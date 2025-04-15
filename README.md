@@ -5,11 +5,11 @@
     <source
       width="256px"
       media="(prefers-color-scheme: dark)"
-      srcset="assets/space_alien.png"
+      srcset="/assets/logo/space_alien.png"
     >
     <img 
       width="256px"
-      src="assets/space_alien.png"
+      src="/assets/logo/space_alien.png"
     >
   </picture>
   <br>
