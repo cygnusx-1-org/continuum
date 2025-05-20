@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="application_name" translatable="false">Continuum</string>
     <string name="login_activity_label">Giriş Yap</string>
