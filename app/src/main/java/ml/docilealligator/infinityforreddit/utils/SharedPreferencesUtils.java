@@ -208,6 +208,7 @@ public class SharedPreferencesUtils {
     public static final String HIDE_TEXT_POST_CONTENT = "hide_text_post_content";
     public static final String SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD = "show_fewer_toolbar_options_threshold";
     public static final String SHOW_AUTHOR_AVATAR = "show_author_avatar";
+    public static final String ALWAYS_SHOW_CHILD_COMMENT_COUNT = "always_show_child_comment_count";
     public static final String SHOW_USER_PREFIX = "show_user_prefix";
     public static final String HIDE_UPVOTE_RATIO = "hide_upvote_ratio";
     public static final String POST_FEED_MAX_RESOLUTION = "post_feed_max_resolution";

@@ -1098,6 +1098,7 @@
     <string name="settings_show_fewer_toolbar_options_threshold_title">"Εμφάνιση Λιγότερων Επιλογών Γραμμής Εργαλείων Ξεκινώντας από"</string>
     <string name="settings_show_fewer_toolbar_options_threshold_summary">Επίπεδο %1$d</string>
     <string name="settings_show_author_avatar_title">"Εμφάνιση Άβαταρ Συντάκτη"</string>
+    <string name="settings_always_show_child_comment_count_title">"Εμφάνιση Αριθμού Θυγατρικών Σχολίων Πάντα"</string>
     <string name="settings_hide_upvote_ratio_title">"Απόκρυψη Αναλογίας Ψήφων"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Επικίνδυνο"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Αυξήστε την τιμή για εμφάνιση προεπισκοπήσεων σε μεγαλύτερη ανάλυση αλλά, η εφαρμογή μπορεί να τερματιστεί απροσδόκητα."</string>

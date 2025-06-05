@@ -1290,6 +1290,7 @@ Cliquer pour réessayer."</string>
 
     <!-- Je pensée aussi a mineure plutôt qu'enfant -->
     <!-- Fuzzy -->
+    <string name="settings_always_show_child_comment_count_title">"Toujours afficher les réponses"</string>
     <string name="settings_hide_upvote_ratio_title">"Cacher le ratio d'upvotes"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Dangereux"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Augmenter cette valeur permet d'afficher les prévisualisations avec une plus haute résolution, mais l'application risque de planter."</string>

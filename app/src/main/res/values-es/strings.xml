@@ -1216,6 +1216,7 @@ Toque para volver a intentarlo."</string>
     <!-- Fuzzy -->
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Nivel %1$d"</string>
     <string name="settings_show_author_avatar_title">"Mostrar avatar del autor"</string>
+    <string name="settings_always_show_child_comment_count_title">"Mostrar siempre el número de comentarios descendientes"</string>
     <string name="settings_hide_upvote_ratio_title">"Ocultar proporción de votos"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Peligroso"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Aumenta el valor para mostrar vistas previas en mayor resolución, pero la aplicación puede fallar inesperadamente."</string>

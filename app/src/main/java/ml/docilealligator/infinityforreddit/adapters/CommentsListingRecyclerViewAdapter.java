@@ -425,21 +425,20 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         }
 
         void setBaseView(LinearLayout linearLayout,
-                         TextView authorTextView,
-                         TextView authorFlairTextView,
-                         TextView commentTimeTextView,
-                         RecyclerView commentMarkdownView,
-                         ConstraintLayout bottomConstraintLayout,
-                         MaterialButton upvoteButton,
-                         TextView scoreTextView,
-                         MaterialButton downvoteButton,
-                         View placeholder,
-                         MaterialButton moreButton,
-                         MaterialButton saveButton,
-                         TextView expandButton,
-                         MaterialButton replyButton,
-                         CommentIndentationView commentIndentationView,
-                         View commentDivider) {
+                        TextView authorTextView,
+                        TextView authorFlairTextView,
+                        TextView commentTimeTextView,
+                        RecyclerView commentMarkdownView,
+                        ConstraintLayout bottomConstraintLayout,
+                        MaterialButton upvoteButton,
+                        TextView scoreTextView,
+                        MaterialButton downvoteButton,
+                        View placeholder,
+                        MaterialButton moreButton,
+                        MaterialButton saveButton,
+                        MaterialButton replyButton,
+                        CommentIndentationView commentIndentationView,
+                        View commentDivider) {
             this.linearLayout = linearLayout;
             this.authorTextView = authorTextView;
             this.authorFlairTextView = authorFlairTextView;
@@ -469,8 +468,6 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 constraintSet.clear(scoreTextView.getId(), ConstraintSet.END);
                 constraintSet.clear(downvoteButton.getId(), ConstraintSet.START);
                 constraintSet.clear(downvoteButton.getId(), ConstraintSet.END);
-                constraintSet.clear(expandButton.getId(), ConstraintSet.START);
-                constraintSet.clear(expandButton.getId(), ConstraintSet.END);
                 constraintSet.clear(saveButton.getId(), ConstraintSet.START);
                 constraintSet.clear(saveButton.getId(), ConstraintSet.END);
                 constraintSet.clear(replyButton.getId(), ConstraintSet.START);
@@ -485,12 +482,10 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.START, scoreTextView.getId(), ConstraintSet.END);
                 constraintSet.connect(placeholder.getId(), ConstraintSet.END, upvoteButton.getId(), ConstraintSet.START);
                 constraintSet.connect(placeholder.getId(), ConstraintSet.START, moreButton.getId(), ConstraintSet.END);
-                constraintSet.connect(moreButton.getId(), ConstraintSet.START, expandButton.getId(), ConstraintSet.END);
-                constraintSet.connect(moreButton.getId(), ConstraintSet.END, placeholder.getId(), ConstraintSet.START);
-                constraintSet.connect(expandButton.getId(), ConstraintSet.START, saveButton.getId(), ConstraintSet.END);
-                constraintSet.connect(expandButton.getId(), ConstraintSet.END, moreButton.getId(), ConstraintSet.START);
+                constraintSet.connect(moreButton.getId(), ConstraintSet.START, saveButton.getId(), ConstraintSet.END);
+                constraintSet.connect(moreButton.getId(), ConstraintSet.END, placeholder.getId(), ConstraintSet.START);;
                 constraintSet.connect(saveButton.getId(), ConstraintSet.START, replyButton.getId(), ConstraintSet.END);
-                constraintSet.connect(saveButton.getId(), ConstraintSet.END, expandButton.getId(), ConstraintSet.START);
+                constraintSet.connect(saveButton.getId(), ConstraintSet.END, moreButton.getId(), ConstraintSet.START);
                 constraintSet.connect(replyButton.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
                 constraintSet.connect(replyButton.getId(), ConstraintSet.END, saveButton.getId(), ConstraintSet.START);
                 constraintSet.applyTo(bottomConstraintLayout);
@@ -825,7 +820,6 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                     binding.placeholderItemPostComment,
                     binding.moreButtonItemPostComment,
                     binding.saveButtonItemPostComment,
-                    binding.expandButtonItemPostComment,
                     binding.replyButtonItemPostComment,
                     binding.verticalBlockIndentationItemComment,
                     binding.dividerItemComment);

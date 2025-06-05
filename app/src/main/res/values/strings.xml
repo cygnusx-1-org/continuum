@@ -644,6 +644,7 @@
     <string name="settings_show_fewer_toolbar_options_threshold_title">Show Fewer Toolbar Options Starting From</string>
     <string name="settings_show_fewer_toolbar_options_threshold_summary">Level %1$d</string>
     <string name="settings_show_author_avatar_title">Show Author Avatar</string>
+    <string name="settings_always_show_child_comment_count_title">Always Show the Number of Child Comments</string>
     <string name="settings_show_user_prefix_title">Show User Prefix</string>
     <string name="settings_hide_upvote_ratio_title">Hide Upvote Ratio</string>
     <string name="settings_miscellaneous_dangerous_group_title">Dangerous</string>
