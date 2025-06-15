@@ -27,7 +27,7 @@
         app:title="@string/settings_show_only_one_comment_level_indicator" />
 
     <ml.docilealligator.infinityforreddit.customviews.CustomFontSwitchPreference
-        app:defaultValue="false"
+        app:defaultValue="true"
         app:key="comment_toolbar_hidden"
         app:title="@string/settings_comment_toolbar_hidden" />
 
@@ -45,6 +45,11 @@
         app:defaultValue="false"
         app:key="show_author_avatar"
         android:title="@string/settings_show_author_avatar_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="always_show_child_comment_count"
+        android:title="@string/settings_always_show_child_comment_count_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.CustomFontSwitchPreference
         app:defaultValue="false"

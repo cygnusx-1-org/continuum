@@ -1163,6 +1163,7 @@ https://play.google.com/store/"</string>
     <!-- Fuzzy -->
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Рівень %1$d"</string>
     <string name="settings_show_author_avatar_title">"Показувати аватарку автора"</string>
+    <string name="settings_always_show_child_comment_count_title">"Завжди показувати кількість дитячих коментарів"</string>
     <string name="settings_hide_upvote_ratio_title">"Ховати голоси вверх"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Небезпечно"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Збільшувати значення для показу огляду у вищій роздільності, але програма може неочікувано дати збій."</string>
