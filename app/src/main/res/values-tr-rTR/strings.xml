@@ -1189,6 +1189,7 @@ Tekrar denemek için tıklayın."</string>
     <!-- Fuzzy -->
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Seviye %1$d"</string>
     <string name="settings_show_author_avatar_title">"Yazar Avatarını Göster"</string>
+    <string name="settings_always_show_child_comment_count_title">"Her Zaman Alt Yorum Sayısını Göster"</string>
     <string name="settings_hide_upvote_ratio_title">"Olumlu Oy Oranını Gizle"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Tehlikeli"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Önizlemeleri daha yüksek çözünürlükte göstermek için değeri artırın, ancak uygulama beklenmedik bir şekilde çökebilir."</string>
