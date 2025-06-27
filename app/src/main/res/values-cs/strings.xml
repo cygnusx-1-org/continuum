@@ -1168,6 +1168,7 @@ Pokud ano, přejmenujte je, než povolíte Material You."</string>
     <!-- Fuzzy -->
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Úroveň %1$d"</string>
     <string name="settings_show_author_avatar_title">"Zobrazit avatar autora"</string>
+    <string name="settings_always_show_child_comment_count_title">"Vždy zobrazit počet podřazených komentářů"</string>
     <string name="settings_hide_upvote_ratio_title">"Skrýt poměr hlasů pro"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Nebezpečné"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Zvyšte hodnotu pro zobrazení náhledů ve vyšším rozlišení. Může to způsobit náhlé pády aplikace."</string>
