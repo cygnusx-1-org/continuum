@@ -1213,6 +1213,7 @@ Antippen zum Wiederholen."</string>
     <!-- Fuzzy -->
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Wert %1$d"</string>
     <string name="settings_show_author_avatar_title">"Autoravatar zeigen"</string>
+    <string name="settings_always_show_child_comment_count_title">"Immer die Anzahl von untergeordneten Kommentaren anzeigen"</string>
     <string name="settings_hide_upvote_ratio_title">"Upvoteverhaltnis verstecken"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Gefährlich"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Wert erhöhen um Vorschau in höherer Qualität zu zeigen, aber die App kann unerwartet abstürzen."</string>

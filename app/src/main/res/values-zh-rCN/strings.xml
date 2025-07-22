@@ -1181,6 +1181,7 @@ Reddit 视频分辨率较低。
     <string name="settings_show_fewer_toolbar_options_threshold_title">"自何处开始显示更少的工具栏选项"</string>
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"层级 %1$d"</string>
     <string name="settings_show_author_avatar_title">"显示作者头像"</string>
+    <string name="settings_always_show_child_comment_count_title">"总是显示子评论数量"</string>
     <string name="settings_hide_upvote_ratio_title">"隐藏顶帖比例"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"危险"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"增加该值以更高分辨率显示预览，但应用程序可能会意外崩溃"</string>
