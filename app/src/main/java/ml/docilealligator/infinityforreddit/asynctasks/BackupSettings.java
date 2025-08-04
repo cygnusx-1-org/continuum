@@ -67,7 +67,21 @@ public class BackupSettings {
                                     SharedPreferences navigationDrawerSharedPreferences,
                                     BackupSettingsListener backupSettingsListener) {
         executor.execute(() -> {
-            String backupDir = context.getExternalCacheDir() + "/Backup/" + BuildConfig.VERSION_NAME;
+            // Defensive null check for external cache directory
+            File externalCacheDir = context.getExternalCacheDir();
+            String backupDir;
+            if (externalCacheDir != null) {
+                backupDir = externalCacheDir.getAbsolutePath() + "/Backup/" + BuildConfig.VERSION_NAME;
+            } else {
+                // Fallback to internal cache if external cache directory creation failed
+                File internalCacheDir = context.getCacheDir();
+                if (internalCacheDir != null) {
+                    backupDir = internalCacheDir.getAbsolutePath() + "/Backup/" + BuildConfig.VERSION_NAME;
+                } else {
+                    // Last resort - use app files directory
+                    backupDir = context.getFilesDir().getAbsolutePath() + "/cache/Backup/" + BuildConfig.VERSION_NAME;
+                }
+            }
             File backupDirFile = new File(backupDir);
             if (new File(backupDir).exists()) {
                 try {
@@ -149,7 +163,15 @@ public class BackupSettings {
             boolean zipRes = zipAndMoveToDestinationDir(context, contentResolver, destinationDirUri, password);
 
             try {
-                FileUtils.deleteDirectory(new File(context.getExternalCacheDir() + "/Backup/"));
+                // Use the same cache directory logic for cleanup
+                File cacheDir = context.getExternalCacheDir();
+                if (cacheDir == null) {
+                    cacheDir = context.getCacheDir();
+                    if (cacheDir == null) {
+                        cacheDir = new File(context.getFilesDir(), "cache");
+                    }
+                }
+                FileUtils.deleteDirectory(new File(cacheDir, "Backup"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -215,12 +237,20 @@ public class BackupSettings {
         try {
             String time = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(System.currentTimeMillis()));
             String fileName = "Continuum_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
-            String filePath = context.getExternalCacheDir() + "/Backup/" + fileName;
+            // Use the same cache directory logic for zip creation
+            File cacheDir = context.getExternalCacheDir();
+            if (cacheDir == null) {
+                cacheDir = context.getCacheDir();
+                if (cacheDir == null) {
+                    cacheDir = new File(context.getFilesDir(), "cache");
+                }
+            }
+            String filePath = cacheDir.getAbsolutePath() + "/Backup/" + fileName;
             ZipFile zip = new ZipFile(filePath, password.toCharArray());
             ZipParameters zipParameters = new ZipParameters();
             zipParameters.setEncryptFiles(true);
             zipParameters.setEncryptionMethod(EncryptionMethod.AES);
-            zip.addFolder(new File(context.getExternalCacheDir() + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
+            zip.addFolder(new File(cacheDir.getAbsolutePath() + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
 
             DocumentFile dir = DocumentFile.fromTreeUri(context, destinationDirUri);
             if (dir == null) {
