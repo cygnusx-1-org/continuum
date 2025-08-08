@@ -2,6 +2,20 @@
 
 ---
 
+7.5.1.2 / 2025-8-8
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added contains subreddit and users post filters #112
+* Added thumbnails for crossposts
+* Fixed crash when trying to select the camera with no permission
+* Fixed Can't post my own GIFs #100
+* Fixed Reduce the size of the placeholder preview image #53
+  - If you don't like the divide line for posts in the compact mode, "Settings | Interface | Post | Compact Layout | Show Divider"
+* Fixed "Remove Alls" -> "Remove All" #81
+* Fixed Swap taps and long press in comments #111
+* Fixed Duplicate image title downloads #101
+
 7.5.1.2 / 2025-6-16
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
