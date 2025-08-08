@@ -1147,6 +1147,7 @@ Toque para tentar de novo."</string>
     <!-- Fuzzy -->
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Nível %1$,d"</string>
     <string name="settings_show_author_avatar_title">"Exibir avatar do autor"</string>
+    <string name="settings_always_show_child_comment_count_title">"Exibir sempre o n. de comentários filhos"</string>
     <string name="settings_hide_upvote_ratio_title">"Ocultar taxa de votos a favor"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Perigoso"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Aumente o valor para ver prévias em alta resolução, mas o aplicativo pode travar inesperadamente."</string>
