@@ -1179,6 +1179,7 @@ https://play.google.com/store/"</string>
     <!-- Fuzzy -->
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Уровень %1$d"</string>
     <string name="settings_show_author_avatar_title">"Показывать аватар автора"</string>
+    <string name="settings_always_show_child_comment_count_title">"Всегда показывать количество дочерних комментариев"</string>
     <string name="settings_hide_upvote_ratio_title">"Скрыть соотношение голосов"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Опасно"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Можно увеличивать это значение, чтобы показывать предварительный просмотр в более высоком разрешении, но приложение может аварийно закрываться."</string>

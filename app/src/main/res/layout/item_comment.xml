@@ -240,30 +240,11 @@
                 app:icon="@drawable/ic_more_vert_grey_24dp"
                 app:iconSize="24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/expand_button_item_post_comment"
+                app:layout_constraintEnd_toStartOf="@+id/save_button_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/placeholder_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent"
                 style="?attr/materialIconButtonOutlinedStyle" />
-
-            <TextView
-                android:id="@+id/expand_button_item_post_comment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?actionBarItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:fontFamily="?attr/font_family"
-                android:gravity="center"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:textSize="?attr/font_default"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/save_button_item_post_comment"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/more_button_item_post_comment"
-                app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/save_button_item_post_comment"
@@ -274,7 +255,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/reply_button_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/expand_button_item_post_comment"
+                app:layout_constraintStart_toEndOf="@+id/more_button_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent"
                 style="?attr/materialIconButtonOutlinedStyle" />
 

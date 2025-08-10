@@ -1103,6 +1103,7 @@ Premi per riprovare."</string>
     <string name="settings_show_fewer_toolbar_options_threshold_title">"Mostra meno opzioni della barra degli strumenti a partire da"</string>
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"Livello %1$d"</string>
     <string name="settings_show_author_avatar_title">"Mostra avatar dell'autore"</string>
+    <string name="settings_always_show_child_comment_count_title">"Mostra sempre il numero di commenti figlio"</string>
     <string name="settings_hide_upvote_ratio_title">"Nascondi rapporto upvoti"</string>
     <string name="settings_miscellaneous_dangerous_group_title">"Pericoloso"</string>
     <string name="settings_post_feed_max_resolution_warning_title">"Aumenta il valore per mostrare le anteprime con una risoluzione maggiore, ma l'app potrebbe bloccarsi in modo imprevisto."</string>
