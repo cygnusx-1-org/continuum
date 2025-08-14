@@ -131,6 +131,9 @@ public class PostFilter implements Parcelable {
         if (post.isNSFW() && !postFilter.allowNSFW) {
             return false;
         }
+        if(post.isStickied()){
+            return true;
+        }
         if (postFilter.maxVote > 0 && post.getVoteType() + post.getScore() > postFilter.maxVote) {
             return false;
         }
