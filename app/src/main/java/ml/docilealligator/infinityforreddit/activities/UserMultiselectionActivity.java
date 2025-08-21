@@ -12,6 +12,10 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -83,7 +87,26 @@ public class UserMultiselectionActivity extends BaseActivity implements Activity
                 } else {
                     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
                 }
+                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                    @NonNull
+                    @Override
+                    public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                        Insets allInsets = insets.getInsets(
+                                WindowInsetsCompat.Type.systemBars()
+                                        | WindowInsetsCompat.Type.displayCutout()
+                        );
 
+                        setMargins(binding.toolbarSubscribedUsersMultiselectionActivity,
+                                allInsets.left,
+                                allInsets.top,
+                                allInsets.right,
+                                BaseActivity.IGNORE_MARGIN);
+
+                        binding.recyclerViewSubscribedSubscribedUsersMultiselectionActivity.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
+
+                        return WindowInsetsCompat.CONSUMED;
+                    }
+                });
                 //adjustToolbar(binding.toolbarSubscribedUsersMultiselectionActivity);
 
                 //int navBarHeight = getNavBarHeight();
