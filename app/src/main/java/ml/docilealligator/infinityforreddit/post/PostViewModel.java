@@ -96,7 +96,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -137,7 +137,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -179,7 +179,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -222,7 +222,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -266,7 +266,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
