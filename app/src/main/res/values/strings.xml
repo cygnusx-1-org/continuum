@@ -600,6 +600,7 @@
     <string name="settings_backup_settings_title">Backup Settings</string>
     <string name="settings_backup_settings_summary">Includes accounts, Client ID, and Giphy API Key. You will be prompted to enter a password when creating the backup.</string>
     <string name="settings_restore_settings_title">Restore Settings</string>
+    <string name="settings_restore_settings_file_picker">Use default Android file picker if the selected picker fails.</string>
     <string name="settings_credits_love_animation_title">Love Animation</string>
     <string name="settings_swipe_between_posts_title">Swipe Between Posts</string>
     <string name="settings_navigation_drawer_title">Navigation Drawer</string>
