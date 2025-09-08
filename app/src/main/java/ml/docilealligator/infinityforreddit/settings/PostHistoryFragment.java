@@ -71,6 +71,7 @@ public class PostHistoryFragment extends Fragment {
             binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.markPostsAsReadOnScrollLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.hideReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
+            binding.showAccountReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             return binding.getRoot();
         }
 
@@ -86,6 +87,8 @@ public class PostHistoryFragment extends Fragment {
                 activity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_ON_SCROLL_BASE, false));
         binding.hideReadPostsAutomaticallySwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
                 activity.accountName + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+        binding.showAccountReadPostsAutomaticallySwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
+                activity.accountName + SharedPreferencesUtils.SHOW_ACCOUNT_READ_POSTS, true));
 
         updateOptions();
 
@@ -132,6 +135,10 @@ public class PostHistoryFragment extends Fragment {
 
         binding.hideReadPostsAutomaticallySwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> postHistorySharedPreferences.edit().putBoolean(activity.accountName + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, b).apply());
 
+        binding.showAccountReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setOnClickListener(view -> binding.showAccountReadPostsAutomaticallySwitchPostHistoryFragment.performClick());
+
+        binding.showAccountReadPostsAutomaticallySwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> postHistorySharedPreferences.edit().putBoolean(activity.accountName + SharedPreferencesUtils.SHOW_ACCOUNT_READ_POSTS, b).apply());
+
         return binding.getRoot();
     }
 
@@ -142,6 +149,7 @@ public class PostHistoryFragment extends Fragment {
             binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
             binding.markPostsAsReadOnScrollLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
             binding.hideReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
+            binding.showAccountReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
 
             boolean limitReadPosts = postHistorySharedPreferences.getBoolean(
                     activity.accountName + SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED, true);
@@ -152,6 +160,7 @@ public class PostHistoryFragment extends Fragment {
             binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.markPostsAsReadOnScrollLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.hideReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
+            binding.showAccountReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
         }
     }
 
@@ -168,6 +177,7 @@ public class PostHistoryFragment extends Fragment {
         binding.markPostsAsReadAfterVotingTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.markPostsAsReadOnScrollTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.hideReadPostsAutomaticallyTextViewPostHistoryFragment.setTextColor(primaryTextColor);
+        binding.showAccountReadPostsAutomaticallyTextViewPostHistoryFragment.setTextColor(primaryTextColor);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             binding.readPostsLimitTextInputLayoutPostHistoryFragment.setCursorColor(ColorStateList.valueOf(primaryTextColor));
