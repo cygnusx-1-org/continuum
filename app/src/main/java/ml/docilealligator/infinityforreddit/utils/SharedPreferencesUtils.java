@@ -420,6 +420,19 @@ public class SharedPreferencesUtils {
     public static final String COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION = "collapse_subscribed_subreddits_section";
     public static final String HIDE_FAVORITE_SUBREDDITS_SECTION = "hide_favorite_subreddits_sections";
     public static final String HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS = "hide_subscribed_subreddits_sections";
+    public static final String HIDE_ACCOUNT_SECTION = "hide_account_section";
+    public static final String HIDE_PROFILE_BUTTON = "hide_profile_button";
+    public static final String HIDE_SUBSCRIPTIONS_BUTTON = "hide_subscriptions_button";
+    public static final String HIDE_MULTIREDDIT_BUTTON = "hide_multireddit_button";
+    public static final String HIDE_INBOX_BUTTON = "hide_inbox_button";
+    public static final String HIDE_HISTORY_BUTTON = "hide_history_button";
+    public static final String HIDE_POST_SECTION = "hide_post_section";
+    public static final String HIDE_UPVOTED_BUTTON = "hide_upvoted_button";
+    public static final String HIDE_DOWNVOTED_BUTTON = "hide_downvoted_button";
+    public static final String HIDE_HIDDEN_BUTTON = "hide_hidden_button";
+    public static final String HIDE_SAVED_BUTTON = "hide_saved_button";
+    public static final String HIDE_THEME_BUTTON = "hide_theme_button";
+    public static final String HIDE_NSFW_BUTTON = "hide_nsfw_button";
 
     public static final String POST_DETAILS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_details";
     public static final String SEPARATE_POST_AND_COMMENTS_IN_PORTRAIT_MODE = "separate_post_and_comments_in_portrait_mode";

@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.adapters.navigationdrawer;
 
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -19,13 +20,18 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
 
     private static final int VIEW_TYPE_MENU_GROUP_TITLE = 1;
     private static final int VIEW_TYPE_MENU_ITEM = 2;
-    private static final int POST_SECTION_ITEMS = 4;
+    private final int POST_SECTION_ITEMS;
 
     private final BaseActivity baseActivity;
     private final int primaryTextColor;
     private final int secondaryTextColor;
     private final int primaryIconColor;
     private boolean collapsePostSection;
+    private final boolean hidePostSection;
+    private final boolean hideUpvotedButton;
+    private final boolean hideDownvotedButton;
+    private final boolean hideHiddenButton;
+    private final boolean hideSavedButton;
     private final boolean isLoggedIn;
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
 
@@ -37,6 +43,18 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
         secondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         collapsePostSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_POST_SECTION, false);
+        hidePostSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_SECTION, false);
+        hideUpvotedButton = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_UPVOTED_BUTTON, false);
+        hideDownvotedButton = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_DOWNVOTED_BUTTON, false);
+        hideHiddenButton = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_HIDDEN_BUTTON, false);
+        hideSavedButton = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SAVED_BUTTON, false);
+        int count = 4;
+        if (hideUpvotedButton) count--;
+        if (hideDownvotedButton) count--;
+        if (hideHiddenButton) count--;
+        if (hideSavedButton) count--;
+        POST_SECTION_ITEMS = count;
+
         this.isLoggedIn = isLoggedIn;
         this.itemClickListener = itemClickListener;
     }
@@ -60,12 +78,12 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof MenuGroupTitleViewHolder) {
-            ((MenuGroupTitleViewHolder) holder).binding.titleTextViewItemNavDrawerMenuGroupTitle.setText(R.string.label_post);
+        if (holder instanceof MenuGroupTitleViewHolder vh) {
+            vh.binding.titleTextViewItemNavDrawerMenuGroupTitle.setText(R.string.label_post);
             if (collapsePostSection) {
-                ((MenuGroupTitleViewHolder) holder).binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(R.drawable.ic_baseline_arrow_drop_up_24dp);
+                vh.binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(R.drawable.ic_baseline_arrow_drop_up_24dp);
             } else {
-                ((MenuGroupTitleViewHolder) holder).binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(R.drawable.ic_baseline_arrow_drop_down_24dp);
+                vh.binding.collapseIndicatorImageViewItemNavDrawerMenuGroupTitle.setImageResource(R.drawable.ic_baseline_arrow_drop_down_24dp);
             }
 
             holder.itemView.setOnClickListener(view -> {
@@ -78,42 +96,68 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
                 }
                 notifyItemChanged(holder.getBindingAdapterPosition());
             });
-        } else if (holder instanceof MenuItemViewHolder) {
+        }
+        else if (holder instanceof MenuItemViewHolder vh) {
+            vh.itemView.setVisibility(View.VISIBLE);
+            vh.binding.textViewItemNavDrawerMenuItem.setText(null);
+            vh.binding.imageViewItemNavDrawerMenuItem.setImageDrawable(null);
+            vh.itemView.setOnClickListener(null);
+
+            int targetIndex = position - 1;
+            int visibleIndex = 0;
             int stringId = 0;
             int drawableId = 0;
-
-            if (isLoggedIn) {
-                switch (position) {
-                    case 1:
-                        stringId = R.string.upvoted;
-                        drawableId = R.drawable.ic_arrow_upward_day_night_24dp;
-                        break;
-                    case 2:
-                        stringId = R.string.downvoted;
-                        drawableId = R.drawable.ic_arrow_downward_day_night_24dp;
-                        break;
-                    case 3:
-                        stringId = R.string.hidden;
-                        drawableId = R.drawable.ic_lock_day_night_24dp;
-                        break;
-                    case 4:
-                        stringId = R.string.account_saved_thing_activity_label;
-                        drawableId = R.drawable.ic_bookmarks_day_night_24dp;
-                        break;
+            boolean matched = false;
+            if (!hideUpvotedButton) {
+                if (visibleIndex == targetIndex) {
+                    stringId = R.string.upvoted;
+                    drawableId = R.drawable.ic_arrow_upward_day_night_24dp;
+                    matched = true;
                 }
+                visibleIndex++;
+            }
+            if (!hideDownvotedButton && !matched) {
+                if (visibleIndex == targetIndex) {
+                    stringId = R.string.downvoted;
+                    drawableId = R.drawable.ic_arrow_downward_day_night_24dp;
+                    matched = true;
+                }
+                visibleIndex++;
+            }
+            if (!hideHiddenButton && !matched) {
+                if (visibleIndex == targetIndex) {
+                    stringId = R.string.hidden;
+                    drawableId = R.drawable.ic_lock_day_night_24dp;
+                    matched = true;
+                }
+                visibleIndex++;
             }
 
-            ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(stringId);
-            ((MenuItemViewHolder) holder).binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, drawableId));
+            if (!hideSavedButton && !matched) {
+                if (visibleIndex == targetIndex) {
+                    stringId = R.string.account_saved_thing_activity_label;
+                    drawableId = R.drawable.ic_bookmarks_day_night_24dp;
+                    matched = true;
+                }
+            }
+            if (!matched) {
+                vh.itemView.setVisibility(View.GONE);
+                return;
+            }
+
+            vh.binding.textViewItemNavDrawerMenuItem.setText(stringId);
+            vh.binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, drawableId));
             int finalStringId = stringId;
-            holder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(finalStringId));
+            vh.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(finalStringId));
         }
     }
 
     @Override
     public int getItemCount() {
-        return isLoggedIn ? (collapsePostSection ? 1: POST_SECTION_ITEMS + 1) : 0;
+        if (!isLoggedIn || hidePostSection) return 0;
+        return collapsePostSection ? 1: POST_SECTION_ITEMS + 1;
     }
+
 
     class MenuGroupTitleViewHolder extends RecyclerView.ViewHolder {
         ItemNavDrawerMenuGroupTitleBinding binding;

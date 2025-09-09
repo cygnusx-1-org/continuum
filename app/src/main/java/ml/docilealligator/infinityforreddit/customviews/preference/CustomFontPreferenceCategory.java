@@ -14,8 +14,8 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiver;
 
 public class CustomFontPreferenceCategory extends PreferenceCategory implements CustomFontReceiver, CustomThemeWrapperReceiver {
-    private CustomThemeWrapper customThemeWrapper;
-    private Typeface typeface;
+    protected CustomThemeWrapper customThemeWrapper;
+    protected Typeface typeface;
 
     public CustomFontPreferenceCategory(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);

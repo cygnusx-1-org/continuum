@@ -1,60 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:key="info_pref"
         app:icon="@drawable/ic_info_preference_day_night_24dp"
         app:summary="@string/restart_app_see_changes"
         app:enabled="false" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="show_avatar_on_the_right"
-        app:title="@string/settings_show_avatar_on_the_right" />
+        app:title="@string/settings_show_avatar_on_the_right"
+        app:defaultValue="false" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="collapse_account_section"
-        app:title="@string/settings_collapse_account_section_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="collapse_reddit_section"
-        app:title="@string/settings_collapse_reddit_section_title" />
+        app:title="@string/settings_collapse_reddit_section_title"
+        app:defaultValue="false" />
+
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="collapse_post_section"
-        app:title="@string/settings_collapse_post_section_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="collapse_preferences_section"
-        app:title="@string/settings_collapse_preferences_section_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="collapse_favorite_subreddits_section"
-        app:title="@string/settings_collapse_favorite_subreddits_section_title" />
+        app:title="@string/settings_collapse_favorite_subreddits_section_title"
+        app:defaultValue="false" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="collapse_subscribed_subreddits_section"
-        app:title="@string/settings_collapse_subscribed_subreddits_section_title" />
+        app:title="@string/settings_collapse_subscribed_subreddits_section_title"
+        app:defaultValue="false" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="hide_favorite_subreddits_sections"
-        app:title="@string/settings_hide_favorite_subreddits_sections_title" />
+        app:title="@string/settings_hide_favorite_subreddits_sections_title"
+        app:defaultValue="false" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="hide_subscribed_subreddits_sections"
-        app:title="@string/settings_hide_subscribed_subreddits_sections_title" />
+        app:title="@string/settings_hide_subscribed_subreddits_sections_title"
+        app:defaultValue="false" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
         app:key="hide_account_karma"
-        app:title="@string/settings_navigation_drawer_enable_hide_karma_title" />
+        app:title="@string/settings_navigation_drawer_enable_hide_karma_title"
+        app:defaultValue="false" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CollapsiblePreferenceCategory
+        android:title="@string/settings_account_section_title">
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_account_section"
+            app:title="@string/settings_hide_account_section_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="collapse_account_section"
+            app:title="@string/settings_collapse_account_section_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_profile_button"
+            app:title="@string/settings_hide_profile_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_subscriptions_button"
+            app:title="@string/settings_hide_subscriptions_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_multireddit_button"
+            app:title="@string/settings_hide_multireddit_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_inbox_button"
+            app:title="@string/settings_hide_inbox_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_history_button"
+            app:title="@string/settings_hide_history_button_title"
+            app:defaultValue="false" />
+    </ml.docilealligator.infinityforreddit.customviews.preference.CollapsiblePreferenceCategory>
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CollapsiblePreferenceCategory
+        android:title="@string/settings_post_section_title">
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_post_section"
+            app:title="@string/settings_hide_post_section_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="collapse_post_section"
+            app:title="@string/settings_collapse_post_section_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_upvoted_button"
+            app:title="@string/settings_hide_upvoted_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_downvoted_button"
+            app:title="@string/settings_hide_downvoted_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_hidden_button"
+            app:title="@string/settings_hide_hidden_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_saved_button"
+            app:title="@string/settings_hide_saved_button_title"
+            app:defaultValue="false" />
+    </ml.docilealligator.infinityforreddit.customviews.preference.CollapsiblePreferenceCategory>
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CollapsiblePreferenceCategory
+        android:title="@string/settings_preferences_section_title">
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="collapse_preferences_section"
+            app:title="@string/settings_collapse_preferences_section_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_theme_button"
+            app:title="@string/settings_hide_theme_button_title"
+            app:defaultValue="false" />
+
+        <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+            app:key="hide_nsfw_button"
+            app:title="@string/settings_hide_nsfw_button_title"
+            app:defaultValue="false" />
+    </ml.docilealligator.infinityforreddit.customviews.preference.CollapsiblePreferenceCategory>
 
 </PreferenceScreen>
