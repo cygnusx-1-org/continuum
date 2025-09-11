@@ -99,7 +99,8 @@ public class PostViewModel extends ViewModel {
                                 post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
     }
 
     // PostPagingSource.TYPE_SUBREDDIT || PostPagingSource.TYPE_ANONYMOUS_FRONT_PAGE || PostPagingSource.TYPE_ANONYMOUS_MULTIREDDIT
@@ -140,7 +141,8 @@ public class PostViewModel extends ViewModel {
                                 post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
     }
 
     // PostPagingSource.TYPE_MULTI_REDDIT
@@ -182,7 +184,8 @@ public class PostViewModel extends ViewModel {
                                 post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
     }
 
     public PostViewModel(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
@@ -225,7 +228,8 @@ public class PostViewModel extends ViewModel {
                                 post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
     }
 
     // postType == PostPagingSource.TYPE_SEARCH
@@ -269,7 +273,8 @@ public class PostViewModel extends ViewModel {
                                 post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() ||  post.isStickied()))), ViewModelKt.getViewModelScope(this));
 
         currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
     }
 
     public LiveData<PagingData<Post>> getPosts() {
