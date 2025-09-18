@@ -2,6 +2,17 @@
 
 ---
 
+8.0.3.1 / 2025-9-17
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Ensure `mark posts as read` is also turned on before hiding read posts
+* Don't show the number of online subscribers in ViewSubredditDetailAct, aka
+the comments not loading
+* Always show read posts on any users page
+* Hide the + button on PostFilterUsageListingActivity as it does nothing
+* Upgraded to 8.0.3, aka Redgif sound
+
 8.0.2.1 / 2025-9-8
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
