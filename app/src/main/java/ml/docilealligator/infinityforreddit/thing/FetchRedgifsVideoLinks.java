@@ -10,12 +10,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
-import ml.docilealligator.infinityforreddit.apis.OhMyDlAPI;
 import ml.docilealligator.infinityforreddit.apis.RedgifsAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
@@ -31,6 +28,41 @@ public class FetchRedgifsVideoLinks {
                                               FetchVideoLinkListener fetchVideoLinkListener) {
         executor.execute(() -> {
             try {
+                // Get valid token
+                String accessToken = getValidAccessToken(redgifsRetrofit, currentAccountSharedPreferences);
+                if (accessToken.isEmpty()) {
+                    handler.post(() -> fetchVideoLinkListener.failed(null));
+                    return;
+                }
+
+                Response<String> response = redgifsRetrofit
+                        .create(RedgifsAPI.class)
+                        .getRedgifsData(APIUtils.getRedgifsOAuthHeader(accessToken),
+                                redgifsId, APIUtils.USER_AGENT)
+                        .execute();
+                if (response.isSuccessful()) {
+                    parseRedgifsVideoLinks(handler, response.body(), fetchVideoLinkListener);
+                } else if (response.code() == 401) {
+                    // Token expired, try once more with new token
+                    accessToken = refreshAccessToken(redgifsRetrofit, currentAccountSharedPreferences);
+                    if (!accessToken.isEmpty()) {
+                        response = redgifsRetrofit
+                                .create(RedgifsAPI.class)
+                                .getRedgifsData(
+                                        APIUtils.getRedgifsOAuthHeader(accessToken),
+                                        redgifsId, APIUtils.USER_AGENT)
+                                .execute();
+                        if (response.isSuccessful()) {
+                            parseRedgifsVideoLinks(handler, response.body(), fetchVideoLinkListener);
+                        } else {
+                            handler.post(() -> fetchVideoLinkListener.failed(null));
+                        }
+                    } else {
+                        handler.post(() -> fetchVideoLinkListener.failed(null));
+                    }
+                } else {
+                    handler.post(() -> fetchVideoLinkListener.failed(null));
+                }
                 /*Response<String> response = redgifsRetrofit
                         .create(RedgifsAPI.class)
                         .getRedgifsData(
@@ -61,7 +93,7 @@ public class FetchRedgifsVideoLinks {
                     handler.post(() -> fetchVideoLinkListener.failed(null));
                 }*/
 
-                Map<String, String> params = new HashMap<>();
+                /*Map<String, String> params = new HashMap<>();
                 params.put(APIUtils.PLATFORM_KEY, "redgifs");
                 params.put(APIUtils.URL_KEY, "https://www.redgifs.com/watch/" + redgifsId);
 
@@ -73,7 +105,7 @@ public class FetchRedgifsVideoLinks {
                     parseRedgifsVideoLinks(handler, response.body(), fetchVideoLinkListener);
                 } else {
                     handler.post(() -> fetchVideoLinkListener.failed(null));
-                }
+                }*/
             } catch (IOException e) {
                 e.printStackTrace();
                 handler.post(() -> fetchVideoLinkListener.failed(null));
@@ -94,6 +126,32 @@ public class FetchRedgifsVideoLinks {
             }
 
             Response<String> response = redgifsRetrofit
+                    .create(RedgifsAPI.class)
+                    .getRedgifsData(APIUtils.getRedgifsOAuthHeader(accessToken),
+                            redgifsId, APIUtils.USER_AGENT)
+                    .execute();
+            if (response.isSuccessful()) {
+                return parseRedgifsVideoLinks(response.body());
+            } else if (response.code() == 401) {
+                // Token expired, try once more with new token
+                accessToken = refreshAccessToken(redgifsRetrofit, currentAccountSharedPreferences);
+                if (!accessToken.isEmpty()) {
+                    response = redgifsRetrofit
+                            .create(RedgifsAPI.class)
+                            .getRedgifsData(
+                                    APIUtils.getRedgifsOAuthHeader(accessToken),
+                                    redgifsId, APIUtils.USER_AGENT)
+                            .execute();
+                    if (response.isSuccessful()) {
+                        return parseRedgifsVideoLinks(response.body());
+                    }
+                }
+                return null;
+            } else {
+                return null;
+            }
+
+            /*Response<String> response = redgifsRetrofit
                     .create(RedgifsAPI.class)
                     .getRedgifsData(
                             APIUtils.getRedgifsOAuthHeader(accessToken),
@@ -118,7 +176,7 @@ public class FetchRedgifsVideoLinks {
                 return null;
             } else {
                 return null;
-            }
+            }*/
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -145,17 +203,43 @@ public class FetchRedgifsVideoLinks {
 
     private static void parseRedgifsVideoLinks(Handler handler, String response,
                                               FetchVideoLinkListener fetchVideoLinkListener) {
-        try {
-            /*String mp4 = new JSONObject(response).getJSONObject(JSONUtils.GIF_KEY).getJSONObject(JSONUtils.URLS_KEY)
+        /*try {
+            *//*String mp4 = new JSONObject(response).getJSONObject(JSONUtils.GIF_KEY).getJSONObject(JSONUtils.URLS_KEY)
                     .getString(JSONUtils.HD_KEY);
             if (mp4.contains("-silent")) {
                 mp4 = mp4.substring(0, mp4.indexOf("-silent")) + ".mp4";
             }
             final String mp4Name = mp4;
-            handler.post(() -> fetchVideoLinkListener.onFetchRedgifsVideoLinkSuccess(mp4Name, mp4Name));*/
+            handler.post(() -> fetchVideoLinkListener.onFetchRedgifsVideoLinkSuccess(mp4Name, mp4Name));*//*
 
             String mp4 = new JSONObject(response).getString(JSONUtils.VIDEO_DOWNLOAD_URL);
             handler.post(() -> fetchVideoLinkListener.onFetchRedgifsVideoLinkSuccess(mp4, mp4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            handler.post(() -> fetchVideoLinkListener.failed(null));
+        }*/
+
+        try {
+            JSONObject jsonResponse = new JSONObject(response);
+            JSONObject gif = jsonResponse.getJSONObject(JSONUtils.GIF_KEY);
+            JSONObject urls = gif.getJSONObject(JSONUtils.URLS_KEY);
+
+            // Try HD first, fall back to SD if not available
+            String mp4;
+            if (urls.has(JSONUtils.HD_KEY)) {
+                mp4 = urls.getString(JSONUtils.HD_KEY);
+            } else if (urls.has("sd")) {
+                mp4 = urls.getString("sd");
+            } else {
+                handler.post(() -> fetchVideoLinkListener.failed(null));
+                return;
+            }
+
+            if (mp4.contains("-silent")) {
+                mp4 = mp4.substring(0, mp4.indexOf("-silent")) + ".mp4";
+            }
+            final String mp4Name = mp4;
+            handler.post(() -> fetchVideoLinkListener.onFetchRedgifsVideoLinkSuccess(mp4Name, mp4Name));
         } catch (JSONException e) {
             e.printStackTrace();
             handler.post(() -> fetchVideoLinkListener.failed(null));
