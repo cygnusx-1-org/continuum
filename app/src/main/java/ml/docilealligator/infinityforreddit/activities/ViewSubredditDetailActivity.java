@@ -1717,10 +1717,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             }
 
             Fragment fragment = fragmentManager.findFragmentByTag("f" + position);
-            if (fragment instanceof PostFragment) {
-                return fragment;
-            }
-            else if(fragment instanceof SidebarFragment){
+            if (fragment instanceof PostFragment || fragment instanceof SidebarFragment) {
                 return fragment;
             }
             return null;
