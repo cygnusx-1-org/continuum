@@ -51,6 +51,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -819,6 +820,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
     @ExperimentalBadgeUtils
     private void bindView() {
+
         if (mMessageFullname != null) {
             ReadMessage.readMessage(mOauthRetrofit, accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
@@ -1164,6 +1166,41 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         }).attach();
         fixViewPager2Sensitivity(binding.viewPagerViewSubredditDetailActivity);
 
+        // Add double-tap listener for tabs
+        binding.tabLayoutViewSubredditDetailActivity.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            private long lastTabClickTime = 0;
+            private int lastClickedTabPosition = -1;
+            private static final long DOUBLE_TAP_TIME_DELTA = 300; // milliseconds
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                handleTabClick(tab);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                handleTabClick(tab);
+            }
+
+            private void handleTabClick(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+                long currentTime = System.currentTimeMillis();
+
+                if (position == lastClickedTabPosition &&
+                        currentTime - lastTabClickTime < DOUBLE_TAP_TIME_DELTA) {
+                    // Double tap detected on same tab
+                    scrollTabToTop(position);
+                    lastTabClickTime = 0; // Reset to prevent triple-tap
+                    lastClickedTabPosition = -1;
+                } else {
+                    lastTabClickTime = currentTime;
+                    lastClickedTabPosition = position;
+                }
+            }
+        });
+
         boolean viewSidebar = getIntent().getBooleanExtra(EXTRA_VIEW_SIDEBAR, false);
         if (viewSidebar) {
             binding.viewPagerViewSubredditDetailActivity.setCurrentItem(1, false);
@@ -1287,6 +1324,23 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
     public boolean isNsfwSubreddit() {
         return isNsfwSubreddit;
+    }
+
+    private void scrollTabToTop(int position) {
+        // Get the fragment at the specified position and scroll to top
+        if (sectionsPagerAdapter != null) {
+            if(position == 0) {
+                PostFragment fragment = (PostFragment) sectionsPagerAdapter.getFragmentAtPosition(position);
+                if (fragment != null) {
+                    fragment.goBackToTop();
+                }
+            }else if (position == 1) {
+                SidebarFragment fragment = (SidebarFragment) sectionsPagerAdapter.getFragmentAtPosition(position);
+                if (fragment != null) {
+                    fragment.goBackToTop();
+                }
+            }
+        }
     }
 
     private void makeSnackbar(int resId, boolean retry) {
@@ -1654,6 +1708,19 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 return null;
             }
             return fragmentManager.findFragmentByTag("f" + binding.viewPagerViewSubredditDetailActivity.getCurrentItem());
+        }
+
+        @Nullable
+        private Fragment getFragmentAtPosition(int position) {
+            if (fragmentManager == null) {
+                return null;
+            }
+
+            Fragment fragment = fragmentManager.findFragmentByTag("f" + position);
+            if (fragment instanceof PostFragment || fragment instanceof SidebarFragment) {
+                return fragment;
+            }
+            return null;
         }
 
         public boolean handleKeyDown(int keyCode) {
