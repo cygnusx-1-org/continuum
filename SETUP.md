@@ -77,8 +77,14 @@ It is best to copy and paste it.
 ### Correct username and password does not work
 Continuum depends on
 [Android System Webview](https://play.google.com/store/apps/details?id=com.google.android.webview)
-by default for logging into Reddit. So if having the login issue, your best
-course of action would be to upgraded to the latest version of Android
+by default for logging into Reddit. So if having the login issue, your quickest
+course of action would be to use the pinkish login button located at the bottom of your screen which opens up reddit in your default browser for you to login. Keep in mind this method tends to not work with the Fennec browser. These are some of the browsers which are guarenteed to work with this method; 
+
+- Brave
+
+-
+
+Alternatively, you can update to the latest version of Android
 possible, and then the latest version of
 [Android System Webview](https://play.google.com/store/apps/details?id=com.google.android.webview)
 possible.
