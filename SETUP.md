@@ -83,7 +83,7 @@ by default for logging into Reddit. So if having the login issue, you can as a w
 
 - Brave
 
-- 
+- Chrome
 
 Alternatively, you can update to the latest version of Android
 possible, and then the latest version of
