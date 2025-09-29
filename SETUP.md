@@ -85,6 +85,8 @@ by default for logging into Reddit. So if having the login issue, you can as a w
 
 - Chrome
 
+- Vivaldi
+
 Alternatively, you can update to the latest version of Android
 possible, and then the latest version of
 [Android System Webview](https://play.google.com/store/apps/details?id=com.google.android.webview)
