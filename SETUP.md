@@ -78,7 +78,9 @@ It is best to copy and paste it.
 Continuum depends on
 [Android System Webview](https://play.google.com/store/apps/details?id=com.google.android.webview)
 by default for logging into Reddit. So if having the login issue, your quickest
-course of action would be to use the [login button](/assets/screenshots/login_button.png) located at the bottom of your screen which opens up reddit in your default browser for you to login. Keep in mind this method tends to not work with hardend browsers like Fennec. Here are some of the browsers which are guarenteed to work with this method; 
+course of action would be to use the login button located at the bottom of your screen which opens up reddit in your default browser for you to login. Keep in mind this method tends to not work with hardened browsers like Fennec. Here are some of the browsers which are guaranteed to work with this method; 
+
+ <img src="/assets/screenshots/login_button.png">
 
 - Brave
 
