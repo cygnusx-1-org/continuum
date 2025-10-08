@@ -63,49 +63,6 @@ public class FetchRedgifsVideoLinks {
                 } else {
                     handler.post(() -> fetchVideoLinkListener.failed(null));
                 }
-                /*Response<String> response = redgifsRetrofit
-                        .create(RedgifsAPI.class)
-                        .getRedgifsData(
-                                APIUtils.getRedgifsOAuthHeader(accessToken),
-                                redgifsId, APIUtils.USER_AGENT)
-                        .execute();
-                if (response.isSuccessful()) {
-                    parseRedgifsVideoLinks(handler, response.body(), fetchVideoLinkListener);
-                } else if (response.code() == 401) {
-                    // Token expired, try once more with new token
-                    accessToken = refreshAccessToken(redgifsRetrofit, currentAccountSharedPreferences);
-                    if (!accessToken.isEmpty()) {
-                        response = redgifsRetrofit
-                                .create(RedgifsAPI.class)
-                                .getRedgifsData(
-                                        APIUtils.getRedgifsOAuthHeader(accessToken),
-                                        redgifsId, APIUtils.USER_AGENT)
-                                .execute();
-                        if (response.isSuccessful()) {
-                            parseRedgifsVideoLinks(handler, response.body(), fetchVideoLinkListener);
-                        } else {
-                            handler.post(() -> fetchVideoLinkListener.failed(null));
-                        }
-                    } else {
-                        handler.post(() -> fetchVideoLinkListener.failed(null));
-                    }
-                } else {
-                    handler.post(() -> fetchVideoLinkListener.failed(null));
-                }*/
-
-                /*Map<String, String> params = new HashMap<>();
-                params.put(APIUtils.PLATFORM_KEY, "redgifs");
-                params.put(APIUtils.URL_KEY, "https://www.redgifs.com/watch/" + redgifsId);
-
-                Response<String> response = redgifsRetrofit
-                        .create(OhMyDlAPI.class)
-                        .getRedgifsData(params)
-                        .execute();
-                if (response.isSuccessful()) {
-                    parseRedgifsVideoLinks(handler, response.body(), fetchVideoLinkListener);
-                } else {
-                    handler.post(() -> fetchVideoLinkListener.failed(null));
-                }*/
             } catch (IOException e) {
                 e.printStackTrace();
                 handler.post(() -> fetchVideoLinkListener.failed(null));
@@ -150,33 +107,6 @@ public class FetchRedgifsVideoLinks {
             } else {
                 return null;
             }
-
-            /*Response<String> response = redgifsRetrofit
-                    .create(RedgifsAPI.class)
-                    .getRedgifsData(
-                            APIUtils.getRedgifsOAuthHeader(accessToken),
-                            redgifsId, APIUtils.USER_AGENT)
-                    .execute();
-            if (response.isSuccessful()) {
-                return parseRedgifsVideoLinks(response.body());
-            } else if (response.code() == 401) {
-                // Token expired, try once more with new token
-                accessToken = refreshAccessToken(redgifsRetrofit, currentAccountSharedPreferences);
-                if (!accessToken.isEmpty()) {
-                    response = redgifsRetrofit
-                            .create(RedgifsAPI.class)
-                            .getRedgifsData(
-                                    APIUtils.getRedgifsOAuthHeader(accessToken),
-                                    redgifsId, APIUtils.USER_AGENT)
-                            .execute();
-                    if (response.isSuccessful()) {
-                        return parseRedgifsVideoLinks(response.body());
-                    }
-                }
-                return null;
-            } else {
-                return null;
-            }*/
         } catch (IOException e) {
             e.printStackTrace();
             return null;

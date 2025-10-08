@@ -906,6 +906,7 @@ public class DownloadMediaService extends JobService {
 
             if (contentStringResId != 0) {
                 builder.setContentText(getString(contentStringResId));
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(getString(contentStringResId)));
             }
 
             if (mediaUri != null) {
@@ -1115,7 +1116,7 @@ public class DownloadMediaService extends JobService {
 
     private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, int mediaType, int randomNotificationIdOffset, String mimeType, Uri destinationFileUri, int errorCode, boolean multipleDownloads) {
         if (errorCode != NO_ERROR) {
-            if (multipleDownloads) {
+            if (!multipleDownloads) {
                 switch (errorCode) {
                     case ERROR_CANNOT_GET_DESTINATION_DIRECTORY:
                         updateNotification(builder, mediaType, R.string.downloading_image_or_gif_failed_cannot_get_destination_directory,

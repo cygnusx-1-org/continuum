@@ -671,6 +671,7 @@ public class DownloadRedditVideoService extends JobService {
 
             if (contentStringResId != 0) {
                 builder.setContentText(getString(contentStringResId));
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(getString(contentStringResId)));
             }
 
             if (mediaUri != null) {
