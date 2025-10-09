@@ -226,24 +226,17 @@ public class DownloadMediaService extends JobService {
                 if (post.isLoadedStreamableVideoAlready()) {
                     extras.putString(EXTRA_URL, post.getVideoUrl());
                 } else {
-                    extras.putString(EXTRA_REDGIFS_ID, post.getRedgifsId());
+                    extras.putString(EXTRA_STREAMABLE_SHORT_CODE, post.getStreamableShortCode());
                 }
 
                 extras.putString(EXTRA_FILE_NAME, "Streamable-" + post.getStreamableShortCode() + ".mp4");
             } else if (post.isRedgifs()) {
-                if (post.isLoadedStreamableVideoAlready()) {
-                    extras.putString(EXTRA_URL, post.getVideoUrl());
-                } else {
-                    extras.putString(EXTRA_STREAMABLE_SHORT_CODE, post.getStreamableShortCode());
-                    // URL will be fetched later in downloadMedia if null
-                }
-            } else if (post.isRedgifs()) {
-                if (post.isLoadedStreamableVideoAlready()) {
-                    url = post.getVideoUrl();
-                    extras.putString(EXTRA_URL, url);
-                } else {
-                    extras.putString(EXTRA_REDGIFS_ID, post.getRedgifsId());
-                    // URL will be fetched later in downloadMedia if null
+                extras.putString(EXTRA_URL, post.getVideoUrl());
+                extras.putString(EXTRA_REDGIFS_ID, post.getRedgifsId());
+
+                String redgifsId = post.getRedgifsId();
+                if (redgifsId != null && redgifsId.contains("-")) {
+                    redgifsId = redgifsId.substring(0, redgifsId.indexOf('-'));
                 }
             } else if (post.isImgur()) {
                 url = post.getVideoUrl();
@@ -253,16 +246,6 @@ public class DownloadMediaService extends JobService {
                 extras.putString(EXTRA_URL, url);
             }
             extras.putInt(EXTRA_MEDIA_TYPE, currentMediaType);
-            extras.putString(EXTRA_SUBREDDIT_NAME, post.getSubredditName());
-            extras.putInt(EXTRA_IS_NSFW, post.isNSFW() ? 1 : 0);
-        } else if (post.getPostType() == Post.GALLERY_TYPE) {
-            Log.d("GalleryDownload", "DownloadMediaService.constructJobInfo(Gallery): galleryIndex=" + galleryIndex);
-            if (post.getGallery() == null || galleryIndex < 0 || galleryIndex >= post.getGallery().size()) {
-                Log.e("GalleryDownload", "DownloadMediaService.constructJobInfo(Gallery): Invalid gallery index or gallery is null.");
-                return null; // Cannot construct job with invalid index
-            }
-
-            extras.putInt(EXTRA_MEDIA_TYPE, EXTRA_MEDIA_TYPE_VIDEO);
             extras.putString(EXTRA_SUBREDDIT_NAME, post.getSubredditName());
             extras.putInt(EXTRA_IS_NSFW, post.isNSFW() ? 1 : 0);
         } else if (post.getPostType() == Post.GALLERY_TYPE) {

@@ -16,6 +16,7 @@ import android.os.PersistableBundle;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -64,6 +65,7 @@ import ml.docilealligator.infinityforreddit.post.SubmitPost;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import retrofit2.Response;
@@ -270,6 +272,7 @@ public class SubmitPostService extends JobService {
                 .build();
     }
 
+    @WorkerThread
     private void submitTextOrLinkPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
         Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount,
         String subredditName, String title, String content, @Nullable String url,
@@ -296,6 +299,7 @@ public class SubmitPostService extends JobService {
             });
     }
 
+    @WorkerThread
     private void submitCrosspost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
         Executor executor, Handler handler, Retrofit newAuthenticatorOauthRetrofit,
         Account selectedAccount, String subredditName,
@@ -321,33 +325,33 @@ public class SubmitPostService extends JobService {
             });
     }
 
+    @WorkerThread
     private void submitImagePost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
-        Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, Uri mediaUri,
-        String subredditName, String title, String content, Flair flair,
-        boolean isSpoiler, boolean isNSFW, boolean receivePostReplyNotifications) {
-
+                                 Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, Uri mediaUri,
+                                 String subredditName, String title, String content, Flair flair,
+                                 boolean isSpoiler, boolean isNSFW, boolean receivePostReplyNotifications) {
         try {
             Bitmap resource = Glide.with(this).asBitmap().load(mediaUri).submit().get();
             SubmitPost.submitImagePost(mExecutor, handler, newAuthenticatorOauthRetrofit, mUploadMediaRetrofit,
-                selectedAccount.getAccessToken(), subredditName, title, content, resource, flair, isSpoiler, isNSFW, receivePostReplyNotifications,
-                new SubmitPost.SubmitPostListener() {
-                    @Override
-                    public void submitSuccessful(Post post) {
-                        handler.post(() -> {
-                            EventBus.getDefault().post(new SubmitImagePostEvent(true, null));
-                            Toast.makeText(SubmitPostService.this, R.string.image_is_processing, Toast.LENGTH_SHORT).show();
-                        });
+                    selectedAccount.getAccessToken(), subredditName, title, content, resource, flair, isSpoiler, isNSFW, receivePostReplyNotifications,
+                    new SubmitPost.SubmitPostListener() {
+                        @Override
+                        public void submitSuccessful(Post post) {
+                            handler.post(() -> {
+                                EventBus.getDefault().post(new SubmitImagePostEvent(true, null));
+                                Toast.makeText(SubmitPostService.this, R.string.image_is_processing, Toast.LENGTH_SHORT).show();
+                            });
 
-                        stopJob(parameters, manager, randomNotificationIdOffset);
-                    }
+                            stopJob(parameters, manager, randomNotificationIdOffset);
+                        }
 
-                    @Override
-                    public void submitFailed(@Nullable String errorMessage) {
-                        handler.post(() -> EventBus.getDefault().post(new SubmitImagePostEvent(false, errorMessage)));
+                        @Override
+                        public void submitFailed(@Nullable String errorMessage) {
+                            handler.post(() -> EventBus.getDefault().post(new SubmitImagePostEvent(false, errorMessage)));
 
-                        stopJob(parameters, manager, randomNotificationIdOffset);
-                    }
-                });
+                            stopJob(parameters, manager, randomNotificationIdOffset);
+                        }
+                    });
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
             handler.post(() -> EventBus.getDefault().post(new SubmitImagePostEvent(false, getString(R.string.error_processing_image))));
@@ -355,6 +359,7 @@ public class SubmitPostService extends JobService {
         }
     }
 
+    @WorkerThread
     private void submitVideoPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
         Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, Uri mediaUri,
         String subredditName, String title, String content, Flair flair,
@@ -363,12 +368,17 @@ public class SubmitPostService extends JobService {
         try {
             InputStream in = getContentResolver().openInputStream(mediaUri);
             String type = getContentResolver().getType(mediaUri);
+            File cacheDir = Utils.getCacheDir(this);
+            if (cacheDir == null) {
+                handler.post(() -> EventBus.getDefault().post(new SubmitVideoOrGifPostEvent(false, false, getString(R.string.submit_video_or_gif_post_failed_cannot_get_cache_directory))));
+                return;
+            }
             String cacheFilePath;
 
             if (type != null && type.contains("gif")) {
-                cacheFilePath = getExternalCacheDir() + "/" + mediaUri.getLastPathSegment() + ".gif";
+                cacheFilePath = cacheDir + "/" + mediaUri.getLastPathSegment() + ".gif";
             } else {
-                cacheFilePath = getExternalCacheDir() + "/" + mediaUri.getLastPathSegment() + ".mp4";
+                cacheFilePath = cacheDir + "/" + mediaUri.getLastPathSegment() + ".mp4";
             }
 
             copyFileToCache(in, cacheFilePath);
@@ -416,7 +426,7 @@ public class SubmitPostService extends JobService {
         }
     }
 
-    private void submitGalleryPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset, Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, String payload) {
+    @WorkerThread private void submitGalleryPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset, Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, String payload) {
         try {
             Response<String> response = newAuthenticatorOauthRetrofit.create(RedditAPI.class).submitGalleryPost(APIUtils.getOAuthHeader(selectedAccount.getAccessToken()), payload).execute();
             if (response.isSuccessful()) {
@@ -453,7 +463,7 @@ public class SubmitPostService extends JobService {
         }
     }
 
-    private void submitPollPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset, Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, String payload) {
+    @WorkerThread private void submitPollPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset, Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, String payload) {
         try {
             Response<String> response = newAuthenticatorOauthRetrofit.create(RedditAPI.class).submitPollPost(APIUtils.getOAuthHeader(selectedAccount.getAccessToken()), payload).execute();
             if (response.isSuccessful()) {

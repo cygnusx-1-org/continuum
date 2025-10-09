@@ -51,7 +51,7 @@ public class PostViewModel extends ViewModel {
     private PostFilter postFilter;
     private String userWhere;
     private ReadPostsListInterface readPostsList;
-    private final MutableLiveData<Boolean> currentlyReadPostIdsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> hideReadPostsValue = new MutableLiveData<>();
 
     private final LiveData<PagingData<Post>> posts;
     private final LiveData<PagingData<Post>> postsWithReadPostsHidden;
@@ -90,19 +90,16 @@ public class PostViewModel extends ViewModel {
                     sortTypeLiveData.getValue(), postFilterLiveData.getValue());
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
-        if(postType == PostPagingSource.TYPE_USER)
-            postsWithReadPostsHidden = posts;
-        else {
-            postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(currentlyReadPostIdsLiveData,
-                    currentlyReadPostIds -> Transformations.map(
-                            posts,
-                            postPagingData -> PagingDataTransforms.filter(
-                                    postPagingData, executor,
-                                    post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() || post.isStickied()))), ViewModelKt.getViewModelScope(this));
-        }
-        currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
+
+        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
+                currentlyReadPostIds -> Transformations.map(
+                        posts,
+                        postPagingData -> PagingDataTransforms.filter(
+                                postPagingData, executor,
+                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+
+        hideReadPostsValue.setValue(postHistorySharedPreferences != null
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
     }
 
     // PostPagingSource.TYPE_SUBREDDIT || PostPagingSource.TYPE_ANONYMOUS_FRONT_PAGE || PostPagingSource.TYPE_ANONYMOUS_MULTIREDDIT
@@ -134,19 +131,17 @@ public class PostViewModel extends ViewModel {
                     sortTypeLiveData.getValue(), postFilterLiveData.getValue());
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
-        if(postType == PostPagingSource.TYPE_USER)
-            postsWithReadPostsHidden = posts;
-        else {
-            postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(currentlyReadPostIdsLiveData,
-                    currentlyReadPostIds -> Transformations.map(
-                            posts,
-                            postPagingData -> PagingDataTransforms.filter(
-                                    postPagingData, executor,
-                                    post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() || post.isStickied()))), ViewModelKt.getViewModelScope(this));
-        }
-        currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
+
+        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
+                currentlyReadPostIds -> Transformations.map(
+                        posts,
+                        postPagingData -> PagingDataTransforms.filter(
+                                postPagingData, executor,
+                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+
+        hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
+                && (postType != PostPagingSource.TYPE_SUBREDDIT || subredditName.equals("all") || subredditName.equals("popular")));
     }
 
     // PostPagingSource.TYPE_MULTI_REDDIT
@@ -179,21 +174,19 @@ public class PostViewModel extends ViewModel {
                     sortTypeLiveData.getValue(), postFilterLiveData.getValue());
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
-        if(postType == PostPagingSource.TYPE_USER)
-            postsWithReadPostsHidden = posts;
-        else {
-            postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(currentlyReadPostIdsLiveData,
-                    currentlyReadPostIds -> Transformations.map(
-                            posts,
-                            postPagingData -> PagingDataTransforms.filter(
-                                    postPagingData, executor,
-                                    post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() || post.isStickied()))), ViewModelKt.getViewModelScope(this));
-        }
-        currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
+
+        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
+                currentlyReadPostIds -> Transformations.map(
+                        posts,
+                        postPagingData -> PagingDataTransforms.filter(
+                                postPagingData, executor,
+                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+
+        hideReadPostsValue.setValue(postHistorySharedPreferences != null
+                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
     }
 
+    // PostPagingSource.TYPE_USER
     public PostViewModel(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                          SharedPreferences sharedPreferences,
                          SharedPreferences postFeedScrolledPositionSharedPreferences,
@@ -225,19 +218,15 @@ public class PostViewModel extends ViewModel {
                     sortTypeLiveData.getValue(), postFilterLiveData.getValue());
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
-        if(postType == PostPagingSource.TYPE_USER)
-            postsWithReadPostsHidden = posts;
-        else {
-            postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(currentlyReadPostIdsLiveData,
-                    currentlyReadPostIds -> Transformations.map(
-                            posts,
-                            postPagingData -> PagingDataTransforms.filter(
-                                    postPagingData, executor,
-                                    post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() || post.isStickied()))), ViewModelKt.getViewModelScope(this));
-        }
-        currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
+
+        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
+                currentlyReadPostIds -> Transformations.map(
+                        posts,
+                        postPagingData -> PagingDataTransforms.filter(
+                                postPagingData, executor,
+                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+
+        hideReadPostsValue.setValue(false);
     }
 
     // postType == PostPagingSource.TYPE_SEARCH
@@ -272,19 +261,15 @@ public class PostViewModel extends ViewModel {
                     sortTypeLiveData.getValue(), postFilterLiveData.getValue());
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
-        if(postType == PostPagingSource.TYPE_USER)
-            postsWithReadPostsHidden = posts;
-        else {
-            postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(currentlyReadPostIdsLiveData,
-                    currentlyReadPostIds -> Transformations.map(
-                            posts,
-                            postPagingData -> PagingDataTransforms.filter(
-                                    postPagingData, executor,
-                                    post -> !post.isRead() || !currentlyReadPostIdsLiveData.getValue() || post.isStickied()))), ViewModelKt.getViewModelScope(this));
-        }
-        currentlyReadPostIdsLiveData.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false) );
+
+        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
+                currentlyReadPostIds -> Transformations.map(
+                        posts,
+                        postPagingData -> PagingDataTransforms.filter(
+                                postPagingData, executor,
+                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+
+        hideReadPostsValue.setValue(false);
     }
 
     public LiveData<PagingData<Post>> getPosts() {
@@ -292,7 +277,7 @@ public class PostViewModel extends ViewModel {
     }
 
     public void hideReadPosts() {
-        currentlyReadPostIdsLiveData.setValue(true);
+        hideReadPostsValue.setValue(true);
     }
 
     public PostPagingSource returnPagingSoruce() {

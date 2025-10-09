@@ -44,6 +44,7 @@ import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class RestoreSettings {
     public static void restoreSettings(Context context, Executor executor, Handler handler,
@@ -74,7 +75,12 @@ public class RestoreSettings {
                     return;
                 }
 
-                String cachePath = context.getExternalCacheDir() + "/Restore/";
+                File cacheDir = Utils.getCacheDir(context);
+                if (cacheDir == null) {
+                    handler.post(() -> restoreSettingsListener.failed(context.getString(R.string.restore_settings_failed_cannot_get_cache_dir)));
+                    return;
+                }
+                String cachePath = cacheDir + "/Restore/";
                 if (new File(cachePath).exists()) {
                     FileUtils.deleteDirectory(new File(cachePath));
                 }

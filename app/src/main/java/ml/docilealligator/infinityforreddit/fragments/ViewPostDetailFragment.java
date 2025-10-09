@@ -1495,6 +1495,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                             SortType.Type sortTypeType = loadSortType();
                             activity.setTitle(sortTypeType.fullName);
                             ViewPostDetailFragment.this.sortType = sortTypeType;
+                            fetchComments(changeRefreshState, ViewPostDetailFragment.this.sortType);
                         }
                     });
         } else {

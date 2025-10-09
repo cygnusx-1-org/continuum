@@ -45,6 +45,7 @@ import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubred
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class BackupSettings {
     public static void backupSettings(Context context, Executor executor, Handler handler,
@@ -67,7 +68,13 @@ public class BackupSettings {
                                     SharedPreferences navigationDrawerSharedPreferences,
                                     BackupSettingsListener backupSettingsListener) {
         executor.execute(() -> {
-            String backupDir = context.getExternalCacheDir() + "/Backup/" + BuildConfig.VERSION_NAME;
+            File cacheDir = Utils.getCacheDir(context);
+            if (cacheDir == null) {
+                handler.post(() -> backupSettingsListener.failed(context.getText(R.string.restore_settings_failed_cannot_get_cache_dir).toString()));
+                return;
+            }
+
+            String backupDir = cacheDir + "/Backup/" + BuildConfig.VERSION_NAME;
             File backupDirFile = new File(backupDir);
             if (new File(backupDir).exists()) {
                 try {
@@ -146,10 +153,10 @@ public class BackupSettings {
             boolean res23 = saveDatabaseTableToFile(accountsJson, databaseDirFile.getAbsolutePath(), "/accounts.json");
 
 
-            boolean zipRes = zipAndMoveToDestinationDir(context, contentResolver, destinationDirUri, password);
+            boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri, password);
 
             try {
-                FileUtils.deleteDirectory(new File(context.getExternalCacheDir() + "/Backup/"));
+                FileUtils.deleteDirectory(new File(cacheDir + "/Backup/"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -209,18 +216,18 @@ public class BackupSettings {
         return true;
     }
 
-    private static boolean zipAndMoveToDestinationDir(Context context, ContentResolver contentResolver, Uri destinationDirUri, String password) {
+    private static boolean zipAndMoveToDestinationDir(Context context, File cacheDir, ContentResolver contentResolver, Uri destinationDirUri, String password) {
         OutputStream outputStream = null;
         boolean result = false;
         try {
             String time = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(System.currentTimeMillis()));
             String fileName = "Continuum_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
-            String filePath = context.getExternalCacheDir() + "/Backup/" + fileName;
+            String filePath = cacheDir + "/Backup/" + fileName;
             ZipFile zip = new ZipFile(filePath, password.toCharArray());
             ZipParameters zipParameters = new ZipParameters();
             zipParameters.setEncryptFiles(true);
             zipParameters.setEncryptionMethod(EncryptionMethod.AES);
-            zip.addFolder(new File(context.getExternalCacheDir() + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
+            zip.addFolder(new File(cacheDir + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
 
             DocumentFile dir = DocumentFile.fromTreeUri(context, destinationDirUri);
             if (dir == null) {

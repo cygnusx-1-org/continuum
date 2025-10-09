@@ -25,9 +25,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -185,13 +182,15 @@ public class CustomizePostFilterActivity extends BaseActivity {
             startActivityForResult(intent, ADD_CONTAIN_SUBREDDITS_REQUEST_CODE);
         });
         binding.excludeAddUsersImageViewCustomizePostFilterActivity.setOnClickListener(view -> {
-            Intent intent = new Intent(this, UserMultiselectionActivity.class);
-            intent.putExtra(UserMultiselectionActivity.EXTRA_GET_SELECTED_USERS, binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.getText().toString().trim());
+            Intent intent = new Intent(this, SearchActivity.class);
+            intent.putExtra(SearchActivity.EXTRA_SEARCH_ONLY_USERS, true);
+            intent.putExtra(SearchActivity.EXTRA_IS_MULTI_SELECTION, true);
             startActivityForResult(intent, ADD_EXCLUDE_USERS_REQUEST_CODE);
         });
         binding.containAddUsersImageViewCustomizePostFilterActivity.setOnClickListener(view -> {
-            Intent intent = new Intent(this, UserMultiselectionActivity.class);
-            intent.putExtra(UserMultiselectionActivity.EXTRA_GET_SELECTED_USERS, binding.containsUsersTextInputEditTextCustomizePostFilterActivity.getText().toString().trim());
+            Intent intent = new Intent(this, SearchActivity.class);
+            intent.putExtra(SearchActivity.EXTRA_SEARCH_ONLY_USERS, true);
+            intent.putExtra(SearchActivity.EXTRA_IS_MULTI_SELECTION, true);
             startActivityForResult(intent, ADD_CONTAIN_USERS_REQUEST_CODE);
         });
 
@@ -256,6 +255,18 @@ public class CustomizePostFilterActivity extends BaseActivity {
                 binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.append(",");
             }
             binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.append(excludeSubreddit);
+        }
+        if (containSubreddit != null && !containSubreddit.equals("")) {
+            if (!binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+                binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.append(",");
+            }
+            binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.append(containSubreddit);
+        }
+        if (containUser != null && !containUser.equals("")) {
+            if (!binding.containsUsersTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+                binding.containsUsersTextInputEditTextCustomizePostFilterActivity.append(",");
+            }
+            binding.containsUsersTextInputEditTextCustomizePostFilterActivity.append(containUser);
         }
         if (excludeUser != null && !excludeUser.equals("")) {
             if (!binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
@@ -474,6 +485,7 @@ public class CustomizePostFilterActivity extends BaseActivity {
             setCursorDrawableColor(binding.excludesUsersTextInputEditTextCustomizePostFilterActivity, primaryTextColor);
             setCursorDrawableColor(binding.containsUsersTextInputEditTextCustomizePostFilterActivity, primaryTextColor);
             setCursorDrawableColor(binding.excludesFlairsTextInputEditTextCustomizePostFilterActivity, primaryTextColor);
+            setCursorDrawableColor(binding.containsUsersTextInputEditTextCustomizePostFilterActivity, primaryTextColor);
             setCursorDrawableColor(binding.containsFlairsTextInputEditTextCustomizePostFilterActivity, primaryTextColor);
             setCursorDrawableColor(binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity, primaryTextColor);
             setCursorDrawableColor(binding.containDomainsTextInputEditTextCustomizePostFilterActivity, primaryTextColor);
@@ -591,83 +603,40 @@ public class CustomizePostFilterActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK || data == null) return;
-        switch (requestCode) {
-            case ADD_EXCLUDE_SUBREDDITS_REQUEST_CODE:
-                applyNewItemsToField(
-                        binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity,
-                        data.getStringArrayListExtra(SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS)
-                );
-                break;
-            case ADD_CONTAIN_SUBREDDITS_REQUEST_CODE:
-                applyNewItemsToField(
-                        binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity,
-                        data.getStringArrayListExtra(SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS)
-                );
-                break;
-            case ADD_EXCLUDE_USERS_REQUEST_CODE:
-                applyNewItemsToField(
-                        binding.excludesUsersTextInputEditTextCustomizePostFilterActivity,
-                        data.getStringArrayListExtra(UserMultiselectionActivity.EXTRA_RETURN_SELECTED_USERNAMES)
-                );
-                break;
-            case ADD_CONTAIN_USERS_REQUEST_CODE:
-                applyNewItemsToField(
-                        binding.containsUsersTextInputEditTextCustomizePostFilterActivity,
-                        data.getStringArrayListExtra(UserMultiselectionActivity.EXTRA_RETURN_SELECTED_USERNAMES)
-                );
-                break;
-        }
-    }
-
-    private void applyNewItemsToField(
-            com.google.android.material.textfield.TextInputEditText field,
-            @Nullable ArrayList<String> newItems
-    ) {
-        if (newItems == null || newItems.isEmpty()) return;
-
-        String currentCsv = field.getText().toString().trim();
-        List<String> toAdd = getToAdd(currentCsv, newItems);
-        if (toAdd.isEmpty()) return;
-
-        StringBuilder updated = getStringBuilder(currentCsv, toAdd);
-        field.setText(updated.toString());
-    }
-
-    @NonNull
-    private static List<String> getToAdd(String currentCsv, List<String> candidates) {
-        Set<String> existing = new HashSet<>();
-        if (!currentCsv.isEmpty()) {
-            for (String u : currentCsv.split(",")) {
-                String t = u.trim();
-                if (!t.isEmpty()) existing.add(t);
+        if (resultCode == RESULT_OK && data != null) {
+            if (requestCode == ADD_EXCLUDE_SUBREDDITS_REQUEST_CODE) {
+                ArrayList<String> subredditNames = data.getStringArrayListExtra(
+                        SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
+                updateSubredditsUsersNames(subredditNames, binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity);
+            } else if (requestCode == ADD_CONTAIN_SUBREDDITS_REQUEST_CODE) {
+                ArrayList<String> subredditNames = data.getStringArrayListExtra(
+                        SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
+                updateSubredditsUsersNames(subredditNames, binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity);
+            } else if (requestCode == ADD_EXCLUDE_USERS_REQUEST_CODE) {
+                ArrayList<String> usernames = data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES);
+                updateSubredditsUsersNames(usernames, binding.excludesUsersTextInputEditTextCustomizePostFilterActivity);
+            } else if (requestCode == ADD_CONTAIN_USERS_REQUEST_CODE) {
+                ArrayList<String> usernames = data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES);
+                updateSubredditsUsersNames(usernames, binding.containsUsersTextInputEditTextCustomizePostFilterActivity);
             }
         }
-        List<String> toAdd = new ArrayList<>();
-        for (String s : candidates) {
-            String trimmed = s.trim();
-            if (!trimmed.isEmpty() && !existing.contains(trimmed)) {
-                toAdd.add(trimmed);
-            }
-        }
-        return toAdd;
     }
 
-    @NonNull
-    private static StringBuilder getStringBuilder(String currentCsv, List<String> toAdd) {
+    private void updateSubredditsUsersNames(@Nullable ArrayList<String> subredditNames,
+                                      com.google.android.material.textfield.TextInputEditText targetEditText) {
+        if (subredditNames == null || subredditNames.isEmpty() || targetEditText == null) return;
+
+        String current = targetEditText.getText().toString().trim();
+        if (!current.isEmpty() && current.charAt(current.length() - 1) != ',') {
+            targetEditText.setText(current + ",");
+        }
+
         StringBuilder sb = new StringBuilder();
-        if (!currentCsv.isEmpty() && !currentCsv.endsWith(",")) {
-            sb.append(currentCsv).append(",");
-        } else {
-            sb.append(currentCsv);
+        for (String s : subredditNames) {
+            sb.append(s).append(",");
         }
-        for (String u : toAdd) {
-            sb.append(u).append(",");
-        }
-        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ',') {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        return sb;
+        if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
+        targetEditText.append(sb.toString());
     }
 
 

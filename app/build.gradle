@@ -84,8 +84,8 @@ android {
 
         minSdk 21
         targetSdk 35
-        versionCode 200
-        versionName "8.0.4.1"
+        versionCode 201
+        versionName "8.0.5.1"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }
@@ -291,7 +291,7 @@ dependencies {
 /**** User Interface (frontend) ****/
 
     //Image loading
-    def glideVersion = "4.16.0"
+    def glideVersion = "5.0.5"
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
