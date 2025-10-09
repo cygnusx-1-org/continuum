@@ -382,84 +382,82 @@ public class SearchActivity extends BaseActivity {
         }
     }
 
-    private void bindView() {
-        if (!accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            adapter = new SearchActivityRecyclerViewAdapter(this, mCustomThemeWrapper, new SearchActivityRecyclerViewAdapter.ItemOnClickListener() {
-                @Override
-                public void onClick(RecentSearchQuery recentSearchQuery, boolean searchImmediately) {
-                    if (searchImmediately) {
-                        searchInSubredditOrUserName = recentSearchQuery.getSearchInSubredditOrUserName();
-                        searchInMultiReddit = MultiReddit.getDummyMultiReddit(recentSearchQuery.getMultiRedditPath());
-                        if (searchInMultiReddit != null && recentSearchQuery.getMultiRedditDisplayName() != null) {
-                            searchInMultiReddit.setDisplayName(recentSearchQuery.getMultiRedditDisplayName());
-                        }
-                        searchInThingType = recentSearchQuery.getSearchInThingType();
-                        search(recentSearchQuery.getSearchQuery());
-                    } else {
-                        binding.searchEditTextSearchActivity.setText(recentSearchQuery.getSearchQuery());
-                        binding.searchEditTextSearchActivity.setSelection(recentSearchQuery.getSearchQuery().length());
+private void bindView() {
+        adapter = new SearchActivityRecyclerViewAdapter(this, mCustomThemeWrapper, new SearchActivityRecyclerViewAdapter.ItemOnClickListener() {
+            @Override
+            public void onClick(RecentSearchQuery recentSearchQuery, boolean searchImmediately) {
+                if (searchImmediately) {
+                    searchInSubredditOrUserName = recentSearchQuery.getSearchInSubredditOrUserName();
+                    searchInMultiReddit = MultiReddit.getDummyMultiReddit(recentSearchQuery.getMultiRedditPath());
+                    if (searchInMultiReddit != null && recentSearchQuery.getMultiRedditDisplayName() != null) {
+                        searchInMultiReddit.setDisplayName(recentSearchQuery.getMultiRedditDisplayName());
                     }
+                    searchInThingType = recentSearchQuery.getSearchInThingType();
+                    search(recentSearchQuery.getSearchQuery());
+                } else {
+                    binding.searchEditTextSearchActivity.setText(recentSearchQuery.getSearchQuery());
+                    binding.searchEditTextSearchActivity.setSelection(recentSearchQuery.getSearchQuery().length());
                 }
+            }
 
-                @Override
-                public void onDelete(RecentSearchQuery recentSearchQuery) {
-                    Utils.hideKeyboard(SearchActivity.this);
+            @Override
+            public void onDelete(RecentSearchQuery recentSearchQuery) {
+                Utils.hideKeyboard(SearchActivity.this);
 
-                    executor.execute(() -> {
-                        mRedditDataRoomDatabase.recentSearchQueryDao().deleteRecentSearchQueries(recentSearchQuery);
-                        Snackbar.make(binding.getRoot(), R.string.recent_search_deleted, Snackbar.LENGTH_SHORT)
-                                .setAction(R.string.undo, v -> executor.execute(() -> mRedditDataRoomDatabase.recentSearchQueryDao().insert(recentSearchQuery)))
-                                .addCallback(new Snackbar.Callback() {
-                                    @Override
-                                    public void onDismissed(Snackbar transientBottomBar, int event) {
-                                        Utils.showKeyboard(SearchActivity.this, handler, binding.searchEditTextSearchActivity);
-                                    }
-                                })
-                                .show();
-                    });
-                }
-            });
-            binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
-            binding.recentSearchQueryRecyclerViewSearchActivity.setNestedScrollingEnabled(false);
-            binding.recentSearchQueryRecyclerViewSearchActivity.setAdapter(adapter);
-            binding.recentSearchQueryRecyclerViewSearchActivity.addItemDecoration(new RecyclerView.ItemDecoration() {
-                final int spacing = (int) Utils.convertDpToPixel(16, SearchActivity.this);
-                final int halfSpacing = spacing / 2;
-
-                @Override
-                public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                    int column = ((GridLayoutManager.LayoutParams) view.getLayoutParams()).getSpanIndex();
-                    boolean toTheLeft = column == 0;
-
-                    if (toTheLeft) {
-                        outRect.left = spacing;
-                        outRect.right = halfSpacing;
-                    } else {
-                        outRect.left = halfSpacing;
-                        outRect.right = spacing;
-                    }
-                    outRect.top = spacing;
-                }
-            });
-
-            binding.subredditAutocompleteRecyclerViewSearchActivity.setAdapter(subredditAutocompleteRecyclerViewAdapter);
-
-            if (mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SEARCH_HISTORY, true)) {
-                mRecentSearchQueryViewModel = new ViewModelProvider(this,
-                        new RecentSearchQueryViewModel.Factory(mRedditDataRoomDatabase, accountName))
-                        .get(RecentSearchQueryViewModel.class);
-
-                mRecentSearchQueryViewModel.getAllRecentSearchQueries().observe(this, recentSearchQueries -> {
-                    if (recentSearchQueries != null && !recentSearchQueries.isEmpty()) {
-                        binding.dividerSearchActivity.setVisibility(View.VISIBLE);
-                        binding.deleteAllRecentSearchesButtonSearchActivity.setVisibility(View.VISIBLE);
-                    } else {
-                        binding.dividerSearchActivity.setVisibility(View.GONE);
-                        binding.deleteAllRecentSearchesButtonSearchActivity.setVisibility(View.GONE);
-                    }
-                    adapter.setRecentSearchQueries(recentSearchQueries);
+                executor.execute(() -> {
+                    mRedditDataRoomDatabase.recentSearchQueryDao().deleteRecentSearchQueries(recentSearchQuery);
+                    Snackbar.make(binding.getRoot(), R.string.recent_search_deleted, Snackbar.LENGTH_SHORT)
+                            .setAction(R.string.undo, v -> executor.execute(() -> mRedditDataRoomDatabase.recentSearchQueryDao().insert(recentSearchQuery)))
+                            .addCallback(new Snackbar.Callback() {
+                                @Override
+                                public void onDismissed(Snackbar transientBottomBar, int event) {
+                                    Utils.showKeyboard(SearchActivity.this, handler, binding.searchEditTextSearchActivity);
+                                }
+                            })
+                            .show();
                 });
             }
+        });
+        binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
+        binding.recentSearchQueryRecyclerViewSearchActivity.setNestedScrollingEnabled(false);
+        binding.recentSearchQueryRecyclerViewSearchActivity.setAdapter(adapter);
+        binding.recentSearchQueryRecyclerViewSearchActivity.addItemDecoration(new RecyclerView.ItemDecoration() {
+            final int spacing = (int) Utils.convertDpToPixel(16, SearchActivity.this);
+            final int halfSpacing = spacing / 2;
+
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                int column = ((GridLayoutManager.LayoutParams) view.getLayoutParams()).getSpanIndex();
+                boolean toTheLeft = column == 0;
+
+                if (toTheLeft) {
+                    outRect.left = spacing;
+                    outRect.right = halfSpacing;
+                } else {
+                    outRect.left = halfSpacing;
+                    outRect.right = spacing;
+                }
+                outRect.top = spacing;
+            }
+        });
+
+        binding.subredditAutocompleteRecyclerViewSearchActivity.setAdapter(subredditAutocompleteRecyclerViewAdapter);
+
+        if (mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SEARCH_HISTORY, true)) {
+            mRecentSearchQueryViewModel = new ViewModelProvider(this,
+                    new RecentSearchQueryViewModel.Factory(mRedditDataRoomDatabase, accountName))
+                    .get(RecentSearchQueryViewModel.class);
+
+            mRecentSearchQueryViewModel.getAllRecentSearchQueries().observe(this, recentSearchQueries -> {
+                if (recentSearchQueries != null && !recentSearchQueries.isEmpty()) {
+                    binding.dividerSearchActivity.setVisibility(View.VISIBLE);
+                    binding.deleteAllRecentSearchesButtonSearchActivity.setVisibility(View.VISIBLE);
+                } else {
+                    binding.dividerSearchActivity.setVisibility(View.GONE);
+                    binding.deleteAllRecentSearchesButtonSearchActivity.setVisibility(View.GONE);
+                }
+                adapter.setRecentSearchQueries(recentSearchQueries);
+            });
         }
     }
 
