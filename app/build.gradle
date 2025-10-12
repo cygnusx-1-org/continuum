@@ -178,8 +178,21 @@ if (githubPropertiesFile.exists()) {
         def releaseNotes = System.getenv("RELEASE_NOTES") ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
 
         token = githubProperties["githubToken"]
-        owner = "cygnusx-1-org"
-        repo = "continuum"
+
+        def repoEnv = System.getenv("GITHUB_REPOSITORY")
+        if (repoEnv) {
+            def parts = repoEnv.split("/")
+            if (parts.length == 2) {
+                owner = parts[0]
+                repo = parts[1]
+            } else {
+                owner = githubProperties["owner"] ?: "cygnusx-1-org"
+                repo = githubProperties["repo"] ?: "continuum"
+            }
+        } else {
+            owner = githubProperties["owner"] ?: "cygnusx-1-org"
+            repo = githubProperties["repo"] ?: "continuum"
+        }
         tagName = android.defaultConfig.versionName ?: "default-version"
         targetCommitish = "master"
         releaseName = "Release ${android.defaultConfig.versionName ?: "default-version"}"

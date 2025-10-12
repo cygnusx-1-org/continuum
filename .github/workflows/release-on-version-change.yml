@@ -1,0 +1,164 @@
+name: Release on Version Change
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - app/build.gradle
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Detect version change
+        id: version
+        run: |
+          set -eo pipefail
+          current=$(awk '/^[[:space:]]*versionName[[:space:]]*"/ { gsub(/^[^"]*"/,""); gsub(/".*/,""); print; exit }' app/build.gradle)
+          if [ -z "$current" ]; then
+            echo "Unable to locate versionName in app/build.gradle" >&2
+            exit 1
+          fi
+
+          if git show HEAD^:app/build.gradle > /tmp/previous.gradle 2>/dev/null; then
+            previous=$(awk '/^[[:space:]]*versionName[[:space:]]*"/ { gsub(/^[^"]*"/,""); gsub(/".*/,""); print; exit }' /tmp/previous.gradle)
+          else
+            previous=""
+          fi
+
+          if [ "$current" != "$previous" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+
+      - name: Stop if version unchanged
+        if: steps.version.outputs.changed != 'true'
+        run: |
+          echo "versionName unchanged (current: ${CURRENT}). Skipping release workflow."
+        env:
+          CURRENT: ${{ steps.version.outputs.current }}
+
+      - name: Set up Java
+        if: steps.version.outputs.changed == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        if: steps.version.outputs.changed == 'true'
+        uses: android-actions/setup-android@v3
+        with:
+          packages: build-tools;35.0.0 platforms;android-35 platform-tools
+
+      - name: Accept Android SDK licenses
+        if: steps.version.outputs.changed == 'true'
+        run: yes | sdkmanager --licenses
+
+      - name: Set up Gradle
+        if: steps.version.outputs.changed == 'true'
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Compute release notes
+        if: steps.version.outputs.changed == 'true'
+        id: notes
+        run: |
+          set -eo pipefail
+          current_version="${CURRENT_VERSION}"
+          last_tag="$(git tag --merged HEAD --sort=-creatordate | grep -Fxv "${current_version}" | head -n 1 || true)"
+          range=""
+          if [ -n "$last_tag" ]; then
+            range="${last_tag}..HEAD"
+          fi
+
+          if [ -n "$range" ]; then
+            notes="$(git log "$range" --pretty=format:'* %s' -n 200)"
+          else
+            notes="$(git log --pretty=format:'* %s' -n 200)"
+          fi
+
+          if [ "$(printf '%s' "$notes" | wc -c)" -gt 60000 ]; then
+            notes="$(printf '%s\n' "$notes" | head -n 600)"
+            notes="${notes}"$'\n'"* (truncated release notes)"
+          fi
+
+          if [ -z "$notes" ]; then
+            notes="* Release ${current_version}"
+          fi
+
+          delimiter="EOF_$(date +%s%N)"
+          {
+            echo "notes<<${delimiter}"
+            printf '%s\n' "$notes"
+            echo "${delimiter}"
+            echo "last_tag=$last_tag"
+          } >> "$GITHUB_OUTPUT"
+        env:
+          CURRENT_VERSION: ${{ steps.version.outputs.current }}
+
+      - name: Check for existing tag
+        if: steps.version.outputs.changed == 'true'
+        id: tag_check
+        run: |
+          if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          VERSION: ${{ steps.version.outputs.current }}
+
+      - name: Stop if tag already exists
+        if: steps.version.outputs.changed == 'true' && steps.tag_check.outputs.exists == 'true'
+        run: |
+          echo "Tag ${VERSION} already exists. Nothing to release."
+        env:
+          VERSION: ${{ steps.version.outputs.current }}
+
+      - name: Prepare GitHub release properties
+        if: steps.version.outputs.changed == 'true' && steps.tag_check.outputs.exists != 'true'
+        run: |
+          cat <<EOF > github.properties
+          githubToken=${TOKEN}
+          EOF
+        env:
+          TOKEN: ${{ github.token }}
+
+      - name: Configure git for tagging
+        if: steps.version.outputs.changed == 'true' && steps.tag_check.outputs.exists != 'true'
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: Create and push version tag
+        if: steps.version.outputs.changed == 'true' && steps.tag_check.outputs.exists != 'true'
+        run: |
+          git tag -a "${VERSION}" -m "Version ${VERSION}"
+          git push origin "${VERSION}"
+        env:
+          VERSION: ${{ steps.version.outputs.current }}
+
+      - name: Build and publish release
+        if: steps.version.outputs.changed == 'true' && steps.tag_check.outputs.exists != 'true'
+        run: |
+          cat <<'EOF' > release_notes.txt
+          ${{ steps.notes.outputs.notes }}
+          EOF
+          scripts/release-github.sh release_notes.txt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
