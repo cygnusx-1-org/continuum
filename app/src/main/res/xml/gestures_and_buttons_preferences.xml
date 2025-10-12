@@ -26,11 +26,6 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
-        app:key="swap_tap_and_long_in_comments"
-        app:title="@string/settings_swap_tap_and_long_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="true"
         app:key="pull_to_refresh"
         app:title="@string/settings_pull_to_refresh_title" />
 
@@ -73,7 +68,7 @@
         app:title="@string/settings_volume_keys_navigate_comments_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
+        app:defaultValue="true"
         app:key="swap_tap_and_long_in_comments"
         app:title="@string/settings_swap_tap_and_long_title" />
 
