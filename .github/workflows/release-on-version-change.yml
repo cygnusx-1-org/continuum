@@ -87,18 +87,24 @@ jobs:
           fi
 
           if [ -n "$range" ]; then
-            notes="$(git log "$range" --pretty=format:'* %s' -n 200)"
+            log_notes="$(git log "$range" --pretty=format:'* %s' -n 200)"
           else
-            notes="$(git log --pretty=format:'* %s' -n 200)"
+            log_notes="$(git log --pretty=format:'* %s' -n 200)"
           fi
 
-          if [ "$(printf '%s' "$notes" | wc -c)" -gt 60000 ]; then
-            notes="$(printf '%s\n' "$notes" | head -n 600)"
-            notes="${notes}"$'\n'"* (truncated release notes)"
+          if [ "$(printf '%s' "$log_notes" | wc -c)" -gt 60000 ]; then
+            log_notes="$(printf '%s\n' "$log_notes" | head -n 600)"
+            log_notes="${log_notes}"$'\n'"* (truncated release notes)"
           fi
 
-          if [ -z "$notes" ]; then
-            notes="* Release ${current_version}"
+          if [ -z "$log_notes" ]; then
+            log_notes="* Release ${current_version}"
+          fi
+
+          notes="Note v8a is the 64-bit build, and should be considered the default choice."
+
+          if [ -n "$log_notes" ]; then
+            notes="${notes}"$'\n\n'"${log_notes}"
           fi
 
           delimiter="EOF_$(date +%s%N)"
