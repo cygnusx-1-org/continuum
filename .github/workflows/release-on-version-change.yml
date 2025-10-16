@@ -159,6 +159,23 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.current }}
 
+      - name: Prepare signing config
+        if: steps.version.outputs.changed == 'true' && steps.tag_check.outputs.exists != 'true'
+        run: |
+          set -eo pipefail
+          if [ -z "${KEYSTORE_B64}" ] || [ -z "${KEYSTORE_PROPERTIES}" ]; then
+            echo "Android signing secrets are not configured. Please set ANDROID_KEYSTORE_B64 and ANDROID_KEYSTORE_PROPERTIES." >&2
+            exit 1
+          fi
+
+          echo "${KEYSTORE_B64}" | base64 --decode > release.keystore
+          mkdir -p app
+          cp release.keystore app/release.keystore
+          printf '%s' "${KEYSTORE_PROPERTIES}" > keystore.properties
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PROPERTIES: ${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}
+
       - name: Build and publish release
         if: steps.version.outputs.changed == 'true' && steps.tag_check.outputs.exists != 'true'
         run: |
