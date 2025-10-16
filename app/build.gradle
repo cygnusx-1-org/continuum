@@ -198,7 +198,9 @@ if (githubPropertiesFile.exists()) {
         releaseName = "Release ${android.defaultConfig.versionName ?: "default-version"}"
         body = "$releaseNotes"
         draft = false
-        prerelease = false
+        def prereleaseValue = System.getenv("GITHUB_PRERELEASE")
+
+        prerelease = prereleaseValue ? prereleaseValue.toBoolean() : false
         overwrite = false
 
         // Dynamically set releaseAssets by searching the APK path

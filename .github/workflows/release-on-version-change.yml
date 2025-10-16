@@ -167,4 +167,5 @@ jobs:
           EOF
           scripts/release-github.sh release_notes.txt
         env:
+          GITHUB_PRERELEASE: "true"
           GITHUB_TOKEN: ${{ github.token }}
