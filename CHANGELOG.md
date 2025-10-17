@@ -2,6 +2,14 @@
 
 ---
 
+8.0.5.1 / 2025-10-17
+=============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Make double tapping tabs cause a scroll to the top (in Subreddit view)
+* Add contain subreddits/users in postFilter
+* Upgraded to 8.0.5
+
 8.0.3.1 / 2025-9-17
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
