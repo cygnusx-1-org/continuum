@@ -26,11 +26,4 @@ jobs:
         uses: gradle/wrapper-validation-action@v3
 
       - name: Build with Gradle
-        run: ./gradlew tasks
-
-      - name: Archive reports for failed build
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: reports
-          path: '*/build/reports'
+        run: ./gradlew assembleRelease
