@@ -23,7 +23,14 @@ jobs:
           cache: gradle
 
       - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v3
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: Build with Gradle
         run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: app/build/outputs/apk/release/*.apk
