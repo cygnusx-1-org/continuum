@@ -411,10 +411,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         new MaterialAlertDialogBuilder(MainActivity.this, R.style.MaterialAlertDialogTheme)
                                 .setTitle(R.string.exit_app)
                                 .setPositiveButton(R.string.yes, (dialogInterface, i)
-                                        -> {
-                                    setEnabled(false);
-                                    triggerBackPress();
-                                })
+                                        -> finish())
                                 .setNegativeButton(R.string.no, null)
                                 .show();
                     } else if (mBackButtonAction == SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION_OPEN_NAVIGATION_DRAWER) {
