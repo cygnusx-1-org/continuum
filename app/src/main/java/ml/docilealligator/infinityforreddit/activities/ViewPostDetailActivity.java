@@ -909,7 +909,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         if (fragment != null) {
             fragment.changeSortType(sortType);
             binding.toolbarViewPostDetailActivity.setTitle("r/" + fragment.getSubredditName());
-            binding.toolbarViewPostDetailActivity.setSubtitle(sortType.getType().fullName.toLowerCase());
+            binding.toolbarViewPostDetailActivity.setSubtitle(sortType.getType().fullName);
         }
     }
 

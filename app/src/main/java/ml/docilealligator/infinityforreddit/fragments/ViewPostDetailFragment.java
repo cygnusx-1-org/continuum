@@ -1456,7 +1456,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                 try {
                     SortType.Type sortTypeType = SortType.Type.valueOf(mPost.getSuggestedSort().toUpperCase(Locale.US));
                     activity.setTitle(mPost.getSubredditNamePrefixed());
-                    activity.setToolbarSubtitle(sortTypeType.fullName.toLowerCase(Locale.US));
+                    activity.setToolbarSubtitle(sortTypeType.fullName);
                     ViewPostDetailFragment.this.sortType = sortTypeType;
                     fetchComments(changeRefreshState, ViewPostDetailFragment.this.sortType);
                     return;
@@ -1484,7 +1484,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                                 }
                             }
                             activity.setTitle(mPost.getSubredditNamePrefixed());
-                            activity.setToolbarSubtitle(sortTypeType.fullName.toLowerCase(Locale.US));
+                            activity.setToolbarSubtitle(sortTypeType.fullName);
                             ViewPostDetailFragment.this.sortType = sortTypeType;
                             fetchComments(changeRefreshState, ViewPostDetailFragment.this.sortType);
                         }
@@ -1494,7 +1494,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                             mRespectSubredditRecommendedSortType = false;
                             SortType.Type sortTypeType = loadSortType();
                             activity.setTitle(mPost.getSubredditNamePrefixed());
-                            activity.setToolbarSubtitle(sortTypeType.fullName.toLowerCase(Locale.US));
+                            activity.setToolbarSubtitle(sortTypeType.fullName);
                             ViewPostDetailFragment.this.sortType = sortTypeType;
                             fetchComments(changeRefreshState, ViewPostDetailFragment.this.sortType);
                         }
