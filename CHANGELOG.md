@@ -2,6 +2,13 @@
 
 ---
 
+8.0.7.1 / 2025-11-5
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Confirm to exit doesn't really exit #154 
+* Upgraded to 8.0.7
+
 8.0.5.1 / 2025-10-17
 =============
 Note v8a is the 64-bit build, and should be considered the default choose.
