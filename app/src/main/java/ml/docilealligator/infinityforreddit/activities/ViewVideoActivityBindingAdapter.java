@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.activities;
 
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -22,8 +23,8 @@ public class ViewVideoActivityBindingAdapter {
     private ActivityViewVideoZoomableBinding zoomableBinding;
 
     private final MaterialButton playPauseButton;
-    private final MaterialButton forwardButton;
-    private final MaterialButton rewindButton;
+    private final ImageButton forwardButton;
+    private final ImageButton rewindButton;
     private final MaterialButton muteButton;
     private final MaterialButton videoQualityButton;
     private final BottomAppBar bottomAppBar;
@@ -76,11 +77,11 @@ public class ViewVideoActivityBindingAdapter {
         return playPauseButton;
     }
 
-    public MaterialButton getForwardButton() {
+    public ImageButton getForwardButton() {
         return forwardButton;
     }
 
-    public MaterialButton getRewindButton() {
+    public ImageButton getRewindButton() {
         return rewindButton;
     }
 

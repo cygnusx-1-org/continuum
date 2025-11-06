@@ -49,27 +49,24 @@
             app:strokeWidth="0dp"
             tools:visibility="visible" />
 
-        <com.google.android.material.button.MaterialButtonGroup
+        <LinearLayout
             android:id="@+id/button_group_exo_playback_control_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:spacing="0dp"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/endBarrier"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@id/startBarrier"
             app:layout_constraintTop_toTopOf="parent">
 
-            <com.google.android.material.button.MaterialButton
+            <ImageButton
                 android:id="@id/exo_rew"
-                style="?attr/materialIconButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:backgroundTint="#444141"
-                app:icon="@drawable/ic_fast_rewind_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:strokeWidth="0dp" />
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/ic_fast_rewind_24dp"
+                android:contentDescription="@string/exo_controls_rewind_description"
+                android:scaleType="fitCenter" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/exo_play_pause_button_exo_playback_control_view"
@@ -82,18 +79,15 @@
                 app:iconTint="@null"
                 app:strokeWidth="0dp" />
 
-            <com.google.android.material.button.MaterialButton
+            <ImageButton
                 android:id="@id/exo_ffwd"
-                style="?attr/materialIconButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:backgroundTint="#444141"
-                app:icon="@drawable/ic_fast_forward_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:strokeWidth="0dp" />
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/ic_fast_forward_24dp"
+                android:contentDescription="@string/exo_controls_fastforward_description"
+                android:scaleType="fitCenter" />
 
-        </com.google.android.material.button.MaterialButtonGroup>
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/video_quality_exo_playback_control_view"
