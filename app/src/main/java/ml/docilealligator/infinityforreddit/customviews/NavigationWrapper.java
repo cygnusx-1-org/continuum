@@ -185,9 +185,6 @@ public class NavigationWrapper {
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_USER:
                 view.setContentDescription(context.getString(R.string.content_description_go_to_user));
                 break;
-            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_RANDOM:
-                view.setContentDescription(context.getString(R.string.content_description_random));
-                break;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDE_READ_POSTS:
                 view.setContentDescription(context.getString(R.string.content_description_hide_read_posts));
                 break;
