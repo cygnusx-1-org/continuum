@@ -4105,6 +4105,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             playButtonImageView.setColorFilter(mMediaIndicatorIconTint, PorterDuff.Mode.SRC_IN);
             playButtonImageView.setBackgroundTintList(ColorStateList.valueOf(mMediaIndicatorBackgroundColor));
             loadingIndicator.setIndicatorColor(mColorAccent);
+            loadingIndicator.setVisibility(View.GONE);
             noPreviewLinkImageView.setBackgroundColor(mNoPreviewPostTypeBackgroundColor);
             noPreviewLinkImageView.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
             upvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
@@ -4387,6 +4388,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
             binding.titleTextViewItemPostGallery.setTextColor(mPostTitleColor);
             binding.progressBarItemPostGallery.setIndicatorColor(mColorAccent);
+            binding.progressBarItemPostGallery.setVisibility(View.GONE);
             binding.imageViewNoPreviewItemPostGallery.setBackgroundColor(mNoPreviewPostTypeBackgroundColor);
             binding.imageViewNoPreviewItemPostGallery.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
             binding.videoOrGifIndicatorImageViewItemPostGallery.setColorFilter(mMediaIndicatorIconTint, PorterDuff.Mode.SRC_IN);

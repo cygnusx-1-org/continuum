@@ -804,6 +804,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                         }
                     });
         } else {
+            binding.getLoadingIndicator().setVisibility(View.GONE);
             if (videoType == VIDEO_TYPE_NORMAL) {
                 // Prepare the player with the source.
                 player.prepare();
