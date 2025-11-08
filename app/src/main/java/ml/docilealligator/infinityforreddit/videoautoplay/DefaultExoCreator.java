@@ -151,12 +151,6 @@ public class DefaultExoCreator implements ExoCreator, MediaSourceEventListener {
     /// MediaSourceEventListener
 
     @Override
-    public void onLoadStarted(int windowIndex, @Nullable MediaSource.MediaPeriodId mediaPeriodId,
-                              LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
-        // no-ops
-    }
-
-    @Override
     public void onLoadCompleted(int windowIndex, @Nullable MediaSource.MediaPeriodId mediaPeriodId,
                                 LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
         // no-ops
