@@ -132,8 +132,9 @@ public class ExoPlayable extends PlayableImpl {
             ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
             if (trackGroups == lastSeenTrackGroupArray) return;
             lastSeenTrackGroupArray = trackGroups;
-            if (!(creator instanceof DefaultExoCreator)) return;
-            TrackSelector selector = ((DefaultExoCreator) creator).getTrackSelector();
+            if (player == null) return;
+            // Get the TrackSelector from the player instance instead of the creator
+            TrackSelector selector = player.getPlayer().getTrackSelector();
             if (selector instanceof DefaultTrackSelector) {
                 MappingTrackSelector.MappedTrackInfo trackInfo = ((DefaultTrackSelector) selector).getCurrentMappedTrackInfo();
                 if (trackInfo != null) {
