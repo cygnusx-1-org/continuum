@@ -2,6 +2,13 @@
 
 ---
 
+8.0.7.2 / 2025-11-7
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Updated media3-exoplayer to 1.8.0
+* Having Video issue on Huawei #186
+
 8.0.7.1 / 2025-11-5
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
