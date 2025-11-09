@@ -2,6 +2,13 @@
 
 ---
 
+8.0.7.3 / 2025-11-9
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed App closes when I try to open a post with a video #189
+* Fixed issue with post image recycling while scrolling for auto-played video posts
+
 8.0.7.2 / 2025-11-7
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
