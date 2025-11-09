@@ -2943,7 +2943,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                     @Override
                     public void onRenderedFirstFrame() {
-                        mGlide.clear(previewImageView);
+                        // Don't clear the preview image - just hide it
+                        // This allows it to be shown again if the player is released while scrolling
                         previewImageView.setVisibility(View.GONE);
                     }
 
@@ -2989,6 +2990,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (helper != null) {
                 helper.release();
                 helper = null;
+            }
+            // Show the preview image again when player is released
+            if (previewImageView != null) {
+                previewImageView.setVisibility(View.VISIBLE);
             }
             isManuallyPaused = false;
             container = null;
