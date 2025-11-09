@@ -100,7 +100,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (keystorePropertiesFile.exists()) {
-                signingConfig signingConfigs.release
+                signingConfig = signingConfigs.release
             } else {
                 println("Warning: keystore.properties file not found. Skipping signing configuration for release.")
             }
@@ -112,7 +112,7 @@ android {
             initWith buildTypes.release
             zipAlignEnabled true
             minifyEnabled true
-            shrinkResources true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -134,7 +134,7 @@ android {
     }
 
     testOptions {
-        animationsDisabled true
+        animationsDisabled = true
         //execution 'ANDROIDX_TEST_ORCHESTRATOR'
         unitTests.returnDefaultValues = true
         unitTests.all {
@@ -152,14 +152,14 @@ android {
         disable 'MissingTranslation'
     }
 
-    namespace 'ml.docilealligator.infinityforreddit'
+    namespace = 'ml.docilealligator.infinityforreddit'
 
     splits {
         abi {
-            enable true
+            enable = true
             reset()
             include 'armeabi-v7a', 'arm64-v8a'
-            universalApk false  // Set to true if you also want a universal APK
+            universalApk = false  // Set to true if you also want a universal APK
         }
     }
 
