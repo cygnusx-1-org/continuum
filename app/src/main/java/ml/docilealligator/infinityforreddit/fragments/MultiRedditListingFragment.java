@@ -41,6 +41,7 @@ import ml.docilealligator.infinityforreddit.databinding.FragmentMultiRedditListi
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiRedditViewModel;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
 
 public class MultiRedditListingFragment extends Fragment implements FragmentCommunicator {
@@ -80,18 +81,15 @@ public class MultiRedditListingFragment extends Fragment implements FragmentComm
         applyTheme();
 
         if ((mActivity != null && mActivity.isImmersiveInterface())) {
-            ViewCompat.setOnApplyWindowInsetsListener(mActivity.getWindow().getDecorView(), new OnApplyWindowInsetsListener() {
+            ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
                 @NonNull
                 @Override
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                    Insets allInsets = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                                    | WindowInsetsCompat.Type.displayCutout()
-                    );
+                    Insets allInsets = Utils.getInsets(insets, false);
                     binding.recyclerViewMultiRedditListingFragment.setPadding(
                             0, 0, 0, allInsets.bottom
                     );
-                    return insets;
+                    return WindowInsetsCompat.CONSUMED;
                 }
             });
             //binding.recyclerViewMultiRedditListingFragment.setPadding(0, 0, 0, mActivity.getNavBarHeight());

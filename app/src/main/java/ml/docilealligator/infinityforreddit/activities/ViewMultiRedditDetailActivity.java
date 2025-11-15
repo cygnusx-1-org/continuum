@@ -190,10 +190,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = insets.getInsets(
-                                WindowInsetsCompat.Type.systemBars()
-                                        | WindowInsetsCompat.Type.displayCutout()
-                        );
+                        Insets allInsets = Utils.getInsets(insets, false);
 
                         if (navigationWrapper.navigationRailView == null) {
                             if (navigationWrapper.bottomAppBar.getVisibility() != View.VISIBLE) {
@@ -248,7 +245,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                                 allInsets.right,
                                 BaseActivity.IGNORE_MARGIN);
 
-                        return WindowInsetsCompat.CONSUMED;
+                        return insets;
                     }
                 });
 
@@ -610,6 +607,8 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 return R.drawable.ic_subscriptions_bottom_app_bar_day_night_24dp;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX:
                 return R.drawable.ic_inbox_day_night_24dp;
+            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_PROFILE:
+                return R.drawable.ic_account_circle_day_night_24dp;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_MULTIREDDITS:
                 return R.drawable.ic_multi_reddit_day_night_24dp;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS:

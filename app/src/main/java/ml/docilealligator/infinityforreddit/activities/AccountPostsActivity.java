@@ -40,6 +40,7 @@ import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class AccountPostsActivity extends BaseActivity implements SortTypeSelectionCallback,
         PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, ActivityToolbarInterface {
@@ -98,10 +99,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = insets.getInsets(
-                                WindowInsetsCompat.Type.systemBars()
-                                        | WindowInsetsCompat.Type.displayCutout()
-                        );
+                        Insets allInsets = Utils.getInsets(insets, false);
 
                         setMargins(binding.accountPostsToolbar,
                                 allInsets.left,
@@ -111,7 +109,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
 
                         binding.accountPostsFrameLayout.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
 
-                        return WindowInsetsCompat.CONSUMED;
+                        return insets;
                     }
                 });
                 //adjustToolbar(binding.accountPostsToolbar);
