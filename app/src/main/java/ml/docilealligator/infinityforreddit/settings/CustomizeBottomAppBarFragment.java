@@ -101,6 +101,12 @@ public class CustomizeBottomAppBarFragment extends Fragment {
         mainActivityOption3 = Utils.fixIndexOutOfBounds(mainActivityOptions, mainActivityOption3);
         mainActivityOption4 = Utils.fixIndexOutOfBounds(mainActivityOptions, mainActivityOption4);
 
+        // Additional bounds checking to prevent ArrayIndexOutOfBoundsException
+        if (mainActivityOption1 < 0 || mainActivityOption1 >= mainActivityOptions.length) mainActivityOption1 = 0;
+        if (mainActivityOption2 < 0 || mainActivityOption2 >= mainActivityOptions.length) mainActivityOption2 = 0;
+        if (mainActivityOption3 < 0 || mainActivityOption3 >= mainActivityOptions.length) mainActivityOption3 = 0;
+        if (mainActivityOption4 < 0 || mainActivityOption4 >= mainActivityOptions.length) mainActivityOption4 = 0;
+
         binding.mainActivityOptionCountTextViewCustomizeBottomAppBarFragment.setText(Integer.toString(mainActivityOptionCount));
         binding.mainActivityOption1TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[mainActivityOption1]);
         binding.mainActivityOption2TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[mainActivityOption2]);
@@ -119,6 +125,9 @@ public class CustomizeBottomAppBarFragment extends Fragment {
         } else {
             fabOptions = resources.getStringArray(R.array.settings_bottom_app_bar_fab_options);
         }
+
+        // Additional bounds checking for FAB option
+        if (mainActivityFAB < 0 || mainActivityFAB >= fabOptions.length) mainActivityFAB = 0;
 
         binding.mainActivityFabTextViewCustomizeBottomAppBarFragment.setText(fabOptions[mainActivityFAB]);
 
@@ -223,6 +232,12 @@ public class CustomizeBottomAppBarFragment extends Fragment {
         otherActivitiesOption3 = Utils.fixIndexOutOfBounds(otherActivitiesOptions, otherActivitiesOption3);
         otherActivitiesOption4 = Utils.fixIndexOutOfBounds(otherActivitiesOptions, otherActivitiesOption4);
 
+        // Additional bounds checking to prevent ArrayIndexOutOfBoundsException
+        if (otherActivitiesOption1 < 0 || otherActivitiesOption1 >= otherActivitiesOptions.length) otherActivitiesOption1 = 0;
+        if (otherActivitiesOption2 < 0 || otherActivitiesOption2 >= otherActivitiesOptions.length) otherActivitiesOption2 = 0;
+        if (otherActivitiesOption3 < 0 || otherActivitiesOption3 >= otherActivitiesOptions.length) otherActivitiesOption3 = 0;
+        if (otherActivitiesOption4 < 0 || otherActivitiesOption4 >= otherActivitiesOptions.length) otherActivitiesOption4 = 0;
+
         binding.otherActivitiesOptionCountTextViewCustomizeBottomAppBarFragment.setText(Integer.toString(otherActivitiesOptionCount));
         binding.otherActivitiesOption1TextViewCustomizeBottomAppBarFragment.setText(otherActivitiesOptions[otherActivitiesOption1]);
         binding.otherActivitiesOption2TextViewCustomizeBottomAppBarFragment.setText(otherActivitiesOptions[otherActivitiesOption2]);
@@ -237,6 +252,9 @@ public class CustomizeBottomAppBarFragment extends Fragment {
             otherActivitiesOption4 = otherActivitiesOptionAnonymousValuesList.indexOf(Integer.toString(otherActivitiesOption4));
             otherActivitiesFAB = otherActivitiesFAB >= 9 ? otherActivitiesFAB - 2 : otherActivitiesFAB - 1;
         }
+
+        // Additional bounds checking for FAB option
+        if (otherActivitiesFAB < 0 || otherActivitiesFAB >= fabOptions.length) otherActivitiesFAB = 0;
 
         binding.otherActivitiesFabTextViewCustomizeBottomAppBarFragment.setText(fabOptions[otherActivitiesFAB]);
 
