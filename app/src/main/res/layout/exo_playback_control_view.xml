@@ -64,6 +64,8 @@
                 android:id="@id/exo_rew"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
                 android:background="@drawable/ic_fast_rewind_24dp"
                 android:contentDescription="@string/exo_controls_rewind_description"
                 android:scaleType="fitCenter" />
@@ -73,6 +75,7 @@
                 style="?attr/materialIconButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 app:backgroundTint="@color/colorAccent"
                 app:icon="@drawable/ic_play_arrow_24dp"
                 app:iconSize="36dp"
@@ -83,6 +86,8 @@
                 android:id="@id/exo_ffwd"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
                 android:background="@drawable/ic_fast_forward_24dp"
                 android:contentDescription="@string/exo_controls_fastforward_description"
                 android:scaleType="fitCenter" />
