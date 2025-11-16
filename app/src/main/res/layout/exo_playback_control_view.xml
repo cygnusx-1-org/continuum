@@ -62,11 +62,15 @@
 
             <ImageButton
                 android:id="@id/exo_rew"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@drawable/ic_fast_rewind_24dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/exo_control_button_background"
+                android:src="@drawable/ic_fast_rewind_24dp"
                 android:contentDescription="@string/exo_controls_rewind_description"
-                android:scaleType="fitCenter" />
+                android:scaleType="centerInside"
+                android:padding="10dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/exo_play_pause_button_exo_playback_control_view"
@@ -81,11 +85,15 @@
 
             <ImageButton
                 android:id="@id/exo_ffwd"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@drawable/ic_fast_forward_24dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/exo_control_button_background"
+                android:src="@drawable/ic_fast_forward_24dp"
                 android:contentDescription="@string/exo_controls_fastforward_description"
-                android:scaleType="fitCenter" />
+                android:scaleType="centerInside"
+                android:padding="10dp" />
 
         </LinearLayout>
 
