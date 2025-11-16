@@ -2,6 +2,14 @@
 
 ---
 
+8.0.8.1 / 2025-11-16
+=============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Bottom Navigation Bar #196
+* Fixed Video player control is not aligned properly #198
+* Upgraded to 8.0.8
+
 8.0.7.3 / 2025-11-9
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
