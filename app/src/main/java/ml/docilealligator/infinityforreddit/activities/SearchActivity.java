@@ -175,6 +175,7 @@ public class SearchActivity extends BaseActivity {
         setSupportActionBar(binding.toolbar);
 
         binding.clearSearchEditViewSearchActivity.setVisibility(View.GONE);
+        binding.viewAllSearchHistoryButtonSearchActivity.setVisibility(View.GONE);
         binding.deleteAllRecentSearchesButtonSearchActivity.setVisibility(View.GONE);
 
         searchOnlySubreddits = getIntent().getBooleanExtra(EXTRA_SEARCH_ONLY_SUBREDDITS, false);
@@ -302,6 +303,11 @@ public class SearchActivity extends BaseActivity {
                 startActivity(intent);
                 finish();
             }
+        });
+
+        binding.viewAllSearchHistoryButtonSearchActivity.setOnClickListener(view -> {
+            Intent intent = new Intent(this, SearchHistoryActivity.class);
+            startActivity(intent);
         });
 
         binding.deleteAllRecentSearchesButtonSearchActivity.setOnClickListener(view -> {
@@ -446,12 +452,14 @@ public class SearchActivity extends BaseActivity {
                         new RecentSearchQueryViewModel.Factory(mRedditDataRoomDatabase, accountName))
                         .get(RecentSearchQueryViewModel.class);
 
-                mRecentSearchQueryViewModel.getAllRecentSearchQueries().observe(this, recentSearchQueries -> {
+                mRecentSearchQueryViewModel.getLimitedRecentSearchQueries().observe(this, recentSearchQueries -> {
                     if (recentSearchQueries != null && !recentSearchQueries.isEmpty()) {
                         binding.dividerSearchActivity.setVisibility(View.VISIBLE);
+                        binding.viewAllSearchHistoryButtonSearchActivity.setVisibility(View.VISIBLE);
                         binding.deleteAllRecentSearchesButtonSearchActivity.setVisibility(View.VISIBLE);
                     } else {
                         binding.dividerSearchActivity.setVisibility(View.GONE);
+                        binding.viewAllSearchHistoryButtonSearchActivity.setVisibility(View.GONE);
                         binding.deleteAllRecentSearchesButtonSearchActivity.setVisibility(View.GONE);
                     }
                     adapter.setRecentSearchQueries(recentSearchQueries);
@@ -540,6 +548,7 @@ public class SearchActivity extends BaseActivity {
         int colorAccent = mCustomThemeWrapper.getColorAccent();
         binding.searchInTextViewSearchActivity.setTextColor(colorAccent);
         binding.subredditNameTextViewSearchActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
+        binding.viewAllSearchHistoryButtonSearchActivity.setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor()));
         binding.deleteAllRecentSearchesButtonSearchActivity.setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor()));
         binding.dividerSearchActivity.setBackgroundColor(mCustomThemeWrapper.getDividerColor());
         if (typeface != null) {

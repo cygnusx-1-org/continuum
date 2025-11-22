@@ -361,6 +361,11 @@
             android:theme="@style/AppTheme.Slidable"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:name=".activities.SearchHistoryActivity"
+            android:label="@string/search_history"
+            android:parentActivityName=".activities.SearchActivity"
+            android:theme="@style/AppTheme.Slidable" />
+        <activity
             android:name=".activities.RulesActivity"
             android:label="@string/rules_activity_label"
             android:parentActivityName=".activities.MainActivity"

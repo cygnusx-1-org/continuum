@@ -114,6 +114,17 @@
                     android:fontFamily="?attr/font_family" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/view_all_search_history_button_search_activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/delete_all_recent_searches_button_search_activity"
+                    android:layout_centerVertical="true"
+                    app:strokeWidth="0dp"
+                    app:icon="@drawable/ic_history_day_night_24dp"
+                    app:iconSize="24dp"
+                    style="?attr/materialIconButtonOutlinedStyle" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/delete_all_recent_searches_button_search_activity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

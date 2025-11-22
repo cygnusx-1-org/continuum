@@ -41,6 +41,7 @@ import ml.docilealligator.infinityforreddit.activities.PostVideoActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
 import ml.docilealligator.infinityforreddit.activities.RulesActivity;
 import ml.docilealligator.infinityforreddit.activities.SearchActivity;
+import ml.docilealligator.infinityforreddit.activities.SearchHistoryActivity;
 import ml.docilealligator.infinityforreddit.activities.SearchResultActivity;
 import ml.docilealligator.infinityforreddit.activities.SearchSubredditsResultActivity;
 import ml.docilealligator.infinityforreddit.activities.SearchUsersResultActivity;
@@ -174,6 +175,8 @@ public interface AppComponent {
     void inject(LinkResolverActivity linkResolverActivity);
 
     void inject(SearchActivity searchActivity);
+
+    void inject(SearchHistoryActivity searchHistoryActivity);
 
     void inject(SettingsActivity settingsActivity);
 

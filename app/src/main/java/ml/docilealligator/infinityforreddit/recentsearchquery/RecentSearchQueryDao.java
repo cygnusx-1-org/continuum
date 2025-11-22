@@ -20,6 +20,9 @@ public interface RecentSearchQueryDao {
     @Query("SELECT * FROM recent_search_queries WHERE username = :username ORDER BY time DESC")
     LiveData<List<RecentSearchQuery>> getAllRecentSearchQueriesLiveData(String username);
 
+    @Query("SELECT * FROM recent_search_queries WHERE username = :username ORDER BY time DESC LIMIT :limit")
+    LiveData<List<RecentSearchQuery>> getRecentSearchQueriesLiveData(String username, int limit);
+
     @Query("SELECT * FROM recent_search_queries WHERE username = :username ORDER BY time DESC")
     List<RecentSearchQuery> getAllRecentSearchQueries(String username);
 
