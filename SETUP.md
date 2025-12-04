@@ -10,6 +10,14 @@ See [here](/GIPHY.md).
 A Reddit Client ID is needed to access Reddit from 3rd party clients.
 
 ### Reddit Client ID creation steps
+
+
+> [!IMPORTANT]
+>
+> Reddit has recently changed the guidelines to create api key
+> [see here](https://www.reddit.com/r/redditdev/comments/1oug31u/introducing_the_responsible_builder_policy_new/)
+> we are not sure how it wll affect the app in the future but currently it seems most users are unable to create new api keys
+
 ![Create application](assets/screenshots/create_application.png)
 
 1. Go to [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps) and login if
