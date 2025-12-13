@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,9 +50,9 @@ public class SubredditMultiselectionRecyclerViewAdapter extends RecyclerView.Ada
         if (holder instanceof SubscribedSubredditViewHolder) {
             ((SubscribedSubredditViewHolder) holder).binding.nameTextViewItemSubscribedSubredditMultiselection.setText(subscribedSubreddits.get(position).getName());
             glide.load(subscribedSubreddits.get(position).getIconUrl())
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .error(glide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                            .transform(new RoundedCornersTransformation(72, 0)))
                     .into(((SubscribedSubredditViewHolder) holder).binding.iconGifImageViewItemSubscribedSubredditMultiselection);
             ((SubscribedSubredditViewHolder) holder).binding.checkboxItemSubscribedSubredditMultiselection.setChecked(subscribedSubreddits.get(position).isSelected());
             ((SubscribedSubredditViewHolder) holder).binding.checkboxItemSubscribedSubredditMultiselection.setOnClickListener(view -> {

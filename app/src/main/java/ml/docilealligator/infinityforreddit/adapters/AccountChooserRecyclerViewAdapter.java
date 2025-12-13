@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
         if (holder instanceof AccountViewHolder) {
             glide.load(accounts.get(position).getProfileImageUrl())
                     .error(glide.load(R.drawable.subreddit_default_icon))
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(128, 0)))
+                    .transform(new RoundedCornersTransformation(128, 0))
                     .into(((AccountViewHolder) holder).binding.profileImageItemAccount);
             ((AccountViewHolder) holder).binding.usernameTextViewItemAccount.setText(accounts.get(position).getAccountName());
             holder.itemView.setOnClickListener(view ->

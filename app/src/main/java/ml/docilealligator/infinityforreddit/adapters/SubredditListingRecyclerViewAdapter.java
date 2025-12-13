@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.concurrent.Executor;
 
@@ -122,13 +121,13 @@ public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<Subred
 
                 if (!subredditData.getIconUrl().equals("")) {
                     glide.load(subredditData.getIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .error(glide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                    .transform(new RoundedCornersTransformation(72, 0)))
                             .into(((DataViewHolder) holder).binding.subredditIconGifImageViewItemSubredditListing);
                 } else {
                     glide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .into(((DataViewHolder) holder).binding.subredditIconGifImageViewItemSubredditListing);
                 }
 

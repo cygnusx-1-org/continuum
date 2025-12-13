@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.List;
@@ -48,9 +47,9 @@ public class SubredditAutocompleteRecyclerViewAdapter extends RecyclerView.Adapt
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof SubredditViewHolder) {
             glide.load(subreddits.get(position).getIconUrl())
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .error(glide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                            .transform(new RoundedCornersTransformation(72, 0)))
                     .into(((SubredditViewHolder) holder).iconImageView);
             ((SubredditViewHolder) holder).subredditNameTextView.setText(subreddits.get(position).getName());
             ((SubredditViewHolder) holder).subscriberCountTextView.setText(activity.getString(R.string.subscribers_number_detail, subreddits.get(position).getNSubscribers()));

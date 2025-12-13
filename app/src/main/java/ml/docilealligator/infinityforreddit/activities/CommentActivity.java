@@ -30,7 +30,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.giphy.sdk.core.models.Media;
 import com.giphy.sdk.ui.GPHContentType;
 import com.giphy.sdk.ui.Giphy;
@@ -322,9 +321,9 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
 
             if (selectedAccount != null) {
                 mGlide.load(selectedAccount.getProfileImageUrl())
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(binding.commentAccountIconGifImageView);
 
                 binding.commentAccountNameTextView.setText(selectedAccount.getAccountName());
@@ -414,8 +413,8 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             handler.post(() -> {
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
-                        .error(mGlide.load(R.drawable.subreddit_default_icon).apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                        .transform(new RoundedCornersTransformation(72, 0))
+                        .error(mGlide.load(R.drawable.subreddit_default_icon).transform(new RoundedCornersTransformation(72, 0)))
                         .into(binding.commentAccountIconGifImageView);
 
                     binding.commentAccountNameTextView.setText(account.getAccountName());
@@ -694,9 +693,9 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             selectedAccount = account;
 
             mGlide.load(selectedAccount.getProfileImageUrl())
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                            .transform(new RoundedCornersTransformation(72, 0)))
                     .into(binding.commentAccountIconGifImageView);
 
             binding.commentAccountNameTextView.setText(selectedAccount.getAccountName());

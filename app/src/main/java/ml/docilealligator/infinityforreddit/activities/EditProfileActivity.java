@@ -26,7 +26,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.greenrobot.eventbus.EventBus;
@@ -182,7 +181,7 @@ public class EditProfileActivity extends BaseActivity {
             // AVATAR
             final String userAvatar = userData.getIconUrl();
             glide.load(userAvatar)
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(216, 0)))
+                    .transform(new RoundedCornersTransformation(216, 0))
                     .into(binding.imageViewAvatarEditProfileActivity);
             LayoutParams cAvatarLp = (LayoutParams) binding.imageViewChangeAvatarEditProfileActivity.getLayoutParams();
             if (userAvatar.contains("avatar_default_")) {

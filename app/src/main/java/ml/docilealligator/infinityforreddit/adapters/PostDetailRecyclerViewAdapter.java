@@ -548,13 +548,13 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                         if (mActivity != null && getItemCount() > 0) {
                             if (iconImageUrl == null || iconImageUrl.isEmpty()) {
                                 mGlide.load(R.drawable.subreddit_default_icon)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                        .transform(new RoundedCornersTransformation(72, 0))
                                         .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                             } else {
                                 mGlide.load(iconImageUrl)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                        .transform(new RoundedCornersTransformation(72, 0))
                                         .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                                .transform(new RoundedCornersTransformation(72, 0)))
                                         .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                             }
 
@@ -565,13 +565,13 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                     });
                 } else if (!mPost.getAuthorIconUrl().equals("")) {
                     mGlide.load(mPost.getAuthorIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                    .transform(new RoundedCornersTransformation(72, 0)))
                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                 } else {
                     mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                 }
             } else {
@@ -582,13 +582,13 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                             iconImageUrl -> {
                                 if (iconImageUrl == null || iconImageUrl.equals("")) {
                                     mGlide.load(R.drawable.subreddit_default_icon)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
                                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                 } else {
                                     mGlide.load(iconImageUrl)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
                                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                                    .transform(new RoundedCornersTransformation(72, 0)))
                                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                 }
 
@@ -596,13 +596,13 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                             });
                 } else if (!mPost.getSubredditIconUrl().equals("")) {
                     mGlide.load(mPost.getSubredditIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                    .transform(new RoundedCornersTransformation(72, 0)))
                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                 } else {
                     mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                 }
             }

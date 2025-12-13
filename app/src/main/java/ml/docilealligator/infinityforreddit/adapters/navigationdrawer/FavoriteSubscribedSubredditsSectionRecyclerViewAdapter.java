@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,13 +92,13 @@ public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends Recy
             ((FavoriteSubscribedThingViewHolder) holder).binding.thingNameTextViewItemNavDrawerSubscribedThing.setText(subredditName);
             if (iconUrl != null && !iconUrl.equals("")) {
                 glide.load(iconUrl)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(glide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(((FavoriteSubscribedThingViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
             } else {
                 glide.load(R.drawable.subreddit_default_icon)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .into(((FavoriteSubscribedThingViewHolder) holder).binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
             }
 

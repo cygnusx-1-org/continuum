@@ -45,7 +45,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.appbar.AppBarLayout;
@@ -472,15 +471,15 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
                 if (subredditData.getIconUrl().equals("")) {
                     glide.load(getDrawable(R.drawable.subreddit_default_icon))
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(216, 0)))
+                            .transform(new RoundedCornersTransformation(216, 0))
                             .into(binding.iconGifImageViewViewSubredditDetailActivity);
                     binding.iconGifImageViewViewSubredditDetailActivity.setOnClickListener(null);
                 } else {
                     glide.asBitmap()
                             .load(subredditData.getIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(216, 0)))
+                            .transform(new RoundedCornersTransformation(216, 0))
                             .error(glide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(216, 0))))
+                                    .transform(new RoundedCornersTransformation(216, 0)))
                             .into(new CustomTarget<Bitmap>() {
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {

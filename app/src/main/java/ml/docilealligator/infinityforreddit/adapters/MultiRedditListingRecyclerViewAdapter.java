@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -208,13 +207,13 @@ public class MultiRedditListingRecyclerViewAdapter extends RecyclerView.Adapter<
 
             if (iconUrl != null && !iconUrl.equals("")) {
                 mGlide.load(iconUrl)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(((MultiRedditViewHolder) holder).binding.multiRedditIconGifImageViewItemMultiReddit);
             } else {
                 mGlide.load(R.drawable.subreddit_default_icon)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .into(((MultiRedditViewHolder) holder).binding.multiRedditIconGifImageViewItemMultiReddit);
             }
             ((MultiRedditViewHolder) holder).binding.multiRedditNameTextViewItemMultiReddit.setText(name);
@@ -308,13 +307,13 @@ public class MultiRedditListingRecyclerViewAdapter extends RecyclerView.Adapter<
 
             if (iconUrl != null && !iconUrl.equals("")) {
                 mGlide.load(iconUrl)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(((FavoriteMultiRedditViewHolder) holder).binding.multiRedditIconGifImageViewItemMultiReddit);
             } else {
                 mGlide.load(R.drawable.subreddit_default_icon)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .into(((FavoriteMultiRedditViewHolder) holder).binding.multiRedditIconGifImageViewItemMultiReddit);
             }
             ((FavoriteMultiRedditViewHolder) holder).binding.multiRedditNameTextViewItemMultiReddit.setText(name);

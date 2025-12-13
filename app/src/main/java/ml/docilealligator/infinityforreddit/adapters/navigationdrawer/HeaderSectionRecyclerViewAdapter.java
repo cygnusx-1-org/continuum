@@ -19,7 +19,6 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.concurrent.Executor;
 
@@ -96,13 +95,13 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
                 ((NavHeaderViewHolder) holder).binding.nameTextViewNavHeaderMain.setText(accountName);
                 if (profileImageUrl != null && !profileImageUrl.equals("")) {
                     glide.load(profileImageUrl)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(144, 0)))
+                            .transform(new RoundedCornersTransformation(144, 0))
                             .error(glide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(144, 0))))
+                                    .transform(new RoundedCornersTransformation(144, 0)))
                             .into(((NavHeaderViewHolder) holder).binding.profileImageViewNavHeaderMain);
                 } else {
                     glide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(144, 0)))
+                            .transform(new RoundedCornersTransformation(144, 0))
                             .into(((NavHeaderViewHolder) holder).binding.profileImageViewNavHeaderMain);
                 }
 
@@ -113,7 +112,7 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
                 ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.setText(R.string.press_here_to_login);
                 ((NavHeaderViewHolder) holder).binding.nameTextViewNavHeaderMain.setText(R.string.anonymous_account);
                 glide.load(R.drawable.subreddit_default_icon)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(144, 0)))
+                        .transform(new RoundedCornersTransformation(144, 0))
                         .into(((NavHeaderViewHolder) holder).binding.profileImageViewNavHeaderMain);
             }
 

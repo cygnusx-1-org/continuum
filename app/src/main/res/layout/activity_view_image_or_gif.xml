@@ -20,6 +20,13 @@
         app:optimizeDisplay="true"
         app:tapToRetry="false" />
 
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/apng_image_view_view_image_or_gif_activity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/load_image_error_linear_layout_view_image_or_gif_activity"
         android:layout_width="match_parent"

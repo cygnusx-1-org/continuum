@@ -715,13 +715,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             if (mActivity != null && getItemCount() > 0 && post.getAuthor().equals(subredditOrUserName)) {
                                 if (iconUrl == null || iconUrl.isEmpty()) {
                                     mGlide.load(R.drawable.subreddit_default_icon)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
                                             .into(((PostViewHolder) holder).iconGifImageView);
                                 } else {
                                     mGlide.load(iconUrl)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
                                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                                    .transform(new RoundedCornersTransformation(72, 0)))
                                             .into(((PostViewHolder) holder).iconGifImageView);
                                 }
 
@@ -732,13 +732,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         });
                     } else if (!post.getAuthorIconUrl().isEmpty()) {
                         mGlide.load(post.getAuthorIconUrl())
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                .transform(new RoundedCornersTransformation(72, 0))
                                 .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                        .transform(new RoundedCornersTransformation(72, 0)))
                                 .into(((PostViewHolder) holder).iconGifImageView);
                     } else {
                         mGlide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                .transform(new RoundedCornersTransformation(72, 0))
                                 .into(((PostViewHolder) holder).iconGifImageView);
                     }
                 } else {
@@ -747,13 +747,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             if (mActivity != null && getItemCount() > 0 && post.getSubredditName().equals(subredditOrUserName)) {
                                 if (iconUrl == null || iconUrl.isEmpty()) {
                                     mGlide.load(R.drawable.subreddit_default_icon)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
                                             .into(((PostViewHolder) holder).iconGifImageView);
                                 } else {
                                     mGlide.load(iconUrl)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
                                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                                    .transform(new RoundedCornersTransformation(72, 0)))
                                             .into(((PostViewHolder) holder).iconGifImageView);
                                 }
 
@@ -764,13 +764,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         });
                     } else if (!post.getSubredditIconUrl().isEmpty()) {
                         mGlide.load(post.getSubredditIconUrl())
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                .transform(new RoundedCornersTransformation(72, 0))
                                 .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                        .transform(new RoundedCornersTransformation(72, 0)))
                                 .into(((PostViewHolder) holder).iconGifImageView);
                     } else {
                         mGlide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                .transform(new RoundedCornersTransformation(72, 0))
                                 .into(((PostViewHolder) holder).iconGifImageView);
                     }
                 }
@@ -781,13 +781,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         if (mActivity != null && getItemCount() > 0) {
                             if (iconUrl == null || iconUrl.isEmpty() && authorName.equals(subredditOrUserName)) {
                                 mGlide.load(R.drawable.subreddit_default_icon)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                        .transform(new RoundedCornersTransformation(72, 0))
                                         .into(((PostViewHolder) holder).iconGifImageView);
                             } else {
                                 mGlide.load(iconUrl)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                        .transform(new RoundedCornersTransformation(72, 0))
                                         .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                                .transform(new RoundedCornersTransformation(72, 0)))
                                         .into(((PostViewHolder) holder).iconGifImageView);
                             }
 
@@ -798,13 +798,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     });
                 } else if (!post.getAuthorIconUrl().isEmpty()) {
                     mGlide.load(post.getAuthorIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                    .transform(new RoundedCornersTransformation(72, 0)))
                             .into(((PostViewHolder) holder).iconGifImageView);
                 } else {
                     mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .into(((PostViewHolder) holder).iconGifImageView);
                 }
             }

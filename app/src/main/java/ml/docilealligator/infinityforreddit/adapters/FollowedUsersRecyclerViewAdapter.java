@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -109,13 +108,13 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
 
             if (!mSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - offset).getIconUrl().equals("")) {
                 glide.load(mSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - offset).getIconUrl())
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(glide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(((UserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
             } else {
                 glide.load(R.drawable.subreddit_default_icon)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .into(((UserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
             }
             ((UserViewHolder) viewHolder).binding.thingNameTextViewItemSubscribedThing.setText(mSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - offset).getName());
@@ -128,13 +127,13 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         } else if (viewHolder instanceof FavoriteUserViewHolder) {
             if (!mFavoriteSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - 1).getIconUrl().equals("")) {
                 glide.load(mFavoriteSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - 1).getIconUrl())
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(glide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(((FavoriteUserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
             } else {
                 glide.load(R.drawable.subreddit_default_icon)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .into(((FavoriteUserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
             }
             ((FavoriteUserViewHolder) viewHolder).binding.thingNameTextViewItemSubscribedThing.setText(mFavoriteSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - 1).getName());

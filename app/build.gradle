@@ -300,6 +300,8 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
     implementation 'com.github.santalu:aspect-ratio-imageview:1.0.9'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.29'
+    // APNG animation support for profile avatars
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:3.0.5'
     def bivVersion = "1.8.1"
     implementation "com.github.piasy:BigImageViewer:$bivVersion"
     implementation "com.github.piasy:GlideImageLoader:$bivVersion"

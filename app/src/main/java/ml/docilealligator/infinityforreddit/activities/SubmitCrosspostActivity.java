@@ -28,7 +28,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
@@ -193,9 +192,9 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
 
             if (selectedAccount != null) {
                 mGlide.load(selectedAccount.getProfileImageUrl())
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
 
                 binding.accountNameTextViewSubmitCrosspostActivity.setText(selectedAccount.getAccountName());
@@ -239,7 +238,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             loadCurrentAccount();
 
             mGlide.load(R.drawable.subreddit_default_icon)
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .into(binding.subredditIconGifImageViewSubmitCrosspostActivity);
 
             if (post.isSpoiler()) {
@@ -394,9 +393,9 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             handler.post(() -> {
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                    .transform(new RoundedCornersTransformation(72, 0)))
                             .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
 
                     binding.accountNameTextViewSubmitCrosspostActivity.setText(account.getAccountName());
@@ -479,13 +478,13 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     private void displaySubredditIcon() {
         if (iconUrl != null && !iconUrl.equals("")) {
             mGlide.load(iconUrl)
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                            .transform(new RoundedCornersTransformation(72, 0)))
                     .into(binding.subredditIconGifImageViewSubmitCrosspostActivity);
         } else {
             mGlide.load(R.drawable.subreddit_default_icon)
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .into(binding.subredditIconGifImageViewSubmitCrosspostActivity);
         }
     }
@@ -660,9 +659,9 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             selectedAccount = account;
 
             mGlide.load(selectedAccount.getProfileImageUrl())
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                            .transform(new RoundedCornersTransformation(72, 0)))
                     .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
 
             binding.accountNameTextViewSubmitCrosspostActivity.setText(selectedAccount.getAccountName());

@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
@@ -42,7 +41,7 @@ public class ThemePreviewPostsFragment extends Fragment {
 
         binding.cardViewThemePreviewPostsFragment.setBackgroundTintList(ColorStateList.valueOf(customTheme.cardViewBackgroundColor));
         Glide.with(this).load(R.drawable.subreddit_default_icon)
-                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                .transform(new RoundedCornersTransformation(72, 0))
                 .into(binding.iconGifImageViewThemePreviewPostsFragment);
         binding.subredditNameTextViewThemePreviewPostsFragment.setTextColor(customTheme.subreddit);
         binding.userTextViewThemePreviewPostsFragment.setTextColor(customTheme.username);

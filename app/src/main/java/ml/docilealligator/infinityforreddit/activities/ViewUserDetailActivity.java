@@ -42,7 +42,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -467,14 +466,14 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
                 if (userData.getIconUrl().equals("")) {
                     glide.load(getDrawable(R.drawable.subreddit_default_icon))
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(216, 0)))
+                            .transform(new RoundedCornersTransformation(216, 0))
                             .into(binding.iconGifImageViewViewUserDetailActivity);
                     binding.iconGifImageViewViewUserDetailActivity.setOnClickListener(null);
                 } else {
                     glide.load(userData.getIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(216, 0)))
+                            .transform(new RoundedCornersTransformation(216, 0))
                             .error(glide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(216, 0))))
+                                    .transform(new RoundedCornersTransformation(216, 0)))
                             .into(binding.iconGifImageViewViewUserDetailActivity);
 
                     binding.iconGifImageViewViewUserDetailActivity.setOnClickListener(view -> {

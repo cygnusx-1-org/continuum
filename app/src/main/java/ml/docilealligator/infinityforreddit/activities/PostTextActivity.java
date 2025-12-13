@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -206,9 +205,9 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
 
             if (selectedAccount != null) {
                 mGlide.load(selectedAccount.getProfileImageUrl())
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                .transform(new RoundedCornersTransformation(72, 0)))
                         .into(binding.accountIconGifImageViewPostTextActivity);
 
                 binding.accountNameTextViewPostTextActivity.setText(selectedAccount.getAccountName());
@@ -261,7 +260,7 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
                 loadSubredditIcon();
             } else {
                 mGlide.load(R.drawable.subreddit_default_icon)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                        .transform(new RoundedCornersTransformation(72, 0))
                         .into(binding.subredditIconGifImageViewPostTextActivity);
             }
 
@@ -398,9 +397,9 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
             handler.post(() -> {
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                    .transform(new RoundedCornersTransformation(72, 0)))
                             .into(binding.accountIconGifImageViewPostTextActivity);
 
                     binding.accountNameTextViewPostTextActivity.setText(account.getAccountName());
@@ -468,13 +467,13 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
     private void displaySubredditIcon() {
         if (iconUrl != null && !iconUrl.equals("")) {
             mGlide.load(iconUrl)
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                            .transform(new RoundedCornersTransformation(72, 0)))
                     .into(binding.subredditIconGifImageViewPostTextActivity);
         } else {
             mGlide.load(R.drawable.subreddit_default_icon)
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .into(binding.subredditIconGifImageViewPostTextActivity);
         }
     }
@@ -747,9 +746,9 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
             selectedAccount = account;
 
             mGlide.load(selectedAccount.getProfileImageUrl())
-                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                    .transform(new RoundedCornersTransformation(72, 0))
                     .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                            .transform(new RoundedCornersTransformation(72, 0)))
                     .into(binding.accountIconGifImageViewPostTextActivity);
 
             binding.accountNameTextViewPostTextActivity.setText(selectedAccount.getAccountName());

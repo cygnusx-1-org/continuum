@@ -104,6 +104,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     private String mImageFileName;
     private String mSubredditName;
     private boolean isGif = true;
+    private boolean isApng = false;
     private boolean isNsfw;
     private Typeface typeface;
     private Handler handler;
@@ -166,6 +167,18 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         mSubredditName = intent.getStringExtra(EXTRA_SUBREDDIT_OR_USERNAME_KEY);
         isNsfw = intent.getBooleanExtra(EXTRA_IS_NSFW, false);
 
+        // Detect APNG/avatar images - check URL extension or if it's an icon/avatar
+        // Use animated-capable view for avatars since they may be APNG
+        if (mImageUrl != null && (mImageUrl.toLowerCase().endsWith(".apng") ||
+            mImageUrl.toLowerCase().contains(".apng?") ||
+            mImageUrl.toLowerCase().contains(".apng&"))) {
+            isApng = true;
+        } else if (mImageFileName != null && (mImageFileName.toLowerCase().contains("-icon.") ||
+                   mImageFileName.toLowerCase().contains("avatar"))) {
+            // Avatar/icon images - treat as potentially animated
+            isApng = true;
+        }
+
         boolean useBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
         if (postTitle != null) {
             Spanned title = Html.fromHtml(String.format("<font color=\"#FFFFFF\"><small>%s</small></font>", postTitle));
@@ -191,7 +204,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                 requestPermissionAndDownload();
             });
             binding.shareImageViewViewImageOrGifActivity.setOnClickListener(view -> {
-                if (isGif)
+                if (isGif || isApng)
                     shareGif();
                 else
                     shareImage();
@@ -303,7 +316,43 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     }
 
     private void loadImage() {
-        binding.imageViewViewImageOrGifActivity.showImage(Uri.parse(mImageUrl));
+        if (isApng) {
+            // Use GifImageView for APNG files, which Glide with APNG4Android plugin will animate
+            binding.imageViewViewImageOrGifActivity.setVisibility(View.GONE);
+            binding.apngImageViewViewImageOrGifActivity.setVisibility(View.VISIBLE);
+
+            glide.load(mImageUrl)
+                    .into(binding.apngImageViewViewImageOrGifActivity);
+
+            binding.progressBarViewImageOrGifActivity.setVisibility(View.GONE);
+
+            binding.apngImageViewViewImageOrGifActivity.setOnClickListener(view -> {
+                if (isActionBarHidden) {
+                    getWindow().getDecorView().setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                    isActionBarHidden = false;
+                    if (mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false)) {
+                        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    getWindow().getDecorView().setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE);
+                    isActionBarHidden = true;
+                    if (mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false)) {
+                        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
+                    }
+                }
+            });
+        } else {
+            binding.imageViewViewImageOrGifActivity.showImage(Uri.parse(mImageUrl));
+        }
     }
 
     @Override
@@ -312,7 +361,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         for (int i = 0; i < menu.size(); i++) {
             Utils.setTitleWithCustomFontToMenuItem(typeface, menu.getItem(i), null);
         }
-        if (!isGif) {
+        if (!isGif && !isApng) {
             menu.findItem(R.id.action_set_wallpaper_view_image_or_gif_activity).setVisible(true);
         }
         return true;
@@ -332,7 +381,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             requestPermissionAndDownload();
             return true;
         } else if (itemId == R.id.action_share_view_image_or_gif_activity) {
-            if (isGif)
+            if (isGif || isApng)
                 shareGif();
             else
                 shareImage();
@@ -369,12 +418,12 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         // Check if download location is set
         String downloadLocation;
-        int mediaType = isGif ? DownloadMediaService.EXTRA_MEDIA_TYPE_GIF : DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE;
+        int mediaType = (isGif || isApng) ? DownloadMediaService.EXTRA_MEDIA_TYPE_GIF : DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE;
 
         if (isNsfw && mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
             downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
         } else {
-            if (isGif) {
+            if (isGif || isApng) {
                 downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, "");
             } else {
                 downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
@@ -394,25 +443,29 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         // Reconstruct filename using post title passed in intent
         String postTitle = getIntent().getStringExtra(EXTRA_POST_TITLE_KEY);
-        String title = (postTitle != null && !postTitle.isEmpty()) ? postTitle : (isGif ? "reddit_gif" : "reddit_image");
+        String title = (postTitle != null && !postTitle.isEmpty()) ? postTitle : ((isGif || isApng) ? "reddit_gif" : "reddit_image");
 
         // Basic sanitization (similar to DownloadMediaService)
         String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");
         if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
-        if (sanitizedTitle.isEmpty()) sanitizedTitle = (isGif ? "reddit_gif_" : "reddit_image_") + System.currentTimeMillis();
+        if (sanitizedTitle.isEmpty()) sanitizedTitle = ((isGif || isApng) ? "reddit_gif_" : "reddit_image_") + System.currentTimeMillis();
 
         // Basic extension determination
         String extension = ".unknown";
         if (mImageUrl != null) {
             String urlExt = org.apache.commons.io.FilenameUtils.getExtension(mImageUrl);
 
-            if (urlExt != null && !urlExt.isEmpty() && urlExt.matches("(?i)(jpg|jpeg|png|gif|mp4|webm|mov|avi)")) {
+            if (urlExt != null && !urlExt.isEmpty() && urlExt.matches("(?i)(jpg|jpeg|png|apng|gif|mp4|webm|mov|avi)")) {
                 extension = "." + urlExt.toLowerCase().substring(0, Math.min(urlExt.length(), 5));
+            } else if (isApng) {
+                extension = ".apng";
             } else if (isGif) {
                 extension = ".gif";
             } else {
                 extension = ".jpg"; // Default for images if URL extension is weird
             }
+        } else if (isApng) {
+            extension = ".apng";
         } else if (isGif) {
             extension = ".gif";
         } else {
@@ -513,7 +566,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     }
 
     private void setWallpaper() {
-        if (!isGif) {
+        if (!isGif && !isApng) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 SetAsWallpaperBottomSheetFragment setAsWallpaperBottomSheetFragment = new SetAsWallpaperBottomSheetFragment();
                 setAsWallpaperBottomSheetFragment.show(getSupportFragmentManager(), setAsWallpaperBottomSheetFragment.getTag());
