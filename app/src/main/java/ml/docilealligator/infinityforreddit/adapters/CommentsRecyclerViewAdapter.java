@@ -133,6 +133,7 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
     private final boolean mFullyCollapseComment;
     private final boolean mShowOnlyOneCommentLevelIndicator;
     private final boolean mShowAuthorAvatar;
+    private final boolean mDisableProfileAvatarAnimation;
     private final boolean mShowUserPrefix;
     private final boolean mHideTheNumberOfVotes;
     private final int mDepthThreshold;
@@ -287,6 +288,7 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
         mFullyCollapseComment = sharedPreferences.getBoolean(SharedPreferencesUtils.FULLY_COLLAPSE_COMMENT, false);
         mShowOnlyOneCommentLevelIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ONLY_ONE_COMMENT_LEVEL_INDICATOR, false);
         mShowAuthorAvatar = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_AUTHOR_AVATAR, false);
+        mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
         mShowUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_USER_PREFIX, false);
         mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS, false);
         mDepthThreshold = sharedPreferences.getInt(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD, 5);
@@ -470,20 +472,36 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
                                 Comment currentComment = getCurrentComment(holder);
                                 if (currentComment != null && authorFullName.equals(currentComment.getAuthorFullName())) {
-                                    mGlide.load(iconUrl)
-                                            .transform(new RoundedCornersTransformation(72, 0))
-                                            .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .transform(new RoundedCornersTransformation(72, 0)))
-                                            .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                                    if (mDisableProfileAvatarAnimation) {
+                                        mGlide.asBitmap().load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                                    } else {
+                                        mGlide.load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                                    }
                                 }
                             });
                         }
                     } else {
-                        mGlide.load(comment.getAuthorIconUrl())
-                                .transform(new RoundedCornersTransformation(72, 0))
-                                .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                        .transform(new RoundedCornersTransformation(72, 0)))
-                                .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                        if (mDisableProfileAvatarAnimation) {
+                            mGlide.asBitmap().load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                        } else {
+                            mGlide.load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                        }
                     }
                 }
 
@@ -651,20 +669,36 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
                                 Comment currentComment = getCurrentComment(holder);
                                 if (currentComment != null && authorFullName.equals(currentComment.getAuthorFullName())) {
-                                    mGlide.load(iconUrl)
-                                            .transform(new RoundedCornersTransformation(72, 0))
-                                            .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .transform(new RoundedCornersTransformation(72, 0)))
-                                            .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                                    if (mDisableProfileAvatarAnimation) {
+                                        mGlide.asBitmap().load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                                    } else {
+                                        mGlide.load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                                    }
                                 }
                             });
                         }
                     } else {
-                        mGlide.load(comment.getAuthorIconUrl())
-                                .transform(new RoundedCornersTransformation(72, 0))
-                                .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                        .transform(new RoundedCornersTransformation(72, 0)))
-                                .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                        if (mDisableProfileAvatarAnimation) {
+                            mGlide.asBitmap().load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                        } else {
+                            mGlide.load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                        }
                     }
                 }
 

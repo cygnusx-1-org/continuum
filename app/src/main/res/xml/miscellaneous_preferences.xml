@@ -31,6 +31,11 @@
         app:title="@string/settings_enable_search_history_title"
         app:summary="@string/only_for_logged_in_user" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="disable_profile_avatar_animation"
+        app:title="@string/settings_disable_profile_avatar_animation_title" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="auto"
         app:entries="@array/settings_language"

@@ -475,6 +475,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                             .into(binding.iconGifImageViewViewSubredditDetailActivity);
                     binding.iconGifImageViewViewSubredditDetailActivity.setOnClickListener(null);
                 } else {
+                    // Note: This already uses asBitmap() which loads only the first frame,
+                    // effectively disabling animation for all cases. The setting check is
+                    // kept here for consistency but asBitmap() always prevents animation.
                     glide.asBitmap()
                             .load(subredditData.getIconUrl())
                             .transform(new RoundedCornersTransformation(216, 0))

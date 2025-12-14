@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.google.android.material.appbar.AppBarLayout;
@@ -470,11 +471,22 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                             .into(binding.iconGifImageViewViewUserDetailActivity);
                     binding.iconGifImageViewViewUserDetailActivity.setOnClickListener(null);
                 } else {
-                    glide.load(userData.getIconUrl())
-                            .transform(new RoundedCornersTransformation(216, 0))
-                            .error(glide.load(R.drawable.subreddit_default_icon)
-                                    .transform(new RoundedCornersTransformation(216, 0)))
-                            .into(binding.iconGifImageViewViewUserDetailActivity);
+                    boolean disableAnimation = mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
+                    if (disableAnimation) {
+                        // Use asBitmap() to load only the first frame and prevent animation
+                        glide.asBitmap()
+                                .load(userData.getIconUrl())
+                                .transform(new RoundedCornersTransformation(216, 0))
+                                .error(glide.load(R.drawable.subreddit_default_icon)
+                                        .transform(new RoundedCornersTransformation(216, 0)))
+                                .into(binding.iconGifImageViewViewUserDetailActivity);
+                    } else {
+                        glide.load(userData.getIconUrl())
+                                .transform(new RoundedCornersTransformation(216, 0))
+                                .error(glide.load(R.drawable.subreddit_default_icon)
+                                        .transform(new RoundedCornersTransformation(216, 0)))
+                                .into(binding.iconGifImageViewViewUserDetailActivity);
+                    }
 
                     binding.iconGifImageViewViewUserDetailActivity.setOnClickListener(view -> {
                         Intent intent = new Intent(this, ViewImageOrGifActivity.class);

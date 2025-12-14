@@ -321,8 +321,13 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             binding.imageViewViewImageOrGifActivity.setVisibility(View.GONE);
             binding.apngImageViewViewImageOrGifActivity.setVisibility(View.VISIBLE);
 
-            glide.load(mImageUrl)
-                    .into(binding.apngImageViewViewImageOrGifActivity);
+            boolean disableAnimation = mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
+            if (disableAnimation) {
+                // Use asBitmap() to load only the first frame and prevent animation
+                glide.asBitmap().load(mImageUrl).into(binding.apngImageViewViewImageOrGifActivity);
+            } else {
+                glide.load(mImageUrl).into(binding.apngImageViewViewImageOrGifActivity);
+            }
 
             binding.progressBarViewImageOrGifActivity.setVisibility(View.GONE);
 
