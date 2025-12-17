@@ -440,6 +440,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         return mCustomThemeWrapper;
     }
 
+    public boolean isDisableSwipingBetweenTabs() {
+        return mDisableSwipingBetweenTabs;
+    }
+
     @Override
     protected void applyCustomTheme() {
         int backgroundColor = mCustomThemeWrapper.getBackgroundColor();

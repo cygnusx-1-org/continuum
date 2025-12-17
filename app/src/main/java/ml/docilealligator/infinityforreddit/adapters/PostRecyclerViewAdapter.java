@@ -188,6 +188,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private CustomThemeWrapper mCustomThemeWrapper;
     private Locale mLocale;
     private boolean canStartActivity = true;
+    private boolean mDisableSwipingBetweenTabs;
     private int mPostType;
     private int mPostLayout;
     private int mDefaultLinkPostLayout;
@@ -332,6 +333,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mDisableImagePreview = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW, false);
             mOnlyDisablePreviewInVideoAndGifPosts = sharedPreferences.getBoolean(SharedPreferencesUtils.ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS, false);
             mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
+            mDisableSwipingBetweenTabs = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
 
             if (postHistorySharedPreferences != null) {
                 mMarkPostsAsRead = postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false);
@@ -3811,7 +3813,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             }
 
                             if (mActivity.mViewPager2 != null) {
-                                mActivity.mViewPager2.setUserInputEnabled(true);
+                                mActivity.mViewPager2.setUserInputEnabled(!mDisableSwipingBetweenTabs);
                             }
                             mActivity.unlockSwipeRightToGoBack();
                             swipeLocked = false;
@@ -4639,7 +4641,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             }
 
                             if (mActivity.mViewPager2 != null) {
-                                mActivity.mViewPager2.setUserInputEnabled(true);
+                                mActivity.mViewPager2.setUserInputEnabled(!mDisableSwipingBetweenTabs);
                             }
                             mActivity.unlockSwipeRightToGoBack();
                     }
