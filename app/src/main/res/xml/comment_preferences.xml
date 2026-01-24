@@ -43,6 +43,11 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
+        app:key="remember_comment_scroll_position"
+        android:title="@string/settings_remember_comment_scroll_position" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
         app:key="show_author_avatar"
         android:title="@string/settings_show_author_avatar_title" />
 

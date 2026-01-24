@@ -116,6 +116,7 @@ import ml.docilealligator.infinityforreddit.thing.ReplyNotificationsToggle;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.CommentScrollPositionCache;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
@@ -239,6 +240,9 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
     private FragmentViewPostDetailBinding binding;
     private RecyclerView mCommentsRecyclerView;
     public ViewPostDetailFragmentViewModel viewPostDetailFragmentViewModel;
+    private boolean mRememberCommentScrollPosition;
+    private int mPendingScrollPositionRestore = -1;
+    private boolean mScrollPositionRestored = false;
 
     public ViewPostDetailFragment() {
         // Required empty public constructor
@@ -304,6 +308,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
         mSwipeUpToHideFab = mSharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_UP_TO_HIDE_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON, false);
         mExpandChildren = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_TOP_LEVEL_COMMENTS_FIRST, false);
         mMarkPostsAsRead = mPostHistorySharedPreferences.getBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false);
+        mRememberCommentScrollPosition = mSharedPreferences.getBoolean(SharedPreferencesUtils.REMEMBER_COMMENT_SCROLL_POSITION, false);
         if (savedInstanceState == null) {
             mRespectSubredditRecommendedSortType = mSharedPreferences.getBoolean(SharedPreferencesUtils.RESPECT_SUBREDDIT_RECOMMENDED_COMMENT_SORT_TYPE, false);
             viewPostDetailFragmentId = System.currentTimeMillis();
@@ -681,6 +686,25 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
 
     public void fetchCommentsAfterCommentFilterAvailable() {
         if (comments == null) {
+            // Check if we have cached comments for this post
+            if (mRememberCommentScrollPosition && mPost != null && !mScrollPositionRestored) {
+                CommentScrollPositionCache.CachedPostComments cached =
+                        CommentScrollPositionCache.getInstance().get(mPost.getId());
+                if (cached != null && cached.comments != null && !cached.comments.isEmpty()) {
+                    // Use cached comments
+                    comments = cached.comments;
+                    children = cached.children;
+                    hasMoreChildren = cached.hasMoreChildren;
+                    mPendingScrollPositionRestore = cached.scrollPosition;
+                    mCommentsAdapter.addComments(comments, hasMoreChildren);
+                    restorePendingScrollPosition();
+
+                    if (children != null && children.size() > 0) {
+                        setupChildrenScrollListener();
+                    }
+                    return;
+                }
+            }
             fetchCommentsRespectRecommendedSort(false);
         } else {
             if (isRefreshing) {
@@ -690,6 +714,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                 fetchCommentsRespectRecommendedSort(false);
             } else {
                 mCommentsAdapter.addComments(comments, hasMoreChildren);
+                restorePendingScrollPosition();
                 if (isLoadingMoreChildren) {
                     isLoadingMoreChildren = false;
                     fetchMoreComments();
@@ -757,6 +782,82 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
 
             mMenu.findItem(R.id.action_view_crosspost_parent_view_post_detail_fragment).setVisible(mPost.getCrosspostParentId() != null);
         }
+    }
+
+    private void restorePendingScrollPosition() {
+        if (mPendingScrollPositionRestore >= 0 && !mScrollPositionRestored) {
+            mScrollPositionRestored = true;
+            final int positionToRestore = mPendingScrollPositionRestore;
+            mPendingScrollPositionRestore = -1;
+
+            RecyclerView targetRecyclerView = mCommentsRecyclerView != null
+                    ? mCommentsRecyclerView
+                    : binding.postDetailRecyclerViewViewPostDetailFragment;
+
+            // Post to ensure the adapter has processed the new items
+            targetRecyclerView.post(() -> {
+                if (isAdded() && targetRecyclerView.getLayoutManager() instanceof LinearLayoutManager) {
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) targetRecyclerView.getLayoutManager();
+                    // Adjust position based on layout mode
+                    int adjustedPosition = positionToRestore;
+                    if (mCommentsRecyclerView == null) {
+                        // Combined layout - need to account for post adapter item
+                        adjustedPosition = positionToRestore + 1;
+                    }
+                    // Use scrollToPositionWithOffset to position the item at the top of the view
+                    layoutManager.scrollToPositionWithOffset(adjustedPosition, 0);
+                }
+            });
+        }
+    }
+
+    private void setupChildrenScrollListener() {
+        RecyclerView targetRecyclerView = mCommentsRecyclerView == null
+                ? binding.postDetailRecyclerViewViewPostDetailFragment
+                : mCommentsRecyclerView;
+        targetRecyclerView.clearOnScrollListeners();
+        targetRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (!mIsSmoothScrolling && !mLockFab) {
+                    if (!recyclerView.canScrollVertically(1)) {
+                        mActivity.hideFab();
+                    } else {
+                        if (dy > 0) {
+                            if (mSwipeUpToHideFab) {
+                                mActivity.showFab();
+                            } else {
+                                mActivity.hideFab();
+                            }
+                        } else {
+                            if (mSwipeUpToHideFab) {
+                                mActivity.hideFab();
+                            } else {
+                                mActivity.showFab();
+                            }
+                        }
+                    }
+                }
+
+                if (!isLoadingMoreChildren && loadMoreChildrenSuccess) {
+                    int visibleItemCount = targetRecyclerView.getLayoutManager().getChildCount();
+                    int totalItemCount = targetRecyclerView.getLayoutManager().getItemCount();
+                    int firstVisibleItemPosition = ((LinearLayoutManagerBugFixed) targetRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+
+                    if ((visibleItemCount + firstVisibleItemPosition >= totalItemCount) && firstVisibleItemPosition >= 0) {
+                        fetchMoreComments();
+                    }
+                }
+            }
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    mIsSmoothScrolling = false;
+                }
+            }
+        });
     }
 
     private void initializeSwipeActionDrawable() {
@@ -1232,6 +1333,30 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
         if (binding.postDetailRecyclerViewViewPostDetailFragment != null) {
             binding.postDetailRecyclerViewViewPostDetailFragment.onWindowVisibilityChanged(View.GONE);
         }
+
+        // Save comments and scroll position to cache if feature is enabled
+        if (mRememberCommentScrollPosition && mPost != null && mCommentsAdapter != null) {
+            ArrayList<Comment> visibleComments = mCommentsAdapter.getVisibleComments();
+            if (visibleComments != null && !visibleComments.isEmpty()) {
+                RecyclerView targetRecyclerView = mCommentsRecyclerView != null
+                        ? mCommentsRecyclerView
+                        : binding.postDetailRecyclerViewViewPostDetailFragment;
+                int currentPosition = 0;
+                if (targetRecyclerView != null && targetRecyclerView.getLayoutManager() != null) {
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) targetRecyclerView.getLayoutManager();
+                    currentPosition = layoutManager.findFirstVisibleItemPosition();
+                    // Adjust position for combined layout mode (subtract 1 for post adapter item)
+                    if (mCommentsRecyclerView == null && currentPosition > 0) {
+                        currentPosition = currentPosition - 1;
+                    }
+                    if (currentPosition < 0) {
+                        currentPosition = 0;
+                    }
+                }
+                CommentScrollPositionCache.getInstance().save(
+                        mPost.getId(), visibleComments, children, hasMoreChildren, currentPosition);
+            }
+        }
     }
 
     @Override
@@ -1361,6 +1486,26 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                                             mCommentFilter = commentFilter;
                                             commentFilterFetched = true;
 
+                                            // Check if we have cached comments for this post
+                                            if (mRememberCommentScrollPosition && !mScrollPositionRestored) {
+                                                CommentScrollPositionCache.CachedPostComments cached =
+                                                        CommentScrollPositionCache.getInstance().get(mPost.getId());
+                                                if (cached != null && cached.comments != null && !cached.comments.isEmpty()) {
+                                                    // Use cached comments
+                                                    comments = cached.comments;
+                                                    children = cached.children;
+                                                    hasMoreChildren = cached.hasMoreChildren;
+                                                    mPendingScrollPositionRestore = cached.scrollPosition;
+                                                    mCommentsAdapter.addComments(comments, hasMoreChildren);
+                                                    restorePendingScrollPosition();
+
+                                                    if (children != null && children.size() > 0) {
+                                                        setupChildrenScrollListener();
+                                                    }
+                                                    return;
+                                                }
+                                            }
+
                                             if (mRespectSubredditRecommendedSortType) {
                                                 fetchCommentsRespectRecommendedSort(false);
                                             } else {
@@ -1372,6 +1517,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
 
                                                                 hasMoreChildren = children.size() != 0;
                                                                 mCommentsAdapter.addComments(expandedComments, hasMoreChildren);
+                                                                restorePendingScrollPosition();
 
                                                                 if (children.size() > 0) {
                                                                     (mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView).clearOnScrollListeners();
@@ -1520,6 +1666,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                         comments = expandedComments;
                         hasMoreChildren = children.size() != 0;
                         mCommentsAdapter.addComments(expandedComments, hasMoreChildren);
+                        restorePendingScrollPosition();
 
                         if (children.size() > 0) {
                             (mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView).clearOnScrollListeners();
