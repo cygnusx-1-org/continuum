@@ -101,12 +101,12 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
 
         applyTheme();
 
-        if (mActivity.isImmersiveInterface()) {
+        if (mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
                 @NonNull
                 @Override
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                    Insets allInsets = Utils.getInsets(insets, false);
+                    Insets allInsets = Utils.getInsets(insets, false, mActivity.isForcedImmersiveInterface());
                     binding.recyclerViewSubredditListingFragment.setPadding(
                             0, 0, 0, allInsets.bottom
                     );
@@ -255,17 +255,17 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
         return sortType;
     }
 
-    public ArrayList<String> getSelectedSubredditNames() {
+    public ArrayList<SubredditData> getSelectedSubredditNames() {
         if (mSubredditListingViewModel != null) {
             List<SubredditData> allSubreddits = mSubredditListingViewModel.getSubreddits().getValue();
             if (allSubreddits == null) {
                 return null;
             }
 
-            ArrayList<String> selectedSubreddits = new ArrayList<>();
+            ArrayList<SubredditData> selectedSubreddits = new ArrayList<>();
             for (SubredditData s : allSubreddits) {
                 if (s.isSelected()) {
-                    selectedSubreddits.add(s.getName());
+                    selectedSubreddits.add(s);
                 }
             }
             return selectedSubreddits;

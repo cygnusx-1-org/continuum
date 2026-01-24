@@ -235,7 +235,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Window window = getWindow();
-            if (isImmersiveInterface()) {
+            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
                     window.setDecorFitsSystemWindows(false);
@@ -248,7 +248,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false);
+                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
                         topSystemBarHeight = allInsets.top;
 
@@ -600,6 +600,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         });
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutViewSubredditDetailActivity,
                 binding.collapsingToolbarLayoutViewSubredditDetailActivity, binding.toolbar, false);
+        applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutViewSubredditDetailActivity, binding.tabLayoutViewSubredditDetailActivity);
         expandedTabTextColor = mCustomThemeWrapper.getTabLayoutWithExpandedCollapsingToolbarTextColor();
         expandedTabIndicatorColor = mCustomThemeWrapper.getTabLayoutWithExpandedCollapsingToolbarTabIndicator();
         expandedTabBackgroundColor = mCustomThemeWrapper.getTabLayoutWithExpandedCollapsingToolbarTabBackground();

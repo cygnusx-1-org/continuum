@@ -89,7 +89,7 @@ public class RulesActivity extends BaseActivity {
                 addOnOffsetChangedListener(binding.appbarLayoutRulesActivity);
             }
 
-            if (isImmersiveInterface()) {
+            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     window.setDecorFitsSystemWindows(false);
                 } else {
@@ -100,7 +100,7 @@ public class RulesActivity extends BaseActivity {
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false);
+                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
                         setMargins(binding.toolbarRulesActivity,
                                 allInsets.left,
@@ -178,6 +178,7 @@ public class RulesActivity extends BaseActivity {
         binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutRulesActivity,
                 binding.collapsingToolbarLayoutRulesActivity, binding.toolbarRulesActivity);
+        applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutRulesActivity);
         binding.progressBarRulesActivity.setIndicatorColor(mCustomThemeWrapper.getColorAccent());
         binding.errorTextViewRulesActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
         if (typeface != null) {

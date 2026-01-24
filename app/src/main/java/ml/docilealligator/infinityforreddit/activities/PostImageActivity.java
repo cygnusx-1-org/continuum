@@ -160,7 +160,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
 
         applyCustomTheme();
 
-        if (isImmersiveInterface()) {
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             if (isChangeStatusBarIconColor()) {
                 addOnOffsetChangedListener(binding.appbarLayoutPostImageActivity);
             }
@@ -169,7 +169,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
                 @NonNull
                 @Override
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                    Insets allInsets = Utils.getInsets(insets, true);
+                    Insets allInsets = Utils.getInsets(insets, true, isForcedImmersiveInterface());
 
                     setMargins(binding.toolbarPostImageActivity,
                             allInsets.left,

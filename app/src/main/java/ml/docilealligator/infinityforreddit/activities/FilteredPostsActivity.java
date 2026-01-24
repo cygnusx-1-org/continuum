@@ -127,7 +127,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 addOnOffsetChangedListener(binding.appbarLayoutFilteredPostsActivity);
             }
 
-            if (isImmersiveInterface()) {
+            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     window.setDecorFitsSystemWindows(false);
                 } else {
@@ -138,7 +138,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false);
+                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
                         setMargins(binding.toolbarFilteredPostsActivity,
                                 allInsets.left,
@@ -292,6 +292,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutFilteredPostsActivity,
                 binding.collapsingToolbarLayoutFilteredPostsActivity, binding.toolbarFilteredPostsActivity);
+        applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutFilteredPostsActivity);
         applyFABTheme(binding.fabFilteredThingActivity);
     }
 

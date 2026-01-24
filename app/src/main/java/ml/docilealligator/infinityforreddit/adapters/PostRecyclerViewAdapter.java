@@ -129,6 +129,7 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoPlayerViewHelper;
+import ml.docilealligator.infinityforreddit.videoautoplay.MultiPlayPlayerSelector;
 import ml.docilealligator.infinityforreddit.videoautoplay.Playable;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
@@ -263,6 +264,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mDisableProfileAvatarAnimation;
     private int mDataSavingModeDefaultResolution;
     private int mNonDataSavingModeDefaultResolution;
+    private int mSimultaneousAutoplayLimit;
     private String mLongPressPostNonMediaAreaAction = SharedPreferencesUtils.LONG_PRESS_POST_VALUE_SHOW_POST_OPTIONS;
     private String mLongPressPostMediaAction = SharedPreferencesUtils.LONG_PRESS_POST_VALUE_SHOW_POST_OPTIONS;
     private boolean mHandleReadPost;
@@ -270,6 +272,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private Callback mCallback;
     private boolean canPlayVideo = true;
     private RecyclerView.RecycledViewPool mGalleryRecycledViewPool;
+    private MultiPlayPlayerSelector multiPlayPlayerSelector;
 
     // postHistorySharedPreferences will be null when being used in HistoryPostFragment.
     public PostRecyclerViewAdapter(BaseActivity activity, PostFragmentBase fragment, Executor executor, Retrofit oauthRetrofit,
@@ -353,6 +356,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mEasierToWatchInFullScreen = sharedPreferences.getBoolean(SharedPreferencesUtils.EASIER_TO_WATCH_IN_FULL_SCREEN, false);
             mDataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"));
             mNonDataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"));
+            mSimultaneousAutoplayLimit = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.SIMULTANEOUS_AUTOPLAY_LIMIT, "1"));
 
             mPostLayout = postLayout;
             mDefaultLinkPostLayout = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.DEFAULT_LINK_POST_LAYOUT_KEY, "-1"));
@@ -403,6 +407,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mCallback = callback;
 
             mGalleryRecycledViewPool = new RecyclerView.RecycledViewPool();
+            multiPlayPlayerSelector = new MultiPlayPlayerSelector(mSimultaneousAutoplayLimit);
         }
     }
 
@@ -1720,6 +1725,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         mNonDataSavingModeDefaultResolution = value;
     }
 
+    public void setSimultaneousAutoplayLimit(int limit) {
+        mSimultaneousAutoplayLimit = limit;
+        multiPlayPlayerSelector.setSimultaneousAutoplayLimit(limit);
+    }
+
     @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
@@ -2866,6 +2876,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
             if (this.container == null) {
                 this.container = container;
+                this.container.setPlayerSelector(multiPlayPlayerSelector);
             }
             if (mediaUri == null) {
                 return;

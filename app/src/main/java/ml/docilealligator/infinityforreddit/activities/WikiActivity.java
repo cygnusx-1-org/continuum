@@ -117,7 +117,7 @@ public class WikiActivity extends BaseActivity {
                 addOnOffsetChangedListener(binding.appbarLayoutCommentWikiActivity);
             }
 
-            if (isImmersiveInterface()) {
+            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     window.setDecorFitsSystemWindows(false);
                 } else {
@@ -128,7 +128,7 @@ public class WikiActivity extends BaseActivity {
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false);
+                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
                         setMargins(binding.toolbarCommentWikiActivity,
                                 allInsets.left,
@@ -343,6 +343,7 @@ public class WikiActivity extends BaseActivity {
         binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCommentWikiActivity,
                 binding.collapsingToolbarLayoutWikiActivity, binding.toolbarCommentWikiActivity);
+        applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutWikiActivity);
         binding.swipeRefreshLayoutWikiActivity.setProgressBackgroundColorSchemeColor(mCustomThemeWrapper.getCircularProgressBarBackground());
         binding.swipeRefreshLayoutWikiActivity.setColorSchemeColors(mCustomThemeWrapper.getColorAccent());
         binding.fetchWikiTextViewWikiActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());

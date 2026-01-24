@@ -91,12 +91,12 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
         }
         mGlide = Glide.with(this);
 
-        if (mActivity.isImmersiveInterface()) {
+        if (mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
                 @NonNull
                 @Override
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                    Insets allInsets = Utils.getInsets(insets, false);
+                    Insets allInsets = Utils.getInsets(insets, false, mActivity.isForcedImmersiveInterface());
 
                     binding.recyclerViewInboxFragment.setPadding(0, 0, 0, allInsets.bottom);
 
@@ -108,7 +108,7 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
 
         mWhere = arguments.getString(EXTRA_MESSAGE_WHERE, FetchMessage.WHERE_INBOX);
         mAdapter = new MessageRecyclerViewAdapter(mActivity, mOauthRetrofit, mCustomThemeWrapper,
-                mActivity.accessToken, mWhere, () -> mMessageViewModel.retryLoadingMore());
+                mActivity.accessToken, mActivity.accountName, mWhere, () -> mMessageViewModel.retryLoadingMore());
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
         binding.recyclerViewInboxFragment.setLayoutManager(mLinearLayoutManager);
         binding.recyclerViewInboxFragment.setAdapter(mAdapter);

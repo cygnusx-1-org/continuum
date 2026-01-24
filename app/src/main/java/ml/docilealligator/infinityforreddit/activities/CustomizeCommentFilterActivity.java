@@ -85,7 +85,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
 
         applyCustomTheme();
 
-        if (isImmersiveInterface()) {
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             if (isChangeStatusBarIconColor()) {
                 addOnOffsetChangedListener(binding.appbarLayoutCustomizeCommentFilterActivity);
             }
@@ -94,7 +94,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
                 @NonNull
                 @Override
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                    Insets windowInsets = Utils.getInsets(insets, false);
+                    Insets windowInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
                     Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
 
                     setMargins(binding.toolbarCustomizeCommentFilterActivity,
@@ -213,7 +213,9 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
     @Override
     protected void applyCustomTheme() {
         binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
-        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeCommentFilterActivity, binding.collapsingToolbarLayoutCustomizeCommentFilterActivity, binding.toolbarCustomizeCommentFilterActivity);
+        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeCommentFilterActivity,
+                binding.collapsingToolbarLayoutCustomizeCommentFilterActivity, binding.toolbarCustomizeCommentFilterActivity);
+        applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCustomizeCommentFilterActivity);
         int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
         int primaryIconColor = mCustomThemeWrapper.getPrimaryIconColor();
         int filledCardViewBackgroundColor = mCustomThemeWrapper.getFilledCardViewBackgroundColor();

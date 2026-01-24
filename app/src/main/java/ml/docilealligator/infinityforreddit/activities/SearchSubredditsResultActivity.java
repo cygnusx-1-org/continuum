@@ -33,6 +33,7 @@ import ml.docilealligator.infinityforreddit.customviews.slidr.Slidr;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySearchSubredditsResultBinding;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.SubredditListingFragment;
+import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
@@ -40,7 +41,7 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
 
     static final String EXTRA_QUERY = "EQ";
     static final String EXTRA_IS_MULTI_SELECTION = "EIMS";
-    static final String RETURN_EXTRA_SELECTED_SUBREDDIT_NAMES = "RESS";
+    static final String RETURN_EXTRA_SELECTED_SUBREDDITS = "RESS";
 
     private static final String FRAGMENT_OUT_STATE = "FOS";
 
@@ -79,7 +80,7 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
                 addOnOffsetChangedListener(binding.appbarLayoutSearchSubredditsResultActivity);
             }
 
-            if (isImmersiveInterface()) {
+            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     window.setDecorFitsSystemWindows(false);
                 } else {
@@ -90,7 +91,7 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false);
+                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
                         setMargins(binding.toolbarSearchSubredditsResultActivity,
                                 allInsets.left,
@@ -165,9 +166,9 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
             return true;
         } else if (item.getItemId() == R.id.action_save_search_subreddits_result_activity) {
             if (mFragment != null) {
-                ArrayList<String> selectedSubredditNames = ((SubredditListingFragment) mFragment).getSelectedSubredditNames();
+                ArrayList<SubredditData> selectedSubreddits = ((SubredditListingFragment) mFragment).getSelectedSubredditNames();
                 Intent returnIntent = new Intent();
-                returnIntent.putStringArrayListExtra(RETURN_EXTRA_SELECTED_SUBREDDIT_NAMES, selectedSubredditNames);
+                returnIntent.putParcelableArrayListExtra(RETURN_EXTRA_SELECTED_SUBREDDITS, selectedSubreddits);
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }

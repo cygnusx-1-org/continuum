@@ -114,7 +114,7 @@ public class CustomThemeListingActivity extends BaseActivity implements
 
         applyCustomTheme();
 
-        if (isImmersiveInterface()) {
+        if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             if (isChangeStatusBarIconColor()) {
                 addOnOffsetChangedListener(binding.appbarLayoutCustomizeThemeListingActivity);
             }
@@ -124,7 +124,7 @@ public class CustomThemeListingActivity extends BaseActivity implements
                 @NonNull
                 @Override
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                    Insets allInsets = Utils.getInsets(insets, false);
+                    Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
                     setMargins(binding.toolbarCustomizeThemeListingActivity,
                             allInsets.left,
@@ -220,7 +220,9 @@ public class CustomThemeListingActivity extends BaseActivity implements
     @Override
     protected void applyCustomTheme() {
         binding.coordinatorLayoutCustomThemeListingActivity.setBackgroundColor(customThemeWrapper.getBackgroundColor());
-        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeThemeListingActivity, binding.collapsingToolbarLayoutCustomizeThemeListingActivity, binding.toolbarCustomizeThemeListingActivity);
+        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeThemeListingActivity,
+                binding.collapsingToolbarLayoutCustomizeThemeListingActivity, binding.toolbarCustomizeThemeListingActivity);
+        applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCustomizeThemeListingActivity);
         applyFABTheme(binding.fabCustomThemeListingActivity);
         applyTabLayoutTheme(binding.tabLayoutCustomizeThemeListingActivity);
     }

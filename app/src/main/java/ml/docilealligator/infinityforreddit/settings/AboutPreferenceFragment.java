@@ -26,6 +26,7 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         setPreferencesFromResource(R.xml.about_preferences, rootKey);
 
         Preference openSourcePreference = findPreference(SharedPreferencesUtils.OPEN_SOURCE_KEY);
+        Preference ratePreference = findPreference(SharedPreferencesUtils.RATE_KEY);
         Preference emailPreference = findPreference(SharedPreferencesUtils.EMAIL_KEY);
         Preference redditAccountPreference = findPreference(SharedPreferencesUtils.REDDIT_ACCOUNT_KEY);
         Preference subredditPreference = findPreference(SharedPreferencesUtils.SUBREDDIT_KEY);
@@ -34,9 +35,24 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
 
         if (openSourcePreference != null) {
             openSourcePreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(activity, LinkResolverActivity.class);
+                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
                 intent.setData(Uri.parse("https://github.com/cygnusx-1-org/continuum"));
-                activity.startActivity(intent);
+                mActivity.startActivity(intent);
+                return true;
+            });
+        }
+
+        if (ratePreference != null) {
+            ratePreference.setOnPreferenceClickListener(preference -> {
+                Intent playStoreIntent = new Intent(Intent.ACTION_VIEW);
+                playStoreIntent.setData(Uri.parse("market://details?id=ml.docilealligator.infinityforreddit.plus"));
+                if (playStoreIntent.resolveActivity(mActivity.getPackageManager()) != null) {
+                    mActivity.startActivity(playStoreIntent);
+                } else {
+                    Intent intent = new Intent(mActivity, LinkResolverActivity.class);
+                    intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=ml.docilealligator.infinityforreddit"));
+                    mActivity.startActivity(intent);
+                }
                 return true;
             });
         }
@@ -46,9 +62,9 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
                 intent.setData(Uri.parse("mailto:continuum@cygnusx-1.org"));
                 try {
-                    activity.startActivity(intent);
+                    mActivity.startActivity(intent);
                 } catch (ActivityNotFoundException e) {
-                    Toast.makeText(activity, R.string.no_email_client, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, R.string.no_email_client, Toast.LENGTH_SHORT).show();
                 }
                 return true;
             });
@@ -56,18 +72,18 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
 
         if (redditAccountPreference != null) {
             redditAccountPreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(activity, LinkResolverActivity.class);
+                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
                 intent.setData(Uri.parse("https://www.reddit.com/user/edgan"));
-                activity.startActivity(intent);
+                mActivity.startActivity(intent);
                 return true;
             });
         }
 
         if (subredditPreference != null) {
             subredditPreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(activity, LinkResolverActivity.class);
+                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
                 intent.setData(Uri.parse("https://www.reddit.com/r/continuumreddit"));
-                activity.startActivity(intent);
+                mActivity.startActivity(intent);
                 return true;
             });
         }
@@ -77,10 +93,10 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_this_app));
-                if (intent.resolveActivity(activity.getPackageManager()) != null) {
-                    activity.startActivity(intent);
+                if (intent.resolveActivity(mActivity.getPackageManager()) != null) {
+                    mActivity.startActivity(intent);
                 } else {
-                    Toast.makeText(activity, R.string.no_app, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, R.string.no_app, Toast.LENGTH_SHORT).show();
                 }
                 return true;
             });
@@ -98,7 +114,7 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
                 public boolean onPreferenceClick(Preference preference) {
                     clickedTimes++;
                     if (clickedTimes > 6) {
-                        Toast.makeText(activity, R.string.no_developer_easter_egg, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mActivity, R.string.no_developer_easter_egg, Toast.LENGTH_SHORT).show();
                         clickedTimes = 0;
                     }
                     return true;

@@ -81,7 +81,7 @@ public class UserMultiselectionActivity extends BaseActivity implements Activity
                 addOnOffsetChangedListener(binding.appbarLayoutUsersMultiselectionActivity);
             }
 
-            if (isImmersiveInterface()) {
+            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     window.setDecorFitsSystemWindows(false);
                 } else {

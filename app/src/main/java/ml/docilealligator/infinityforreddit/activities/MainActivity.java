@@ -2,6 +2,9 @@ package ml.docilealligator.infinityforreddit.activities;
 
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL;
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 
 import android.Manifest;
 import android.content.Context;
@@ -54,6 +57,7 @@ import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
@@ -125,6 +129,7 @@ import ml.docilealligator.infinityforreddit.user.FetchUserData;
 import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
@@ -254,7 +259,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 addOnOffsetChangedListener(binding.includedAppBar.appbarLayoutMainActivity);
             }
 
-            if (isImmersiveInterface()) {
+            if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
                 binding.drawerLayout.setStatusBarBackgroundColor(Color.TRANSPARENT);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     binding.drawerLayout.setFitsSystemWindows(false);
@@ -268,7 +273,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     @NonNull
                     @Override
                     public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                        Insets allInsets = Utils.getInsets(insets, false);
+                        Insets allInsets = Utils.getInsets(insets, false, isForcedImmersiveInterface());
 
                         binding.navigationViewMainActivity.setPadding(allInsets.left, 0, 0, 0);
 
@@ -352,6 +357,17 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     binding.navDrawerRecyclerViewMainActivity.setPadding(0, 0, 0, navBarHeight);
                 }*/
             } else {
+                /*ViewGroupCompat.installCompatInsetsDispatch(binding.getRoot());
+                ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+                            @NonNull
+                            @Override
+                            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                                Insets inset = Utils.getInsets(insets, false);
+
+                                setMargins(binding.drawerLayout, inset.left, inset.top, inset.right, inset.bottom);
+                                return insets;
+                            }
+                });*/
                 binding.drawerLayout.setStatusBarBackgroundColor(mCustomThemeWrapper.getColorPrimaryDark());
             }
         }
@@ -420,6 +436,12 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     }
                 }
             }
+        });
+
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.LOCK_TOOLBAR, false).observe(this, lock -> {
+            AppBarLayout.LayoutParams p = (AppBarLayout.LayoutParams) binding.includedAppBar.collapsingToolbarLayoutMainActivity.getLayoutParams();
+            p.setScrollFlags(lock ? SCROLL_FLAG_NO_SCROLL : SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
+            binding.includedAppBar.collapsingToolbarLayoutMainActivity.setLayoutParams(p);
         });
 
         initializeNotificationAndBindView();
