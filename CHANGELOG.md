@@ -2,6 +2,13 @@
 
 ---
 
+8.1.0.1 / 2026-1-23
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added Remember Comment Scroll Position in Settings | Interface | Comment, disabled by default
+* Upgraded to 8.1.0
+
 8.0.8.1 / 2025-11-16
 =============
 Note v8a is the 64-bit build, and should be considered the default choose.
