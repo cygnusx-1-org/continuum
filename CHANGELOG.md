@@ -2,6 +2,12 @@
 
 ---
 
+8.1.0.2 / 2026-1-23
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed crash on start with 8.1.0.1 
+
 8.1.0.1 / 2026-1-23
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
