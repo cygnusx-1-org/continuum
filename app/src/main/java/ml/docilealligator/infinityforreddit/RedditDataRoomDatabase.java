@@ -483,14 +483,6 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     private static final Migration MIGRATION_30_31 = new Migration(30, 31) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("ALTER TABLE post_filter ADD COLUMN contain_users TEXT");
-            database.execSQL("ALTER TABLE post_filter ADD COLUMN contain_subreddits TEXT");
-        }
-    };
-
-    private static final Migration MIGRATION_31_32 = new Migration(31, 32) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE anonymous_multireddit_subreddits ADD COLUMN icon_url TEXT");
         }
     };
