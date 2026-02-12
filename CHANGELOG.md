@@ -2,6 +2,13 @@
 
 ---
 
+8.1.1.1 / 2026-2-12
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Gifs no longer showing up in comments #217
+* Upgraded to 8.1.1
+
 8.1.0.2 / 2026-1-23
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
