@@ -537,7 +537,10 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
         });
 
         if (enableSwipeAction) {
-            touchHelper.attachToRecyclerView((mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView), 5);
+            touchHelper.attachToRecyclerView(
+                    (mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView),
+                    Float.parseFloat(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_ACTION_SENSITIVITY_IN_COMMENTS, "5"))
+            );
         }
 
         binding.swipeRefreshLayoutViewPostDetailFragment.setOnRefreshListener(() -> refresh(true, true));
@@ -753,6 +756,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
             } else {
                 saveItem.setVisible(false);
                 hideItem.setVisible(false);
+                mMenu.findItem(R.id.action_crosspost_view_post_detail_fragment).setVisible(false);
             }
 
             if (mPost.getAuthor().equals(mActivity.accountName)) {

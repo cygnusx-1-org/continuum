@@ -387,6 +387,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 }
             }
         });
+        SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.NAVIGATION_DRAWER_SWIPE_AREA, "0").observe(this, swipeArea -> {
+            binding.drawerLayout.setSwipeEdgeSize(Integer.parseInt(swipeArea));
+        });
+
         toggle.syncState();
 
         mViewPager2 = binding.includedAppBar.viewPagerMainActivity;
@@ -565,6 +569,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 Intent intent = new Intent(this, ViewUserDetailActivity.class);
                 intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, accountName);
                 startActivity(intent);
+                break;
+            }
+            case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBMIT_POSTS: {
+                PostTypeBottomSheetFragment postTypeBottomSheetFragment = new PostTypeBottomSheetFragment();
+                postTypeBottomSheetFragment.show(getSupportFragmentManager(), postTypeBottomSheetFragment.getTag());
                 break;
             }
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH: {

@@ -55,7 +55,6 @@ import ml.docilealligator.infinityforreddit.asynctasks.DeleteMultiredditInDataba
 import ml.docilealligator.infinityforreddit.asynctasks.InsertMultireddit;
 import ml.docilealligator.infinityforreddit.asynctasks.InsertSubscribedThings;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
-import ml.docilealligator.infinityforreddit.customviews.slidr.Slidr;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySubscribedThingListingBinding;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.RefreshMultiRedditsEvent;
@@ -134,9 +133,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
 
         applyCustomTheme();
 
-        if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_RIGHT_TO_GO_BACK, true)) {
-            mSliderPanel = Slidr.attach(this);
-        }
+        attachSliderPanelIfApplicable();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Window window = getWindow();
@@ -370,8 +367,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                     }
 
                     return true;
-                }
-                else {
+                } else {
                     intent.putExtra(SearchActivity.EXTRA_SEARCH_SUBREDDITS_AND_USERS, true);
                 }
 

@@ -60,6 +60,7 @@ import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.customviews.slidr.Slidr;
 import ml.docilealligator.infinityforreddit.customviews.slidr.widget.SliderPanel;
 import ml.docilealligator.infinityforreddit.events.FinishViewMediaActivityEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
@@ -501,7 +502,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
             Object touchSlopBox = touchSlopField.get(recyclerView);
             if (touchSlopBox != null) {
                 int touchSlop = (int) touchSlopBox;
-                touchSlopField.set(recyclerView, touchSlop * 4);
+                touchSlopField.set(recyclerView, touchSlop * Integer.parseInt(getDefaultSharedPreferences().getString(SharedPreferencesUtils.TAB_SWITCHING_SENSITIVITY, "4")));
             }
         } catch (NoSuchFieldException | IllegalAccessException ignore) {}
     }
@@ -538,6 +539,14 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_GO_TO_TOP:
                 fab.setContentDescription(getString(R.string.content_description_go_to_top));
                 break;
+        }
+    }
+
+    protected void attachSliderPanelIfApplicable() {
+        if (getDefaultSharedPreferences().getBoolean(SharedPreferencesUtils.SWIPE_RIGHT_TO_GO_BACK, true)) {
+            mSliderPanel = Slidr.attach(this,
+                    Float.parseFloat(getDefaultSharedPreferences().getString(SharedPreferencesUtils.SWIPE_RIGHT_TO_GO_BACK_SENSITIVITY, "0.1"))
+            );
         }
     }
 
