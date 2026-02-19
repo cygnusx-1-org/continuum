@@ -373,7 +373,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         });
 
         binding.recyclerViewHistoryPostFragment.setAdapter(mAdapter.withLoadStateFooter(new Paging3LoadingStateAdapter(mActivity, mCustomThemeWrapper, R.string.load_more_posts_error,
-                view -> mAdapter.retry())));
+                view -> mAdapter.retry(), null)));
     }
 
     @Override

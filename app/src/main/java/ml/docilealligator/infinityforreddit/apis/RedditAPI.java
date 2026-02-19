@@ -275,18 +275,19 @@ public interface RedditAPI {
     ListenableFuture<Response<String>> getBestPostsListenableFuture(@Path("sortType") SortType.Type sortType, @Query("t") SortType.Time sortTime,
                                                                     @Query("after") String lastItem, @HeaderMap Map<String, String> headers);
 
-    @GET("r/{subredditName}/{sortType}.json?raw_json=1&limit=100&always_show_media=1")
+    @GET("r/{subredditName}/{sortType}.json?raw_json=1&always_show_media=1")
     ListenableFuture<Response<String>> getSubredditBestPostsOauthListenableFuture(@Path("subredditName") String subredditName, @Path("sortType") SortType.Type sortType,
-                                            @Query("t") SortType.Time sortTime, @Query("after") String lastItem,
+                                            @Query("t") SortType.Time sortTime, @Query("after") String lastItem, @Query("limit") int limit,
                                             @HeaderMap Map<String, String> headers);
 
-    @GET("r/{subredditName}/{sortType}.json?raw_json=1&limit=100&always_show_media=1")
+    @GET("r/{subredditName}/{sortType}.json?raw_json=1&always_show_media=1")
     ListenableFuture<Response<String>> getSubredditBestPostsListenableFuture(@Path("subredditName") String subredditName, @Path("sortType") SortType.Type sortType,
-                                                                             @Query("t") SortType.Time sortTime, @Query("after") String lastItem);
+                                                                             @Query("t") SortType.Time sortTime, @Query("after") String lastItem, @Query("limit") int limit);
 
-    @GET("r/{subredditName}/{sortType}.json?raw_json=1&limit=100&always_show_media=1")
+    @GET("r/{subredditName}/{sortType}.json?raw_json=1&always_show_media=1")
     ListenableFuture<Response<String>> getAnonymousFrontPageOrMultiredditPostsListenableFuture(@Path("subredditName") String subredditName, @Path("sortType") SortType.Type sortType,
-                                                                             @Query("t") SortType.Time sortTime, @Query("after") String lastItem, @Header("User-Agent") String userAgent);
+                                                                             @Query("t") SortType.Time sortTime, @Query("after") String lastItem, @Query("limit") int limit,
+                                                                                               @Header("User-Agent") String userAgent);
 
     @GET("user/{username}/{where}.json?type=links&raw_json=1&limit=100")
     ListenableFuture<Response<String>> getUserPostsOauthListenableFuture(@Header(APIUtils.AUTHORIZATION_KEY) String authorization,
@@ -350,18 +351,21 @@ public interface RedditAPI {
     Call<String> getBestPosts(@Path("sortType") SortType.Type sortType, @Query("t") SortType.Time sortTime,
                               @Query("after") String lastItem, @HeaderMap Map<String, String> headers);
 
-    @GET("r/{subredditName}/{sortType}.json?raw_json=1&limit=100&always_show_media=1")
+    @GET("r/{subredditName}/{sortType}.json?raw_json=1&always_show_media=1")
     Call<String> getSubredditBestPostsOauth(@Path("subredditName") String subredditName, @Path("sortType") SortType.Type sortType,
-                                                                                  @Query("t") SortType.Time sortTime, @Query("after") String lastItem,
-                                                                                  @HeaderMap Map<String, String> headers);
+                                            @Query("t") SortType.Time sortTime, @Query("after") String lastItem,
+                                            @Query("limit") int limit,
+                                            @HeaderMap Map<String, String> headers);
 
-    @GET("r/{subredditName}/{sortType}.json?raw_json=1&limit=100&always_show_media=1")
+    @GET("r/{subredditName}/{sortType}.json?raw_json=1&always_show_media=1")
     Call<String> getSubredditBestPosts(@Path("subredditName") String subredditName, @Path("sortType") SortType.Type sortType,
-                                       @Query("t") SortType.Time sortTime, @Query("after") String lastItem);
+                                       @Query("t") SortType.Time sortTime, @Query("after") String lastItem,
+                                       @Query("limit") int limit);
 
-    @GET("r/{subredditName}/{sortType}.json?raw_json=1&limit=100&always_show_media=1")
+    @GET("r/{subredditName}/{sortType}.json?raw_json=1&always_show_media=1")
     Call<String> getAnonymousFrontPageOrMultiredditPosts(@Path("subredditName") String subredditName, @Path("sortType") SortType.Type sortType,
-                                       @Query("t") SortType.Time sortTime, @Query("after") String lastItem, @Header("User-Agent") String userAgent);
+                                                         @Query("t") SortType.Time sortTime, @Query("after") String lastItem, @Query("limit") int limit,
+                                                         @Header("User-Agent") String userAgent);
 
     @GET("user/{username}/{where}.json?&type=links&raw_json=1&limit=100")
     Call<String> getUserPostsOauth(@Path("username") String username, @Path("where") String where,

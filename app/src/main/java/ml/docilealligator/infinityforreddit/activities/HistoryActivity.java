@@ -104,7 +104,7 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
                                 allInsets.right,
                                 BaseActivity.IGNORE_MARGIN);
 
-                        binding.viewPagerHistoryActivity.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
+                        binding.viewPagerHistoryActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
 
                         return insets;
                     }

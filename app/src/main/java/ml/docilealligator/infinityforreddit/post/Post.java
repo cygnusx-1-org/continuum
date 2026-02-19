@@ -68,6 +68,7 @@ public class Post implements Parcelable {
     private final boolean archived;
     private boolean locked;
     private boolean saved;
+    private boolean sendReplies;
     private final boolean isCrosspost;
     private boolean isRead;
     private String crosspostParentId;
@@ -90,7 +91,7 @@ public class Post implements Parcelable {
                 String author, String authorFlair, String authorFlairHTML, long postTimeMillis,
                 String title, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
-                boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved,
+                boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
                 boolean isCrosspost, boolean canModPost, boolean approved, long approvedAtUTC, String approvedBy,
                 boolean removed, boolean spam, String distinguished, String suggestedSort) {
         this.id = id;
@@ -117,6 +118,7 @@ public class Post implements Parcelable {
         this.archived = archived;
         this.locked = locked;
         this.saved = saved;
+        this.sendReplies = sendReplies;
         this.isCrosspost = isCrosspost;
         this.canModPost = canModPost;
         this.approved = approved;
@@ -133,7 +135,7 @@ public class Post implements Parcelable {
                 String author, String authorFlair, String authorFlairHTML, long postTimeMillis, String title,
                 String url, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
-                boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved,
+                boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
                 boolean isCrosspost, boolean canModPost, boolean approved, long approvedAtUTC, String approvedBy,
                 boolean removed, boolean spam, String distinguished, String suggestedSort) {
         this.id = id;
@@ -161,6 +163,7 @@ public class Post implements Parcelable {
         this.archived = archived;
         this.locked = locked;
         this.saved = saved;
+        this.sendReplies = sendReplies;
         this.isCrosspost = isCrosspost;
         this.canModPost = canModPost;
         this.approved = approved;
@@ -215,6 +218,7 @@ public class Post implements Parcelable {
         archived = in.readByte() != 0;
         locked = in.readByte() != 0;
         saved = in.readByte() != 0;
+        sendReplies = in.readByte() != 0;
         isCrosspost = in.readByte() != 0;
         canModPost = in.readByte() != 0;
         approved = in.readByte() != 0;
@@ -578,6 +582,7 @@ public class Post implements Parcelable {
         dest.writeByte((byte) (archived ? 1 : 0));
         dest.writeByte((byte) (locked ? 1 : 0));
         dest.writeByte((byte) (saved ? 1 : 0));
+        dest.writeByte((byte) (sendReplies ? 1 : 0));
         dest.writeByte((byte) (isCrosspost ? 1 : 0));
         dest.writeByte((byte) (canModPost ? 1 : 0));
         dest.writeByte((byte) (approved ? 1 : 0));
@@ -621,6 +626,14 @@ public class Post implements Parcelable {
 
     public void setSaved(boolean saved) {
         this.saved = saved;
+    }
+
+    public boolean isSendReplies() {
+        return sendReplies;
+    }
+
+    public void setSendReplies(boolean sendReplies) {
+        this.sendReplies = sendReplies;
     }
 
     public boolean isCrosspost() {

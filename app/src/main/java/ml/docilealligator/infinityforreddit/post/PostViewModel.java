@@ -62,6 +62,9 @@ public class PostViewModel extends ViewModel {
 
     public final SingleLiveEvent<PostModerationEvent> moderationEventLiveData = new SingleLiveEvent<>();
 
+    private int limitDivisor = 1;
+    private PostPagingSource currentPagingSource;
+
     // PostPagingSource.TYPE_FRONT_PAGE
     public PostViewModel(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                          SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
@@ -316,7 +319,20 @@ public class PostViewModel extends ViewModel {
                         sortType, postFilter, userWhere, readPostsList);
                 break;
         }
+        paging3PagingSource.setLimitDivisor(limitDivisor);
+        currentPagingSource = paging3PagingSource;
         return paging3PagingSource;
+    }
+
+    public void halveLimitAndRetry() {
+        limitDivisor *= 2;
+        if (currentPagingSource != null) {
+            currentPagingSource.invalidate();
+        }
+    }
+
+    public int getLimitDivisor() {
+        return limitDivisor;
     }
 
     private void changeSortTypeAndPostFilter(SortType sortType, PostFilter postFilter) {
@@ -654,6 +670,28 @@ public class PostViewModel extends ViewModel {
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable throwable) {
                 moderationEventLiveData.postValue(post.isModerator() ? new PostModerationEvent.UndistinguishAsModFailed(post, position) : new PostModerationEvent.DistinguishAsModFailed(post, position));
+            }
+        });
+    }
+
+    public void toggleNotification(@NonNull Post post, int position) {
+        Map<String, String> params = new HashMap<>();
+        params.put(APIUtils.ID_KEY, post.getFullName());
+        params.put(APIUtils.STATE_KEY, String.valueOf(!post.isSendReplies()));
+        retrofit.create(RedditAPI.class).toggleRepliesNotification(APIUtils.getOAuthHeader(accessToken), params).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful()) {
+                    post.setSendReplies(!post.isSendReplies());
+                    moderationEventLiveData.postValue(post.isSendReplies() ? new PostModerationEvent.SetReceiveNotification(post, position): new PostModerationEvent.UnsetReceiveNotification(post, position));
+                } else {
+                    moderationEventLiveData.postValue(post.isSendReplies() ? new PostModerationEvent.UnsetReceiveNotificationFailed(post, position) : new PostModerationEvent.SetReceiveNotificationFailed(post, position));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable throwable) {
+                moderationEventLiveData.postValue(post.isSendReplies() ? new PostModerationEvent.UnsetReceiveNotificationFailed(post, position) : new PostModerationEvent.SetReceiveNotificationFailed(post, position));
             }
         });
     }

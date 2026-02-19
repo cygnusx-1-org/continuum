@@ -124,7 +124,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
                                 allInsets.right,
                                 BaseActivity.IGNORE_MARGIN);
 
-                        binding.accountSavedThingViewPager2.setPadding(allInsets.left, 0, allInsets.right, allInsets.bottom);
+                        binding.accountSavedThingViewPager2.setPadding(allInsets.left, 0, allInsets.right, 0);
 
                         return insets;
                     }

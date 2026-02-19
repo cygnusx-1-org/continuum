@@ -583,10 +583,12 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                 switch (postType) {
                     case PostPagingSource.TYPE_SUBREDDIT:
                         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                            call = api.getSubredditBestPosts(subredditName, sortType, sortTime, afterKey);
+                            call = api.getSubredditBestPosts(subredditName, sortType, sortTime, afterKey,
+                                    APIUtils.subredditAPICallLimit(subredditName));
                         } else {
                             call = api.getSubredditBestPostsOauth(subredditName, sortType,
-                                    sortTime, afterKey, APIUtils.getOAuthHeader(accessToken));
+                                    sortTime, afterKey, APIUtils.subredditAPICallLimit(subredditName),
+                                    APIUtils.getOAuthHeader(accessToken));
                         }
                         break;
                     case PostPagingSource.TYPE_USER:
@@ -627,7 +629,9 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                         break;
                     case PostPagingSource.TYPE_ANONYMOUS_FRONT_PAGE:
                     case PostPagingSource.TYPE_ANONYMOUS_MULTIREDDIT:
-                        call = api.getAnonymousFrontPageOrMultiredditPosts(concatenatedSubredditNames, sortType, sortTime, afterKey, APIUtils.ANONYMOUS_USER_AGENT);
+                        call = api.getAnonymousFrontPageOrMultiredditPosts(concatenatedSubredditNames, sortType,
+                                sortTime, afterKey, APIUtils.subredditAPICallLimit(subredditName),
+                                APIUtils.ANONYMOUS_USER_AGENT);
                         break;
                     default:
                         call = api.getBestPosts(sortType, sortTime, afterKey,

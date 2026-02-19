@@ -136,7 +136,7 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
                                 allInsets.left,
                                 0,
                                 allInsets.right,
-                                allInsets.bottom);
+                                0);
 
                         setMargins(binding.fabInboxActivity,
                                 BaseActivity.IGNORE_MARGIN,
