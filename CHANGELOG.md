@@ -2,6 +2,13 @@
 
 ---
 
+8.1.2.1 / 2026-2-18
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added feature to allow the user to "Halve the post limit" on failure 
+* Upgraded to 8.1.2
+
 8.1.1.1 / 2026-2-12
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
