@@ -11,59 +11,35 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp" />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/error_view_relative_layout_item_paging_3_load_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/error_text_view_item_paging_3_load_state"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="?attr/font_18"
-                android:fontFamily="?attr/font_family" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/retry_button_item_paging_3_load_state"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/retry"
-                android:textSize="?attr/font_default"
-                android:fontFamily="?attr/font_family" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/halve_limit_button_item_paging_3_load_state"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/halve_limit"
-                android:textSize="?attr/font_default"
-                android:fontFamily="?attr/font_family" />
-
-        </LinearLayout>
+        android:layout_marginBottom="16dp">
 
         <TextView
-            android:id="@+id/halve_limit_hint_text_view_item_paging_3_load_state"
-            android:layout_width="match_parent"
+            android:id="@+id/error_text_view_item_paging_3_load_state"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/halve_limit_hint"
-            android:textSize="?attr/font_12"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/retry_button_item_paging_3_load_state"
+            android:textSize="?attr/font_18"
             android:fontFamily="?attr/font_family" />
 
-    </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/retry_button_item_paging_3_load_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="@string/retry"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family" />
+
+    </RelativeLayout>
 
 </FrameLayout>

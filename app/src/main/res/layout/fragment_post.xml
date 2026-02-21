@@ -41,44 +41,6 @@
             android:textSize="?attr/font_default"
             android:fontFamily="?attr/font_family" />
 
-        <LinearLayout
-            android:id="@+id/load_error_buttons_post_fragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/retry_button_post_fragment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/retry"
-                android:textSize="?attr/font_default"
-                android:fontFamily="?attr/font_family" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/halve_limit_button_post_fragment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/halve_limit"
-                android:textSize="?attr/font_default"
-                android:fontFamily="?attr/font_family" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/halve_limit_hint_text_view_post_fragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="@string/halve_limit_hint"
-            android:textSize="?attr/font_12"
-            android:fontFamily="?attr/font_family"
-            android:visibility="gone" />
-
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -58,11 +58,6 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private String multiRedditPath;
     private final LinkedHashSet<Post> postLinkedHashSet;
     private String previousLastItem;
-    private int limitDivisor = 1;
-
-    void setLimitDivisor(int divisor) {
-        limitDivisor = divisor > 0 ? divisor : 1;
-    }
 
     PostPagingSource(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                      SharedPreferences sharedPreferences,
@@ -259,13 +254,12 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     private ListenableFuture<LoadResult<String, Post>> loadSubredditPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
         ListenableFuture<Response<String>> subredditPost;
-        int limit = Math.max(1, APIUtils.subredditAPICallLimit(subredditOrUserName) / limitDivisor);
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             subredditPost = api.getSubredditBestPostsListenableFuture(subredditOrUserName, sortType.getType(),
-                    sortType.getTime(), loadParams.getKey(), limit);
+                    sortType.getTime(), loadParams.getKey(), APIUtils.subredditAPICallLimit(subredditOrUserName));
         } else {
             subredditPost = api.getSubredditBestPostsOauthListenableFuture(subredditOrUserName, sortType.getType(),
-                    sortType.getTime(), loadParams.getKey(), limit,
+                    sortType.getTime(), loadParams.getKey(), APIUtils.subredditAPICallLimit(subredditOrUserName),
                     APIUtils.getOAuthHeader(accessToken));
         }
 
@@ -360,10 +354,9 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private ListenableFuture<LoadResult<String, Post>> loadAnonymousFrontPageOrMultiredditPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
-        int limit = Math.max(1, APIUtils.subredditAPICallLimit(subredditOrUserName) / limitDivisor);
         ListenableFuture<Response<String>> anonymousHomePosts = api.getAnonymousFrontPageOrMultiredditPostsListenableFuture(
                 subredditOrUserName, sortType.getType(), sortType.getTime(), loadParams.getKey(),
-                limit, APIUtils.ANONYMOUS_USER_AGENT);
+                APIUtils.subredditAPICallLimit(subredditOrUserName), APIUtils.ANONYMOUS_USER_AGENT);
 
         ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(anonymousHomePosts, this::transformData, executor);
 

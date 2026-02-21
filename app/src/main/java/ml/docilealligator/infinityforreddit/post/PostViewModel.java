@@ -62,9 +62,6 @@ public class PostViewModel extends ViewModel {
 
     public final SingleLiveEvent<PostModerationEvent> moderationEventLiveData = new SingleLiveEvent<>();
 
-    private int limitDivisor = 1;
-    private PostPagingSource currentPagingSource;
-
     // PostPagingSource.TYPE_FRONT_PAGE
     public PostViewModel(Executor executor, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                          SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
@@ -319,20 +316,7 @@ public class PostViewModel extends ViewModel {
                         sortType, postFilter, userWhere, readPostsList);
                 break;
         }
-        paging3PagingSource.setLimitDivisor(limitDivisor);
-        currentPagingSource = paging3PagingSource;
         return paging3PagingSource;
-    }
-
-    public void halveLimitAndRetry() {
-        limitDivisor *= 2;
-        if (currentPagingSource != null) {
-            currentPagingSource.invalidate();
-        }
-    }
-
-    public int getLimitDivisor() {
-        return limitDivisor;
     }
 
     private void changeSortTypeAndPostFilter(SortType sortType, PostFilter postFilter) {

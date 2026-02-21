@@ -951,9 +951,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             LoadState appendLoadState = combinedLoadStates.getAppend();
 
             binding.swipeRefreshLayoutPostFragment.setRefreshing(refreshLoadState instanceof LoadState.Loading);
-            if (refreshLoadState instanceof LoadState.Loading) {
-                binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
-            } else if (refreshLoadState instanceof LoadState.NotLoading) {
+            if (refreshLoadState instanceof LoadState.NotLoading) {
                 if (refreshLoadState.getEndOfPaginationReached() && mAdapter.getItemCount() < 1) {
                     noPostFound();
                 } else {
@@ -961,12 +959,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     hasPost = true;
                 }
             } else if (refreshLoadState instanceof LoadState.Error) {
-                binding.fetchPostInfoLinearLayoutPostFragment.setOnClickListener(null);
-                binding.retryButtonPostFragment.setOnClickListener(view -> refresh());
-                binding.halveLimitButtonPostFragment.setOnClickListener(view -> mPostViewModel.halveLimitAndRetry());
+                binding.fetchPostInfoLinearLayoutPostFragment.setOnClickListener(view -> refresh());
                 showErrorView(R.string.load_posts_error);
-                binding.loadErrorButtonsPostFragment.setVisibility(View.VISIBLE);
-                binding.halveLimitHintTextViewPostFragment.setVisibility(View.VISIBLE);
             }
             if (!(refreshLoadState instanceof LoadState.Loading) && appendLoadState instanceof LoadState.NotLoading) {
                 if (appendLoadState.getEndOfPaginationReached() && mAdapter.getItemCount() < 1) {
@@ -977,8 +971,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         });
 
         binding.recyclerViewPostFragment.setAdapter(mAdapter.withLoadStateFooter(new Paging3LoadingStateAdapter(mActivity, mCustomThemeWrapper, R.string.load_more_posts_error,
-                view -> mAdapter.retry(),
-                view -> mPostViewModel.halveLimitAndRetry())));
+                view -> mAdapter.retry())));
     }
 
     @Override
@@ -1149,8 +1142,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             binding.swipeRefreshLayoutPostFragment.setRefreshing(false);
             binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.VISIBLE);
             binding.fetchPostInfoTextViewPostFragment.setText(stringResId);
-            binding.loadErrorButtonsPostFragment.setVisibility(View.GONE);
-            binding.halveLimitHintTextViewPostFragment.setVisibility(View.GONE);
+            mGlide.load(R.drawable.error_image).into(binding.fetchPostInfoImageViewPostFragment);
         }
     }
 
@@ -1247,16 +1239,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         binding.swipeRefreshLayoutPostFragment.setProgressBackgroundColorSchemeColor(mCustomThemeWrapper.getCircularProgressBarBackground());
         binding.swipeRefreshLayoutPostFragment.setColorSchemeColors(mCustomThemeWrapper.getColorAccent());
         binding.fetchPostInfoTextViewPostFragment.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
-        binding.retryButtonPostFragment.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
-        binding.retryButtonPostFragment.setTextColor(mCustomThemeWrapper.getButtonTextColor());
-        binding.halveLimitButtonPostFragment.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
-        binding.halveLimitButtonPostFragment.setTextColor(mCustomThemeWrapper.getButtonTextColor());
-        binding.halveLimitHintTextViewPostFragment.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
         if (mActivity.typeface != null) {
             binding.fetchPostInfoTextViewPostFragment.setTypeface(mActivity.typeface);
-            binding.retryButtonPostFragment.setTypeface(mActivity.typeface);
-            binding.halveLimitButtonPostFragment.setTypeface(mActivity.typeface);
-            binding.halveLimitHintTextViewPostFragment.setTypeface(mActivity.typeface);
         }
     }
 

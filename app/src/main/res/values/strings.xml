@@ -116,7 +116,7 @@
     <string name="no_system_webview_error">Error opening System\'s WebView</string>
 
     <string name="error_loading_image_tap_to_retry">Error loading the image. Tap to retry.</string>
-    <string name="load_posts_error">Error loading posts.</string>
+    <string name="load_posts_error">Error loading posts.\nTap to retry.</string>
     <string name="load_more_posts_error">Error loading posts.</string>
     <string name="load_post_error">Error loading this post.\nTap to retry.</string>
     <string name="search_subreddits_error">Error searching subreddits.\nTap to retry.</string>
@@ -130,8 +130,6 @@
 
     <string name="load_comments_failed">Error loading comments.\nTap to retry.</string>
     <string name="retry">Retry</string>
-    <string name="halve_limit">Halve the post limit</string>
-    <string name="halve_limit_hint">If you need to use the Halve the post limit button, please file an issue.</string>
     <string name="no_comments_yet">No comments yet. Write a comment?</string>
     <string name="vote_failed">Vote failed</string>
     <string name="refresh_post_failed">Error refreshing the post</string>

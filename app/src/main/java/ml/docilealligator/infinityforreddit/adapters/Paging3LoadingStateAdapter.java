@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,15 +23,12 @@ public class Paging3LoadingStateAdapter extends LoadStateAdapter<Paging3LoadingS
     private final CustomThemeWrapper mCustomThemeWrapper;
     private final int mErrorStringId;
     private final View.OnClickListener mRetryCallback;
-    private final View.OnClickListener mHalveLimitCallback;
 
-    public Paging3LoadingStateAdapter(BaseActivity activity, CustomThemeWrapper customThemeWrapper, int errorStringId,
-                                      View.OnClickListener retryCallback, View.OnClickListener halveLimitCallback) {
+    public Paging3LoadingStateAdapter(BaseActivity activity, CustomThemeWrapper customThemeWrapper, int errorStringId, View.OnClickListener retryCallback) {
         this.activity = activity;
         this.mCustomThemeWrapper = customThemeWrapper;
         this.mErrorStringId = errorStringId;
         this.mRetryCallback = retryCallback;
-        this.mHalveLimitCallback = halveLimitCallback;
     }
 
     @Override
@@ -42,50 +39,33 @@ public class Paging3LoadingStateAdapter extends LoadStateAdapter<Paging3LoadingS
     @NonNull
     @Override
     public LoadStateViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, @NonNull LoadState loadState) {
-        return new LoadStateViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_paging_3_load_state, viewGroup, false),
-                mRetryCallback, mHalveLimitCallback);
+        return new LoadStateViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_paging_3_load_state, viewGroup, false), mRetryCallback);
     }
 
     class LoadStateViewHolder extends RecyclerView.ViewHolder {
         private final LoadingIndicator mLoadingIndicator;
-        private final LinearLayout mErrorView;
+        private final RelativeLayout mErrorView;
         private final TextView mErrorMsg;
         private final MaterialButton mRetry;
-        private final MaterialButton mHalveLimit;
-        private final TextView mHalveLimitHint;
 
-        LoadStateViewHolder(@NonNull View itemView, @NonNull View.OnClickListener retryCallback,
-                            View.OnClickListener halveLimitCallback) {
+        LoadStateViewHolder(@NonNull View itemView, @NonNull View.OnClickListener retryCallback) {
             super(itemView);
 
             mLoadingIndicator = itemView.findViewById(R.id.progress_bar_item_paging_3_load_state);
             mErrorView = itemView.findViewById(R.id.error_view_relative_layout_item_paging_3_load_state);
             mErrorMsg = itemView.findViewById(R.id.error_text_view_item_paging_3_load_state);
             mRetry = itemView.findViewById(R.id.retry_button_item_paging_3_load_state);
-            mHalveLimit = itemView.findViewById(R.id.halve_limit_button_item_paging_3_load_state);
-            mHalveLimitHint = itemView.findViewById(R.id.halve_limit_hint_text_view_item_paging_3_load_state);
 
             mErrorMsg.setText(mErrorStringId);
             mErrorMsg.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
             mRetry.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
             mRetry.setTextColor(mCustomThemeWrapper.getButtonTextColor());
             mRetry.setOnClickListener(retryCallback);
-
-            if (halveLimitCallback != null) {
-                mHalveLimit.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
-                mHalveLimit.setTextColor(mCustomThemeWrapper.getButtonTextColor());
-                mHalveLimit.setOnClickListener(halveLimitCallback);
-                mHalveLimitHint.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
-            } else {
-                mHalveLimit.setVisibility(View.GONE);
-                mHalveLimitHint.setVisibility(View.GONE);
-            }
+            mErrorView.setOnClickListener(retryCallback);
 
             if (activity.typeface != null) {
                 mErrorMsg.setTypeface(activity.typeface);
                 mRetry.setTypeface(activity.typeface);
-                mHalveLimit.setTypeface(activity.typeface);
-                mHalveLimitHint.setTypeface(activity.typeface);
             }
         }
 
