@@ -41,6 +41,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     public static final String USER_WHERE_HIDDEN = "hidden";
     public static final String USER_WHERE_SAVED = "saved";
 
+    private static final int HTTP_INTERNAL_SERVER_ERROR = 500;
+
     private final Executor executor;
     private final Retrofit retrofit;
     private final String accessToken;
@@ -252,18 +254,40 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 IOException.class, LoadResult.Error::new, executor);
     }
 
-    private ListenableFuture<LoadResult<String, Post>> loadSubredditPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
-        ListenableFuture<Response<String>> subredditPost;
+    private ListenableFuture<Response<String>> fetchSubredditPosts(LoadParams<String> loadParams, RedditAPI api, int limit) {
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            subredditPost = api.getSubredditBestPostsListenableFuture(subredditOrUserName, sortType.getType(),
-                    sortType.getTime(), loadParams.getKey(), APIUtils.subredditAPICallLimit(subredditOrUserName));
+            return api.getSubredditBestPostsListenableFuture(subredditOrUserName, sortType.getType(),
+                    sortType.getTime(), loadParams.getKey(), limit);
         } else {
-            subredditPost = api.getSubredditBestPostsOauthListenableFuture(subredditOrUserName, sortType.getType(),
-                    sortType.getTime(), loadParams.getKey(), APIUtils.subredditAPICallLimit(subredditOrUserName),
+            return api.getSubredditBestPostsOauthListenableFuture(subredditOrUserName, sortType.getType(),
+                    sortType.getTime(), loadParams.getKey(), limit,
                     APIUtils.getOAuthHeader(accessToken));
         }
+    }
 
-        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(subredditPost, this::transformData, executor);
+    private ListenableFuture<LoadResult<String, Post>> loadSubredditPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
+        int[] limit = {APIUtils.subredditAPICallLimit(subredditOrUserName)};
+        ListenableFuture<Response<String>> subredditPost = fetchSubredditPosts(loadParams, api, limit[0]);
+
+        // Retry with halved limit on HTTP 500
+        ListenableFuture<Response<String>> retryOnce = Futures.transformAsync(subredditPost, response -> {
+            if (response.code() == HTTP_INTERNAL_SERVER_ERROR) {
+                limit[0] /= 2;
+                return fetchSubredditPosts(loadParams, api, limit[0]);
+            }
+            return Futures.immediateFuture(response);
+        }, executor);
+
+        // Retry with halved limit again on HTTP 500
+        ListenableFuture<Response<String>> retryTwice = Futures.transformAsync(retryOnce, response -> {
+            if (response.code() == HTTP_INTERNAL_SERVER_ERROR) {
+                limit[0] /= 2;
+                return fetchSubredditPosts(loadParams, api, limit[0]);
+            }
+            return Futures.immediateFuture(response);
+        }, executor);
+
+        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(retryTwice, this::transformData, executor);
 
         ListenableFuture<LoadResult<String, Post>> partialLoadResultFuture =
                 Futures.catching(pageFuture, HttpException.class,
