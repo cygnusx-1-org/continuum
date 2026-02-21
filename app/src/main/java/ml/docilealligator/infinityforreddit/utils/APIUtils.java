@@ -216,7 +216,7 @@ public class APIUtils {
 
     // Concatenated subreddit name works too
     public static int subredditAPICallLimit(String subredditName) {
-        return subredditName.toLowerCase().contains("stablediffusion") ? 55 : 100;
+        return 100;
     }
 
     // RedGifs token management
