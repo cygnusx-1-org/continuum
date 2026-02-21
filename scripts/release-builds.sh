@@ -58,9 +58,7 @@ awk -v sep="${SEPARATOR}" -v new_entry="${CHANGELOG_ENTRY}" '
 # commit
 git add "${BUILD_GRADLE_FILENAME}" "${CHANGELOG_FILENAME}"
 
-COMMIT_MESSAGE="Updated versionCode in ${BUILD_GRADLE_FILENAME}
-
-Updated ${CHANGELOG_FILENAME}"
+COMMIT_MESSAGE="Updated ${CHANGELOG_FILENAME}"
 
 # Make a new commit for a new release
 git commit -m "${COMMIT_MESSAGE}"
