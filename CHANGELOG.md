@@ -2,6 +2,14 @@
 
 ---
 
+8.1.2.2 / 2026-2-21
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added retry logic to 500 errors when loading posts from a subreddit
+* Made subredditAPICallLimit always return 100
+* Reverted halve the limit button
+
 8.1.2.1 / 2026-2-18
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
