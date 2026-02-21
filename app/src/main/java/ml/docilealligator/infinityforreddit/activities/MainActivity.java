@@ -957,7 +957,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                         .setPositiveButton(R.string.ok, null)
                                         .show();
                             } else {
-                                intent = new Intent(MainActivity.this, LoginChromeCustomTabActivity.class);
+                                intent = new Intent(MainActivity.this, LoginActivity.class);
                             }
                         } else if (stringId == R.string.anonymous_account) {
                             AccountManagement.switchToAnonymousMode(mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
@@ -1012,7 +1012,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             @Override
             public void onMenuLongClick(int stringId) {
                 if (stringId == R.string.add_account) {
-                    Intent intent = new Intent(MainActivity.this, LoginChromeCustomTabActivity.class);
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
                     binding.drawerLayout.closeDrawers();
                 }
