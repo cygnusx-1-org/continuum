@@ -37,7 +37,7 @@ public class GiphyGifBlockParser extends AbstractBlockParser {
     }
 
     public static class Factory extends AbstractBlockParserFactory {
-        private final Pattern pattern =  Pattern.compile("!\\[gif]\\(giphy\\|\\w+\\|downsized\\)");
+        private final Pattern pattern =  Pattern.compile("!\\[gif]\\(giphy\\|\\w+(\\|downsized)?\\)");
         @Nullable
         private GiphyGif giphyGif;
 

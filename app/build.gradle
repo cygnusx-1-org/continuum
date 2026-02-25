@@ -375,6 +375,7 @@ dependencies {
 
     testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
     testImplementation "io.qameta.allure:allure-junit5"
+    testImplementation "org.json:json:20231013"
     agent "org.aspectj:aspectjweaver:$aspectJVersion"
 
     androidTestImplementation "androidx.test.ext:junit:1.0.0"
