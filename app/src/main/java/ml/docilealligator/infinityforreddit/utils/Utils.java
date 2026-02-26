@@ -93,10 +93,26 @@ public final class Utils {
         return regexed;
     }
 
+    private static final Pattern PROCESSING_IMG_PATTERN = Pattern.compile("\\*?Processing img (\\w+)\\.{3}\\*?");
+
     public static String parseRedditImagesBlock(String markdown, @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         if (mediaMetadataMap == null) {
             return markdown;
         }
+
+        // Replace "Processing img <id>..." placeholders with the actual URL from media_metadata.
+        // The bare URL will then be wrapped by the existing preview.redd.it / i.redd.it logic below.
+        Matcher processingMatcher = PROCESSING_IMG_PATTERN.matcher(markdown);
+        StringBuffer sb = new StringBuffer();
+        while (processingMatcher.find()) {
+            String imgId = processingMatcher.group(1);
+            MediaMetadata mediaMetadata = mediaMetadataMap.get(imgId);
+            if (mediaMetadata != null && mediaMetadata.original != null) {
+                processingMatcher.appendReplacement(sb, Matcher.quoteReplacement(mediaMetadata.original.url));
+            }
+        }
+        processingMatcher.appendTail(sb);
+        markdown = sb.toString();
 
         StringBuilder markdownStringBuilder = new StringBuilder(markdown);
         Pattern previewReddItAndIReddItImagePattern = REGEX_PATTERNS[3];
