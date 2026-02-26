@@ -151,6 +151,13 @@ public class ParseComment {
         executor.execute(() -> {
             try {
                 JSONObject sentCommentData = new JSONObject(response);
+                if (!sentCommentData.has(JSONUtils.ID_KEY) && sentCommentData.has(JSONUtils.JSON_KEY)) {
+                    sentCommentData = sentCommentData.getJSONObject(JSONUtils.JSON_KEY)
+                            .getJSONObject(JSONUtils.DATA_KEY)
+                            .getJSONArray(JSONUtils.THINGS_KEY)
+                            .getJSONObject(0)
+                            .getJSONObject(JSONUtils.DATA_KEY);
+                }
                 Comment comment = parseSingleComment(sentCommentData, depth);
 
                 handler.post(() -> parseSentCommentListener.onParseSentCommentSuccess(comment));
