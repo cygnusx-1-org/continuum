@@ -65,6 +65,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.FABMoreOptionsB
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
@@ -247,7 +248,16 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
         postType = getArguments().getInt(EXTRA_POST_TYPE);
 
-        int defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"));
+        int defaultPostLayout;
+        boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
+        boolean isTablet = getResources().getBoolean(R.bool.isTablet);
+        if (foldEnabled && isTablet) {
+            defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(
+                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_UNFOLDED_KEY, "0"));
+        } else {
+            defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(
+                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"));
+        }
         savePostFeedScrolledPosition = mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION, false);
         Locale locale = resources.getConfiguration().locale;
 
@@ -1342,6 +1352,44 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
                     }
                     break;
+            }
+        }
+    }
+
+    @Subscribe
+    public void onChangeDefaultPostLayoutUnfoldedEvent(ChangeDefaultPostLayoutUnfoldedEvent event) {
+        boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
+        boolean isTablet = getResources().getBoolean(R.bool.isTablet);
+        if (foldEnabled && isTablet) {
+            Bundle bundle = getArguments();
+            if (bundle != null) {
+                switch (postType) {
+                    case PostPagingSource.TYPE_SUBREDDIT:
+                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + bundle.getString(EXTRA_NAME))) {
+                            changePostLayout(event.defaultPostLayoutUnfolded, true);
+                        }
+                        break;
+                    case PostPagingSource.TYPE_USER:
+                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + bundle.getString(EXTRA_USER_NAME))) {
+                            changePostLayout(event.defaultPostLayoutUnfolded, true);
+                        }
+                        break;
+                    case PostPagingSource.TYPE_MULTI_REDDIT:
+                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + bundle.getString(EXTRA_NAME))) {
+                            changePostLayout(event.defaultPostLayoutUnfolded, true);
+                        }
+                        break;
+                    case PostPagingSource.TYPE_SEARCH:
+                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST)) {
+                            changePostLayout(event.defaultPostLayoutUnfolded, true);
+                        }
+                        break;
+                    case PostPagingSource.TYPE_FRONT_PAGE:
+                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST)) {
+                            changePostLayout(event.defaultPostLayoutUnfolded, true);
+                        }
+                        break;
+                }
             }
         }
     }

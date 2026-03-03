@@ -11,6 +11,14 @@
         app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="0"
+        android:entries="@array/settings_default_post_layout"
+        app:entryValues="@array/settings_default_post_layout_values"
+        app:key="default_post_layout_unfolded"
+        app:title="@string/settings_default_post_layout_unfolded"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="-1"
         android:entries="@array/settings_default_link_post_layout"
         app:entryValues="@array/settings_default_link_post_layout_values"

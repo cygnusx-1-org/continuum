@@ -2,7 +2,10 @@ package ml.docilealligator.infinityforreddit.settings;
 
 import android.os.Bundle;
 
+import android.content.SharedPreferences;
+
 import androidx.preference.ListPreference;
+import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -12,6 +15,7 @@ import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPre
 import ml.docilealligator.infinityforreddit.events.ChangeCompactLayoutToolbarHiddenByDefaultEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultLinkPostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeFixedHeightPreviewInCardEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHidePostFlairEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHidePostTypeEvent;
@@ -32,6 +36,7 @@ public class PostPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         setPreferencesFromResource(R.xml.post_preferences, rootKey);
 
         ListPreference defaultPostLayoutList = findPreference(SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY);
+        ListPreference defaultPostLayoutUnfoldedList = findPreference(SharedPreferencesUtils.DEFAULT_POST_LAYOUT_UNFOLDED_KEY);
         ListPreference defaultLinkPostLayoutList = findPreference(SharedPreferencesUtils.DEFAULT_LINK_POST_LAYOUT_KEY);
         SwitchPreference showDividerInCompactLayoutSwitch = findPreference(SharedPreferencesUtils.SHOW_DIVIDER_IN_COMPACT_LAYOUT);
         SwitchPreference showThumbnailOnTheLeftInCompactLayoutSwitch = findPreference(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT);
@@ -49,6 +54,16 @@ public class PostPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         if (defaultPostLayoutList != null) {
             defaultPostLayoutList.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeDefaultPostLayoutEvent(Integer.parseInt((String) newValue)));
+                return true;
+            });
+        }
+
+        if (defaultPostLayoutUnfoldedList != null) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            boolean foldEnabled = sharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
+            defaultPostLayoutUnfoldedList.setVisible(foldEnabled);
+            defaultPostLayoutUnfoldedList.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeDefaultPostLayoutUnfoldedEvent(Integer.parseInt((String) newValue)));
                 return true;
             });
         }

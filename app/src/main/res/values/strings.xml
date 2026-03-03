@@ -431,6 +431,7 @@
     <string name="settings_time_format_title">Time Format</string>
     <string name="settings_category_post_title">Post</string>
     <string name="settings_default_post_layout">Default Post Layout</string>
+    <string name="settings_default_post_layout_unfolded">Default Post Layout for a Foldable Unfolded</string>
     <string name="settings_default_link_post_layout">Default Link Post Layout</string>
     <string name="settings_show_divider_in_compact_layout">Show Divider</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">Show Thumbnail on the Left</string>
@@ -493,6 +494,13 @@
     <string name="settings_privacy_policy_title">Privacy Policy</string>
     <string name="settings_version_title">Continuum</string>
     <string name="settings_version_summary">Version %s</string>
+    <string name="settings_screen_width_dp_title">Screen Width</string>
+    <string name="settings_screen_width_dp_summary">%d dp</string>
+    <string name="settings_smallest_screen_width_dp_title">Smallest Screen Width</string>
+    <string name="settings_smallest_screen_width_dp_summary">%d dp</string>
+    <string name="settings_is_tablet_title">isTablet (sw600dp)</string>
+    <string name="settings_is_tablet_summary_true">true</string>
+    <string name="settings_is_tablet_summary_false">false</string>
     <string name="settings_category_customization_title">Customization</string>
     <string name="settings_customize_light_theme_title">Light Theme</string>
     <string name="settings_customize_dark_theme_title">Dark Theme</string>

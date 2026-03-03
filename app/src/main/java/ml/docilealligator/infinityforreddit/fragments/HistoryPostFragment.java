@@ -52,6 +52,7 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentHistoryPostBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
 import ml.docilealligator.infinityforreddit.post.HistoryPostPagingSource;
@@ -200,7 +201,16 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         }
 
         historyType = getArguments().getInt(EXTRA_HISTORY_TYPE, HISTORY_TYPE_READ_POSTS);
-        int defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"));
+        int defaultPostLayout;
+        boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
+        boolean isTablet = getResources().getBoolean(R.bool.isTablet);
+        if (foldEnabled && isTablet) {
+            defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(
+                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_UNFOLDED_KEY, "0"));
+        } else {
+            defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(
+                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"));
+        }
         Locale locale = getResources().getConfiguration().locale;
 
         if (historyType == HISTORY_TYPE_READ_POSTS) {
@@ -591,6 +601,24 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                         changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
                     }
                     break;
+            }
+        }
+    }
+
+    @Subscribe
+    public void onChangeDefaultPostLayoutUnfoldedEvent(ChangeDefaultPostLayoutUnfoldedEvent event) {
+        boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
+        boolean isTablet = getResources().getBoolean(R.bool.isTablet);
+        if (foldEnabled && isTablet) {
+            Bundle bundle = getArguments();
+            if (bundle != null) {
+                switch (postType) {
+                    case HistoryPostPagingSource.TYPE_READ_POSTS:
+                        if (mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST)) {
+                            changePostLayout(event.defaultPostLayoutUnfolded, true);
+                        }
+                        break;
+                }
             }
         }
     }
