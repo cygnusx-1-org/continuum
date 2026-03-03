@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        android:key="screen_width_dp"
+        app:title="@string/settings_screen_width_dp_title"
+        app:summary="@string/settings_screen_width_dp_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        android:key="smallest_screen_width_dp"
+        app:title="@string/settings_smallest_screen_width_dp_title"
+        app:summary="@string/settings_smallest_screen_width_dp_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        android:key="is_tablet"
+        app:title="@string/settings_is_tablet_title"
+        app:summary="@string/settings_is_tablet_summary_false" />
+
+</PreferenceScreen>

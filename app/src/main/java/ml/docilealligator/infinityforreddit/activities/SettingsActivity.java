@@ -38,6 +38,7 @@ import ml.docilealligator.infinityforreddit.databinding.ActivitySettingsBinding;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.settings.AboutPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.AdvancedPreferenceFragment;
+import ml.docilealligator.infinityforreddit.settings.DebugPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.APIKeysPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.GesturesAndButtonsPreferenceFragment;
@@ -137,6 +138,8 @@ public class SettingsActivity extends BaseActivity implements
                 setTitle(R.string.settings_advanced_master_title);
             } else if (fragment instanceof APIKeysPreferenceFragment) {
                 setTitle(R.string.settings_api_keys_title);
+            } else if (fragment instanceof DebugPreferenceFragment) {
+                setTitle(R.string.settings_debug_title);
             } else if (fragment instanceof MainPreferenceFragment) {
                 setTitle(R.string.settings_activity_label);
             }
@@ -208,6 +211,7 @@ public class SettingsActivity extends BaseActivity implements
             .replace(R.id.frame_layout_settings_activity, fragment)
             .addToBackStack(null)
             .commit();
+        binding.appbarLayoutSettingsActivity.setExpanded(true);
         setTitle(pref.getTitle());
         return true;
     }

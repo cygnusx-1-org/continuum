@@ -109,4 +109,10 @@
         app:icon="@drawable/ic_privacy_policy_day_night_24dp"
         app:title="@string/settings_privacy_policy_title" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:icon="@drawable/ic_info_preference_day_night_24dp"
+        app:title="@string/settings_debug_title"
+        app:bottom="true"
+        app:fragment="ml.docilealligator.infinityforreddit.settings.DebugPreferenceFragment" />
+
 </androidx.preference.PreferenceScreen>

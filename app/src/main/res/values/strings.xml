@@ -492,6 +492,7 @@
     <string name="settings_share_title">Share</string>
     <string name="settings_share_summary">Share this app to other people if you enjoy it</string>
     <string name="settings_privacy_policy_title">Privacy Policy</string>
+    <string name="settings_debug_title">Debug</string>
     <string name="settings_version_title">Continuum</string>
     <string name="settings_version_summary">Version %s</string>
     <string name="settings_screen_width_dp_title">Screen Width</string>

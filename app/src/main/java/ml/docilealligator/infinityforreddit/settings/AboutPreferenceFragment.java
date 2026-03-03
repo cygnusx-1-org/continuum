@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.res.Configuration;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -33,9 +33,7 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         Preference subredditPreference = findPreference(SharedPreferencesUtils.SUBREDDIT_KEY);
         Preference sharePreference = findPreference(SharedPreferencesUtils.SHARE_KEY);
         Preference versionPreference = findPreference(SharedPreferencesUtils.VERSION_KEY);
-        Preference screenWidthDpPreference = findPreference(SharedPreferencesUtils.SCREEN_WIDTH_DP_KEY);
-        Preference smallestScreenWidthDpPreference = findPreference(SharedPreferencesUtils.SMALLEST_SCREEN_WIDTH_DP_KEY);
-        Preference isTabletPreference = findPreference(SharedPreferencesUtils.IS_TABLET_KEY);
+
 
         if (openSourcePreference != null) {
             openSourcePreference.setOnPreferenceClickListener(preference -> {
@@ -126,23 +124,5 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
             });
         }
 
-        if (screenWidthDpPreference != null) {
-            Configuration config = getResources().getConfiguration();
-            int screenWidthDp = config.screenWidthDp;
-            screenWidthDpPreference.setSummary(getString(R.string.settings_screen_width_dp_summary, screenWidthDp));
-        }
-
-        if (smallestScreenWidthDpPreference != null) {
-            Configuration config = getResources().getConfiguration();
-            int smallestScreenWidthDp = config.smallestScreenWidthDp;
-            smallestScreenWidthDpPreference.setSummary(getString(R.string.settings_smallest_screen_width_dp_summary, smallestScreenWidthDp));
-        }
-
-        if (isTabletPreference != null) {
-            boolean isTablet = getResources().getBoolean(R.bool.isTablet);
-            isTabletPreference.setSummary(isTablet
-                    ? getString(R.string.settings_is_tablet_summary_true)
-                    : getString(R.string.settings_is_tablet_summary_false));
-        }
     }
 }
