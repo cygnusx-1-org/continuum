@@ -238,39 +238,41 @@ public class SearchActivity extends BaseActivity {
                 if (!currentQuery.isEmpty()) {
                     binding.clearSearchEditViewSearchActivity.setVisibility(View.VISIBLE);
 
-                    autoCompleteRunnable = () -> {
-                        subredditAutocompleteCall = mOauthRetrofit.create(RedditAPI.class).subredditAutocomplete(APIUtils.getOAuthHeader(accessToken),
-                                currentQuery, nsfw);
-                        subredditAutocompleteCall.enqueue(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                subredditAutocompleteCall = null;
-                                if (response.isSuccessful() && !call.isCanceled()) {
-                                    ParseSubredditData.parseSubredditListingData(executor, handler,
-                                            response.body(), nsfw, new ParseSubredditData.ParseSubredditListingDataListener() {
-                                                @Override
-                                                public void onParseSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
-                                                    binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.GONE);
-                                                    binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
-                                                    subredditAutocompleteRecyclerViewAdapter.setSubreddits(subredditData);
-                                                }
+                    if (!searchOnlyUsers) {
+                        autoCompleteRunnable = () -> {
+                            subredditAutocompleteCall = mOauthRetrofit.create(RedditAPI.class).subredditAutocomplete(APIUtils.getOAuthHeader(accessToken),
+                                    currentQuery, nsfw);
+                            subredditAutocompleteCall.enqueue(new Callback<>() {
+                                @Override
+                                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                    subredditAutocompleteCall = null;
+                                    if (response.isSuccessful() && !call.isCanceled()) {
+                                        ParseSubredditData.parseSubredditListingData(executor, handler,
+                                                response.body(), nsfw, new ParseSubredditData.ParseSubredditListingDataListener() {
+                                                    @Override
+                                                    public void onParseSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
+                                                        binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.GONE);
+                                                        binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
+                                                        subredditAutocompleteRecyclerViewAdapter.setSubreddits(subredditData);
+                                                    }
 
-                                                @Override
-                                                public void onParseSubredditListingDataFail() {
+                                                    @Override
+                                                    public void onParseSubredditListingDataFail() {
 
-                                                }
-                                            });
+                                                    }
+                                                });
+                                    }
                                 }
-                            }
 
-                            @Override
-                            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                subredditAutocompleteCall = null;
-                            }
-                        });
-                    };
+                                @Override
+                                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                    subredditAutocompleteCall = null;
+                                }
+                            });
+                        };
 
-                    handler.postDelayed(autoCompleteRunnable, 500);
+                        handler.postDelayed(autoCompleteRunnable, 500);
+                    }
                 } else {
                     binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
                     binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.GONE);

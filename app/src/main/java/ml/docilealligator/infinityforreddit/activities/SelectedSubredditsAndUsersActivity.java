@@ -35,7 +35,6 @@ import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFi
 import ml.docilealligator.infinityforreddit.databinding.ActivitySelectedSubredditsBinding;
 import ml.docilealligator.infinityforreddit.multireddit.ExpandedSubredditInMultiReddit;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditWithSelection;
-import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class SelectedSubredditsAndUsersActivity extends BaseActivity implements ActivityToolbarInterface {
@@ -151,6 +150,7 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
     public void selectUsers() {
         Intent intent = new Intent(this, SearchActivity.class);
         intent.putExtra(SearchActivity.EXTRA_SEARCH_ONLY_USERS, true);
+        intent.putExtra(SearchActivity.EXTRA_IS_MULTI_SELECTION, true);
         startActivityForResult(intent, USER_SELECTION_REQUEST_CODE);
     }
 
@@ -194,7 +194,12 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
                     if (subreddits == null) {
                         subreddits = new ArrayList<>();
                     }
-                    adapter.addUserInSubredditType("u_" + data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME));
+                    ArrayList<String> selectedUsernames = data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES);
+                    if (selectedUsernames != null) {
+                        for (String username : selectedUsernames) {
+                            adapter.addUserInSubredditType("u_" + username);
+                        }
+                    }
                 }
             }
         }
