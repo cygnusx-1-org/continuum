@@ -77,6 +77,7 @@
     <string name="action_edit_multi_reddit">Edit MultiReddit</string>
     <string name="action_delete_multi_reddit">Delete Multireddit</string>
     <string name="action_copy_multi_reddit">Copy Multireddit</string>
+    <string name="action_list_subreddits">MultiReddit\'s Subreddits</string>
     <string name="action_share">Share</string>
     <string name="action_preview">Preview</string>
     <string name="action_report">Report</string>

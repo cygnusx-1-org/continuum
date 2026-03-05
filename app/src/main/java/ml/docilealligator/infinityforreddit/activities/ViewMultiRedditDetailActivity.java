@@ -64,6 +64,8 @@ import ml.docilealligator.infinityforreddit.fragments.FragmentCommunicator;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import ml.docilealligator.infinityforreddit.multireddit.DeleteMultiReddit;
+import ml.docilealligator.infinityforreddit.multireddit.ExpandedSubredditInMultiReddit;
+import ml.docilealligator.infinityforreddit.multireddit.FetchMultiRedditInfo;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -830,6 +832,35 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         } else if (itemId == R.id.action_change_post_layout_view_multi_reddit_detail_activity) {
             showPostLayoutBottomSheetFragment();
             return true;
+        } else if (itemId == R.id.action_list_subreddits_view_multi_reddit_detail_activity) {
+            if (multiReddit != null && multiReddit.getSubreddits() != null && !multiReddit.getSubreddits().isEmpty()) {
+                showListSubredditsDialog(multiReddit.getSubreddits());
+            } else {
+                FetchMultiRedditInfo.FetchMultiRedditInfoListener listener = new FetchMultiRedditInfo.FetchMultiRedditInfoListener() {
+                    @Override
+                    public void success(MultiReddit fetchedMultiReddit) {
+                        if (fetchedMultiReddit.getSubreddits() != null && !fetchedMultiReddit.getSubreddits().isEmpty()) {
+                            if (multiReddit != null) {
+                                multiReddit.setSubreddits(fetchedMultiReddit.getSubreddits());
+                            }
+                            showListSubredditsDialog(fetchedMultiReddit.getSubreddits());
+                        } else {
+                            Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void failed() {
+                        Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
+                    }
+                };
+                if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                    FetchMultiRedditInfo.anonymousFetchMultiRedditInfo(mExecutor, new Handler(), mRedditDataRoomDatabase, multiPath, listener);
+                } else {
+                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
+                }
+            }
+            return true;
         } else if (itemId == R.id.action_edit_view_multi_reddit_detail_activity) {
             Intent editIntent = new Intent(this, EditMultiRedditActivity.class);
             editIntent.putExtra(EditMultiRedditActivity.EXTRA_MULTI_PATH, multiPath);
@@ -874,6 +905,31 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
             return true;
         }
         return false;
+    }
+
+    private void showListSubredditsDialog(ArrayList<ExpandedSubredditInMultiReddit> subreddits) {
+        String title;
+        if (multiReddit != null) {
+            title = multiReddit.getDisplayName() + "'s subreddits";
+        } else if (multiPath != null) {
+            String[] segments = multiPath.split("/");
+            title = segments[segments.length - 1] + "'s subreddits";
+        } else {
+            title = getString(R.string.action_list_subreddits);
+        }
+
+        String[] subredditNames = new String[subreddits.size()];
+        for (int i = 0; i < subreddits.size(); i++) {
+            subredditNames[i] = subreddits.get(i).getName();
+        }
+        new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                .setTitle(title)
+                .setItems(subredditNames, (dialogInterface, i) -> {
+                    Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, subredditNames[i]);
+                    startActivity(subredditIntent);
+                })
+                .show();
     }
 
     @Override
