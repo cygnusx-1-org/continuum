@@ -2,6 +2,17 @@
 
 ---
 
+8.1.2.3 / 2026-3-4
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Simplified adding a user profile to a multi-reddit
+* Fixed Add a multireddit description page #230
+* Moved "Enable folding phone support" to "Settings | Miscellaneous"
+* Added "Default Post Layout for a Foldable Unfolded" in "Settings | Interface | Post"
+* Fixed Some gifs in comments fail to embed #227
+* Fixed bug with uploading an image into a comment
+
 8.1.2.2 / 2026-2-21
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
