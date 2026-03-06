@@ -59,6 +59,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
 import com.libRG.CustomTextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -194,6 +195,7 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     private final boolean mDisableProfileAvatarAnimation;
     private final int mDataSavingModeDefaultResolution;
     private final int mNonDataSavingModeDefaultResolution;
+    private final int mMaxResolution;
     private final PostDetailRecyclerViewAdapterCallback mPostDetailRecyclerViewAdapterCallback;
 
     private final int mColorAccent;
@@ -254,7 +256,8 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         mStreamableApiProvider = streamableApiProvider;
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mGlide = glide;
-        mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")));
+        mMaxResolution = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
+        mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
         mCurrentAccountSharedPreferences = currentAccountSharedPreferences;
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         int markdownColor = customThemeWrapper.getPostContentColor();
@@ -901,9 +904,23 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                     } else {
                         ((PostDetailGalleryViewHolder) holder).adapter.setRatio(-1);
                     }
-                    ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(mPost.getGallery());
                     ((PostDetailGalleryViewHolder) holder).adapter.setBlurImage(
                             (mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost.isSpoiler() && mNeedBlurSpoiler));
+                    // Delay setGalleryImages until the gallery RecyclerView has been
+                    // laid out with its final width. In the split post/comments view,
+                    // the RecyclerView may have width=0 during initial bind because the
+                    // weighted LinearLayout hasn't distributed widths yet. Without this,
+                    // gallery items get bound at a tiny size (e.g. 122px) and Glide
+                    // decodes images at that resolution, causing severe pixelation.
+                    ArrayList<Post.Gallery> gallery = mPost.getGallery();
+                    int rvWidth = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getWidth();
+                    if (rvWidth > 0) {
+                        ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery);
+                    } else {
+                        ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.post(() ->
+                            ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery)
+                        );
+                    }
                 }
             }
         }
@@ -920,10 +937,10 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                 previewIndex = 0;
             }
             preview = previews.get(previewIndex);
-            if (preview.getPreviewWidth() * preview.getPreviewHeight() > 5_000_000) {
+            if (preview.getPreviewWidth() * preview.getPreviewHeight() > mMaxResolution) {
                 for (int i = previews.size() - 1; i >= 1; i--) {
                     preview = previews.get(i);
-                    if (preview.getPreviewWidth() * preview.getPreviewHeight() <= 5_000_000) {
+                    if (preview.getPreviewWidth() * preview.getPreviewHeight() <= mMaxResolution) {
                         return preview;
                     }
                 }

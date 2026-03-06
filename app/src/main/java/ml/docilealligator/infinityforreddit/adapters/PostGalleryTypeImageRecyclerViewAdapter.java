@@ -93,6 +93,16 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         holder.binding.imageViewItemGalleryImageInPostFeed.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                int viewWidth = right - left;
+                // In split/weighted layouts, views get intermediate layout passes with
+                // incorrect (tiny) dimensions. Skip those and wait for the real size.
+                ViewGroup parent = (ViewGroup) v.getParent();
+                while (parent != null && !(parent instanceof RecyclerView)) {
+                    parent = (ViewGroup) parent.getParent();
+                }
+                if (parent != null && parent.getWidth() > 0 && viewWidth < parent.getWidth() / 2) {
+                    return;
+                }
                 holder.binding.imageViewItemGalleryImageInPostFeed.removeOnLayoutChangeListener(this);
                 loadImage(holder);
             }
