@@ -2,6 +2,12 @@
 
 ---
 
+8.1.2.4 / 2026-3-6
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed issue with preview image quality in the split view
+
 8.1.2.3 / 2026-3-4
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
