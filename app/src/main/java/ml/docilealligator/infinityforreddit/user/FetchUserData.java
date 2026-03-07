@@ -133,11 +133,23 @@ public class FetchUserData {
                                     e.printStackTrace();
                                 }
                             }
-                            handler.post(() -> fetchUserListingDataListener.onFetchUserListingDataSuccess(userDataList, newAfter));
+
+                            // On the first page, also try a direct user lookup for the exact query
+                            // to handle usernames that Reddit search doesn't find (e.g. hyphenated names)
+                            if (after == null) {
+                                fetchAndPrependExactUser(executor, handler, retrofit, query, userDataList, newAfter, fetchUserListingDataListener);
+                            } else {
+                                handler.post(() -> fetchUserListingDataListener.onFetchUserListingDataSuccess(userDataList, newAfter));
+                            }
                         } catch (JSONException e) {
                             handler.post(() -> {
                                 if (responseString[0] != null && responseString[0].equals("\"{}\"")) {
-                                    fetchUserListingDataListener.onFetchUserListingDataSuccess(new ArrayList<>(), null);
+                                    // Still try direct lookup even when search returns empty
+                                    if (after == null) {
+                                        fetchAndPrependExactUser(executor, handler, retrofit, query, new ArrayList<>(), null, fetchUserListingDataListener);
+                                    } else {
+                                        fetchUserListingDataListener.onFetchUserListingDataSuccess(new ArrayList<>(), null);
+                                    }
                                 } else {
                                     fetchUserListingDataListener.onFetchUserListingDataFailed();
                                 }
@@ -153,6 +165,27 @@ public class FetchUserData {
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable throwable) {
                 fetchUserListingDataListener.onFetchUserListingDataFailed();
             }
+        });
+    }
+
+    private static void fetchAndPrependExactUser(Executor executor, Handler handler, Retrofit retrofit,
+                                                  String query, List<UserData> searchResults, String after,
+                                                  FetchUserListingDataListener fetchUserListingDataListener) {
+        executor.execute(() -> {
+            try {
+                Response<String> directResponse = retrofit.create(RedditAPI.class).getUserData(query).execute();
+                if (directResponse.isSuccessful() && directResponse.body() != null) {
+                    UserData exactUser = parseUserDataBase(new JSONObject(directResponse.body()), false);
+                    if (exactUser != null) {
+                        // Remove duplicate if the exact user already exists in search results
+                        searchResults.removeIf(u -> u.getName().equalsIgnoreCase(exactUser.getName()));
+                        searchResults.add(0, exactUser);
+                    }
+                }
+            } catch (IOException | JSONException e) {
+                // Direct lookup failed; just use the search results as-is
+            }
+            handler.post(() -> fetchUserListingDataListener.onFetchUserListingDataSuccess(searchResults, after));
         });
     }
 
