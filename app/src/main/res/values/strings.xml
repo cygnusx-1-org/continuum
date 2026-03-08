@@ -646,6 +646,8 @@
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">Separate Post And Comments in Portrait Mode</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">Separate Post And Comments in Landscape Mode</string>
     <string name="settings_separate_post_and_comments_summary">Video autoplay will be disabled in the post detail page</string>
+    <string name="settings_swap_post_and_comments_in_split_mode_title">Swap Post and Comments Sides</string>
+    <string name="settings_swap_post_and_comments_in_split_mode_summary">Show comments on the left and the post on the right in split-screen mode</string>
     <string name="settings_use_bottom_toolbar_in_media_viewer_title">Use Bottom Toolbar in Media Viewer</string>
     <string name="settings_navigation_drawer_enable_hide_karma_title">Hide Account Karma</string>
     <string name="settings_secure_mode_title">Secure Mode</string>

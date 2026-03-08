@@ -15,6 +15,12 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
+        app:key="swap_post_and_comments_in_split_mode"
+        app:title="@string/settings_swap_post_and_comments_in_split_mode_title"
+        app:summary="@string/settings_swap_post_and_comments_in_split_mode_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
         app:key="hide_post_type"
         app:title="@string/settings_hide_post_type" />
 

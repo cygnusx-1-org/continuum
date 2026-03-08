@@ -441,6 +441,7 @@ public class SharedPreferencesUtils {
     public static final String POST_DETAILS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_details";
     public static final String SEPARATE_POST_AND_COMMENTS_IN_PORTRAIT_MODE = "separate_post_and_comments_in_portrait_mode";
     public static final String SEPARATE_POST_AND_COMMENTS_IN_LANDSCAPE_MODE = "separate_post_and_comments_in_landscape_mode";
+    public static final String SWAP_POST_AND_COMMENTS_IN_SPLIT_MODE = "swap_post_and_comments_in_split_mode";
 
     public static final String SECURITY_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.security";
     public static final String REQUIRE_AUTHENTICATION_TO_GO_TO_ACCOUNT_SECTION_IN_NAVIGATION_DRAWER = "require_auth_to_account_section";
