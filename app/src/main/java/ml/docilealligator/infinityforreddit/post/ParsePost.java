@@ -241,9 +241,8 @@ public class ParsePost {
 
         Map<String, MediaMetadata> mediaMetadataMap = JSONUtils.parseMediaMetadata(data);
 
-        if (data.has(JSONUtils.CROSSPOST_PARENT_LIST)) {
+        if (data.has(JSONUtils.CROSSPOST_PARENT_LIST) && data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).length() > 0) {
             //Cross post
-            //data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0) out of bounds????????????
             JSONObject parentData = data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0);
 
             // Extract previews from parent post if available
