@@ -925,9 +925,15 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
                 .setTitle(title)
                 .setItems(subredditNames, (dialogInterface, i) -> {
-                    Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, subredditNames[i]);
-                    startActivity(subredditIntent);
+                    if (subredditNames[i].startsWith("u_")) {
+                        Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
+                        userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, subredditNames[i].substring(2));
+                        startActivity(userIntent);
+                    } else {
+                        Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
+                        subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, subredditNames[i]);
+                        startActivity(subredditIntent);
+                    }
                 })
                 .show();
     }

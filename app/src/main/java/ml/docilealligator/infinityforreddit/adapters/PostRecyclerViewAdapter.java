@@ -2092,6 +2092,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             super(itemView);
         }
 
+        void startSubredditOrUserActivity(String subredditName) {
+            if (subredditName.startsWith("u_")) {
+                Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
+                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, subredditName.substring(2));
+                mActivity.startActivity(intent);
+            } else {
+                Intent intent = new Intent(mActivity, ViewSubredditDetailActivity.class);
+                intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, subredditName);
+                mActivity.startActivity(intent);
+            }
+        }
+
         void setBaseView(AspectRatioGifImageView iconGifImageView,
                         TextView subredditTextView,
                         TextView userTextView,
@@ -2141,10 +2153,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     if (post != null) {
                         if (canStartActivity) {
                             canStartActivity = false;
-                            Intent intent = new Intent(mActivity, ViewSubredditDetailActivity.class);
-                            intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY,
-                                    post.getSubredditName());
-                            mActivity.startActivity(intent);
+                            startSubredditOrUserActivity(post.getSubredditName());
                         }
                     }
                 });
@@ -2160,10 +2169,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     if (post != null) {
                         if (canStartActivity) {
                             canStartActivity = false;
-                            Intent intent = new Intent(mActivity, ViewSubredditDetailActivity.class);
-                            intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY,
-                                    post.getSubredditName());
-                            mActivity.startActivity(intent);
+                            startSubredditOrUserActivity(post.getSubredditName());
                         }
                     }
                 });
@@ -2247,10 +2253,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 if (post != null && canStartActivity) {
                     canStartActivity = false;
                     if (mDisplaySubredditName) {
-                        Intent intent = new Intent(mActivity, ViewSubredditDetailActivity.class);
-                        intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY,
-                                post.getSubredditName());
-                        mActivity.startActivity(intent);
+                        startSubredditOrUserActivity(post.getSubredditName());
                     } else if (!post.isAuthorDeleted()) {
                         Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
                         intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, post.getAuthor());
