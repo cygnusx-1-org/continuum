@@ -49,8 +49,8 @@ public class ThemePreviewPostsFragment extends Fragment {
         binding.titleTextViewBestThemePreviewPostsFragment.setTextColor(customTheme.postTitleColor);
         binding.contentTextViewThemePreviewPostsFragment.setTextColor(customTheme.postContentColor);
         binding.stickiedPostImageViewThemePreviewPostsFragment.setColorFilter(customTheme.stickiedPostIconTint, PorterDuff.Mode.SRC_IN);
-        binding.typeTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.postTypeBackgroundColor);
-        binding.typeTextViewThemePreviewPostsFragment.setBorderColor(customTheme.postTypeBackgroundColor);
+        binding.typeTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.linkTypeBackgroundColor);
+        binding.typeTextViewThemePreviewPostsFragment.setBorderColor(customTheme.linkTypeBackgroundColor);
         binding.typeTextViewThemePreviewPostsFragment.setTextColor(customTheme.postTypeTextColor);
         binding.spoilerCustomTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.spoilerBackgroundColor);
         binding.spoilerCustomTextViewThemePreviewPostsFragment.setBorderColor(customTheme.spoilerBackgroundColor);

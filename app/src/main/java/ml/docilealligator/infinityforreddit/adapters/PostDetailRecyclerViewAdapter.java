@@ -203,7 +203,12 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     private final int mSecondaryTextColor;
     private final int mPostTitleColor;
     private final int mPrimaryTextColor;
-    private final int mPostTypeBackgroundColor;
+    private final int mTextTypeBackgroundColor;
+    private final int mImageTypeBackgroundColor;
+    private final int mLinkTypeBackgroundColor;
+    private final int mVideoTypeBackgroundColor;
+    private final int mGifTypeBackgroundColor;
+    private final int mGalleryTypeBackgroundColor;
     private final int mPostTypeTextColor;
     private final int mSubredditColor;
     private final int mUsernameColor;
@@ -325,7 +330,12 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         mCardViewColor = customThemeWrapper.getCardViewBackgroundColor();
         mPostTitleColor = customThemeWrapper.getPostTitleColor();
         mPrimaryTextColor = customThemeWrapper.getPrimaryTextColor();
-        mPostTypeBackgroundColor = customThemeWrapper.getPostTypeBackgroundColor();
+        mTextTypeBackgroundColor = customThemeWrapper.getTextTypeBackgroundColor();
+        mImageTypeBackgroundColor = customThemeWrapper.getImageTypeBackgroundColor();
+        mLinkTypeBackgroundColor = customThemeWrapper.getLinkTypeBackgroundColor();
+        mVideoTypeBackgroundColor = customThemeWrapper.getVideoTypeBackgroundColor();
+        mGifTypeBackgroundColor = customThemeWrapper.getGifTypeBackgroundColor();
+        mGalleryTypeBackgroundColor = customThemeWrapper.getGalleryTypeBackgroundColor();
         mPostTypeTextColor = customThemeWrapper.getPostTypeTextColor();
         mAuthorFlairTextColor = customThemeWrapper.getAuthorFlairTextColor();
         mSpoilerBackgroundColor = customThemeWrapper.getSpoilerBackgroundColor();
@@ -545,6 +555,7 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof PostDetailBaseViewHolder) {
             ((PostDetailBaseViewHolder) holder).titleTextView.setText(mPost.getTitle());
+            applyTypeColor(((PostDetailBaseViewHolder) holder).typeTextView, mPost.getPostType());
             if (mPost.getSubredditNamePrefixed().startsWith("u/")) {
                 if (mPost.getAuthorIconUrl() == null) {
                     String authorName = mPost.isAuthorDeleted() ? mPost.getSubredditNamePrefixed().substring(2) : mPost.getAuthor();
@@ -1094,6 +1105,37 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
             mPost.setNComments(mPost.getNComments() + 1);
             notifyItemChanged(0);
         }
+    }
+
+    private void applyTypeColor(CustomTextView typeTextView, int postType) {
+        if (typeTextView == null) return;
+        int color;
+        switch (postType) {
+            case Post.VIDEO_TYPE:
+                color = mVideoTypeBackgroundColor;
+                break;
+            case Post.GIF_TYPE:
+                color = mGifTypeBackgroundColor;
+                break;
+            case Post.IMAGE_TYPE:
+                color = mImageTypeBackgroundColor;
+                break;
+            case Post.LINK_TYPE:
+            case Post.NO_PREVIEW_LINK_TYPE:
+                color = mLinkTypeBackgroundColor;
+                break;
+            case Post.GALLERY_TYPE:
+                color = mGalleryTypeBackgroundColor;
+                break;
+            case Post.TEXT_TYPE:
+                color = mTextTypeBackgroundColor;
+                break;
+            default:
+                color = mTextTypeBackgroundColor;
+                break;
+        }
+        typeTextView.setBackgroundColor(color);
+        typeTextView.setBorderColor(color);
     }
 
     private void openMedia(Post post) {
@@ -1752,8 +1794,6 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
             authorFlairTextView.setTextColor(mAuthorFlairTextColor);
             postTimeTextView.setTextColor(mSecondaryTextColor);
             titleTextView.setTextColor(mPostTitleColor);
-            typeTextView.setBackgroundColor(mPostTypeBackgroundColor);
-            typeTextView.setBorderColor(mPostTypeBackgroundColor);
             typeTextView.setTextColor(mPostTypeTextColor);
             spoilerTextView.setBackgroundColor(mSpoilerBackgroundColor);
             spoilerTextView.setBorderColor(mSpoilerBackgroundColor);

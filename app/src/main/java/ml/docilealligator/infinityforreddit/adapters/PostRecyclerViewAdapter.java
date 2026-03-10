@@ -205,7 +205,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private int mReadPostTitleColor;
     private int mReadPostContentColor;
     private int mStickiedPostIconTint;
-    private int mPostTypeBackgroundColor;
+    private int mTextTypeBackgroundColor;
+    private int mImageTypeBackgroundColor;
+    private int mLinkTypeBackgroundColor;
+    private int mVideoTypeBackgroundColor;
+    private int mGifTypeBackgroundColor;
+    private int mGalleryTypeBackgroundColor;
     private int mPostTypeTextColor;
     private int mSubredditColor;
     private int mUsernameColor;
@@ -373,7 +378,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mReadPostTitleColor = customThemeWrapper.getReadPostTitleColor();
             mReadPostContentColor = customThemeWrapper.getReadPostContentColor();
             mStickiedPostIconTint = customThemeWrapper.getStickiedPostIconTint();
-            mPostTypeBackgroundColor = customThemeWrapper.getPostTypeBackgroundColor();
+            mTextTypeBackgroundColor = customThemeWrapper.getTextTypeBackgroundColor();
+            mImageTypeBackgroundColor = customThemeWrapper.getImageTypeBackgroundColor();
+            mLinkTypeBackgroundColor = customThemeWrapper.getLinkTypeBackgroundColor();
+            mVideoTypeBackgroundColor = customThemeWrapper.getVideoTypeBackgroundColor();
+            mGifTypeBackgroundColor = customThemeWrapper.getGifTypeBackgroundColor();
+            mGalleryTypeBackgroundColor = customThemeWrapper.getGalleryTypeBackgroundColor();
             mPostTypeTextColor = customThemeWrapper.getPostTypeTextColor();
             mSubredditColor = customThemeWrapper.getSubreddit();
             mUsernameColor = customThemeWrapper.getUsername();
@@ -980,6 +990,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
 
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.loadVideo(position);
+                    applyTypeColor(((PostBaseVideoAutoplayViewHolder) holder).typeTextView, post.getPostType());
                 } else if (holder instanceof PostWithPreviewTypeViewHolder) {
                     if (post.getPostType() == Post.VIDEO_TYPE) {
                         ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.VISIBLE);
@@ -1011,6 +1022,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(R.drawable.ic_link_day_night_24dp);
                         }
                     }
+                    applyTypeColor(((PostWithPreviewTypeViewHolder) holder).typeTextView, post.getPostType());
 
                     if (mDataSavingMode && mDisableImagePreview) {
                         ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
@@ -1094,6 +1106,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(
                                 (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler));
                     }
+                    applyTypeColor(((PostBaseGalleryTypeViewHolder) holder).typeTextView, post.getPostType());
                 } else if (holder instanceof PostTextTypeViewHolder) {
                     if (!mHideTextPostContent && !post.isSpoiler() && post.getSelfTextPlainTrimmed() != null && !post.getSelfTextPlainTrimmed().isEmpty()) {
                         ((PostTextTypeViewHolder) holder).contentTextView.setVisibility(View.VISIBLE);
@@ -1102,6 +1115,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         ((PostTextTypeViewHolder) holder).contentTextView.setText(post.getSelfTextPlainTrimmed());
                     }
+                    applyTypeColor(((PostTextTypeViewHolder) holder).typeTextView, post.getPostType());
                 }
                 mCallback.currentlyBindItem(holder.getBindingAdapterPosition());
             } else if (holder instanceof PostCompactBaseViewHolder) {
@@ -1237,6 +1251,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         break;
                 }
+                applyTypeColor(((PostCompactBaseViewHolder) holder).typeTextView, post.getPostType());
 
                 mCallback.currentlyBindItem(holder.getBindingAdapterPosition());
             }
@@ -1478,6 +1493,37 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     private boolean shouldUseCompactLayout(Post post) {
         return (post.getPreviews() == null || post.getPreviews().isEmpty()) && !hasValidThumbnailFallback(post.getThumbnailUrl());
+    }
+
+    private void applyTypeColor(CustomTextView typeTextView, int postType) {
+        if (typeTextView == null) return;
+        int color;
+        switch (postType) {
+            case Post.VIDEO_TYPE:
+                color = mVideoTypeBackgroundColor;
+                break;
+            case Post.GIF_TYPE:
+                color = mGifTypeBackgroundColor;
+                break;
+            case Post.IMAGE_TYPE:
+                color = mImageTypeBackgroundColor;
+                break;
+            case Post.LINK_TYPE:
+            case Post.NO_PREVIEW_LINK_TYPE:
+                color = mLinkTypeBackgroundColor;
+                break;
+            case Post.GALLERY_TYPE:
+                color = mGalleryTypeBackgroundColor;
+                break;
+            case Post.TEXT_TYPE:
+                color = mTextTypeBackgroundColor;
+                break;
+            default:
+                color = mTextTypeBackgroundColor;
+                break;
+        }
+        typeTextView.setBackgroundColor(color);
+        typeTextView.setBorderColor(color);
     }
 
     private void loadImage(final RecyclerView.ViewHolder holder) {
@@ -3171,8 +3217,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             stickiedPostImageView.setColorFilter(mStickiedPostIconTint, PorterDuff.Mode.SRC_IN);
 
             if (typeTextView != null) {
-                typeTextView.setBackgroundColor(mPostTypeBackgroundColor);
-                typeTextView.setBorderColor(mPostTypeBackgroundColor);
                 typeTextView.setTextColor(mPostTypeTextColor);
             }
 
@@ -4132,8 +4176,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             titleTextView.setTextColor(mPostTitleColor);
             stickiedPostImageView.setColorFilter(mStickiedPostIconTint, PorterDuff.Mode.SRC_IN);
             if (typeTextView != null) {
-                typeTextView.setBackgroundColor(mPostTypeBackgroundColor);
-                typeTextView.setBorderColor(mPostTypeBackgroundColor);
                 typeTextView.setTextColor(mPostTypeTextColor);
             }
             if (spoilerTextView != null) {
