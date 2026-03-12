@@ -37,6 +37,12 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
+        app:key="post_type_triangle_indicator"
+        app:title="@string/settings_post_type_triangle_indicator"
+        app:summary="@string/settings_post_type_triangle_indicator_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
         app:key="hide_post_flair"
         app:title="@string/settings_hide_post_flair" />
 

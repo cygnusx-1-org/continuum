@@ -93,6 +93,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomShee
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2GalleryTypeBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2TextBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2VideoAutoplayBinding;
@@ -258,6 +259,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mMarkPostsAsReadAfterVoting;
     private boolean mMarkPostsAsReadOnScroll;
     private boolean mHidePostType;
+    private boolean mPostTypeTriangleIndicator;
     private boolean mHidePostFlair;
     private boolean mHideSubredditAndUserPrefix;
     private boolean mHideTheNumberOfVotes;
@@ -351,6 +353,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             mHidePostType = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
+            mPostTypeTriangleIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false);
             mHidePostFlair = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
             mHideSubredditAndUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
             mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES, false);
@@ -881,7 +884,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             if (((PostViewHolder) holder).typeTextView != null) {
-                if (mHidePostType) {
+                if (mHidePostType || (mPostTypeTriangleIndicator && holder instanceof PostCompactBaseViewHolder)) {
                     ((PostViewHolder) holder).typeTextView.setVisibility(View.GONE);
                 } else {
                     ((PostViewHolder) holder).typeTextView.setVisibility(View.VISIBLE);
@@ -1252,6 +1255,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         break;
                 }
                 applyTypeColor(((PostCompactBaseViewHolder) holder).typeTextView, post.getPostType());
+                applyTriangleIndicator(((PostCompactBaseViewHolder) holder).postTypeIndicatorView, post.getPostType());
 
                 mCallback.currentlyBindItem(holder.getBindingAdapterPosition());
             }
@@ -1495,35 +1499,40 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return (post.getPreviews() == null || post.getPreviews().isEmpty()) && !hasValidThumbnailFallback(post.getThumbnailUrl());
     }
 
-    private void applyTypeColor(CustomTextView typeTextView, int postType) {
-        if (typeTextView == null) return;
-        int color;
+    private int getTypeColor(int postType) {
         switch (postType) {
             case Post.VIDEO_TYPE:
-                color = mVideoTypeBackgroundColor;
-                break;
+                return mVideoTypeBackgroundColor;
             case Post.GIF_TYPE:
-                color = mGifTypeBackgroundColor;
-                break;
+                return mGifTypeBackgroundColor;
             case Post.IMAGE_TYPE:
-                color = mImageTypeBackgroundColor;
-                break;
+                return mImageTypeBackgroundColor;
             case Post.LINK_TYPE:
             case Post.NO_PREVIEW_LINK_TYPE:
-                color = mLinkTypeBackgroundColor;
-                break;
+                return mLinkTypeBackgroundColor;
             case Post.GALLERY_TYPE:
-                color = mGalleryTypeBackgroundColor;
-                break;
+                return mGalleryTypeBackgroundColor;
             case Post.TEXT_TYPE:
-                color = mTextTypeBackgroundColor;
-                break;
             default:
-                color = mTextTypeBackgroundColor;
-                break;
+                return mTextTypeBackgroundColor;
         }
+    }
+
+    private void applyTypeColor(CustomTextView typeTextView, int postType) {
+        if (typeTextView == null) return;
+        int color = getTypeColor(postType);
         typeTextView.setBackgroundColor(color);
         typeTextView.setBorderColor(color);
+    }
+
+    private void applyTriangleIndicator(@Nullable PostTypeIndicatorView indicatorView, int postType) {
+        if (indicatorView == null) return;
+        if (mPostTypeTriangleIndicator && !mHidePostType) {
+            indicatorView.setIndicatorColor(getTypeColor(postType));
+            indicatorView.setVisibility(View.VISIBLE);
+        } else {
+            indicatorView.setVisibility(View.GONE);
+        }
     }
 
     private void loadImage(final RecyclerView.ViewHolder holder) {
@@ -1868,6 +1877,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 ((PostCompactBaseViewHolder) holder).imageView.setVisibility(View.GONE);
                 ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(View.GONE);
                 ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.GONE);
+                if (((PostCompactBaseViewHolder) holder).postTypeIndicatorView != null) {
+                    ((PostCompactBaseViewHolder) holder).postTypeIndicatorView.setVisibility(View.GONE);
+                }
             }
         } else if (holder instanceof PostGalleryViewHolder) {
             if (mHandleReadPost && mMarkPostsAsReadOnScroll) {
@@ -4055,6 +4067,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         FrameLayout noPreviewPostImageFrameLayout;
         ImageView noPreviewPostImageView;
         @Nullable ConstraintLayout bottomConstraintLayout;
+        @Nullable PostTypeIndicatorView postTypeIndicatorView;
         View divider;
         RequestListener<Drawable> requestListener;
 
@@ -4337,6 +4350,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     class PostCompactLeftThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompactLeftThumbnailViewHolder(@NonNull ItemPostCompactBinding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact;
 
             setBaseView(binding.iconGifImageViewItemPostCompact,
                     binding.nameTextViewItemPostCompact,
@@ -4371,6 +4385,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     class PostCompactRightThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompactRightThumbnailViewHolder(@NonNull ItemPostCompactRightThumbnailBinding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompactRightThumbnail;
 
             setBaseView(binding.iconGifImageViewItemPostCompactRightThumbnail,
                     binding.nameTextViewItemPostCompactRightThumbnail,
@@ -4405,6 +4420,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     class PostCompact2LeftThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompact2LeftThumbnailViewHolder(@NonNull ItemPostCompact2Binding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact2;
 
             setBaseView(binding.iconGifImageViewItemPostCompact2,
                     binding.nameTextViewItemPostCompact2,
@@ -4439,6 +4455,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     class PostCompact2RightThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompact2RightThumbnailViewHolder(@NonNull ItemPostCompact2RightThumbnailBinding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact2RightThumbnail;
 
             setBaseView(binding.iconGifImageViewItemPostCompact2RightThumbnail,
                     binding.nameTextViewItemPostCompact2RightThumbnail,

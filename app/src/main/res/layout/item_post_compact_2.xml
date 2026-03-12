@@ -121,6 +121,13 @@
                     android:padding="4dp"
                     android:visibility="gone" />
 
+                <ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView
+                    android:id="@+id/post_type_indicator_view_item_post_compact_2"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="bottom|end"
+                    android:visibility="gone" />
+
             </FrameLayout>
 
             <com.google.android.material.loadingindicator.LoadingIndicator
