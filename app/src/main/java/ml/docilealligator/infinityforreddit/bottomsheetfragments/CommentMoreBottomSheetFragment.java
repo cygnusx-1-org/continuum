@@ -32,6 +32,7 @@ import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRounded
 import ml.docilealligator.infinityforreddit.databinding.FragmentCommentMoreBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.ShareScreenshotUtilsKt;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 
@@ -185,6 +186,22 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
             CopyTextBottomSheetFragment.show(activity.getSupportFragmentManager(),
                     comment.getCommentRawText(), comment.getCommentMarkdown());
         });
+
+        if (activity instanceof ViewPostDetailActivity) {
+            binding.readAloudTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
+            TextToSpeechHelper helper = ((ViewPostDetailActivity) activity).getTextToSpeechHelper();
+            if (helper.isSpeaking()) {
+                binding.readAloudTextViewCommentMoreBottomSheetFragment.setText(R.string.stop_reading);
+            }
+            binding.readAloudTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+                if (helper.isSpeaking()) {
+                    helper.stop();
+                } else {
+                    helper.speak(comment.getCommentRawText());
+                }
+                dismiss();
+            });
+        }
 
         binding.reportViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
             Intent intent = new Intent(activity, ReportActivity.class);

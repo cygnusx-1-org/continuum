@@ -30,6 +30,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
+import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
 import ml.docilealligator.infinityforreddit.activities.SubmitCrosspostActivity;
@@ -41,6 +42,7 @@ import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
 
@@ -187,6 +189,33 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
                 dismiss();
             });
+
+            if (mBaseActivity instanceof ViewPostDetailActivity) {
+                binding.readAloudTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                TextToSpeechHelper helper = ((ViewPostDetailActivity) mBaseActivity).getTextToSpeechHelper();
+                if (helper.isSpeaking()) {
+                    binding.readAloudTextViewPostOptionsBottomSheetFragment.setText(R.string.stop_reading);
+                }
+                binding.readAloudTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    if (helper.isSpeaking()) {
+                        helper.stop();
+                    } else {
+                        StringBuilder textToSpeak = new StringBuilder();
+                        if (mPost.getTitle() != null) {
+                            textToSpeak.append(mPost.getTitle());
+                        }
+                        String selfText = mPost.getSelfTextPlain();
+                        if (selfText != null && !selfText.isEmpty()) {
+                            if (textToSpeak.length() > 0) {
+                                textToSpeak.append("\n\n");
+                            }
+                            textToSpeak.append(selfText);
+                        }
+                        helper.speak(textToSpeak.toString());
+                    }
+                    dismiss();
+                });
+            }
 
             binding.addToPostFilterTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                 Intent intent = new Intent(mBaseActivity, PostFilterPreferenceActivity.class);

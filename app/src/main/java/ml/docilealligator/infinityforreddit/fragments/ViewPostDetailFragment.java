@@ -120,6 +120,7 @@ import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CommentScrollPositionCache;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
@@ -801,6 +802,15 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
             }
 
             mMenu.findItem(R.id.action_view_crosspost_parent_view_post_detail_fragment).setVisible(mPost.getCrosspostParentId() != null);
+
+            MenuItem readAloudItem = mMenu.findItem(R.id.action_read_aloud_view_post_detail_fragment);
+            readAloudItem.setVisible(true);
+            if (mActivity instanceof ViewPostDetailActivity
+                    && ((ViewPostDetailActivity) mActivity).getTextToSpeechHelper().isSpeaking()) {
+                Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, readAloudItem, mActivity.getString(R.string.stop_reading));
+            } else {
+                Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, readAloudItem, mActivity.getString(R.string.read_aloud));
+            }
         }
     }
 
@@ -1074,6 +1084,19 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
     }
 
     @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem readAloudItem = menu.findItem(R.id.action_read_aloud_view_post_detail_fragment);
+        if (readAloudItem != null && readAloudItem.isVisible() && mActivity instanceof ViewPostDetailActivity) {
+            if (((ViewPostDetailActivity) mActivity).getTextToSpeechHelper().isSpeaking()) {
+                Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, readAloudItem, mActivity.getString(R.string.stop_reading));
+            } else {
+                Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, readAloudItem, mActivity.getString(R.string.read_aloud));
+            }
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_search_view_post_detail_fragment) {
@@ -1292,6 +1315,27 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
             Intent intent = new Intent(mActivity, PostFilterPreferenceActivity.class);
             intent.putExtra(PostFilterPreferenceActivity.EXTRA_POST, mPost);
             startActivity(intent);
+            return true;
+        } else if (itemId == R.id.action_read_aloud_view_post_detail_fragment) {
+            if (mPost != null && mActivity instanceof ViewPostDetailActivity) {
+                TextToSpeechHelper helper = ((ViewPostDetailActivity) mActivity).getTextToSpeechHelper();
+                if (helper.isSpeaking()) {
+                    helper.stop();
+                } else {
+                    StringBuilder textToSpeak = new StringBuilder();
+                    if (mPost.getTitle() != null) {
+                        textToSpeak.append(mPost.getTitle());
+                    }
+                    String selfText = mPost.getSelfTextPlain();
+                    if (selfText != null && !selfText.isEmpty()) {
+                        if (textToSpeak.length() > 0) {
+                            textToSpeak.append("\n\n");
+                        }
+                        textToSpeak.append(selfText);
+                    }
+                    helper.speak(textToSpeak.toString());
+                }
+            }
             return true;
         }
         return false;

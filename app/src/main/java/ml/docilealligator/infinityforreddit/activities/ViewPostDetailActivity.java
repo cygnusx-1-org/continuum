@@ -81,6 +81,7 @@ import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel;
 import retrofit2.Call;
@@ -99,6 +100,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     public static final String EXTRA_POST_FRAGMENT_ID = "EPFI";
     public static final String EXTRA_IS_NSFW_SUBREDDIT = "EINS";
     public static final int EDIT_COMMENT_REQUEST_CODE = 3;
+    private TextToSpeechHelper textToSpeechHelper;
     @State
     String mNewAccountName;
     @Inject
@@ -881,8 +883,26 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         Bridge.saveInstanceState(this, outState);
     }
 
+    public TextToSpeechHelper getTextToSpeechHelper() {
+        if (textToSpeechHelper == null) {
+            textToSpeechHelper = new TextToSpeechHelper(this);
+        }
+        return textToSpeechHelper;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (textToSpeechHelper != null) {
+            textToSpeechHelper.stop();
+        }
+    }
+
     @Override
     protected void onDestroy() {
+        if (textToSpeechHelper != null) {
+            textToSpeechHelper.shutdown();
+        }
         EventBus.getDefault().unregister(this);
         super.onDestroy();
         Bridge.clear(this);
