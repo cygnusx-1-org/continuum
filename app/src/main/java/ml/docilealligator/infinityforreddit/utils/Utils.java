@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -35,7 +34,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.text.HtmlCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
@@ -51,7 +49,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -456,8 +453,8 @@ public final class Utils {
         Handler handler = new Handler();
         executor.execute(() -> {
             try {
-                Bitmap bitmap = Glide.with(context).asBitmap().load(imageUri).submit().get();
-                String imageKeyOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit, accessToken, bitmap, true);
+                String imageKeyOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
+                        context.getContentResolver(), accessToken, imageUri, true);
                 handler.post(() -> {
                     if (imageKeyOrError != null && !imageKeyOrError.startsWith("Error: ")) {
                         String fileName = Utils.getFileName(context, imageUri);
@@ -483,9 +480,6 @@ public final class Utils {
                         Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show();
                     }
                 });
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-                handler.post(() -> Toast.makeText(context, R.string.get_image_bitmap_failed, Toast.LENGTH_LONG).show());
             } catch (XmlPullParserException | JSONException | IOException e) {
                 e.printStackTrace();
                 handler.post(() -> Toast.makeText(context, R.string.error_processing_image, Toast.LENGTH_LONG).show());
