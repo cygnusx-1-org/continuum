@@ -2,6 +2,14 @@
 
 ---
 
+8.1.3.1 / 2026-3-16
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Link in comment doesnt render/link properly #238
+* Fixed Ability to swap both the content and comments on Fold when unfolded #232
+* Improved the user experience when adding a user to a multi-reddit
+
 8.1.2.4 / 2026-3-6
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
