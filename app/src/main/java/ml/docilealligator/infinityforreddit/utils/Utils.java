@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -86,11 +87,49 @@ public final class Utils {
     };
 
     public static String modifyMarkdown(String markdown) {
-        String regexed = REGEX_PATTERNS[0].matcher(markdown).replaceAll("[$0](https://www.reddit.com$0)");
-        regexed = REGEX_PATTERNS[1].matcher(regexed).replaceAll("[$0](https://www.reddit.com/$0)");
+        String regexed = replaceOutsideMarkdownLinks(markdown, REGEX_PATTERNS[0], "[$0](https://www.reddit.com$0)");
+        regexed = replaceOutsideMarkdownLinks(regexed, REGEX_PATTERNS[1], "[$0](https://www.reddit.com/$0)");
         regexed = REGEX_PATTERNS[2].matcher(regexed).replaceAll("^");
 
         return regexed;
+    }
+
+    /**
+     * Performs regex replacement only on text that is not inside the text portion of a markdown
+     * link (i.e., not inside the [...] of [...](url)). This prevents corrupting existing
+     * markdown links by nesting link syntax inside them.
+     */
+    private static String replaceOutsideMarkdownLinks(String text, Pattern pattern, String replacement) {
+        Pattern markdownLinkPattern = Pattern.compile("\\[(?:[^\\[\\]]|\\\\\\[|\\\\\\])*]\\([^)]*\\)");
+        Matcher linkMatcher = markdownLinkPattern.matcher(text);
+
+        List<int[]> linkRanges = new ArrayList<>();
+        while (linkMatcher.find()) {
+            linkRanges.add(new int[]{linkMatcher.start(), linkMatcher.end()});
+        }
+
+        if (linkRanges.isEmpty()) {
+            return pattern.matcher(text).replaceAll(replacement);
+        }
+
+        Matcher matcher = pattern.matcher(text);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            boolean insideLink = false;
+            for (int[] range : linkRanges) {
+                if (matcher.start() >= range[0] && matcher.end() <= range[1]) {
+                    insideLink = true;
+                    break;
+                }
+            }
+            if (insideLink) {
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group()));
+            } else {
+                matcher.appendReplacement(sb, replacement);
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PROCESSING_IMG_PATTERN = Pattern.compile("\\*?Processing img (\\w+)\\.{3}\\*?");
