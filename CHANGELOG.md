@@ -2,6 +2,13 @@
 
 ---
 
+8.1.4.2 / 2026-3-27
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added "Share as Image with Comments" and "Share as Image with this Comment Thread"
+* Fixed the colors of the "Share as Image" QR codes to always be white/black for usability with the Android Camera app
+
 8.1.4.1 / 2026-3-27
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
