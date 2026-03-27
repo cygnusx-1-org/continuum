@@ -1685,4 +1685,8 @@
     <string name="comment_spam_status">This comment is removed as spam</string>
 
     <string name="copying_multi_reddit">Copying</string>
+
+    <string name="settings_search_settings">Search Settings</string>
+    <string name="settings_search_hint">Search settings…</string>
+    <string name="settings_search_no_results">No results found</string>
 </resources>

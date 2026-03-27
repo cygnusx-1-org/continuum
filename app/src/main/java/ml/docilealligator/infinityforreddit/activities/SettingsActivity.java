@@ -7,6 +7,7 @@ import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROL
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -45,6 +46,8 @@ import ml.docilealligator.infinityforreddit.settings.GesturesAndButtonsPreferenc
 import ml.docilealligator.infinityforreddit.settings.InterfacePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MainPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.PostPreferenceFragment;
+import ml.docilealligator.infinityforreddit.settings.SettingsSearchFragment;
+import ml.docilealligator.infinityforreddit.settings.SettingsSearchRegistry;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -106,6 +109,8 @@ public class SettingsActivity extends BaseActivity implements
 
         setSupportActionBar(binding.toolbarSettingsActivity);
 
+        SettingsSearchRegistry.getInstance().buildRegistry(getApplicationContext());
+
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                 .beginTransaction()
@@ -116,39 +121,45 @@ public class SettingsActivity extends BaseActivity implements
         }
 
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            invalidateOptionsMenu();
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 setTitle(R.string.settings_activity_label);
-
+                setToolbarScrollLocked(mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_TOOLBAR, false));
                 return;
             }
 
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.frame_layout_settings_activity);
 
-            if (fragment instanceof AboutPreferenceFragment) {
-                setTitle(R.string.settings_about_master_title);
-            } else if (fragment instanceof InterfacePreferenceFragment) {
-                setTitle(R.string.settings_interface_title);
-            } else if (fragment instanceof FontPreferenceFragment) {
-                setTitle(R.string.settings_font_title);
-            } else if (fragment instanceof GesturesAndButtonsPreferenceFragment) {
-                setTitle(R.string.settings_gestures_and_buttons_title);
-            } else if (fragment instanceof PostPreferenceFragment) {
-                setTitle(R.string.settings_category_post_title);
-            } else if (fragment instanceof AdvancedPreferenceFragment) {
-                setTitle(R.string.settings_advanced_master_title);
-            } else if (fragment instanceof APIKeysPreferenceFragment) {
-                setTitle(R.string.settings_api_keys_title);
-            } else if (fragment instanceof DebugPreferenceFragment) {
-                setTitle(R.string.settings_debug_title);
-            } else if (fragment instanceof MainPreferenceFragment) {
-                setTitle(R.string.settings_activity_label);
+            if (fragment instanceof SettingsSearchFragment) {
+                setTitle(R.string.settings_search_settings);
+                setToolbarScrollLocked(true);
+            } else {
+                setToolbarScrollLocked(mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_TOOLBAR, false));
+                if (fragment instanceof AboutPreferenceFragment) {
+                    setTitle(R.string.settings_about_master_title);
+                } else if (fragment instanceof InterfacePreferenceFragment) {
+                    setTitle(R.string.settings_interface_title);
+                } else if (fragment instanceof FontPreferenceFragment) {
+                    setTitle(R.string.settings_font_title);
+                } else if (fragment instanceof GesturesAndButtonsPreferenceFragment) {
+                    setTitle(R.string.settings_gestures_and_buttons_title);
+                } else if (fragment instanceof PostPreferenceFragment) {
+                    setTitle(R.string.settings_category_post_title);
+                } else if (fragment instanceof AdvancedPreferenceFragment) {
+                    setTitle(R.string.settings_advanced_master_title);
+                } else if (fragment instanceof APIKeysPreferenceFragment) {
+                    setTitle(R.string.settings_api_keys_title);
+                } else if (fragment instanceof DebugPreferenceFragment) {
+                    setTitle(R.string.settings_debug_title);
+                } else if (fragment instanceof MainPreferenceFragment) {
+                    setTitle(R.string.settings_activity_label);
+                }
             }
         });
 
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.LOCK_TOOLBAR, false).observe(this, lock -> {
-            AppBarLayout.LayoutParams p = (AppBarLayout.LayoutParams) binding.collapsingToolbarLayoutSettingsActivity.getLayoutParams();
-            p.setScrollFlags(lock ? SCROLL_FLAG_NO_SCROLL : SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-            binding.collapsingToolbarLayoutSettingsActivity.setLayoutParams(p);
+            Fragment current = getSupportFragmentManager().findFragmentById(R.id.frame_layout_settings_activity);
+            setToolbarScrollLocked(lock || current instanceof SettingsSearchFragment);
         });
     }
 
@@ -174,13 +185,63 @@ public class SettingsActivity extends BaseActivity implements
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Fragment current = getSupportFragmentManager().findFragmentById(R.id.frame_layout_settings_activity);
+        menu.findItem(R.id.action_search_settings).setVisible(!(current instanceof SettingsSearchFragment));
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
             return true;
         }
 
+        if (item.getItemId() == R.id.action_search_settings) {
+            Fragment current = getSupportFragmentManager()
+                    .findFragmentById(R.id.frame_layout_settings_activity);
+            if (!(current instanceof SettingsSearchFragment)) {
+                SettingsSearchFragment searchFragment = new SettingsSearchFragment();
+                getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left,
+                                R.anim.enter_from_left, R.anim.exit_to_right)
+                        .replace(R.id.frame_layout_settings_activity, searchFragment)
+                        .addToBackStack(null)
+                        .commit();
+                binding.appbarLayoutSettingsActivity.setExpanded(true);
+                setToolbarScrollLocked(true);
+                setTitle(R.string.settings_search_settings);
+            }
+            return true;
+        }
+
         return false;
+    }
+
+    public void navigateToSettingsFragment(Fragment fragment, int titleResId) {
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left,
+                        R.anim.enter_from_left, R.anim.exit_to_right)
+                .replace(R.id.frame_layout_settings_activity, fragment)
+                .addToBackStack(null)
+                .commit();
+        binding.appbarLayoutSettingsActivity.setExpanded(true);
+        setToolbarScrollLocked(mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_TOOLBAR, false));
+        setTitle(titleResId);
+    }
+
+    private void setToolbarScrollLocked(boolean locked) {
+        AppBarLayout.LayoutParams p = (AppBarLayout.LayoutParams)
+                binding.collapsingToolbarLayoutSettingsActivity.getLayoutParams();
+        p.setScrollFlags(locked ? SCROLL_FLAG_NO_SCROLL : SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
+        binding.collapsingToolbarLayoutSettingsActivity.setLayoutParams(p);
     }
 
     @Override
