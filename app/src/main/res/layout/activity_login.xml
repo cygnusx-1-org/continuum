@@ -64,7 +64,7 @@
                     android:text="@string/login_activity_internet_disconnected_error"
                     android:textSize="?attr/font_18"
                     android:fontFamily="?attr/font_family" />
-                
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/internet_disconnected_error_retry_button_login_activity"
                     android:layout_width="wrap_content"
