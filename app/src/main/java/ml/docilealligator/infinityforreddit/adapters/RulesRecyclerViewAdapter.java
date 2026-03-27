@@ -106,7 +106,7 @@ public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecycler
         imageAndGifPlugin = new ImageAndGifPlugin();
         imageAndGifEntry = new ImageAndGifEntry(activity,
                 Glide.with(activity), SharedPreferencesUtils.EMBEDDED_MEDIA_ALL,
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId) -> {
                     Intent imageIntent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
                         imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, mediaMetadata.original.url);

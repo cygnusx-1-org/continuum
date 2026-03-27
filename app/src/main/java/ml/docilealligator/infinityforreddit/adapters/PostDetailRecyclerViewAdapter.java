@@ -412,6 +412,8 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -425,7 +427,7 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                 mGlide, Integer.parseInt(postDetailsSharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
                 mDataSavingMode, mDisableImagePreview,
                 (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost.isSpoiler() && mNeedBlurSpoiler),
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId) -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
                         intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, mediaMetadata.original.url);
@@ -435,6 +437,8 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -1150,6 +1154,7 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, post.getSubredditName()
                         + "-" + post.getId() + ".jpg");
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                 mActivity.startActivity(intent);
@@ -1170,6 +1175,7 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                             + "-" + post.getId() + ".gif");
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, post.getVideoUrl());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                     mActivity.startActivity(intent);

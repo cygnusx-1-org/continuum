@@ -1057,6 +1057,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
             if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
             if (sanitizedTitle.isEmpty()) sanitizedTitle = "video_" + System.currentTimeMillis();
+            if (post.getId() != null && !post.getId().isEmpty()) {
+                sanitizedTitle = sanitizedTitle + "_" + post.getId();
+            }
 
             if (videoType != VIDEO_TYPE_NORMAL || post.isTumblr()) {
                 if (post.getPostType() == Post.GIF_TYPE) {

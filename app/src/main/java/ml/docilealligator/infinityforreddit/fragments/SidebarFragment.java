@@ -183,7 +183,7 @@ public class SidebarFragment extends Fragment {
         ImageAndGifPlugin imageAndGifPlugin = new ImageAndGifPlugin();
         imageAndGifEntry = new ImageAndGifEntry(mActivity,
                 Glide.with(this), SharedPreferencesUtils.EMBEDDED_MEDIA_ALL,
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId) -> {
                     Intent imageIntent = new Intent(mActivity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
                         imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, mediaMetadata.original.url);

@@ -89,6 +89,8 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     public static final String EXTRA_FILE_NAME_KEY = "EFNK";
     public static final String EXTRA_SUBREDDIT_OR_USERNAME_KEY = "ESOUK";
     public static final String EXTRA_POST_TITLE_KEY = "EPTK";
+    public static final String EXTRA_POST_ID_KEY = "EPIK";
+    public static final String EXTRA_COMMENT_ID_KEY = "ECIK";
     public static final String EXTRA_IS_NSFW = "EIN";
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
@@ -448,7 +450,16 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         // Reconstruct filename using post title passed in intent
         String postTitle = getIntent().getStringExtra(EXTRA_POST_TITLE_KEY);
-        String title = (postTitle != null && !postTitle.isEmpty()) ? postTitle : ((isGif || isApng) ? "reddit_gif" : "reddit_image");
+        String commentId = getIntent().getStringExtra(EXTRA_COMMENT_ID_KEY);
+        String postId = getIntent().getStringExtra(EXTRA_POST_ID_KEY);
+        String title = (postTitle != null && !postTitle.isEmpty()) ? postTitle
+                : ((isGif || isApng) ? "reddit_gif" : "reddit_image");
+        if (postId != null && !postId.isEmpty()) {
+            title = title + "_" + postId;
+        }
+        if (commentId != null && !commentId.isEmpty()) {
+            title = title + "_" + commentId;
+        }
 
         // Basic sanitization (similar to DownloadMediaService)
         String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");

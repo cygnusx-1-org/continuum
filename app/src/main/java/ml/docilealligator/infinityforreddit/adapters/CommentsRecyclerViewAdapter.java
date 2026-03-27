@@ -238,6 +238,8 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -253,7 +255,7 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
         boolean needBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, false);
         boolean blurImage = (post.isNSFW() && needBlurNsfw && !(doNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && needBlurSpoiler);
         mImageAndGifEntry = new ImageAndGifEntry(activity, mGlide, Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")), blurImage,
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId) -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
                         intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, mediaMetadata.original.url);
@@ -263,6 +265,11 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
+                    if (commentId != null && !commentId.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_COMMENT_ID_KEY, commentId);
+                    }
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -524,6 +531,8 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mImageAndGifPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
+                mImageAndGifEntry.setCurrentCommentId(comment.getId());
+                mImageAndGifEntry.setCurrentPostId(mPost.getId());
                 ((CommentBaseViewHolder) holder).mMarkwonAdapter.setMarkdown(mCommentMarkwon, comment.getCommentMarkdown());
                 // noinspection NotifyDataSetChanged
                 ((CommentBaseViewHolder) holder).mMarkwonAdapter.notifyDataSetChanged();

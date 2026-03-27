@@ -206,7 +206,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 commentSpoilerBackgroundColor, onLinkLongClickListener);
         mImageAndGifEntry = new ImageAndGifEntry(activity, Glide.with(activity),
                 Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId) -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
                         intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, mediaMetadata.original.url);
@@ -215,6 +215,12 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                     }
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, username);
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    if (commentId != null && !commentId.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_COMMENT_ID_KEY, commentId);
+                    }
+                    if (postId != null && !postId.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, postId);
+                    }
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -261,6 +267,8 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
 
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mImageAndGifPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
+                mImageAndGifEntry.setCurrentCommentId(comment.getId());
+                mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
                 ((CommentBaseViewHolder) holder).markwonAdapter.setMarkdown(mMarkwon, comment.getCommentMarkdown());
                 // noinspection NotifyDataSetChanged
                 ((CommentBaseViewHolder) holder).markwonAdapter.notifyDataSetChanged();

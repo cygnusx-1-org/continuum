@@ -74,6 +74,9 @@ public class DownloadMediaService extends JobService {
     public static final int EXTRA_MEDIA_TYPE_GIF = 1;
     public static final int EXTRA_MEDIA_TYPE_VIDEO = 2;
 
+    public static final String EXTRA_POST_ID = "EPI";
+    public static final String EXTRA_COMMENT_ID = "ECI";
+
     public static final String EXTRA_ALL_GALLERY_IMAGE_URLS = "EAGIU";
     public static final String EXTRA_ALL_GALLERY_IMAGE_MEDIA_TYPES = "EAGIMT";
     public static final String EXTRA_ALL_GALLERY_IMAGE_FILE_NAMES = "EAGIFN";
@@ -202,6 +205,9 @@ public class DownloadMediaService extends JobService {
     public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, Post post, int galleryIndex) {
         PersistableBundle extras = new PersistableBundle();
         String sanitizedTitle = sanitizeFilename(post.getTitle());
+        if (post.getId() != null && !post.getId().isEmpty()) {
+            sanitizedTitle = sanitizedTitle + "_" + post.getId();
+        }
         String url = "";
         String extension = "";
         int currentMediaType = -1;
@@ -321,6 +327,9 @@ public class DownloadMediaService extends JobService {
                 String url = "";
                 int currentMediaType = -1;
                 String sanitizedTitle = sanitizeFilename(post.getTitle()); // Sanitize title once
+                if (post.getId() != null && !post.getId().isEmpty()) {
+                    sanitizedTitle = sanitizedTitle + "_" + post.getId();
+                }
 
                 if (media.mediaType == Post.Gallery.TYPE_VIDEO) {
                     url = media.url;
