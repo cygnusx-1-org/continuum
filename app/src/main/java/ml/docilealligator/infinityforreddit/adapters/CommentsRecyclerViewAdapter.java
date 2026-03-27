@@ -1659,6 +1659,17 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
                     if (comment.getDepth() >= mDepthThreshold) {
                         bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_AND_SAVE_OPTION, true);
                     }
+                    bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_POST, mPost);
+                    int commentPos = mIsSingleCommentThreadMode
+                            ? getBindingAdapterPosition() - 1 : getBindingAdapterPosition();
+                    ArrayList<Comment> thread = new ArrayList<>();
+                    thread.add(comment);
+                    for (int i = commentPos + 1; i < mVisibleComments.size() && thread.size() < 10; i++) {
+                        Comment child = mVisibleComments.get(i);
+                        if (child.getDepth() <= comment.getDepth()) break;
+                        thread.add(child);
+                    }
+                    bundle.putParcelableArrayList(CommentMoreBottomSheetFragment.EXTRA_THREAD_COMMENTS, thread);
                     CommentMoreBottomSheetFragment commentMoreBottomSheetFragment = new CommentMoreBottomSheetFragment();
                     commentMoreBottomSheetFragment.setArguments(bundle);
                     commentMoreBottomSheetFragment.show(mFragment.getChildFragmentManager(), commentMoreBottomSheetFragment.getTag());

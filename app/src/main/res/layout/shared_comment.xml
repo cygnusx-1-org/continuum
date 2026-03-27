@@ -43,7 +43,9 @@
                 android:id="@+id/qr_code_image_view_shared_comment"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"
+                android:background="@android:color/white"
+                android:padding="4dp" />
 
         </LinearLayout>
 

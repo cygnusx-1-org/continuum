@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
@@ -78,6 +79,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.FilteredPostsActivity;
@@ -197,6 +199,7 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     private final int mNonDataSavingModeDefaultResolution;
     private final int mMaxResolution;
     private final PostDetailRecyclerViewAdapterCallback mPostDetailRecyclerViewAdapterCallback;
+    private Supplier<ArrayList<Comment>> mCommentsSupplier;
 
     private final int mColorAccent;
     private final int mCardViewColor;
@@ -1244,6 +1247,10 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         return 1;
     }
 
+    public void setCommentsSupplier(Supplier<ArrayList<Comment>> supplier) {
+        mCommentsSupplier = supplier;
+    }
+
     @Nullable
     @Override
     public Object getKeyForOrder(int order) {
@@ -1707,6 +1714,13 @@ public class PostDetailRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
                     }
                 }
                 bundle.putParcelable(ShareBottomSheetFragment.EXTRA_POST, mPost);
+                if (mCommentsSupplier != null) {
+                    ArrayList<Comment> comments = mCommentsSupplier.get();
+                    if (comments != null && !comments.isEmpty()) {
+                        ArrayList<Comment> topComments = new ArrayList<>(comments.subList(0, Math.min(10, comments.size())));
+                        bundle.putParcelableArrayList(ShareBottomSheetFragment.EXTRA_COMMENTS, topComments);
+                    }
+                }
                 ShareBottomSheetFragment shareBottomSheetFragment = new ShareBottomSheetFragment();
                 shareBottomSheetFragment.setArguments(bundle);
                 shareBottomSheetFragment.show(mFragment.getChildFragmentManager(), shareBottomSheetFragment.getTag());

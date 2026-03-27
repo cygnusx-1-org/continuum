@@ -631,6 +631,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                     mSeparatePostAndComments, mActivity.accessToken, mActivity.accountName, mPost, mLocale,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostDetailsSharedPreferences,
                     mExoCreator, post -> EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, postListPosition)));
+            mPostAdapter.setCommentsSupplier(() -> mCommentsAdapter != null ? mCommentsAdapter.getVisibleComments() : null);
             mCommentsAdapter = new CommentsRecyclerViewAdapter(mActivity,
                     this, mCustomThemeWrapper, mExecutor, mRetrofit, mOauthRetrofit,
                     mActivity.accessToken, mActivity.accountName, mPost, mLocale, mSingleCommentId,
@@ -1472,6 +1473,7 @@ public class ViewPostDetailFragment extends Fragment implements FragmentCommunic
                                     mPostDetailsSharedPreferences, mExoCreator,
                                     post1 -> EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, postListPosition)));
 
+                            mPostAdapter.setCommentsSupplier(() -> mCommentsAdapter != null ? mCommentsAdapter.getVisibleComments() : null);
                             mCommentsAdapter = new CommentsRecyclerViewAdapter(mActivity,
                                     ViewPostDetailFragment.this, mCustomThemeWrapper, mExecutor,
                                     mRetrofit, mOauthRetrofit, mActivity.accessToken, mActivity.accountName, mPost, mLocale,

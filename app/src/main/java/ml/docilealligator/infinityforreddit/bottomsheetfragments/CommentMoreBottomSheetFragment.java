@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
@@ -28,10 +29,12 @@ import ml.docilealligator.infinityforreddit.activities.ReportActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.comment.Comment;
+import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentCommentMoreBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.ShareScreenshotUtilsKt;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 
@@ -45,6 +48,8 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
     public static final String EXTRA_POSITION = "EP";
     public static final String EXTRA_SHOW_REPLY_AND_SAVE_OPTION = "ESSARO";
     public static final String EXTRA_IS_NSFW = "EIN";
+    public static final String EXTRA_POST = "EPO";
+    public static final String EXTRA_THREAD_COMMENTS = "ETC";
 
     private FragmentCommentMoreBottomSheetBinding binding;
     private BaseActivity activity;
@@ -179,6 +184,24 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
             dismiss();
             ShareScreenshotUtilsKt.shareCommentAsScreenshot(activity, comment);
         });
+
+        Post post = bundle.getParcelable(EXTRA_POST);
+        ArrayList<Comment> threadComments = bundle.getParcelableArrayList(EXTRA_THREAD_COMMENTS);
+        if (post != null && threadComments != null && !threadComments.isEmpty()) {
+            binding.shareAsImageWithThreadTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
+            binding.shareAsImageWithThreadTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+                dismiss();
+                ShareScreenshotUtilsKt.sharePostWithCommentsAsScreenshot(
+                        activity, post, threadComments, activity.customThemeWrapper,
+                        activity.getResources().getConfiguration().locale,
+                        activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
+                                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE),
+                        new SaveMemoryCenterInisdeDownsampleStrategy(
+                                Integer.parseInt(activity.getDefaultSharedPreferences()
+                                        .getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))
+                );
+            });
+        }
 
         binding.copyTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
             dismiss();

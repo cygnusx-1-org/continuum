@@ -794,6 +794,9 @@
     <string name="copy_link">Copy Link</string>
     <string name="open_link">Open Link</string>
     <string name="share_as_image">Share as Image</string>
+    <string name="share_with_comments">Share as Image with Comments</string>
+    <string name="share_as_image_with_thread">Share as Image with this Comment Thread</string>
+    <string name="error_loading_comments_for_share">Error loading comments</string>
 
     <string name="copy_success">Copied</string>
     <string name="copy_link_failed">Cannot copy the link</string>

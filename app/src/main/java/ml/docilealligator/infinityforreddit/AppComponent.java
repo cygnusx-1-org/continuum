@@ -69,6 +69,7 @@ import ml.docilealligator.infinityforreddit.activities.WikiActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostOptionsBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.CustomThemeListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.FollowedUsersListingFragment;
@@ -321,6 +322,8 @@ public interface AppComponent {
     void inject(LoginChromeCustomTabActivity loginChromeCustomTabActivity);
 
     void inject(PostOptionsBottomSheetFragment postOptionsBottomSheetFragment);
+
+    void inject(ShareBottomSheetFragment shareBottomSheetFragment);
 
     void inject(ProxyPreferenceFragment proxyPreferenceFragment);
 
