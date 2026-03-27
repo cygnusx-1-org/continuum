@@ -10,6 +10,14 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 * Added the ability to search Settings
 * Added post ids or post ids + comment ids to saved filenames
 
+8.1.4.1 / 2026-3-27
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Updated to 8.1.4
+* Added the ability to search Settings
+* Added post ids or post ids + comment ids to saved filenames
+
 8.1.3.1 / 2026-3-16
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
