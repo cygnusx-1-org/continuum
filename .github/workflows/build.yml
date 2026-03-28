@@ -1,0 +1,11 @@
+# This workflow is intentionally disabled for this fork.
+# The upstream build.yml is overridden here to prevent phantom CI runs.
+# Only runs manually via workflow_dispatch.
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'This fork does not use CI builds. Are you sure?'
+        required: false

@@ -1,0 +1,3 @@
+# Keep our fork's versions of these files when merging from upstream
+.github/workflows/build.yml merge=ours
+.github/workflows/codeql-analysis.yml merge=ours
