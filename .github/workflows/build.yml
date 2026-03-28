@@ -1,11 +1,14 @@
-# This workflow is intentionally disabled for this fork.
-# The upstream build.yml is overridden here to prevent phantom CI runs.
-# Only runs manually via workflow_dispatch.
+# This workflow overrides the upstream build.yml for this fork.
+# It runs a no-op job so GitHub doesn't report "no jobs were run".
 name: Build
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
-    inputs:
-      confirm:
-        description: 'This fork does not use CI builds. Are you sure?'
-        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Build workflow disabled for this fork"
