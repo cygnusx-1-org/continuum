@@ -184,14 +184,29 @@ if (githubPropertiesFile.exists()) {
         def releaseNotes = System.getenv("RELEASE_NOTES") ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
 
         token = githubProperties["githubToken"]
-        owner = "cygnusx-1-org"
-        repo = "continuum"
+
+        def repoEnv = System.getenv("GITHUB_REPOSITORY")
+        if (repoEnv) {
+            def parts = repoEnv.split("/")
+            if (parts.length == 2) {
+                owner = parts[0]
+                repo = parts[1]
+            } else {
+                owner = githubProperties["owner"] ?: "cygnusx-1-org"
+                repo = githubProperties["repo"] ?: "continuum"
+            }
+        } else {
+            owner = githubProperties["owner"] ?: "cygnusx-1-org"
+            repo = githubProperties["repo"] ?: "continuum"
+        }
         tagName = android.defaultConfig.versionName ?: "default-version"
         targetCommitish = "master"
         releaseName = "Release ${android.defaultConfig.versionName ?: "default-version"}"
         body = "$releaseNotes"
         draft = false
-        prerelease = false
+        def prereleaseValue = System.getenv("GITHUB_PRERELEASE")
+
+        prerelease = prereleaseValue ? prereleaseValue.toBoolean() : false
         overwrite = false
 
         // Dynamically set releaseAssets by searching the APK path
