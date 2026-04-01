@@ -2,6 +2,12 @@
 
 ---
 
+8.1.4.3 / 2026-3-31
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed WebView login
+
 8.1.4.2 / 2026-3-27
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
