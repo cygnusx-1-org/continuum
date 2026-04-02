@@ -239,36 +239,67 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
     }
 
     private void openLoginPage() {
+        Uri.Builder uriBuilder = Uri.parse(APIUtils.OAUTH_URL).buildUpon();
+        uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
+        uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);
+        uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, APIUtils.STATE);
+        uriBuilder.appendQueryParameter(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
+        uriBuilder.appendQueryParameter(APIUtils.DURATION_KEY, APIUtils.DURATION);
+        uriBuilder.appendQueryParameter(APIUtils.SCOPE_KEY, APIUtils.SCOPE);
+        Uri loginUri = uriBuilder.build();
+
         ArrayList<ResolveInfo> resolveInfos = getCustomTabsPackages(getPackageManager());
 
         if (!resolveInfos.isEmpty()) {
-            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-            // add share action to menu list
-            builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
-            builder.setDefaultColorSchemeParams(
-                new CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(mCustomThemeWrapper.getColorPrimary())
-                    .build());
-            CustomTabsIntent customTabsIntent = builder.build();
-            customTabsIntent.intent.setPackage(resolveInfos.get(0).activityInfo.packageName);
-            customTabsIntent.intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true);
+            String packageName = resolveInfos.get(0).activityInfo.packageName;
 
+            if (isFirefoxBrowser(packageName)) {
+                // Firefox Custom Tabs don't handle custom scheme redirects properly.
+                // Use a regular browser intent instead — the full browser will
+                // dispatch continuum://localhost via standard Android intent resolution.
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, loginUri);
+                browserIntent.setPackage(packageName);
+                try {
+                    startActivity(browserIntent);
+                } catch (ActivityNotFoundException e) {
+                    Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
+                }
+            } else {
+                CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                // add share action to menu list
+                builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
+                builder.setDefaultColorSchemeParams(
+                    new CustomTabColorSchemeParams.Builder()
+                        .setToolbarColor(mCustomThemeWrapper.getColorPrimary())
+                        .build());
+                CustomTabsIntent customTabsIntent = builder.build();
+                customTabsIntent.intent.setPackage(packageName);
+                customTabsIntent.intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true);
+
+                try {
+                    customTabsIntent.launchUrl(this, loginUri);
+                } catch (ActivityNotFoundException e) {
+                    Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            // No Custom Tabs browsers found — try opening in any available browser.
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, loginUri);
             try {
-                Uri.Builder uriBuilder = Uri.parse(APIUtils.OAUTH_URL).buildUpon();
-                uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
-                uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);
-                uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, APIUtils.STATE);
-                uriBuilder.appendQueryParameter(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
-                uriBuilder.appendQueryParameter(APIUtils.DURATION_KEY, APIUtils.DURATION);
-                uriBuilder.appendQueryParameter(APIUtils.SCOPE_KEY, APIUtils.SCOPE);
-
-                customTabsIntent.launchUrl(this, uriBuilder.build());
+                startActivity(browserIntent);
             } catch (ActivityNotFoundException e) {
                 Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
             }
-        } else {
-            Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
         }
+    }
+
+    private boolean isFirefoxBrowser(String packageName) {
+        return packageName != null && (
+            packageName.startsWith("org.mozilla.firefox") ||
+            packageName.startsWith("org.mozilla.fenix") ||
+            packageName.equals("org.mozilla.focus") ||
+            packageName.equals("org.mozilla.klar")
+        );
     }
 
     private ArrayList<ResolveInfo> getCustomTabsPackages(PackageManager pm) {
