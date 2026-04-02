@@ -44,7 +44,8 @@ public class APIUtils {
     public static final String STATE_KEY = "state";
     public static final String STATE = "23ro8xlxvzp4asqd";
     public static final String REDIRECT_URI_KEY = "redirect_uri";
-    public static final String REDIRECT_URI = "continuum://localhost";
+    public static final String DEFAULT_REDIRECT_URI = "continuum://localhost";
+    public static String REDIRECT_URI = DEFAULT_REDIRECT_URI;
     public static final String DURATION_KEY = "duration";
     public static final String DURATION = "permanent";
     public static final String SCOPE_KEY = "scope";
@@ -62,8 +63,9 @@ public class APIUtils {
     public static final String AUTHORIZATION_KEY = "Authorization";
     public static final String AUTHORIZATION_BASE = "bearer ";
     public static final String USER_AGENT_KEY = "User-Agent";
-    public static final String USER_AGENT = "android:org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
-    public static final String ANONYMOUS_USER_AGENT = "android:org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
+    public static final String DEFAULT_USER_AGENT = "android:org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
+    public static String USER_AGENT = DEFAULT_USER_AGENT;
+    public static String ANONYMOUS_USER_AGENT = DEFAULT_USER_AGENT;
     public static final String USERNAME_KEY = "username";
 
     public static final String GRANT_TYPE_KEY = "grant_type";
@@ -139,6 +141,25 @@ public class APIUtils {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
 
         return sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, context.getString(R.string.default_client_id));
+    }
+
+    // Method to retrieve User Agent from SharedPreferences
+    public static String getUserAgent(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(SharedPreferencesUtils.USER_AGENT_PREF_KEY, DEFAULT_USER_AGENT);
+    }
+
+    // Method to retrieve Redirect URI from SharedPreferences
+    public static String getRedirectUri(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY, context.getString(R.string.default_redirect_uri));
+    }
+
+    // Initialize mutable configurable fields from SharedPreferences at app startup
+    public static void initConfigurableFields(Context context) {
+        USER_AGENT = getUserAgent(context);
+        ANONYMOUS_USER_AGENT = USER_AGENT;
+        REDIRECT_URI = getRedirectUri(context);
     }
 
     // Method to retrieve Giphy API Key from SharedPreferences

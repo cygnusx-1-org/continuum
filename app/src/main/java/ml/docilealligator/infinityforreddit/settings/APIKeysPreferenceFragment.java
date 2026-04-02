@@ -29,6 +29,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.QRCodeScannerActivity;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
@@ -83,6 +84,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
         setupClientIdPreference();
         setupGiphyApiKeyPreference();
+        setupUserAgentPreference();
+        setupRedirectUriPreference();
     }
 
     private void setupClientIdPreference() {
@@ -280,6 +283,106 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
         } else {
             Log.e(TAG, "Could not find Giphy API Key preference: " + SharedPreferencesUtils.GIPHY_API_KEY_PREF_KEY);
+        }
+    }
+
+    private void setupUserAgentPreference() {
+        EditTextPreference userAgentPref = findPreference(SharedPreferencesUtils.USER_AGENT_PREF_KEY);
+        if (userAgentPref != null) {
+            userAgentPref.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                editText.setSingleLine(true);
+
+                String currentValue = userAgentPref.getText();
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(APIUtils.DEFAULT_USER_AGENT)) {
+                    editText.setText("");
+                }
+            });
+
+            userAgentPref.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String currentValue = preference.getText();
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(APIUtils.DEFAULT_USER_AGENT)) {
+                    return preference.getContext().getString(R.string.tap_to_set_user_agent);
+                } else {
+                    return currentValue;
+                }
+            });
+
+            userAgentPref.setOnPreferenceChangeListener(((preference, newValue) -> {
+                String value = (String) newValue;
+                if (value == null) {
+                    value = "";
+                }
+
+                SharedPreferences prefs = preference.getContext().getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(SharedPreferencesUtils.USER_AGENT_PREF_KEY, value);
+                boolean success = editor.commit();
+
+                if (success) {
+                    Log.i(TAG, "User Agent saved successfully.");
+                    preference.setSummaryProvider(userAgentPref.getSummaryProvider());
+                    AppRestartHelper.triggerAppRestart(requireContext());
+                } else {
+                    Log.e(TAG, "Failed to save User Agent.");
+                    Toast.makeText(getContext(), "Error saving User Agent.", Toast.LENGTH_SHORT).show();
+                }
+
+                return false;
+            }));
+        } else {
+            Log.e(TAG, "Could not find User Agent preference: " + SharedPreferencesUtils.USER_AGENT_PREF_KEY);
+        }
+    }
+
+    private void setupRedirectUriPreference() {
+        EditTextPreference redirectUriPref = findPreference(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY);
+        if (redirectUriPref != null) {
+            redirectUriPref.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                editText.setSingleLine(true);
+
+                String currentValue = redirectUriPref.getText();
+                String defaultValue = editText.getContext().getString(R.string.default_redirect_uri);
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(defaultValue)) {
+                    editText.setText("");
+                }
+            });
+
+            redirectUriPref.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String currentValue = preference.getText();
+                String defaultValue = preference.getContext().getString(R.string.default_redirect_uri);
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(defaultValue)) {
+                    return preference.getContext().getString(R.string.tap_to_set_redirect_uri);
+                } else {
+                    return currentValue;
+                }
+            });
+
+            redirectUriPref.setOnPreferenceChangeListener(((preference, newValue) -> {
+                String value = (String) newValue;
+                if (value == null) {
+                    value = "";
+                }
+
+                SharedPreferences prefs = preference.getContext().getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY, value);
+                boolean success = editor.commit();
+
+                if (success) {
+                    Log.i(TAG, "Redirect URI saved successfully.");
+                    preference.setSummaryProvider(redirectUriPref.getSummaryProvider());
+                    AppRestartHelper.triggerAppRestart(requireContext());
+                } else {
+                    Log.e(TAG, "Failed to save Redirect URI.");
+                    Toast.makeText(getContext(), "Error saving Redirect URI.", Toast.LENGTH_SHORT).show();
+                }
+
+                return false;
+            }));
+        } else {
+            Log.e(TAG, "Could not find Redirect URI preference: " + SharedPreferencesUtils.REDIRECT_URI_PREF_KEY);
         }
     }
 

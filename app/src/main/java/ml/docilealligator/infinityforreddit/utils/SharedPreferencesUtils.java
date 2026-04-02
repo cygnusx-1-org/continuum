@@ -462,6 +462,8 @@ public class SharedPreferencesUtils {
     public static final String PROXY_PORT = "proxy_port";
     public static final String CLIENT_ID_PREF_KEY = "client_id_pref_key";
     public static final String GIPHY_API_KEY_PREF_KEY = "giphy_api_key_pref_key";
+    public static final String USER_AGENT_PREF_KEY = "user_agent_pref_key";
+    public static final String REDIRECT_URI_PREF_KEY = "redirect_uri_pref_key";
 
     //Legacy Settings
     public static final String MAIN_PAGE_TAB_1_TITLE_LEGACY = "main_page_tab_1_title";

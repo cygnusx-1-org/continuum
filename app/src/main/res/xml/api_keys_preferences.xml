@@ -17,4 +17,19 @@
         app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 
+    <EditTextPreference
+        android:key="@string/user_agent_pref_key"
+        android:title="@string/settings_user_agent_title"
+        android:summary="@string/tap_to_set_user_agent"
+        app:iconSpaceReserved="false"
+        app:useSimpleSummaryProvider="true" />
+
+    <EditTextPreference
+        android:defaultValue="@string/default_redirect_uri"
+        android:key="@string/redirect_uri_pref_key"
+        android:title="@string/settings_redirect_uri_title"
+        android:summary="@string/tap_to_set_redirect_uri"
+        app:iconSpaceReserved="false"
+        app:useSimpleSummaryProvider="true" />
+
 </androidx.preference.PreferenceScreen>
