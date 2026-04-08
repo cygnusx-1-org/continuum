@@ -110,6 +110,7 @@
 
     <string name="parse_json_response_error">Error occurred when parsing the JSON response</string>
     <string name="retrieve_token_error">Error Retrieving the token</string>
+    <string name="invalid_client_id_error">Invalid client ID, check your API Key setting</string>
     <string name="something_went_wrong">Something went wrong. Try again later.</string>
     <string name="access_denied">Access denied</string>
     <string name="parse_user_info_error">Error occurred when parsing the user info</string>
