@@ -4,7 +4,7 @@
 
 There can be issues with `Android System Webview`. See [Common errors](/SETUP.md#common-errors) in [SETUP.md](/SETUP.md).
 
-You need to set the language of your Reddit account to `English`.
+There is a known issue with the `Reddit` API that prevents logging in when the language if the language is anything other than `English`. You need to set the language of your Reddit account to `English`.
 
 1. Go to https://old.reddit.com/prefs/
 2. Change the `interface language`
