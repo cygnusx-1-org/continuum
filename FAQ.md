@@ -4,8 +4,14 @@
 
 There can be issues with `Android System Webview`. See [Common errors](/SETUP.md#common-errors) in [SETUP.md](/SETUP.md).
 
-There is a known issue with the `Reddit` API that prevents logging in when the language if the language is anything other than `English`. You need to set the language of your Reddit account to `English`.
+There is a known issue with the `Reddit` login JavaScript. It was discovered by wchill. It prevents logging in when the language if the language is anything other than `English`. So you need to set the language of your `Reddit` account to `English`.
 
+I have implemented a hack to workaround the issue in `8.1.4.5`, but it has a few issues.
+
+1. It could break at anytime if `Reddit` rewrites their JavaScript.
+2. The hack only works in the WebView not Chrome, Brave or Firefox.
+
+## How to change the Reddit account interface language
 1. Go to https://old.reddit.com/prefs/
 2. Change the `interface language`
 
