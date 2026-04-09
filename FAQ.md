@@ -4,6 +4,25 @@
 
 There can be issues with `Android System Webview`. See [Common errors](/SETUP.md#common-errors) in [SETUP.md](/SETUP.md).
 
+You need to set the language of your Reddit account to `English`.
+
+1. Go to https://old.reddit.com/prefs/
+2. Change the `interface language`
+
+<p align="center">
+  <picture>
+    <source
+      width="256px"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/reddit_account_language.png"
+    >
+    <img
+      width="256px"
+      src="assets/screenshots/reddit_account_language.png"
+    >
+  </picture>
+</p>
+
 Sometimes there can be popups on the login page, like a cookies popup, that block the keyboard appearing. Real browsers deal with these better than `Android System WebView`.
 
 There is also a button in the bottom right of the login screen that lets you use your default browser instead of `Android System WebView`. But the browser needs to be `Chrome` based like `Chrome`, `Chromium`, or `Brave` to work. It has been tested with `Firefox`, and it doesn't work.
