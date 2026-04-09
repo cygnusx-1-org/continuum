@@ -6,8 +6,9 @@
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Added support for configuring the user agent and redirect uri directly in the app
-* Added support for logging in with Firefox as the external browser
+* Fixed issue with the Reddit account's interface language being anything
+other than English at WebView login. Thanks to @wchill
+* Fixed Jump to Next Top-level Comment #244
 
 8.1.4.4 / 2026-4-3
 ===========
