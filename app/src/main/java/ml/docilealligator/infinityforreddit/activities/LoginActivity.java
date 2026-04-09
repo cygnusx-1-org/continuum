@@ -12,6 +12,7 @@ import android.view.InflateException;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -168,6 +169,7 @@ public class LoginActivity extends BaseActivity {
         CookieManager.getInstance().removeAllCookies(aBoolean -> {
         });
 
+        binding.webviewLoginActivity.addJavascriptInterface(new JsRequestLogger(), "AndroidLogger");
         binding.webviewLoginActivity.loadUrl(url);
         binding.webviewLoginActivity.setWebViewClient(new WebViewClient() {
             @Override
@@ -269,6 +271,17 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                view.evaluateJavascript(
+                    "(function() {" +
+                    "  document.addEventListener('submit', function(e) {" +
+                    "    if (e.submitter && e.submitter.name === 'authorize') {" +
+                    "      AndroidLogger.log('rewriting authorize from [' + e.submitter.value + '] to [Allow]');" +
+                    "      e.submitter.value = 'Allow';" +
+                    "    }" +
+                    "  }, true);" +
+                    "})();",
+                    null
+                );
             }
 
             @Override
@@ -316,6 +329,13 @@ public class LoginActivity extends BaseActivity {
             binding.twoFaInfOTextViewLoginActivity.setTypeface(typeface);
             binding.internetDisconnectedErrorTextViewLoginActivity.setTypeface(typeface);
             binding.internetDisconnectedErrorRetryButtonLoginActivity.setTypeface(typeface);
+        }
+    }
+
+    private static class JsRequestLogger {
+        @JavascriptInterface
+        public void log(String message) {
+            Log.d("LoginActivity", "[JS] " + message);
         }
     }
 
