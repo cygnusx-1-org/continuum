@@ -12,12 +12,12 @@ You need to set the language of your Reddit account to `English`.
 <p align="center">
   <picture>
     <source
-      width="512x"
+      width="1053x"
       media="(prefers-color-scheme: dark)"
       srcset="assets/screenshots/reddit_account_language.png"
     >
     <img
-      width="512px"
+      width="1053px"
       src="assets/screenshots/reddit_account_language.png"
     >
   </picture>
