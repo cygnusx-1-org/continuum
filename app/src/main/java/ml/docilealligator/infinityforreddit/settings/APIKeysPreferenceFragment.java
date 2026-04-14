@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
@@ -28,6 +29,7 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.QRCodeScannerActivity;
+import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
@@ -44,7 +46,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     SharedPreferences mSharedPreferences;
 
     private ActivityResultLauncher<Intent> qrCodeScannerLauncher;
-    private EditTextPreference clientIdPref;
+    private CustomFontEditTextPreference clientIdPref;
     private EditText currentClientIdEditText;
 
     public APIKeysPreferenceFragment() {}
@@ -91,10 +93,18 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     private void setupClientIdPreference() {
         clientIdPref = findPreference(SharedPreferencesUtils.CLIENT_ID_PREF_KEY);
         if (clientIdPref != null) {
+            android.graphics.Typeface robotoMonoMedium = ResourcesCompat.getFont(requireContext(), R.font.roboto_mono_medium);
+            if (robotoMonoMedium != null) {
+                clientIdPref.setSummaryTypeface(robotoMonoMedium);
+            }
+
             // Set input type to visible password to prevent suggestions, but allow any string
             clientIdPref.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                 editText.setSingleLine(true);
+                if (robotoMonoMedium != null) {
+                    editText.setTypeface(robotoMonoMedium);
+                }
 
                 // Store a reference to the current EditText
                 currentClientIdEditText = editText;

@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <EditTextPreference
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
         android:defaultValue="@string/default_client_id"
         android:key="@string/client_id_pref_key"
         android:summary="@string/tap_to_set_client_id"

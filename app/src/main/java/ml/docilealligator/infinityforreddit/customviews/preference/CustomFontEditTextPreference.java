@@ -17,6 +17,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 public class CustomFontEditTextPreference extends EditTextPreference implements CustomFontReceiver, CustomThemeWrapperReceiver {
     private CustomThemeWrapper customThemeWrapper;
     private Typeface typeface;
+    private Typeface summaryTypeface;
 
     public CustomFontEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -61,10 +62,18 @@ public class CustomFontEditTextPreference extends EditTextPreference implements 
             if (titleTextView instanceof TextView) {
                 ((TextView) titleTextView).setTypeface(typeface);
             }
+        }
+        Typeface effectiveSummaryTypeface = summaryTypeface != null ? summaryTypeface : typeface;
+        if (effectiveSummaryTypeface != null) {
             if (summaryTextView instanceof TextView) {
-                ((TextView) summaryTextView).setTypeface(typeface);
+                ((TextView) summaryTextView).setTypeface(effectiveSummaryTypeface);
             }
         }
+    }
+
+    public void setSummaryTypeface(Typeface summaryTypeface) {
+        this.summaryTypeface = summaryTypeface;
+        notifyChanged();
     }
 
     @Override
