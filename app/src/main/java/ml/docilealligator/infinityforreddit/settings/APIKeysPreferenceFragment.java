@@ -120,7 +120,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 // Otherwise, the EditText will automatically show the non-default current value
 
                 // Setup validation for the specific length
-                setupLengthValidation(editText, CLIENT_ID_LENGTH);
+                setupLengthValidation(editText, CLIENT_ID_LENGTH, true);
 
                 // Add QR code scanning button to dialog
                 View rootView = editText.getRootView();
@@ -184,7 +184,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 // Reset the current EditText reference since the dialog will be dismissed
                 currentClientIdEditText = null;
 
-                String value = (String) newValue;
+                String value = stripWhitespace((String) newValue);
 
                 // Final validation check (redundant due to button state, but safe)
                 if (value == null || value.length() != CLIENT_ID_LENGTH) {
@@ -234,7 +234,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 // No need to clear the text field like for client ID, as there's no "default" shown
 
                 // Setup validation for the specific length
-                setupLengthValidation(editText, GIPHY_API_KEY_LENGTH);
+                setupLengthValidation(editText, GIPHY_API_KEY_LENGTH, false);
             });
 
             // Set a summary provider that hides the default value but shows custom ones
@@ -319,7 +319,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             });
 
             userAgentPref.setOnPreferenceChangeListener(((preference, newValue) -> {
-                String value = (String) newValue;
+                String value = stripLeadingTrailingWhitespace((String) newValue);
                 if (value == null) {
                     value = "";
                 }
@@ -370,7 +370,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             });
 
             redirectUriPref.setOnPreferenceChangeListener(((preference, newValue) -> {
-                String value = (String) newValue;
+                String value = stripWhitespace((String) newValue);
                 if (value == null) {
                     value = "";
                 }
@@ -396,8 +396,39 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
         }
     }
 
+    // Strips all whitespace from the string (leading, trailing, and internal).
+    private static String stripWhitespace(String value) {
+        if (value == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    // Strips only leading and trailing whitespace; preserves internal spaces (e.g. in user agents).
+    private static String stripLeadingTrailingWhitespace(String value) {
+        if (value == null) {
+            return null;
+        }
+        int start = 0;
+        int end = value.length();
+        while (start < end && Character.isWhitespace(value.charAt(start))) {
+            start++;
+        }
+        while (end > start && Character.isWhitespace(value.charAt(end - 1))) {
+            end--;
+        }
+        return value.substring(start, end);
+    }
+
     // Reusable helper method for setting up length validation on an EditTextPreference dialog
-    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength) {
+    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck) {
         // Add TextWatcher to enable/disable OK button based on length
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -412,7 +443,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 if (rootView != null) {
                     Button positiveButton = rootView.findViewById(android.R.id.button1);
                     if (positiveButton != null) {
-                        boolean isEnabled = s.length() == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && s.length() == 0); // Allow empty for Giphy
+                        int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(s.toString()).length() : s.length();
+                        boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
                         positiveButton.setEnabled(isEnabled);
                         positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f); // Adjust alpha for visual feedback
                     } else {
@@ -430,7 +462,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             if (rootView != null) {
                 Button positiveButton = rootView.findViewById(android.R.id.button1);
                 if (positiveButton != null) {
-                    boolean isEnabled = editText.getText().length() == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && editText.getText().length() == 0); // Allow empty for Giphy
+                    int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(editText.getText().toString()).length() : editText.getText().length();
+                    boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
                     positiveButton.setEnabled(isEnabled);
                     positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f);
                 } else {
