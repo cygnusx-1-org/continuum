@@ -146,7 +146,11 @@ public class APIUtils {
     // Method to retrieve User Agent from SharedPreferences
     public static String getUserAgent(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(SharedPreferencesUtils.USER_AGENT_PREF_KEY, DEFAULT_USER_AGENT);
+        String userAgent = sharedPreferences.getString(SharedPreferencesUtils.USER_AGENT_PREF_KEY, DEFAULT_USER_AGENT);
+        if (userAgent == null || userAgent.isEmpty()) {
+            return DEFAULT_USER_AGENT;
+        }
+        return userAgent;
     }
 
     // Method to retrieve Redirect URI from SharedPreferences
