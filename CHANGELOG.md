@@ -2,6 +2,16 @@
 
 ---
 
+8.1.4.6 / 2026-4-18
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed issue with the redirect URI when it defined but blank
+* Fixed issue with the user agent when it is defined but blank
+* Added whitespace trimming for the client ID and redirect URI
+* Added leading and trailing only whitespace trimming to the user agent
+* Changed the font used for client IDs to make typos less likely
+
 8.1.4.5 / 2026-4-9
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
