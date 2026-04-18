@@ -156,7 +156,12 @@ public class APIUtils {
     // Method to retrieve Redirect URI from SharedPreferences
     public static String getRedirectUri(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY, context.getString(R.string.default_redirect_uri));
+        String defaultRedirectUri = context.getString(R.string.default_redirect_uri);
+        String redirectUri = sharedPreferences.getString(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY, defaultRedirectUri);
+        if (redirectUri == null || redirectUri.isEmpty()) {
+            return defaultRedirectUri;
+        }
+        return redirectUri;
     }
 
     // Initialize mutable configurable fields from SharedPreferences at app startup
