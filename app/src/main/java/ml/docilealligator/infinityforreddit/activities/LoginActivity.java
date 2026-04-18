@@ -140,10 +140,15 @@ public class LoginActivity extends BaseActivity {
         binding.webviewLoginActivity.getSettings().setJavaScriptEnabled(true);
 
         String userAgent = binding.webviewLoginActivity.getSettings().getUserAgentString();
+        Log.d("LoginActivity", "Default WebView user agent: " + userAgent);
         String chromeUserAgent = userAgent
                 .replace("; wv)", ")")
                 .replace("Version/4.0 ", "");
         binding.webviewLoginActivity.getSettings().setUserAgentString(chromeUserAgent);
+        Log.d("LoginActivity", "Overridden WebView user agent: " + chromeUserAgent);
+        Log.d("LoginActivity", "App user agent (APIUtils.USER_AGENT, unused by WebView): " + APIUtils.USER_AGENT);
+
+        Log.d("LoginActivity", "OAuth redirect URI: " + APIUtils.REDIRECT_URI);
 
         Uri baseUri = Uri.parse(APIUtils.OAUTH_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
