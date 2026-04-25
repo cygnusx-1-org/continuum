@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -599,6 +602,37 @@ public final class Utils {
         }
 
         return context.getFilesDir();
+    }
+
+    // Sample the four corners of a loaded bitmap to decide whether a thumbnail has
+    // a transparent background. Used so dark logos on transparent PNGs don't disappear
+    // against a dark theme card surface.
+    public static boolean previewLikelyHasTransparentBackground(@Nullable Drawable drawable) {
+        if (!(drawable instanceof BitmapDrawable)) {
+            return false;
+        }
+        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+        if (bitmap == null || bitmap.isRecycled() || !bitmap.hasAlpha()) {
+            return false;
+        }
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        if (width < 2 || height < 2) {
+            return false;
+        }
+        int[] samples = new int[]{
+                bitmap.getPixel(0, 0),
+                bitmap.getPixel(width - 1, 0),
+                bitmap.getPixel(0, height - 1),
+                bitmap.getPixel(width - 1, height - 1),
+        };
+        int transparentCount = 0;
+        for (int color : samples) {
+            if (Color.alpha(color) < 128) {
+                transparentCount++;
+            }
+        }
+        return transparentCount >= 3;
     }
 
     public static Insets getInsets(WindowInsetsCompat insets, boolean includeIME, boolean forcedImmersiveMode) {

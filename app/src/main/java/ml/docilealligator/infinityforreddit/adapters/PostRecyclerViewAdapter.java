@@ -1483,6 +1483,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private void loadImage(final RecyclerView.ViewHolder holder) {
         if (holder instanceof PostWithPreviewTypeViewHolder) {
             ((PostWithPreviewTypeViewHolder) holder).loadingIndicator.setVisibility(View.VISIBLE);
+            ((PostWithPreviewTypeViewHolder) holder).imageView.setBackground(null);
             Post post = ((PostWithPreviewTypeViewHolder) holder).post;
             Post.Preview preview = ((PostWithPreviewTypeViewHolder) holder).preview;
             if (preview != null) {
@@ -1503,6 +1504,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
         } else if (holder instanceof PostCompactBaseViewHolder) {
             Post post = ((PostCompactBaseViewHolder) holder).post;
+            ((PostCompactBaseViewHolder) holder).imageView.setBackground(null);
             String postCompactThumbnailPreviewUrl = null;
             ArrayList<Post.Preview> previews = post.getPreviews();
             if (previews != null && !previews.isEmpty()) {
@@ -1531,6 +1533,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
         } else if (holder instanceof PostGalleryViewHolder) {
             ((PostGalleryViewHolder) holder).binding.progressBarItemPostGallery.setVisibility(View.VISIBLE);
+            ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setBackground(null);
             Post post = ((PostGalleryViewHolder) holder).post;
             Post.Preview preview = ((PostGalleryViewHolder) holder).preview;
             if (preview != null) {
@@ -3647,6 +3650,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                     loadImageErrorTextView.setVisibility(View.GONE);
                     loadingIndicator.setVisibility(View.GONE);
+                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
+                        imageView.setBackgroundResource(R.drawable.transparent_image_backdrop);
+                    }
                     return false;
                 }
             };
@@ -4254,6 +4260,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
                     loadingIndicator.setVisibility(View.GONE);
+                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
+                        imageView.setBackgroundResource(R.drawable.transparent_image_backdrop);
+                    }
                     return false;
                 }
             };
@@ -4514,6 +4523,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                     binding.loadImageErrorTextViewItemGallery.setVisibility(View.GONE);
                     binding.progressBarItemPostGallery.setVisibility(View.GONE);
+                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
+                        binding.imageViewItemPostGallery.setBackgroundResource(R.drawable.transparent_image_backdrop);
+                    }
                     return false;
                 }
             };
