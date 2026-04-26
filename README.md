@@ -77,6 +77,10 @@ You can easily install and update Continuum with [Discoverium](https://github.co
   </a>
 </p>
 
+## Verification
+org.cygnusx1.continuum 4F:34:BF:D2:0C:C4:84:15:10:E7:EF:FB:75:CB:FB:C2:3A:09:C2:CA:92:D0:4C:ED:5B:33:6C:8F:25:A0:D3:E3
+
+You can verify it with [AppVerifier](https://github.com/soupslurpr/AppVerifier).
 
 
 # About The Project
