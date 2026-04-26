@@ -204,6 +204,11 @@ public class LoginActivity extends BaseActivity {
                                         }
 
                                         JSONObject responseJSON = new JSONObject(accountResponse);
+                                        if (!responseJSON.has(APIUtils.ACCESS_TOKEN_KEY) || !responseJSON.has(APIUtils.REFRESH_TOKEN_KEY)) {
+                                            Toast.makeText(LoginActivity.this, R.string.invalid_client_id_error, Toast.LENGTH_LONG).show();
+                                            finish();
+                                            return;
+                                        }
                                         String accessToken = responseJSON.getString(APIUtils.ACCESS_TOKEN_KEY);
                                         String refreshToken = responseJSON.getString(APIUtils.REFRESH_TOKEN_KEY);
 
