@@ -147,6 +147,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
+    public static final String EXTRA_GO_HOME = "EGH";
 
     private static final String FETCH_USER_INFO_STATE = "FUIS";
     private static final String FETCH_SUBSCRIPTIONS_STATE = "FSS";
@@ -1144,6 +1145,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         });
 
         fixViewPager2Sensitivity(binding.includedAppBar.viewPagerMainActivity);
+        handleGoHomeIntent(getIntent());
 
         loadSubscriptions();
 
@@ -1577,6 +1579,20 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleGoHomeIntent(intent);
+    }
+
+    private void handleGoHomeIntent(Intent intent) {
+        if (intent.getBooleanExtra(EXTRA_GO_HOME, false)) {
+            binding.includedAppBar.viewPagerMainActivity.setCurrentItem(0, false);
+            intent.removeExtra(EXTRA_GO_HOME);
+        }
     }
 
     @Override

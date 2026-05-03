@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -267,6 +268,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         binding.toolbarViewPostDetailActivity.setTitle("");
         setSupportActionBar(binding.toolbarViewPostDetailActivity);
         setToolbarGoToTop(binding.toolbarViewPostDetailActivity);
+        setNavigationIconLongClickToHome();
 
         if (savedInstanceState == null) {
             mNewAccountName = getIntent().getStringExtra(EXTRA_NEW_ACCOUNT_NAME);
@@ -307,6 +309,24 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                 mHandler, mRedditDataRoomDatabase, mRetrofit)).get(ViewPostDetailActivityViewModel.class);
 
         checkNewAccountAndBindView(savedInstanceState);
+    }
+
+    private void setNavigationIconLongClickToHome() {
+        binding.toolbarViewPostDetailActivity.post(() -> {
+            for (int i = 0; i < binding.toolbarViewPostDetailActivity.getChildCount(); i++) {
+                View child = binding.toolbarViewPostDetailActivity.getChildAt(i);
+                if (child instanceof ImageButton) {
+                    child.setOnLongClickListener(view -> {
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        intent.putExtra(MainActivity.EXTRA_GO_HOME, true);
+                        startActivity(intent);
+                        return true;
+                    });
+                    return;
+                }
+            }
+        });
     }
 
     public void setTitle(String title) {
