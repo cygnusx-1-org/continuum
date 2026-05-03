@@ -1,5 +1,8 @@
 package ml.docilealligator.infinityforreddit.fragments;
 
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
+
 import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
@@ -57,6 +60,7 @@ import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
 import okhttp3.OkHttpClient;
 
 public class ViewRedditGalleryVideoFragment extends Fragment {
@@ -155,8 +159,10 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
         player = new ExoPlayer.Builder(activity)
                 .setTrackSelector(trackSelector)
                 .setRenderersFactory(new DefaultRenderersFactory(activity).setEnableDecoderFallback(true))
+                .setSeekBackIncrementMs(VIDEO_SEEK_BACK_INCREMENT_MS)
+                .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
                 .build();
-        binding.getPlayerView().setPlayer(player);
+        binding.getPlayerView().setPlayer(new DurationAwareSeekPlayer(player));
         dataSourceFactory = new CacheDataSource.Factory().setCache(mSimpleCache)
                 .setUpstreamDataSourceFactory(new OkHttpDataSource.Factory(mOkHttpClient).setUserAgent(APIUtils.USER_AGENT));
         player.prepare();

@@ -1,5 +1,8 @@
 package ml.docilealligator.infinityforreddit.activities;
 
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
+
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
@@ -70,6 +73,7 @@ import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
 import retrofit2.Retrofit;
 
 public class PostVideoActivity extends BaseActivity implements FlairBottomSheetFragment.FlairSelectionCallback,
@@ -195,8 +199,11 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
 
         mGlide = Glide.with(this);
 
-        player = new ExoPlayer.Builder(this).build();
-        binding.playerViewPostVideoActivity.setPlayer(player);
+        player = new ExoPlayer.Builder(this)
+                .setSeekBackIncrementMs(VIDEO_SEEK_BACK_INCREMENT_MS)
+                .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
+                .build();
+        binding.playerViewPostVideoActivity.setPlayer(new DurationAwareSeekPlayer(player));
         dataSourceFactory = new DefaultDataSourceFactory(this,
                 Util.getUserAgent(this, "Infinity"));
         if (mSharedPreferences.getBoolean(SharedPreferencesUtils.LOOP_VIDEO, true)) {

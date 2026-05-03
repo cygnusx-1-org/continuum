@@ -4,6 +4,8 @@ import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -117,6 +119,7 @@ import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
@@ -421,6 +424,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         player = new ExoPlayer.Builder(this)
                 .setTrackSelector(trackSelector)
                 .setRenderersFactory(new DefaultRenderersFactory(this).setEnableDecoderFallback(true))
+                .setSeekBackIncrementMs(VIDEO_SEEK_BACK_INCREMENT_MS)
+                .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
                 .build();
 
         if (zoomable) {
@@ -443,7 +448,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                 }
             });
-            playerControlView.setPlayer(player);
+            playerControlView.setPlayer(new DurationAwareSeekPlayer(player));
 
             ZoomSurfaceView zoomSurfaceView = findViewById(R.id.zoom_surface_view_view_video_activity);
             player.addListener(new Player.Listener() {
@@ -487,7 +492,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             });
         } else {
             PlayerView videoPlayerView = findViewById(R.id.player_view_view_video_activity);
-            videoPlayerView.setPlayer(player);
+            videoPlayerView.setPlayer(new DurationAwareSeekPlayer(player));
             videoPlayerView.setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
                 switch (visibility) {
                     case View.GONE:

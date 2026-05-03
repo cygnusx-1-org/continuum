@@ -91,7 +91,7 @@ class PlayableImpl implements Playable {
             this.playerView.setPlayer(null);
         } else {
             if (this.player != null) {
-                PlayerView.switchTargetView(this.player.getPlayer(), this.playerView, playerView);
+                PlayerView.switchTargetView(this.player.getDurationAwareSeekPlayer(), this.playerView, playerView);
             }
         }
 
@@ -268,7 +268,9 @@ class PlayableImpl implements Playable {
     }
 
     private void ensurePlayerView() {
-        if (playerView != null && playerView.getPlayer() != player.getPlayer()) playerView.setPlayer(player.getPlayer());
+        if (playerView != null && playerView.getPlayer() != player.getDurationAwareSeekPlayer()) {
+            playerView.setPlayer(player.getDurationAwareSeekPlayer());
+        }
     }
 
     // TODO [20180822] Double check this.
