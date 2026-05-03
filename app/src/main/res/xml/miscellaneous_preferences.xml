@@ -17,6 +17,12 @@
         app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue=""
+        app:key="ephemeral_custom_tab_package"
+        app:title="@string/settings_ephemeral_custom_tab_browser_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"
         app:entries="@array/main_page_back_button_action"
         app:entryValues="@array/main_page_back_button_action_values"

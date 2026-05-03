@@ -1,14 +1,26 @@
 package ml.docilealligator.infinityforreddit.settings;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsService;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,10 +49,35 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 
+        ListPreference linkHandlerListPreference = findPreference(SharedPreferencesUtils.LINK_HANDLER);
+        ListPreference ephemeralBrowserListPreference = findPreference(SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE);
         ListPreference mainPageBackButtonActionListPreference = findPreference(SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION);
         SwitchPreference savePostFeedScrolledPositionSwitch = findPreference(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION);
         ListPreference languageListPreference = findPreference(SharedPreferencesUtils.LANGUAGE);
         EditTextPreference postFeedMaxResolution = findPreference(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION);
+
+        List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
+        boolean hasEphemeralBrowser = !ephemeralBrowsers.isEmpty();
+
+        if (linkHandlerListPreference != null) {
+            filterLinkHandlerEntries(linkHandlerListPreference, hasEphemeralBrowser);
+            linkHandlerListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (ephemeralBrowserListPreference != null) {
+                    ephemeralBrowserListPreference.setVisible("3".equals(newValue));
+                }
+                return true;
+            });
+        }
+
+        if (ephemeralBrowserListPreference != null) {
+            if (hasEphemeralBrowser) {
+                populateEphemeralBrowserEntries(ephemeralBrowserListPreference, ephemeralBrowsers);
+                ephemeralBrowserListPreference.setVisible(linkHandlerListPreference != null
+                        && "3".equals(linkHandlerListPreference.getValue()));
+            } else {
+                ephemeralBrowserListPreference.setVisible(false);
+            }
+        }
 
         if (mainPageBackButtonActionListPreference != null) {
             mainPageBackButtonActionListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -81,6 +118,57 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
                 }
                 return true;
             });
+        }
+    }
+
+    private static List<String[]> findEphemeralBrowsers(Context context) {
+        PackageManager pm = context.getPackageManager();
+        Intent svcQuery = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+        List<String[]> browsers = new ArrayList<>();
+        for (ResolveInfo info : pm.queryIntentServices(svcQuery, 0)) {
+            ServiceInfo si = info.serviceInfo;
+            if (si == null) continue;
+            if (!CustomTabsClient.isEphemeralBrowsingSupported(context, si.packageName)) continue;
+            try {
+                String label = pm.getApplicationLabel(pm.getApplicationInfo(si.packageName, 0)).toString();
+                browsers.add(new String[]{label, si.packageName});
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+        }
+        Collections.sort(browsers, Comparator.comparing(b -> b[0].toLowerCase()));
+        return browsers;
+    }
+
+    private void populateEphemeralBrowserEntries(ListPreference pref, List<String[]> browsers) {
+        List<CharSequence> entries = new ArrayList<>();
+        List<CharSequence> values = new ArrayList<>();
+        for (String[] b : browsers) {
+            entries.add(b[0]);
+            values.add(b[1]);
+        }
+        pref.setEntries(entries.toArray(new CharSequence[0]));
+        pref.setEntryValues(values.toArray(new CharSequence[0]));
+        String current = pref.getValue();
+        if ((current == null || !values.contains(current)) && !values.isEmpty()) {
+            pref.setValue(values.get(0).toString());
+        }
+    }
+
+    private void filterLinkHandlerEntries(ListPreference pref, boolean allowEphemeral) {
+        if (allowEphemeral) return;
+        CharSequence[] origEntries = pref.getEntries();
+        CharSequence[] origValues = pref.getEntryValues();
+        List<CharSequence> entries = new ArrayList<>();
+        List<CharSequence> values = new ArrayList<>();
+        for (int i = 0; i < origValues.length; i++) {
+            if ("3".equals(origValues[i].toString())) continue;
+            entries.add(origEntries[i]);
+            values.add(origValues[i]);
+        }
+        pref.setEntries(entries.toArray(new CharSequence[0]));
+        pref.setEntryValues(values.toArray(new CharSequence[0]));
+        if ("3".equals(pref.getValue())) {
+            pref.setValue("0");
         }
     }
 }

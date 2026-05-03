@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
 
@@ -397,7 +398,7 @@ public class LinkResolverActivity extends AppCompatActivity {
 
         String authority = uri.getAuthority();
         if(authority != null && (authority.contains("reddit.com") || authority.contains("redd.it") || authority.contains("reddit.app.link"))) {
-            openInCustomTabs(uri, pm, false);
+            openInCustomTabs(uri, pm, false, false);
             return;
         }
 
@@ -405,7 +406,9 @@ public class LinkResolverActivity extends AppCompatActivity {
         if (linkHandler == 0) {
             openInBrowser(uri, pm, true);
         } else if (linkHandler == 1) {
-            openInCustomTabs(uri, pm, true);
+            openInCustomTabs(uri, pm, true, false);
+        } else if (linkHandler == 3) {
+            openInCustomTabs(uri, pm, true, true);
         } else {
             openInWebView(uri);
         }
@@ -419,7 +422,7 @@ public class LinkResolverActivity extends AppCompatActivity {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
             if (handleError) {
-                openInCustomTabs(uri, pm, false);
+                openInCustomTabs(uri, pm, false, false);
             } else {
                 openInWebView(uri);
             }
@@ -448,9 +451,42 @@ public class LinkResolverActivity extends AppCompatActivity {
         return packagesSupportingCustomTabs;
     }
 
-    private void openInCustomTabs(Uri uri, PackageManager pm, boolean handleError) {
-        ArrayList<ResolveInfo> resolveInfos = getCustomTabsPackages(pm);
-        if (!resolveInfos.isEmpty()) {
+    private void openInCustomTabs(Uri uri, PackageManager pm, boolean handleError, boolean ephemeral) {
+        String selectedPackage = null;
+        if (ephemeral) {
+            String preferredPackage = mSharedPreferences.getString(
+                    SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE, "");
+            if (preferredPackage != null && !preferredPackage.isEmpty()
+                    && CustomTabsClient.isEphemeralBrowsingSupported(this, preferredPackage)) {
+                selectedPackage = preferredPackage;
+            } else {
+                // queryIntentActivities for http only returns the default browser
+                // on API 30+, so enumerate Custom Tabs services directly to find
+                // any installed browser that declares ephemeral support.
+                Intent svcQuery = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+                for (ResolveInfo info : pm.queryIntentServices(svcQuery, 0)) {
+                    if (info.serviceInfo == null) continue;
+                    String pkg = info.serviceInfo.packageName;
+                    if (CustomTabsClient.isEphemeralBrowsingSupported(this, pkg)) {
+                        selectedPackage = pkg;
+                        break;
+                    }
+                }
+            }
+            if (selectedPackage == null) {
+                // No installed Custom Tabs provider supports ephemeral browsing.
+                // Fall back to the internal WebView, which is closer in privacy
+                // posture than reusing the system browser session.
+                openInWebView(uri);
+                return;
+            }
+        } else {
+            ArrayList<ResolveInfo> resolveInfos = getCustomTabsPackages(pm);
+            if (!resolveInfos.isEmpty()) {
+                selectedPackage = resolveInfos.get(0).activityInfo.packageName;
+            }
+        }
+        if (selectedPackage != null) {
             CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
             // add share action to menu list
             builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
@@ -458,8 +494,11 @@ public class LinkResolverActivity extends AppCompatActivity {
                     new CustomTabColorSchemeParams.Builder()
                             .setToolbarColor(mCustomThemeWrapper.getColorPrimary())
                             .build());
+            if (ephemeral) {
+                builder.setEphemeralBrowsingEnabled(true);
+            }
             CustomTabsIntent customTabsIntent = builder.build();
-            customTabsIntent.intent.setPackage(resolveInfos.get(0).activityInfo.packageName);
+            customTabsIntent.intent.setPackage(selectedPackage);
             if (uri.getScheme() == null) {
                 uri = Uri.parse("http://" + uri);
             }

@@ -661,6 +661,8 @@
     <string name="settings_default_playback_speed_title">Default Playback Speed</string>
     <string name="settings_link_handler_value_external_browser">External App</string>
     <string name="settings_link_handler_value_custom_tab">Custom Tab</string>
+    <string name="settings_link_handler_value_ephemeral_custom_tab">Ephemeral Custom Tab</string>
+    <string name="settings_ephemeral_custom_tab_browser_title">Ephemeral Browser</string>
     <string name="settings_link_handler_value_internal_browser">Internal Browser</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">Legacy Video Controller UI</string>
     <string name="settings_pinch_to_zoom_video_title">Pinch to Zoom Video</string>
