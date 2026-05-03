@@ -2,6 +2,15 @@
 
 ---
 
+8.1.4.7 / 2026-5-3
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Implemented Add support for ephemeral customTabs #147
+* Implemented Feature request: Adjust seek interval for video player controls #239
+* Added "Show Thumbnail on the Left" as "Toggle Thumbnail Side" in the "Bottom Navigation Bar"
+* Fixed issue with transparent pngs as preview or thumbnails images
+
 8.1.4.6 / 2026-4-18
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
