@@ -44,15 +44,15 @@ public class LinkResolverActivity extends AppCompatActivity {
     public static final String EXTRA_SUBREDDIT_NAME = "ESN_LRA";
     public static final String EXTRA_POST_TITLE_KEY = "ET_LRA";
 
-    private static final String POST_PATTERN = "/r/[\\w-]+/comments/\\w+/?\\w+/?";
+    private static final String POST_PATTERN = "/r/[\\w.-]+/comments/\\w+/?\\w+/?";
     private static final String POST_PATTERN_2 = "/(u|U|user)/[\\w-]+/comments/\\w+/?\\w+/?";
     private static final String POST_PATTERN_3 = "/[\\w-]+$";
-    private static final String COMMENT_PATTERN = "/(r|u|U|user)/[\\w-]+/comments/\\w+/?[\\w-]+/\\w+/?";
-    private static final String SUBREDDIT_PATTERN = "/[rR]/[\\w-]+/?";
+    private static final String COMMENT_PATTERN = "/(r|u|U|user)/[\\w.-]+/comments/\\w+/?[\\w-]+/\\w+/?";
+    private static final String SUBREDDIT_PATTERN = "/[rR]/[\\w.-]+/?";
     private static final String USER_PATTERN = "/(u|U|user)/[\\w-]+/?";
-    private static final String SHARELINK_SUBREDDIT_PATTERN = "/r/[\\w-]+/s/[\\w-]+";
+    private static final String SHARELINK_SUBREDDIT_PATTERN = "/r/[\\w.-]+/s/[\\w-]+";
     private static final String SHARELINK_USER_PATTERN = "/u/[\\w-]+/s/[\\w-]+";
-    private static final String SIDEBAR_PATTERN = "/[rR]/[\\w-]+/about/sidebar";
+    private static final String SIDEBAR_PATTERN = "/[rR]/[\\w.-]+/about/sidebar";
     private static final String MULTIREDDIT_PATTERN_2 = "/[rR]/(\\w+\\+?)+/?";
     private static final String REDD_IT_POST_PATTERN = "/\\w+/?";
     private static final String REDGIFS_PATTERN = "/watch/[\\w-]+$";
@@ -60,7 +60,7 @@ public class LinkResolverActivity extends AppCompatActivity {
     private static final String IMGUR_ALBUM_PATTERN = "/(album|a)/\\w+/?";
     private static final String IMGUR_IMAGE_PATTERN = "/\\w+/?";
     private static final String REDDIT_IMAGE_PATTERN =  "^/media$";
-    private static final String WIKI_PATTERN = "/[rR]/[\\w-]+/(wiki|w)(?:/[\\w-]+)*";
+    private static final String WIKI_PATTERN = "/[rR]/[\\w.-]+/(wiki|w)(?:/[\\w-]+)*";
     private static final String GOOGLE_AMP_PATTERN = "/amp/s/amp.reddit.com/.*";
     private static final String STREAMABLE_PATTERN = "/\\w+/?";
 
