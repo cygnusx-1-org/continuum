@@ -63,9 +63,9 @@ public class APIUtils {
     public static final String AUTHORIZATION_KEY = "Authorization";
     public static final String AUTHORIZATION_BASE = "bearer ";
     public static final String USER_AGENT_KEY = "User-Agent";
-    public static final String DEFAULT_USER_AGENT = "android:org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
+    public static String ANONYMOUS_USER_AGENT = "org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
+    public static final String DEFAULT_USER_AGENT = "android:" + ANONYMOUS_USER_AGENT;
     public static String USER_AGENT = DEFAULT_USER_AGENT;
-    public static String ANONYMOUS_USER_AGENT = DEFAULT_USER_AGENT;
     public static final String USERNAME_KEY = "username";
 
     public static final String GRANT_TYPE_KEY = "grant_type";
@@ -167,7 +167,6 @@ public class APIUtils {
     // Initialize mutable configurable fields from SharedPreferences at app startup
     public static void initConfigurableFields(Context context) {
         USER_AGENT = getUserAgent(context);
-        ANONYMOUS_USER_AGENT = USER_AGENT;
         REDIRECT_URI = getRedirectUri(context);
     }
 
