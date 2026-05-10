@@ -721,7 +721,10 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                 long lastItem = 0;
                 List<Post> posts = viewPostDetailActivityViewModel.getPosts();
                 if (posts != null && !posts.isEmpty()) {
-                    lastItem = mRedditDataRoomDatabase.readPostDao().getReadPost(posts.get(posts.size() - 1).getId()).getTime();
+                    ReadPost lastReadPost = mRedditDataRoomDatabase.readPostDao().getReadPost(posts.get(posts.size() - 1).getId(), readPostType);
+                    if (lastReadPost != null) {
+                        lastItem = lastReadPost.getTime();
+                    }
                 }
                 List<ReadPost> readPosts = mRedditDataRoomDatabase.readPostDao().getAllReadPosts(accountName, lastItem, readPostType);
                 StringBuilder ids = new StringBuilder();

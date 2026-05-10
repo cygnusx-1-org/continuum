@@ -26,8 +26,8 @@ public interface ReadPostDao {
     @Query("SELECT * FROM read_posts WHERE username = :username AND read_post_type != 0 AND id IN (:postIds)")
     List<ReadPost> getAllReadPostsForMetadata(String username, List<String> postIds);
 
-    @Query("SELECT * FROM read_posts WHERE id = :id AND read_post_type = 0 LIMIT 1")
-    ReadPost getReadPost(String id);
+    @Query("SELECT * FROM read_posts WHERE id = :id AND read_post_type = :readPostType LIMIT 1")
+    ReadPost getReadPost(String id, @ReadPostType int readPostType);
 
     @Query("SELECT COUNT(id) FROM read_posts WHERE username = :username AND read_post_type = :readPostType")
     int getReadPostsCount(String username, @ReadPostType int readPostType);
