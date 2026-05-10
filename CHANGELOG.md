@@ -2,6 +2,16 @@
 
 ---
 
+8.2.1.1 / 2026-5-10
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Update to 8.1.2
+* Fixed Create multireddit function broken for Anonymous #193
+* Fixed Some links don't open inside the app #254
+* Fixed crash when opening a saved post in Anonymous mode
+* Fixed [Bug] history/saved/upvoted/downvoted posts sometimes don't work in the local "saved on device"
+
 8.1.4.7 / 2026-5-3
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
