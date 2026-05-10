@@ -394,7 +394,7 @@ public class SettingsSearchRegistry {
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_mute_autoplaying_videos_title), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_remember_muting_option_in_post_feed), null, bc,
+        add(items, c.getString(R.string.settings_remember_mute), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_autoplay_nsfw_videos_title), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);

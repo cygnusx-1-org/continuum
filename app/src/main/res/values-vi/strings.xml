@@ -878,7 +878,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Chỉ tắt xem trước trong các bài đăng video và gif"</string>
     <string name="settings_enable_search_history_title">"Bật lịch sử tìm kiếm"</string>
     <string name="settings_post_history_title">"Lịch sử bài đăng"</string>
-    <string name="settings_mark_posts_as_read_title">"Đánh dấu các bài đăng là đã đọc"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"Đánh dấu các bài đăng là đã đọc sau khi vote"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"Đánh dấu các bài đăng là đã đọc khi cuộn"</string>
     <string name="settings_hide_read_posts_automatically_title">"Tự động ẩn các bài đăng đã đọc"</string>
@@ -1046,7 +1045,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_more_tabs_show_multireddits_title">"Show Multireddits"</string>
     <string name="settings_collapse_reddit_section_title">"Thu gọn khu vực Reddit"</string>
     <string name="settings_video_player_automatic_landscape_orientation">"Tự động chuyển sang màn hình ngang trong trình phát video"</string>
-    <string name="settings_remember_muting_option_in_post_feed">"Ghi nhớ tuỳ chọn tắt tiếng trong nguồn dữ liệu bài đăng"</string>
     <string name="link_post_layout_auto">"Tự động"</string>
     <string name="uploaded_images">"Đã tải hình ảnh"</string>
     <string name="select_image">"Chọn một hình ảnh"</string>

@@ -881,7 +881,6 @@ https://play.google.com/store/"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Отключить предпросмотр только в постах с видео и GIF"</string>
     <string name="settings_enable_search_history_title">"Включить историю поиска"</string>
     <string name="settings_post_history_title">"История поста"</string>
-    <string name="settings_mark_posts_as_read_title">"Отметить посты как прочтённые"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"Отмечать посты прочтёнными после голосования"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"Отмечать посты прочтёнными при прокрутке"</string>
     <string name="settings_hide_read_posts_automatically_title">"Автоматически скрывать прочтённые посты"</string>
@@ -1047,7 +1046,6 @@ https://play.google.com/store/"</string>
     <string name="settings_more_tabs_show_multireddits_title">"Показывать мультиреддиты"</string>
     <string name="settings_collapse_reddit_section_title">"Свернуть раздел Reddit"</string>
     <string name="settings_video_player_automatic_landscape_orientation">"Автоматически переключаться на альбомную ориентацию в видеопроигрывателе"</string>
-    <string name="settings_remember_muting_option_in_post_feed">"Запоминать отключение звука в ленте постов"</string>
     <string name="link_post_layout_auto">"Автовыбор"</string>
     <string name="uploaded_images">"Загруженные изображения"</string>
     <string name="select_image">"Выберите изображение"</string>
@@ -1201,7 +1199,6 @@ https://play.google.com/store/"</string>
     <string name="comment_karma">"Карма комментария:"</string>
     <string name="awarder_karma">"Карма наградителя:"</string>
     <string name="awardee_karma">"Карма награждённого:"</string>
-    <string name="history_activity_label">"История"</string>
     <string name="history">"История"</string>
     <string name="settings_easier_to_watch_in_full_screen_title">"Удобный просмотр в полноэкранном режиме"</string>
     <string name="clear_user_flair">"Очистить флейр"</string>

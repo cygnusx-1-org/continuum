@@ -44,7 +44,8 @@
     <string name="wiki_activity_label">Wiki</string>
     <string name="edit_profile_activity_label">Edit Profile</string>
     <string name="post_poll_activity_label">Poll Post</string>
-    <string name="history_activity_label">History</string>
+    <string name="history_activity_read_posts_label">Read Posts</string>
+    <string name="history_activity_subtitle">Stored on this device</string>
     <string name="subscription_activity_label">Subscription</string>
     <string name="comment_filter_preference_activity_label">Comment Filter</string>
     <string name="customize_comment_filter_activity_label">Customize Comment Filter</string>
@@ -57,6 +58,7 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_add_comment">Send comment</string>
     <string name="action_save_post">Save post</string>
+    <string name="action_unsave_post">Unsave post</string>
     <string name="action_view_crosspost_parent">View crosspost parent</string>
     <string name="action_search">Search</string>
     <string name="action_start_lazy_mode">Start Lazy Mode</string>
@@ -596,9 +598,9 @@
     <string name="settings_language_title">Language</string>
     <string name="settings_enable_search_history_title">Enable Search History</string>
     <string name="settings_post_history_title">Post History</string>
-    <string name="settings_mark_posts_as_read_title">Mark Posts as Read</string>
-    <string name="settings_read_posts_limit_title">Limit Read Posts</string>
-    <string name="settings_read_posts_limit_hint">Set read posts limit</string>
+    <string name="settings_save_read_posts_title">Save Read Posts</string>
+    <string name="settings_limit_history_size_title">Limit History Size</string>
+    <string name="settings_limit_history_size_hint">History Limit</string>
     <string name="settings_read_posts_db_summary">Read Posts DB Table \nSize: %1$d(KB) \nCount: %2$d</string>
     <string name="settings_mark_posts_as_read_after_voting_title">Mark Posts as Read After Voting</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">Mark Posts as Read on Scroll</string>
@@ -642,7 +644,7 @@
     <string name="settings_video_player_automatic_landscape_orientation">Switch to Landscape Orientation in Video Player Automatically</string>
     <string name="settings_loop_video_title">Loop Video</string>
     <string name="settings_loop_video_summary">Restart the app to apply this setting to autoplaying videos</string>
-    <string name="settings_remember_muting_option_in_post_feed">Remember Muting Option in Post Feed</string>
+    <string name="settings_remember_mute">Remember Mute</string>
     <string name="settings_post_details_title">Post Details</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">Separate Post And Comments in Portrait Mode</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">Separate Post And Comments in Landscape Mode</string>
@@ -682,6 +684,8 @@
     <string name="settings_post_feed_max_resolution_warning_title">Increase the value to show previews in higher resolution, but the app may crash unexpectedly.</string>
     <string name="settings_post_feed_max_resolution_title">Post Feed Preview Max Resolution (Width * Height)</string>
     <string name="settings_reddit_video_default_resolution">Reddit Video Default Resolution</string>
+    <string name="settings_comment_thread_continuity_capacity_title">Comment Thread Continuity Capacity</string>
+    <string name="settings_comment_thread_continuity_capacity_summary">%1$s comment thread(s) will be cached for seamless continuity.</string>
     <string name="settings_easier_to_watch_in_full_screen_title">Easier to Watch in Full Screen</string>
     <string name="settings_hide_fab_in_post_feed">Hide FAB in Post Feed</string>
     <string name="settings_comment_divider_type">Comment Divider Type</string>
@@ -1165,6 +1169,17 @@
 
     <string name="login_activity_2fa_prompt">2-factor authentication: &lt;password&gt;:&lt;2FA code&gt;.\nExample: yourpass:123456\nGoogle login or having trouble login: click the bottom right button.</string>
     <string name="login_activity_internet_disconnected_error">No Internet Connection</string>
+    <string name="login">Log in</string>
+    <string name="login_using_different_method">You can try a different login method if this one doesn’t work.</string>
+    <string name="login_using_chrome_custom_tab">Chrome Custom Tab</string>
+    <string name="login_using_webview">WebView (legacy)</string>
+    <string name="login_chrome_required">You must have Chrome browser installed.</string>
+    <string name="login_failed_error">Login failed. Error:</string>
+    <string name="login_failed_auth_result_verification_failed">Verification failed.</string>
+    <string name="login_failed_auth_result_verification_timed_out">Verification timed out.</string>
+    <string name="login_failed_auth_result_unknown_error">Unknown error.</string>
+    <string name="login_failed_result_url_error">No code found in the result URL</string>
+    <string name="login_failed_result_url_unknown_error">No code found in the result URL. No error provided.</string>
 
     <string name="block_user">Block User</string>
     <string name="block_user_success">Blocked</string>
@@ -1300,7 +1315,7 @@
     <string name="choose_a_user">Choose a user</string>
 
     <string name="open_login_page">Open login page</string>
-    <string name="custom_tab_not_available">Chrome custom tab not available. Is Chrome or Firefox installed?</string>
+    <string name="custom_tab_not_available">Chrome custom tab not available. Is Chrome installed?</string>
 
     <string name="vote">Vote</string>
 

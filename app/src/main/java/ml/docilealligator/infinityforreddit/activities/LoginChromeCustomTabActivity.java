@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.activities;
 
+
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -107,10 +108,10 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarLoginChromeCustomTabActivity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        openLoginPage();
+        checkAndOpenLoginPage();
 
         binding.openWebpageButtonLoginChromeCustomTabActivity.setOnClickListener(view -> {
-            openLoginPage();
+            checkAndOpenLoginPage();
         });
     }
 
@@ -238,7 +239,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         }
     }
 
-    private void openLoginPage() {
+    private void checkAndOpenLoginPage() {
         Uri.Builder uriBuilder = Uri.parse(APIUtils.OAUTH_URL).buildUpon();
         uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
         uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);

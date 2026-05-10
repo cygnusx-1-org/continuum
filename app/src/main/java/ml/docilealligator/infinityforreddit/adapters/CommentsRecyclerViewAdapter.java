@@ -1171,7 +1171,14 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
     public void setSingleComment(String singleCommentId, boolean isSingleCommentThreadMode) {
         mSingleCommentId = singleCommentId;
-        mIsSingleCommentThreadMode = isSingleCommentThreadMode;
+        if (mIsSingleCommentThreadMode != isSingleCommentThreadMode) {
+            mIsSingleCommentThreadMode = isSingleCommentThreadMode;
+            if (isSingleCommentThreadMode) {
+                notifyItemInserted(0);
+            } else {
+                notifyItemRemoved(0);
+            }
+        }
     }
 
     public ArrayList<Comment> getVisibleComments() {
@@ -1977,8 +1984,10 @@ public class CommentsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
                             mVisibleComments.addAll(commentPosition + 1, newList);
 
                             if (mIsSingleCommentThreadMode) {
+                                notifyItemChanged(commentPosition + 1);
                                 notifyItemRangeInserted(commentPosition + 2, newList.size());
                             } else {
+                                notifyItemChanged(commentPosition);
                                 notifyItemRangeInserted(commentPosition + 1, newList.size());
                             }
                             // Notify that the parent item itself changed (its expanded state), using payload

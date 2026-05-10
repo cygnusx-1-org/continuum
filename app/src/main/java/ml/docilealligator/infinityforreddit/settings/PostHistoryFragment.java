@@ -29,7 +29,6 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
-import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostHistoryBinding;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -76,21 +75,6 @@ public class PostHistoryFragment extends Fragment {
 
         if (mActivity.typeface != null) {
             Utils.setFontToAllTextViews(binding.getRoot(), mActivity.typeface);
-        }
-
-        boolean isAnonymous = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT);
-        if (isAnonymous) {
-            binding.infoTextViewPostHistoryFragment.setText(R.string.only_for_logged_in_user);
-            binding.markPostsAsReadLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.readPostsLimitLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.readPostsLimitTextInputLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.markPostsAsReadOnScrollLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.hideReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.hideReadPostsAutomaticallyInSubredditsLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.hideReadPostsAutomaticallyInUsersLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.hideReadPostsAutomaticallyInSearchLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            return binding.getRoot();
         }
 
         binding.markPostsAsReadSwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
@@ -171,8 +155,6 @@ public class PostHistoryFragment extends Fragment {
 
     private void updateOptions() {
         if (binding.markPostsAsReadSwitchPostHistoryFragment.isChecked()) {
-            binding.readPostsLimitLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
-            binding.readPostsLimitTextInputLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
             binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
             binding.markPostsAsReadOnScrollLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
             binding.hideReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.VISIBLE);
@@ -184,8 +166,6 @@ public class PostHistoryFragment extends Fragment {
                     mActivity.accountName + SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED, true);
             binding.readPostsLimitTextInputLayoutPostHistoryFragment.setVisibility(limitReadPosts ? View.VISIBLE : View.GONE);
         } else {
-            binding.readPostsLimitLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
-            binding.readPostsLimitTextInputLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.markPostsAsReadOnScrollLinearLayoutPostHistoryFragment.setVisibility(View.GONE);
             binding.hideReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setVisibility(View.GONE);

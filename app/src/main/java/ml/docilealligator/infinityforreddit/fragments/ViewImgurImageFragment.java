@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -56,6 +57,7 @@ import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
 
 public class ViewImgurImageFragment extends Fragment {
 
@@ -77,6 +79,7 @@ public class ViewImgurImageFragment extends Fragment {
     private boolean isDownloading = false;
     private boolean isActionBarHidden = false;
     private FragmentViewImgurImageBinding binding;
+    ViewGalleryViewModel viewGalleryViewModel;
 
     public ViewImgurImageFragment() {
         // Required empty public constructor
@@ -146,6 +149,20 @@ public class ViewImgurImageFragment extends Fragment {
                 setWallpaper();
             });
         }
+
+        viewGalleryViewModel = new ViewModelProvider(requireActivity()).get(ViewGalleryViewModel.class);
+        viewGalleryViewModel.getInsets().observe(getViewLifecycleOwner(), insets -> {
+            ViewGroup.LayoutParams lp = binding.bottomNavigationViewImgurImageFragment.getLayoutParams();
+            if (lp instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) lp;
+
+                marginParams.bottomMargin = insets.bottom;
+                marginParams.setMarginStart(insets.left);
+                marginParams.setMarginEnd(insets.right);
+
+                binding.bottomNavigationViewImgurImageFragment.setLayoutParams(marginParams);
+            }
+        });
 
         return binding.getRoot();
     }
