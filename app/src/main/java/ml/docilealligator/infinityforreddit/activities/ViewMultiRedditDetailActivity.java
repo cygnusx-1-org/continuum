@@ -102,6 +102,9 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     @Named("oauth")
     Retrofit mOauthRetrofit;
     @Inject
+    @Named("no_oauth")
+    Retrofit mRetrofit;
+    @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
     @Named("default")
@@ -497,7 +500,10 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         mFragment = new PostFragment();
         Bundle bundle = new Bundle();
         bundle.putString(PostFragment.EXTRA_NAME, multiPath);
-        bundle.putInt(PostFragment.EXTRA_POST_TYPE, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? PostType.ANONYMOUS_MULTIREDDIT : PostType.MULTIREDDIT);
+        boolean isAnonymousLocalMulti = accountName.equals(Account.ANONYMOUS_ACCOUNT)
+                && multiPath != null && multiPath.startsWith("/user/-/m/");
+        bundle.putInt(PostFragment.EXTRA_POST_TYPE,
+                isAnonymousLocalMulti ? PostType.ANONYMOUS_MULTIREDDIT : PostType.MULTIREDDIT);
         mFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
     }
@@ -866,7 +872,11 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                     }
                 };
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                    FetchMultiRedditInfo.anonymousFetchMultiRedditInfo(mExecutor, new Handler(), mRedditDataRoomDatabase, multiPath, listener);
+                    if (multiPath != null && multiPath.startsWith("/user/-/m/")) {
+                        FetchMultiRedditInfo.anonymousFetchMultiRedditInfo(mExecutor, new Handler(), mRedditDataRoomDatabase, multiPath, listener);
+                    } else {
+                        FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
+                    }
                 } else {
                     FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
                 }

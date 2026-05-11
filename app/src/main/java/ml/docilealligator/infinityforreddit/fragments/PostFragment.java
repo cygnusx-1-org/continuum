@@ -822,6 +822,15 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     } else {
                         initializeAndBindPostViewModelForAnonymous(concatenatedSubredditNames);
                     }
+                } else if (postType == PostType.MULTIREDDIT) {
+                    FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilter(mRedditDataRoomDatabase, mExecutor,
+                            new Handler(), usage, nameOfUsage, (postFilter) -> {
+                                if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
+                                    this.postFilter = postFilter;
+                                    this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                    initializeAndBindPostViewModel();
+                                }
+                            });
                 } else {
                     FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilter(mRedditDataRoomDatabase, mExecutor,
                             new Handler(), usage, nameOfUsage, (postFilter) -> {
@@ -867,6 +876,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     } else {
                         initializeAndBindPostViewModelForAnonymous(concatenatedSubredditNames);
                     }
+                } else if (postType == PostType.MULTIREDDIT) {
+                    initializeAndBindPostViewModel();
                 } else {
                     initializeAndBindPostViewModelForAnonymous(null);
                 }

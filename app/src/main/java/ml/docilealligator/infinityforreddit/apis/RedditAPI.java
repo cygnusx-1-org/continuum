@@ -212,6 +212,9 @@ public interface RedditAPI {
     @GET("/api/multi/multipath?expand_srs=true")
     ListenableFuture<Response<String>> getMultiRedditInfoListenableFuture(@HeaderMap Map<String, String> headers, @Query("multipath") String multipath);
 
+    @GET("/api/multi{multipath}?expand_srs=true&raw_json=1")
+    Call<String> getPublicMultiRedditInfo(@Path(value = "multipath", encoded = true) String multipath);
+
     @FormUrlEncoded
     @POST("/api/report")
     Call<String> report(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
@@ -340,12 +343,12 @@ public interface RedditAPI {
                                                                                       @Query("q") String query, @Query("sort") SortType.Type sort,
                                                                                       @Query("t") SortType.Time sortTime, @Query("after") String after);
 
-    @GET("{multipath}?raw_json=1&limit=100")
+    @GET("{multipath}/{sortType}.json?raw_json=1&limit=100")
     ListenableFuture<Response<String>> getMultiRedditPostsListenableFuture(@Path(value = "multipath", encoded = true) String multiPath,
                                                                            @Path(value = "sortType", encoded = true) SortType.Type sortType,
                                                                            @Query("after") String after, @Query("t") SortType.Time sortTime);
 
-    @GET("{multipath}?raw_json=1")
+    @GET("{multipath}/{sortType}.json?raw_json=1")
     ListenableFuture<Response<String>> getMultiRedditPostsListenableFuture(@Path(value = "multipath", encoded = true) String multiPath,
                                                                            @Path(value = "sortType", encoded = true) SortType.Type sortType,
                                                                            @Query("after") String after, @Query("t") SortType.Time sortTime,
