@@ -14,6 +14,12 @@ public interface ReadPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(ReadPost readPost);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAll(List<ReadPost> readPosts);
+
+    @Query("SELECT * FROM read_posts")
+    List<ReadPost> getAllReadPostsForBackup();
+
     @Query("SELECT * FROM read_posts WHERE username = :username AND (:before IS NULL OR time < :before) AND read_post_type = :readPostType ORDER BY time DESC LIMIT 25")
     ListenableFuture<List<ReadPost>> getAllReadPostsListenableFuture(String username, Long before, @ReadPostType int readPostType);
 

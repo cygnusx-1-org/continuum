@@ -139,7 +139,8 @@ public class EditMultiRedditActivity extends BaseActivity {
 
                             @Override
                             public void failed() {
-                                //Will not be called
+                                Snackbar.make(binding.coordinatorLayoutEditMultiRedditActivity, R.string.cannot_fetch_multireddit, Snackbar.LENGTH_SHORT).show();
+                                finish();
                             }
                         });
             } else {

@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubr
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
+import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
@@ -158,6 +159,7 @@ public class RestoreSettings {
                                 File commentFiltersFile = new File(f.getAbsolutePath() + "/comment_filters.json");
                                 File commentFilterUsageFile = new File(f.getAbsolutePath() + "/comment_filter_usage.json");
                                 File accountsFile = new File(f.getAbsolutePath() + "/accounts.json");
+                                File readPostsFile = new File(f.getAbsolutePath() + "/read_posts.json");
 
                                 if (anonymousSubscribedSubredditsFile.exists()) {
                                     List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
@@ -218,6 +220,13 @@ public class RestoreSettings {
                                                 .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, firstAccount.getProfileImageUrl())
                                                 .apply();
                                         }
+                                    }
+                                }
+                                // Restore read_posts after accounts so the FK on username is satisfied.
+                                if (readPostsFile.exists()) {
+                                    List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
+                                    if (readPosts != null) {
+                                        redditDataRoomDatabase.readPostDao().insertAll(readPosts);
                                     }
                                 }
                             }
