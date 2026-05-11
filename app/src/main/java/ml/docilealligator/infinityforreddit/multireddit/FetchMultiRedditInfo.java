@@ -63,6 +63,10 @@ public class FetchMultiRedditInfo {
                                                      FetchMultiRedditInfoListener fetchMultiRedditInfoListener) {
         executor.execute(() -> {
             MultiReddit multiReddit = redditDataRoomDatabase.multiRedditDao().getMultiReddit(multipath, Account.ANONYMOUS_ACCOUNT);
+            if (multiReddit == null) {
+                handler.post(fetchMultiRedditInfoListener::failed);
+                return;
+            }
             ArrayList<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits =
                     (ArrayList<AnonymousMultiredditSubreddit>) redditDataRoomDatabase.anonymousMultiredditSubredditDao().getAllAnonymousMultiRedditSubreddits(multipath);
             ArrayList<ExpandedSubredditInMultiReddit> subreddits = new ArrayList<>();
