@@ -2,6 +2,14 @@
 
 ---
 
+8.2.1.2 / 2026-5-11
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed accessing users' multi-reddits in Anonymous mode
+* Added Anonymous local data like upvotes, saved, and history to the backup
+* Fixed crash with multi-reddits in Anonymous mode
+
 8.2.1.1 / 2026-5-10
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
