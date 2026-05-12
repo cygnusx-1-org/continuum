@@ -2,6 +2,12 @@
 
 ---
 
+8.2.1.3 / 2026-5-12
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed issue with cookie dialog on the login page when using WebView
+
 8.2.1.2 / 2026-5-11
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
