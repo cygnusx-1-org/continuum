@@ -226,6 +226,7 @@ dependencies {
     implementation "androidx.paging:paging-guava:$pagingVersion"
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.webkit:webkit:1.14.0'
     def roomVersion = "2.7.2"
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"

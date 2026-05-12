@@ -26,12 +26,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -181,6 +184,35 @@ public class LoginActivity extends BaseActivity {
         });
 
         binding.webviewLoginActivity.addJavascriptInterface(new JsRequestLogger(), "AndroidLogger");
+
+        // Hide Reddit's cookie consent wrapper before any page script runs. It can appear
+        // behind the login form and steal focus from inputs. Inject at document-start so the
+        // CSS rule + MutationObserver land before Reddit's own scripts mount the element.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+            WebViewCompat.addDocumentStartJavaScript(
+                    binding.webviewLoginActivity,
+                    "(function(){"
+                            + "var ID='data-protection-consent-wrapper';"
+                            + "var addStyle=function(){"
+                            + "if(document.getElementById('_dpcStyle'))return;"
+                            + "var s=document.createElement('style');"
+                            + "s.id='_dpcStyle';"
+                            + "s.textContent='#'+ID+'{display:none!important}';"
+                            + "(document.head||document.documentElement||document)"
+                            + ".appendChild(s);"
+                            + "};"
+                            + "var kill=function(){"
+                            + "var el=document.getElementById(ID);"
+                            + "if(el)el.remove();"
+                            + "};"
+                            + "addStyle();kill();"
+                            + "new MutationObserver(function(){addStyle();kill();})"
+                            + ".observe(document.documentElement||document,"
+                            + "{childList:true,subtree:true});"
+                            + "})()",
+                    Collections.singleton("https://*.reddit.com"));
+        }
+
         binding.webviewLoginActivity.loadUrl(url);
         binding.webviewLoginActivity.setWebViewClient(new WebViewClient() {
             @Override
