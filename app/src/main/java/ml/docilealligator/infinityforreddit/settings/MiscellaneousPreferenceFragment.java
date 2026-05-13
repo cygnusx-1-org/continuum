@@ -113,6 +113,10 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
                 String savedPkg = mSharedPreferences.getString(specificPkgKey, "");
                 if (savedPkg != null && !savedPkg.isEmpty()) {
                     specificBrowserListPreference.setValue(savedPkg);
+                } else {
+                    String firstPkg = installedBrowsers.get(0)[1];
+                    specificBrowserListPreference.setValue(firstPkg);
+                    mSharedPreferences.edit().putString(specificPkgKey, firstPkg).apply();
                 }
                 specificBrowserListPreference.setVisible("4".equals(currentLinkHandler));
                 specificBrowserListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
