@@ -36,6 +36,9 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
     @Inject
+    @Named("default")
+    SharedPreferences mSharedPreferences;
+    @Inject
     @Named("post_feed_scrolled_position_cache")
     SharedPreferences cache;
 
@@ -60,14 +63,17 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
         boolean hasEphemeralBrowser = !ephemeralBrowsers.isEmpty();
 
-        if (specificBrowserEditTextPreference != null) {
-            specificBrowserEditTextPreference.setVisible(linkHandlerListPreference != null
-                    && "4".equals(linkHandlerListPreference.getValue()));
-        }
+        String linkHandlerKey = mActivity.accountName + SharedPreferencesUtils.LINK_HANDLER_BASE;
+        String ephemeralPkgKey = mActivity.accountName + SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE;
+        String specificPkgKey = mActivity.accountName + SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE_BASE;
+        String currentLinkHandler = mSharedPreferences.getString(linkHandlerKey, "0");
 
         if (linkHandlerListPreference != null) {
+            linkHandlerListPreference.setPersistent(false);
             filterLinkHandlerEntries(linkHandlerListPreference, hasEphemeralBrowser);
+            linkHandlerListPreference.setValue(currentLinkHandler);
             linkHandlerListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                mSharedPreferences.edit().putString(linkHandlerKey, (String) newValue).apply();
                 if (ephemeralBrowserListPreference != null) {
                     ephemeralBrowserListPreference.setVisible("3".equals(newValue));
                 }
@@ -81,11 +87,29 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         if (ephemeralBrowserListPreference != null) {
             if (hasEphemeralBrowser) {
                 populateEphemeralBrowserEntries(ephemeralBrowserListPreference, ephemeralBrowsers);
-                ephemeralBrowserListPreference.setVisible(linkHandlerListPreference != null
-                        && "3".equals(linkHandlerListPreference.getValue()));
+                ephemeralBrowserListPreference.setPersistent(false);
+                String savedEphemeralPkg = mSharedPreferences.getString(ephemeralPkgKey, "");
+                if (savedEphemeralPkg != null && !savedEphemeralPkg.isEmpty()) {
+                    ephemeralBrowserListPreference.setValue(savedEphemeralPkg);
+                }
+                ephemeralBrowserListPreference.setVisible("3".equals(currentLinkHandler));
+                ephemeralBrowserListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    mSharedPreferences.edit().putString(ephemeralPkgKey, (String) newValue).apply();
+                    return true;
+                });
             } else {
                 ephemeralBrowserListPreference.setVisible(false);
             }
+        }
+
+        if (specificBrowserEditTextPreference != null) {
+            specificBrowserEditTextPreference.setPersistent(false);
+            specificBrowserEditTextPreference.setText(mSharedPreferences.getString(specificPkgKey, ""));
+            specificBrowserEditTextPreference.setVisible("4".equals(currentLinkHandler));
+            specificBrowserEditTextPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                mSharedPreferences.edit().putString(specificPkgKey, (String) newValue).apply();
+                return true;
+            });
         }
 
         if (mainPageBackButtonActionListPreference != null) {

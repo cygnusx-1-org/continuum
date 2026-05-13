@@ -70,6 +70,9 @@ public class LinkResolverActivity extends AppCompatActivity {
     @Inject
     @Named("default")
     SharedPreferences mSharedPreferences;
+    @Inject
+    @Named("current_account")
+    SharedPreferences mCurrentAccountSharedPreferences;
 
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
@@ -402,7 +405,11 @@ public class LinkResolverActivity extends AppCompatActivity {
             return;
         }
 
-        int linkHandler = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.LINK_HANDLER, "0"));
+        String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
+        String linkHandlerKey = (accountName != null && !accountName.isEmpty())
+                ? accountName + SharedPreferencesUtils.LINK_HANDLER_BASE
+                : SharedPreferencesUtils.LINK_HANDLER;
+        int linkHandler = Integer.parseInt(mSharedPreferences.getString(linkHandlerKey, "0"));
         if (linkHandler == 0) {
             openInBrowser(uri, pm, true);
         } else if (linkHandler == 1) {
@@ -417,7 +424,11 @@ public class LinkResolverActivity extends AppCompatActivity {
     }
 
     private void openInSpecificBrowser(Uri uri, PackageManager pm) {
-        String pkg = mSharedPreferences.getString(SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE, "");
+        String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
+        String pkgKey = (accountName != null && !accountName.isEmpty())
+                ? accountName + SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE_BASE
+                : SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE;
+        String pkg = mSharedPreferences.getString(pkgKey, "");
         if (pkg != null && !pkg.isEmpty()) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(uri);
@@ -471,8 +482,11 @@ public class LinkResolverActivity extends AppCompatActivity {
     private void openInCustomTabs(Uri uri, PackageManager pm, boolean handleError, boolean ephemeral) {
         String selectedPackage = null;
         if (ephemeral) {
-            String preferredPackage = mSharedPreferences.getString(
-                    SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE, "");
+            String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
+            String ephemeralPkgKey = (accountName != null && !accountName.isEmpty())
+                    ? accountName + SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE
+                    : SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE;
+            String preferredPackage = mSharedPreferences.getString(ephemeralPkgKey, "");
             if (preferredPackage != null && !preferredPackage.isEmpty()
                     && CustomTabsClient.isEphemeralBrowsingSupported(this, preferredPackage)) {
                 selectedPackage = preferredPackage;
