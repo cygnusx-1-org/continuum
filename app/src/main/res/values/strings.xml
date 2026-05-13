@@ -667,7 +667,7 @@
     <string name="settings_ephemeral_custom_tab_browser_title">Ephemeral Browser</string>
     <string name="settings_link_handler_value_internal_browser">Internal Browser</string>
     <string name="settings_link_handler_value_specific_browser">Specific Browser</string>
-    <string name="settings_specific_browser_title">Specific Browser Package Name</string>
+    <string name="settings_specific_browser_title">Specific Browser</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">Legacy Video Controller UI</string>
     <string name="settings_pinch_to_zoom_video_title">Pinch to Zoom Video</string>
     <string name="settings_experimental_feature">Experimental feature</string>
