@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -54,7 +56,7 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
 
         ListPreference linkHandlerListPreference = findPreference(SharedPreferencesUtils.LINK_HANDLER);
         ListPreference ephemeralBrowserListPreference = findPreference(SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE);
-        EditTextPreference specificBrowserEditTextPreference = findPreference(SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE);
+        ListPreference specificBrowserListPreference = findPreference(SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE);
         ListPreference mainPageBackButtonActionListPreference = findPreference(SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION);
         SwitchPreference savePostFeedScrolledPositionSwitch = findPreference(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION);
         ListPreference languageListPreference = findPreference(SharedPreferencesUtils.LANGUAGE);
@@ -62,6 +64,8 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
 
         List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
         boolean hasEphemeralBrowser = !ephemeralBrowsers.isEmpty();
+
+        List<String[]> installedBrowsers = findInstalledBrowsers(mActivity);
 
         String linkHandlerKey = mActivity.accountName + SharedPreferencesUtils.LINK_HANDLER_BASE;
         String ephemeralPkgKey = mActivity.accountName + SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE;
@@ -77,8 +81,8 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
                 if (ephemeralBrowserListPreference != null) {
                     ephemeralBrowserListPreference.setVisible("3".equals(newValue));
                 }
-                if (specificBrowserEditTextPreference != null) {
-                    specificBrowserEditTextPreference.setVisible("4".equals(newValue));
+                if (specificBrowserListPreference != null) {
+                    specificBrowserListPreference.setVisible("4".equals(newValue));
                 }
                 return true;
             });
@@ -102,14 +106,22 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
             }
         }
 
-        if (specificBrowserEditTextPreference != null) {
-            specificBrowserEditTextPreference.setPersistent(false);
-            specificBrowserEditTextPreference.setText(mSharedPreferences.getString(specificPkgKey, ""));
-            specificBrowserEditTextPreference.setVisible("4".equals(currentLinkHandler));
-            specificBrowserEditTextPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                mSharedPreferences.edit().putString(specificPkgKey, (String) newValue).apply();
-                return true;
-            });
+        if (specificBrowserListPreference != null) {
+            if (!installedBrowsers.isEmpty()) {
+                populateBrowserEntries(specificBrowserListPreference, installedBrowsers);
+                specificBrowserListPreference.setPersistent(false);
+                String savedPkg = mSharedPreferences.getString(specificPkgKey, "");
+                if (savedPkg != null && !savedPkg.isEmpty()) {
+                    specificBrowserListPreference.setValue(savedPkg);
+                }
+                specificBrowserListPreference.setVisible("4".equals(currentLinkHandler));
+                specificBrowserListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                    mSharedPreferences.edit().putString(specificPkgKey, (String) newValue).apply();
+                    return true;
+                });
+            } else {
+                specificBrowserListPreference.setVisible(false);
+            }
         }
 
         if (mainPageBackButtonActionListPreference != null) {
@@ -152,6 +164,35 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
                 return true;
             });
         }
+    }
+
+    private static List<String[]> findInstalledBrowsers(Context context) {
+        PackageManager pm = context.getPackageManager();
+        int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                ? PackageManager.MATCH_ALL
+                : PackageManager.GET_DISABLED_COMPONENTS;
+        List<ResolveInfo> resolved = pm.queryIntentActivities(
+                new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com")), flags);
+        List<String[]> browsers = new ArrayList<>();
+        for (ResolveInfo info : resolved) {
+            if (info.activityInfo == null || !info.activityInfo.enabled) continue;
+            String pkg = info.activityInfo.applicationInfo.packageName;
+            String label = pm.getApplicationLabel(info.activityInfo.applicationInfo).toString();
+            browsers.add(new String[]{label, pkg});
+        }
+        Collections.sort(browsers, Comparator.comparing(b -> b[0].toLowerCase()));
+        return browsers;
+    }
+
+    private static void populateBrowserEntries(ListPreference pref, List<String[]> browsers) {
+        List<CharSequence> entries = new ArrayList<>();
+        List<CharSequence> values = new ArrayList<>();
+        for (String[] b : browsers) {
+            entries.add(b[0]);
+            values.add(b[1]);
+        }
+        pref.setEntries(entries.toArray(new CharSequence[0]));
+        pref.setEntryValues(values.toArray(new CharSequence[0]));
     }
 
     private static List<String[]> findEphemeralBrowsers(Context context) {
