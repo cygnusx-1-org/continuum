@@ -409,9 +409,26 @@ public class LinkResolverActivity extends AppCompatActivity {
             openInCustomTabs(uri, pm, true, false);
         } else if (linkHandler == 3) {
             openInCustomTabs(uri, pm, true, true);
+        } else if (linkHandler == 4) {
+            openInSpecificBrowser(uri, pm);
         } else {
             openInWebView(uri);
         }
+    }
+
+    private void openInSpecificBrowser(Uri uri, PackageManager pm) {
+        String pkg = mSharedPreferences.getString(SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE, "");
+        if (pkg != null && !pkg.isEmpty()) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            intent.setPackage(pkg);
+            try {
+                startActivity(intent);
+                return;
+            } catch (ActivityNotFoundException ignored) {
+            }
+        }
+        openInBrowser(uri, pm, true);
     }
 
     private void openInBrowser(Uri uri, PackageManager pm, boolean handleError) {

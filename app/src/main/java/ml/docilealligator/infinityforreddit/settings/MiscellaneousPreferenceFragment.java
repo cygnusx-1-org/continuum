@@ -51,6 +51,7 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
 
         ListPreference linkHandlerListPreference = findPreference(SharedPreferencesUtils.LINK_HANDLER);
         ListPreference ephemeralBrowserListPreference = findPreference(SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE);
+        EditTextPreference specificBrowserEditTextPreference = findPreference(SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE);
         ListPreference mainPageBackButtonActionListPreference = findPreference(SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION);
         SwitchPreference savePostFeedScrolledPositionSwitch = findPreference(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION);
         ListPreference languageListPreference = findPreference(SharedPreferencesUtils.LANGUAGE);
@@ -59,11 +60,19 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
         boolean hasEphemeralBrowser = !ephemeralBrowsers.isEmpty();
 
+        if (specificBrowserEditTextPreference != null) {
+            specificBrowserEditTextPreference.setVisible(linkHandlerListPreference != null
+                    && "4".equals(linkHandlerListPreference.getValue()));
+        }
+
         if (linkHandlerListPreference != null) {
             filterLinkHandlerEntries(linkHandlerListPreference, hasEphemeralBrowser);
             linkHandlerListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (ephemeralBrowserListPreference != null) {
                     ephemeralBrowserListPreference.setVisible("3".equals(newValue));
+                }
+                if (specificBrowserEditTextPreference != null) {
+                    specificBrowserEditTextPreference.setVisible("4".equals(newValue));
                 }
                 return true;
             });

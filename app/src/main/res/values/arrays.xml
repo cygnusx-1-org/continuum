@@ -676,6 +676,7 @@
         <item>@string/settings_link_handler_value_custom_tab</item>
         <item>@string/settings_link_handler_value_ephemeral_custom_tab</item>
         <item>@string/settings_link_handler_value_internal_browser</item>
+        <item>@string/settings_link_handler_value_specific_browser</item>
     </string-array>
 
     <string-array name="link_handler_values">
@@ -683,6 +684,7 @@
         <item>1</item>
         <item>3</item>
         <item>2</item>
+        <item>4</item>
     </string-array>
 
     <string-array name="settings_reddit_video_default_resolution">

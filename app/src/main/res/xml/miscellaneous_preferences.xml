@@ -22,6 +22,12 @@
         app:title="@string/settings_ephemeral_custom_tab_browser_title"
         app:useSimpleSummaryProvider="true" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
+        app:defaultValue=""
+        app:key="specific_browser_package"
+        app:title="@string/settings_specific_browser_title"
+        app:useSimpleSummaryProvider="true" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"
         app:entries="@array/main_page_back_button_action"
