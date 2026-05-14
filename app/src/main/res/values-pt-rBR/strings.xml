@@ -1047,7 +1047,7 @@ Toque para tentar de novo."</string>
     <string name="action_go_to_wiki">"Ir à wiki"</string>
     <string name="action_playback_speed">"Velocidade de reprodução"</string>
     <string name="about">"Sobre"</string>
-    <string name="settings_link_handler_title">"Manipulador de links"</string>
+    <string name="settings_link_handler_title">"Manipulador de links (Por conta)"</string>
     <string name="settings_main_page_back_button_action">"Ação do botão de voltar na página principal"</string>
     <string name="settings_open_navigation_drawer">"Abrir gaveta de navegação"</string>
     <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Retrato (desdobrado)"</string>
