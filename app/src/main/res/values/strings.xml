@@ -209,6 +209,15 @@
 
     <string name="select_a_subreddit">Please select a subreddit first</string>
     <string name="title_required">The post needs a good title</string>
+    <string name="crosspost_not_subscribed_title">Not subscribed</string>
+    <string name="crosspost_not_subscribed_message">You\'re not subscribed to r/%1$s, so you can\'t crosspost there. Subscribe first, then try again.</string>
+    <string name="crosspost_disallowed_title">Crossposts not allowed</string>
+    <string name="crosspost_disallowed_message">r/%1$s doesn\'t allow crossposts.</string>
+    <string name="crosspost_user_profile_disallowed_message">Your profile doesn\'t accept crossposts. Enable crossposts to your profile in your Reddit user settings.</string>
+    <string name="crosspost_could_not_verify_title">Couldn\'t verify</string>
+    <string name="crosspost_could_not_verify_message">Couldn\'t check whether this subreddit accepts crossposts. Check your connection and try again.</string>
+    <string name="crosspost_retry">Retry</string>
+    <string name="flair_required">Flair (required)</string>
     <string name="link_required">Hey where is the link?</string>
     <string name="select_an_image">Please select an image first</string>
     <string name="voting_length">Voting length: %1$d days</string>

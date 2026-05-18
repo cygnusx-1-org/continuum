@@ -104,6 +104,12 @@ public interface RedditAPI {
     @POST("api/submit")
     Call<String> submit(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
 
+    @GET("api/crosspostable_subreddits?raw_json=1")
+    Call<String> getCrosspostableSubreddits(@HeaderMap Map<String, String> headers, @Query("sr_name") String sourceSubredditName);
+
+    @GET("api/v1/{subredditName}/post_requirements?raw_json=1")
+    Call<String> getPostRequirements(@HeaderMap Map<String, String> headers, @Path("subredditName") String subredditName);
+
     @FormUrlEncoded
     @POST("api/media/asset.json?raw_json=1&gilding_detail=1")
     Call<String> uploadImage(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);

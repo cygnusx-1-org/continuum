@@ -36,8 +36,10 @@ import com.google.android.material.snackbar.Snackbar;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -48,6 +50,9 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.asynctasks.FetchCrosspostableSubreddits;
+import ml.docilealligator.infinityforreddit.asynctasks.FlairRequirementController;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
@@ -60,7 +65,11 @@ import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class SubmitCrosspostActivity extends BaseActivity implements FlairBottomSheetFragment.FlairSelectionCallback,
@@ -123,6 +132,9 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private ActivitySubmitCrosspostBinding binding;
+    private Set<String> crosspostableSubreddits;
+    private boolean crosspostableLoadFailed = false;
+    private FlairRequirementController flairController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,6 +190,12 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
 
         post = getIntent().getParcelableExtra(EXTRA_POST);
 
+        flairController = new FlairRequirementController(mOauthRetrofit,
+                R.id.action_send_submit_crosspost_activity,
+                this::applyFlairLabelStyle);
+
+        fetchCrosspostableSubreddits();
+
         if (savedInstanceState != null) {
             selectedAccount = savedInstanceState.getParcelable(SELECTED_ACCOUNT_STATE);
             subredditName = savedInstanceState.getString(SUBREDDIT_NAME_STATE);
@@ -206,6 +224,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 binding.subredditNameTextViewSubmitCrosspostActivity.setTextColor(primaryTextColor);
                 binding.subredditNameTextViewSubmitCrosspostActivity.setText(subredditName);
                 binding.flairCustomTextViewSubmitCrosspostActivity.setVisibility(View.VISIBLE);
+                onSubredditChangedNotifyController(subredditName, subredditIsUser);
                 if (!loadSubredditIconSuccessful) {
                     loadSubredditIcon();
                 }
@@ -331,10 +350,10 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 flairSelectionBottomSheetFragment.setArguments(bundle);
                 flairSelectionBottomSheetFragment.show(getSupportFragmentManager(), flairSelectionBottomSheetFragment.getTag());
             } else {
-                binding.flairCustomTextViewSubmitCrosspostActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
-                binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(primaryTextColor);
-                binding.flairCustomTextViewSubmitCrosspostActivity.setText(getString(R.string.flair));
                 flair = null;
+                flairController.setHasFlair(false);
+                binding.flairCustomTextViewSubmitCrosspostActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
+                applyFlairLabelStyle();
             }
         });
 
@@ -498,6 +517,133 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         });
     }
 
+    private void applyFlairLabelStyle() {
+        if (flair != null) return;
+        boolean required = flairController != null && flairController.isFlairRequired();
+        binding.flairCustomTextViewSubmitCrosspostActivity.setText(getString(required ? R.string.flair_required : R.string.flair));
+        binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
+    }
+
+    private void onSubredditChangedNotifyController(String targetSub, boolean targetIsUser) {
+        String token = selectedAccount != null && selectedAccount.getAccessToken() != null
+                ? selectedAccount.getAccessToken() : accessToken;
+        flairController.onSubredditChanged(targetSub, targetIsUser, token);
+    }
+
+    private void fetchCrosspostableSubreddits() {
+        crosspostableSubreddits = null;
+        crosspostableLoadFailed = false;
+        String token = selectedAccount != null && selectedAccount.getAccessToken() != null
+                ? selectedAccount.getAccessToken() : accessToken;
+        String sourceSub = post != null ? post.getSubredditName() : null;
+        if (token == null) {
+            crosspostableLoadFailed = true;
+            return;
+        }
+        FetchCrosspostableSubreddits.fetch(mOauthRetrofit, token, sourceSub,
+                new FetchCrosspostableSubreddits.FetchCrosspostableSubredditsListener() {
+                    @Override
+                    public void onSuccess(Set<String> allowed) {
+                        crosspostableSubreddits = allowed;
+                        crosspostableLoadFailed = false;
+                    }
+
+                    @Override
+                    public void onFail() {
+                        crosspostableSubreddits = null;
+                        crosspostableLoadFailed = true;
+                    }
+                });
+    }
+
+    /**
+     * @return true if the target sub is known-eligible; false means caller should bail.
+     * When loaded-and-disallowed, shows a blocking dialog explaining why.
+     * When still loading or load failed, shows the "couldn't verify" dialog (fail-closed).
+     */
+    private boolean checkCrosspostAllowed(String targetSubName, boolean targetIsUser) {
+        if (crosspostableLoadFailed || crosspostableSubreddits == null) {
+            showCouldNotVerifyDialog();
+            return false;
+        }
+        String key = (targetIsUser ? "u_" + targetSubName : targetSubName).toLowerCase();
+        if (crosspostableSubreddits.contains(key)) {
+            return true;
+        }
+        explainCrosspostBlock(targetSubName, targetIsUser);
+        return false;
+    }
+
+    private void explainCrosspostBlock(String targetSubName, boolean targetIsUser) {
+        if (targetIsUser) {
+            new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                    .setTitle(R.string.crosspost_disallowed_title)
+                    .setMessage(R.string.crosspost_user_profile_disallowed_message)
+                    .setPositiveButton(R.string.ok, null)
+                    .show();
+            return;
+        }
+        // Reddit's `user_is_subscriber` on /r/{sub}/about.json is the authoritative answer.
+        // The local SubscribedSubreddit DB cache can lag behind, so we ask Reddit directly.
+        String token = selectedAccount != null && selectedAccount.getAccessToken() != null
+                ? selectedAccount.getAccessToken() : accessToken;
+        mOauthRetrofit.create(RedditAPI.class)
+                .getSubredditDataOauth(targetSubName, APIUtils.getOAuthHeader(token))
+                .enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        Boolean subscribed = null;
+                        if (response.isSuccessful() && response.body() != null) {
+                            try {
+                                JSONObject data = new JSONObject(response.body()).getJSONObject(JSONUtils.DATA_KEY);
+                                if (!data.isNull("user_is_subscriber")) {
+                                    subscribed = data.getBoolean("user_is_subscriber");
+                                }
+                            } catch (Exception ignored) {
+                            }
+                        }
+                        showBlockDialog(targetSubName, subscribed);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        showBlockDialog(targetSubName, null);
+                    }
+                });
+    }
+
+    private void showBlockDialog(String targetSubName, Boolean subscribed) {
+        if (isFinishing() || isDestroyed()) return;
+        int titleRes;
+        String message;
+        if (subscribed == null) {
+            // Couldn't confirm subscription state — present the disallowed message,
+            // since exclusion from crosspostable_subreddits when subscribed implies disallowed.
+            titleRes = R.string.crosspost_disallowed_title;
+            message = getString(R.string.crosspost_disallowed_message, targetSubName);
+        } else if (subscribed) {
+            titleRes = R.string.crosspost_disallowed_title;
+            message = getString(R.string.crosspost_disallowed_message, targetSubName);
+        } else {
+            titleRes = R.string.crosspost_not_subscribed_title;
+            message = getString(R.string.crosspost_not_subscribed_message, targetSubName);
+        }
+        new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                .setTitle(titleRes)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok, null)
+                .show();
+    }
+
+    private void showCouldNotVerifyDialog() {
+        new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                .setTitle(R.string.crosspost_could_not_verify_title)
+                .setMessage(R.string.crosspost_could_not_verify_message)
+                .setPositiveButton(R.string.crosspost_retry, (d, w) -> fetchCrosspostableSubreddits())
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
     private void promptAlertDialog(int titleResId, int messageResId) {
         new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
                 .setTitle(titleResId)
@@ -513,10 +659,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         getMenuInflater().inflate(R.menu.submit_crosspost_activity, menu);
         applyMenuItemTheme(menu);
         mMenu = menu;
-        if (isPosting) {
-            mMenu.findItem(R.id.action_send_submit_crosspost_activity).setEnabled(false);
-            mMenu.findItem(R.id.action_send_submit_crosspost_activity).getIcon().setAlpha(130);
-        }
+        flairController.setMenu(menu);
         return true;
     }
 
@@ -537,10 +680,13 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 return true;
             }
 
-            isPosting = true;
+            String targetSubName = binding.subredditNameTextViewSubmitCrosspostActivity.getText().toString();
+            if (!checkCrosspostAllowed(targetSubName, subredditIsUser)) {
+                return true;
+            }
 
-            item.setEnabled(false);
-            item.getIcon().setAlpha(130);
+            isPosting = true;
+            flairController.setPosting(true);
 
             mPostingSnackbar.show();
 
@@ -620,20 +766,33 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE) {
             if (resultCode == RESULT_OK && data != null) {
-                subredditName = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME);
+                String pickedName = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME);
+                boolean pickedIsUser = data.getIntExtra(SelectThingReturnKey.RETURN_EXTRA_THING_TYPE, SelectThingReturnKey.THING_TYPE.SUBREDDIT) == SelectThingReturnKey.THING_TYPE.USER;
+
+                if (crosspostableSubreddits != null && pickedName != null) {
+                    String key = (pickedIsUser ? "u_" + pickedName : pickedName).toLowerCase();
+                    if (!crosspostableSubreddits.contains(key)) {
+                        explainCrosspostBlock(pickedName, pickedIsUser);
+                        return;
+                    }
+                }
+
+                subredditName = pickedName;
                 iconUrl = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_ICON);
                 subredditSelected = true;
-                subredditIsUser = data.getIntExtra(SelectThingReturnKey.RETURN_EXTRA_THING_TYPE, SelectThingReturnKey.THING_TYPE.SUBREDDIT) == SelectThingReturnKey.THING_TYPE.USER;
+                subredditIsUser = pickedIsUser;
 
                 binding.subredditNameTextViewSubmitCrosspostActivity.setTextColor(primaryTextColor);
                 binding.subredditNameTextViewSubmitCrosspostActivity.setText(subredditName);
                 displaySubredditIcon();
 
+                flair = null;
                 binding.flairCustomTextViewSubmitCrosspostActivity.setVisibility(View.VISIBLE);
                 binding.flairCustomTextViewSubmitCrosspostActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
                 binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(primaryTextColor);
                 binding.flairCustomTextViewSubmitCrosspostActivity.setText(getString(R.string.flair));
-                flair = null;
+
+                onSubredditChangedNotifyController(subredditName, subredditIsUser);
             }
         }
     }
@@ -651,6 +810,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         binding.flairCustomTextViewSubmitCrosspostActivity.setBackgroundColor(flairBackgroundColor);
         binding.flairCustomTextViewSubmitCrosspostActivity.setBorderColor(flairBackgroundColor);
         binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(flairTextColor);
+        flairController.setHasFlair(true);
     }
 
     @Override
@@ -665,6 +825,8 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                     .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
 
             binding.accountNameTextViewSubmitCrosspostActivity.setText(selectedAccount.getAccountName());
+
+            fetchCrosspostableSubreddits();
         }
     }
 
@@ -676,6 +838,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     @Subscribe
     public void onSubmitCrosspostEvent(SubmitCrosspostEvent submitCrosspostEvent) {
         isPosting = false;
+        flairController.setPosting(false);
         mPostingSnackbar.dismiss();
         if (submitCrosspostEvent.postSuccess) {
             Intent intent = new Intent(this, ViewPostDetailActivity.class);
@@ -683,8 +846,6 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             startActivity(intent);
             finish();
         } else {
-            mMenu.findItem(R.id.action_send_submit_crosspost_activity).setEnabled(true);
-            mMenu.findItem(R.id.action_send_submit_crosspost_activity).getIcon().setAlpha(255);
             if (submitCrosspostEvent.errorMessage == null || submitCrosspostEvent.errorMessage.equals("")) {
                 Snackbar.make(binding.getRoot(), R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
