@@ -723,6 +723,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         bottomAppBarOptionAction(option2);
                     });
 
+                    setProfileLongClickListener(navigationWrapper.option2BottomAppBar, option1);
+                    setProfileLongClickListener(navigationWrapper.option4BottomAppBar, option2);
+
                     setBottomAppBarContentDescription(navigationWrapper.option2BottomAppBar, option1);
                     setBottomAppBarContentDescription(navigationWrapper.option4BottomAppBar, option2);
                 } else {
@@ -763,6 +766,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     navigationWrapper.option4BottomAppBar.setOnClickListener(view -> {
                         bottomAppBarOptionAction(option4);
                     });
+
+                    setProfileLongClickListener(navigationWrapper.option1BottomAppBar, option1);
+                    setProfileLongClickListener(navigationWrapper.option2BottomAppBar, option2);
+                    setProfileLongClickListener(navigationWrapper.option3BottomAppBar, option3);
+                    setProfileLongClickListener(navigationWrapper.option4BottomAppBar, option4);
 
                     setBottomAppBarContentDescription(navigationWrapper.option1BottomAppBar, option1);
                     setBottomAppBarContentDescription(navigationWrapper.option2BottomAppBar, option2);
@@ -1292,6 +1300,26 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             default:
                 view.setContentDescription(getString(R.string.content_description_go_to_top));
                 break;
+        }
+    }
+
+    private void setProfileLongClickListener(View view, int option) {
+        if (option == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE) {
+            view.setOnLongClickListener(v -> {
+                openAccountManagementInDrawer();
+                return true;
+            });
+        } else {
+            view.setOnLongClickListener(null);
+            view.setLongClickable(false);
+        }
+    }
+
+    private void openAccountManagementInDrawer() {
+        binding.drawerLayout.open();
+        if (adapter != null && !mSecuritySharedPreferences.getBoolean(
+                SharedPreferencesUtils.REQUIRE_AUTHENTICATION_TO_GO_TO_ACCOUNT_SECTION_IN_NAVIGATION_DRAWER, false)) {
+            adapter.openAccountManagementPage();
         }
     }
 

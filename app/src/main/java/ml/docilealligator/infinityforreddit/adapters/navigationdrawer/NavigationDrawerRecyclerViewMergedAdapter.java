@@ -77,7 +77,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         return mainPageConcatAdapter;
     }
 
-    private void openAccountSection() {
+    public void openAccountSection() {
         mainPageConcatAdapter.removeAdapter(accountSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(redditSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(postSectionRecyclerViewAdapter);
@@ -86,6 +86,18 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         mainPageConcatAdapter.removeAdapter(subscribedSubredditsRecyclerViewAdapter);
 
         mainPageConcatAdapter.addAdapter(accountManagementSectionRecyclerViewAdapter);
+    }
+
+    public void openAccountManagementPage() {
+        if (mainPageConcatAdapter.getAdapters().contains(accountManagementSectionRecyclerViewAdapter)) {
+            return;
+        }
+        openAccountSection();
+        headerSectionRecyclerViewAdapter.openAccountManagement(true);
+    }
+
+    public boolean isInAccountManagementPage() {
+        return mainPageConcatAdapter.getAdapters().contains(accountManagementSectionRecyclerViewAdapter);
     }
 
     public void closeAccountManagement(boolean refreshHeader) {
