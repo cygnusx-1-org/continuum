@@ -2,6 +2,15 @@
 
 ---
 
+8.2.1.4 / 2026-5-24
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Replaced more Infinity for Reddit icons with Continuum icons
+* Made a subreddit flair required obvious for cross-posts, and all post types
+* Disabled the submit button for cross-posts and all posts types when a flair hasn't been set when required
+* Feat/specific browser link handler per account
+
 8.2.1.3 / 2026-5-12
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
