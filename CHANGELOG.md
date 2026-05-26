@@ -2,6 +2,14 @@
 
 ---
 
+8.2.1.5 / 2026-5-26
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Adaptive Icon #260
+* Added ability to long press the back arrow to return to Home
+* Implemented Switch accounts by holding profile icon on homepage #237
+
 8.2.1.4 / 2026-5-24
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
