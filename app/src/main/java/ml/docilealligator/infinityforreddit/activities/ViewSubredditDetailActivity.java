@@ -141,6 +141,13 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private static final String FETCH_SUBREDDIT_INFO_STATE = "FSIS";
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
+    private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
+    private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
+
+    // Tracked by the AppBar OffsetChangedListener so we can persist the collapsed/expanded
+    // state across rotation. Without this, the AppBarLayout resets to fully expanded on
+    // every recreate, pushing the post feed down even when the user was scrolled mid-feed.
+    private boolean mAppBarCollapsed = false;
     public SubredditViewModel mSubredditViewModel;
 
     @Inject
@@ -338,11 +345,13 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                     @Override
                     public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
                         if (state == State.COLLAPSED) {
+                            mAppBarCollapsed = true;
                             decorView.setSystemUiVisibility(getSystemVisibilityToolbarCollapsed());
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                             binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
                         } else if (state == State.EXPANDED) {
+                            mAppBarCollapsed = false;
                             decorView.setSystemUiVisibility(getSystemVisibilityToolbarExpanded());
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
@@ -355,10 +364,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                     @Override
                     public void onStateChanged(AppBarLayout appBarLayout, State state) {
                         if (state == State.COLLAPSED) {
+                            mAppBarCollapsed = true;
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                             binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
                         } else if (state == State.EXPANDED) {
+                            mAppBarCollapsed = false;
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
                             binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
@@ -371,10 +382,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 @Override
                 public void onStateChanged(AppBarLayout appBarLayout, State state) {
                     if (state == State.EXPANDED) {
+                        mAppBarCollapsed = false;
                         binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
                         binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
                         binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
                     } else if (state == State.COLLAPSED) {
+                        mAppBarCollapsed = true;
                         binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                         binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                         binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
@@ -397,6 +410,22 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             mFetchSubredditInfoSuccess = savedInstanceState.getBoolean(FETCH_SUBREDDIT_INFO_STATE);
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
             mNewAccountName = savedInstanceState.getString(NEW_ACCOUNT_NAME_STATE);
+            mAppBarCollapsed = savedInstanceState.getBoolean(APP_BAR_COLLAPSED_STATE, false);
+            if (mAppBarCollapsed) {
+                // Restore the collapsed AppBar without animation, so the post feed isn't
+                // pushed down by the re-expanded subreddit header on rotation.
+                binding.appbarLayoutViewSubredditDetailActivity.setExpanded(false, false);
+            }
+            if (savedInstanceState.getBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, false)
+                    && navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
+                // The bottom app bar and its FAB auto-hide on scroll but reset to shown on
+                // recreate. Re-hide both so they match the pre-rotation state.
+                navigationWrapper.bottomAppBar.post(
+                        () -> {
+                            navigationWrapper.bottomAppBar.performHide(false);
+                            navigationWrapper.hideFab();
+                        });
+            }
         }
 
         sectionsPagerAdapter = new SectionsPagerAdapter(this);
@@ -1326,6 +1355,11 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         outState.putBoolean(FETCH_SUBREDDIT_INFO_STATE, mFetchSubredditInfoSuccess);
         outState.putString(MESSAGE_FULLNAME_STATE, mMessageFullname);
         outState.putString(NEW_ACCOUNT_NAME_STATE, mNewAccountName);
+        outState.putBoolean(APP_BAR_COLLAPSED_STATE, mAppBarCollapsed);
+        boolean bottomAppBarHidden = navigationWrapper != null
+                && navigationWrapper.bottomAppBar != null
+                && navigationWrapper.bottomAppBar.getTranslationY() > 0;
+        outState.putBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, bottomAppBarHidden);
     }
 
     @Override

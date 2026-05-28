@@ -158,6 +158,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
     private static final String INBOX_COUNT_STATE = "ICS";
+    private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
+    private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
 
     MultiRedditViewModel multiRedditViewModel;
     SubscribedSubredditViewModel subscribedSubredditViewModel;
@@ -208,6 +210,18 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private SectionsPagerAdapter sectionsPagerAdapter;
     private NavigationDrawerRecyclerViewMergedAdapter adapter;
     private NavigationWrapper navigationWrapper;
+    // Tracks the AppBar collapsed/expanded state so it can be persisted across rotation;
+    // without this the AppBar resets to expanded on recreate, pushing the post feed down.
+    private boolean mAppBarCollapsed = false;
+    // Suppression window: set when restoring a rotation where the bottom bar was hidden.
+    // While set, all "show" paths (ViewPager onPageSelected, content-scroll-up callbacks
+    // triggered by the programmatic scroll restore) are blocked so the bar/FAB stay hidden
+    // to match the pre-rotation state. Cleared shortly after the restore settles.
+    private boolean mKeepBottomBarHiddenOnRestore = false;
+    // Sticky record of whether the bottom app bar is hidden. Landscape uses a navigation
+    // rail (no bottom app bar), so we can't read translationY there; this field carries the
+    // portrait hidden-state across the landscape intermediate so a P→L→P round trip keeps it.
+    private boolean mBottomBarHidden = false;
     private Runnable autoCompleteRunnable;
     private Call<String> subredditAutocompleteCall;
     private boolean mFetchUserInfoSuccess = false;
@@ -252,6 +266,19 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 findViewById(R.id.option_3_bottom_app_bar), findViewById(R.id.option_4_bottom_app_bar),
                 findViewById(R.id.fab_main_activity),
                 findViewById(R.id.navigation_rail), customThemeWrapper, showBottomAppBar);
+
+        // Track AppBar collapsed/expanded state so we can restore it across rotation.
+        binding.includedAppBar.appbarLayoutMainActivity.addOnOffsetChangedListener(
+                new AppBarStateChangeListener() {
+                    @Override
+                    public void onStateChanged(AppBarLayout appBarLayout, State state) {
+                        if (state == State.COLLAPSED) {
+                            mAppBarCollapsed = true;
+                        } else if (state == State.EXPANDED) {
+                            mAppBarCollapsed = false;
+                        }
+                    }
+                });
 
         EventBus.getDefault().register(this);
 
@@ -413,6 +440,31 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
             mNewAccountName = savedInstanceState.getString(NEW_ACCOUNT_NAME_STATE);
             inboxCount = savedInstanceState.getInt(INBOX_COUNT_STATE);
+            mAppBarCollapsed = savedInstanceState.getBoolean(APP_BAR_COLLAPSED_STATE, false);
+            mBottomBarHidden = savedInstanceState.getBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, false);
+            if (mAppBarCollapsed) {
+                // Restore the collapsed AppBar without animation so the post feed isn't pushed
+                // down by the re-expanded toolbar on rotation.
+                binding.includedAppBar.appbarLayoutMainActivity.setExpanded(false, false);
+            }
+            if (mBottomBarHidden) {
+                // The bottom app bar and its FAB auto-hide on scroll but reset to shown on
+                // recreate. Open a suppression window so the ViewPager's onPageSelected and
+                // the scroll-restore's contentScrollUp don't re-show them, and re-hide once
+                // the views are laid out. In landscape (navigation rail) bottomAppBar is null
+                // and there's nothing to hide, but the flag/state still carry to portrait.
+                mKeepBottomBarHiddenOnRestore = true;
+                binding.getRoot().post(() -> {
+                    if (navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
+                        navigationWrapper.bottomAppBar.performHide(false);
+                    }
+                    if (navigationWrapper != null) {
+                        navigationWrapper.hideFab();
+                    }
+                });
+                binding.getRoot().postDelayed(
+                        () -> mKeepBottomBarHiddenOnRestore = false, 800);
+            }
         } else {
             mMessageFullname = getIntent().getStringExtra(EXTRA_MESSAGE_FULLNAME);
             mNewAccountName = getIntent().getStringExtra(EXTRA_NEW_ACCOUNT_NAME);
@@ -1165,11 +1217,14 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         binding.includedAppBar.viewPagerMainActivity.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                if (showBottomAppBar) {
-                    navigationWrapper.showNavigation();
-                }
-                if (!hideFab) {
-                    navigationWrapper.showFab();
+                // While restoring a rotation where the bar was hidden, don't re-show it.
+                if (!mKeepBottomBarHiddenOnRestore) {
+                    if (showBottomAppBar) {
+                        navigationWrapper.showNavigation();
+                    }
+                    if (!hideFab) {
+                        navigationWrapper.showFab();
+                    }
                 }
                 sectionsPagerAdapter.displaySortTypeInToolbar();
             }
@@ -1470,6 +1525,14 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         outState.putString(MESSAGE_FULLNAME_STATE, mMessageFullname);
         outState.putString(NEW_ACCOUNT_NAME_STATE, mNewAccountName);
         outState.putInt(INBOX_COUNT_STATE, inboxCount);
+        outState.putBoolean(APP_BAR_COLLAPSED_STATE, mAppBarCollapsed);
+        // When the bottom app bar exists (portrait), read its real state. When it's null
+        // (landscape navigation-rail mode) keep the sticky value so the portrait hidden-state
+        // survives the landscape intermediate of a P→L→P round trip.
+        if (navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
+            mBottomBarHidden = navigationWrapper.bottomAppBar.getTranslationY() > 0;
+        }
+        outState.putBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, mBottomBarHidden);
     }
 
     @Override
@@ -1529,8 +1592,18 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     @Override
     public void contentScrollUp() {
+        // Suppress the show while restoring a rotation where the bar was hidden — the
+        // programmatic scroll restore can fire this and would otherwise re-show the bar/FAB.
+        if (mKeepBottomBarHiddenOnRestore) {
+            return;
+        }
         if (showBottomAppBar && !mLockBottomAppBar) {
             navigationWrapper.showNavigation();
+            // Only track state when the bottom app bar actually exists (portrait); leave it
+            // sticky in landscape rail mode.
+            if (navigationWrapper.bottomAppBar != null) {
+                mBottomBarHidden = false;
+            }
         }
         if (!(showBottomAppBar && mLockBottomAppBar) && !hideFab) {
             navigationWrapper.showFab();
@@ -1544,6 +1617,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
         if (showBottomAppBar && !mLockBottomAppBar) {
             navigationWrapper.hideNavigation();
+            if (navigationWrapper.bottomAppBar != null) {
+                mBottomBarHidden = true;
+            }
         }
     }
 

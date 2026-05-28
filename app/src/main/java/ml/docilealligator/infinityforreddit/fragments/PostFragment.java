@@ -107,9 +107,20 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     private static final String IS_IN_LAZY_MODE_STATE = "IILMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
+    private static final String RECYCLER_VIEW_POSITION_OFFSET_STATE = "RVPOS";
+    private static final String RECYCLER_VIEW_USER_ANCHOR_STATE = "RVUA";
+    private static final String RECYCLER_VIEW_USER_ANCHOR_OFFSET_STATE = "RVUAO";
     private static final String POST_FILTER_STATE = "PFS";
     private static final String CONCATENATED_SUBREDDIT_NAMES_STATE = "CSNS";
     private static final String POST_FRAGMENT_ID_STATE = "PFIS";
+
+    // The user's "intended" anchor position + offset, persisted across rotation round-trips.
+    // The offset is sticky: it's only re-captured when the anchor item itself changes (the
+    // user scrolled away). This preserves the original offset through the lossy multi-col
+    // intermediate, where StaggeredGridLayoutManager's gap-handling snaps the anchor to the
+    // top and would otherwise overwrite the good offset with the snapped one.
+    private int userAnchorPos = RecyclerView.NO_POSITION;
+    private int userAnchorOffset = 0;
 
     PostViewModel mPostViewModel;
     @Inject
@@ -220,8 +231,13 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         binding.swipeRefreshLayoutPostFragment.setOnRefreshListener(this::refresh);
 
         int recyclerViewPosition;
+        int recyclerViewPositionOffset;
         if (savedInstanceState != null) {
             recyclerViewPosition = savedInstanceState.getInt(RECYCLER_VIEW_POSITION_STATE);
+            recyclerViewPositionOffset = savedInstanceState.getInt(RECYCLER_VIEW_POSITION_OFFSET_STATE);
+            userAnchorPos = savedInstanceState.getInt(
+                    RECYCLER_VIEW_USER_ANCHOR_STATE, RecyclerView.NO_POSITION);
+            userAnchorOffset = savedInstanceState.getInt(RECYCLER_VIEW_USER_ANCHOR_OFFSET_STATE, 0);
 
             isInLazyMode = savedInstanceState.getBoolean(IS_IN_LAZY_MODE_STATE);
             postFilter = savedInstanceState.getParcelable(POST_FILTER_STATE);
@@ -229,6 +245,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             postFragmentId = savedInstanceState.getLong(POST_FRAGMENT_ID_STATE);
         } else {
             recyclerViewPosition = 0;
+            recyclerViewPositionOffset = 0;
+            userAnchorPos = RecyclerView.NO_POSITION;
+            userAnchorOffset = 0;
             postFilter = getArguments().getParcelable(EXTRA_FILTER);
             postFragmentId = System.currentTimeMillis() + new Random().nextInt(1000);
         }
@@ -734,11 +753,23 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         if (recyclerViewPosition > 0) {
+            final int restorePosition = recyclerViewPosition;
+            final int restoreOffset = recyclerViewPositionOffset;
             mAdapter.addLoadStateListener(new Function1<>() {
                 @Override
                 public Unit invoke(CombinedLoadStates combinedLoadStates) {
                     if (combinedLoadStates.getRefresh() instanceof LoadState.NotLoading && mAdapter.getItemCount() > 0) {
-                        binding.recyclerViewPostFragment.scrollToPosition(recyclerViewPosition);
+                        // Use scrollToPositionWithOffset to preserve the exact pixel offset
+                        // of the topmost visible item, not just scroll it into view.
+                        if (mLinearLayoutManager != null) {
+                            mLinearLayoutManager.scrollToPositionWithOffset(
+                                    restorePosition, restoreOffset);
+                        } else if (mStaggeredGridLayoutManager != null) {
+                            mStaggeredGridLayoutManager.scrollToPositionWithOffset(
+                                    restorePosition, restoreOffset);
+                        } else {
+                            binding.recyclerViewPostFragment.scrollToPosition(restorePosition);
+                        }
                         mAdapter.removeLoadStateListener(this);
                     }
                     return Unit.INSTANCE;
@@ -1131,13 +1162,82 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(IS_IN_LAZY_MODE_STATE, isInLazyMode);
-        if (mLinearLayoutManager != null) {
-            outState.putInt(RECYCLER_VIEW_POSITION_STATE, mLinearLayoutManager.findFirstVisibleItemPosition());
-        } else if (mStaggeredGridLayoutManager != null) {
-            int[] into = new int[mStaggeredGridLayoutManager.getSpanCount()];
-            outState.putInt(RECYCLER_VIEW_POSITION_STATE,
-                    mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0]);
+
+        RecyclerView rv = binding.recyclerViewPostFragment;
+        int paddingTop = rv.getPaddingTop();
+
+        // Pick the anchor by scanning rendered children. We want the item the user
+        // perceives as their "main content" — the one that occupies the most of the
+        // viewport's vertical extent. Preferences:
+        //   1. userAnchorPos from a previous save, if still rendered. Preserves the user's
+        //      intended item AND its (sticky) offset across multi-col round-trips, where
+        //      StaggeredGridLayoutManager's gap-handling snaps the anchor to the top and
+        //      would otherwise overwrite the good offset with the snapped one.
+        //   2. The child with the largest visible height in the viewport. Ties → smaller
+        //      adapter position (preserves the "top of the row" feel in multi-col).
+        RecyclerView.LayoutManager lm = rv.getLayoutManager();
+        int viewportBottom = rv.getHeight() - rv.getPaddingBottom();
+        int bestAnchorPos = RecyclerView.NO_POSITION;
+        int bestAnchorOffset = 0;
+        int bestVisible = -1;
+        boolean userAnchorVisible = false;
+        for (int i = 0; i < rv.getChildCount(); i++) {
+            View child = rv.getChildAt(i);
+            if (child == null) continue;
+            int childTop = child.getTop();
+            int childBottom = child.getBottom();
+            if (childBottom <= paddingTop) continue;
+            int pos = rv.getChildAdapterPosition(child);
+            if (pos == RecyclerView.NO_POSITION) continue;
+            // The offset scrollToPositionWithOffset() restores against is measured to the
+            // item's decorated START (top decoration inset AND top margin removed), relative
+            // to paddingTop. Capturing exactly that makes the restore land pixel-exact instead
+            // of drifting by the decoration/margin inset on each cycle.
+            int topMargin = ((ViewGroup.MarginLayoutParams) child.getLayoutParams()).topMargin;
+            int decoratedStart = (lm != null ? lm.getDecoratedTop(child) : childTop) - topMargin;
+            int childOffset = decoratedStart - paddingTop;
+            int visibleBottom = Math.min(childBottom, viewportBottom);
+            int visible = Math.max(0, visibleBottom - Math.max(childTop, paddingTop));
+            if (visible <= 0) continue;
+            if (visible > bestVisible
+                    || (visible == bestVisible
+                            && (bestAnchorPos == RecyclerView.NO_POSITION
+                                    || pos < bestAnchorPos))) {
+                bestAnchorPos = pos;
+                bestAnchorOffset = childOffset;
+                bestVisible = visible;
+            }
+            if (pos == userAnchorPos) {
+                userAnchorVisible = true;
+            }
         }
+
+        int anchorPos;
+        int anchorOffset;
+        if (userAnchorVisible) {
+            // Anchor unchanged: keep the sticky offset (the original, un-snapped one) so the
+            // lossy multi-col intermediate doesn't overwrite it.
+            anchorPos = userAnchorPos;
+            anchorOffset = userAnchorOffset;
+        } else if (bestAnchorPos != RecyclerView.NO_POSITION) {
+            // Anchor changed (user scrolled away): adopt the most-visible item and capture a
+            // fresh offset.
+            anchorPos = bestAnchorPos;
+            anchorOffset = bestAnchorOffset;
+            userAnchorPos = anchorPos;
+            userAnchorOffset = anchorOffset;
+        } else {
+            anchorPos = RecyclerView.NO_POSITION;
+            anchorOffset = 0;
+        }
+
+        if (anchorPos != RecyclerView.NO_POSITION) {
+            outState.putInt(RECYCLER_VIEW_POSITION_STATE, anchorPos);
+            outState.putInt(RECYCLER_VIEW_POSITION_OFFSET_STATE, anchorOffset);
+            outState.putInt(RECYCLER_VIEW_USER_ANCHOR_STATE, userAnchorPos);
+            outState.putInt(RECYCLER_VIEW_USER_ANCHOR_OFFSET_STATE, userAnchorOffset);
+        }
+
         outState.putParcelable(POST_FILTER_STATE, postFilter);
         outState.putString(CONCATENATED_SUBREDDIT_NAMES_STATE, concatenatedSubredditNames);
         outState.putLong(POST_FRAGMENT_ID_STATE, postFragmentId);
