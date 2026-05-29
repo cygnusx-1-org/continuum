@@ -2,6 +2,13 @@
 
 ---
 
+8.2.1.7 / 2026-5-29
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Posts and Subreddits won't load in Anonymous mode #261
+* Fixed exact restoration of the position and layout for Home and Subreddits
+
 8.2.1.6 / 2026-5-29
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
