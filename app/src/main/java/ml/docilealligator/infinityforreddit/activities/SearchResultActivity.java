@@ -36,6 +36,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -100,6 +102,9 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
+    @Inject
+    @Named("no_oauth")
+    Retrofit mRetrofit;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -661,7 +666,10 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
                 String currentQuery = editable.toString().trim();
                 if (!currentQuery.isEmpty()) {
                     autoCompleteRunnable = () -> {
-                        subredditAutocompleteCall = mOauthRetrofit.create(RedditAPI.class).subredditAutocomplete(APIUtils.getOAuthHeader(accessToken),
+                        boolean anonymous = accountName.equals(Account.ANONYMOUS_ACCOUNT);
+                        Retrofit autocompleteRetrofit = anonymous ? mRetrofit : mOauthRetrofit;
+                        Map<String, String> autocompleteHeaders = anonymous ? new HashMap<>() : APIUtils.getOAuthHeader(accessToken);
+                        subredditAutocompleteCall = autocompleteRetrofit.create(RedditAPI.class).subredditAutocomplete(autocompleteHeaders,
                                 currentQuery, nsfw);
                         subredditAutocompleteCall.enqueue(new Callback<String>() {
                             @Override
