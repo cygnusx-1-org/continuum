@@ -17,6 +17,7 @@ import dagger.Module;
 import dagger.Provides;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.network.AccessTokenAuthenticator;
+import ml.docilealligator.infinityforreddit.network.AnonymousOAuthInterceptor;
 import ml.docilealligator.infinityforreddit.network.RedgifsAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.ServerAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.SortTypeConverterFactory;
@@ -93,8 +94,25 @@ abstract class NetworkModule {
 
     @Provides
     @Named("no_oauth")
-    static Retrofit provideRetrofit(@Named("base") Retrofit retrofit) {
-        return retrofit;
+    @Singleton
+    static OkHttpClient provideNoOauthOkHttpClient(Context context,
+        @Named("base") OkHttpClient httpClient,
+        @Named("current_account") SharedPreferences currentAccountSharedPreferences,
+        ConnectionPool connectionPool) {
+
+        // Anonymous browsing now uses an application-only OAuth token against oauth.reddit.com,
+        // because Reddit shut down the unauthenticated www.reddit.com/*.json endpoints.
+        return httpClient.newBuilder()
+            .addInterceptor(new AnonymousOAuthInterceptor(APIUtils.getClientId(context), currentAccountSharedPreferences))
+            .connectionPool(connectionPool)
+            .build();
+    }
+
+    @Provides
+    @Named("no_oauth")
+    static Retrofit provideRetrofit(@Named("base") Retrofit retrofit,
+        @Named("no_oauth") OkHttpClient okHttpClient) {
+        return retrofit.newBuilder().client(okHttpClient).build();
     }
 
     @Provides

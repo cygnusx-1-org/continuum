@@ -71,7 +71,14 @@ public class APIUtils {
     public static final String GRANT_TYPE_KEY = "grant_type";
     public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+    // Application-only ("userless") OAuth grant for installed apps. Used for anonymous browsing
+    // now that Reddit has shut down the unauthenticated www.reddit.com/*.json endpoints.
+    public static final String GRANT_TYPE_INSTALLED_CLIENT = "https://oauth.reddit.com/grants/installed_client";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
+
+    public static final String DEVICE_ID_KEY = "device_id";
+    // Privacy-respecting sentinel accepted by Reddit in place of a unique per-device id.
+    public static final String DEVICE_ID_DO_NOT_TRACK = "DO_NOT_TRACK_THIS_DEVICE";
 
     public static final String DIR_KEY = "dir";
     public static final String ID_KEY = "id";
@@ -247,6 +254,31 @@ public class APIUtils {
     // Concatenated subreddit name works too
     public static int subredditAPICallLimit(@Nullable String subredditName) {
         return 100;
+    }
+
+    // Application-only (anonymous/userless) Reddit OAuth token management
+    public static final AtomicReference<ApplicationOnlyToken> ANONYMOUS_TOKEN = new AtomicReference<>(new ApplicationOnlyToken("", 0));
+
+    public static class ApplicationOnlyToken {
+        @NonNull public final String token;
+        private final long expireAt;
+
+        private ApplicationOnlyToken(@NonNull String token, final long expireAt) {
+            this.token = token;
+            this.expireAt = expireAt;
+        }
+
+        // Reddit application-only tokens are valid for expiresInSeconds (typically 3600s / 1 hour).
+        // Expire a few minutes early to give a safety margin before the real expiry.
+        public static ApplicationOnlyToken expireIn(@NonNull String token, long expiresInSeconds) {
+            long leewayMillis = 5 * 60 * 1000;
+            long lifetimeMillis = Math.max(0, expiresInSeconds * 1000 - leewayMillis);
+            return new ApplicationOnlyToken(token, SystemClock.uptimeMillis() + lifetimeMillis);
+        }
+
+        public boolean isValid() {
+            return !token.isEmpty() && expireAt > SystemClock.uptimeMillis();
+        }
     }
 
     // RedGifs token management
