@@ -169,6 +169,7 @@
     <string name="unsubscribe">Unsubscribe</string>
     <string name="subscribed">Subscribed</string>"
     <string name="subscribe_failed">Subscribe Failed</string>
+    <string name="cannot_subscribe_nsfw_subreddit_anonymous">Cannot subscribe to NSFW subreddits in Anonymous mode</string>
     <string name="unsubscribed">Unsubscribed</string>"
     <string name="unsubscribe_failed">Unsubscribe Failed</string>
 

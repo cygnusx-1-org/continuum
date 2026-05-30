@@ -64,6 +64,7 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FABMoreOptionsBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostBinding;
+import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
@@ -975,6 +976,43 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         bindPostViewModel();
     }
 
+    // Loads the anonymous home feed or anonymous multireddit. Unlike a signed-in account, these
+    // feeds are assembled from the locally stored subscription list rather than a server-side feed,
+    // so the set of subreddits can change while this fragment is alive (e.g. subscribing from the
+    // Popular tab or another screen). Re-queries the concatenated subreddit names from the database,
+    // then either binds the post view model or shows the "no subscriptions" empty state.
+    //
+    // Safe to call again on pull-to-refresh: it lets the feed pick up newly added/removed
+    // subreddits and recover from the empty state, where no post view model was ever created and
+    // mAdapter.refresh() would otherwise do nothing.
+    private void loadAnonymousFrontPageOrMultireddit(int usage, String nameOfUsage) {
+        FetchPostFilterAndConcatenatedSubredditNames.FetchPostFilterAndConcatenatecSubredditNamesListener listener =
+                (fetchedPostFilter, fetchedConcatenatedSubredditNames) -> {
+                    if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
+                        if (postFilter == null) {
+                            postFilter = fetchedPostFilter;
+                        }
+                        postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)
+                                && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                        concatenatedSubredditNames = fetchedConcatenatedSubredditNames;
+                        if (concatenatedSubredditNames == null) {
+                            showErrorView(postType == PostType.ANONYMOUS_MULTIREDDIT
+                                    ? R.string.anonymous_multireddit_no_subreddit
+                                    : R.string.anonymous_front_page_no_subscriptions);
+                        } else {
+                            initializeAndBindPostViewModelForAnonymous(concatenatedSubredditNames);
+                        }
+                    }
+                };
+        if (postType == PostType.ANONYMOUS_MULTIREDDIT) {
+            FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilterAndConcatenatedSubredditNames(
+                    mRedditDataRoomDatabase, mExecutor, new Handler(), multiRedditPath, usage, nameOfUsage, listener);
+        } else {
+            FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilterAndConcatenatedSubredditNames(
+                    mRedditDataRoomDatabase, mExecutor, new Handler(), usage, nameOfUsage, listener);
+        }
+    }
+
     private void initializeAndBindPostViewModelForAnonymous(String concatenatedSubredditNames) {
         if (postType == PostType.SEARCH) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
@@ -1268,9 +1306,45 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         if (isInLazyMode) {
             stopLazyMode();
         }
+        if (isAnonymousFrontPageOrMultireddit()) {
+            // The anonymous home/multireddit feed is built from the locally stored subscription
+            // list, so a refresh must re-read it from the database. This both picks up subreddits
+            // (un)subscribed to elsewhere and recovers from the empty state, where no post view
+            // model was created and refreshing the adapter below would have no effect.
+            reloadAnonymousFrontPageOrMultireddit();
+            return;
+        }
         saveCache();
         mAdapter.refresh();
         goBackToTop();
+    }
+
+    private boolean isAnonymousFrontPageOrMultireddit() {
+        return mActivity != null && mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)
+                && (postType == PostType.ANONYMOUS_FRONT_PAGE || postType == PostType.ANONYMOUS_MULTIREDDIT);
+    }
+
+    private void reloadAnonymousFrontPageOrMultireddit() {
+        concatenatedSubredditNames = null;
+        loadAnonymousFrontPageOrMultireddit(
+                postType == PostType.ANONYMOUS_MULTIREDDIT ? PostFilterUsage.MULTIREDDIT_TYPE : PostFilterUsage.HOME_TYPE,
+                postType == PostType.ANONYMOUS_MULTIREDDIT ? multiRedditPath : PostFilterUsage.NO_USAGE);
+    }
+
+    @Subscribe
+    public void onChangeAnonymousSubredditSubscriptionEvent(ChangeAnonymousSubredditSubscriptionEvent event) {
+        if (!isAnonymousFrontPageOrMultireddit()) {
+            return;
+        }
+        // Always force the next load to re-read the local subscription list. If the view is gone
+        // (e.g. an offscreen pager page), clearing the cached names is enough: onCreateView re-reads
+        // them when the view is recreated. Only reload immediately when a view actually exists,
+        // because the reload binds to it.
+        if (getView() == null) {
+            concatenatedSubredditNames = null;
+        } else {
+            reloadAnonymousFrontPageOrMultireddit();
+        }
     }
 
     @Override

@@ -18,6 +18,8 @@ import com.bumptech.glide.RequestManager;
 
 import java.util.concurrent.Executor;
 
+import org.greenrobot.eventbus.EventBus;
+
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.R;
@@ -26,6 +28,7 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.asynctasks.CheckIsSubscribedToSubreddit;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterErrorBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterLoadingBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemSubredditListingBinding;
@@ -172,11 +175,17 @@ public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<Subred
                                                         public void onSubredditSubscriptionSuccess() {
                                                             ((DataViewHolder) holder).binding.subscribeImageViewItemSubredditListing.setVisibility(View.GONE);
                                                             Toast.makeText(activity, R.string.subscribed, Toast.LENGTH_SHORT).show();
+                                                            EventBus.getDefault().post(new ChangeAnonymousSubredditSubscriptionEvent());
                                                         }
 
                                                         @Override
                                                         public void onSubredditSubscriptionFail() {
                                                             Toast.makeText(activity, R.string.subscribe_failed, Toast.LENGTH_SHORT).show();
+                                                        }
+
+                                                        @Override
+                                                        public void onSubredditSubscriptionNSFWBlocked() {
+                                                            Toast.makeText(activity, R.string.cannot_subscribe_nsfw_subreddit_anonymous, Toast.LENGTH_SHORT).show();
                                                         }
                                                     });
                                         }

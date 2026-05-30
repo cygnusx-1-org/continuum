@@ -93,6 +93,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSh
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewSubredditDetailBinding;
+import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
@@ -1086,11 +1087,18 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                                         binding.subscribeSubredditChipViewSubredditDetailActivity.setChipBackgroundColor(ColorStateList.valueOf(subscribedColor));
                                         makeSnackbar(R.string.subscribed, false);
                                         subscriptionReady = true;
+                                        EventBus.getDefault().post(new ChangeAnonymousSubredditSubscriptionEvent());
                                     }
 
                                     @Override
                                     public void onSubredditSubscriptionFail() {
                                         makeSnackbar(R.string.subscribe_failed, false);
+                                        subscriptionReady = true;
+                                    }
+
+                                    @Override
+                                    public void onSubredditSubscriptionNSFWBlocked() {
+                                        makeSnackbar(R.string.cannot_subscribe_nsfw_subreddit_anonymous, false);
                                         subscriptionReady = true;
                                     }
                                 });
@@ -1104,6 +1112,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                                         binding.subscribeSubredditChipViewSubredditDetailActivity.setChipBackgroundColor(ColorStateList.valueOf(unsubscribedColor));
                                         makeSnackbar(R.string.unsubscribed, false);
                                         subscriptionReady = true;
+                                        EventBus.getDefault().post(new ChangeAnonymousSubredditSubscriptionEvent());
                                     }
 
                                     @Override
