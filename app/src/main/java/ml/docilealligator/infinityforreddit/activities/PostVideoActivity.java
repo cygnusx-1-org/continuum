@@ -3,12 +3,14 @@ package ml.docilealligator.infinityforreddit.activities;
 import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
 import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
 
+import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -22,9 +24,12 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -130,6 +135,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     private Uri videoUri;
     private boolean loadSubredditIconSuccessful = true;
     private boolean isPosting;
+    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
     private boolean wasPlaying;
     private int primaryTextColor;
     private int flairBackgroundColor;
@@ -162,6 +168,15 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
 
         binding = ActivityPostVideoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        requestCameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(), isGranted -> {
+                    if (isGranted) {
+                        captureVideo();
+                    } else {
+                        Snackbar.make(binding.coordinatorLayoutPostVideoActivity, R.string.camera_permission_required, Snackbar.LENGTH_SHORT).show();
+                    }
+                });
 
         EventBus.getDefault().register(this);
 
@@ -400,11 +415,10 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         });
 
         binding.captureFabPostVideoActivity.setOnClickListener(view -> {
-            Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-            try {
-                startActivityForResult(takeVideoIntent, CAPTURE_VIDEO_REQUEST_CODE);
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                captureVideo();
+            } else {
+                requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
             }
         });
 
@@ -541,6 +555,15 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     }
 
     @OptIn(markerClass = UnstableApi.class)
+    private void captureVideo() {
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        try {
+            startActivityForResult(takeVideoIntent, CAPTURE_VIDEO_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void loadVideo() {
         binding.selectVideoConstraintLayoutPostVideoActivity.setVisibility(View.GONE);
         binding.selectAgainTextViewPostVideoActivity.setVisibility(View.VISIBLE);
