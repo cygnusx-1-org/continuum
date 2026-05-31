@@ -2,6 +2,15 @@
 
 ---
 
+8.2.1.10 / 2026-5-31
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Home tab fails to fetch subscriptions in anonymous mode #263
+* Blocked subscribing to NSFW subreddits for Anonymous users(Because it doesn't work)
+* Fixed crash caused by a permissions problem when trying to record a video for a video post submission
+* Fixed issue with uploading video files from an SD card with sanitization.
+
 8.2.1.9 / 2026-5-31
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
