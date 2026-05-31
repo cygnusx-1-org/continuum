@@ -88,7 +88,7 @@ Unique features of **Continuum**:
 
 - Ability to use your own `Client ID`.
 - Ability to use your own Giphy gifs API key.
-- Ability to backup your accounts.
+- Ability to backup your accounts with your own password.
 - The max number of main page tabs has been increased to six.
 - Sensible download names.
 - Bug fixes and more...
