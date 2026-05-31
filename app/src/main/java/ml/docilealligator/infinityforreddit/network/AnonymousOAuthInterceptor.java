@@ -29,11 +29,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  * OAuth token. Reddit shut down the unauthenticated www.reddit.com/*.json endpoints, so anonymous
  * browsing must now go through oauth.reddit.com with a token obtained via the installed_client
  * grant. This interceptor:
- * <ul>
- *     <li>rewrites the host of anonymous data requests from www.reddit.com to oauth.reddit.com,</li>
- *     <li>injects a cached application-only bearer token (fetching one lazily when needed), and</li>
- *     <li>refreshes the token and retries once on a 401.</li>
- * </ul>
+ *     rewrites the host of anonymous data requests from www.reddit.com to oauth.reddit.com,
+ *     injects a cached application-only bearer token (fetching one lazily when needed), and
+ *     refreshes the token and retries once on a 401.
+ *
  * The token-exchange and authorize endpoints are left untouched so the normal login flow, which
  * shares the same Retrofit instance, keeps working.
  */
@@ -98,7 +97,7 @@ public class AnonymousOAuthInterceptor implements Interceptor {
         return request.newBuilder()
                 .url(newUrl)
                 .header(APIUtils.AUTHORIZATION_KEY, APIUtils.AUTHORIZATION_BASE + token)
-                .header(APIUtils.USER_AGENT_KEY, APIUtils.USER_AGENT)
+                .header(APIUtils.USER_AGENT_KEY, APIUtils.ANONYMOUS_USER_AGENT)
                 .build();
     }
 
@@ -124,7 +123,7 @@ public class AnonymousOAuthInterceptor implements Interceptor {
 
         Map<String, String> headers = new HashMap<>();
         headers.put(APIUtils.AUTHORIZATION_KEY, basicAuthHeader);
-        headers.put(APIUtils.USER_AGENT_KEY, APIUtils.USER_AGENT);
+        headers.put(APIUtils.USER_AGENT_KEY, APIUtils.ANONYMOUS_USER_AGENT);
 
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.GRANT_TYPE_KEY, APIUtils.GRANT_TYPE_INSTALLED_CLIENT);
