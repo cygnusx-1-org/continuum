@@ -25,6 +25,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.CombinedLoadStates;
 import androidx.paging.LoadState;
+import androidx.paging.PagingData;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -996,6 +997,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                                 && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
                         concatenatedSubredditNames = fetchedConcatenatedSubredditNames;
                         if (concatenatedSubredditNames == null) {
+                            // Unsubscribing from the last subreddit leaves no feed to show. The
+                            // adapter still holds the previously loaded posts, so clear them before
+                            // showing the empty state; otherwise the old posts stay visible behind it.
+                            mAdapter.submitData(getViewLifecycleOwner().getLifecycle(), PagingData.empty());
                             showErrorView(postType == PostType.ANONYMOUS_MULTIREDDIT
                                     ? R.string.anonymous_multireddit_no_subreddit
                                     : R.string.anonymous_front_page_no_subscriptions);
@@ -1034,10 +1039,18 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             ).get(PostViewModel.class);
         } else {
             //Anonymous front page or multireddit
+            boolean reusedExistingViewModel = mPostViewModel != null;
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, mSharedPreferences, concatenatedSubredditNames,
                     postType, sortType, postFilter, readPostsList)
             ).get(PostViewModel.class);
+            if (reusedExistingViewModel) {
+                // On a reload (e.g. after subscribing) ViewModelProvider.get() hands back the existing
+                // fragment-scoped ViewModel and ignores the Factory above, so its subreddit names are
+                // still the ones captured when it was first created. Push the freshly read names onto
+                // it so a newly (un)subscribed subreddit shows up now instead of only after a restart.
+                mPostViewModel.changeSubredditName(concatenatedSubredditNames);
+            }
         }
 
         bindPostViewModel();
@@ -1134,7 +1147,15 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         binding.fetchPostInfoLinearLayoutPostFragment.setOnClickListener(null);
-        showErrorView(R.string.no_posts);
+        if (isAnonymousFrontPageOrMultireddit() && concatenatedSubredditNames == null) {
+            // An anonymous home/multireddit feed with no subscriptions has no posts to load, but the
+            // generic "no posts" message is misleading here. Tell the user to add a subreddit instead.
+            showErrorView(postType == PostType.ANONYMOUS_MULTIREDDIT
+                    ? R.string.anonymous_multireddit_no_subreddit
+                    : R.string.anonymous_front_page_no_subscriptions);
+        } else {
+            showErrorView(R.string.no_posts);
+        }
     }
 
     public void changeSortType(SortType sortType) {

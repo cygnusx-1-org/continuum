@@ -345,6 +345,16 @@ public class PostViewModel extends ViewModel {
         postFilterLiveData.postValue(postFilter);
     }
 
+    // Used by the anonymous home/multireddit feed, whose subreddit list is assembled locally and can
+    // change while this ViewModel is alive (e.g. subscribing from another screen). Updates the names
+    // read by returnPagingSoruce() and re-triggers the paging pipeline so a fresh PostPagingSource is
+    // built with them. Re-posting the current sort type rebuilds the feed exactly as changeSortType
+    // does; without it the cached PagingData (and its stale names) would stick around.
+    public void changeSubredditName(String name) {
+        this.name = name;
+        sortTypeLiveData.postValue(sortTypeLiveData.getValue());
+    }
+
     public static class Factory extends ViewModelProvider.NewInstanceFactory {
         private final Executor executor;
         private final Retrofit retrofit;
