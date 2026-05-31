@@ -258,10 +258,10 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
     implementation "com.squareup.retrofit2:adapter-guava:$retrofitVersion"
-    implementation 'com.squareup.okhttp3:okhttp:5.3.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
 
     // Dependency injection
-    def daggerVersion = '2.59'
+    def daggerVersion = '2.59.2'
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
@@ -284,13 +284,13 @@ dependencies {
 
     // Object to JSON
     // NOTE: Replace with Squareup's Moshi?
-    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'com.google.code.gson:gson:2.14.0'
 
     // Java library for zip files and streams
-    implementation 'net.lingala.zip4j:zip4j:2.11.5'
+    implementation 'net.lingala.zip4j:zip4j:2.11.6'
 
     // IO functionality
-    implementation 'commons-io:commons-io:2.16.1'
+    implementation 'commons-io:commons-io:2.22.0'
 
     // Crash reporting
     implementation 'com.github.FunkyMuse:Crashy:1.2.0'
@@ -299,11 +299,11 @@ dependencies {
 /**** User Interface (frontend) ****/
 
     //Image loading
-    def glideVersion = "5.0.5"
+    def glideVersion = "5.0.7"
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     kapt "com.github.bumptech.glide:compiler:$glideVersion"
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
-    implementation "com.github.bumptech.glide:compose:1.0.0-beta08"
+    implementation "com.github.bumptech.glide:compose:1.0.0-beta09"
     implementation 'com.github.santalu:aspect-ratio-imageview:1.0.9'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.29'
     // APNG animation support for profile avatars
@@ -366,7 +366,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4'
     implementation 'androidx.compose.runtime:runtime-livedata'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
 /**** Builds and flavors ****/
     // debugImplementation because LeakCanary should only run in debug builds.
