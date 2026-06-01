@@ -3,16 +3,15 @@ package ml.docilealligator.infinityforreddit.customviews;
 import android.content.Context;
 import android.net.Uri;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.github.piasy.biv.metadata.ImageInfoExtractor;
-import com.github.piasy.biv.view.BigImageView;
 import com.github.piasy.biv.view.ImageViewFactory;
 
 import java.io.File;
 
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
-import pl.droidsonroids.gif.GifImageView;
 
 public class GlideGifImageViewFactory extends ImageViewFactory {
     private SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy;
@@ -27,9 +26,11 @@ public class GlideGifImageViewFactory extends ImageViewFactory {
         switch (imageType) {
             case ImageInfoExtractor.TYPE_GIF:
             case ImageInfoExtractor.TYPE_ANIMATED_WEBP: {
-                final GifImageView imageView = new GifImageView(context);
-                imageView.setScaleType(BigImageView.scaleType(initScaleType));
-                return imageView;
+                // ZoomableGifImageView is an ImageView subclass, so Glide animates the GIF into
+                // it exactly as before while the otaliastudios zoom engine adds pinch-to-zoom and
+                // pan on top. We intentionally don't call setScaleType here: ZoomImageView drives
+                // its own MATRIX scale type and overriding it would break the zoom transform.
+                return new ZoomableGifImageView(context);
             }
             default:
                 return super.createAnimatedImageView(context, imageType, initScaleType);
@@ -42,12 +43,12 @@ public class GlideGifImageViewFactory extends ImageViewFactory {
         switch (imageType) {
             case ImageInfoExtractor.TYPE_GIF:
             case ImageInfoExtractor.TYPE_ANIMATED_WEBP: {
-                if (view instanceof GifImageView) {
+                if (view instanceof ImageView) {
                     Glide.with(view.getContext())
                             .load(imageFile)
                             .centerInside()
                             .downsample(saveMemoryCenterInisdeDownsampleStrategy)
-                            .into((GifImageView) view);
+                            .into((ImageView) view);
                 }
                 break;
             }
@@ -59,10 +60,10 @@ public class GlideGifImageViewFactory extends ImageViewFactory {
 
     @Override
     public void loadThumbnailContent(final View view, final Uri thumbnail) {
-        if (view instanceof GifImageView) {
+        if (view instanceof ImageView) {
             Glide.with(view.getContext())
                     .load(thumbnail)
-                    .into((GifImageView) view);
+                    .into((ImageView) view);
         }
     }
 }

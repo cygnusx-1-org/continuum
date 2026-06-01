@@ -31,6 +31,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,7 +74,6 @@ import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.PlayerControlView;
-import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
 
 import com.google.android.material.button.MaterialButton;
@@ -97,7 +97,6 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PlaybackSpeedBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
-import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoBinding;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoZoomableBinding;
 import ml.docilealligator.infinityforreddit.events.FinishViewMediaActivityEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
@@ -185,6 +184,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private ViewVideoActivityBindingAdapter binding;
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
     private View rotatableVideoView; // The video surface to rotate (excludes playback controls)
+    private ZoomSurfaceView zoomSurfaceView; // The pinch-to-zoom video surface
 
     public ViewVideoViewModel viewVideoViewModel;
 
@@ -281,15 +281,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         getTheme().applyStyle(TitleFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
         getTheme().applyStyle(ContentFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
 
-        boolean zoomable = mSharedPreferences.getBoolean(SharedPreferencesUtils.PINCH_TO_ZOOM_VIDEO, false);
-
-        if (zoomable) {
-            binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding.inflate(getLayoutInflater()));
-            setContentView(binding.getRoot());
-        } else {
-            binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoBinding.inflate(getLayoutInflater()));
-            setContentView(binding.getRoot());
-        }
+        binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding.inflate(getLayoutInflater()));
+        setContentView(binding.getRoot());
 
         EventBus.getDefault().register(this);
 
@@ -439,7 +432,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
                 .build();
 
-        if (zoomable) {
+        {
             PlayerControlView playerControlView = findViewById(R.id.player_control_view_view_video_activity);
             playerControlView.addVisibilityListener(visibility -> {
                 switch (visibility) {
@@ -461,7 +454,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             });
             playerControlView.setPlayer(new DurationAwareSeekPlayer(player));
 
-            ZoomSurfaceView zoomSurfaceView = findViewById(R.id.zoom_surface_view_view_video_activity);
+            zoomSurfaceView = findViewById(R.id.zoom_surface_view_view_video_activity);
             rotatableVideoView = zoomSurfaceView;
             player.addListener(new Player.Listener() {
                 @Override
@@ -486,13 +479,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             zoomSurfaceView.getEngine().addListener(new ZoomEngine.Listener() {
                 @Override
                 public void onUpdate(@NonNull ZoomEngine zoomEngine, @NonNull Matrix matrix) {
-                    if (zoomEngine.getZoom() < 1.00001) {
-                        binding.getRoot().setDragEnabled(true);
-                        binding.getNestedScrollView().setScrollEnabled(true);
-                    } else {
-                        binding.getRoot().setDragEnabled(false);
-                        binding.getNestedScrollView().setScrollEnabled(false);
-                    }
+                    // While zoomed in, panning the video must not trigger swipe-to-dismiss.
+                    setSwipeToDismissEnabled(zoomEngine.getZoom() < 1.00001);
                 }
 
                 @Override
@@ -503,36 +491,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                     playerControlView.hide();
                 } else {
                     playerControlView.show();
-                }
-            });
-        } else {
-            PlayerView videoPlayerView = findViewById(R.id.player_view_view_video_activity);
-            videoPlayerView.setPlayer(new DurationAwareSeekPlayer(player));
-            rotatableVideoView = videoPlayerView.getVideoSurfaceView();
-            player.addListener(new Player.Listener() {
-                @Override
-                public void onVideoSizeChanged(VideoSize videoSize) {
-                    if (currentRotation != 0) {
-                        applyRotation();
-                    }
-                }
-            });
-            videoPlayerView.setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
-                switch (visibility) {
-                    case View.GONE:
-                        getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
-                        break;
-                    case View.VISIBLE:
-                        getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                 }
             });
         }
@@ -972,6 +930,32 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         rotatableVideoView.setScaleX(scale);
         rotatableVideoView.setScaleY(scale);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // Pinch-to-zoom (two fingers) and the HaulerView swipe-to-dismiss (one finger
+        // dragging up) both want vertical gestures. The moment a second finger lands we
+        // hand the gesture to the ZoomSurfaceView so the pinch isn't swallowed by the
+        // dismiss/scroll parents; on release we restore swipe-to-dismiss unless zoomed in.
+        if (zoomSurfaceView != null) {
+            switch (ev.getActionMasked()) {
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    setSwipeToDismissEnabled(false);
+                    zoomSurfaceView.getParent().requestDisallowInterceptTouchEvent(true);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    setSwipeToDismissEnabled(zoomSurfaceView.getEngine().getZoom() < 1.00001);
+                    break;
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private void setSwipeToDismissEnabled(boolean enabled) {
+        binding.getRoot().setDragEnabled(enabled);
+        binding.getNestedScrollView().setScrollEnabled(enabled);
     }
 
     /*@OptIn(markerClass = UnstableApi.class)

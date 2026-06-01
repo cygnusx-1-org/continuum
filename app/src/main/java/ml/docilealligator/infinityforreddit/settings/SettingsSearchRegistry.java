@@ -433,9 +433,6 @@ public class SettingsSearchRegistry {
                 GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
         add(items, c.getString(R.string.settings_swipe_vertically_to_go_back_from_media_title), null, bc,
                 GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_pinch_to_zoom_video_title),
-                c.getString(R.string.settings_experimental_feature), bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
         add(items, c.getString(R.string.settings_lock_jump_to_next_top_level_comment_button_title), null, bc,
                 GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
         add(items, c.getString(R.string.settings_swap_tap_and_long_title), null, bc,

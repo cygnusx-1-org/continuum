@@ -216,7 +216,6 @@ public class SharedPreferencesUtils {
     public static final String LOOP_VIDEO = "loop_video";
     public static final String DEFAULT_PLAYBACK_SPEED = "default_playback_speed";
     public static final String LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI = "legacy_autoplay_video_controller_ui";
-    public static final String PINCH_TO_ZOOM_VIDEO = "pinch_to_zoom_video";
     public static final String FIXED_HEIGHT_PREVIEW_IN_CARD = "fixed_height_preview_in_card";
     public static final String HIDE_TEXT_POST_CONTENT = "hide_text_post_content";
     public static final String SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD = "show_fewer_toolbar_options_threshold";
