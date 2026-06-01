@@ -2,29 +2,6 @@
 
 ---
 
-8.2.4.2 / 2026-6-1
-===========
-Note v8a is the 64-bit build, and should be considered the default choose.
-
-* Updated minSdk from 21(Android 5.0) to 28(Android 9)
-
-This means the minimum version for this release is Android 9. This is the only
-change I have made. It is revertable. So if you are affected by this file an
-issue on GitHub, or join in to an existing issue.
-
-I did a poll on the /r/continuumreddit subreddit recently. Thank you to those
-that voted, but it was only 28 votes out of thousands of users.
-
-Such long backward compatiablity is somewhat holding Continuum back on library
-upgrades, and the oldest versions have known issues with the new rotation
-feature. Newer versions of libraries would include new features and bugfixes.
-
-* Extended pinch to zoom to gifs
-* Deconflicted swipe up/down to dismiss from pinch to zoom
-* Removed pinch to zoom preference, it is the new default
-* Added rotation support to images, videos, and galleries
-* Removed the media view bottom bar option and made it the default
-
 8.2.4.1 / 2026-6-1
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
