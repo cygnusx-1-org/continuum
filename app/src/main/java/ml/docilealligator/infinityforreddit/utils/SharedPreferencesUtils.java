@@ -131,6 +131,7 @@ public class SharedPreferencesUtils {
     public static final String COMMENT_TOOLBAR_HIDE_ON_CLICK = "comment_toolbar_hide_on_click";
     public static final String FULLY_COLLAPSE_COMMENT = "fully_collapse_comment";
     public static final String SHOW_COMMENT_DIVIDER = "show_comment_divider";
+    public static final String ALWAYS_SHOW_CHILD_COMMENT_COUNT = "always_show_child_comment_count";
     public static final String SHOW_ABSOLUTE_NUMBER_OF_VOTES = "show_absolute_number_of_votes";
     public static final String CUSTOMIZE_LIGHT_THEME = "customize_light_theme";
     public static final String CUSTOMIZE_DARK_THEME = "customize_dark_theme";
@@ -248,6 +249,7 @@ public class SharedPreferencesUtils {
     public static final String SWIPE_ACTION_SENSITIVITY_IN_COMMENTS = "swipe_action_sensitivity_in_comments";
     public static final String NAVIGATION_DRAWER_SWIPE_AREA = "navigation_drawer_swipe_area";
     public static final String COMMENT_THREAD_CONTINUITY_CAPACITY = "comment_thread_continuity_capacity";
+    public static final String CURRENT_VERSION = "current_version";
 
     public static String getPostDetailFabPortraitX(@Nullable Display display) {
         if (display == null) {
@@ -474,6 +476,8 @@ public class SharedPreferencesUtils {
     public static final String GIPHY_API_KEY_PREF_KEY = "giphy_api_key_pref_key";
     public static final String USER_AGENT_PREF_KEY = "user_agent_pref_key";
     public static final String REDIRECT_URI_PREF_KEY = "redirect_uri_pref_key";
+
+    public static final String COOKIE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.cookie";
 
     //Legacy Settings
     public static final String MAIN_PAGE_TAB_1_TITLE_LEGACY = "main_page_tab_1_title";

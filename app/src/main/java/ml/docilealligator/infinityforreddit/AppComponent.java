@@ -86,6 +86,7 @@ import ml.docilealligator.infinityforreddit.fragments.UserListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurImageFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurVideoFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragment;
+import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryImageOrGifFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryVideoFragment;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
@@ -334,6 +335,8 @@ public interface AppComponent {
     void inject(AppAuthLoginActivity appAuthLoginActivity);
 
     void inject(PostDetailsPreferenceFragment postDetailsPreferenceFragment);
+
+    void inject(ViewPostDetailFragmentNew viewPostDetailFragmentNew);
 
     @Component.Factory
     interface Factory {

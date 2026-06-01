@@ -108,7 +108,12 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarLoginChromeCustomTabActivity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        checkAndOpenLoginPage();
+        Intent intent = getIntent();
+        if (intent != null && intent.getData() != null) {
+            handleRedirectUri(intent.getData());
+        } else {
+            checkAndOpenLoginPage();
+        }
 
         binding.openWebpageButtonLoginChromeCustomTabActivity.setOnClickListener(view -> {
             checkAndOpenLoginPage();
@@ -116,7 +121,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
 
         Uri uri = intent.getData();
@@ -126,6 +131,36 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
             return;
         }
 
+        handleRedirectUri(uri);
+    }
+
+    @Override
+    public SharedPreferences getDefaultSharedPreferences() {
+        return mSharedPreferences;
+    }
+
+    @Override
+    public SharedPreferences getCurrentAccountSharedPreferences() {
+        return mCurrentAccountSharedPreferences;
+    }
+
+    @Override
+    public CustomThemeWrapper getCustomThemeWrapper() {
+        return mCustomThemeWrapper;
+    }
+
+    @Override
+    protected void applyCustomTheme() {
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutLoginChromeCustomTabActivity, null, binding.toolbarLoginChromeCustomTabActivity);
+        binding.openWebpageButtonLoginChromeCustomTabActivity.setTextColor(mCustomThemeWrapper.getButtonTextColor());
+        binding.openWebpageButtonLoginChromeCustomTabActivity.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
+        if (typeface != null) {
+            binding.openWebpageButtonLoginChromeCustomTabActivity.setTypeface(typeface);
+        }
+    }
+
+    private void handleRedirectUri(@NonNull Uri uri) {
         binding.openWebpageButtonLoginChromeCustomTabActivity.setVisibility(View.GONE);
 
         String authCode = uri.getQueryParameter("code");
@@ -209,33 +244,6 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         } else if ("access_denied".equals(uri.getQueryParameter("error"))) {
             Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
             finish();
-        }
-    }
-
-    @Override
-    public SharedPreferences getDefaultSharedPreferences() {
-        return mSharedPreferences;
-    }
-
-    @Override
-    public SharedPreferences getCurrentAccountSharedPreferences() {
-        return mCurrentAccountSharedPreferences;
-    }
-
-    @Override
-    public CustomThemeWrapper getCustomThemeWrapper() {
-        return mCustomThemeWrapper;
-    }
-
-    @Override
-    protected void applyCustomTheme() {
-        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
-        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutLoginChromeCustomTabActivity, null, binding.toolbarLoginChromeCustomTabActivity);
-        binding.openWebpageButtonLoginChromeCustomTabActivity.setTextColor(mCustomThemeWrapper.getButtonTextColor());
-        binding.openWebpageButtonLoginChromeCustomTabActivity.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
-
-        if (typeface != null) {
-            binding.openWebpageButtonLoginChromeCustomTabActivity.setTypeface(typeface);
         }
     }
 

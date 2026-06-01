@@ -18,20 +18,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SortType;
-import ml.docilealligator.infinityforreddit.account.Account;
-import ml.docilealligator.infinityforreddit.apis.RedditAPI;
-import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import retrofit2.HttpException;
@@ -72,7 +74,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private final ReadPostsListInterface readPostsList;
     private String userWhere;
     private String multiRedditPath;
-    private final LinkedHashSet<Post> postLinkedHashSet;
+    private final List<Post> posts;
+    private final Set<String> existingPostIds = new HashSet<>();
     private String previousLastItem;
     private List<String> multiRedditUsernames;
     private boolean multiRedditUsernamesFetched = false;
@@ -93,7 +96,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.sortType = sortType == null ? new SortType(SortType.Type.BEST) : sortType;
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
-        postLinkedHashSet = new LinkedHashSet<>();
+        posts = new ArrayList<>();
     }
 
     // PostPagingSource.TYPE_SUBREDDIT || PostPagingSource.TYPE_ANONYMOUS_FRONT_PAGE || PostPagingSource.TYPE_ANONYMOUS_MULTIREDDIT:
@@ -125,7 +128,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
-        postLinkedHashSet = new LinkedHashSet<>();
+        posts = new ArrayList<>();
     }
 
     // PostPagingSource.TYPE_MULTI_REDDIT
@@ -155,7 +158,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
-        postLinkedHashSet = new LinkedHashSet<>();
+        posts = new ArrayList<>();
     }
 
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
@@ -176,7 +179,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.postFilter = postFilter;
         userWhere = where;
         this.readPostsList = readPostsList;
-        postLinkedHashSet = new LinkedHashSet<>();
+        posts = new ArrayList<>();
     }
 
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
@@ -197,8 +200,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.postType = postType;
         this.sortType = sortType == null ? new SortType(SortType.Type.RELEVANCE) : sortType;
         this.postFilter = postFilter;
-        postLinkedHashSet = new LinkedHashSet<>();
         this.readPostsList = readPostsList;
+        posts = new ArrayList<>();
     }
 
     @Nullable
@@ -235,7 +238,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             if (newPosts == null) {
                 return new LoadResult.Error<>(new Exception("Error parsing posts"));
             } else {
-                int currentPostsSize = postLinkedHashSet.size();
+                int currentPostsSize = posts.size();
                 if (lastItem != null && lastItem.equals(previousLastItem)) {
                     lastItem = null;
                 }
@@ -245,11 +248,19 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                     setMetadataToAnonymousPosts(newPosts);
                 }
 
-                postLinkedHashSet.addAll(newPosts);
-                if (currentPostsSize == postLinkedHashSet.size()) {
+                for (Post p : newPosts) {
+                    if (existingPostIds.contains(p.getId())) {
+                        continue;
+                    }
+
+                    existingPostIds.add(p.getId());
+                    posts.add(p);
+                }
+
+                if (currentPostsSize == posts.size()) {
                     return new LoadResult.Page<>(new ArrayList<>(), null, lastItem);
                 } else {
-                    return new LoadResult.Page<>(new ArrayList<>(postLinkedHashSet).subList(currentPostsSize, postLinkedHashSet.size()), null, lastItem);
+                    return new LoadResult.Page<>(posts.subList(currentPostsSize, posts.size()), null, lastItem);
                 }
             }
         } else {
@@ -356,10 +367,10 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         ListenableFuture<Response<String>> userPosts;
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             userPosts = api.getUserPostsListenableFuture(subredditOrUserName, loadParams.getKey(), sortType.getType(),
-                    sortType.getTime());
+                    sortType.getTime(), 100);
         } else {
             userPosts = api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken,
-                    subredditOrUserName, userWhere, loadParams.getKey(), USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null);
+                    subredditOrUserName, userWhere, loadParams.getKey(), USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null, 100);
         }
 
         ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(userPosts, this::transformData, executor);
@@ -437,7 +448,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                     sortType.getTime(), APIUtils.getOAuthHeader(accessToken), 75);
         } else {
             multiRedditPosts = api.getMultiRedditPostsOauthListenableFuture(multiRedditPath, sortType.getType(), multiAfterKey,
-                    sortType.getTime(), APIUtils.getOAuthHeader(accessToken));
+                    sortType.getTime(), APIUtils.getOAuthHeader(accessToken), 100);
         }
 
         // On first load, fetch multi-reddit info to discover user entries, then fire user
@@ -566,7 +577,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private LoadResult<String, Post> mergeResponses(
             Response<String> mainResponse, List<Response<String>> userResponses,
             List<String> usersToFetch) {
-        int currentPostsSize = postLinkedHashSet.size();
+        int currentPostsSize = posts.size();
 
         // Parse main multi-reddit response
         String mainLastItem = null;
@@ -575,7 +586,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostsList);
             mainLastItem = ParsePost.getLastItem(responseString);
             if (newPosts != null) {
-                postLinkedHashSet.addAll(newPosts);
+                addNewPosts(newPosts);
             }
         }
 
@@ -585,11 +596,11 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 mainLastItem = null;
             }
             previousLastItem = mainLastItem;
-            int newSize = postLinkedHashSet.size();
+            int newSize = posts.size();
             if (newSize == currentPostsSize) {
                 return new LoadResult.Page<>(new ArrayList<>(), null, mainLastItem);
             }
-            return new LoadResult.Page<>(new ArrayList<>(postLinkedHashSet).subList(currentPostsSize, newSize), null, mainLastItem);
+            return new LoadResult.Page<>(new ArrayList<>(posts.subList(currentPostsSize, newSize)), null, mainLastItem);
         }
 
         try {
@@ -611,7 +622,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                     LinkedHashSet<Post> userPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostsList);
                     String userLastItem = ParsePost.getLastItem(responseString);
                     if (userPosts != null) {
-                        postLinkedHashSet.addAll(userPosts);
+                        addNewPosts(userPosts);
                     }
                     if (userLastItem != null && !userLastItem.isEmpty()) {
                         userAfters.put(username, userLastItem);
@@ -632,14 +643,23 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private LoadResult<String, Post> buildSortedPage(int currentPostsSize, String nextKey) {
-        int newSize = postLinkedHashSet.size();
+        int newSize = posts.size();
         if (newSize == currentPostsSize) {
             return new LoadResult.Page<>(new ArrayList<>(), null, nextKey);
         }
-        List<Post> resultPosts = new ArrayList<>(postLinkedHashSet).subList(currentPostsSize, newSize);
-        resultPosts = new ArrayList<>(resultPosts);
+        List<Post> resultPosts = new ArrayList<>(posts.subList(currentPostsSize, newSize));
         resultPosts.sort((a, b) -> Long.compare(b.getPostTimeMillis(), a.getPostTimeMillis()));
         return new LoadResult.Page<>(resultPosts, null, nextKey);
+    }
+
+    private void addNewPosts(LinkedHashSet<Post> newPosts) {
+        for (Post p : newPosts) {
+            if (existingPostIds.contains(p.getId())) {
+                continue;
+            }
+            existingPostIds.add(p.getId());
+            posts.add(p);
+        }
     }
 
     private ListenableFuture<LoadResult<String, Post>> catchErrors(ListenableFuture<LoadResult<String, Post>> future) {

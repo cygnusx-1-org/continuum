@@ -130,7 +130,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ((Infinity) mBaseActivity.getApplication()).getAppComponent().inject(this);
         // Inflate the layout for this fragment
-        binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);
+        FragmentPostOptionsBottomSheetBinding binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);
 
         if (mPost != null) {
             switch (mPost.getPostType()) {

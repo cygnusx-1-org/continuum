@@ -16,8 +16,9 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
+import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.network.AccessTokenAuthenticator;
-import ml.docilealligator.infinityforreddit.network.AnonymousOAuthInterceptor;
+import ml.docilealligator.infinityforreddit.network.AnonymousAccessTokenInterceptor;
 import ml.docilealligator.infinityforreddit.network.RedgifsAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.ServerAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.SortTypeConverterFactory;
@@ -94,25 +95,10 @@ abstract class NetworkModule {
 
     @Provides
     @Named("no_oauth")
-    @Singleton
-    static OkHttpClient provideNoOauthOkHttpClient(Context context,
-        @Named("base") OkHttpClient httpClient,
-        @Named("current_account") SharedPreferences currentAccountSharedPreferences,
-        ConnectionPool connectionPool) {
-
-        // Anonymous browsing now uses an application-only OAuth token against oauth.reddit.com,
-        // because Reddit shut down the unauthenticated www.reddit.com/*.json endpoints.
-        return httpClient.newBuilder()
-            .addInterceptor(new AnonymousOAuthInterceptor(APIUtils.getClientId(context), currentAccountSharedPreferences))
-            .connectionPool(connectionPool)
-            .build();
-    }
-
-    @Provides
-    @Named("no_oauth")
-    static Retrofit provideRetrofit(@Named("base") Retrofit retrofit,
-        @Named("no_oauth") OkHttpClient okHttpClient) {
-        return retrofit.newBuilder().client(okHttpClient).build();
+    static Retrofit provideRetrofit(@Named("base") Retrofit retrofit, @Named("anonymous") OkHttpClient okHttpClient) {
+        return retrofit.newBuilder()
+                .client(okHttpClient)
+                .build();
     }
 
     @Provides
@@ -121,6 +107,23 @@ abstract class NetworkModule {
         @Named("default") OkHttpClient okHttpClient) {
 
         return retrofit.newBuilder().baseUrl(APIUtils.OAUTH_API_BASE_URI).client(okHttpClient).build();
+    }
+
+    @Provides
+    @Named("anonymous")
+    @Singleton
+    static OkHttpClient provideCookieOkHttpClient(Context context,
+                                            @Named("base") OkHttpClient httpClient,
+                                            @Named("base") Retrofit retrofit,
+                                            RedditDataRoomDatabase redditDataRoomDatabase,
+                                            ConnectionPool connectionPool) {
+        AnonymousAccessTokenInterceptor anonymousAccessTokenInterceptor
+                = new AnonymousAccessTokenInterceptor(context, retrofit, redditDataRoomDatabase);
+
+        return httpClient.newBuilder()
+                .addInterceptor(anonymousAccessTokenInterceptor)
+                .connectionPool(connectionPool)
+                .build();
     }
 
     @Provides
@@ -295,5 +298,11 @@ abstract class NetworkModule {
     @Singleton
     static StreamableAPI provideStreamableApi(@Named("streamable") Retrofit streamableRetrofit) {
         return streamableRetrofit.create(StreamableAPI.class);
+    }
+
+    @Provides
+    @Singleton
+    static StreamableAPIKt provideStreamableApiKt(@Named("streamable") Retrofit streamableRetrofit) {
+        return streamableRetrofit.create(StreamableAPIKt.class);
     }
 }

@@ -150,6 +150,20 @@ public class ParsePost {
         String fullName = data.getString(JSONUtils.NAME_KEY);
         String subredditName = data.getString(JSONUtils.SUBREDDIT_KEY);
         String subredditNamePrefixed = data.getString(JSONUtils.SUBREDDIT_NAME_PREFIX_KEY);
+        String subredditIconUrl = null;
+        try {
+            JSONObject srDetail = data.getJSONObject(JSONUtils.SR_DETAIL_KEY);
+            if (srDetail.isNull(JSONUtils.COMMUNITY_ICON_KEY)) {
+                subredditIconUrl = "";
+            } else {
+                subredditIconUrl = srDetail.getString(JSONUtils.COMMUNITY_ICON_KEY);
+            }
+            if (subredditIconUrl.isEmpty() && !srDetail.isNull(JSONUtils.ICON_IMG_KEY)) {
+                subredditIconUrl = srDetail.getString(JSONUtils.ICON_IMG_KEY);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         String author = data.getString(JSONUtils.AUTHOR_KEY);
         StringBuilder authorFlairHTMLBuilder = new StringBuilder();
         if (data.has(JSONUtils.AUTHOR_FLAIR_RICHTEXT_KEY)) {
@@ -280,9 +294,11 @@ public class ParsePost {
                 thumbnailUrl = parentThumbnailUrl;
             }
 
-            Post crosspostParent = parseBasicData(parentData);
-            Post post = parseData(parentData, permalink, id, fullName, subredditName, subredditNamePrefixed,
-                    author, authorFlair, authorFlairHTMLBuilder.toString(),
+            //data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0) out of bounds????????????
+            data = data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0);
+            Post crosspostParent = parseBasicData(data);
+            Post post = parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
+                    subredditIconUrl, author, authorFlair, authorFlairHTMLBuilder.toString(),
                     postTime, title, previews, mediaMetadataMap,
                     score, voteType, nComments, upvoteRatio, flair, hidden, spoiler, nsfw, stickied,
                     archived, locked, saved, sendReplies, deleted, removed, true, canModPost, approved,
@@ -292,7 +308,7 @@ public class ParsePost {
             return post;
         } else {
             return parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
-                    author, authorFlair, authorFlairHTMLBuilder.toString(),
+                    subredditIconUrl, author, authorFlair, authorFlairHTMLBuilder.toString(),
                     postTime, title, previews, mediaMetadataMap,
                     score, voteType, nComments, upvoteRatio, flair, hidden,
                     spoiler, nsfw, stickied, archived, locked, saved, sendReplies, deleted, removed, false,
@@ -302,16 +318,16 @@ public class ParsePost {
     }
 
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,
-                                  String subredditName, String subredditNamePrefixed, String author,
-                                  String authorFlair, String authorFlairHTML, long postTimeMillis, String title,
-                                  ArrayList<Post.Preview> previews, Map<String, MediaMetadata> mediaMetadataMap,
-                                  int score, int voteType, int nComments, int upvoteRatio, String flair,
-                                  boolean hidden, boolean spoiler, boolean nsfw,
-                                  boolean stickied, boolean archived, boolean locked, boolean saved,
-                                  boolean sendReplies, boolean deleted, boolean removed, boolean isCrosspost,
-                                  boolean canModPost, boolean approved, long approvedAtUTC, String approvedBy,
-                                  boolean spam, String distinguished, String suggestedSort,
-                                  String thumbnailUrl) throws JSONException {
+                                  String subredditName, String subredditNamePrefixed, String subredditIconUrl,
+                                  String author, String authorFlair, String authorFlairHTML,
+                                  long postTimeMillis, String title, ArrayList<Post.Preview> previews,
+                                  Map<String, MediaMetadata> mediaMetadataMap, int score, int voteType,
+                                  int nComments, int upvoteRatio, String flair, boolean hidden,
+                                  boolean spoiler, boolean nsfw, boolean stickied, boolean archived,
+                                  boolean locked, boolean saved, boolean sendReplies, boolean deleted,
+                                  boolean removed, boolean isCrosspost, boolean canModPost, boolean approved,
+                                  long approvedAtUTC, String approvedBy, boolean spam,
+                                  String distinguished, String suggestedSort, String thumbnailUrl) throws JSONException {
         Post post;
 
         boolean isVideo = data.getBoolean(JSONUtils.IS_VIDEO_KEY);
@@ -383,7 +399,17 @@ public class ParsePost {
                         if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                             post.setSelfText("");
                         } else {
-                            post.setSelfText(Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap));
+                            Utils.ParseRedditMediaBlockResult result =
+                                    Utils.parseRedditImagesBlock(
+                                            Utils.modifyMarkdown(
+                                                    Utils.trimTrailingWhitespace(
+                                                            data.getString(JSONUtils.SELFTEXT_KEY)
+                                                    )
+                                            ),
+                                            mediaMetadataMap
+                                    );
+                            post.setSelfText(result.parsedMarkdown);
+                            mediaMetadataMap = result.mediaMetadataMap;
                         }
 
                         String authority = uri.getAuthority();
@@ -607,7 +633,17 @@ public class ParsePost {
                             if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                                 post.setSelfText("");
                             } else {
-                                post.setSelfText(Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap));
+                                Utils.ParseRedditMediaBlockResult result =
+                                        Utils.parseRedditImagesBlock(
+                                                Utils.modifyMarkdown(
+                                                        Utils.trimTrailingWhitespace(
+                                                                data.getString(JSONUtils.SELFTEXT_KEY)
+                                                        )
+                                                ),
+                                                mediaMetadataMap
+                                        );
+                                post.setSelfText(result.parsedMarkdown);
+                                mediaMetadataMap = result.mediaMetadataMap;
                             }
 
                             post.setPreviews(previews);
@@ -689,7 +725,17 @@ public class ParsePost {
                     if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                         post.setSelfText("");
                     } else {
-                        post.setSelfText(Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap));
+                        Utils.ParseRedditMediaBlockResult result =
+                                Utils.parseRedditImagesBlock(
+                                        Utils.modifyMarkdown(
+                                                Utils.trimTrailingWhitespace(
+                                                        data.getString(JSONUtils.SELFTEXT_KEY)
+                                                )
+                                        ),
+                                        mediaMetadataMap
+                                );
+                        post.setSelfText(result.parsedMarkdown);
+                        mediaMetadataMap = result.mediaMetadataMap;
                     }
 
                     String authority = uri.getAuthority();
@@ -857,7 +903,16 @@ public class ParsePost {
             if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                 post.setSelfText("");
             } else {
-                String selfText = Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap);
+                Utils.ParseRedditMediaBlockResult result = Utils.parseRedditImagesBlock(
+                        Utils.modifyMarkdown(
+                                Utils.trimTrailingWhitespace(
+                                        data.getString(JSONUtils.SELFTEXT_KEY)
+                                )
+                        ),
+                        mediaMetadataMap
+                );
+                String selfText = result.parsedMarkdown;
+                mediaMetadataMap = result.mediaMetadataMap;
                 post.setSelfText(selfText);
 
                 if (data.isNull(JSONUtils.SELFTEXT_HTML_KEY)) {
@@ -889,7 +944,7 @@ public class ParsePost {
 
         post.setThumbnailUrl(thumbnailUrl);
         post.setMediaMetadataMap(mediaMetadataMap);
-
+        post.setSubredditIconUrl(subredditIconUrl);
         return post;
     }
 
