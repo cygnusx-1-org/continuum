@@ -1169,7 +1169,6 @@ Cliquer pour réessayer."</string>
     <string name="settings_separate_post_and_comments_summary">"La lecture automatique de la vidéo sera désactivée dans la page de détail de la publication"</string>
 
     <!-- Fuzzy -->
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Utiliser la barre d'outil en bas dans le lecteur multimédia"</string>
     <string name="settings_secure_mode_title">"Mode sécurisé"</string>
     <string name="settings_secure_mode_summary">"Les captures d'écran et les enregistrements vidéo ne sont pas autorisés. Aucun aperçu dans l'écran de l'application récente."</string>
     <string name="discard_dialog_button">"Annuler"</string>

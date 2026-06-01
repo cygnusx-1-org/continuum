@@ -1047,7 +1047,6 @@ Apasă pentru a reîncerca."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Separă Postarea de Comentarii în Orientarea Portret"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Separă Postarea de Comentarii în Orientarea Peisaj"</string>
     <string name="settings_separate_post_and_comments_summary">"Redarea video automată va fi dezactivată pe pagina de detalii a postării"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Utilizează Bara de Instrumente de Jos în Vizualizatorul Media"</string>
     <string name="settings_secure_mode_title">"Regim Securizat"</string>
     <string name="settings_secure_mode_summary">"Capturile de ecran și înregistrarea video nu sunt permise. Nicio previzualizare în secție aplicațiilor recente."</string>
     <string name="discard_dialog_button">"Renunţă"</string>

@@ -999,7 +999,6 @@ Premi per riprovare."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Dividi il post dai commenti in vista verticale"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Dividi il post dai commenti in vista orizzontale"</string>
     <string name="settings_separate_post_and_comments_summary">"L'autoriproduzione video sarà disattivata quando i post sono aperti"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Usa la barra degli strumenti inferiore nel visualizzatore multimediale"</string>
     <string name="settings_secure_mode_title">"Modalità sicura"</string>
     <string name="settings_secure_mode_summary">"Screenshot e registrazione schermo non sono permessi. Nessuna anteprima nella schermata delle app recenti."</string>
     <string name="discard_dialog_button">"Elimina"</string>

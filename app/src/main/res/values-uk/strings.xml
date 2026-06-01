@@ -1051,7 +1051,6 @@ https://play.google.com/store/"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Відокремлювати дописи і коментарі в портретному режимі"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Відокремлювати дописи і коментарі в альбомному режимі"</string>
     <string name="settings_separate_post_and_comments_summary">"Автовідтворення відео недозволене на сторінці відомостей допису"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Викор. нижню панель засобів під час перегляду медія"</string>
     <string name="settings_secure_mode_title">"Безпечний режим"</string>
     <string name="settings_secure_mode_summary">"Знімки екрана і запис відео не дозволено. Нема передперегляду на екрані свіжого в застосунку."</string>
     <string name="discard_dialog_button">"Відхилити"</string>

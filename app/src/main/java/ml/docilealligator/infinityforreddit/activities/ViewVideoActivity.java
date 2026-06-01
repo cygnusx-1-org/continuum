@@ -21,7 +21,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -42,7 +41,6 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -185,6 +183,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     /*private int playbackSpeed = 100;
     private boolean useBottomAppBar;*/
     private ViewVideoActivityBindingAdapter binding;
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
+    private View rotatableVideoView; // The video surface to rotate (excludes playback controls)
 
     public ViewVideoViewModel viewVideoViewModel;
 
@@ -293,6 +293,10 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         EventBus.getDefault().register(this);
 
+        if (savedInstanceState != null) {
+            currentRotation = savedInstanceState.getInt("currentRotation", 0);
+        }
+
         applyCustomTheme();
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -305,36 +309,32 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         Resources resources = getResources();
 
-        if (mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false)) {
-            getSupportActionBar().hide();
-            binding.getBottomAppBar().setVisibility(View.VISIBLE);
-            binding.getBackButton().setOnClickListener(view -> {
-                finish();
-            });
+        getSupportActionBar().hide();
+        binding.getBottomAppBar().setVisibility(View.VISIBLE);
+        binding.getBackButton().setOnClickListener(view -> {
+            finish();
+        });
 
-            binding.getDownloadButton().setOnClickListener(view -> {
-                if (viewVideoViewModel.isDownloading()) {
-                    return;
-                }
+        binding.getDownloadButton().setOnClickListener(view -> {
+            if (viewVideoViewModel.isDownloading()) {
+                return;
+            }
 
-                if (viewVideoViewModel.getVideoDownloadUrl() == null) {
-                    Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
-                    return;
-                }
+            if (viewVideoViewModel.getVideoDownloadUrl() == null) {
+                Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                viewVideoViewModel.setDownloading(true);
-                requestPermissionAndDownload();
-            });
+            viewVideoViewModel.setDownloading(true);
+            requestPermissionAndDownload();
+        });
 
-            binding.getPlaybackSpeedButton().setOnClickListener(view -> {
-                changePlaybackSpeed();
-            });
-        } else {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = resources.getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(resources.getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
-        }
+        binding.getPlaybackSpeedButton().setOnClickListener(view -> {
+            changePlaybackSpeed();
+        });
+
+        binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
+        binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
 
         /*dataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"));
         nonDataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"));*/
@@ -462,10 +462,14 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             playerControlView.setPlayer(new DurationAwareSeekPlayer(player));
 
             ZoomSurfaceView zoomSurfaceView = findViewById(R.id.zoom_surface_view_view_video_activity);
+            rotatableVideoView = zoomSurfaceView;
             player.addListener(new Player.Listener() {
                 @Override
                 public void onVideoSizeChanged(VideoSize videoSize) {
                     zoomSurfaceView.setContentSize(videoSize.width, videoSize.height);
+                    if (currentRotation != 0) {
+                        applyRotation();
+                    }
                 }
             });
             zoomSurfaceView.addCallback(new ZoomSurfaceView.Callback() {
@@ -504,6 +508,15 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         } else {
             PlayerView videoPlayerView = findViewById(R.id.player_view_view_video_activity);
             videoPlayerView.setPlayer(new DurationAwareSeekPlayer(player));
+            rotatableVideoView = videoPlayerView.getVideoSurfaceView();
+            player.addListener(new Player.Listener() {
+                @Override
+                public void onVideoSizeChanged(VideoSize videoSize) {
+                    if (currentRotation != 0) {
+                        applyRotation();
+                    }
+                }
+            });
             videoPlayerView.setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
                 switch (visibility) {
                     case View.GONE:
@@ -919,6 +932,48 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         playbackSpeedBottomSheetFragment.show(getSupportFragmentManager(), playbackSpeedBottomSheetFragment.getTag());
     }
 
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        applyRotation();
+    }
+
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        applyRotation();
+    }
+
+    /**
+     * Rotates the video surface (not the playback controls) and applies a compensating
+     * zoom so the rotated video fills the screen instead of being letterboxed, mirroring
+     * the behaviour of Slide's rotate feature.
+     */
+    private void applyRotation() {
+        if (rotatableVideoView == null) {
+            return;
+        }
+
+        rotatableVideoView.setRotation(currentRotation);
+
+        VideoSize videoSize = player != null ? player.getVideoSize() : VideoSize.UNKNOWN;
+        float scale = 1.0f;
+        if ((currentRotation == 90 || currentRotation == 270)
+                && videoSize.width > 0 && videoSize.height > 0) {
+            boolean isVerticalVideo = videoSize.height > videoSize.width;
+            if (isVerticalVideo) {
+                // Zoom out so the video's original top/bottom edges fit the screen width.
+                float screenWidth = getResources().getDisplayMetrics().widthPixels;
+                float screenHeight = getResources().getDisplayMetrics().heightPixels;
+                scale = screenWidth / screenHeight;
+            } else {
+                // Zoom in so the horizontal video fills the screen width when sideways.
+                scale = (float) videoSize.width / videoSize.height;
+            }
+        }
+
+        rotatableVideoView.setScaleX(scale);
+        rotatableVideoView.setScaleY(scale);
+    }
+
     /*@OptIn(markerClass = UnstableApi.class)
     private void loadFallbackVideo(Bundle savedInstanceState) {
         if (videoFallbackDirectUrl != null) {
@@ -1106,6 +1161,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
             Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentRotation", currentRotation);
     }
 
     /*@Override

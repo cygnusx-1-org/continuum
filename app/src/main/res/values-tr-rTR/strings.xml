@@ -1077,7 +1077,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Portre Modunda Gönderi ve Yorumları Ayır"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Manzara Modunda Gönderi ve Yorumları Ayır"</string>
     <string name="settings_separate_post_and_comments_summary">"Otomatik video oynatmayı gönderi ayrıntısı sayfasında devre dışı bırak"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Medya Görüntüleyicide Alt Araç Çubuğunu Kullan"</string>
     <string name="settings_secure_mode_title">"Güvenli Mod"</string>
     <string name="settings_secure_mode_summary">"Ekran görüntüsü ve video kaydına izin verilmez. Son uygulama ekranında önizleme yok."</string>
     <string name="discard_dialog_button">"Kaldır"</string>

@@ -1066,7 +1066,6 @@ Nhấn để thử lại."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Chia tách bài đăng và bình luận ở chế độ xoay dọc"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Chia tách bài đăng và bình luận ở chế độ xoay ngang"</string>
     <string name="settings_separate_post_and_comments_summary">"Tự động phát video sẽ bị tắt trong trang chi tiết bài đăng"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Sử dụng thanh công cụ ở dưới trong trình xem phương tiện"</string>
     <string name="settings_secure_mode_title">"Chế độ bảo mật"</string>
     <string name="settings_secure_mode_summary">"Không cho phép chụp màn hình và quay video. Không có mục xem trước trong màn hình gần đây."</string>
     <string name="discard_dialog_button">"Bỏ"</string>

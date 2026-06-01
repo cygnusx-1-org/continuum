@@ -31,6 +31,7 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.Tracks;
+import androidx.media3.common.VideoSize;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
@@ -73,6 +74,7 @@ public class ViewImgurVideoFragment extends Fragment {
     private static final String IS_MUTE_STATE = "IMS";
     private static final String POSITION_STATE = "PS";
     private static final String PLAYBACK_SPEED_STATE = "PSS";
+    private static final String ROTATION_STATE = "RS";
 
     private ViewImgurMediaActivity activity;
     private ImgurMedia imgurMedia;
@@ -92,6 +94,8 @@ public class ViewImgurVideoFragment extends Fragment {
     @Inject
     SimpleCache mSimpleCache;
     private ViewImgurVideoFragmentBindingAdapter binding;
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
+    private View rotatableVideoView; // The video surface to rotate (excludes playback controls)
     ViewGalleryViewModel viewGalleryViewModel;
 
     public ViewImgurVideoFragment() {
@@ -143,6 +147,15 @@ public class ViewImgurVideoFragment extends Fragment {
                 .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
                 .build();
         binding.getRoot().setPlayer(new DurationAwareSeekPlayer(player));
+        rotatableVideoView = binding.getRoot().getVideoSurfaceView();
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onVideoSizeChanged(@NonNull VideoSize videoSize) {
+                if (currentRotation != 0) {
+                    applyRotation();
+                }
+            }
+        });
         dataSourceFactory = new CacheDataSource.Factory().setCache(mSimpleCache)
                 .setUpstreamDataSourceFactory(new OkHttpDataSource.Factory(mOkHttpClient).setUserAgent(APIUtils.USER_AGENT));
         player.prepare();
@@ -150,6 +163,7 @@ public class ViewImgurVideoFragment extends Fragment {
 
         if (savedInstanceState != null) {
             playbackSpeed = savedInstanceState.getInt(PLAYBACK_SPEED_STATE);
+            currentRotation = savedInstanceState.getInt(ROTATION_STATE);
         }
         setPlaybackSpeed(Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100")));
         preparePlayer(savedInstanceState);
@@ -157,25 +171,26 @@ public class ViewImgurVideoFragment extends Fragment {
         binding.getTitleTextView().setText(getString(R.string.view_imgur_media_activity_video_label,
                 getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
 
-        if (activity.isUseBottomAppBar()) {
-            binding.getBottomAppBar().setVisibility(View.VISIBLE);
+        binding.getBottomAppBar().setVisibility(View.VISIBLE);
 
-            binding.getBackButton().setOnClickListener(view -> {
-                activity.finish();
-            });
+        binding.getBackButton().setOnClickListener(view -> {
+            activity.finish();
+        });
 
-            binding.getDownloadButton().setOnClickListener(view -> {
-                if (isDownloading) {
-                    return;
-                }
-                isDownloading = true;
-                requestPermissionAndDownload();
-            });
+        binding.getDownloadButton().setOnClickListener(view -> {
+            if (isDownloading) {
+                return;
+            }
+            isDownloading = true;
+            requestPermissionAndDownload();
+        });
 
-            binding.getPlaybackSpeedButton().setOnClickListener(view -> {
-                changePlaybackSpeed();
-            });
-        }
+        binding.getPlaybackSpeedButton().setOnClickListener(view -> {
+            changePlaybackSpeed();
+        });
+
+        binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
+        binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
 
         viewGalleryViewModel = new ViewModelProvider(requireActivity()).get(ViewGalleryViewModel.class);
         viewGalleryViewModel.getInsets().observe(getViewLifecycleOwner(), insets -> {
@@ -192,6 +207,41 @@ public class ViewImgurVideoFragment extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        applyRotation();
+    }
+
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        applyRotation();
+    }
+
+    private void applyRotation() {
+        if (rotatableVideoView == null) {
+            return;
+        }
+
+        rotatableVideoView.setRotation(currentRotation);
+
+        VideoSize videoSize = player != null ? player.getVideoSize() : VideoSize.UNKNOWN;
+        float scale = 1.0f;
+        if ((currentRotation == 90 || currentRotation == 270)
+                && videoSize.width > 0 && videoSize.height > 0) {
+            boolean isVerticalVideo = videoSize.height > videoSize.width;
+            if (isVerticalVideo) {
+                float screenWidth = getResources().getDisplayMetrics().widthPixels;
+                float screenHeight = getResources().getDisplayMetrics().heightPixels;
+                scale = screenWidth / screenHeight;
+            } else {
+                scale = (float) videoSize.width / videoSize.height;
+            }
+        }
+
+        rotatableVideoView.setScaleX(scale);
+        rotatableVideoView.setScaleY(scale);
     }
 
     private void changePlaybackSpeed() {
@@ -389,6 +439,7 @@ public class ViewImgurVideoFragment extends Fragment {
         outState.putBoolean(IS_MUTE_STATE, isMute);
         outState.putLong(POSITION_STATE, player.getCurrentPosition());
         outState.putInt(PLAYBACK_SPEED_STATE, playbackSpeed);
+        outState.putInt(ROTATION_STATE, currentRotation);
     }
 
     @Override

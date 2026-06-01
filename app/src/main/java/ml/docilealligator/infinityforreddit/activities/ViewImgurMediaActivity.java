@@ -5,13 +5,10 @@ import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +19,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -31,7 +27,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.ViewPager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,7 +81,6 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     public Typeface typeface;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ArrayList<ImgurMedia> mImages;
-    private boolean useBottomAppBar;
     private String subredditName;
     private String postTitle;
     private boolean isNsfw;
@@ -141,17 +135,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
         handler = new Handler(Looper.getMainLooper());
 
-        useBottomAppBar = sharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
-
-        if (!useBottomAppBar) {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
-            setTitle(" ");
-        } else {
-            getSupportActionBar().hide();
-        }
+        getSupportActionBar().hide();
 
         viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
 
@@ -197,10 +181,6 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
         }
 
         binding.loadImageErrorLinearLayoutViewImgurMediaActivity.setOnClickListener(view -> fetchImgurMedia(imgurId));
-    }
-
-    public boolean isUseBottomAppBar() {
-        return useBottomAppBar;
     }
 
     private void fetchImgurMedia(String imgurId) {
@@ -311,28 +291,9 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     }
 
     private void setupViewPager() {
-        if (!useBottomAppBar) {
-            setToolbarTitle(0);
-            binding.viewPagerViewImgurMediaActivity.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int position) {
-                    setToolbarTitle(position);
-                }
-            });
-        }
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewImgurMediaActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewImgurMediaActivity.setOffscreenPageLimit(3);
-    }
-
-    private void setToolbarTitle(int position) {
-        if (mImages != null && position >= 0 && position < mImages.size()) {
-            if (mImages.get(position).getType() == ImgurMedia.TYPE_VIDEO) {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_imgur_media_activity_video_label, position + 1, mImages.size()) + "</font>")));
-            } else {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_imgur_media_activity_image_label, position + 1, mImages.size()) + "</font>")));
-            }
-        }
     }
 
     @Override

@@ -114,8 +114,6 @@ public class SettingsSearchRegistry {
                 InterfacePreferenceFragment.class, R.string.settings_interface_title);
         add(items, c.getString(R.string.settings_hide_subreddit_description_title), null, bc,
                 InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_use_bottom_toolbar_in_media_viewer_title), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
         add(items, c.getString(R.string.settings_default_search_result_tab), null, bc,
                 InterfacePreferenceFragment.class, R.string.settings_interface_title);
         add(items, c.getString(R.string.settings_time_format_title), null, bc,

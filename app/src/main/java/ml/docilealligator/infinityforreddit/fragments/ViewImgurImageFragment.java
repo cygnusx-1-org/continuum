@@ -65,6 +65,7 @@ public class ViewImgurImageFragment extends Fragment {
     public static final String EXTRA_INDEX = "EI";
     public static final String EXTRA_MEDIA_COUNT = "EMC";
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
+    private static final String ROTATION_STATE = "RS";
 
     @Inject
     Executor mExecutor;
@@ -78,6 +79,7 @@ public class ViewImgurImageFragment extends Fragment {
     private ImgurMedia imgurMedia;
     private boolean isDownloading = false;
     private boolean isActionBarHidden = false;
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
     private FragmentViewImgurImageBinding binding;
     ViewGalleryViewModel viewGalleryViewModel;
 
@@ -95,6 +97,11 @@ public class ViewImgurImageFragment extends Fragment {
 
         imgurMedia = getArguments().getParcelable(EXTRA_IMGUR_IMAGES);
         glide = Glide.with(activity);
+
+        if (savedInstanceState != null) {
+            currentRotation = savedInstanceState.getInt(ROTATION_STATE, 0);
+        }
+
         loadImage();
 
         binding.imageViewViewImgurImageFragment.setOnClickListener(view -> {
@@ -104,9 +111,7 @@ public class ViewImgurImageFragment extends Fragment {
                                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                 isActionBarHidden = false;
-                if (activity.isUseBottomAppBar()) {
-                    binding.bottomNavigationViewImgurImageFragment.setVisibility(View.VISIBLE);
-                }
+                binding.bottomNavigationViewImgurImageFragment.setVisibility(View.VISIBLE);
             } else {
                 activity.getWindow().getDecorView().setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -116,9 +121,7 @@ public class ViewImgurImageFragment extends Fragment {
                                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
                 isActionBarHidden = true;
-                if (activity.isUseBottomAppBar()) {
-                    binding.bottomNavigationViewImgurImageFragment.setVisibility(View.GONE);
-                }
+                binding.bottomNavigationViewImgurImageFragment.setVisibility(View.GONE);
             }
         });
         binding.imageViewViewImgurImageFragment.setMinimumDpi(80);
@@ -131,24 +134,24 @@ public class ViewImgurImageFragment extends Fragment {
             loadImage();
         });
 
-        if (activity.isUseBottomAppBar()) {
-            binding.bottomNavigationViewImgurImageFragment.setVisibility(View.VISIBLE);
-            binding.titleTextViewViewImgurImageFragment.setText(getString(R.string.view_imgur_media_activity_image_label,
-                    getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
-            binding.downloadImageViewViewImgurImageFragment.setOnClickListener(view -> {
-                if (isDownloading) {
-                    return;
-                }
-                isDownloading = true;
-                requestPermissionAndDownload();
-            });
-            binding.shareImageViewViewImgurImageFragment.setOnClickListener(view -> {
-                shareImage();
-            });
-            binding.wallpaperImageViewViewImgurImageFragment.setOnClickListener(view -> {
-                setWallpaper();
-            });
-        }
+        binding.bottomNavigationViewImgurImageFragment.setVisibility(View.VISIBLE);
+        binding.titleTextViewViewImgurImageFragment.setText(getString(R.string.view_imgur_media_activity_image_label,
+                getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
+        binding.downloadImageViewViewImgurImageFragment.setOnClickListener(view -> {
+            if (isDownloading) {
+                return;
+            }
+            isDownloading = true;
+            requestPermissionAndDownload();
+        });
+        binding.shareImageViewViewImgurImageFragment.setOnClickListener(view -> {
+            shareImage();
+        });
+        binding.wallpaperImageViewViewImgurImageFragment.setOnClickListener(view -> {
+            setWallpaper();
+        });
+        binding.rotateLeftImageViewViewImgurImageFragment.setOnClickListener(view -> rotateLeft());
+        binding.rotateRightImageViewViewImgurImageFragment.setOnClickListener(view -> rotateRight());
 
         viewGalleryViewModel = new ViewModelProvider(requireActivity()).get(ViewGalleryViewModel.class);
         viewGalleryViewModel.getInsets().observe(getViewLifecycleOwner(), insets -> {
@@ -165,6 +168,27 @@ public class ViewImgurImageFragment extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(ROTATION_STATE, currentRotation);
+    }
+
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        applyRotation();
+    }
+
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        applyRotation();
+    }
+
+    private void applyRotation() {
+        binding.imageViewViewImgurImageFragment.setOrientation(currentRotation);
+        binding.imageViewViewImgurImageFragment.resetScaleAndCenter();
     }
 
     private void loadImage() {
@@ -185,6 +209,9 @@ public class ViewImgurImageFragment extends Fragment {
             @Override
             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                 binding.imageViewViewImgurImageFragment.setImage(ImageSource.bitmap(resource));
+                if (currentRotation != 0) {
+                    binding.imageViewViewImgurImageFragment.setOrientation(currentRotation);
+                }
             }
 
             @Override

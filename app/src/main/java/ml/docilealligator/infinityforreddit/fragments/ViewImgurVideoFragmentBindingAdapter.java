@@ -20,6 +20,8 @@ class ViewImgurVideoFragmentBindingAdapter {
     private MaterialButton backButton;
     private MaterialButton downloadButton;
     private MaterialButton playbackSpeedButton;
+    private MaterialButton rotateLeftButton;
+    private MaterialButton rotateRightButton;
 
     ViewImgurVideoFragmentBindingAdapter(FragmentViewImgurVideoBinding binding) {
         this.binding = binding;
@@ -30,6 +32,8 @@ class ViewImgurVideoFragmentBindingAdapter {
         backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
+        rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
+        rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
     }
 
     PlayerView getRoot() {
@@ -62,5 +66,13 @@ class ViewImgurVideoFragmentBindingAdapter {
 
     MaterialButton getPlaybackSpeedButton() {
         return playbackSpeedButton;
+    }
+
+    MaterialButton getRotateLeftButton() {
+        return rotateLeftButton;
+    }
+
+    MaterialButton getRotateRightButton() {
+        return rotateRightButton;
     }
 }

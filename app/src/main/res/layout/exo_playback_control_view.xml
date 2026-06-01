@@ -202,6 +202,34 @@
                 style="?attr/materialIconButtonOutlinedStyle" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/rotate_left_image_view_exo_playback_control_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/content_description_rotate_left"
+                app:strokeWidth="0dp"
+                app:icon="@drawable/ic_rotate_left_white_24dp"
+                app:iconSize="24dp"
+                app:iconTint="@null"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/rotate_right_image_view_exo_playback_control_view"
+                style="?attr/materialIconButtonOutlinedStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rotate_right_image_view_exo_playback_control_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/content_description_rotate_right"
+                app:strokeWidth="0dp"
+                app:icon="@drawable/ic_rotate_right_white_24dp"
+                app:iconSize="24dp"
+                app:iconTint="@null"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/download_image_view_exo_playback_control_view"
+                style="?attr/materialIconButtonOutlinedStyle" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/download_image_view_exo_playback_control_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

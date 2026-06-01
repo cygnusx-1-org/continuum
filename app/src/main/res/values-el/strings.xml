@@ -994,7 +994,6 @@
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Διαχωρισμός Αναρτήσεων Και Σχολίων σε Οριζόντιο Προσανατολισμό"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Διαχωρισμός Αναρτήσεων Και Σχολίων σε Κάθετο Προσανατολισμό"</string>
     <string name="settings_separate_post_and_comments_summary">"Η αυτόματη αναπαραγωγή βίντεο θα είναι ανενεργή στη σελίδα λεπτομερειών της ανάρτησης"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Χρήση Κάτω Γραμμής Εργαλείων στον Προβολέα Πολυμέσων"</string>
     <string name="settings_secure_mode_title">"Ασφαλής Λειτουργία"</string>
     <string name="settings_secure_mode_summary">"Στιγμιότυπο και καταγραφή οθόνης δεν επιτρέπονται. Δεν γίνεται προεπισκόπηση στην οθόνη πρόσφατων εφαρμογών."</string>
     <string name="discard_dialog_button">"Απόρριψη"</string>

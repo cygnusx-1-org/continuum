@@ -1067,7 +1067,6 @@ https://play.google.com/store/"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Разделять пост и комментарии в портретном режиме"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Разделять пост и комментарии в альбомном режиме"</string>
     <string name="settings_separate_post_and_comments_summary">"Автовоспроизведение видео будет отключено на странице подробной информации о посте"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Нижняя панель инструментов при просмотре медиа"</string>
     <string name="settings_secure_mode_title">"Безопасный режим"</string>
     <string name="settings_secure_mode_summary">"Снимки и запись экрана запрещены. Continuum не отображается в списке недавних приложений."</string>
     <string name="discard_dialog_button">"Отмена"</string>

@@ -661,7 +661,6 @@
     <string name="settings_separate_post_and_comments_summary">Video autoplay will be disabled in the post detail page</string>
     <string name="settings_swap_post_and_comments_in_split_mode_title">Swap Post and Comments Sides</string>
     <string name="settings_swap_post_and_comments_in_split_mode_summary">Show comments on the left and the post on the right in split-screen mode</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">Use Bottom Toolbar in Media Viewer</string>
     <string name="settings_navigation_drawer_enable_hide_karma_title">Hide Account Karma</string>
     <string name="settings_secure_mode_title">Secure Mode</string>
     <string name="settings_secure_mode_summary">Screenshot and video recording are not allowed. No preview in recent app screen.</string>
@@ -1633,6 +1632,8 @@
     <string name="content_description_download">Download</string>
     <string name="content_description_share">Share</string>
     <string name="content_description_set_as_wallpaper">Set as wallpaper</string>
+    <string name="content_description_rotate_right">Rotate 90 degrees clockwise</string>
+    <string name="content_description_rotate_left">Rotate 90 degrees counter-clockwise</string>
     <string name="content_description_previous_result">Go to previous result</string>
     <string name="content_description_next_result">Go to next result</string>
     <string name="content_description_close_search_panel">Close search panel</string>

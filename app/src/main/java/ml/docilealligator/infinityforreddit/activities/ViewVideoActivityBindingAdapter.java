@@ -32,6 +32,8 @@ public class ViewVideoActivityBindingAdapter {
     private final MaterialButton backButton;
     private final MaterialButton downloadButton;
     private final MaterialButton playbackSpeedButton;
+    private final MaterialButton rotateLeftButton;
+    private final MaterialButton rotateRightButton;
 
     public ViewVideoActivityBindingAdapter(ActivityViewVideoBinding binding) {
         this.binding = binding;
@@ -45,6 +47,8 @@ public class ViewVideoActivityBindingAdapter {
         backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
+        rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
+        rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
     }
 
     public ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding binding) {
@@ -59,6 +63,8 @@ public class ViewVideoActivityBindingAdapter {
         backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
+        rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
+        rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
     }
 
     public HaulerView getRoot() {
@@ -111,6 +117,14 @@ public class ViewVideoActivityBindingAdapter {
 
     public MaterialButton getPlaybackSpeedButton() {
         return playbackSpeedButton;
+    }
+
+    public MaterialButton getRotateLeftButton() {
+        return rotateLeftButton;
+    }
+
+    public MaterialButton getRotateRightButton() {
+        return rotateRightButton;
     }
 
     public LockableNestedScrollView getNestedScrollView() {

@@ -1104,7 +1104,6 @@ Toque para volver a intentarlo."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Separar publicación y comentarios en modo vertical"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Separar publicación y comentarios en modo horizontal"</string>
     <string name="settings_separate_post_and_comments_summary">"La reproducción automática del vídeo no estará disponible en la página de detalles de la publicación"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Usar barra de herramientas inferior en el reproductor de medios"</string>
     <string name="settings_secure_mode_title">"Modo seguro"</string>
     <string name="settings_secure_mode_summary">"Las capturas de pantalla y de vídeo no están permitidas. No habrá vista previa en la pantalla de aplicación reciente."</string>
     <string name="discard_dialog_button">"Descartar"</string>

@@ -1037,7 +1037,6 @@ Toque para tentar de novo."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Separar a postagem dos comentários no modo retrato"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Separar a postagem dos comentários no modo paisagem"</string>
     <string name="settings_separate_post_and_comments_summary">"Reprodução automática de vídeo será desativada na página de detalhes da postagem"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Use a barra de ferramentas inferior no visualizador de mídia"</string>
     <string name="settings_secure_mode_title">"Modo seguro"</string>
     <string name="settings_secure_mode_summary">"Capturas e gravações de tela não são permitidas. Sem prévia na tela de aplicativos recentes."</string>
     <string name="discard_dialog_button">"Descartar"</string>

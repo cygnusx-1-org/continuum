@@ -1038,7 +1038,6 @@ Kliknij by spróbować ponownie."</string>
     <string name="wiki_activity_label">"Wiki"</string>
     <string name="settings_post_details_title">"Szczegóły posta"</string>
     <string name="settings_separate_post_and_comments_summary">"Autoodtwarzanie filmu będzie wyłączone na stronie szczegółów posta"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Używaj Dolny Toolbar w Przeglądarce Mediów"</string>
     <string name="settings_secure_mode_title">"Tryb Bezpieczny"</string>
     <string name="settings_secure_mode_summary">"Nagrywanie i zrzuty ekranu nie są dozwolone.
 Brak podglądu w Ostatnich aplikacjach."</string>

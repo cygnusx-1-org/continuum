@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -27,7 +26,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -111,6 +109,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     private Typeface typeface;
     private Handler handler;
     private ActivityViewImageOrGifBinding binding;
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +157,10 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         handler = new Handler(Looper.getMainLooper());
 
+        if (savedInstanceState != null) {
+            currentRotation = savedInstanceState.getInt("currentRotation", 0);
+        }
+
         Intent intent = getIntent();
         mImageUrl = intent.getStringExtra(EXTRA_GIF_URL_KEY);
         if (mImageUrl == null) {
@@ -181,45 +184,31 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             isApng = true;
         }
 
-        boolean useBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
         if (postTitle != null) {
             Spanned title = Html.fromHtml(String.format("<font color=\"#FFFFFF\"><small>%s</small></font>", postTitle));
-            if (useBottomAppBar) {
-                binding.titleTextViewViewImageOrGifActivity.setText(title);
-            } else {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, title));
-            }
-        } else {
-            if (!useBottomAppBar) {
-                setTitle("");
-            }
+            binding.titleTextViewViewImageOrGifActivity.setText(title);
         }
 
-        if (useBottomAppBar) {
-            getSupportActionBar().hide();
-            binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
-            binding.downloadImageViewViewImageOrGifActivity.setOnClickListener(view -> {
-                if (isDownloading) {
-                    return;
-                }
-                isDownloading = true;
-                requestPermissionAndDownload();
-            });
-            binding.shareImageViewViewImageOrGifActivity.setOnClickListener(view -> {
-                if (isGif || isApng)
-                    shareGif();
-                else
-                    shareImage();
-            });
-            binding.wallpaperImageViewViewImageOrGifActivity.setOnClickListener(view -> {
-                setWallpaper();
-            });
-        } else {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
-        }
+        getSupportActionBar().hide();
+        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
+        binding.downloadImageViewViewImageOrGifActivity.setOnClickListener(view -> {
+            if (isDownloading) {
+                return;
+            }
+            isDownloading = true;
+            requestPermissionAndDownload();
+        });
+        binding.shareImageViewViewImageOrGifActivity.setOnClickListener(view -> {
+            if (isGif || isApng)
+                shareGif();
+            else
+                shareImage();
+        });
+        binding.wallpaperImageViewViewImageOrGifActivity.setOnClickListener(view -> {
+            setWallpaper();
+        });
+        binding.rotateLeftImageViewViewImageOrGifActivity.setOnClickListener(view -> rotateLeft());
+        binding.rotateRightImageViewViewImageOrGifActivity.setOnClickListener(view -> rotateRight());
 
         binding.loadImageErrorLinearLayoutViewImageOrGifActivity.setOnClickListener(view -> {
             binding.progressBarViewImageOrGifActivity.setVisibility(View.VISIBLE);
@@ -234,9 +223,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                 isActionBarHidden = false;
-                if (useBottomAppBar) {
-                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
-                }
+                binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
             } else {
                 getWindow().getDecorView().setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -246,9 +233,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
                 isActionBarHidden = true;
-                if (useBottomAppBar) {
-                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
-                }
+                binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
             }
         });
 
@@ -294,6 +279,9 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                             view.setDoubleTapZoomDpi(240);
                             view.setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_FIXED);
                             view.setQuickScaleEnabled(true);
+                            if (currentRotation != 0) {
+                                view.setOrientation(currentRotation);
+                            }
                             view.resetScaleAndCenter();
                         }
                     });
@@ -333,6 +321,10 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
             binding.progressBarViewImageOrGifActivity.setVisibility(View.GONE);
 
+            if (currentRotation != 0) {
+                binding.apngImageViewViewImageOrGifActivity.setRotation(currentRotation);
+            }
+
             binding.apngImageViewViewImageOrGifActivity.setOnClickListener(view -> {
                 if (isActionBarHidden) {
                     getWindow().getDecorView().setSystemUiVisibility(
@@ -340,9 +332,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                     isActionBarHidden = false;
-                    if (mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false)) {
-                        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
-                    }
+                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
                 } else {
                     getWindow().getDecorView().setSystemUiVisibility(
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -352,9 +342,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                                     | View.SYSTEM_UI_FLAG_IMMERSIVE);
                     isActionBarHidden = true;
-                    if (mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false)) {
-                        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
-                    }
+                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
                 }
             });
         } else {
@@ -399,6 +387,41 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         }
 
         return false;
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentRotation", currentRotation);
+    }
+
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        applyRotation();
+    }
+
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        applyRotation();
+    }
+
+    private void applyRotation() {
+        if (isApng) {
+            // APNG/avatar path renders into a plain animated ImageView
+            binding.apngImageViewViewImageOrGifActivity.setRotation(currentRotation);
+            return;
+        }
+
+        SubsamplingScaleImageView ssiv = binding.imageViewViewImageOrGifActivity.getSSIV();
+        if (!isGif && ssiv != null) {
+            // Static images: let the subsampling view re-render at the new orientation
+            ssiv.setOrientation(currentRotation);
+            ssiv.resetScaleAndCenter();
+        } else {
+            // Animated GIFs are rendered by BigImageView's image-view factory, not the
+            // subsampling view, so rotate the whole widget at the view level.
+            binding.imageViewViewImageOrGifActivity.setRotation(currentRotation);
+        }
     }
 
     private void requestPermissionAndDownload() {

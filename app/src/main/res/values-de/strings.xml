@@ -1103,7 +1103,6 @@ Antippen zum Wiederholen."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Post und Kommentare im Hochformat trennen"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Post und Kommentare im Querformat trennen"</string>
     <string name="settings_separate_post_and_comments_summary">"Automatisches Abspielen von Videos wird in der Post Detailseite ausgeschaltet"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Nutzen Sie die untere Toolbar im Medienviewer"</string>
     <string name="settings_secure_mode_title">"Sicherer Modus"</string>
     <string name="settings_secure_mode_summary">"Bildschirmaufnahmen und -aufzeichnungen sind nicht erlaubt. In der Appübersicht wird keine Voransicht gezeigt."</string>
     <string name="discard_dialog_button">"Verwerfen"</string>

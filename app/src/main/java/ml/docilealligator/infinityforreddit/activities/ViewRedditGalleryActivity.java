@@ -11,12 +11,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +21,6 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -34,7 +30,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.ViewPager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -83,7 +78,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
     private ArrayList<Post.Gallery> gallery;
     private String subredditName;
     private boolean isNsfw;
-    private boolean useBottomAppBar;
     private boolean isActionBarHidden = false;
     private ActivityViewRedditGalleryBinding binding;
     ViewGalleryViewModel viewGalleryViewModel;
@@ -155,17 +149,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
 
         EventBus.getDefault().register(this);
 
-        useBottomAppBar = sharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
-
-        if (!useBottomAppBar) {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
-            setTitle(" ");
-        } else {
-            getSupportActionBar().hide();
-        }
+        getSupportActionBar().hide();
 
         viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
 
@@ -204,37 +188,12 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         setupViewPager(savedInstanceState);
     }
 
-    public boolean isUseBottomAppBar() {
-        return useBottomAppBar;
-    }
-
     private void setupViewPager(Bundle savedInstanceState) {
-        if (!useBottomAppBar) {
-            setToolbarTitle(0);
-            binding.viewPagerViewRedditGalleryActivity.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int position) {
-                    setToolbarTitle(position);
-                }
-            });
-        }
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
         if (savedInstanceState == null) {
             binding.viewPagerViewRedditGalleryActivity.setCurrentItem(getIntent().getIntExtra(EXTRA_GALLERY_ITEM_INDEX, 0), false);
-        }
-    }
-
-    private void setToolbarTitle(int position) {
-        if (gallery != null && position >= 0 && position < gallery.size()) {
-            if (gallery.get(position).mediaType == Post.Gallery.TYPE_IMAGE) {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_reddit_gallery_activity_image_label, position + 1, gallery.size()) + "</font>")));
-            } else if (gallery.get(position).mediaType == Post.Gallery.TYPE_GIF) {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_reddit_gallery_activity_gif_label, position + 1, gallery.size()) + "</font>")));
-            } else {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_reddit_gallery_activity_video_label, position + 1, gallery.size()) + "</font>")));
-            }
         }
     }
 
