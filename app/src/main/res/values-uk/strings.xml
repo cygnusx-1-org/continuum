@@ -1079,8 +1079,6 @@ https://play.google.com/store/"</string>
     <string name="settings_link_handler_value_custom_tab">"Власна вкладка"</string>
     <string name="settings_link_handler_value_internal_browser">"Внутрішній оглядач"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Успадкований КІ керування відеозаписами"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Щипком збільшувати відео"</string>
-    <string name="settings_experimental_feature">"Експериментальна функція"</string>
     <string name="theme_item_media_indicator_icon_color">"Колір значка індикатора медія"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Задіяно для: значки відеозаписів або галереї на передперегляді допису"</string>
     <string name="theme_item_media_indicator_background_color">"Колір тла індикатора медія"</string>

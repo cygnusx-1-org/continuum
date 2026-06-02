@@ -1020,8 +1020,6 @@
     <string name="settings_link_handler_value_custom_tab">"Προσαρμοσμένη Καρτέλα"</string>
     <string name="settings_link_handler_value_internal_browser">"Εσωτερικός Περιηγητής"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Απαρχαιωμένο UI χειριστηρίου Βίντεο"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Τσιμπήστε για Ζουμ Βίντεο"</string>
-    <string name="settings_experimental_feature">"Πειραματική λειτουργία"</string>
     <string name="theme_item_media_indicator_icon_color">"Χρώμα Εικονιδίου Ένδειξης Πολυμέσων"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Εφαρμόστηκε σε: Εικονίδιο Βίντεο ή εικόνας στην προεπισκόπηση ανάρτησης"</string>
     <string name="theme_item_media_indicator_background_color">"Χρώμα Παρασκηνίου Ένδειξης Πολυμέσων"</string>

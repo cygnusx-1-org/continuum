@@ -692,8 +692,6 @@
     <!-- Fuzzy -->
     <string name="settings_link_handler_value_external_browser">"வெளிப்புற உலாவி"</string>
     <string name="settings_link_handler_value_custom_tab">"தனிப்பயன் கீற்று"</string>
-    <string name="settings_pinch_to_zoom_video_title">"காணொளியைப் பெரிதாக்க கிள்ளு"</string>
-    <string name="settings_experimental_feature">"பரீட்சார்ந்த அம்சம்"</string>
     <string name="go_to_top">"மேலே செல்"</string>
     <string name="app_lock_timeout_immediately">"உடனடியாக"</string>
     <string name="app_lock_timeout_1_min">"1 நிமிடம்"</string>

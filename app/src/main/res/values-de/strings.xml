@@ -1131,8 +1131,6 @@ Antippen zum Wiederholen."</string>
     <string name="settings_link_handler_value_custom_tab">"Custom Tab"</string>
     <string name="settings_link_handler_value_internal_browser">"Interner Browser"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Altes Video-Steuerungs UI"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Pinch-To-Zoom Video"</string>
-    <string name="settings_experimental_feature">"Experimentelles Feature"</string>
     <string name="theme_item_media_indicator_icon_color">"Medien-Indikator Symbolfarbe"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Angewendet auf: Video- oder Galleriesymbol in Beitrag-Vorschau"</string>
     <string name="theme_item_media_indicator_background_color">"Medien-Indikator Hintergrundfarbe"</string>

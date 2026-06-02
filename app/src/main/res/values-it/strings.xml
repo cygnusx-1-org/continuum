@@ -1025,8 +1025,6 @@ Premi per riprovare."</string>
     <string name="settings_link_handler_value_custom_tab">"Scheda personalizzata"</string>
     <string name="settings_link_handler_value_internal_browser">"Browser interno"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"UI legacy del controller video"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Pizzica per zoomare video"</string>
-    <string name="settings_experimental_feature">"Funzione sperimentale"</string>
     <string name="theme_item_media_indicator_icon_color">"Colore icona indicatore media"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Applicato a: icona video o galleria nell'anteprima post"</string>
     <string name="theme_item_media_indicator_background_color">"Colore di sfondo dell'indicatore media"</string>

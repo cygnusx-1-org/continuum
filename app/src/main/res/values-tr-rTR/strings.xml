@@ -1105,8 +1105,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_link_handler_value_custom_tab">"Özel Sekme"</string>
     <string name="settings_link_handler_value_internal_browser">"Dahili Tarayıcı"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Eski Video Denetleyicisi Kullanıcı Arayüzü"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Videoyu Yakınlaştırmak için Kıstır"</string>
-    <string name="settings_experimental_feature">"Deneysel özellik"</string>
     <string name="theme_item_media_indicator_icon_color">"Medya Gösterge Simgesi Rengi"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Uygulandığı yer: Yayın önizlemesindeki video veya galeri simgesi"</string>
     <string name="theme_item_media_indicator_background_color">"Medya Göstergesi Arka Plan Rengi"</string>

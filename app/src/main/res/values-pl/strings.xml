@@ -1064,7 +1064,6 @@ Brak podglądu w Ostatnich aplikacjach."</string>
     <string name="settings_link_handler_value_custom_tab">"Karta WebView"</string>
     <string name="settings_link_handler_value_internal_browser">"Wewnętrzna przeglądarka"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Stary kontroler Video UI"</string>
-    <string name="settings_experimental_feature">"Funkcja eksperymentalna"</string>
     <string name="go_to_top">"Przejdź do góry"</string>
     <string name="title_contains_strings_hint">"Tytuł: zawiera słowa kluczowe (słowo1,słowo2)"</string>
     <string name="title_contains_regex_hint">"Tytuł: zawiera regex"</string>

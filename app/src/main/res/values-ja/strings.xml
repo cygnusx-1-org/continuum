@@ -1109,8 +1109,6 @@ https://play.google.com/store/"</string>
     <string name="settings_link_handler_value_external_browser">"外部ブラウザ"</string>
     <string name="settings_link_handler_value_custom_tab">"カスタムタブ"</string>
     <string name="settings_link_handler_value_internal_browser">"内部ブラウザ"</string>
-    <string name="settings_pinch_to_zoom_video_title">"ピンチしてビデオをズームする"</string>
-    <string name="settings_experimental_feature">"実験的機能"</string>
     <string name="go_to_top">"トップへ"</string>
     <string name="contain_domain">"このドメインを含める"</string>
     <string name="app_lock_timeout_immediately">"即時"</string>

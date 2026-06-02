@@ -1132,8 +1132,6 @@ Toque para volver a intentarlo."</string>
     <string name="settings_link_handler_value_custom_tab">"Pestaña personalizada"</string>
     <string name="settings_link_handler_value_internal_browser">"Navegador interno"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Interfaz del controlador de vídeo heredado"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Pellizcar para ampliar el vídeo"</string>
-    <string name="settings_experimental_feature">"Característica experimental"</string>
     <string name="theme_item_media_indicator_icon_color">"Color del icono del indicador de medios"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Aplicado a: Icono de vídeo o galería en la vista previa de la publicación"</string>
     <string name="theme_item_media_indicator_background_color">"Color de fondo del indicador de medios"</string>

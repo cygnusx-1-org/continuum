@@ -1095,8 +1095,6 @@ https://play.google.com/store/"</string>
     <string name="settings_link_handler_value_custom_tab">"Пользовательская вкладка"</string>
     <string name="settings_link_handler_value_internal_browser">"Встроенный браузер"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Устаревший пользовательский интерфейс видеоконтроллера"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Масштабирование видео щипком"</string>
-    <string name="settings_experimental_feature">"Экспериментальная особенность"</string>
     <string name="theme_item_media_indicator_icon_color">"Цвет значка индикатора мультимедиа"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Применяется к: значку видео или галереи при предпросмотре публикации"</string>
     <string name="theme_item_media_indicator_background_color">"Цвет фона индикатора мультимедиа"</string>

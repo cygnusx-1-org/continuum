@@ -1063,8 +1063,6 @@ Toque para tentar de novo."</string>
     <string name="settings_link_handler_value_custom_tab">"Aba customizada"</string>
     <string name="settings_link_handler_value_internal_browser">"Navegador interno"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"IU do controlador de vídeo antigo"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Pinça para ampliar o vídeo"</string>
-    <string name="settings_experimental_feature">"Função experimental"</string>
     <string name="theme_item_media_indicator_icon_color">"Cor do ícone de indicador de mídia"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Aplicado a: Ícone de galeria ou vídeo na prévia da postagem"</string>
     <string name="theme_item_media_indicator_background_color">"Cor de fundo do indicador de mídia"</string>

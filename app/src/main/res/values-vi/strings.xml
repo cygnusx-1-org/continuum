@@ -1094,8 +1094,6 @@ Nhấn để thử lại."</string>
     <string name="settings_link_handler_value_custom_tab">"Thẻ tùy chọn"</string>
     <string name="settings_link_handler_value_internal_browser">"Trình duyệt nội bộ"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Giao diện Trình điều khiển Video cũ"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Chạm để thu phóng Video"</string>
-    <string name="settings_experimental_feature">"Tính năng thử nghiệm"</string>
     <string name="theme_item_media_indicator_icon_color">"Màu biểu tượng chỉ phương tiện"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Đã áp dụng cho: xem trước bài đăng cho Video hoặc Thư viện "</string>
     <string name="theme_item_media_indicator_background_color">"Màu nền chỉ phương tiện"</string>

@@ -1197,8 +1197,6 @@ Cliquer pour réessayer."</string>
     <string name="settings_link_handler_value_custom_tab">"Onglet personnalisé"</string>
     <string name="settings_link_handler_value_internal_browser">"Navigateur interne"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Interface Héritée du Contrôleur Vidéo"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Pincer pour zoomer"</string>
-    <string name="settings_experimental_feature">"Fonctionnalités expérimentales"</string>
     <string name="theme_item_media_indicator_icon_color">"Couleur d'Icône de l'Indicateur Média"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Appliqué à : Vidéo ou Icône de Galerie dans l'aperçu de l'article"</string>
     <string name="theme_item_media_indicator_background_color">"Couleur d'Arrière-Plan de l'Indicateur Média"</string>

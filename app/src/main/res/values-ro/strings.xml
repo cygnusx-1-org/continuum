@@ -1075,8 +1075,6 @@ Apasă pentru a reîncerca."</string>
     <string name="settings_link_handler_value_custom_tab">"Filă Personalizată"</string>
     <string name="settings_link_handler_value_internal_browser">"Browser Intern"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"UI-ul Vechi al Controller-ului Video"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Ciupește pentru a Mări Videoclipul"</string>
-    <string name="settings_experimental_feature">"Funcție experimentală"</string>
     <string name="theme_item_media_indicator_icon_color">"Culoarea Pictogramei Indicator Media"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Aplicat pe: Pictograma videoclipului sau galeriei la previzualizarea postării"</string>
     <string name="theme_item_media_indicator_background_color">"Culoarea de Fundal a Indicatorului Media"</string>

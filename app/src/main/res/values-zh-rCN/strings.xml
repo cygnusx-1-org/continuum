@@ -1101,8 +1101,6 @@ Reddit 视频分辨率较低。
     <string name="settings_link_handler_value_custom_tab">"Custom Tab"</string>
     <string name="settings_link_handler_value_internal_browser">"内部浏览器"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"旧版视频控制栏界面"</string>
-    <string name="settings_pinch_to_zoom_video_title">"双指缩放视频"</string>
-    <string name="settings_experimental_feature">"实验性功能"</string>
     <string name="theme_item_media_indicator_icon_color">"媒体指示器图标颜色"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"应用于：帖子预览上的视频或相册图标"</string>
     <string name="theme_item_media_indicator_background_color">"媒体指示器背景颜色"</string>
