@@ -2,16 +2,6 @@
 
 ---
 
-8.2.4.2 / 2026-6-1
-===========
-Note v8a is the 64-bit build, and should be considered the default choose.
-
-* Extended pinch to zoom to gifs
-* Deconflicted swipe up/down to dismiss from pinch to zoom
-* Removed pinch to zoom preference, it is the new default
-* Added rotation support to images, videos, and galleries
-* Removed the media view bottom bar option and made it the default
-
 8.2.4.1 / 2026-6-1
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
