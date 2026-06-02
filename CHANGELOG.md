@@ -2,6 +2,12 @@
 
 ---
 
+8.2.5.2 / 2026-6-2
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added a video scrub with a hortizontal back and forth gesture in videos(Disabled in Galleries)
+
 8.2.5.1 / 2026-6-1
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
