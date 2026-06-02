@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -185,6 +186,18 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
     private View rotatableVideoView; // The video surface to rotate (excludes playback controls)
     private ZoomSurfaceView zoomSurfaceView; // The pinch-to-zoom video surface
+    private PlayerControlView playerControlView; // Bottom playback controls (incl. timeline bar)
+
+    // Default auto-hide delay for the controls, restored after a scrub keeps them pinned open.
+    private static final int CONTROLS_SHOW_TIMEOUT_MS = 5000;
+
+    // Horizontal swipe-to-scrub gesture state.
+    private int scrubTouchSlop;
+    private float scrubStartX;
+    private float scrubStartY;
+    private long scrubStartPosition;
+    private boolean isScrubbing;
+    private boolean scrubGestureRejected; // a non-horizontal/multi-touch gesture won this touch sequence
 
     public ViewVideoViewModel viewVideoViewModel;
 
@@ -432,8 +445,10 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
                 .build();
 
+        scrubTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+
         {
-            PlayerControlView playerControlView = findViewById(R.id.player_control_view_view_video_activity);
+            playerControlView = findViewById(R.id.player_control_view_view_video_activity);
             playerControlView.addVisibilityListener(visibility -> {
                 switch (visibility) {
                     case View.GONE:
@@ -938,19 +953,114 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         // dragging up) both want vertical gestures. The moment a second finger lands we
         // hand the gesture to the ZoomSurfaceView so the pinch isn't swallowed by the
         // dismiss/scroll parents; on release we restore swipe-to-dismiss unless zoomed in.
+        // A single-finger horizontal drag (while not zoomed in) instead scrubs the video.
         if (zoomSurfaceView != null) {
             switch (ev.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    scrubStartX = ev.getX();
+                    scrubStartY = ev.getY();
+                    isScrubbing = false;
+                    // Don't hijack touches that start on the controls (e.g. the timeline bar).
+                    scrubGestureRejected = isTouchInsideControls(ev);
+                    break;
                 case MotionEvent.ACTION_POINTER_DOWN:
+                    // Second finger: this is a pinch, not a scrub. Hand it to the zoom surface.
+                    if (isScrubbing) {
+                        endScrub();
+                    }
+                    scrubGestureRejected = true;
                     setSwipeToDismissEnabled(false);
                     zoomSurfaceView.getParent().requestDisallowInterceptTouchEvent(true);
                     break;
+                case MotionEvent.ACTION_MOVE:
+                    if (!isScrubbing && !scrubGestureRejected && ev.getPointerCount() == 1
+                            && zoomSurfaceView.getEngine().getZoom() < 1.00001
+                            && player != null && player.getDuration() > 0) {
+                        float dx = ev.getX() - scrubStartX;
+                        float dy = ev.getY() - scrubStartY;
+                        if (Math.abs(dx) > scrubTouchSlop && Math.abs(dx) > Math.abs(dy) * 1.5f) {
+                            beginScrub();
+                        } else if (Math.abs(dy) > scrubTouchSlop) {
+                            // A vertical gesture won; leave it to swipe-to-dismiss/scroll.
+                            scrubGestureRejected = true;
+                        }
+                    }
+                    if (isScrubbing) {
+                        updateScrub(ev.getX());
+                        return true; // consume so the zoom surface doesn't also react
+                    }
+                    break;
                 case MotionEvent.ACTION_UP:
+                    if (isScrubbing) {
+                        endScrub();
+                        // Consume so the tap doesn't toggle the controls.
+                        return true;
+                    }
+                    setSwipeToDismissEnabled(zoomSurfaceView.getEngine().getZoom() < 1.00001);
+                    break;
                 case MotionEvent.ACTION_CANCEL:
+                    if (isScrubbing) {
+                        endScrub();
+                    }
                     setSwipeToDismissEnabled(zoomSurfaceView.getEngine().getZoom() < 1.00001);
                     break;
             }
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    private void beginScrub() {
+        isScrubbing = true;
+        // scrubStartX/scrubStartY were captured on ACTION_DOWN; the seek delta is measured
+        // from that original anchor so the gesture has no dead zone after the touch slop.
+        scrubStartPosition = player.getCurrentPosition();
+        setSwipeToDismissEnabled(false);
+        zoomSurfaceView.getParent().requestDisallowInterceptTouchEvent(true);
+        // Pin the controls open so the timeline bar tracks the scrub for the whole gesture.
+        if (playerControlView != null) {
+            playerControlView.setShowTimeoutMs(0);
+            playerControlView.show();
+        }
+    }
+
+    private void updateScrub(float currentX) {
+        long duration = player.getDuration();
+        if (duration <= 0) {
+            return;
+        }
+        int width = zoomSurfaceView.getWidth();
+        if (width <= 0) {
+            width = getResources().getDisplayMetrics().widthPixels;
+        }
+        // Dragging the full width of the screen scrubs across the whole video; partial
+        // drags move proportionally, so any clip length stays reachable in one gesture.
+        float fraction = (currentX - scrubStartX) / width;
+        long target = scrubStartPosition + (long) (fraction * duration);
+        target = Math.max(0, Math.min(duration, target));
+        // The timeline bar in playerControlView follows the player position automatically.
+        player.seekTo(target);
+    }
+
+    private void endScrub() {
+        isScrubbing = false;
+        // Restore the normal auto-hide behaviour for the controls.
+        if (playerControlView != null) {
+            playerControlView.setShowTimeoutMs(CONTROLS_SHOW_TIMEOUT_MS);
+            playerControlView.show();
+        }
+        setSwipeToDismissEnabled(zoomSurfaceView.getEngine().getZoom() < 1.00001);
+    }
+
+    private boolean isTouchInsideControls(MotionEvent ev) {
+        if (playerControlView == null || !playerControlView.isVisible()) {
+            return false;
+        }
+        int[] location = new int[2];
+        playerControlView.getLocationOnScreen(location);
+        float rawX = ev.getRawX();
+        float rawY = ev.getRawY();
+        return rawX >= location[0] && rawX <= location[0] + playerControlView.getWidth()
+                && rawY >= location[1] && rawY <= location[1] + playerControlView.getHeight();
     }
 
     private void setSwipeToDismissEnabled(boolean enabled) {
