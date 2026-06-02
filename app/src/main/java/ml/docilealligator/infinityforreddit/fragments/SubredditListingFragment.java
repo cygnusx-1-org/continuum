@@ -172,11 +172,8 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
             });
         }
 
-        // Anonymous searches must go through the no_oauth retrofit, which transparently obtains and
-        // attaches an application-only OAuth token (oauth.reddit.com no longer serves unauthenticated requests).
-        Retrofit subredditListingRetrofit = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit;
         SubredditListingViewModel.Factory factory = new SubredditListingViewModel.Factory(mExecutor,
-                new Handler(), subredditListingRetrofit, query, sortType, mActivity.accessToken, mActivity.accountName, nsfw);
+                new Handler(), mRetrofit, mOauthRetrofit, query, sortType, mActivity.accessToken, mActivity.accountName, nsfw);
         mSubredditListingViewModel = new ViewModelProvider(this, factory).get(SubredditListingViewModel.class);
         mSubredditListingViewModel.getSubreddits().observe(getViewLifecycleOwner(), subredditData -> mAdapter.submitList(subredditData));
 
