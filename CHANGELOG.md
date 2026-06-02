@@ -2,6 +2,12 @@
 
 ---
 
+8.2.5.1 / 2026-6-1
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Updated to 8.2.5
+
 8.2.4.2 / 2026-6-1
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
