@@ -31,6 +31,7 @@ public class ViewVideoActivityBindingAdapter {
     private final TextView titleTextView;
     private final MaterialButton backButton;
     private final MaterialButton downloadButton;
+    private final MaterialButton shareButton;
     private final MaterialButton playbackSpeedButton;
     private final MaterialButton rotateLeftButton;
     private final MaterialButton rotateRightButton;
@@ -46,6 +47,7 @@ public class ViewVideoActivityBindingAdapter {
         titleTextView = binding.getRoot().findViewById(R.id.title_text_view_exo_playback_control_view);
         backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
+        shareButton = binding.getRoot().findViewById(R.id.share_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
         rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
         rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
@@ -62,6 +64,7 @@ public class ViewVideoActivityBindingAdapter {
         titleTextView = binding.getRoot().findViewById(R.id.title_text_view_exo_playback_control_view);
         backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
+        shareButton = binding.getRoot().findViewById(R.id.share_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
         rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
         rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
@@ -113,6 +116,10 @@ public class ViewVideoActivityBindingAdapter {
 
     public MaterialButton getDownloadButton() {
         return downloadButton;
+    }
+
+    public MaterialButton getShareButton() {
+        return shareButton;
     }
 
     public MaterialButton getPlaybackSpeedButton() {

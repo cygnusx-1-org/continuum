@@ -55,6 +55,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.SetAsWallpaperB
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewImgurImageBinding;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
@@ -354,7 +355,8 @@ public class ViewImgurImageFragment extends Fragment {
                 if (cacheDir != null) {
                     Toast.makeText(activity, R.string.save_image_first, Toast.LENGTH_SHORT).show();
                     SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, new Handler(), resource, cacheDir.getPath(),
-                            imgurMedia.getFileName(),
+                            MediaFileNameUtils.getDownloadFileName(imgurMedia,
+                                    getArguments().getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY)),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {

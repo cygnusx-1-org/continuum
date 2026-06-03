@@ -48,6 +48,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -84,7 +85,9 @@ import com.otaliastudios.zoom.ZoomSurfaceView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -94,12 +97,14 @@ import javax.inject.Provider;
 import app.futured.hauler.DragDirection;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.Infinity;
+import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PlaybackSpeedBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoZoomableBinding;
 import ml.docilealligator.infinityforreddit.events.FinishViewMediaActivityEvent;
+import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.ContentFontStyle;
 import ml.docilealligator.infinityforreddit.font.FontFamily;
@@ -110,6 +115,7 @@ import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
@@ -334,6 +340,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             viewVideoViewModel.setDownloading(true);
             requestPermissionAndDownload();
         });
+
+        binding.getShareButton().setOnClickListener(view -> shareVideo());
 
         binding.getPlaybackSpeedButton().setOnClickListener(view -> {
             changePlaybackSpeed();
@@ -1126,12 +1134,56 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             requestPermissionAndDownload();
 
             return true;
+        } else if (itemId == R.id.action_share_view_video_activity) {
+            shareVideo();
+            return true;
         } else if (itemId == R.id.action_playback_speed_view_video_activity) {
             changePlaybackSpeed();
             return true;
         }
 
         return false;
+    }
+
+    private void shareVideo() {
+        Post post = viewVideoViewModel.getPost();
+        if (post == null || viewVideoViewModel.getVideoDownloadUrl() == null) {
+            Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(this, R.string.preparing_video_for_sharing, Toast.LENGTH_SHORT).show();
+
+        // Share with the same filename scheme used by downloads.
+        String fileName = MediaFileNameUtils.getDownloadFileName(post, 0);
+        PersistableBundle extras = new PersistableBundle();
+
+        if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_NORMAL || post.isTumblr()) {
+            if (post.getPostType() == Post.GIF_TYPE) {
+                extras.putString(DownloadMediaService.EXTRA_URL, post.getVideoUrl());
+                extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_GIF);
+            } else {
+                extras.putString(DownloadMediaService.EXTRA_URL, viewVideoViewModel.getVideoDownloadUrl());
+                extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO);
+            }
+            extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
+            extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, viewVideoViewModel.getSubredditName());
+            extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
+            extras.putInt(DownloadMediaService.EXTRA_IS_SHARE, 1);
+
+            JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
+            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+        } else {
+            extras.putString(DownloadRedditVideoService.EXTRA_VIDEO_URL, viewVideoViewModel.getVideoDownloadUrl());
+            extras.putString(DownloadRedditVideoService.EXTRA_POST_ID, post.getId());
+            extras.putString(DownloadRedditVideoService.EXTRA_SUBREDDIT, viewVideoViewModel.getSubredditName());
+            extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
+            extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, fileName);
+            extras.putInt(DownloadRedditVideoService.EXTRA_IS_SHARE, 1);
+
+            JobInfo jobInfo = DownloadRedditVideoService.constructJobInfo(this, 5000000, extras);
+            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+        }
     }
 
     public void setPlaybackSpeed(int speed100X) {
@@ -1214,24 +1266,18 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         Post post = viewVideoViewModel.getPost();
         if (post != null) {
-            String title = post.getTitle();
-            String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");
-
-            if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
-            if (sanitizedTitle.isEmpty()) sanitizedTitle = "video_" + System.currentTimeMillis();
-            if (post.getId() != null && !post.getId().isEmpty()) {
-                sanitizedTitle = sanitizedTitle + "_" + post.getId();
-            }
+            // Use the shared naming scheme so all download paths produce identical filenames.
+            String fileName = MediaFileNameUtils.getDownloadFileName(post, 0);
 
             if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_NORMAL || post.isTumblr()) {
                 if (post.getPostType() == Post.GIF_TYPE) {
                     extras.putString(DownloadMediaService.EXTRA_URL, post.getVideoUrl());
                     extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_GIF);
-                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, sanitizedTitle + ".gif");
+                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
                 } else {
                     extras.putString(DownloadMediaService.EXTRA_URL, viewVideoViewModel.getVideoDownloadUrl());
                     extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO);
-                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, sanitizedTitle + ".mp4");
+                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
                 }
 
                 extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, viewVideoViewModel.getSubredditName());
@@ -1246,7 +1292,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 extras.putString(DownloadRedditVideoService.EXTRA_SUBREDDIT, viewVideoViewModel.getSubredditName());
                 extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
 
-                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, sanitizedTitle + ".mp4");
+                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, fileName);
 
                 //TODO: contentEstimatedBytes
                 JobInfo jobInfo = DownloadRedditVideoService.constructJobInfo(this, 5000000, extras);
@@ -1288,5 +1334,20 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     @Subscribe
     public void onFinishViewMediaActivityEvent(FinishViewMediaActivityEvent e) {
         finish();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onShareMediaEvent(ShareMediaEvent event) {
+        try {
+            Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider",
+                    new File(event.filePath));
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            shareIntent.setType(event.mimeType);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.error_sharing_video, Toast.LENGTH_SHORT).show();
+        }
     }
 }

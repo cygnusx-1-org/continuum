@@ -38,7 +38,6 @@ import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoPadd
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoShape
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorPixelShape
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorShapes
-import jp.wasabeef.glide.transformations.BlurTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy
@@ -62,6 +61,7 @@ fun sharePostAsScreenshot(
 ) {
     //val binding: SharedPostBinding = SharedPostBinding.inflate(LayoutInflater.from(ContextThemeWrapper(baseActivity, R.style.AppTheme)))
     val binding: SharedPostBinding = SharedPostBinding.inflate(LayoutInflater.from(baseActivity))
+    val fileName = screenshotFileName(post)
 
     binding.titleTextViewSharedPost.text = post.title
     binding.subredditNameTextViewSharedPost.text = post.subredditNamePrefixed
@@ -111,7 +111,6 @@ fun sharePostAsScreenshot(
                 binding.imageViewSharedPost.layoutParams.height = height
                 measureView(binding.getRoot())
 
-                val blurImage = post.isNSFW || post.isSpoiler
                 val url = preview.previewUrl
                 val imageRequestBuilder = Glide.with(baseActivity).load(url)
                     .listener(object : RequestListener<Drawable> {
@@ -123,7 +122,7 @@ fun sharePostAsScreenshot(
                         ): Boolean {
                             binding.imageViewSharedPost.visibility = View.GONE
                             measureView(binding.getRoot())
-                            shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+                            shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), fileName)
                             return false
                         }
 
@@ -135,32 +134,20 @@ fun sharePostAsScreenshot(
                             isFirstResource: Boolean
                         ): Boolean {
                             Handler(Looper.getMainLooper()).post {
-                                shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+                                shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), fileName)
                             }
 
                             return false
                         }
                     })
-                if (blurImage) {
-                    imageRequestBuilder.apply(
-                        RequestOptions.bitmapTransform(
-                            MultiTransformation(
-                                CenterCrop(),
-                                BlurTransformation(50, 10),
-                                RoundedCornersTransformation(4, 0)
-                            )
-                        )
-                    ).into(binding.imageViewSharedPost)
-                } else {
-                    imageRequestBuilder.apply(RequestOptions.bitmapTransform(
-                        MultiTransformation(
-                            CenterCrop(),
-                            RoundedCornersTransformation(50, 0)
-                        )
-                    )).downsample(
-                        saveMemoryCenterInsideDownsampleStrategy
-                    ).into(binding.imageViewSharedPost)
-                }
+                imageRequestBuilder.apply(RequestOptions.bitmapTransform(
+                    MultiTransformation(
+                        CenterCrop(),
+                        RoundedCornersTransformation(50, 0)
+                    )
+                )).downsample(
+                    saveMemoryCenterInsideDownsampleStrategy
+                ).into(binding.imageViewSharedPost)
                 return
             } else {
                 binding.imageViewSharedPost.visibility = View.GONE
@@ -181,7 +168,7 @@ fun sharePostAsScreenshot(
     }
 
     measureView(binding.getRoot())
-    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), fileName)
 }
 
 fun sharePostWithCommentsAsScreenshot(
@@ -190,6 +177,7 @@ fun sharePostWithCommentsAsScreenshot(
     saveMemoryCenterInsideDownsampleStrategy: SaveMemoryCenterInisdeDownsampleStrategy
 ) {
     val binding: SharedPostWithCommentsBinding = SharedPostWithCommentsBinding.inflate(LayoutInflater.from(baseActivity))
+    val fileName = screenshotFileName(post, withComments = true)
 
     binding.titleTextViewSharedPostWithComments.text = post.title
     binding.subredditNameTextViewSharedPostWithComments.text = post.subredditNamePrefixed
@@ -266,29 +254,24 @@ fun sharePostWithCommentsAsScreenshot(
                 binding.imageViewSharedPostWithComments.layoutParams.height = height
                 measureView(binding.root)
 
-                val blurImage = post.isNSFW || post.isSpoiler
                 val url = preview.previewUrl
                 val imageRequestBuilder = Glide.with(baseActivity).load(url)
                     .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                             binding.imageViewSharedPostWithComments.visibility = View.GONE
                             measureView(binding.root)
-                            shareScreenshot(baseActivity, getBitmapFromView(binding.root))
+                            shareScreenshot(baseActivity, getBitmapFromView(binding.root), fileName)
                             return false
                         }
 
                         override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
                             Handler(Looper.getMainLooper()).post {
-                                shareScreenshot(baseActivity, getBitmapFromView(binding.root))
+                                shareScreenshot(baseActivity, getBitmapFromView(binding.root), fileName)
                             }
                             return false
                         }
                     })
-                if (blurImage) {
-                    imageRequestBuilder.apply(RequestOptions.bitmapTransform(MultiTransformation(CenterCrop(), BlurTransformation(50, 10), RoundedCornersTransformation(4, 0)))).into(binding.imageViewSharedPostWithComments)
-                } else {
-                    imageRequestBuilder.apply(RequestOptions.bitmapTransform(MultiTransformation(CenterCrop(), RoundedCornersTransformation(50, 0)))).downsample(saveMemoryCenterInsideDownsampleStrategy).into(binding.imageViewSharedPostWithComments)
-                }
+                imageRequestBuilder.apply(RequestOptions.bitmapTransform(MultiTransformation(CenterCrop(), RoundedCornersTransformation(50, 0)))).downsample(saveMemoryCenterInsideDownsampleStrategy).into(binding.imageViewSharedPostWithComments)
                 return
             } else {
                 binding.imageViewSharedPostWithComments.visibility = View.GONE
@@ -309,7 +292,7 @@ fun sharePostWithCommentsAsScreenshot(
     }
 
     measureView(binding.root)
-    shareScreenshot(baseActivity, getBitmapFromView(binding.root))
+    shareScreenshot(baseActivity, getBitmapFromView(binding.root), fileName)
 }
 
 fun shareCommentAsScreenshot(
@@ -335,7 +318,7 @@ fun shareCommentAsScreenshot(
     binding.qrCodeImageViewSharedComment.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, comment.permalink))
 
     measureView(binding.getRoot())
-    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), screenshotFileName(comment))
 }
 
 private fun measureView(rootView: View) {
@@ -386,14 +369,14 @@ private fun generateQRCode(baseActivity: BaseActivity, customThemeWrapper: Custo
     )
 }
 
-private fun shareScreenshot(context: Context, bitmap: Bitmap) {
+private fun shareScreenshot(context: Context, bitmap: Bitmap, fileName: String) {
     try {
         val cachePath = File(context.externalCacheDir, "images")
         if (!cachePath.exists()) {
             cachePath.mkdirs()
         }
 
-        val file = File(cachePath, "shared_view.png")
+        val file = File(cachePath, fileName)
         val stream = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         stream.close()
@@ -406,10 +389,23 @@ private fun shareScreenshot(context: Context, bitmap: Bitmap) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.setType("image/png")
         intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.clipData = ClipData.newRawUri("", uri)
+        intent.clipData = ClipData.newRawUri(fileName, uri)
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         context.startActivity(Intent.createChooser(intent, "Share"))
     } catch (e: IOException) {
         e.printStackTrace()
     }
+}
+
+// Names the shared screenshot after the post (and comments) so apps like Google Drive show a
+// meaningful filename instead of a generic one. Screenshots are always PNG renders of the card.
+private fun screenshotFileName(post: Post, withComments: Boolean = false): String {
+    val title = MediaFileNameUtils.sanitizeFilename(post.title)
+    val base = if (post.id.isNullOrEmpty()) title else "${title}_${post.id}"
+    return if (withComments) "${base}_comments.png" else "$base.png"
+}
+
+private fun screenshotFileName(comment: Comment): String {
+    val author = MediaFileNameUtils.sanitizeFilename(comment.author)
+    return if (comment.id.isNullOrEmpty()) "comment_$author.png" else "comment_${author}_${comment.id}.png"
 }

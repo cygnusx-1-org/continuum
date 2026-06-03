@@ -47,6 +47,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
@@ -473,13 +474,9 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, mPost.isNSFW() ? 1 : 0);
 
 
-                String title = (mPost != null) ? mPost.getTitle() : "reddit_video"; // Get title or use default
-                String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");
-                if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
-                if (sanitizedTitle.isEmpty()) sanitizedTitle = "reddit_video_" + System.currentTimeMillis();
-
-                String finalFileName = sanitizedTitle + ".mp4";
-                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, finalFileName);
+                // Use the shared naming scheme so all download paths produce identical filenames.
+                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME,
+                        MediaFileNameUtils.getDownloadFileName(mPost, 0));
 
                 //TODO: contentEstimatedBytes
                 JobInfo jobInfo = DownloadRedditVideoService.constructJobInfo(mBaseActivity, 5000000, extras);

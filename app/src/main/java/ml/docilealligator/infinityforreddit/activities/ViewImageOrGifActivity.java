@@ -77,6 +77,7 @@ import ml.docilealligator.infinityforreddit.font.FontStyle;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
@@ -471,7 +472,18 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, mSubredditName);
         extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, isNsfw ? 1 : 0);
 
-        // Reconstruct filename using post title passed in intent
+        extras.putString(DownloadMediaService.EXTRA_FILE_NAME, buildDownloadFileName());
+
+        //TODO: contentEstimatedBytes
+        JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
+    }
+
+    // Builds the filename using the post title passed in the intent, mirroring the download path so
+    // that the save and share actions produce identical filenames.
+    private String buildDownloadFileName() {
         String postTitle = getIntent().getStringExtra(EXTRA_POST_TITLE_KEY);
         String commentId = getIntent().getStringExtra(EXTRA_COMMENT_ID_KEY);
         String postId = getIntent().getStringExtra(EXTRA_POST_ID_KEY);
@@ -484,16 +496,11 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             title = title + "_" + commentId;
         }
 
-        // Basic sanitization (similar to DownloadMediaService)
-        String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");
-        if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
-        if (sanitizedTitle.isEmpty()) sanitizedTitle = ((isGif || isApng) ? "reddit_gif_" : "reddit_image_") + System.currentTimeMillis();
+        String sanitizedTitle = MediaFileNameUtils.sanitizeFilename(title);
 
-        // Basic extension determination
-        String extension = ".unknown";
+        String extension;
         if (mImageUrl != null) {
             String urlExt = org.apache.commons.io.FilenameUtils.getExtension(mImageUrl);
-
             if (urlExt != null && !urlExt.isEmpty() && urlExt.matches("(?i)(jpg|jpeg|png|apng|gif|mp4|webm|mov|avi)")) {
                 extension = "." + urlExt.toLowerCase().substring(0, Math.min(urlExt.length(), 5));
             } else if (isApng) {
@@ -511,14 +518,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             extension = ".jpg";
         }
 
-        String finalFileName = sanitizedTitle + extension;
-        extras.putString(DownloadMediaService.EXTRA_FILE_NAME, finalFileName);
-
-        //TODO: contentEstimatedBytes
-        JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
-        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
-
-        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
+        return sanitizedTitle + extension;
     }
 
     private void shareImage() {
@@ -530,7 +530,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                 if (cacheDir != null) {
                     Toast.makeText(ViewImageOrGifActivity.this, R.string.save_image_first, Toast.LENGTH_SHORT).show();
                     SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, handler, resource,
-                            cacheDir.getPath(), mImageFileName,
+                            cacheDir.getPath(), buildDownloadFileName(),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {
@@ -575,7 +575,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
                 File cacheDir = Utils.getCacheDir(ViewImageOrGifActivity.this);
                 if (cacheDir != null) {
-                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), mImageFileName,
+                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), buildDownloadFileName(),
                             new SaveGIFToFile.SaveGIFToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {

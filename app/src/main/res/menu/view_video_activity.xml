@@ -9,8 +9,15 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_playback_speed_view_video_activity"
+        android:id="@+id/action_share_view_video_activity"
         android:orderInCategory="2"
+        android:title="@string/share"
+        android:icon="@drawable/ic_share_toolbar_white_24dp"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_playback_speed_view_video_activity"
+        android:orderInCategory="3"
         android:title="@string/action_playback_speed"
         android:icon="@drawable/ic_playback_speed_toolbar_24dp"
         app:showAsAction="ifRoom" />

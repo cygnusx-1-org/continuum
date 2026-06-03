@@ -68,6 +68,7 @@ import ml.docilealligator.infinityforreddit.customviews.GlideGifImageViewFactory
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewRedditGalleryImageOrGifBinding;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
@@ -518,6 +519,15 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         Toast.makeText(activity, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
+    // Use the same filename scheme as the download path so saved and shared files match.
+    private String getShareFileName() {
+        Post parentPost = activity.getPost();
+        if (parentPost != null) {
+            return MediaFileNameUtils.getDownloadFileName(parentPost, getArguments().getInt(EXTRA_INDEX, 0));
+        }
+        return media.fileName;
+    }
+
     //TODO: Find a way to share original image, Glide messes with the size and quality,
     // compression should be up to the app being shared with (WhatsApp for example)
     private void shareImage() {
@@ -528,7 +538,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                 if (cacheDir != null) {
                     Toast.makeText(activity, R.string.save_image_first, Toast.LENGTH_SHORT).show();
                     SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, handler, resource, cacheDir.getPath(),
-                            media.fileName,
+                            getShareFileName(),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {
@@ -573,7 +583,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
             public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
                 File cacheDir = Utils.getCacheDir(activity);
                 if (cacheDir != null) {
-                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), media.fileName,
+                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), getShareFileName(),
                             new SaveGIFToFile.SaveGIFToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {

@@ -231,6 +231,9 @@
 
     <string name="download_started">Download Started. Check the notification for progress.</string>
     <string name="download_location_not_set">Set the locations in Settings | Download Locations</string>
+    <string name="download_folder_permission_lost">Re-select your download folder in Settings | Download Location.</string>
+    <string name="preparing_video_for_sharing">Preparing video to share…</string>
+    <string name="error_sharing_video">Error sharing video</string>
 
     <string name="comment_load_more_comments">Load more comments</string>
     <string name="comment_load_more_comments_failed">Load failed. Tap to retry.</string>
@@ -1182,7 +1185,7 @@
     <string name="login_using_different_method">You can try a different login method if this one doesn’t work.</string>
     <string name="login_using_chrome_custom_tab">Chrome Custom Tab</string>
     <string name="login_using_webview">WebView (legacy)</string>
-    <string name="login_chrome_required">You must have Chrome browser installed.</string>
+    <string name="login_chrome_required">You must have a Chrome based or Firefox browser installed.</string>
     <string name="login_failed_error">Login failed. Error:</string>
     <string name="login_failed_auth_result_verification_failed">Verification failed.</string>
     <string name="login_failed_auth_result_verification_timed_out">Verification timed out.</string>
