@@ -645,8 +645,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
                     for (Tracks.Group trackGroup : tracks.getGroups()) {
                         if (trackGroup.getType() == C.TRACK_TYPE_AUDIO) {
-                            if (viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL
-                                    || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED && trackGroup.length > 1) {
+                            if ((viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL
+                                    || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) && trackGroup.length > 1) {
                                 // Reddit video HLS usually has two audio tracks. The first is mono.
                                 // The second (index 1) is stereo.
                                 // Select the stereo audio track if possible.
