@@ -829,6 +829,10 @@ public class Post implements Parcelable {
         public String url;
         public String fallbackUrl;
         private boolean hasFallback;
+        // A smaller, resolution-bounded preview used only when rendering the gallery inline in the
+        // feed/post-detail card. The full-screen media view keeps using `url` (the source). Null for
+        // GIFs/videos and for images that have no usable preview.
+        public String feedPreviewUrl;
         public String fileName;
         public int mediaType;
         public String caption;
@@ -855,6 +859,7 @@ public class Post implements Parcelable {
             url = in.readString();
             fallbackUrl = in.readString();
             hasFallback = in.readByte() != 0;
+            feedPreviewUrl = in.readString();
             fileName = in.readString();
             mediaType = in.readInt();
             caption = in.readString();
@@ -884,6 +889,7 @@ public class Post implements Parcelable {
             parcel.writeString(url);
             parcel.writeString(fallbackUrl);
             parcel.writeByte((byte) (hasFallback ? 1 : 0));
+            parcel.writeString(feedPreviewUrl);
             parcel.writeString(fileName);
             parcel.writeInt(mediaType);
             parcel.writeString(caption);

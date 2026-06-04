@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -137,7 +138,15 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             return;
         }
 
-        RequestBuilder<Drawable> imageRequestBuilder = glide.load(galleryImages.get(index).url).listener(new RequestListener<>() {
+        Post.Gallery galleryImage = galleryImages.get(index);
+        // Prefer the resolution-bounded feed preview for static images; fall back to the source
+        // (always used for GIFs/videos and for images without a usable preview). The full-screen
+        // media view is unaffected — it loads `url` directly.
+        String loadUrl = galleryImage.feedPreviewUrl != null ? galleryImage.feedPreviewUrl : galleryImage.url;
+
+        RequestBuilder<Drawable> imageRequestBuilder = glide.load(loadUrl)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(new RequestListener<>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);

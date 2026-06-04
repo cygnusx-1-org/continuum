@@ -843,6 +843,30 @@ public class ParsePost {
                             postGalleryItem.setHasFallback(true);
                         }
 
+                        // For static images, pick a resolution-bounded preview (Reddit caps `p` at
+                        // 1080 wide) for inline feed/post-detail rendering. This avoids decoding the
+                        // full-size source (often several thousand px) into a bitmap on every bind,
+                        // which keeps the result in Glide's memory cache far longer. GIFs/videos are
+                        // skipped: their `p` previews are static, so the source must keep playing.
+                        // The full-screen media view continues to use `url` (the source).
+                        if ((mimeType.contains("jpg") || mimeType.contains("png"))
+                                && singleGalleryObject.has(JSONUtils.P_KEY)) {
+                            JSONArray previewsArray = singleGalleryObject.getJSONArray(JSONUtils.P_KEY);
+                            String bestPreviewUrl = null;
+                            int bestPreviewWidth = -1;
+                            for (int p = 0; p < previewsArray.length(); p++) {
+                                JSONObject previewObject = previewsArray.getJSONObject(p);
+                                if (previewObject.has(JSONUtils.U_KEY) && previewObject.has(JSONUtils.X_KEY)) {
+                                    int previewWidth = previewObject.getInt(JSONUtils.X_KEY);
+                                    if (previewWidth > bestPreviewWidth) {
+                                        bestPreviewWidth = previewWidth;
+                                        bestPreviewUrl = previewObject.getString(JSONUtils.U_KEY);
+                                    }
+                                }
+                            }
+                            postGalleryItem.feedPreviewUrl = bestPreviewUrl;
+                        }
+
                         gallery.add(postGalleryItem);
                     }
 
