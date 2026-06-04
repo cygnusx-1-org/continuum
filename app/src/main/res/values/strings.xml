@@ -728,6 +728,24 @@
     <string name="settings_proxy_hostname">Hostname</string>
     <string name="settings_proxy_port">Port</string>
 
+    <!-- Settings section summaries -->
+    <string name="settings_notification_master_summary">Enable push notifications and set how often they are checked</string>
+    <string name="settings_interface_summary">Fonts, navigation drawer, tabs, bottom app bar, and post and comment display options</string>
+    <string name="settings_theme_summary">Light, dark, and AMOLED themes, Material You, and custom theme colors</string>
+    <string name="settings_video_summary">Autoplay, muting, playback speed, default resolution, and fullscreen behavior</string>
+    <string name="settings_gestures_and_buttons_summary">Swipe gestures, volume key navigation, long-press actions, and gesture sensitivity</string>
+    <string name="settings_security_summary">App lock, biometric or PIN, secure mode, and authentication to show accounts</string>
+    <string name="settings_data_saving_mode_summary">Disable image previews and lower video resolution to use less data</string>
+    <string name="settings_proxy_summary">Route Reddit traffic through an HTTP or SOCKS proxy</string>
+    <string name="settings_post_history_summary">Mark posts as read, limit read post history, and hide read posts</string>
+    <string name="settings_over_18_and_spoiler_summary">Show or blur NSFW content and blur spoilers</string>
+    <string name="settings_post_filter_summary">Create and manage filters that hide posts</string>
+    <string name="settings_comment_filter_summary">Create and manage filters that hide comments</string>
+    <string name="settings_sort_type_summary">Default sort type and time range for subreddits, users, and comments</string>
+    <string name="settings_download_location_summary">Choose folders for downloaded images, GIFs, videos, and NSFW media</string>
+    <string name="settings_miscellaneous_summary">Link handling, browser, search history, language, and fold support</string>
+    <string name="settings_advanced_master_summary">Back up and restore settings, reset, clear cached data, and crash reports</string>
+
     <!-- API keys-->
     <string name="settings_api_keys_title">API Keys</string>
     <string name="settings_api_keys_summary">Enter your own API keys, including your Client ID</string>
