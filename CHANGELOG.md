@@ -2,6 +2,21 @@
 
 ---
 
+8.2.5.3 / 2026-6-3
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Swipe action not working #267
+* Disabled "Enable Swipe Action" when "Swipe Between Posts" is enabled, because they conflict with each other
+* Fixed greyed out toggles showing they are greyed out
+* Fixed Navbar background #265
+* Fixed login_chrome_required to include mention of Firefox
+* Fixed Apply download naming convention to Share Media #268
+* Added support for sharing videos
+* Removed blur on screenshots for NSFW and Spoiler
+* Fixed Crash after playing videos #269
+* Fixed IndexOutOfBoundsException opening a post when the setting "show author avatar" is enabled. Docile-Alligator/Infinity-For-Reddit #1926
+
 8.2.5.2 / 2026-6-2
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
