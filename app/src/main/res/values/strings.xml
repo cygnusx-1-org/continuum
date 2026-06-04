@@ -640,6 +640,8 @@
     <string name="settings_restore_settings_title">Restore Settings</string>
     <string name="settings_credits_love_animation_title">Love Animation</string>
     <string name="settings_swipe_between_posts_title">Swipe Between Posts</string>
+    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">While enabled, swipe actions in comments are unavailable. Both use horizontal swipes, so they cannot be used at the same time.</string>
+    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">Unavailable while Swipe Between Posts is enabled. Turn that off to use comment swipe actions.</string>
     <string name="settings_navigation_drawer_title">Navigation Drawer</string>
     <string name="settings_collapse_account_section_title">Collapse Account Section</string>
     <string name="settings_collapse_reddit_section_title">Collapse Reddit Section</string>
