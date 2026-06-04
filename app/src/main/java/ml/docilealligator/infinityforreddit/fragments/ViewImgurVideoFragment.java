@@ -19,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -191,6 +192,8 @@ public class ViewImgurVideoFragment extends Fragment {
 
         binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
         binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
+        binding.getOverflowButton().setVisibility(View.VISIBLE);
+        binding.getOverflowButton().setOnClickListener(this::showOverflowMenu);
 
         viewGalleryViewModel = new ViewModelProvider(requireActivity()).get(ViewGalleryViewModel.class);
         viewGalleryViewModel.getInsets().observe(getViewLifecycleOwner(), insets -> {
@@ -207,6 +210,23 @@ public class ViewImgurVideoFragment extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    private void showOverflowMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(activity, anchor);
+        popupMenu.getMenuInflater().inflate(R.menu.view_imgur_media_activity, popupMenu.getMenu());
+        Menu menu = popupMenu.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            Utils.setTitleWithCustomFontToMenuItem(activity.typeface, menu.getItem(i), null);
+        }
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_download_all_imgur_album_media_view_imgur_media_activity) {
+                activity.downloadAllImgurAlbumMedia();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
     }
 
     private void rotateLeft() {

@@ -212,55 +212,59 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
             finish();
             return true;
         } else if (item.getItemId() == R.id.action_download_all_gallery_media_view_reddit_gallery_activity) {
-            // Check if download locations are set for all media types
-            // Gallery can contain images, GIFs, and videos, so we need to check all relevant locations
-            String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-            String gifDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, "");
-            String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
-            String nsfwDownloadLocation = "";
-
-            boolean needsNsfwLocation = isNsfw &&
-                    sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
-
-            if (needsNsfwLocation) {
-                nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
-                if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            } else {
-                // Check for required download locations based on the gallery content
-                boolean hasImage = false;
-                boolean hasGif = false;
-                boolean hasVideo = false;
-
-                for (Post.Gallery galleryItem : gallery) {
-                    if (galleryItem.mediaType == Post.Gallery.TYPE_VIDEO) {
-                        hasVideo = true;
-                    } else if (galleryItem.mediaType == Post.Gallery.TYPE_GIF) {
-                        hasGif = true;
-                    } else {
-                        hasImage = true;
-                    }
-                }
-
-                if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
-                    (hasGif && (gifDownloadLocation == null || gifDownloadLocation.isEmpty())) ||
-                    (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            }
-
-            //TODO: contentEstimatedBytes
-            JobInfo jobInfo = DownloadMediaService.constructGalleryDownloadAllMediaJobInfo(this, 5000000L * gallery.size(), post);
-            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
-
-            Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
+            downloadAllGalleryMedia();
             return true;
         }
 
         return false;
+    }
+
+    public void downloadAllGalleryMedia() {
+        // Check if download locations are set for all media types
+        // Gallery can contain images, GIFs, and videos, so we need to check all relevant locations
+        String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+        String gifDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, "");
+        String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+        String nsfwDownloadLocation = "";
+
+        boolean needsNsfwLocation = isNsfw &&
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
+
+        if (needsNsfwLocation) {
+            nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
+            if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            // Check for required download locations based on the gallery content
+            boolean hasImage = false;
+            boolean hasGif = false;
+            boolean hasVideo = false;
+
+            for (Post.Gallery galleryItem : gallery) {
+                if (galleryItem.mediaType == Post.Gallery.TYPE_VIDEO) {
+                    hasVideo = true;
+                } else if (galleryItem.mediaType == Post.Gallery.TYPE_GIF) {
+                    hasGif = true;
+                } else {
+                    hasImage = true;
+                }
+            }
+
+            if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
+                (hasGif && (gifDownloadLocation == null || gifDownloadLocation.isEmpty())) ||
+                (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        //TODO: contentEstimatedBytes
+        JobInfo jobInfo = DownloadMediaService.constructGalleryDownloadAllMediaJobInfo(this, 5000000L * gallery.size(), post);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -311,67 +311,70 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
             finish();
             return true;
         } else if (item.getItemId() == R.id.action_download_all_imgur_album_media_view_imgur_media_activity) {
-            // Check if download locations are set for all media types
-            // Imgur album can contain images and videos
-            String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-            String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
-            String nsfwDownloadLocation = "";
-
-            boolean needsNsfwLocation = isNsfw &&
-                    sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
-
-            Log.d("ImgurDownload", "ViewImgurMediaActivity - Starting download of album with " + mImages.size() +
-                  " items, isNsfw=" + isNsfw + ", needsNsfwLocation=" + needsNsfwLocation);
-
-            Log.d("ImgurDownload", "Download location prefs - IMAGE: " +
-                  (imageDownloadLocation.isEmpty() ? "EMPTY" : "SET") +
-                  ", VIDEO: " + (videoDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
-
-            if (needsNsfwLocation) {
-                nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
-                Log.d("ImgurDownload", "NSFW location: " + (nsfwDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
-
-                if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
-                    Log.e("ImgurDownload", "NSFW download location not set but required");
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            } else {
-                // Check for required download locations based on the album content
-                boolean hasImage = false;
-                boolean hasVideo = false;
-
-                for (ImgurMedia media : mImages) {
-                    if (media.getType() == ImgurMedia.TYPE_VIDEO) {
-                        hasVideo = true;
-                    } else {
-                        hasImage = true;
-                    }
-                }
-
-                Log.d("ImgurDownload", "Album content - hasImage: " + hasImage + ", hasVideo: " + hasVideo);
-
-                if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
-                    (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
-                    Log.e("ImgurDownload", "Required download location not set - " +
-                          (hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty()) ? "IMAGE missing" : "") +
-                          (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()) ? "VIDEO missing" : ""));
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            }
-
-            JobInfo jobInfo = DownloadMediaService.constructImgurAlbumDownloadAllMediaJobInfo(this, 5000000L * mImages.size(), mImages, subredditName, isNsfw, title);
-            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
-
-            Log.d("ImgurDownload", "Download job scheduled successfully");
-
-            Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
-
+            downloadAllImgurAlbumMedia();
             return true;
         }
 
         return false;
+    }
+
+    public void downloadAllImgurAlbumMedia() {
+        // Check if download locations are set for all media types
+        // Imgur album can contain images and videos
+        String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+        String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+        String nsfwDownloadLocation = "";
+
+        boolean needsNsfwLocation = isNsfw &&
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
+
+        Log.d("ImgurDownload", "ViewImgurMediaActivity - Starting download of album with " + mImages.size() +
+              " items, isNsfw=" + isNsfw + ", needsNsfwLocation=" + needsNsfwLocation);
+
+        Log.d("ImgurDownload", "Download location prefs - IMAGE: " +
+              (imageDownloadLocation.isEmpty() ? "EMPTY" : "SET") +
+              ", VIDEO: " + (videoDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
+
+        if (needsNsfwLocation) {
+            nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
+            Log.d("ImgurDownload", "NSFW location: " + (nsfwDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
+
+            if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
+                Log.e("ImgurDownload", "NSFW download location not set but required");
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            // Check for required download locations based on the album content
+            boolean hasImage = false;
+            boolean hasVideo = false;
+
+            for (ImgurMedia media : mImages) {
+                if (media.getType() == ImgurMedia.TYPE_VIDEO) {
+                    hasVideo = true;
+                } else {
+                    hasImage = true;
+                }
+            }
+
+            Log.d("ImgurDownload", "Album content - hasImage: " + hasImage + ", hasVideo: " + hasVideo);
+
+            if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
+                (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
+                Log.e("ImgurDownload", "Required download location not set - " +
+                      (hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty()) ? "IMAGE missing" : "") +
+                      (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()) ? "VIDEO missing" : ""));
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        JobInfo jobInfo = DownloadMediaService.constructImgurAlbumDownloadAllMediaJobInfo(this, 5000000L * mImages.size(), mImages, subredditName, isNsfw, title);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+        Log.d("ImgurDownload", "Download job scheduled successfully");
+
+        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
     @Override

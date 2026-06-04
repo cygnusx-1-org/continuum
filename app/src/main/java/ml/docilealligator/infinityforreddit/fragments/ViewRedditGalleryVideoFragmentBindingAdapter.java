@@ -24,6 +24,7 @@ class ViewRedditGalleryVideoFragmentBindingAdapter {
     private MaterialButton playbackSpeedButton;
     private MaterialButton rotateLeftButton;
     private MaterialButton rotateRightButton;
+    private MaterialButton overflowButton;
 
     ViewRedditGalleryVideoFragmentBindingAdapter(FragmentViewRedditGalleryVideoBinding binding) {
         this.binding = binding;
@@ -36,6 +37,7 @@ class ViewRedditGalleryVideoFragmentBindingAdapter {
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
         rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
         rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
+        overflowButton = binding.getRoot().findViewById(R.id.overflow_image_view_exo_playback_control_view);
     }
 
     RelativeLayout getRoot() {
@@ -80,5 +82,9 @@ class ViewRedditGalleryVideoFragmentBindingAdapter {
 
     MaterialButton getRotateRightButton() {
         return rotateRightButton;
+    }
+
+    MaterialButton getOverflowButton() {
+        return overflowButton;
     }
 }

@@ -19,7 +19,6 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -33,6 +32,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.ScaleGestureDetector;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -75,13 +76,12 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerControlView;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
-import com.otaliastudios.zoom.ZoomEngine;
-import com.otaliastudios.zoom.ZoomSurfaceView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -189,10 +189,30 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     /*private int playbackSpeed = 100;
     private boolean useBottomAppBar;*/
     private ViewVideoActivityBindingAdapter binding;
+    private static final String ROTATION_TAG = "VideoRotation";
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
-    private View rotatableVideoView; // The video surface to rotate (excludes playback controls)
-    private ZoomSurfaceView zoomSurfaceView; // The pinch-to-zoom video surface
+    // The video renders into a TextureView (not a SurfaceView): a TextureView is a real
+    // view-hierarchy element, so View.setRotation()/setScale()/setTranslation() on its parent
+    // frame actually transform the rendered pixels. A GLSurfaceView (the old ZoomSurfaceView)
+    // ignores rotation. This mirrors Slide's working implementation.
+    private AspectRatioFrameLayout videoFrame; // Sized to the video aspect; rotated/scaled/panned
+    private TextureView videoTextureView; // Video output surface
     private PlayerControlView playerControlView; // Bottom playback controls (incl. timeline bar)
+
+    // Pinch-zoom / pan / rotation state (ported from Slide's ExoVideoView).
+    private ScaleGestureDetector scaleGestureDetector;
+    private float scaleFactor = 1.0f; // Current scale applied to videoFrame
+    private float rotationScaleFactor = 1.0f; // Auto-zoom scale needed to fit the current rotation
+    private boolean userZoomed = false; // True once the user has pinch-zoomed past the fit scale
+    private boolean wasScaling = false; // A pinch happened during the current gesture
+    private boolean wasDragging = false; // A pan happened during the current gesture
+    private boolean isDragging = false;
+    private float positionX = 0f; // Current pan translation
+    private float positionY = 0f;
+    private float lastTouchX;
+    private float lastTouchY;
+    private int originalVideoWidth = 0; // Video dimensions (with embedded rotation applied)
+    private int originalVideoHeight = 0;
 
     // Default auto-hide delay for the controls, restored after a scrub keeps them pinned open.
     private static final int CONTROLS_SHOW_TIMEOUT_MS = 5000;
@@ -477,45 +497,53 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             });
             playerControlView.setPlayer(new DurationAwareSeekPlayer(player));
 
-            zoomSurfaceView = findViewById(R.id.zoom_surface_view_view_video_activity);
-            rotatableVideoView = zoomSurfaceView;
+            videoFrame = findViewById(R.id.video_frame_view_video_activity);
+            videoTextureView = findViewById(R.id.texture_view_view_video_activity);
+            videoFrame.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+            // Fade the video in on the first frame to avoid a black flash while it sizes itself.
+            videoTextureView.setAlpha(0f);
+            scaleGestureDetector = new ScaleGestureDetector(this, new VideoScaleListener());
+
             player.addListener(new Player.Listener() {
                 @Override
                 public void onVideoSizeChanged(VideoSize videoSize) {
-                    zoomSurfaceView.setContentSize(videoSize.width, videoSize.height);
-                    if (currentRotation != 0) {
+                    Log.d(ROTATION_TAG, "onVideoSizeChanged: width=" + videoSize.width
+                            + " height=" + videoSize.height
+                            + " unappliedRotationDegrees=" + videoSize.unappliedRotationDegrees
+                            + " currentRotation=" + currentRotation);
+                    if (videoSize.width > 0 && videoSize.height > 0) {
+                        originalVideoWidth = videoSize.width;
+                        originalVideoHeight = videoSize.height;
+                        float aspectRatio = (float) videoSize.width / videoSize.height;
+                        // Account for rotation embedded in the stream's metadata (this sample has
+                        // none, but other Reddit videos do): swap the aspect and stored dimensions.
+                        if (videoSize.unappliedRotationDegrees == 90
+                                || videoSize.unappliedRotationDegrees == 270) {
+                            aspectRatio = 1.0f / aspectRatio;
+                            originalVideoWidth = videoSize.height;
+                            originalVideoHeight = videoSize.width;
+                        }
+                        // Set the aspect ratio once; user rotation never changes it.
+                        videoFrame.setAspectRatio(aspectRatio);
                         applyRotation();
                     }
                 }
-            });
-            zoomSurfaceView.addCallback(new ZoomSurfaceView.Callback() {
+
                 @Override
-                public void onZoomSurfaceCreated(@NonNull ZoomSurfaceView zoomSurfaceView) {
-                    player.setVideoSurface(zoomSurfaceView.getSurface());
+                public void onPlayerError(@NonNull PlaybackException error) {
+                    Log.e(ROTATION_TAG, "onPlayerError: errorCode=" + error.errorCode
+                            + " (" + error.getErrorCodeName() + ") msg=" + error.getMessage(), error);
                 }
 
                 @Override
-                public void onZoomSurfaceDestroyed(@NonNull ZoomSurfaceView zoomSurfaceView) {
+                public void onRenderedFirstFrame() {
+                    if (videoTextureView != null) {
+                        videoTextureView.animate().alpha(1f).setDuration(150).start();
+                    }
+                }
+            });
 
-                }
-            });
-            zoomSurfaceView.getEngine().addListener(new ZoomEngine.Listener() {
-                @Override
-                public void onUpdate(@NonNull ZoomEngine zoomEngine, @NonNull Matrix matrix) {
-                    // While zoomed in, panning the video must not trigger swipe-to-dismiss.
-                    setSwipeToDismissEnabled(zoomEngine.getZoom() < 1.00001);
-                }
-
-                @Override
-                public void onIdle(@NonNull ZoomEngine zoomEngine) {}
-            });
-            zoomSurfaceView.setOnClickListener(view -> {
-                if (playerControlView.isVisible()) {
-                    playerControlView.hide();
-                } else {
-                    playerControlView.show();
-                }
-            });
+            player.setVideoTextureView(videoTextureView);
         }
 
         /*if (savedInstanceState == null) {
@@ -915,74 +943,172 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
     private void rotateLeft() {
         currentRotation = (currentRotation - 90 + 360) % 360;
+        resetPosition(); // Reset panning when rotating
         applyRotation();
     }
 
     private void rotateRight() {
         currentRotation = (currentRotation + 90) % 360;
+        resetPosition(); // Reset panning when rotating
         applyRotation();
     }
 
     /**
-     * Rotates the video surface (not the playback controls) and applies a compensating
-     * zoom so the rotated video fills the screen instead of being letterboxed, mirroring
-     * the behaviour of Slide's rotate feature.
+     * Rotates the video by rotating the {@link #videoFrame} that hosts the video {@link TextureView}.
+     * A TextureView is composited in the regular view hierarchy, so {@code setRotation()} (and
+     * {@code setScale}/{@code setTranslation}) actually transform the rendered pixels — unlike a
+     * SurfaceView/GLSurfaceView, whose buffer ignores view rotation. A compensating auto-zoom
+     * ({@link #rotationScaleFactor}) makes the sideways video fill the screen instead of being
+     * letterboxed. This mirrors Slide's working implementation.
      */
     private void applyRotation() {
-        if (rotatableVideoView == null) {
+        if (videoFrame == null || originalVideoWidth <= 0 || originalVideoHeight <= 0) {
             return;
         }
 
-        rotatableVideoView.setRotation(currentRotation);
+        videoFrame.setRotation(currentRotation);
+        videoFrame.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
-        VideoSize videoSize = player != null ? player.getVideoSize() : VideoSize.UNKNOWN;
-        float scale = 1.0f;
-        if ((currentRotation == 90 || currentRotation == 270)
-                && videoSize.width > 0 && videoSize.height > 0) {
-            boolean isVerticalVideo = videoSize.height > videoSize.width;
+        boolean isVerticalVideo = originalVideoHeight > originalVideoWidth;
+
+        if (currentRotation == 90 || currentRotation == 270) {
             if (isVerticalVideo) {
-                // Zoom out so the video's original top/bottom edges fit the screen width.
+                // Zoom out so the vertical video's top/bottom edges fit the screen's width.
                 float screenWidth = getResources().getDisplayMetrics().widthPixels;
                 float screenHeight = getResources().getDisplayMetrics().heightPixels;
-                scale = screenWidth / screenHeight;
+                rotationScaleFactor = screenWidth / screenHeight;
             } else {
-                // Zoom in so the horizontal video fills the screen width when sideways.
-                scale = (float) videoSize.width / videoSize.height;
+                // Zoom in so the horizontal video fills the screen's width when sideways.
+                rotationScaleFactor = (float) originalVideoWidth / originalVideoHeight;
             }
+        } else {
+            // 0/180 degrees: back to the normal, un-zoomed view.
+            rotationScaleFactor = 1.0f;
+            scaleFactor = 1.0f;
+            userZoomed = false;
+            resetPosition();
         }
 
-        rotatableVideoView.setScaleX(scale);
-        rotatableVideoView.setScaleY(scale);
+        // Apply the rotation auto-zoom unless the user has manually pinch-zoomed.
+        if (!userZoomed) {
+            scaleFactor = rotationScaleFactor;
+        }
+
+        videoFrame.setScaleX(scaleFactor);
+        videoFrame.setScaleY(scaleFactor);
+        setSwipeToDismissEnabled(scaleFactor <= 1.0f);
+    }
+
+    /** Resets the pan translation back to centre. */
+    private void resetPosition() {
+        positionX = 0f;
+        positionY = 0f;
+        if (videoFrame != null) {
+            videoFrame.setTranslationX(0f);
+            videoFrame.setTranslationY(0f);
+        }
+    }
+
+    /** Pinch-to-zoom handler applied to {@link #videoFrame} (ported from Slide). */
+    private class VideoScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            wasScaling = true;
+            userZoomed = true;
+            scaleFactor *= detector.getScaleFactor();
+            scaleFactor = Math.max(0.5f, Math.min(scaleFactor, 3.0f));
+            if (videoFrame != null) {
+                videoFrame.setScaleX(scaleFactor);
+                videoFrame.setScaleY(scaleFactor);
+            }
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            // Snap back to the rotation-aware fit scale when released near it.
+            if (Math.abs(scaleFactor - rotationScaleFactor) <= 0.05f) {
+                scaleFactor = rotationScaleFactor;
+                userZoomed = false;
+                if (videoFrame != null) {
+                    videoFrame.setScaleX(scaleFactor);
+                    videoFrame.setScaleY(scaleFactor);
+                }
+                resetPosition();
+            } else if (scaleFactor <= 0.6f) {
+                resetPosition();
+            }
+            setSwipeToDismissEnabled(scaleFactor <= 1.0f);
+        }
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        // Pinch-to-zoom (two fingers) and the HaulerView swipe-to-dismiss (one finger
-        // dragging up) both want vertical gestures. The moment a second finger lands we
-        // hand the gesture to the ZoomSurfaceView so the pinch isn't swallowed by the
-        // dismiss/scroll parents; on release we restore swipe-to-dismiss unless zoomed in.
-        // A single-finger horizontal drag (while not zoomed in) instead scrubs the video.
-        if (zoomSurfaceView != null) {
+        // Gesture routing for the video frame:
+        //  - Two fingers  -> pinch-to-zoom (scaleGestureDetector scales videoFrame).
+        //  - One finger while zoomed in (scaleFactor > 1) -> pan the frame.
+        //  - One finger horizontal drag while not zoomed -> scrub the timeline.
+        //  - One finger vertical drag while not zoomed -> HaulerView swipe-to-dismiss/scroll.
+        //  - A clean tap -> toggle the playback controls.
+        if (videoFrame != null && scaleGestureDetector != null) {
+            scaleGestureDetector.onTouchEvent(ev);
+            boolean scaling = scaleGestureDetector.isInProgress();
+
             switch (ev.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     scrubStartX = ev.getX();
                     scrubStartY = ev.getY();
+                    lastTouchX = ev.getX();
+                    lastTouchY = ev.getY();
                     isScrubbing = false;
+                    isDragging = false;
+                    wasScaling = false;
+                    wasDragging = false;
                     // Don't hijack touches that start on the controls (e.g. the timeline bar).
                     scrubGestureRejected = isTouchInsideControls(ev);
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
-                    // Second finger: this is a pinch, not a scrub. Hand it to the zoom surface.
+                    // Second finger: this is a pinch, not a scrub.
                     if (isScrubbing) {
                         endScrub();
                     }
                     scrubGestureRejected = true;
                     setSwipeToDismissEnabled(false);
-                    zoomSurfaceView.getParent().requestDisallowInterceptTouchEvent(true);
+                    disallowParentIntercept(true);
+                    lastTouchX = ev.getX();
+                    lastTouchY = ev.getY();
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    if (!isScrubbing && !scrubGestureRejected && ev.getPointerCount() == 1
-                            && zoomSurfaceView.getEngine().getZoom() < 1.00001
+                    // Pan while zoomed in (single finger, not mid-pinch).
+                    if (scaleFactor > 1.0f && !scaling && ev.getPointerCount() == 1) {
+                        float dx = ev.getX() - lastTouchX;
+                        float dy = ev.getY() - lastTouchY;
+                        if (!isDragging
+                                && (Math.abs(dx) > scrubTouchSlop || Math.abs(dy) > scrubTouchSlop)) {
+                            isDragging = true;
+                            setSwipeToDismissEnabled(false);
+                            disallowParentIntercept(true);
+                        }
+                        if (isDragging) {
+                            positionX += dx;
+                            positionY += dy;
+                            float maxDeltaX = (videoFrame.getWidth() * (scaleFactor - 1)) / 2f;
+                            float maxDeltaY = (videoFrame.getHeight() * (scaleFactor - 1)) / 2f;
+                            positionX = Math.max(-maxDeltaX, Math.min(maxDeltaX, positionX));
+                            positionY = Math.max(-maxDeltaY, Math.min(maxDeltaY, positionY));
+                            videoFrame.setTranslationX(positionX);
+                            videoFrame.setTranslationY(positionY);
+                            wasDragging = true;
+                            lastTouchX = ev.getX();
+                            lastTouchY = ev.getY();
+                            return true; // consume so parents don't also react
+                        }
+                        lastTouchX = ev.getX();
+                        lastTouchY = ev.getY();
+                    }
+                    // Otherwise consider a horizontal scrub (only when not zoomed in).
+                    if (!isScrubbing && !scrubGestureRejected && !scaling
+                            && ev.getPointerCount() == 1 && scaleFactor <= 1.0f
                             && player != null && player.getDuration() > 0) {
                         float dx = ev.getX() - scrubStartX;
                         float dy = ev.getY() - scrubStartY;
@@ -995,26 +1121,48 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                     }
                     if (isScrubbing) {
                         updateScrub(ev.getX());
-                        return true; // consume so the zoom surface doesn't also react
+                        return true; // consume so nothing else reacts
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                     if (isScrubbing) {
                         endScrub();
-                        // Consume so the tap doesn't toggle the controls.
-                        return true;
+                        return true; // consume so the tap doesn't toggle the controls
                     }
-                    setSwipeToDismissEnabled(zoomSurfaceView.getEngine().getZoom() < 1.00001);
+                    // A clean tap (no pinch/pan/scrub) toggles the controls.
+                    if (!wasScaling && !wasDragging && !scaling && !isTouchInsideControls(ev)) {
+                        toggleControls();
+                    }
+                    isDragging = false;
+                    setSwipeToDismissEnabled(scaleFactor <= 1.0f);
                     break;
                 case MotionEvent.ACTION_CANCEL:
                     if (isScrubbing) {
                         endScrub();
                     }
-                    setSwipeToDismissEnabled(zoomSurfaceView.getEngine().getZoom() < 1.00001);
+                    isDragging = false;
+                    setSwipeToDismissEnabled(scaleFactor <= 1.0f);
                     break;
             }
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    private void toggleControls() {
+        if (playerControlView == null) {
+            return;
+        }
+        if (playerControlView.isVisible()) {
+            playerControlView.hide();
+        } else {
+            playerControlView.show();
+        }
+    }
+
+    private void disallowParentIntercept(boolean disallow) {
+        if (videoFrame != null && videoFrame.getParent() != null) {
+            videoFrame.getParent().requestDisallowInterceptTouchEvent(disallow);
+        }
     }
 
     private void beginScrub() {
@@ -1023,7 +1171,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         // from that original anchor so the gesture has no dead zone after the touch slop.
         scrubStartPosition = player.getCurrentPosition();
         setSwipeToDismissEnabled(false);
-        zoomSurfaceView.getParent().requestDisallowInterceptTouchEvent(true);
+        disallowParentIntercept(true);
         // Pin the controls open so the timeline bar tracks the scrub for the whole gesture.
         if (playerControlView != null) {
             playerControlView.setShowTimeoutMs(0);
@@ -1036,7 +1184,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         if (duration <= 0) {
             return;
         }
-        int width = zoomSurfaceView.getWidth();
+        int width = binding.getRoot().getWidth();
         if (width <= 0) {
             width = getResources().getDisplayMetrics().widthPixels;
         }
@@ -1056,7 +1204,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             playerControlView.setShowTimeoutMs(CONTROLS_SHOW_TIMEOUT_MS);
             playerControlView.show();
         }
-        setSwipeToDismissEnabled(zoomSurfaceView.getEngine().getZoom() < 1.00001);
+        setSwipeToDismissEnabled(scaleFactor <= 1.0f);
     }
 
     private boolean isTouchInsideControls(MotionEvent ev) {

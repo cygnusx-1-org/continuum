@@ -21,13 +21,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.otaliastudios.zoom.ZoomSurfaceView
-                android:id="@+id/zoom_surface_view_view_video_activity"
+            <androidx.media3.ui.AspectRatioFrameLayout
+                android:id="@+id/video_frame_view_video_activity"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:horizontalPanEnabled="true"
-                app:verticalPanEnabled="true"
-                app:zoomEnabled="true" />
+                android:layout_gravity="center"
+                app:resize_mode="fit">
+
+                <TextureView
+                    android:id="@+id/texture_view_view_video_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </androidx.media3.ui.AspectRatioFrameLayout>
 
             <androidx.media3.ui.PlayerControlView
                 android:id="@+id/player_control_view_view_video_activity"
