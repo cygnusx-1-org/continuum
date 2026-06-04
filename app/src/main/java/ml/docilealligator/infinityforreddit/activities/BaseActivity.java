@@ -23,12 +23,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +83,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     private boolean transparentStatusBarAfterToolbarCollapsed;
     private boolean hasDrawerLayout = false;
     private boolean isImmersiveInterfaceApplicable = true;
+    private View navBarScrim;
     private int systemVisibilityToolbarExpanded = 0;
     private int systemVisibilityToolbarCollapsed = 0;
     private boolean shouldTrackFullscreenMediaPeekTouchEvent;
@@ -233,6 +236,10 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
                             Insets inset = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
                             v.setBackgroundColor(customThemeWrapper.getColorPrimary());
                             v.setPadding(inset.left, inset.top, inset.right, 0);
+                            // Android 15+ forces edge-to-edge and ignores Window.setNavigationBarColor(),
+                            // so when the immersive interface is off we paint our own opaque strip over the
+                            // (otherwise transparent) navigation bar region to honor the Navigation Bar Color theme.
+                            updateNavBarScrim(inset.bottom);
                         }
                         return insets;
                     }
@@ -337,6 +344,33 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
 
     public boolean isImmersiveInterfaceEnabled() {
         return immersiveInterface;
+    }
+
+    /**
+     * Draws an opaque strip the height of the bottom system-bar inset, colored with the theme's
+     * Navigation Bar Color, on top of the activity content. Used only on Android 15+ where the OS
+     * forces edge-to-edge and ignores {@link Window#setNavigationBarColor(int)}; this restores a
+     * solid navigation bar for users who have the immersive interface turned off.
+     */
+    private void updateNavBarScrim(int bottomInset) {
+        ViewGroup contentView = findViewById(android.R.id.content);
+        if (contentView == null) {
+            return;
+        }
+        if (navBarScrim == null) {
+            navBarScrim = new View(this);
+            navBarScrim.setLayoutParams(new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT, bottomInset, Gravity.BOTTOM));
+            contentView.addView(navBarScrim);
+        } else {
+            ViewGroup.LayoutParams params = navBarScrim.getLayoutParams();
+            if (params.height != bottomInset) {
+                params.height = bottomInset;
+                navBarScrim.setLayoutParams(params);
+            }
+        }
+        navBarScrim.setBackgroundColor(customThemeWrapper.getNavBarColor());
+        navBarScrim.setVisibility(bottomInset > 0 ? View.VISIBLE : View.GONE);
     }
 
     protected void setToolbarGoToTop(Toolbar toolbar) {
