@@ -110,6 +110,12 @@
         app:title="@string/settings_privacy_policy_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="api_statistics"
+        app:icon="@drawable/ic_history_day_night_24dp"
+        app:title="@string/settings_api_statistics_title"
+        app:summary="@string/settings_api_statistics_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_info_preference_day_night_24dp"
         app:title="@string/settings_debug_title"
         app:bottom="true"

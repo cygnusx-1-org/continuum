@@ -119,6 +119,8 @@ import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
 @Singleton
 @Component(modules = {AppModule.class, NetworkModule.class})
 public interface AppComponent {
+    ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker apiCallTracker();
+
     void inject(MainActivity mainActivity);
 
     void inject(LoginActivity loginActivity);
@@ -182,6 +184,8 @@ public interface AppComponent {
     void inject(SearchActivity searchActivity);
 
     void inject(SearchHistoryActivity searchHistoryActivity);
+
+    void inject(ml.docilealligator.infinityforreddit.activities.ApiStatisticsActivity apiStatisticsActivity);
 
     void inject(SettingsActivity settingsActivity);
 

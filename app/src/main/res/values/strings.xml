@@ -296,6 +296,23 @@
     <string name="recent_search_deleted">Recent search Deleted</string>
     <string name="search_history">Search History</string>
     <string name="no_search_history">No search history</string>
+    <string name="api_statistics_activity_label">API Statistics</string>
+    <string name="settings_api_statistics_title">API statistics</string>
+    <string name="settings_api_statistics_summary">Response times of Reddit API calls and media (image/video) retrieval, by endpoint</string>
+    <string name="api_statistics_empty">Nothing recorded yet. Browse posts and view some media, then come back — or check that recording is enabled in the menu.</string>
+    <string name="api_statistics_enable_monitoring">Record API calls</string>
+    <string name="api_statistics_clear">Clear recorded data</string>
+    <string name="api_statistics_section_summary">%1$d calls in the last week</string>
+    <string name="api_statistics_detail_line">n: %1$s%2$s · max %3$s</string>
+    <string name="api_statistics_ttfb_part"> · ttfb %1$s</string>
+    <string name="api_statistics_errors_suffix"> · %1$d err</string>
+    <string name="api_statistics_slower_now"> · slower now</string>
+    <string name="api_statistics_legend_good">Good</string>
+    <string name="api_statistics_legend_marginal">Marginal</string>
+    <string name="api_statistics_legend_bad">Bad</string>
+    <string name="api_statistics_legend_caption">Each bar\'s color rates that period\'s response time against the endpoint\'s weekly average.</string>
+    <string name="api_statistics_combined_title">Combined (all endpoints)</string>
+    <string name="api_statistics_filter_caption">Uncheck Marginal or Bad to hide rows that contain that color. Uncheck Good to hide rows whose every period is green; a section\'s combined chart stays if it still shows a problem.</string>
     <string name="undo">Undo</string>
 
     <string name="sort_best">Best</string>

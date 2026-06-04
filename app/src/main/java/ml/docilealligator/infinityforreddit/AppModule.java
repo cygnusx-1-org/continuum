@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LoopAvailableExoCreator;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
@@ -48,6 +49,14 @@ abstract class AppModule {
     @Singleton
     static RedditDataRoomDatabase provideRedditDataRoomDatabase(Application application) {
         return RedditDataRoomDatabase.create(application);
+    }
+
+    @Provides
+    @Singleton
+    static ApiCallTracker provideApiCallTracker(RedditDataRoomDatabase redditDataRoomDatabase,
+                                                @Named("default") SharedPreferences sharedPreferences,
+                                                Executor executor) {
+        return new ApiCallTracker(redditDataRoomDatabase, sharedPreferences, executor);
     }
 
     @Provides

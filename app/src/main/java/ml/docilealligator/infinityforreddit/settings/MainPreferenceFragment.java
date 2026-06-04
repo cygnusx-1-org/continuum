@@ -18,6 +18,7 @@ import javax.inject.Named;
 
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.activities.ApiStatisticsActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
@@ -41,6 +42,7 @@ public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         Preference postFilterPreference = findPreference(SharedPreferencesUtils.POST_FILTER);
         Preference commentFilterPreference = findPreference(SharedPreferencesUtils.COMMENT_FILTER);
         Preference privacyPolicyPreference = findPreference(SharedPreferencesUtils.PRIVACY_POLICY_KEY);
+        Preference apiStatisticsPreference = findPreference(SharedPreferencesUtils.API_STATISTICS);
 
         BiometricManager biometricManager = BiometricManager.from(mActivity);
         if (biometricManager.canAuthenticate(BIOMETRIC_STRONG | DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS) {
@@ -69,6 +71,14 @@ public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
                     mActivity.startActivity(intent);
                     return true;
                 }
+            });
+        }
+
+        if (apiStatisticsPreference != null) {
+            apiStatisticsPreference.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent(mActivity, ApiStatisticsActivity.class);
+                mActivity.startActivity(intent);
+                return true;
             });
         }
 

@@ -15,6 +15,8 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
+import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.network.AccessTokenAuthenticator;
@@ -40,13 +42,15 @@ abstract class NetworkModule {
     @Provides
     @Named("base")
     @Singleton
-    static OkHttpClient provideBaseOkhttp(@Named("proxy") SharedPreferences mProxySharedPreferences) {
+    static OkHttpClient provideBaseOkhttp(@Named("proxy") SharedPreferences mProxySharedPreferences,
+                                          ApiCallTracker apiCallTracker) {
         boolean proxyEnabled = mProxySharedPreferences.getBoolean(SharedPreferencesUtils.PROXY_ENABLED, false);
 
         var builder = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
+                .eventListenerFactory(new ApiMonitorEventListener.Factory(apiCallTracker))
                 .addInterceptor(chain -> {
                     if (chain.request().header("User-Agent") == null) {
                         return chain.proceed(
