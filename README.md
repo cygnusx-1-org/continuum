@@ -60,6 +60,9 @@ See [SETUP.md](/SETUP.md)
 # FAQ
 See [FAQ.md](/FAQ.md)
 
+# DEBUGGING
+See [DEBUGGING](/DEBUGGING.md)
+
 # Installation
 You can easily install and update Continuum with [Discoverium](https://github.com/cygnusx-1-org/Discoverium/) via its search button.
 <p align="left">
