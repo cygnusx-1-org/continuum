@@ -91,23 +91,39 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
         holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
 
-        holder.binding.imageViewItemGalleryImageInPostFeed.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                int viewWidth = right - left;
-                // In split/weighted layouts, views get intermediate layout passes with
-                // incorrect (tiny) dimensions. Skip those and wait for the real size.
-                ViewGroup parent = (ViewGroup) v.getParent();
-                while (parent != null && !(parent instanceof RecyclerView)) {
-                    parent = (ViewGroup) parent.getParent();
+        ImageView imageView = holder.binding.imageViewItemGalleryImageInPostFeed;
+
+        // Drop any listener left over from a previous bind of this recycled holder.
+        if (holder.pendingLayoutListener != null) {
+            imageView.removeOnLayoutChangeListener(holder.pendingLayoutListener);
+            holder.pendingLayoutListener = null;
+        }
+
+        if (hasUsableWidth(imageView)) {
+            // The recycled view is already laid out at its final width, so no layout change will
+            // fire. Load now — otherwise loadImage() would never run and the spinner spins forever.
+            loadImage(holder);
+        } else {
+            holder.pendingLayoutListener = new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    int viewWidth = right - left;
+                    // In split/weighted layouts, views get intermediate layout passes with
+                    // incorrect (tiny) dimensions. Skip those and wait for the real size.
+                    ViewGroup parent = (ViewGroup) v.getParent();
+                    while (parent != null && !(parent instanceof RecyclerView)) {
+                        parent = (ViewGroup) parent.getParent();
+                    }
+                    if (parent != null && parent.getWidth() > 0 && viewWidth < parent.getWidth() / 2) {
+                        return;
+                    }
+                    v.removeOnLayoutChangeListener(this);
+                    holder.pendingLayoutListener = null;
+                    loadImage(holder);
                 }
-                if (parent != null && parent.getWidth() > 0 && viewWidth < parent.getWidth() / 2) {
-                    return;
-                }
-                holder.binding.imageViewItemGalleryImageInPostFeed.removeOnLayoutChangeListener(this);
-                loadImage(holder);
-            }
-        });
+            };
+            imageView.addOnLayoutChangeListener(holder.pendingLayoutListener);
+        }
 
         if (showCaption) {
             loadCaptionPreview(holder);
@@ -122,11 +138,29 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     @Override
     public void onViewRecycled(@NonNull ImageViewHolder holder) {
         super.onViewRecycled(holder);
+        if (holder.pendingLayoutListener != null) {
+            holder.binding.imageViewItemGalleryImageInPostFeed.removeOnLayoutChangeListener(holder.pendingLayoutListener);
+            holder.pendingLayoutListener = null;
+        }
         holder.binding.captionConstraintLayoutItemGalleryImageInPostFeed.setVisibility(View.GONE);
         holder.binding.captionTextViewItemGalleryImageInPostFeed.setText("");
         holder.binding.captionUrlTextViewItemGalleryImageInPostFeed.setText("");
         holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
         glide.clear(holder.binding.imageViewItemGalleryImageInPostFeed);
+    }
+
+    // Whether the view already has its final width, mirroring the guard in the layout listener: a
+    // width below half the RecyclerView width is an intermediate (split/weighted) layout pass.
+    private boolean hasUsableWidth(View imageView) {
+        int viewWidth = imageView.getWidth();
+        if (viewWidth <= 0) {
+            return false;
+        }
+        ViewGroup parent = (ViewGroup) imageView.getParent();
+        while (parent != null && !(parent instanceof RecyclerView)) {
+            parent = (ViewGroup) parent.getParent();
+        }
+        return parent == null || parent.getWidth() <= 0 || viewWidth >= parent.getWidth() / 2;
     }
 
     private void loadImage(ImageViewHolder holder) {
@@ -215,6 +249,9 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     class ImageViewHolder extends RecyclerView.ViewHolder {
 
         ItemGalleryImageInPostFeedBinding binding;
+        // The deferred-load layout listener for this holder, if it hasn't fired yet. Tracked so a
+        // stale one can be removed on rebind/recycle.
+        View.OnLayoutChangeListener pendingLayoutListener;
 
         public ImageViewHolder(ItemGalleryImageInPostFeedBinding binding) {
             super(binding.getRoot());
