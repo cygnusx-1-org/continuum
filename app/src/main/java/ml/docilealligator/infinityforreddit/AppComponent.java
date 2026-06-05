@@ -85,7 +85,6 @@ import ml.docilealligator.infinityforreddit.fragments.SubscribedSubredditsListin
 import ml.docilealligator.infinityforreddit.fragments.UserListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurImageFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurVideoFragment;
-import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryImageOrGifFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryVideoFragment;
@@ -281,8 +280,6 @@ public interface AppComponent {
     void inject(ViewImgurImageFragment viewImgurImageFragment);
 
     void inject(ViewRedditGalleryImageOrGifFragment viewRedditGalleryImageOrGifFragment);
-
-    void inject(ViewPostDetailFragment viewPostDetailFragment);
 
     void inject(SuicidePreventionActivity suicidePreventionActivity);
 

@@ -40,7 +40,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
@@ -181,7 +180,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private String postId;
     private int postListPosition = -1;
     private boolean showToast = false;
-    private boolean mIsSmoothScrolling = false;
     private boolean mLockFab;
     private boolean mSwipeUpToHideFab;
     private boolean mSeparatePostAndComments = false;
@@ -190,7 +188,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private CommentsStatusRecyclerViewAdapter mCommentsStatusAdapter;
     private CommentsRecyclerViewAdapterNew mCommentsAdapter;
     private CommentsFooterRecyclerViewAdapter mCommentsFooterAdapter;
-    private RecyclerView.SmoothScroller mSmoothScroller;
     private ColorDrawable backgroundSwipeRight;
     private ColorDrawable backgroundSwipeLeft;
     private Drawable drawableSwipeRight;
@@ -273,7 +270,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (!mIsSmoothScrolling && !mLockFab) {
+                if (!mLockFab) {
                     if (!recyclerView.canScrollVertically(1)) {
                         mActivity.hideFab();
                     } else {
@@ -304,13 +301,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                     if ((visibleItemCount + firstVisibleItemPosition >= totalItemCount) && firstVisibleItemPosition >= 0) {
                         viewPostDetailFragmentViewModel.fetchMoreComments();
                     }
-                }
-            }
-
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    mIsSmoothScrolling = false;
                 }
             }
         });
@@ -430,13 +420,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         }
 
         binding.swipeRefreshLayoutViewPostDetailFragment.setOnRefreshListener(() -> viewPostDetailFragmentViewModel.refresh(true, true));
-
-        mSmoothScroller = new LinearSmoothScroller(mActivity) {
-            @Override
-            protected int getVerticalSnapPreference() {
-                return LinearSmoothScroller.SNAP_TO_START;
-            }
-        };
 
         String singleCommentId = getArguments().getString(EXTRA_SINGLE_COMMENT_ID);
 
@@ -1215,9 +1198,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        mSmoothScroller.setTargetPosition(absoluteParentPosition);
-        mIsSmoothScrolling = true;
-        recyclerView.getLayoutManager().startSmoothScroll(mSmoothScroller);
+        layoutManager.scrollToPositionWithOffset(absoluteParentPosition, 0);
     }
 
     public void scrollToPreviousParentComment() {
@@ -1244,9 +1225,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        mSmoothScroller.setTargetPosition(absoluteParentPosition);
-        mIsSmoothScrolling = true;
-        recyclerView.getLayoutManager().startSmoothScroll(mSmoothScroller);
+        layoutManager.scrollToPositionWithOffset(absoluteParentPosition, 0);
     }
 
     public void scrollToParentComment(int position, int currentDepth) {
@@ -1266,9 +1245,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        mSmoothScroller.setTargetPosition(absoluteParentPosition);
-        mIsSmoothScrolling = true;
-        layoutManager.startSmoothScroll(mSmoothScroller);
+        ((LinearLayoutManagerBugFixed) layoutManager).scrollToPositionWithOffset(absoluteParentPosition, 0);
     }
 
     public void delayTransition() {
