@@ -2,6 +2,17 @@
 
 ---
 
+8.2.5.4 / 2026-6-5
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed loading of first image of Reddit Galleries when horitzonal swiping between posts
+* Switched Reddit Gallery static images to using all preview images for the quick swipe viewing in the feed
+* Added English descriptions to most sections of Settings
+* Fixed video rotation
+* Restored the overflow menu media views where appropriate
+* Added an API Statistics section to Settings
+
 8.2.5.3 / 2026-6-3
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
