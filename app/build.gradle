@@ -85,8 +85,8 @@ android {
 
         minSdk 21
         targetSdk 35
-        versionCode 222
-        versionName "8.2.5.3"
+        versionCode 223
+        versionName "8.2.5.4"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }
