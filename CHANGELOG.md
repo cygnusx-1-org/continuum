@@ -2,6 +2,13 @@
 
 ---
 
+8.2.5.5 / 2026-6-5
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Comments collapse lag animation #275
+* Fixed issue with loading previews of gifs in Reddit Galleries
+
 8.2.5.4 / 2026-6-5
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
