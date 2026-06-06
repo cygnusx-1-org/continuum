@@ -616,11 +616,16 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                         if (position >= 0) {
                             List<Comment> commentBatch = getCurrentList().subList(position, Math.min(getCurrentList().size(), UserProfileImagesBatchLoader.BATCH_SIZE + position));
                             mFragment.loadIcon(commentBatch, (authorFullName, iconUrl) -> {
+                                int currentPosition = holder.getBindingAdapterPosition();
+                                if (currentPosition < 0 || currentPosition >= getCurrentList().size()) {
+                                    return;
+                                }
+
                                 if (authorFullName.equals(comment.getAuthorFullName())) {
                                     comment.setAuthorIconUrl(iconUrl);
                                 }
 
-                                Comment currentComment = getItem(holder.getBindingAdapterPosition());
+                                Comment currentComment = getItem(currentPosition);
                                 if (currentComment != null && authorFullName.equals(currentComment.getAuthorFullName())) {
                                     if (mDisableProfileAvatarAnimation) {
                                         mGlide.asBitmap().load(iconUrl)
