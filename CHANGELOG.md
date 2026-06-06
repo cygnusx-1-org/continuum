@@ -2,6 +2,23 @@
 
 ---
 
+8.2.5.6 / 2026-6-6
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Missing child comments indicator #272
+* Fixed Hiding comment votes also hides child count if only top level comments are shown #219
+* Fixed Downloads name randomizer broken for downloaded images/gifs from comments. #278
+* Restored Compact comment defaults
+* Restored Hide user prefix in comments
+* Restored APNG animated avatars
+* Restored Disable profile avatar animation
+* Restored Crosspost thumbnails
+* Restored Preview quality in split view
+* Restored Swap content/comments on Fold
+* Restored Remember comment scroll position
+* Restored Share as Image with Comments
+
 8.2.5.5 / 2026-6-5
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
