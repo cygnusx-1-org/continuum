@@ -330,8 +330,6 @@ public class SettingsSearchRegistry {
                 CommentPreferenceFragment.class, R.string.settings_category_comment_title);
         add(items, c.getString(R.string.settings_fully_collapse_comment_title), null, bc,
                 CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_remember_comment_scroll_position), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
         add(items, c.getString(R.string.settings_show_author_avatar_title), null, bc,
                 CommentPreferenceFragment.class, R.string.settings_category_comment_title);
         add(items, c.getString(R.string.settings_show_user_prefix_title), null, bc,

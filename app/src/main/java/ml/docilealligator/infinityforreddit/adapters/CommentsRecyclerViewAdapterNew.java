@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -119,6 +118,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final boolean mFullyCollapseComment;
     private final boolean mShowOnlyOneCommentLevelIndicator;
     private final boolean mShowAuthorAvatar;
+    private final boolean mDisableProfileAvatarAnimation;
+    private final boolean mShowUserPrefix;
     private final boolean mAlwaysShowChildCommentCount;
     private final boolean mHideTheNumberOfVotes;
     private final boolean mNeedBlurNsfw;
@@ -247,6 +248,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, mPost != null && mPost.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, mPost != null ? mPost.getSubredditName() : "Unknown");
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    if (mPost != null) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, mPost.getTitle());
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, mPost.getId());
+                    }
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -272,6 +277,15 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, mPost != null && mPost.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, mPost != null ? mPost.getSubredditName() : "Unknown");
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    if (mPost != null) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, mPost.getTitle());
+                    }
+                    if (commentId != null && !commentId.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_COMMENT_ID_KEY, commentId);
+                    }
+                    if (postId != null && !postId.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, postId);
+                    }
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -291,15 +305,17 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
         mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
-        mCommentToolbarHidden = sharedPreferences.getBoolean(SharedPreferencesUtils.COMMENT_TOOLBAR_HIDDEN, false);
+        mCommentToolbarHidden = sharedPreferences.getBoolean(SharedPreferencesUtils.COMMENT_TOOLBAR_HIDDEN, true);
         mCommentToolbarHideOnClick = sharedPreferences.getBoolean(SharedPreferencesUtils.COMMENT_TOOLBAR_HIDE_ON_CLICK, true);
-        mSwapTapAndLong = sharedPreferences.getBoolean(SharedPreferencesUtils.SWAP_TAP_AND_LONG_COMMENTS, false);
+        mSwapTapAndLong = sharedPreferences.getBoolean(SharedPreferencesUtils.SWAP_TAP_AND_LONG_COMMENTS, true);
         mShowCommentDivider = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, false);
         mDividerType = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.COMMENT_DIVIDER_TYPE, "0"));
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
         mFullyCollapseComment = sharedPreferences.getBoolean(SharedPreferencesUtils.FULLY_COLLAPSE_COMMENT, false);
         mShowOnlyOneCommentLevelIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ONLY_ONE_COMMENT_LEVEL_INDICATOR, false);
         mShowAuthorAvatar = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_AUTHOR_AVATAR, false);
+        mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
+        mShowUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_USER_PREFIX, false);
         mAlwaysShowChildCommentCount = sharedPreferences.getBoolean(SharedPreferencesUtils.ALWAYS_SHOW_CHILD_COMMENT_COUNT, false);
         mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS, false);
         mDepthThreshold = sharedPreferences.getInt(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD, 5);
@@ -379,8 +395,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     holder.itemView.setBackgroundColor(mSingleCommentThreadBackgroundColor);
                 }
 
-                String authorPrefixed = "u/" + comment.getAuthor();
-                ((CommentBaseViewHolder) holder).authorTextView.setText(authorPrefixed);
+                String authorText = comment.getAuthor();
+                if (mShowUserPrefix) { //adding prefix
+                    authorText = "u/" + authorText;
+                }
+                ((CommentBaseViewHolder) holder).authorTextView.setText(authorText);
 
                 if (comment.getAuthorFlairHTML() != null && !comment.getAuthorFlairHTML().equals("")) {
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
@@ -423,20 +442,36 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                                 Comment currentComment = getItem(currentPosition);
                                 if (currentComment != null && authorFullName.equals(currentComment.getAuthorFullName())) {
-                                    mGlide.load(iconUrl)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
-                                            .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
-                                            .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                                    if (mDisableProfileAvatarAnimation) {
+                                        mGlide.asBitmap().load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                                    } else {
+                                        mGlide.load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                                    }
                                 }
                             });
                         }
                     } else {
-                        mGlide.load(comment.getAuthorIconUrl())
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
-                                .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
-                                .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                        if (mDisableProfileAvatarAnimation) {
+                            mGlide.asBitmap().load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                        } else {
+                            mGlide.load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentBaseViewHolder) holder).authorIconImageView);
+                        }
                     }
                 }
 
@@ -459,6 +494,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mImageAndGifPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
+                mImageAndGifEntry.setCurrentCommentId(comment.getId());
+                mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
                 mVideoPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
                 ((CommentBaseViewHolder) holder).mMarkwonAdapter.setMarkdown(mCommentMarkwon, comment.getCommentMarkdown());
                 // noinspection NotifyDataSetChanged
@@ -556,8 +593,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         } else if (holder instanceof CommentFullyCollapsedViewHolder) {
             Comment comment = getItem(position);
             if (comment != null) {
-                String authorWithPrefix = "u/" + comment.getAuthor();
-                ((CommentFullyCollapsedViewHolder) holder).binding.userNameTextViewItemCommentFullyCollapsed.setText(authorWithPrefix);
+                String authorText = comment.getAuthor();
+                if (mShowUserPrefix) { //adding prefix
+                    authorText = "u/" + authorText;
+                }
+                ((CommentFullyCollapsedViewHolder) holder).binding.userNameTextViewItemCommentFullyCollapsed.setText(authorText);
 
                 if (mShowAuthorAvatar) {
                     if (comment.getAuthorIconUrl() == null) {
@@ -570,20 +610,36 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                                 Comment currentComment = getItem(holder.getBindingAdapterPosition());
                                 if (currentComment != null && authorFullName.equals(currentComment.getAuthorFullName())) {
-                                    mGlide.load(iconUrl)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
-                                            .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
-                                            .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                                    if (mDisableProfileAvatarAnimation) {
+                                        mGlide.asBitmap().load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                                    } else {
+                                        mGlide.load(iconUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                                .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                                    }
                                 }
                             });
                         }
                     } else {
-                        mGlide.load(comment.getAuthorIconUrl())
-                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
-                                .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
-                                .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                        if (mDisableProfileAvatarAnimation) {
+                            mGlide.asBitmap().load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                        } else {
+                            mGlide.load(comment.getAuthorIconUrl())
+                                    .transform(new RoundedCornersTransformation(72, 0))
+                                    .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                            .transform(new RoundedCornersTransformation(72, 0)))
+                                    .into(((CommentFullyCollapsedViewHolder) holder).binding.authorIconImageViewItemCommentFullyCollapsed);
+                        }
                     }
                 }
 
@@ -935,6 +991,17 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     if (comment.getDepth() >= mDepthThreshold) {
                         bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_AND_SAVE_OPTION, true);
                     }
+                    bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_POST, mPost);
+                    int commentPos = getBindingAdapterPosition();
+                    List<Comment> currentList = getCurrentList();
+                    ArrayList<Comment> thread = new ArrayList<>();
+                    thread.add(comment);
+                    for (int i = commentPos + 1; i < currentList.size() && thread.size() < 10; i++) {
+                        Comment child = currentList.get(i);
+                        if (child.getDepth() <= comment.getDepth()) break;
+                        thread.add(child);
+                    }
+                    bundle.putParcelableArrayList(CommentMoreBottomSheetFragment.EXTRA_THREAD_COMMENTS, thread);
                     CommentMoreBottomSheetFragment commentMoreBottomSheetFragment = new CommentMoreBottomSheetFragment();
                     commentMoreBottomSheetFragment.setArguments(bundle);
                     commentMoreBottomSheetFragment.show(mFragment.getChildFragmentManager(), commentMoreBottomSheetFragment.getTag());

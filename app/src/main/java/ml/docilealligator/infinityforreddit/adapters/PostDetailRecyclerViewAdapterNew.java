@@ -59,9 +59,11 @@ import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
 import com.libRG.CustomTextView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
@@ -77,6 +79,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.FilteredPostsActivity;
@@ -197,9 +200,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final boolean mSeparatePostAndComments;
     private final boolean mLegacyAutoplayVideoControllerUI;
     private final boolean mEasierToWatchInFullScreen;
+    private final boolean mDisableProfileAvatarAnimation;
     private final int mDataSavingModeDefaultResolution;
     private final int mNonDataSavingModeDefaultResolution;
+    private final int mMaxResolution;
     private final PostDetailRecyclerViewAdapterCallback mPostDetailRecyclerViewAdapterCallback;
+    private Supplier<ArrayList<Comment>> mCommentsSupplier;
 
     private final int mColorAccent;
     private final int mCardViewColor;
@@ -262,7 +268,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mVideoMuteManager = videoMuteManager;
         mGlide = glide;
-        mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")));
+        mMaxResolution = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
+        mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
         mCurrentAccountSharedPreferences = currentAccountSharedPreferences;
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         int markdownColor = customThemeWrapper.getPostContentColor();
@@ -313,6 +320,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
         mDisableImagePreview = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW, false);
         mOnlyDisablePreviewInVideoAndGifPosts = sharedPreferences.getBoolean(SharedPreferencesUtils.ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS, false);
+        mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
 
         mHidePostType = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
         mHidePostFlair = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
@@ -460,6 +468,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mMarkwonAdapter = MarkdownUtils.createCustomTablesAndImagesAdapter(mActivity, mImageAndGifEntry);
     }
 
+    public void setCommentsSupplier(Supplier<ArrayList<Comment>> supplier) {
+        mCommentsSupplier = supplier;
+    }
+
     public void setCanStartActivity(boolean canStartActivity) {
         this.canStartActivity = canStartActivity;
     }
@@ -497,7 +509,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             case Post.LINK_TYPE:
                 return VIEW_TYPE_POST_DETAIL_LINK;
             case Post.NO_PREVIEW_LINK_TYPE:
-                return VIEW_TYPE_POST_DETAIL_NO_PREVIEW_LINK;
+                // Use the LINK view type when a thumbnail fallback is available (e.g. crossposts)
+                if (getSuitablePreview(mPost.getPreviews()) != null) {
+                    return VIEW_TYPE_POST_DETAIL_LINK;
+                } else {
+                    return VIEW_TYPE_POST_DETAIL_NO_PREVIEW_LINK;
+                }
             case Post.GALLERY_TYPE:
                 return VIEW_TYPE_POST_DETAIL_GALLERY;
             default:
@@ -571,13 +588,19 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 if (mActivity != null && getItemCount() > 0) {
                                     if (iconImageUrl == null || iconImageUrl.isEmpty()) {
                                         mGlide.load(R.drawable.subreddit_default_icon)
-                                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                                    } else if (mDisableProfileAvatarAnimation) {
+                                        mGlide.asBitmap().load(iconImageUrl)
+                                                .transform(new RoundedCornersTransformation(72, 0))
+                                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
                                                 .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                     } else {
                                         mGlide.load(iconImageUrl)
-                                                .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                                .transform(new RoundedCornersTransformation(72, 0))
                                                 .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                        .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                                        .transform(new RoundedCornersTransformation(72, 0)))
                                                 .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                     }
 
@@ -587,14 +610,22 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 }
                             });
                 } else if (!mPost.getAuthorIconUrl().equals("")) {
-                    mGlide.load(mPost.getAuthorIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
-                            .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
-                            .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                    if (mDisableProfileAvatarAnimation) {
+                        mGlide.asBitmap().load(mPost.getAuthorIconUrl())
+                                .transform(new RoundedCornersTransformation(72, 0))
+                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                    } else {
+                        mGlide.load(mPost.getAuthorIconUrl())
+                                .transform(new RoundedCornersTransformation(72, 0))
+                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                    }
                 } else {
                     mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                 }
             } else {
@@ -605,27 +636,41 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                             iconImageUrl -> {
                                 if (iconImageUrl == null || iconImageUrl.isEmpty()) {
                                     mGlide.load(R.drawable.subreddit_default_icon)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
+                                            .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                                } else if (mDisableProfileAvatarAnimation) {
+                                    mGlide.asBitmap().load(iconImageUrl)
+                                            .transform(new RoundedCornersTransformation(72, 0))
+                                            .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                                    .transform(new RoundedCornersTransformation(72, 0)))
                                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                 } else {
                                     mGlide.load(iconImageUrl)
-                                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                                            .transform(new RoundedCornersTransformation(72, 0))
                                             .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
+                                                    .transform(new RoundedCornersTransformation(72, 0)))
                                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                 }
 
                                 mPost.setSubredditIconUrl(iconImageUrl);
                             });
                 } else if (!mPost.getSubredditIconUrl().isEmpty()) {
-                    mGlide.load(mPost.getSubredditIconUrl())
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
-                            .error(mGlide.load(R.drawable.subreddit_default_icon)
-                                    .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
-                            .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                    if (mDisableProfileAvatarAnimation) {
+                        mGlide.asBitmap().load(mPost.getSubredditIconUrl())
+                                .transform(new RoundedCornersTransformation(72, 0))
+                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                    } else {
+                        mGlide.load(mPost.getSubredditIconUrl())
+                                .transform(new RoundedCornersTransformation(72, 0))
+                                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                                        .transform(new RoundedCornersTransformation(72, 0)))
+                                .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
+                    }
                 } else {
                     mGlide.load(R.drawable.subreddit_default_icon)
-                            .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
+                            .transform(new RoundedCornersTransformation(72, 0))
                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                 }
             }
@@ -899,9 +944,23 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     } else {
                         ((PostDetailGalleryViewHolder) holder).adapter.setRatio(-1);
                     }
-                    ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(mPost.getGallery());
                     ((PostDetailGalleryViewHolder) holder).adapter.setBlurImage(
                             (mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost.isSpoiler() && mNeedBlurSpoiler));
+                    // Delay setGalleryImages until the gallery RecyclerView has been
+                    // laid out with its final width. In the split post/comments view,
+                    // the RecyclerView may have width=0 during initial bind because the
+                    // weighted LinearLayout hasn't distributed widths yet. Without this,
+                    // gallery items get bound at a tiny size and Glide decodes images at
+                    // that resolution, causing severe pixelation.
+                    ArrayList<Post.Gallery> gallery = mPost.getGallery();
+                    int rvWidth = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getWidth();
+                    if (rvWidth > 0) {
+                        ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery);
+                    } else {
+                        ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.post(() ->
+                                ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery)
+                        );
+                    }
                 }
             }
         }
@@ -918,16 +977,25 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 previewIndex = 0;
             }
             preview = previews.get(previewIndex);
-            if (preview.getPreviewWidth() * preview.getPreviewHeight() > 5_000_000) {
+            if (preview.getPreviewWidth() * preview.getPreviewHeight() > mMaxResolution) {
                 for (int i = previews.size() - 1; i >= 1; i--) {
                     preview = previews.get(i);
-                    if (preview.getPreviewWidth() * preview.getPreviewHeight() <= 5_000_000) {
+                    if (preview.getPreviewWidth() * preview.getPreviewHeight() <= mMaxResolution) {
                         return preview;
                     }
                 }
             }
 
             return preview;
+        }
+
+        // Thumbnail fallback for post detail view (e.g. crossposts without previews)
+        String thumbnailUrl = mPost.getThumbnailUrl();
+        if (thumbnailUrl != null && !thumbnailUrl.isEmpty() && !thumbnailUrl.equals("self")
+                && !thumbnailUrl.equals("default") && !thumbnailUrl.equals("nsfw")
+                && !thumbnailUrl.equals("spoiler") && !thumbnailUrl.equals("image")
+                && thumbnailUrl.startsWith("http")) {
+            return new Post.Preview(thumbnailUrl, 0, 0, "", "");
         }
 
         return null;
@@ -1127,6 +1195,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, post.getSubredditName()
                         + "-" + post.getId() + ".jpg");
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                 mActivity.startActivity(intent);
@@ -1147,6 +1216,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                             + "-" + post.getId() + ".gif");
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, post.getVideoUrl());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                     mActivity.startActivity(intent);
@@ -1741,6 +1811,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     }
                 }
                 bundle.putParcelable(ShareBottomSheetFragment.EXTRA_POST, mPost);
+                if (mCommentsSupplier != null) {
+                    ArrayList<Comment> comments = mCommentsSupplier.get();
+                    if (comments != null && !comments.isEmpty()) {
+                        ArrayList<Comment> topComments = new ArrayList<>(comments.subList(0, Math.min(10, comments.size())));
+                        bundle.putParcelableArrayList(ShareBottomSheetFragment.EXTRA_COMMENTS, topComments);
+                    }
+                }
                 ShareBottomSheetFragment shareBottomSheetFragment = new ShareBottomSheetFragment();
                 shareBottomSheetFragment.setArguments(bundle);
                 shareBottomSheetFragment.show(mFragment.getChildFragmentManager(), shareBottomSheetFragment.getTag());

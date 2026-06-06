@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -235,6 +236,17 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             }
         } else {
             mSeparatePostAndComments = true;
+
+            boolean swapSides = mPostDetailsSharedPreferences.getBoolean(
+                    SharedPreferencesUtils.SWAP_POST_AND_COMMENTS_IN_SPLIT_MODE, false);
+            if (swapSides && mCommentsRecyclerView != null) {
+                ViewGroup parent = (ViewGroup) mCommentsRecyclerView.getParent();
+                if (parent instanceof LinearLayout) {
+                    View postView = binding.postDetailRecyclerViewViewPostDetailFragment;
+                    parent.removeView(postView);
+                    parent.addView(postView);
+                }
+            }
         }
 
         if (mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
@@ -497,6 +509,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                         viewPostDetailFragmentViewModel.fetchMoreChildComments(position);
                     }
                 });
+
+        mPostAdapter.setCommentsSupplier(() -> mCommentsAdapter != null ? mCommentsAdapter.getVisibleComments() : null);
 
         mCommentsFooterAdapter = new CommentsFooterRecyclerViewAdapter(
                 mActivity, () -> {
