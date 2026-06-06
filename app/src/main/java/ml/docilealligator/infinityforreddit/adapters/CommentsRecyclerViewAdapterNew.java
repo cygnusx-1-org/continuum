@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.InsetDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spanned;
@@ -120,7 +122,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final boolean mShowAuthorAvatar;
     private final boolean mDisableProfileAvatarAnimation;
     private final boolean mShowUserPrefix;
-    private final boolean mAlwaysShowChildCommentCount;
     private final boolean mHideTheNumberOfVotes;
     private final boolean mNeedBlurNsfw;
     private final boolean mDoNotBlurNsfwInNsfwSubreddits;
@@ -316,7 +317,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mShowAuthorAvatar = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_AUTHOR_AVATAR, false);
         mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
         mShowUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_USER_PREFIX, false);
-        mAlwaysShowChildCommentCount = sharedPreferences.getBoolean(SharedPreferencesUtils.ALWAYS_SHOW_CHILD_COMMENT_COUNT, false);
         mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS, false);
         mDepthThreshold = sharedPreferences.getInt(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD, 5);
 
@@ -519,6 +519,21 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     ((CommentBaseViewHolder) holder).scoreTextView.setText(mActivity.getString(R.string.vote));
                 }
 
+                // Child comment count badge next to the score when the comment is collapsed.
+                // Kept independent of mHideTheNumberOfVotes so hiding votes does not hide the
+                // child count (issue #219). The top badge belongs to the collapsed top row
+                // (toolbar hidden), the bottom badge to the comment toolbar.
+                if (comment.hasReply() && comment.getChildCount() > 0 && !comment.isExpanded()) {
+                    String childCountString = "+" + comment.getChildCount();
+                    ((CommentBaseViewHolder) holder).topChildCountTextView.setText(childCountString);
+                    ((CommentBaseViewHolder) holder).childCountTextView.setText(childCountString);
+                    ((CommentBaseViewHolder) holder).topChildCountTextView.setVisibility(mCommentToolbarHidden ? View.VISIBLE : View.GONE);
+                    ((CommentBaseViewHolder) holder).childCountTextView.setVisibility(mCommentToolbarHidden ? View.GONE : View.VISIBLE);
+                } else {
+                    ((CommentBaseViewHolder) holder).topChildCountTextView.setVisibility(View.GONE);
+                    ((CommentBaseViewHolder) holder).childCountTextView.setVisibility(View.GONE);
+                }
+
                 if (comment.isEdited()) {
                     ((CommentBaseViewHolder) holder).editedTextView.setVisibility(View.VISIBLE);
                 } else {
@@ -536,9 +551,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 }
 
                 if (comment.hasReply()) {
-                    if (comment.getChildCount() > 0 && (mAlwaysShowChildCommentCount || !comment.isExpanded())) {
-                        ((CommentBaseViewHolder) holder).expandButton.setText("+" + comment.getChildCount());
-                    }
                     if (comment.isExpanded()) {
                         ((CommentBaseViewHolder) holder).expandButton.setCompoundDrawablesWithIntrinsicBounds(collapseDrawable, null, null, null);
                     } else {
@@ -780,6 +792,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             ((CommentBaseViewHolder) holder).downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
             ((CommentBaseViewHolder) holder).downvoteButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
             ((CommentBaseViewHolder) holder).expandButton.setText("");
+            ((CommentBaseViewHolder) holder).topChildCountTextView.setVisibility(View.GONE);
+            ((CommentBaseViewHolder) holder).childCountTextView.setVisibility(View.GONE);
             ((CommentBaseViewHolder) holder).replyButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
             RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
             params.setMargins(0, 0, 0, 0);
@@ -813,6 +827,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         TextView authorFlairTextView;
         TextView commentTimeTextView;
         TextView topScoreTextView;
+        TextView topChildCountTextView;
+        TextView childCountTextView;
         RecyclerView commentMarkdownView;
         TextView editedTextView;
         ConstraintLayout bottomConstraintLayout;
@@ -838,6 +854,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                          TextView authorFlairTextView,
                          TextView commentTimeTextView,
                          TextView topScoreTextView,
+                         TextView topChildCountTextView,
+                         TextView childCountTextView,
                          RecyclerView commentMarkdownView,
                          TextView editedTextView,
                          ConstraintLayout bottomConstraintLayout,
@@ -857,6 +875,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             this.authorFlairTextView = authorFlairTextView;
             this.commentTimeTextView = commentTimeTextView;
             this.topScoreTextView = topScoreTextView;
+            this.topChildCountTextView = topChildCountTextView;
+            this.childCountTextView = childCountTextView;
             this.commentMarkdownView = commentMarkdownView;
             this.editedTextView = editedTextView;
             this.bottomConstraintLayout = bottomConstraintLayout;
@@ -965,6 +985,24 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             expandButton.setTextColor(mCommentIconAndInfoColor);
             saveButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
             replyButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
+
+            // Style the child comment count badges as rounded bubbles. Each badge needs its
+            // own drawable instance since a shared Drawable would share bounds between views.
+            int badgeHorizontalPadding = (int) Utils.convertDpToPixel(4, mActivity);
+            int badgeVerticalPadding = (int) Utils.convertDpToPixel(2, mActivity);
+            int badgeInset = (int) Utils.convertDpToPixel(1, mActivity);
+            for (TextView childCountBadge : new TextView[]{topChildCountTextView, childCountTextView}) {
+                GradientDrawable badgeBackground = new GradientDrawable();
+                badgeBackground.setShape(GradientDrawable.RECTANGLE);
+                badgeBackground.setCornerRadius(Utils.convertDpToPixel(8, mActivity));
+                badgeBackground.setColor(mUsernameColor);
+                childCountBadge.setBackground(new InsetDrawable(badgeBackground, badgeInset));
+                childCountBadge.setPadding(badgeHorizontalPadding, badgeVerticalPadding, badgeHorizontalPadding, badgeVerticalPadding);
+                childCountBadge.setTextColor(mCommentBackgroundColor);
+                if (mActivity.typeface != null) {
+                    childCountBadge.setTypeface(mActivity.typeface);
+                }
+            }
 
             authorFlairTextView.setOnClickListener(view -> authorTextView.performClick());
 
@@ -1382,6 +1420,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     binding.authorFlairTextViewItemPostComment,
                     binding.commentTimeTextViewItemPostComment,
                     binding.topScoreTextViewItemPostComment,
+                    binding.topChildCountTextViewItemPostComment,
+                    binding.childCountTextViewItemPostComment,
                     binding.commentMarkdownViewItemPostComment,
                     binding.editedTextViewItemPostComment,
                     binding.bottomConstraintLayoutItemPostComment,
