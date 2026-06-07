@@ -2,6 +2,13 @@
 
 ---
 
+8.2.5.7 / 2026-6-6
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Video scrub conflicts with android back gesture #279
+* Fixed App crashes when loading certain posts since 8.2.5 #277
+
 8.2.5.6 / 2026-6-6
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
