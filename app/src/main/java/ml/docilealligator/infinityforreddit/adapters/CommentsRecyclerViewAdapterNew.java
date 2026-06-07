@@ -901,6 +901,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 constraintSet.clone(bottomConstraintLayout);
                 constraintSet.clear(upvoteButton.getId(), ConstraintSet.START);
                 constraintSet.clear(upvoteButton.getId(), ConstraintSet.END);
+                constraintSet.clear(childCountTextView.getId(), ConstraintSet.START);
+                constraintSet.clear(childCountTextView.getId(), ConstraintSet.END);
                 constraintSet.clear(scoreTextView.getId(), ConstraintSet.START);
                 constraintSet.clear(scoreTextView.getId(), ConstraintSet.END);
                 constraintSet.clear(downvoteButton.getId(), ConstraintSet.START);
@@ -913,10 +915,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 constraintSet.clear(replyButton.getId(), ConstraintSet.END);
                 constraintSet.clear(moreButton.getId(), ConstraintSet.START);
                 constraintSet.clear(moreButton.getId(), ConstraintSet.END);
-                constraintSet.connect(upvoteButton.getId(), ConstraintSet.END, scoreTextView.getId(), ConstraintSet.START);
+                constraintSet.connect(upvoteButton.getId(), ConstraintSet.END, childCountTextView.getId(), ConstraintSet.START);
                 constraintSet.connect(upvoteButton.getId(), ConstraintSet.START, placeholder.getId(), ConstraintSet.END);
+                constraintSet.connect(childCountTextView.getId(), ConstraintSet.START, upvoteButton.getId(), ConstraintSet.END);
+                // clear() above wiped the XML marginEnd, so re-apply the gap to the score here.
+                constraintSet.connect(childCountTextView.getId(), ConstraintSet.END, scoreTextView.getId(), ConstraintSet.START,
+                        (int) Utils.convertDpToPixel(8, mActivity));
                 constraintSet.connect(scoreTextView.getId(), ConstraintSet.END, downvoteButton.getId(), ConstraintSet.START);
-                constraintSet.connect(scoreTextView.getId(), ConstraintSet.START, upvoteButton.getId(), ConstraintSet.END);
+                constraintSet.connect(scoreTextView.getId(), ConstraintSet.START, childCountTextView.getId(), ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.START, scoreTextView.getId(), ConstraintSet.END);
                 constraintSet.connect(placeholder.getId(), ConstraintSet.END, upvoteButton.getId(), ConstraintSet.START);
