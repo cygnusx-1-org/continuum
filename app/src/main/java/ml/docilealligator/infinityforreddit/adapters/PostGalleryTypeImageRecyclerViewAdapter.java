@@ -184,7 +184,6 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
-                holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
                 return false;
             }
 
@@ -263,12 +262,6 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             }
             binding.progressBarItemGalleryImageInPostFeed.setIndicatorColor(mColorAccent);
             binding.errorTextViewItemGalleryImageInPostFeed.setTextColor(mPrimaryTextColor);
-
-            binding.errorTextViewItemGalleryImageInPostFeed.setOnClickListener(view -> {
-                binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
-                binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
-                loadImage(this);
-            });
         }
     }
 }

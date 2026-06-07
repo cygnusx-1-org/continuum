@@ -3661,12 +3661,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return false;
             });
 
-            loadImageErrorTextView.setOnClickListener(view -> {
-                loadingIndicator.setVisibility(View.VISIBLE);
-                loadImageErrorTextView.setVisibility(View.GONE);
-                loadImage(this);
-            });
-
             imageViewNoPreviewGallery.setOnClickListener(view -> {
                 imageView.performClick();
             });
@@ -3677,7 +3671,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     loadingIndicator.setVisibility(View.GONE);
-                    loadImageErrorTextView.setVisibility(View.VISIBLE);
                     return false;
                 }
 
@@ -4539,12 +4532,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return true;
             });
 
-            binding.loadImageErrorTextViewItemGallery.setOnClickListener(view -> {
-                binding.progressBarItemPostGallery.setVisibility(View.VISIBLE);
-                binding.loadImageErrorTextViewItemGallery.setVisibility(View.GONE);
-                loadImage(this);
-            });
-
             binding.imageViewNoPreviewItemPostGallery.setOnClickListener(view -> {
                 itemView.performClick();
             });
@@ -4553,7 +4540,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     binding.progressBarItemPostGallery.setVisibility(View.GONE);
-                    binding.loadImageErrorTextViewItemGallery.setVisibility(View.VISIBLE);
                     return false;
                 }
 
