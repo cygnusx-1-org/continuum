@@ -219,6 +219,10 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
     // Horizontal swipe-to-scrub gesture state.
     private int scrubTouchSlop;
+    // Width (px) of the left/right system back-gesture zones. A scrub starting inside one of
+    // these is ignored so an edge swipe goes to the system back gesture instead of scrubbing.
+    private int leftGestureInset;
+    private int rightGestureInset;
     private float scrubStartX;
     private float scrubStartY;
     private long scrubStartPosition;
@@ -374,6 +378,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         nonDataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"));*/
 
         LinearLayout controllerLinearLayout = findViewById(R.id.linear_layout_exo_playback_control_view);
+        // Used when the platform reports no gesture inset (e.g. 3-button nav): still keep a small
+        // edge dead-zone so a swipe from the very edge isn't treated as a scrub.
+        final int fallbackGestureInset = (int) (32 * getResources().getDisplayMetrics().density);
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
             @NonNull
             @Override
@@ -384,6 +391,11 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 params.setMarginStart(allInsets.left);
                 params.setMarginEnd(allInsets.right);
                 controllerLinearLayout.setLayoutParams(params);
+                // Capture the exact system back-gesture zones so scrub can yield the screen edges
+                // to the back gesture. Auto-matches whatever edge sensitivity the user has set.
+                Insets gestureInsets = insets.getInsets(WindowInsetsCompat.Type.systemGestures());
+                leftGestureInset = Math.max(gestureInsets.left, fallbackGestureInset);
+                rightGestureInset = Math.max(gestureInsets.right, fallbackGestureInset);
                 return WindowInsetsCompat.CONSUMED;
             }
         });
@@ -1064,8 +1076,14 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                     isDragging = false;
                     wasScaling = false;
                     wasDragging = false;
-                    // Don't hijack touches that start on the controls (e.g. the timeline bar).
-                    scrubGestureRejected = isTouchInsideControls(ev);
+                    // Don't hijack touches that start on the controls (e.g. the timeline bar),
+                    // nor those starting in the system back-gesture zones at the screen edges:
+                    // leaving the edges to the back gesture stops accidental scrubs when the user
+                    // swipes in from an edge to go back.
+                    int rootWidth = binding.getRoot().getWidth();
+                    boolean inEdgeGestureZone = ev.getX() < leftGestureInset
+                            || (rootWidth > 0 && ev.getX() > rootWidth - rightGestureInset);
+                    scrubGestureRejected = isTouchInsideControls(ev) || inEdgeGestureZone;
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
                     // Second finger: this is a pinch, not a scrub.
