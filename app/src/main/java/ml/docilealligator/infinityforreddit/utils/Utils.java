@@ -633,22 +633,30 @@ public final class Utils {
 
     @Nullable
     public static File getCacheDir(Context context) {
+        // getExternalCacheDir() can return a non-null File that points at a directory the
+        // system failed to prepare (e.g. "Failed to prepare .../Android/data/<pkg>/cache" on
+        // some devices). Writing there then fails, so each candidate must be checked for
+        // usability before being returned, falling back to internal storage when needed.
         File cacheDir = context.getExternalCacheDir();
-        if (cacheDir != null) {
+        if (isUsableDir(cacheDir)) {
             return cacheDir;
         }
 
         cacheDir = context.getCacheDir();
-        if (cacheDir != null) {
+        if (isUsableDir(cacheDir)) {
             return cacheDir;
         }
 
         cacheDir = context.getExternalFilesDir(null);
-        if (cacheDir != null) {
+        if (isUsableDir(cacheDir)) {
             return cacheDir;
         }
 
         return context.getFilesDir();
+    }
+
+    private static boolean isUsableDir(@Nullable File dir) {
+        return dir != null && (dir.isDirectory() || dir.mkdirs()) && dir.canWrite();
     }
 
     // Sample the four corners of a loaded bitmap to decide whether a thumbnail has
