@@ -48,6 +48,13 @@ A Reddit client on Android written in Java. It does not have any ads and it feat
 </div>
 
 ---
+
+> [!IMPORTANT]
+>
+> It seems that Reddit has started deleting client ID/API key.
+> It effectively means you might not be able to use the app anymore with your client ID/API key.
+> [This method](https://old.reddit.com/r/continuumreddit/comments/1scwgcx/custom_api_workaround/) should still work however.
+
 # Fork
 This project is a fork of [Infinity for Reddit](https://github.com/Docile-Alligator/Infinity-For-Reddit).
 
