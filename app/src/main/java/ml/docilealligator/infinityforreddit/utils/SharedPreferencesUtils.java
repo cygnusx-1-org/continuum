@@ -474,6 +474,7 @@ public class SharedPreferencesUtils {
     public static final String GIPHY_API_KEY_PREF_KEY = "giphy_api_key_pref_key";
     public static final String USER_AGENT_PREF_KEY = "user_agent_pref_key";
     public static final String REDIRECT_URI_PREF_KEY = "redirect_uri_pref_key";
+    public static final String ENABLE_API_KEY_OVERRIDES_PREF_KEY = "enable_api_key_overrides_pref_key";
 
     public static final String COOKIE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.cookie";
 

@@ -62,8 +62,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="localhost"
-                    android:scheme="continuum" />
+                    android:host="rr_oauth_redir"
+                    android:scheme="redreader" />
             </intent-filter>
         </activity>
         <activity

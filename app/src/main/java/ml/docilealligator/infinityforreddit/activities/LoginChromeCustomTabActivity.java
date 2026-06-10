@@ -265,7 +265,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
             if (isFirefoxBrowser(packageName)) {
                 // Firefox Custom Tabs don't handle custom scheme redirects properly.
                 // Use a regular browser intent instead — the full browser will
-                // dispatch continuum://localhost via standard Android intent resolution.
+                // dispatch redreader://rr_oauth_redir via standard Android intent resolution.
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, loginUri);
                 browserIntent.setPackage(packageName);
                 try {

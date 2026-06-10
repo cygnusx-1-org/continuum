@@ -58,6 +58,19 @@ public class CustomFontEditTextPreference extends EditTextPreference implements 
             }
         }
 
+        // Setting explicit text colors above overrides the framework's disabled dimming,
+        // so dim the views ourselves to grey out the preference when it is disabled.
+        float alpha = isEnabled() ? 1.0f : 0.5f;
+        if (iconImageView != null) {
+            iconImageView.setAlpha(alpha);
+        }
+        if (titleTextView != null) {
+            titleTextView.setAlpha(alpha);
+        }
+        if (summaryTextView != null) {
+            summaryTextView.setAlpha(alpha);
+        }
+
         if (typeface != null) {
             if (titleTextView instanceof TextView) {
                 ((TextView) titleTextView).setTypeface(typeface);

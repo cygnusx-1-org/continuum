@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import okhttp3.MediaType;
@@ -44,7 +43,7 @@ public class APIUtils {
     public static final String STATE_KEY = "state";
     public static final String STATE = "23ro8xlxvzp4asqd";
     public static final String REDIRECT_URI_KEY = "redirect_uri";
-    public static final String DEFAULT_REDIRECT_URI = "continuum://localhost";
+    public static final String DEFAULT_REDIRECT_URI = "redreader://rr_oauth_redir";
     public static String REDIRECT_URI = DEFAULT_REDIRECT_URI;
     public static final String DURATION_KEY = "duration";
     public static final String DURATION = "permanent";
@@ -63,8 +62,8 @@ public class APIUtils {
     public static final String AUTHORIZATION_KEY = "Authorization";
     public static final String AUTHORIZATION_BASE = "bearer ";
     public static final String USER_AGENT_KEY = "User-Agent";
-    public static String ANONYMOUS_USER_AGENT = "org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
-    public static final String DEFAULT_USER_AGENT = "android:" + ANONYMOUS_USER_AGENT;
+    public static String ANONYMOUS_USER_AGENT = "org.quantumbadger.redreader/1.25.2";
+    public static final String DEFAULT_USER_AGENT = "org.quantumbadger.redreader/1.25.2";
     public static String USER_AGENT = DEFAULT_USER_AGENT;
     public static final String USERNAME_KEY = "username";
 
@@ -142,17 +141,30 @@ public class APIUtils {
     public static final String REFERER_KEY = "Referer";
     public static final String REVEDDIT_REFERER = "https://www.reveddit.com/";
 
+    // Whether the user has opted in to using their custom Client ID / User Agent / Redirect URI.
+    // Defaults to false, so the built-in defaults are used unless overrides are explicitly enabled.
+    private static boolean areOverridesEnabled(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY, false);
+    }
+
     // Method to retrieve Client ID from SharedPreferences
     public static String getClientId(Context context) {
         // Explicitly get SharedPreferences by file name to ensure consistency with the PreferenceFragment
         SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
 
-        return sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, context.getString(R.string.default_client_id));
+        String defaultClientId = context.getString(R.string.default_client_id);
+        if (!areOverridesEnabled(sharedPreferences)) {
+            return defaultClientId;
+        }
+        return sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, defaultClientId);
     }
 
     // Method to retrieve User Agent from SharedPreferences
     public static String getUserAgent(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        if (!areOverridesEnabled(sharedPreferences)) {
+            return DEFAULT_USER_AGENT;
+        }
         String userAgent = sharedPreferences.getString(SharedPreferencesUtils.USER_AGENT_PREF_KEY, DEFAULT_USER_AGENT);
         if (userAgent == null || userAgent.isEmpty()) {
             return DEFAULT_USER_AGENT;
@@ -164,6 +176,9 @@ public class APIUtils {
     public static String getRedirectUri(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
         String defaultRedirectUri = context.getString(R.string.default_redirect_uri);
+        if (!areOverridesEnabled(sharedPreferences)) {
+            return defaultRedirectUri;
+        }
         String redirectUri = sharedPreferences.getString(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY, defaultRedirectUri);
         if (redirectUri == null || redirectUri.isEmpty()) {
             return defaultRedirectUri;
