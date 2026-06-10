@@ -2,6 +2,19 @@
 
 ---
 
+8.2.5.8 / 2026-6-10
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* The new default is the RedReader client ID.
+
+* New Enable Overrides toggle, off by default, to still allow overriding the client ID, user agent, and redirect URI
+
+
+Most users' client IDs have been removed by Reddit. If yours was removed, log out of each account and login again.
+
+Check your https://old.reddit.com/prefs/apps/, some still exist. The override will still let you use it.
+
 8.2.5.7 / 2026-6-6
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
