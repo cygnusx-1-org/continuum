@@ -27,6 +27,7 @@
                 android:layout_height="match_parent"
                 android:animateLayoutChanges="true"
                 app:controller_layout_id="@layout/exo_playback_control_view"
+                app:surface_type="texture_view"
                 app:animation_enabled="false" />
 
             <com.google.android.material.loadingindicator.LoadingIndicator

@@ -869,7 +869,6 @@ https://play.google.com/store/"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Вимкнути передперегляд лише для відео і дописів Gif"</string>
     <string name="settings_enable_search_history_title">"Дозволити історію пошуку"</string>
     <string name="settings_post_history_title">"Історія дописів"</string>
-    <string name="settings_mark_posts_as_read_title">"Позначати дописи прочитаними"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"Позначати дописи прочитаними після голосування"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"Позначати дописи прочитаними під час прокручування"</string>
     <string name="settings_hide_read_posts_automatically_title">"Ховати прочитані дописи автоматично"</string>
@@ -1031,7 +1030,6 @@ https://play.google.com/store/"</string>
     <string name="settings_more_tabs_show_multireddits_title">"Показувати мультиредити"</string>
     <string name="settings_collapse_reddit_section_title">"Згорнути розділ Reddit"</string>
     <string name="settings_video_player_automatic_landscape_orientation">"Автоматично перемикати відеопрогравач на альбомну орієнтацію"</string>
-    <string name="settings_remember_muting_option_in_post_feed">"Памʼятати параметр приглушення в стрічці дописів"</string>
     <string name="link_post_layout_auto">"Авто"</string>
     <string name="uploaded_images">"Відвантажені зображення"</string>
     <string name="select_image">"Вибрати зображення"</string>
@@ -1053,7 +1051,6 @@ https://play.google.com/store/"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Відокремлювати дописи і коментарі в портретному режимі"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Відокремлювати дописи і коментарі в альбомному режимі"</string>
     <string name="settings_separate_post_and_comments_summary">"Автовідтворення відео недозволене на сторінці відомостей допису"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Викор. нижню панель засобів під час перегляду медія"</string>
     <string name="settings_secure_mode_title">"Безпечний режим"</string>
     <string name="settings_secure_mode_summary">"Знімки екрана і запис відео не дозволено. Нема передперегляду на екрані свіжого в застосунку."</string>
     <string name="discard_dialog_button">"Відхилити"</string>
@@ -1082,8 +1079,6 @@ https://play.google.com/store/"</string>
     <string name="settings_link_handler_value_custom_tab">"Власна вкладка"</string>
     <string name="settings_link_handler_value_internal_browser">"Внутрішній оглядач"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Успадкований КІ керування відеозаписами"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Щипком збільшувати відео"</string>
-    <string name="settings_experimental_feature">"Експериментальна функція"</string>
     <string name="theme_item_media_indicator_icon_color">"Колір значка індикатора медія"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Задіяно для: значки відеозаписів або галереї на передперегляді допису"</string>
     <string name="theme_item_media_indicator_background_color">"Колір тла індикатора медія"</string>
@@ -1185,7 +1180,6 @@ https://play.google.com/store/"</string>
     <string name="comment_karma">"Карма за коментарі:"</string>
     <string name="awarder_karma">"Карма за надання нагород:"</string>
     <string name="awardee_karma">"Карма за отримання нагород:"</string>
-    <string name="history_activity_label">"Історія"</string>
     <string name="history">"Історія"</string>
     <string name="settings_easier_to_watch_in_full_screen_title">"Легше дивитися на повному екрані"</string>
     <string name="clear_user_flair">"Очистити личку"</string>

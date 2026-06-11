@@ -114,8 +114,6 @@ public class SettingsSearchRegistry {
                 InterfacePreferenceFragment.class, R.string.settings_interface_title);
         add(items, c.getString(R.string.settings_hide_subreddit_description_title), null, bc,
                 InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_use_bottom_toolbar_in_media_viewer_title), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
         add(items, c.getString(R.string.settings_default_search_result_tab), null, bc,
                 InterfacePreferenceFragment.class, R.string.settings_interface_title);
         add(items, c.getString(R.string.settings_time_format_title), null, bc,
@@ -332,8 +330,6 @@ public class SettingsSearchRegistry {
                 CommentPreferenceFragment.class, R.string.settings_category_comment_title);
         add(items, c.getString(R.string.settings_fully_collapse_comment_title), null, bc,
                 CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_remember_comment_scroll_position), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
         add(items, c.getString(R.string.settings_show_author_avatar_title), null, bc,
                 CommentPreferenceFragment.class, R.string.settings_category_comment_title);
         add(items, c.getString(R.string.settings_show_user_prefix_title), null, bc,
@@ -394,7 +390,7 @@ public class SettingsSearchRegistry {
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_mute_autoplaying_videos_title), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_remember_muting_option_in_post_feed), null, bc,
+        add(items, c.getString(R.string.settings_remember_mute), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_autoplay_nsfw_videos_title), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
@@ -434,9 +430,6 @@ public class SettingsSearchRegistry {
         add(items, c.getString(R.string.settings_navigation_drawer_swipe_area), null, bc,
                 GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
         add(items, c.getString(R.string.settings_swipe_vertically_to_go_back_from_media_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_pinch_to_zoom_video_title),
-                c.getString(R.string.settings_experimental_feature), bc,
                 GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
         add(items, c.getString(R.string.settings_lock_jump_to_next_top_level_comment_button_title), null, bc,
                 GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);

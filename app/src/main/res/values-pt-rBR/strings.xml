@@ -859,7 +859,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Só desativar prévia em GIFs e vídeos"</string>
     <string name="settings_enable_search_history_title">"Ativar histórico de busca"</string>
     <string name="settings_post_history_title">"Histórico de busca"</string>
-    <string name="settings_mark_posts_as_read_title">"Marcar postagens como lidas"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"Marcar postagens como lidas após votar"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"Marcar postagens como lidas ao rolar página"</string>
     <string name="settings_hide_read_posts_automatically_title">"Ocultar postagens lidas automaticamente"</string>
@@ -1017,7 +1016,6 @@ Renomeie-os antes de ativar o Material You se você tiver."</string>
     <string name="settings_more_tabs_show_multireddits_title">"Exibir Multireddits"</string>
     <string name="settings_collapse_reddit_section_title">"Retrair seção do Reddit"</string>
     <string name="settings_video_player_automatic_landscape_orientation">"Mudar para a orientação paisagem automaticamente no reprodutor de vídeo"</string>
-    <string name="settings_remember_muting_option_in_post_feed">"Lembrar opção de silenciar no feed de postagens"</string>
     <string name="link_post_layout_auto">"Automático"</string>
     <string name="uploaded_images">"Imagens enviadas"</string>
     <string name="select_image">"Escolha uma Imagem"</string>
@@ -1039,7 +1037,6 @@ Toque para tentar de novo."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Separar a postagem dos comentários no modo retrato"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Separar a postagem dos comentários no modo paisagem"</string>
     <string name="settings_separate_post_and_comments_summary">"Reprodução automática de vídeo será desativada na página de detalhes da postagem"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Use a barra de ferramentas inferior no visualizador de mídia"</string>
     <string name="settings_secure_mode_title">"Modo seguro"</string>
     <string name="settings_secure_mode_summary">"Capturas e gravações de tela não são permitidas. Sem prévia na tela de aplicativos recentes."</string>
     <string name="discard_dialog_button">"Descartar"</string>
@@ -1049,7 +1046,7 @@ Toque para tentar de novo."</string>
     <string name="action_go_to_wiki">"Ir à wiki"</string>
     <string name="action_playback_speed">"Velocidade de reprodução"</string>
     <string name="about">"Sobre"</string>
-    <string name="settings_link_handler_title">"Manipulador de links"</string>
+    <string name="settings_link_handler_title">"Manipulador de links (Por conta)"</string>
     <string name="settings_main_page_back_button_action">"Ação do botão de voltar na página principal"</string>
     <string name="settings_open_navigation_drawer">"Abrir gaveta de navegação"</string>
     <string name="settings_number_of_columns_in_post_feed_unfolded_portrait_title">"Retrato (desdobrado)"</string>
@@ -1066,8 +1063,6 @@ Toque para tentar de novo."</string>
     <string name="settings_link_handler_value_custom_tab">"Aba customizada"</string>
     <string name="settings_link_handler_value_internal_browser">"Navegador interno"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"IU do controlador de vídeo antigo"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Pinça para ampliar o vídeo"</string>
-    <string name="settings_experimental_feature">"Função experimental"</string>
     <string name="theme_item_media_indicator_icon_color">"Cor do ícone de indicador de mídia"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Aplicado a: Ícone de galeria ou vídeo na prévia da postagem"</string>
     <string name="theme_item_media_indicator_background_color">"Cor de fundo do indicador de mídia"</string>
@@ -1169,7 +1164,6 @@ Toque para tentar de novo."</string>
     <string name="comment_karma">"Carma do comentário:"</string>
     <string name="awarder_karma">"Carma do premiador:"</string>
     <string name="awardee_karma">"Carma do premiado:"</string>
-    <string name="history_activity_label">"Histórico"</string>
     <string name="history">"Histórico"</string>
     <string name="settings_easier_to_watch_in_full_screen_title">"Mais fácil de assistir em tela cheia"</string>
     <string name="clear_user_flair">"Limpar etiqueta"</string>

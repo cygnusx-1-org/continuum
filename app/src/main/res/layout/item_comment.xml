@@ -176,7 +176,7 @@
                 android:id="@+id/childCountTextViewItemPostComment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="8dp"
                 android:visibility="gone"
                 android:textSize="?attr/font_12"
                 android:textStyle="bold"

@@ -34,6 +34,13 @@ public class SubredditSubscription {
                 "", new FetchSubredditData.FetchSubredditDataListener() {
                     @Override
                     public void onFetchSubredditDataSuccess(SubredditData subredditData, int nCurrentOnlineSubscribers) {
+                        // Anonymous browsing uses an application-only OAuth token with no over-18
+                        // account behind it, so NSFW subreddits cannot be loaded. Block subscribing
+                        // to one rather than adding a subreddit that would never load in the feed.
+                        if (subredditData.isNSFW()) {
+                            subredditSubscriptionListener.onSubredditSubscriptionNSFWBlocked();
+                            return;
+                        }
                         insertSubscription(executor, handler, redditDataRoomDatabase,
                                 subredditData, Account.ANONYMOUS_ACCOUNT, subredditSubscriptionListener);
                     }
@@ -110,6 +117,13 @@ public class SubredditSubscription {
         void onSubredditSubscriptionSuccess();
 
         void onSubredditSubscriptionFail();
+
+        // Only reachable from the anonymous subscribe path, which refuses NSFW subreddits because
+        // anonymous (application-only) OAuth cannot load them. Defaults to the generic failure
+        // handling; callers that subscribe anonymously override it to explain why it was blocked.
+        default void onSubredditSubscriptionNSFWBlocked() {
+            onSubredditSubscriptionFail();
+        }
     }
 
     private static void insertSubscription(Executor executor, Handler handler,

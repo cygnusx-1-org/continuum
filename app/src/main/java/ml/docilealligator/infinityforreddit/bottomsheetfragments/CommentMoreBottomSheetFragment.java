@@ -51,7 +51,6 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
     public static final String EXTRA_POST = "EPO";
     public static final String EXTRA_THREAD_COMMENTS = "ETC";
 
-    private FragmentCommentMoreBottomSheetBinding binding;
     private BaseActivity activity;
 
     public CommentMoreBottomSheetFragment() {
@@ -61,7 +60,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentCommentMoreBottomSheetBinding.inflate(inflater, container, false);
+        FragmentCommentMoreBottomSheetBinding binding = FragmentCommentMoreBottomSheetBinding.inflate(inflater, container, false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 && (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {

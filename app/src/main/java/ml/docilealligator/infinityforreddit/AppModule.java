@@ -3,6 +3,8 @@ package ml.docilealligator.infinityforreddit;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.OptIn;
 import androidx.media3.common.util.UnstableApi;
@@ -22,8 +24,11 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LoopAvailableExoCreator;
+import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
+import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -32,6 +37,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.MediaSourceBuilder;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroExo;
 import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 
 @Module
 abstract class AppModule {
@@ -43,6 +49,14 @@ abstract class AppModule {
     @Singleton
     static RedditDataRoomDatabase provideRedditDataRoomDatabase(Application application) {
         return RedditDataRoomDatabase.create(application);
+    }
+
+    @Provides
+    @Singleton
+    static ApiCallTracker provideApiCallTracker(RedditDataRoomDatabase redditDataRoomDatabase,
+                                                @Named("default") SharedPreferences sharedPreferences,
+                                                Executor executor) {
+        return new ApiCallTracker(redditDataRoomDatabase, sharedPreferences, executor);
     }
 
     @Provides
@@ -148,6 +162,13 @@ abstract class AppModule {
     }
 
     @Provides
+    @Named("cookies")
+    @Singleton
+    static SharedPreferences provideCookieSharedPreferences(Application application) {
+        return application.getSharedPreferences(SharedPreferencesUtils.COOKIE_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    }
+
+    @Provides
     @Named("proxy")
     @Singleton
     static SharedPreferences provideProxySharedPreferences(Application application) {
@@ -218,5 +239,37 @@ abstract class AppModule {
     @Singleton
     static Executor provideExecutor() {
         return Executors.newFixedThreadPool(4);
+    }
+
+    @Provides
+    @Singleton
+    static UserProfileImagesBatchLoader provideUserProfileImagesBatchLoader(
+            Executor executor,
+            RedditDataRoomDatabase redditDataRoomDatabase,
+            @Named("no_oauth") Retrofit retrofit,
+            @Named("oauth") Retrofit oauthRetrofit
+    ) {
+        return new UserProfileImagesBatchLoader(executor, new Handler(Looper.getMainLooper()),
+                redditDataRoomDatabase, retrofit, oauthRetrofit);
+    }
+
+    @Provides
+    @Singleton
+    static PostDetailCommentsCacheManager providePostDetailCommentsCacheManager(@Named("post_details") SharedPreferences postDetailsSharedPreferences) {
+        try {
+            int capacity = Integer.parseInt(postDetailsSharedPreferences.getString(SharedPreferencesUtils.COMMENT_THREAD_CONTINUITY_CAPACITY, "10"));
+            return new PostDetailCommentsCacheManager(new AutoRemovalLinkedHashMap<>(capacity));
+        } catch (NumberFormatException ignore) {
+            return new PostDetailCommentsCacheManager(new AutoRemovalLinkedHashMap<>(10));
+        }
+    }
+
+    @Provides
+    @Singleton
+    static VideoMuteManager provideVideoMuteManager(@Named("default") SharedPreferences sharedPreferences) {
+        return new VideoMuteManager(
+                sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_AUTOPLAYING_VIDEOS, true),
+                sharedPreferences.getBoolean(SharedPreferencesUtils.REMEMBER_MUTING_OPTION_IN_POST_FEED, false)
+        );
     }
 }

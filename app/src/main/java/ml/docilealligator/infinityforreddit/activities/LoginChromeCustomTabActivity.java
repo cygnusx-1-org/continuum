@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.activities;
 
+
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -107,15 +108,20 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarLoginChromeCustomTabActivity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        openLoginPage();
+        Intent intent = getIntent();
+        if (intent != null && intent.getData() != null) {
+            handleRedirectUri(intent.getData());
+        } else {
+            checkAndOpenLoginPage();
+        }
 
         binding.openWebpageButtonLoginChromeCustomTabActivity.setOnClickListener(view -> {
-            openLoginPage();
+            checkAndOpenLoginPage();
         });
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
 
         Uri uri = intent.getData();
@@ -125,6 +131,36 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
             return;
         }
 
+        handleRedirectUri(uri);
+    }
+
+    @Override
+    public SharedPreferences getDefaultSharedPreferences() {
+        return mSharedPreferences;
+    }
+
+    @Override
+    public SharedPreferences getCurrentAccountSharedPreferences() {
+        return mCurrentAccountSharedPreferences;
+    }
+
+    @Override
+    public CustomThemeWrapper getCustomThemeWrapper() {
+        return mCustomThemeWrapper;
+    }
+
+    @Override
+    protected void applyCustomTheme() {
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutLoginChromeCustomTabActivity, null, binding.toolbarLoginChromeCustomTabActivity);
+        binding.openWebpageButtonLoginChromeCustomTabActivity.setTextColor(mCustomThemeWrapper.getButtonTextColor());
+        binding.openWebpageButtonLoginChromeCustomTabActivity.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
+        if (typeface != null) {
+            binding.openWebpageButtonLoginChromeCustomTabActivity.setTypeface(typeface);
+        }
+    }
+
+    private void handleRedirectUri(@NonNull Uri uri) {
         binding.openWebpageButtonLoginChromeCustomTabActivity.setVisibility(View.GONE);
 
         String authCode = uri.getQueryParameter("code");
@@ -211,34 +247,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public SharedPreferences getDefaultSharedPreferences() {
-        return mSharedPreferences;
-    }
-
-    @Override
-    public SharedPreferences getCurrentAccountSharedPreferences() {
-        return mCurrentAccountSharedPreferences;
-    }
-
-    @Override
-    public CustomThemeWrapper getCustomThemeWrapper() {
-        return mCustomThemeWrapper;
-    }
-
-    @Override
-    protected void applyCustomTheme() {
-        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
-        applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutLoginChromeCustomTabActivity, null, binding.toolbarLoginChromeCustomTabActivity);
-        binding.openWebpageButtonLoginChromeCustomTabActivity.setTextColor(mCustomThemeWrapper.getButtonTextColor());
-        binding.openWebpageButtonLoginChromeCustomTabActivity.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
-
-        if (typeface != null) {
-            binding.openWebpageButtonLoginChromeCustomTabActivity.setTypeface(typeface);
-        }
-    }
-
-    private void openLoginPage() {
+    private void checkAndOpenLoginPage() {
         Uri.Builder uriBuilder = Uri.parse(APIUtils.OAUTH_URL).buildUpon();
         uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
         uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);
@@ -256,7 +265,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
             if (isFirefoxBrowser(packageName)) {
                 // Firefox Custom Tabs don't handle custom scheme redirects properly.
                 // Use a regular browser intent instead — the full browser will
-                // dispatch continuum://localhost via standard Android intent resolution.
+                // dispatch redreader://rr_oauth_redir via standard Android intent resolution.
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, loginUri);
                 browserIntent.setPackage(packageName);
                 try {

@@ -70,5 +70,22 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
                 }
             });
         }
+
+        SwitchPreference swipeBetweenPostsSwitch = findPreference(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS);
+        if (swipeBetweenPostsSwitch != null) {
+            // Swipe Between Posts and comment Swipe Action both consume horizontal swipes and
+            // cannot coexist; the former takes precedence. Warn here when it is enabled.
+            updateSwipeBetweenPostsSummary(swipeBetweenPostsSwitch, swipeBetweenPostsSwitch.isChecked());
+            swipeBetweenPostsSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
+                updateSwipeBetweenPostsSummary(swipeBetweenPostsSwitch, (Boolean) newValue);
+                return true;
+            });
+        }
+    }
+
+    private void updateSwipeBetweenPostsSummary(SwitchPreference swipeBetweenPostsSwitch, boolean enabled) {
+        swipeBetweenPostsSwitch.setSummary(enabled
+                ? getString(R.string.settings_swipe_between_posts_disables_comment_swipe_summary)
+                : null);
     }
 }

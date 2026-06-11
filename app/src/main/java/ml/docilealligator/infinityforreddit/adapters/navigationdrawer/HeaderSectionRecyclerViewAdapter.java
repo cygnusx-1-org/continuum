@@ -179,6 +179,13 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         }
     }
 
+    public void openAccountManagement(boolean notifyItemChanged) {
+        isInMainPage = false;
+        if (notifyItemChanged) {
+            notifyItemChanged(0);
+        }
+    }
+
     public void updateAccountInfo(String profileImageUrl, String bannerImageUrl, int karma) {
         this.profileImageUrl = profileImageUrl;
         this.bannerImageUrl = bannerImageUrl;

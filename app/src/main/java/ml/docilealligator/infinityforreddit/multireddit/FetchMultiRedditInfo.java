@@ -57,12 +57,43 @@ public class FetchMultiRedditInfo {
         });
     }
 
+    public static void publicFetchMultiRedditInfo(Executor executor, Handler handler, Retrofit retrofit,
+                                                  String multipath,
+                                                  FetchMultiRedditInfoListener fetchMultiRedditInfoListener) {
+        retrofit.create(RedditAPI.class).getPublicMultiRedditInfo(multipath).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful()) {
+                    executor.execute(() -> {
+                        MultiReddit multiReddit = parseMultiRedditInfo(response.body());
+                        if (multiReddit != null) {
+                            handler.post(() -> fetchMultiRedditInfoListener.success(multiReddit));
+                        } else {
+                            handler.post(fetchMultiRedditInfoListener::failed);
+                        }
+                    });
+                } else {
+                    fetchMultiRedditInfoListener.failed();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                fetchMultiRedditInfoListener.failed();
+            }
+        });
+    }
+
     public static void anonymousFetchMultiRedditInfo(Executor executor, Handler handler,
                                                      RedditDataRoomDatabase redditDataRoomDatabase,
                                                      String multipath,
                                                      FetchMultiRedditInfoListener fetchMultiRedditInfoListener) {
         executor.execute(() -> {
             MultiReddit multiReddit = redditDataRoomDatabase.multiRedditDao().getMultiReddit(multipath, Account.ANONYMOUS_ACCOUNT);
+            if (multiReddit == null) {
+                handler.post(fetchMultiRedditInfoListener::failed);
+                return;
+            }
             ArrayList<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits =
                     (ArrayList<AnonymousMultiredditSubreddit>) redditDataRoomDatabase.anonymousMultiredditSubredditDao().getAllAnonymousMultiRedditSubreddits(multipath);
             ArrayList<ExpandedSubredditInMultiReddit> subreddits = new ArrayList<>();

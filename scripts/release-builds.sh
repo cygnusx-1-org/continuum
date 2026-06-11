@@ -81,3 +81,5 @@ fi
 
 # Creating .apk in app/build/outputs/apk/Release, and uploading it to git repository in GitHub as a new release.
 scripts/release-github.sh "${RELEVANT_COMMIT_MESSAGES}"
+
+git push

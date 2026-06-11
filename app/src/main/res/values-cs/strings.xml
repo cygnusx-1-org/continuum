@@ -872,7 +872,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Zakázat pouze náhled ve video a GIF příspěvcích"</string>
     <string name="settings_enable_search_history_title">"Povolit historii vyhledávání"</string>
     <string name="settings_post_history_title">"Historie příspěvků"</string>
-    <string name="settings_mark_posts_as_read_title">"Označovat příspěvky jako přečtené"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"Označovat příspěvky jako přečtené po hlasování"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"Označovat příspěvky jako přečtené po posunutí"</string>
     <string name="settings_hide_read_posts_automatically_title">"Automaticky skrývat přečtené příspěvky"</string>
@@ -1036,7 +1035,6 @@ Pokud ano, přejmenujte je, než povolíte Material You."</string>
     <string name="settings_more_tabs_show_multireddits_title">"Zobrazit multireddity"</string>
     <string name="settings_collapse_reddit_section_title">"Sbalit sekci Redditu"</string>
     <string name="settings_video_player_automatic_landscape_orientation">"Automaticky přepnout na režim na šířku ve video přehrávači"</string>
-    <string name="settings_remember_muting_option_in_post_feed">"Zapamatovat stav ztlumení v příspěvcích"</string>
     <string name="link_post_layout_auto">"Automaticky"</string>
     <string name="uploaded_images">"Nahrané obrázky"</string>
     <string name="select_image">"Vybrat obrázek"</string>
@@ -1058,7 +1056,6 @@ Pokud ano, přejmenujte je, než povolíte Material You."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Oddělit příspěvek a komentáře v režimu na výšku"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Oddělit příspěvek a komentáře v režimu na šířku"</string>
     <string name="settings_separate_post_and_comments_summary">"Automatické přehrávání videí bude zakázáno na stránce podrobností o příspěvku"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Použít spodní nástrojovou lištu v prohlížeči médií"</string>
     <string name="settings_secure_mode_title">"Bezpečný režim"</string>
     <string name="settings_secure_mode_summary">"Snímání obrazovky a nahrávání videí není povoleno. Žádný náhled na obrazovce posledních aplikací."</string>
     <string name="discard_dialog_button">"Zrušit"</string>
@@ -1087,8 +1084,6 @@ Pokud ano, přejmenujte je, než povolíte Material You."</string>
     <string name="settings_link_handler_value_custom_tab">"Vlastní záložka"</string>
     <string name="settings_link_handler_value_internal_browser">"Interní prohlížeč"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Staré UI ovládání videa"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Povolit přibližování videí"</string>
-    <string name="settings_experimental_feature">"Experimentální funkce"</string>
     <string name="theme_item_media_indicator_icon_color">"Barva ikony indikátoru médií"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Použito na: ikonu videa nebo galerie na náhledu příspěvku"</string>
     <string name="theme_item_media_indicator_background_color">"Barva pozadí indikátoru médií"</string>
@@ -1190,7 +1185,6 @@ Pokud ano, přejmenujte je, než povolíte Material You."</string>
     <string name="comment_karma">"Komentářová karma:"</string>
     <string name="awarder_karma">"Karma ocenění:"</string>
     <string name="awardee_karma">"Karma obdarování:"</string>
-    <string name="history_activity_label">"Historie"</string>
     <string name="history">"Historie"</string>
     <string name="settings_easier_to_watch_in_full_screen_title">"Jednodušší sledovat na celé obrazovce"</string>
     <string name="clear_user_flair">"Odstranit štítek"</string>

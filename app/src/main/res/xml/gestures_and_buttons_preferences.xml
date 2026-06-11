@@ -82,12 +82,6 @@
         app:key="swipe_vertically_to_go_back_from_media"
         app:title="@string/settings_swipe_vertically_to_go_back_from_media_title" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="pinch_to_zoom_video"
-        app:title="@string/settings_pinch_to_zoom_video_title"
-        app:summary="@string/settings_experimental_feature" />
-
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
         app:title="@string/settings_category_comment_title" />
 

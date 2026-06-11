@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
 
@@ -43,15 +44,15 @@ public class LinkResolverActivity extends AppCompatActivity {
     public static final String EXTRA_SUBREDDIT_NAME = "ESN_LRA";
     public static final String EXTRA_POST_TITLE_KEY = "ET_LRA";
 
-    private static final String POST_PATTERN = "/r/[\\w-]+/comments/\\w+/?\\w+/?";
+    private static final String POST_PATTERN = "/r/[\\w.-]+/comments/\\w+/?\\w+/?";
     private static final String POST_PATTERN_2 = "/(u|U|user)/[\\w-]+/comments/\\w+/?\\w+/?";
     private static final String POST_PATTERN_3 = "/[\\w-]+$";
-    private static final String COMMENT_PATTERN = "/(r|u|U|user)/[\\w-]+/comments/\\w+/?[\\w-]+/\\w+/?";
-    private static final String SUBREDDIT_PATTERN = "/[rR]/[\\w-]+/?";
+    private static final String COMMENT_PATTERN = "/(r|u|U|user)/[\\w.-]+/comments/\\w+/?[\\w-]+/\\w+/?";
+    private static final String SUBREDDIT_PATTERN = "/[rR]/[\\w.-]+/?";
     private static final String USER_PATTERN = "/(u|U|user)/[\\w-]+/?";
-    private static final String SHARELINK_SUBREDDIT_PATTERN = "/r/[\\w-]+/s/[\\w-]+";
+    private static final String SHARELINK_SUBREDDIT_PATTERN = "/r/[\\w.-]+/s/[\\w-]+";
     private static final String SHARELINK_USER_PATTERN = "/u/[\\w-]+/s/[\\w-]+";
-    private static final String SIDEBAR_PATTERN = "/[rR]/[\\w-]+/about/sidebar";
+    private static final String SIDEBAR_PATTERN = "/[rR]/[\\w.-]+/about/sidebar";
     private static final String MULTIREDDIT_PATTERN_2 = "/[rR]/(\\w+\\+?)+/?";
     private static final String REDD_IT_POST_PATTERN = "/\\w+/?";
     private static final String REDGIFS_PATTERN = "/watch/[\\w-]+$";
@@ -59,7 +60,7 @@ public class LinkResolverActivity extends AppCompatActivity {
     private static final String IMGUR_ALBUM_PATTERN = "/(album|a)/\\w+/?";
     private static final String IMGUR_IMAGE_PATTERN = "/\\w+/?";
     private static final String REDDIT_IMAGE_PATTERN =  "^/media$";
-    private static final String WIKI_PATTERN = "/[rR]/[\\w-]+/(wiki|w)(?:/[\\w-]+)*";
+    private static final String WIKI_PATTERN = "/[rR]/[\\w.-]+/(wiki|w)(?:/[\\w-]+)*";
     private static final String GOOGLE_AMP_PATTERN = "/amp/s/amp.reddit.com/.*";
     private static final String STREAMABLE_PATTERN = "/\\w+/?";
 
@@ -69,6 +70,9 @@ public class LinkResolverActivity extends AppCompatActivity {
     @Inject
     @Named("default")
     SharedPreferences mSharedPreferences;
+    @Inject
+    @Named("current_account")
+    SharedPreferences mCurrentAccountSharedPreferences;
 
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
@@ -158,7 +162,9 @@ public class LinkResolverActivity extends AppCompatActivity {
                     List<String> segments = uri.getPathSegments();
 
                     if (authority != null) {
-                        if (authority.equals("reddit-uploaded-media.s3-accelerate.amazonaws.com")) {
+                        if (authority.equals("sh.reddit.com")) {
+                            deepLinkError(uri);
+                        } else if (authority.equals("reddit-uploaded-media.s3-accelerate.amazonaws.com")) {
                             String unescapedUrl = uri.toString().replace("%2F", "/");
                             int lastSlashIndex = unescapedUrl.lastIndexOf("/");
                             if (lastSlashIndex < 0 || lastSlashIndex == unescapedUrl.length() - 1) {
@@ -397,18 +403,45 @@ public class LinkResolverActivity extends AppCompatActivity {
 
         String authority = uri.getAuthority();
         if(authority != null && (authority.contains("reddit.com") || authority.contains("redd.it") || authority.contains("reddit.app.link"))) {
-            openInCustomTabs(uri, pm, false);
+            openInCustomTabs(uri, pm, false, false);
             return;
         }
 
-        int linkHandler = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.LINK_HANDLER, "0"));
+        String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
+        String linkHandlerKey = (accountName != null && !accountName.isEmpty())
+                ? accountName + SharedPreferencesUtils.LINK_HANDLER_BASE
+                : SharedPreferencesUtils.LINK_HANDLER;
+        int linkHandler = Integer.parseInt(mSharedPreferences.getString(linkHandlerKey, "0"));
         if (linkHandler == 0) {
             openInBrowser(uri, pm, true);
         } else if (linkHandler == 1) {
-            openInCustomTabs(uri, pm, true);
+            openInCustomTabs(uri, pm, true, false);
+        } else if (linkHandler == 3) {
+            openInCustomTabs(uri, pm, true, true);
+        } else if (linkHandler == 4) {
+            openInSpecificBrowser(uri, pm);
         } else {
             openInWebView(uri);
         }
+    }
+
+    private void openInSpecificBrowser(Uri uri, PackageManager pm) {
+        String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
+        String pkgKey = (accountName != null && !accountName.isEmpty())
+                ? accountName + SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE_BASE
+                : SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE;
+        String pkg = mSharedPreferences.getString(pkgKey, "");
+        if (pkg != null && !pkg.isEmpty()) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            intent.setPackage(pkg);
+            try {
+                startActivity(intent);
+                return;
+            } catch (ActivityNotFoundException ignored) {
+            }
+        }
+        openInBrowser(uri, pm, true);
     }
 
     private void openInBrowser(Uri uri, PackageManager pm, boolean handleError) {
@@ -419,7 +452,7 @@ public class LinkResolverActivity extends AppCompatActivity {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
             if (handleError) {
-                openInCustomTabs(uri, pm, false);
+                openInCustomTabs(uri, pm, false, false);
             } else {
                 openInWebView(uri);
             }
@@ -448,9 +481,45 @@ public class LinkResolverActivity extends AppCompatActivity {
         return packagesSupportingCustomTabs;
     }
 
-    private void openInCustomTabs(Uri uri, PackageManager pm, boolean handleError) {
-        ArrayList<ResolveInfo> resolveInfos = getCustomTabsPackages(pm);
-        if (!resolveInfos.isEmpty()) {
+    private void openInCustomTabs(Uri uri, PackageManager pm, boolean handleError, boolean ephemeral) {
+        String selectedPackage = null;
+        if (ephemeral) {
+            String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
+            String ephemeralPkgKey = (accountName != null && !accountName.isEmpty())
+                    ? accountName + SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE
+                    : SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE;
+            String preferredPackage = mSharedPreferences.getString(ephemeralPkgKey, "");
+            if (preferredPackage != null && !preferredPackage.isEmpty()
+                    && CustomTabsClient.isEphemeralBrowsingSupported(this, preferredPackage)) {
+                selectedPackage = preferredPackage;
+            } else {
+                // queryIntentActivities for http only returns the default browser
+                // on API 30+, so enumerate Custom Tabs services directly to find
+                // any installed browser that declares ephemeral support.
+                Intent svcQuery = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+                for (ResolveInfo info : pm.queryIntentServices(svcQuery, 0)) {
+                    if (info.serviceInfo == null) continue;
+                    String pkg = info.serviceInfo.packageName;
+                    if (CustomTabsClient.isEphemeralBrowsingSupported(this, pkg)) {
+                        selectedPackage = pkg;
+                        break;
+                    }
+                }
+            }
+            if (selectedPackage == null) {
+                // No installed Custom Tabs provider supports ephemeral browsing.
+                // Fall back to the internal WebView, which is closer in privacy
+                // posture than reusing the system browser session.
+                openInWebView(uri);
+                return;
+            }
+        } else {
+            ArrayList<ResolveInfo> resolveInfos = getCustomTabsPackages(pm);
+            if (!resolveInfos.isEmpty()) {
+                selectedPackage = resolveInfos.get(0).activityInfo.packageName;
+            }
+        }
+        if (selectedPackage != null) {
             CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
             // add share action to menu list
             builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
@@ -458,8 +527,11 @@ public class LinkResolverActivity extends AppCompatActivity {
                     new CustomTabColorSchemeParams.Builder()
                             .setToolbarColor(mCustomThemeWrapper.getColorPrimary())
                             .build());
+            if (ephemeral) {
+                builder.setEphemeralBrowsingEnabled(true);
+            }
             CustomTabsIntent customTabsIntent = builder.build();
-            customTabsIntent.intent.setPackage(resolveInfos.get(0).activityInfo.packageName);
+            customTabsIntent.intent.setPackage(selectedPackage);
             if (uri.getScheme() == null) {
                 uri = Uri.parse("http://" + uri);
             }

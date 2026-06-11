@@ -40,11 +40,6 @@
         app:key="hide_subreddit_description"
         app:title="@string/settings_hide_subreddit_description_title" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="use_bottom_toolbar_in_media_viewer"
-        app:title="@string/settings_use_bottom_toolbar_in_media_viewer_title" />
-
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"
         app:entries="@array/settings_default_search_result_tab"
