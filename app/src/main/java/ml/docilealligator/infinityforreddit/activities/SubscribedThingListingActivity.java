@@ -113,6 +113,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     private boolean mInsertMultiredditSuccess;
     private boolean showMultiReddits;
     private boolean isThingSelectionMode;
+    private boolean searchPrefixOnly;
     private int thingSelectionType;
     private String mAccountProfileImageUrl;
     private SectionsPagerAdapter sectionsPagerAdapter;
@@ -238,6 +239,13 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
             binding.searchEditTextSubscribedThingListingActivity.setImeOptions(binding.searchEditTextSubscribedThingListingActivity.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
         }
 
+        searchPrefixOnly = false;
+        binding.prefixMatchSwitchSubscribedThingListingActivity.setChecked(false);
+        binding.prefixMatchSwitchSubscribedThingListingActivity.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            searchPrefixOnly = isChecked;
+            applySearchQuery(binding.searchEditTextSubscribedThingListingActivity.getText().toString());
+        });
+
         binding.searchEditTextSubscribedThingListingActivity.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
@@ -247,7 +255,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
 
             @Override
             public void afterTextChanged(Editable editable) {
-                sectionsPagerAdapter.changeSearchQuery(editable.toString());
+                applySearchQuery(editable.toString());
             }
         });
 
@@ -259,12 +267,12 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (binding.searchEditTextSubscribedThingListingActivity.getVisibility() == View.VISIBLE) {
+                if (binding.searchContainerSubscribedThingListingActivity.getVisibility() == View.VISIBLE) {
                     Utils.hideKeyboard(SubscribedThingListingActivity.this);
-                    binding.searchEditTextSubscribedThingListingActivity.setVisibility(View.GONE);
+                    binding.searchContainerSubscribedThingListingActivity.setVisibility(View.GONE);
                     binding.searchEditTextSubscribedThingListingActivity.setText("");
                     mMenu.findItem(R.id.action_search_subscribed_thing_listing_activity).setVisible(true);
-                    sectionsPagerAdapter.changeSearchQuery("");
+                    applySearchQuery("");
                 } else {
                     setEnabled(false);
                     triggerBackPress();
@@ -299,6 +307,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         applyFABTheme(binding.fabSubscribedThingListingActivity);
         binding.searchEditTextSubscribedThingListingActivity.setTextColor(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor());
         binding.searchEditTextSubscribedThingListingActivity.setHintTextColor(mCustomThemeWrapper.getToolbarSecondaryTextColor());
+        binding.prefixMatchSwitchSubscribedThingListingActivity.setTextColor(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor());
     }
 
     private void initializeViewPagerAndLoadSubscriptions() {
@@ -359,7 +368,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                     intent.putExtra(SearchActivity.EXTRA_SEARCH_ONLY_USERS, true);
                 } else if (thingSelectionType == EXTRA_THING_SELECTION_TYPE_MULTIREDDIT) {
                     item.setVisible(false);
-                    binding.searchEditTextSubscribedThingListingActivity.setVisibility(View.VISIBLE);
+                    binding.searchContainerSubscribedThingListingActivity.setVisibility(View.VISIBLE);
                     binding.searchEditTextSubscribedThingListingActivity.requestFocus();
                     if (binding.searchEditTextSubscribedThingListingActivity.requestFocus()) {
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -377,7 +386,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
             }
 
             item.setVisible(false);
-            binding.searchEditTextSubscribedThingListingActivity.setVisibility(View.VISIBLE);
+            binding.searchContainerSubscribedThingListingActivity.setVisibility(View.VISIBLE);
             binding.searchEditTextSubscribedThingListingActivity.requestFocus();
 
             if (binding.searchEditTextSubscribedThingListingActivity.requestFocus()) {
@@ -392,6 +401,10 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         }
 
         return false;
+    }
+
+    private void applySearchQuery(String query) {
+        sectionsPagerAdapter.changeSearchQuery(searchPrefixOnly ? query + "%" : "%" + query + "%");
     }
 
     @Override

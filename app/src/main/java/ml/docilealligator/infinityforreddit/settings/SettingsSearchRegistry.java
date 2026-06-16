@@ -255,6 +255,12 @@ public class SettingsSearchRegistry {
                 PostPreferenceFragment.class, R.string.settings_category_post_title);
         add(items, c.getString(R.string.settings_click_to_show_media_in_gallery_layout), null, bc,
                 PostPreferenceFragment.class, R.string.settings_category_post_title);
+        add(items, c.getString(R.string.settings_hide_post_type_indicator_title),
+                c.getString(R.string.settings_hide_post_type_indicator_summary), bc,
+                PostPreferenceFragment.class, R.string.settings_category_post_title);
+        add(items, c.getString(R.string.settings_hide_image_count_in_gallery_title),
+                c.getString(R.string.settings_hide_image_count_in_gallery_summary), bc,
+                PostPreferenceFragment.class, R.string.settings_category_post_title);
     }
 
     // -------------------------------------------------------------------------

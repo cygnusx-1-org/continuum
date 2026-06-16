@@ -61,6 +61,7 @@
     <string name="action_unsave_post">Unsave post</string>
     <string name="action_view_crosspost_parent">View crosspost parent</string>
     <string name="action_search">Search</string>
+    <string name="action_match_prefix_only">Match prefix only</string>
     <string name="action_start_lazy_mode">Start Lazy Mode</string>
     <string name="action_stop_lazy_mode">Stop Lazy Mode</string>
     <string name="action_send">Send</string>
@@ -646,6 +647,10 @@
     <string name="settings_user_default_sort_time_title">User Default Sort Time</string>
     <string name="settings_click_to_show_media_in_gallery_layout">Click to Show Media in Gallery Layout</string>
     <string name="settings_hide_post_type">Hide Post Type</string>
+    <string name="settings_hide_post_type_indicator_title">Hide Post Type Icon</string>
+    <string name="settings_hide_post_type_indicator_summary">Hide the play and link icons overlaid on thumbnails in all post layouts</string>
+    <string name="settings_hide_image_count_in_gallery_title">Hide Image Count in Gallery</string>
+    <string name="settings_hide_image_count_in_gallery_summary">Hide the image count badge on gallery posts in all post layouts</string>
     <string name="settings_hide_post_flair">Hide Post Flair</string>
     <string name="settings_hide_subreddit_and_user_prefix">Hide Subreddit and User Prefix</string>
     <string name="settings_hide_the_number_of_votes">Hide the Number of Votes</string>

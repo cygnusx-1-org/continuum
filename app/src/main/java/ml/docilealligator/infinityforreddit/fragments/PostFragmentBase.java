@@ -989,40 +989,16 @@ public abstract class PostFragmentBase extends Fragment {
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardWithPreviewViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardGalleryTypeViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardTextTypeViewHolder) {
-                    if (mNColumns == 2) {
-                        if (spanIndex == 0) {
-                            outRect.set(-mHalfOffset, mCard3VerticalSpace, mCard3HorizontalSpace, mCard3VerticalSpace);
-                        } else {
-                            outRect.set(mCard3HorizontalSpace, mCard3VerticalSpace, -mHalfOffset, mCard3VerticalSpace);
-                        }
-                    } else if (mNColumns == 3) {
-                        if (spanIndex == 0) {
-                            outRect.set(-mHalfOffset, mCard3VerticalSpace, mCard3HorizontalSpace, mCard3VerticalSpace);
-                        } else if (spanIndex == 1) {
-                            outRect.set(mCard3HorizontalSpace, mCard3VerticalSpace, mCard3HorizontalSpace, mCard3VerticalSpace);
-                        } else {
-                            outRect.set(mCard3HorizontalSpace, mCard3VerticalSpace, -mHalfOffset, mCard3VerticalSpace);
-                        }
-                    }
+                    int cardLeft = (spanIndex == 0) ? -mHalfOffset : mCard3HorizontalSpace;
+                    int cardRight = (spanIndex == mNColumns - 1) ? -mHalfOffset : mCard3HorizontalSpace;
+                    outRect.set(cardLeft, mCard3VerticalSpace, cardRight, mCard3VerticalSpace);
                     return;
                 }
             }
 
-            if (mNColumns == 2) {
-                if (spanIndex == 0) {
-                    outRect.set(mHalfOffset, 0, mQuaterOffset, 0);
-                } else {
-                    outRect.set(mQuaterOffset, 0, mHalfOffset, 0);
-                }
-            } else if (mNColumns == 3) {
-                if (spanIndex == 0) {
-                    outRect.set(mHalfOffset, 0, mQuaterOffset, 0);
-                } else if (spanIndex == 1) {
-                    outRect.set(mQuaterOffset, 0, mQuaterOffset, 0);
-                } else {
-                    outRect.set(mQuaterOffset, 0, mHalfOffset, 0);
-                }
-            }
+            int left = (spanIndex == 0) ? mHalfOffset : mQuaterOffset;
+            int right = (spanIndex == mNColumns - 1) ? mHalfOffset : mQuaterOffset;
+            outRect.set(left, 0, right, 0);
         }
     }
 

@@ -30,19 +30,38 @@
                 app:popupTheme="@style/AppTheme.PopupOverlay"
                 app:navigationIcon="?attr/homeAsUpIndicator">
 
-                <EditText
-                    android:id="@+id/search_edit_text_subscribed_thing_listing_activity"
+                <LinearLayout
+                    android:id="@+id/search_container_subscribed_thing_listing_activity"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#00000000"
-                    android:gravity="top"
-                    android:hint="@string/search"
-                    android:maxLines="1"
-                    android:textSize="?attr/font_20"
-                    android:fontFamily="?attr/font_family"
-                    android:inputType="textNoSuggestions"
-                    android:imeOptions="actionSearch"
-                    android:visibility="gone" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
+
+                    <EditText
+                        android:id="@+id/search_edit_text_subscribed_thing_listing_activity"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="#00000000"
+                        android:gravity="center_vertical"
+                        android:hint="@string/search"
+                        android:maxLines="1"
+                        android:textSize="?attr/font_20"
+                        android:fontFamily="?attr/font_family"
+                        android:inputType="textNoSuggestions"
+                        android:imeOptions="actionSearch" />
+
+                    <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
+                        android:id="@+id/prefix_match_switch_subscribed_thing_listing_activity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/action_match_prefix_only"
+                        android:fontFamily="?attr/font_family" />
+
+                </LinearLayout>
 
             </androidx.appcompat.widget.Toolbar>
 

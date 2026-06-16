@@ -37,6 +37,18 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
+        app:key="hide_post_type_indicator"
+        app:summary="@string/settings_hide_post_type_indicator_summary"
+        app:title="@string/settings_hide_post_type_indicator_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="hide_image_count_in_gallery"
+        app:summary="@string/settings_hide_image_count_in_gallery_summary"
+        app:title="@string/settings_hide_image_count_in_gallery_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
         app:key="hide_post_flair"
         app:title="@string/settings_hide_post_flair" />
 

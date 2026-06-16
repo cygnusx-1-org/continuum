@@ -20,7 +20,7 @@ public class MultiRedditViewModel extends ViewModel {
 
     public MultiRedditViewModel(RedditDataRoomDatabase redditDataRoomDatabase, String accountName) {
         mMultiRedditRepository = new MultiRedditRepository(redditDataRoomDatabase, accountName);
-        searchQueryLiveData = new MutableLiveData<>("");
+        searchQueryLiveData = new MutableLiveData<>("%");
 
         mAllMultiReddits = Transformations.switchMap(searchQueryLiveData, searchQuery -> mMultiRedditRepository.getAllMultiRedditsWithSearchQuery(searchQuery));
         mAllFavoriteMultiReddits = Transformations.switchMap(searchQueryLiveData, searchQuery -> mMultiRedditRepository.getAllFavoriteMultiRedditsWithSearchQuery(searchQuery));
