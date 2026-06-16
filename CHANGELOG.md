@@ -2,6 +2,15 @@
 
 ---
 
+8.2.5.9 / 2026-6-15
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented a prefix toggle search of subscriptions
+* Fixed gallery layout columns #290
+* Added Hide Post Type Icon and Hide Image Count in Gallery options
+* Fixed lazy-mode crash with >2 gallery columns by sizing span array to span count
+
 8.2.5.8 / 2026-6-10
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
