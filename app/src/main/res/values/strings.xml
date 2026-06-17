@@ -460,6 +460,9 @@
     <string name="settings_fully_collapse_comment_title">Fully Collapse Comment</string>
     <string name="settings_comment_toolbar_hidden">Comment Toolbar Hidden by Default</string>
     <string name="settings_show_absolute_number_of_votes_title">Show Absolute Number of Votes</string>
+    <string name="settings_category_display_title">Display</string>
+    <string name="settings_force_max_refresh_rate_title">Force Maximum Refresh Rate</string>
+    <string name="settings_force_max_refresh_rate_summary">Request the highest refresh rate your screen supports for smoother scrolling. This is best effort. Whether it takes effect depends on your device\'s make and model.</string>
     <string name="settings_show_elapsed_time">Show Elapsed Time in Posts and Comments</string>
     <string name="settings_time_format_title">Time Format</string>
     <string name="settings_category_post_title">Post</string>

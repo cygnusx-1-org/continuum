@@ -23,6 +23,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,6 +80,9 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public abstract class BaseActivity extends AppCompatActivity implements CustomFontReceiver {
     public static final int IGNORE_MARGIN = -1;
+    // Tag for refresh-rate diagnostics. Filter logcat with `RefreshRate:* *:S` to confirm whether
+    // the "Force Maximum Refresh Rate" setting is actually taking effect on a given device.
+    private static final String REFRESH_RATE_TAG = "RefreshRate";
 
     private boolean immersiveInterface;
     private boolean changeStatusBarIconColor;
@@ -267,10 +273,79 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
             }
         }
 
+        applyPreferredRefreshRate(window, mSharedPreferences);
+
         accessToken = getCurrentAccountSharedPreferences().getString(SharedPreferencesUtils.ACCESS_TOKEN, null);
         accountName = getCurrentAccountSharedPreferences().getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT);
 
         mHandler = new Handler(Looper.getMainLooper());
+    }
+
+    /**
+     * When the "Force Maximum Refresh Rate" setting is enabled, detect the highest refresh rate the
+     * current display supports and request it as the window's preferred refresh rate. This is only a
+     * hint: the system (and some manufacturers' display schedulers) may ignore it, so it is best
+     * effort and varies by make and model. When the setting is disabled the preferred refresh rate
+     * is not set, leaving the device to manage the refresh rate as usual.
+     */
+    private void applyPreferredRefreshRate(Window window, SharedPreferences sharedPreferences) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        boolean enabled = sharedPreferences.getBoolean(SharedPreferencesUtils.FORCE_MAX_REFRESH_RATE_KEY, false);
+
+        Display display;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            display = getDisplay();
+        } else {
+            display = getWindowManager().getDefaultDisplay();
+        }
+        if (display == null) {
+            Log.w(REFRESH_RATE_TAG, "No display available; cannot read or set refresh rate");
+            return;
+        }
+
+        // Current active rate at activity-create time (the baseline, before this hint is applied).
+        float currentRefreshRate = display.getMode().getRefreshRate();
+        Log.d(REFRESH_RATE_TAG, this.getClass().getSimpleName()
+                + ": setting " + (enabled ? "ON" : "OFF")
+                + "; current refresh rate = " + currentRefreshRate + "Hz");
+
+        if (!enabled) {
+            Log.d(REFRESH_RATE_TAG, "Force max refresh rate disabled; leaving preferredRefreshRate unset");
+            logEffectiveRefreshRateAfterSettle(window, display);
+            return;
+        }
+
+        float maxRefreshRate = 0f;
+        StringBuilder modes = new StringBuilder();
+        for (Display.Mode mode : display.getSupportedModes()) {
+            modes.append(String.format(Locale.US, "[%dx%d@%.2fHz] ",
+                    mode.getPhysicalWidth(), mode.getPhysicalHeight(), mode.getRefreshRate()));
+            if (mode.getRefreshRate() > maxRefreshRate) {
+                maxRefreshRate = mode.getRefreshRate();
+            }
+        }
+        Log.d(REFRESH_RATE_TAG, "supported modes = " + modes.toString().trim()
+                + "; detected max = " + maxRefreshRate + "Hz");
+        if (maxRefreshRate > 0f) {
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.preferredRefreshRate = maxRefreshRate;
+            window.setAttributes(params);
+            Log.d(REFRESH_RATE_TAG, "Requested preferredRefreshRate = "
+                    + window.getAttributes().preferredRefreshRate + "Hz");
+        }
+        logEffectiveRefreshRateAfterSettle(window, display);
+    }
+
+    // The requested rate does not take effect until the window has been laid out and the display
+    // scheduler has switched, so we read the actual active rate again a short time after create.
+    private void logEffectiveRefreshRateAfterSettle(Window window, Display display) {
+        window.getDecorView().postDelayed(() -> {
+            float effective = display.getMode().getRefreshRate();
+            Log.d(REFRESH_RATE_TAG, this.getClass().getSimpleName()
+                    + ": effective refresh rate after settle = " + effective + "Hz");
+        }, 1500);
     }
 
     @Override
