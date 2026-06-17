@@ -857,6 +857,7 @@
     <string name="share_gif_link">Share Gif Link</string>
     <string name="share_video_link">Share Video Link</string>
     <string name="share_link">Share Link</string>
+    <string name="copy_title">Copy Title</string>
     <string name="copy_post_link">Copy Post Link</string>
     <string name="copy_image_link">Copy Image Link</string>
     <string name="copy_gif_link">Copy Gif Link</string>

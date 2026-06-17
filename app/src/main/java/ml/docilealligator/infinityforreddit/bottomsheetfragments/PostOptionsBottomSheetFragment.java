@@ -203,6 +203,11 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 dismiss();
             });
 
+            binding.copyTitleTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                CopyTextBottomSheetFragment.showCopyDialog(mBaseActivity, mPost.getTitle());
+                dismiss();
+            });
+
             binding.addToPostFilterTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                 Intent intent = new Intent(mBaseActivity, PostFilterPreferenceActivity.class);
                 intent.putExtra(PostFilterPreferenceActivity.EXTRA_POST, mPost);
