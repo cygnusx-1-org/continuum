@@ -2,6 +2,16 @@
 
 ---
 
+8.2.5.9.1 / 2026-6-17
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Force maximum refresh rate #297
+* Fixed Unable to select and copy post titles now #296
+
+Used 8.2.5.9.1 instead of 8.2.5.10 to avoid a bug in GitHub's release page
+where it will get the order wrong.
+
 8.2.5.9 / 2026-6-15
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
