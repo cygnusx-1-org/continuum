@@ -49,6 +49,11 @@
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".activities.UserMultiRedditsActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.SubscribedThingListingActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".activities.LoginChromeCustomTabActivity"
             android:exported="true"
             android:label="@string/login_activity_label"

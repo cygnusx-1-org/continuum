@@ -814,12 +814,25 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.view_multi_reddit_detail_activity, menu);
+        boolean isFollowedEntry = multiReddit != null && multiReddit.isFollowed();
+        boolean isNotOwned;
         if (multiReddit == null && multiPath != null) {
             String[] segments = multiPath.split("/");
-            if (segments.length > 2 && !segments[1].equals(accountName)) {
-                menu.findItem(R.id.action_edit_view_multi_reddit_detail_activity).setVisible(false);
+            isNotOwned = segments.length > 2 && !segments[1].equals(accountName);
+        } else {
+            isNotOwned = isFollowedEntry;
+        }
+        if (isNotOwned) {
+            menu.findItem(R.id.action_edit_view_multi_reddit_detail_activity).setVisible(false);
+            menu.findItem(R.id.action_copy_view_multi_reddit_detail_activity).setVisible(true);
+            if (isFollowedEntry) {
+                // Already saved locally: allow removing it, hide the Reddit-side delete and the save action.
                 menu.findItem(R.id.action_delete_view_multi_reddit_detail_activity).setVisible(false);
-                menu.findItem(R.id.action_copy_view_multi_reddit_detail_activity).setVisible(true);
+                menu.findItem(R.id.action_remove_followed_view_multi_reddit_detail_activity).setVisible(true);
+            } else {
+                // Someone else's feed we are only viewing: offer to save it locally, nothing to delete.
+                menu.findItem(R.id.action_delete_view_multi_reddit_detail_activity).setVisible(false);
+                menu.findItem(R.id.action_save_locally_view_multi_reddit_detail_activity).setVisible(true);
             }
         }
         applyMenuItemTheme(menu);
@@ -928,8 +941,57 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         } else if (itemId == R.id.action_copy_view_multi_reddit_detail_activity) {
             CopyMultiRedditActivity.Companion.start(this, multiPath);
             return true;
+        } else if (itemId == R.id.action_save_locally_view_multi_reddit_detail_activity) {
+            if (multiReddit != null) {
+                saveFollowedMultiReddit(multiReddit);
+            } else {
+                FetchMultiRedditInfo.FetchMultiRedditInfoListener listener = new FetchMultiRedditInfo.FetchMultiRedditInfoListener() {
+                    @Override
+                    public void success(MultiReddit fetchedMultiReddit) {
+                        saveFollowedMultiReddit(fetchedMultiReddit);
+                    }
+
+                    @Override
+                    public void failed() {
+                        Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
+                    }
+                };
+                if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                    FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
+                } else {
+                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
+                }
+            }
+            return true;
+        } else if (itemId == R.id.action_remove_followed_view_multi_reddit_detail_activity) {
+            new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                    .setTitle(R.string.remove_followed_multi_reddit)
+                    .setMessage(R.string.remove_followed_multi_reddit_dialog_message)
+                    .setPositiveButton(R.string.remove, (dialogInterface, i) -> mExecutor.execute(() -> {
+                        mRedditDataRoomDatabase.multiRedditDao().deleteFollowedMultiReddit(multiPath, accountName);
+                        new Handler(getMainLooper()).post(() -> {
+                            Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.remove_followed_multi_reddit_success, Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    }))
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+            return true;
         }
         return false;
+    }
+
+    private void saveFollowedMultiReddit(MultiReddit source) {
+        MultiReddit followed = new MultiReddit(source.getPath(), source.getDisplayName(),
+                source.getName(), source.getDescription(), source.getCopiedFrom(), source.getIconUrl(),
+                source.getVisibility(), accountName, source.getNSubscribers(), source.getCreatedUTC(),
+                source.isOver18(), false, false);
+        followed.setFollowed(true);
+        mExecutor.execute(() -> {
+            mRedditDataRoomDatabase.multiRedditDao().insert(followed);
+            new Handler(getMainLooper()).post(() ->
+                    Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.save_multi_reddit_locally_success, Toast.LENGTH_SHORT).show());
+        });
     }
 
     private void showListSubredditsDialog(ArrayList<ExpandedSubredditInMultiReddit> subreddits) {

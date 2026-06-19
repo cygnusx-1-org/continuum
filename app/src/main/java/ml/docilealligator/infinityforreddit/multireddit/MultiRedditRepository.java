@@ -9,17 +9,19 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 public class MultiRedditRepository {
     private final MultiRedditDao mMultiRedditDao;
     private final String mAccountName;
+    private final boolean mFollowed;
 
-    MultiRedditRepository(RedditDataRoomDatabase redditDataRoomDatabase, String accountName) {
+    MultiRedditRepository(RedditDataRoomDatabase redditDataRoomDatabase, String accountName, boolean followed) {
         mMultiRedditDao = redditDataRoomDatabase.multiRedditDao();
         mAccountName = accountName;
+        mFollowed = followed;
     }
 
     LiveData<List<MultiReddit>> getAllMultiRedditsWithSearchQuery(String searchQuery) {
-        return mMultiRedditDao.getAllMultiRedditsWithSearchQuery(mAccountName, searchQuery);
+        return mMultiRedditDao.getAllMultiRedditsWithSearchQuery(mAccountName, mFollowed, searchQuery);
     }
 
     LiveData<List<MultiReddit>> getAllFavoriteMultiRedditsWithSearchQuery(String searchQuery) {
-        return mMultiRedditDao.getAllFavoriteMultiRedditsWithSearchQuery(mAccountName, searchQuery);
+        return mMultiRedditDao.getAllFavoriteMultiRedditsWithSearchQuery(mAccountName, mFollowed, searchQuery);
     }
 }

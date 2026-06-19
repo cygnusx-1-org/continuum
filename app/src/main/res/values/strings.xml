@@ -253,6 +253,7 @@
     <string name="subreddits">Subreddits</string>
     <string name="users">Users</string>
     <string name="multi_reddits">MultiReddits</string>
+    <string name="users_multireddits">Users MultiReddits</string>
     <string name="posts">Posts</string>
     <string name="comments">Comments</string>
     <string name="about">About</string>
@@ -385,6 +386,7 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="save">Save</string>
     <string name="edit_success">Edit successfully</string>
     <string name="delete_post_success">Delete successfully</string>
     <string name="delete_post_failed">Delete failed</string>
@@ -902,6 +904,23 @@
     <string name="delete_multi_reddit_failed">Delete failed</string>
     <string name="delete_multi_reddit_dialog_message">Are you sure?</string>
     <string name="copy_multi_reddit_failed">Cannot copy this multireddit.</string>
+    <string name="action_save_multi_reddit_locally">Save Multireddit locally</string>
+    <string name="save_multi_reddit_locally_success">Saved to Users MultiReddits</string>
+    <string name="remove_followed_multi_reddit">Remove from Users MultiReddits</string>
+    <string name="remove_followed_multi_reddit_dialog_message">Remove this saved multireddit? The original is not affected.</string>
+    <string name="remove_followed_multi_reddit_success">Removed</string>
+    <string name="add_user_title">Follow user</string>
+    <string name="follow_failed_user_suspended">u/%1$s is suspended and can\'t be followed</string>
+    <string name="follow_failed_user_not_found">u/%1$s doesn\'t exist or was deleted</string>
+    <string name="follow_failed_user_blocked">You\'ve blocked u/%1$s. Unblock to follow.</string>
+    <string name="follow_failed_user_cannot_be_followed">u/%1$s can\'t be followed</string>
+    <string name="follow_failed_user_nsfw">u/%1$s has an NSFW profile. Enable NSFW in settings to follow.</string>
+    <string name="add_user_multireddit_title">Add user\'s MultiReddits</string>
+    <string name="add_user_multireddit_username_hint">Username</string>
+    <string name="fetch_user_multireddit_failed">Could not fetch this user\'s MultiReddits</string>
+    <string name="user_has_no_public_multireddit">This user has no public MultiReddits</string>
+    <string name="save_user_multireddit_success">Saved %1$d MultiReddit(s)</string>
+    <string name="user_multireddits_activity_label">%1$s\'s MultiReddits</string>
 
     <string name="enable_nsfw">Enable NSFW</string>
     <string name="disable_nsfw">Disable NSFW</string>

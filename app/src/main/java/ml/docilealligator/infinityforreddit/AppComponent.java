@@ -13,6 +13,7 @@ import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterUsageListingActivity;
 import ml.docilealligator.infinityforreddit.activities.CopyMultiRedditActivity;
+import ml.docilealligator.infinityforreddit.activities.UserMultiRedditsActivity;
 import ml.docilealligator.infinityforreddit.activities.CreateMultiRedditActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomThemeListingActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomThemePreviewActivity;
@@ -332,6 +333,8 @@ public interface AppComponent {
     void inject(ProxyPreferenceFragment proxyPreferenceFragment);
 
     void inject(CopyMultiRedditActivity copyMultiRedditActivity);
+
+    void inject(UserMultiRedditsActivity userMultiRedditsActivity);
 
     void inject(AppAuthLoginActivity appAuthLoginActivity);
 

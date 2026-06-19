@@ -197,6 +197,12 @@ public interface RedditAPI {
     @GET("/api/multi/mine?expand_srs=true")
     Call<String> getMyMultiReddits(@HeaderMap Map<String, String> headers);
 
+    @GET("/api/multi/user/{username}?expand_srs=true&raw_json=1")
+    Call<String> getUserMultiReddits(@HeaderMap Map<String, String> headers, @Path("username") String username);
+
+    @GET("/api/multi/user/{username}?expand_srs=true&raw_json=1")
+    Call<String> getPublicUserMultiReddits(@Path("username") String username);
+
     @FormUrlEncoded
     @POST("/api/multi/favorite?raw_json=1&gilding_detail=1")
     Call<String> favoriteMultiReddit(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
