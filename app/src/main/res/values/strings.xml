@@ -574,8 +574,10 @@
     <string name="settings_tab_6_summary">Tab 6</string>
     <string name="settings_more_tabs_summary">More Tabs</string>
     <string name="settings_more_tabs_info_summary">Enabling the following options will cause an unintended behaviour:\nTabs may lose all the content after switching to others. This is the same as refreshing the page.</string>
-    <string name="settings_more_tabs_show_favorite_multireddits_title">Show Favorite Multireddits</string>
-    <string name="settings_more_tabs_show_multireddits_title">Show Multireddits</string>
+    <string name="settings_more_tabs_show_favorite_multireddits_title">Show Favorite MultiReddits</string>
+    <string name="settings_more_tabs_show_multireddits_title">Show MultiReddits</string>
+    <string name="settings_more_tabs_show_favorite_users_multireddits_title">Show Favorite Users MultiReddits</string>
+    <string name="settings_more_tabs_show_users_multireddits_title">Show Users MultiReddits</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">Show Favorite Subscribed Subreddits</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">Show Subscribed Subreddits</string>
     <string name="settings_tab_title">Title</string>
@@ -1295,6 +1297,7 @@
     <string name="leave">Leave</string>
 
     <string name="go_to_subreddit">Go to Subreddit</string>
+    <string name="add_subreddit">Add Subreddit</string>
     <string name="go_to_user">Go to User</string>
     <string name="go_to_thing_hint">Name</string>
     <string name="go_to_top">Go To Top</string>

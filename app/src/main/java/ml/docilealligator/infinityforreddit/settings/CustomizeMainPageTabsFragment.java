@@ -740,6 +740,26 @@ public class CustomizeMainPageTabsFragment extends Fragment {
             binding.showFavoriteMultiredditsSwitchMaterialCustomizeMainPageTabsFragment.performClick();
         });
 
+        binding.showUsersMultiredditsSwitchMaterialCustomizeMainPageTabsFragment.setChecked(mainActivityTabsSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_USERS_MULTIREDDITS, false));
+        binding.showUsersMultiredditsSwitchMaterialCustomizeMainPageTabsFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            mainActivityTabsSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_USERS_MULTIREDDITS, b).apply();
+            mSettingsChanged = true;
+            updateRestartButtonVisibility();
+        });
+        binding.showUsersMultiredditsLinearLayoutCustomizeMainPageTabsFragment.setOnClickListener(view -> {
+            binding.showUsersMultiredditsSwitchMaterialCustomizeMainPageTabsFragment.performClick();
+        });
+
+        binding.showFavoriteUsersMultiredditsSwitchMaterialCustomizeMainPageTabsFragment.setChecked(mainActivityTabsSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS, false));
+        binding.showFavoriteUsersMultiredditsSwitchMaterialCustomizeMainPageTabsFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            mainActivityTabsSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS, b).apply();
+            mSettingsChanged = true;
+            updateRestartButtonVisibility();
+        });
+        binding.showFavoriteUsersMultiredditsLinearLayoutCustomizeMainPageTabsFragment.setOnClickListener(view -> {
+            binding.showFavoriteUsersMultiredditsSwitchMaterialCustomizeMainPageTabsFragment.performClick();
+        });
+
         binding.showSubscribedSubredditsSwitchMaterialCustomizeMainPageTabsFragment.setChecked(mainActivityTabsSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS, false));
         binding.showSubscribedSubredditsSwitchMaterialCustomizeMainPageTabsFragment.setOnCheckedChangeListener((compoundButton, b) -> {
             mainActivityTabsSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS, b).apply();

@@ -136,7 +136,9 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
             }
 
             if (stringId != 0) {
-                ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(stringId);
+                // Display the plural label for the multireddit row, but keep stringId as the click key.
+                int labelId = stringId == R.string.multi_reddit ? R.string.multi_reddits : stringId;
+                ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(labelId);
                 ((MenuItemViewHolder) holder).binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, drawableId));
             }
             if (setOnClickListener) {

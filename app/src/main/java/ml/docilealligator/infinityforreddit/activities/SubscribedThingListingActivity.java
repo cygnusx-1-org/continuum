@@ -574,7 +574,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     private void showGoToSubredditDialog() {
         View rootView = getLayoutInflater().inflate(R.layout.dialog_go_to_thing_edit_text, (ViewGroup) binding.getRoot(), false);
         TextInputEditText thingEditText = rootView.findViewById(R.id.text_input_edit_text_go_to_thing_edit_text);
-        thingEditText.setHint(R.string.go_to_subreddit);
+        thingEditText.setHint(R.string.add_subreddit);
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_view_go_to_thing_edit_text);
         SubredditAutocompleteRecyclerViewAdapter adapter = new SubredditAutocompleteRecyclerViewAdapter(
                 this, mCustomThemeWrapper, subredditData -> {
@@ -650,7 +650,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         });
 
         new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
-                .setTitle(R.string.go_to_subreddit)
+                .setTitle(R.string.add_subreddit)
                 .setView(rootView)
                 .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
                     Utils.hideKeyboard(this);
