@@ -2,6 +2,19 @@
 
 ---
 
+8.2.5.9.2 / 2026-6-19
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Custom Feeds not visible #299
+* Added an Add button to Subreddits and Users in Subscriptions
+* Added Show Users MultiReddits" and "Show Favorite Users MultiReddits"
+toggles in "Settings | Interface | Customize Tabs in Main Page"
+* Fixed tabs to auto-fit the screen width
+* Excluded favorites from the non-favorite tabs to avoid duplicate tabs
+* Changed the "Multireddits" label to "MultiReddits" in the navigation drawer
+* Fixed add button in Subscriptions | Subreddits to say "Add Subreddit"
+
 8.2.5.9.1 / 2026-6-17
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
