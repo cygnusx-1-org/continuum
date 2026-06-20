@@ -11,14 +11,12 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/restart_button_customize_main_page_tabs"
+        <TextView
+            android:id="@+id/restart_warning_customize_main_page_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/restart_app_to_apply_changes"
-            android:visibility="gone"
-            app:icon="@android:drawable/ic_menu_rotate" />
+            android:padding="16dp"
+            android:visibility="gone" />
 
 
         <View

@@ -563,7 +563,7 @@
     <string name="settings_delete_all_legacy_settings_title">Delete All Legacy Settings</string>
     <string name="settings_reset_all_settings_title">Reset All Settings</string>
     <string name="restart_app_see_changes">Restart the app to see the changes</string>
-    <string name="app_will_restart">If you go back to the previous screen after changing the configuration, the app will restart</string>
+    <string name="app_will_restart">Going back after changing a value will cause the app to restart.</string>
     <string name="settings_tab_count">Tab Count</string>
     <string name="settings_show_tab_names">Show Tab Names</string>
     <string name="settings_tab_1_summary">Tab 1</string>

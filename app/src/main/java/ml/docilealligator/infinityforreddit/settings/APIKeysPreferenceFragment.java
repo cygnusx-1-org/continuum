@@ -3,20 +3,30 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.EditTextPreference;
@@ -49,11 +59,25 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     private CustomFontEditTextPreference clientIdPref;
     private EditText currentClientIdEditText;
 
+    // Restart is deferred until the user leaves this screen, so a single restart covers
+    // however many keys they edited. This callback fires on back button / back gesture / Up.
+    private boolean mPendingRestart = false;
+    private OnBackPressedCallback mRestartOnBackCallback;
+    private TextView mRestartWarning;
+
     public APIKeysPreferenceFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mRestartOnBackCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                AppRestartHelper.triggerAppRestart(requireContext());
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, mRestartOnBackCallback);
 
         // Initialize the launcher for QR code scanning
         qrCodeScannerLauncher = registerForActivityResult(
@@ -74,6 +98,42 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                         }
                     }
                 });
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View preferenceView = super.onCreateView(inflater, container, savedInstanceState);
+
+        // Wrap the preference list with a warning banner across the top, matching the
+        // "pending changes" affordance used elsewhere (e.g. CustomizeMainPageTabsFragment).
+        // The banner stays hidden until a restart-requiring key is edited.
+        LinearLayout wrapper = new LinearLayout(requireContext());
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+
+        mRestartWarning = new TextView(requireContext());
+        // Warning sign glyph in front (enlarged 2x) so the message reads as an alert at a glance.
+        String symbol = "⚠";
+        SpannableString warningText = new SpannableString(symbol + "  " + getString(R.string.app_will_restart));
+        warningText.setSpan(new RelativeSizeSpan(2f), 0, symbol.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mRestartWarning.setText(warningText);
+        mRestartWarning.setTypeface(mRestartWarning.getTypeface(), Typeface.BOLD);
+        int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16,
+                getResources().getDisplayMetrics());
+        mRestartWarning.setPadding(padding, padding, padding, padding);
+        if (mActivity != null && mActivity.customThemeWrapper != null) {
+            mRestartWarning.setBackgroundColor(mActivity.customThemeWrapper.getCardViewBackgroundColor());
+            // Accent is the theme's alert/attention color, so the text stands out.
+            mRestartWarning.setTextColor(mActivity.customThemeWrapper.getColorAccent());
+        }
+        mRestartWarning.setVisibility(mPendingRestart ? View.VISIBLE : View.GONE);
+
+        wrapper.addView(mRestartWarning, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        wrapper.addView(preferenceView, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        return wrapper;
     }
 
     @Override
@@ -200,9 +260,10 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
                 if (success) {
                     Log.i(TAG, "Client ID manually saved successfully.");
-                    // Update the summary provider manually since we return false
-                    preference.setSummaryProvider(clientIdPref.getSummaryProvider()); // Re-set to trigger update
-                    AppRestartHelper.triggerAppRestart(requireContext()); // Use the helper
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    clientIdPref.setText(value);
+                    markRestartPendingAndWarn();
                 } else {
                     Log.e(TAG, "Failed to save Client ID manually.");
                     Toast.makeText(getContext(), "Error saving Client ID.", Toast.LENGTH_SHORT).show();
@@ -331,8 +392,10 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
                 if (success) {
                     Log.i(TAG, "User Agent saved successfully.");
-                    preference.setSummaryProvider(userAgentPref.getSummaryProvider());
-                    AppRestartHelper.triggerAppRestart(requireContext());
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    userAgentPref.setText(value);
+                    markRestartPendingAndWarn();
                 } else {
                     Log.e(TAG, "Failed to save User Agent.");
                     Toast.makeText(getContext(), "Error saving User Agent.", Toast.LENGTH_SHORT).show();
@@ -382,8 +445,10 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
                 if (success) {
                     Log.i(TAG, "Redirect URI saved successfully.");
-                    preference.setSummaryProvider(redirectUriPref.getSummaryProvider());
-                    AppRestartHelper.triggerAppRestart(requireContext());
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    redirectUriPref.setText(value);
+                    markRestartPendingAndWarn();
                 } else {
                     Log.e(TAG, "Failed to save Redirect URI.");
                     Toast.makeText(getContext(), "Error saving Redirect URI.", Toast.LENGTH_SHORT).show();
@@ -393,6 +458,18 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             }));
         } else {
             Log.e(TAG, "Could not find Redirect URI preference: " + SharedPreferencesUtils.REDIRECT_URI_PREF_KEY);
+        }
+    }
+
+    // Records that a restart-requiring key changed, arms the back callback so leaving the
+    // screen restarts the app, and reveals the top banner so the deferred restart isn't a surprise.
+    private void markRestartPendingAndWarn() {
+        mPendingRestart = true;
+        if (mRestartOnBackCallback != null) {
+            mRestartOnBackCallback.setEnabled(true);
+        }
+        if (mRestartWarning != null) {
+            mRestartWarning.setVisibility(View.VISIBLE);
         }
     }
 

@@ -4,16 +4,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Button;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -68,11 +73,29 @@ public class CustomizeMainPageTabsFragment extends Fragment {
     private String tab6CurrentTitle;
     private int tab6CurrentPostType;
     private String tab6CurrentName;
-    private Button restartButton;
+    private TextView restartWarning;
+    private OnBackPressedCallback mRestartOnBackCallback;
     private boolean mSettingsChanged = false;
 
     public CustomizeMainPageTabsFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Restart is deferred until the user leaves the screen, so editing several tab
+        // settings only restarts once. Fires on back button / back gesture / Up.
+        mRestartOnBackCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mActivity != null) {
+                    AppRestartHelper.triggerAppRestart(mActivity);
+                }
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, mRestartOnBackCallback);
     }
 
     @Override
@@ -82,18 +105,21 @@ public class CustomizeMainPageTabsFragment extends Fragment {
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 
-        // Initialize the restart button
-        restartButton = binding.getRoot().findViewById(R.id.restart_button_customize_main_page_tabs);
-        if (restartButton != null) {
-            restartButton.setOnClickListener(v -> {
-                if (mActivity != null) {
-                    AppRestartHelper.triggerAppRestart(mActivity);
-                    mSettingsChanged = false; // Reset flag
-                    updateRestartButtonVisibility(); // Hide button
-                }
-            });
+        // Initialize the restart warning banner (mirrors API Keys: the restart happens on back,
+        // the banner just warns that leaving will restart). Styled via spans so it survives the
+        // setFontToAllTextViews() pass below, which replaces the base typeface but not spans/color.
+        restartWarning = binding.getRoot().findViewById(R.id.restart_warning_customize_main_page_tabs);
+        if (restartWarning != null) {
+            String symbol = "⚠";
+            SpannableString warningText = new SpannableString(symbol + "  " + getString(R.string.app_will_restart));
+            warningText.setSpan(new RelativeSizeSpan(2f), 0, symbol.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            warningText.setSpan(new StyleSpan(Typeface.BOLD), 0, warningText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            restartWarning.setText(warningText);
+            // Accent is the theme's alert/attention color, so the text stands out.
+            restartWarning.setTextColor(mActivity.customThemeWrapper.getColorAccent());
+            restartWarning.setBackgroundColor(mActivity.customThemeWrapper.getCardViewBackgroundColor());
         }
-        updateRestartButtonVisibility(); // Set initial visibility (should be hidden)
+        updateRestartButtonVisibility(); // Set initial visibility (hidden)
 
         binding.getRoot().setBackgroundColor(mActivity.customThemeWrapper.getBackgroundColor());
         applyCustomTheme();
@@ -836,8 +862,11 @@ public class CustomizeMainPageTabsFragment extends Fragment {
     }
 
     private void updateRestartButtonVisibility() {
-        if (restartButton != null) {
-            restartButton.setVisibility(mSettingsChanged ? View.VISIBLE : View.GONE);
+        if (mRestartOnBackCallback != null) {
+            mRestartOnBackCallback.setEnabled(mSettingsChanged);
+        }
+        if (restartWarning != null) {
+            restartWarning.setVisibility(mSettingsChanged ? View.VISIBLE : View.GONE);
         }
     }
 
