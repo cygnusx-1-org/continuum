@@ -101,7 +101,9 @@ import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityMainBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHideFabInPostFeedEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHideKarmaEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeNavigationDrawerSectionsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeLockBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
@@ -757,6 +759,18 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return;
         }
 
+        bindBottomAppBar();
+        bindNavigationDrawerAndTabs();
+    }
+
+    // Builds the bottom app bar options and FAB. Split out of bindView() so it can be re-run
+    // live (e.g. from the Customize Bottom App Bar settings) without rebuilding the whole screen.
+    @ExperimentalBadgeUtils
+    private void bindBottomAppBar() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+
         if (showBottomAppBar) {
             int optionCount = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, 4);
             int option1 = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS);
@@ -969,7 +983,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return true;
         });
         navigationWrapper.floatingActionButton.setVisibility(hideFab ? View.GONE : View.VISIBLE);
+    }
 
+    @ExperimentalBadgeUtils
+    private void bindNavigationDrawerAndTabs() {
         adapter = new NavigationDrawerRecyclerViewMergedAdapter(this, mSharedPreferences,
                 mNsfwAndSpoilerSharedPreferences, mNavigationDrawerSharedPreferences, mSecuritySharedPreferences,
                 mCustomThemeWrapper, accountName, new NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener() {
@@ -1813,6 +1830,20 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         if (adapter != null) {
             adapter.setHideKarma(event.hideKarma);
         }
+    }
+
+    @Subscribe
+    public void onChangeNavigationDrawerSectionsEvent(ChangeNavigationDrawerSectionsEvent event) {
+        if (adapter != null) {
+            adapter.refreshNavigationDrawerSections(mNavigationDrawerSharedPreferences);
+        }
+    }
+
+    @ExperimentalBadgeUtils
+    @Subscribe
+    public void onChangeBottomAppBarEvent(ChangeBottomAppBarEvent event) {
+        // Re-read and re-apply the bottom app bar options/FAB without rebuilding the whole screen.
+        bindBottomAppBar();
     }
 
     @Subscribe

@@ -20,6 +20,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
 
@@ -31,6 +33,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostHistoryBinding;
+import ml.docilealligator.infinityforreddit.events.ChangePostHistorySettingsEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
@@ -103,6 +106,7 @@ public class PostHistoryFragment extends Fragment {
         binding.markPostsAsReadSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> {
             postHistorySharedPreferences.edit().putBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, b).apply();
             updateOptions();
+            postMarkPostsAsReadSettingsChanged();
         });
 
 
@@ -129,11 +133,16 @@ public class PostHistoryFragment extends Fragment {
         });
 
         binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setOnClickListener(view -> binding.markPostsAsReadAfterVotingSwitchPostHistoryFragment.performClick());
-        binding.markPostsAsReadAfterVotingSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) ->
-                postHistorySharedPreferences.edit().putBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_AFTER_VOTING_BASE, b).apply());
+        binding.markPostsAsReadAfterVotingSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            postHistorySharedPreferences.edit().putBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_AFTER_VOTING_BASE, b).apply();
+            postMarkPostsAsReadSettingsChanged();
+        });
 
         binding.markPostsAsReadOnScrollLinearLayoutPostHistoryFragment.setOnClickListener(view -> binding.markPostsAsReadOnScrollSwitchPostHistoryFragment.performClick());
-        binding.markPostsAsReadOnScrollSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> postHistorySharedPreferences.edit().putBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_ON_SCROLL_BASE, b).apply());
+        binding.markPostsAsReadOnScrollSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            postHistorySharedPreferences.edit().putBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_ON_SCROLL_BASE, b).apply();
+            postMarkPostsAsReadSettingsChanged();
+        });
 
         binding.hideReadPostsAutomaticallyLinearLayoutPostHistoryFragment.setOnClickListener(view -> binding.hideReadPostsAutomaticallySwitchPostHistoryFragment.performClick());
         binding.hideReadPostsAutomaticallySwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> {
@@ -151,6 +160,14 @@ public class PostHistoryFragment extends Fragment {
         binding.hideReadPostsAutomaticallyInSearchSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> postHistorySharedPreferences.edit().putBoolean(mActivity.accountName + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE, b).apply());
 
         return binding.getRoot();
+    }
+
+    // Apply the mark-as-read toggles live to any visible post feed instead of requiring a restart.
+    private void postMarkPostsAsReadSettingsChanged() {
+        EventBus.getDefault().post(new ChangePostHistorySettingsEvent(
+                binding.markPostsAsReadSwitchPostHistoryFragment.isChecked(),
+                binding.markPostsAsReadAfterVotingSwitchPostHistoryFragment.isChecked(),
+                binding.markPostsAsReadOnScrollSwitchPostHistoryFragment.isChecked()));
     }
 
     private void updateOptions() {
@@ -176,9 +193,6 @@ public class PostHistoryFragment extends Fragment {
     }
 
     private void applyCustomTheme() {
-        binding.infoTextViewPostHistoryFragment.setTextColor(mActivity.customThemeWrapper.getSecondaryTextColor());
-        Drawable infoDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_info_preference_day_night_24dp, mActivity.customThemeWrapper.getPrimaryIconColor());
-        binding.infoTextViewPostHistoryFragment.setCompoundDrawablesWithIntrinsicBounds(infoDrawable, null, null, null);
         int primaryTextColor = mActivity.customThemeWrapper.getPrimaryTextColor();
         binding.markPostsAsReadTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.readPostsLimitTextViewPostHistoryFragment.setTextColor(primaryTextColor);

@@ -69,8 +69,7 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="legacy_autoplay_video_controller_ui"
-        app:title="@string/settings_legacy_autoplay_video_controller_ui_title"
-        app:summary="@string/restart_app_see_changes" />
+        app:title="@string/settings_legacy_autoplay_video_controller_ui_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"

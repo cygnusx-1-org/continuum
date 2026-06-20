@@ -67,6 +67,9 @@ import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFi
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayVideoControllerUIEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
+import ml.docilealligator.infinityforreddit.events.ChangePostHistorySettingsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
@@ -1547,6 +1550,30 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             return ((FilteredPostsActivity) mActivity).isNsfwSubreddit();
         } else {
             return false;
+        }
+    }
+
+    @Subscribe
+    public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
+        // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
+        changePostLayout(postLayout, true);
+    }
+
+    @Subscribe
+    public void onChangePostHistorySettingsEvent(ChangePostHistorySettingsEvent event) {
+        if (mAdapter != null) {
+            mAdapter.setMarkPostsAsReadSettings(event.markPostsAsRead, event.markPostsAsReadAfterVoting,
+                    event.markPostsAsReadOnScroll);
+        }
+    }
+
+    @Subscribe
+    public void onChangeAutoplayVideoControllerUIEvent(ChangeAutoplayVideoControllerUIEvent event) {
+        if (mAdapter != null) {
+            // The controller UI is chosen in onCreateViewHolder, so re-attach the adapter to
+            // recreate the view holders with the new layout.
+            mAdapter.setLegacyAutoplayVideoControllerUI(event.legacyAutoplayVideoControllerUI);
+            refreshAdapter();
         }
     }
 

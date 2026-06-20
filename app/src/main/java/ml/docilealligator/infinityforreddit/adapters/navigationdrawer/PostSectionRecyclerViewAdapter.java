@@ -39,6 +39,11 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
         this.itemClickListener = itemClickListener;
     }
 
+    public void setCollapsePostSection(boolean collapsePostSection) {
+        this.collapsePostSection = collapsePostSection;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemViewType(int position) {
         return position == 0 ? VIEW_TYPE_MENU_GROUP_TITLE : VIEW_TYPE_MENU_ITEM;

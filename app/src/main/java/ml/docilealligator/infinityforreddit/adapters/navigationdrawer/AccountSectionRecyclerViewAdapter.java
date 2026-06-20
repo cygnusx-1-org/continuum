@@ -45,6 +45,11 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
         this.itemClickListener = itemClickListener;
     }
 
+    public void setCollapseAccountSection(boolean collapseAccountSection) {
+        this.collapseAccountSection = collapseAccountSection;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemViewType(int position) {
         return position == 0 ? VIEW_TYPE_MENU_GROUP_TITLE : VIEW_TYPE_MENU_ITEM;

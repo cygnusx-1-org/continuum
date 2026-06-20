@@ -47,6 +47,11 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         this.itemClickListener = itemClickListener;
     }
 
+    public void setCollapsePreferencesSection(boolean collapsePreferencesSection) {
+        this.collapsePreferencesSection = collapsePreferencesSection;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemViewType(int position) {
         return position == 0 ? VIEW_TYPE_MENU_GROUP_TITLE : VIEW_TYPE_MENU_ITEM;
