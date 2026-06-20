@@ -920,7 +920,7 @@
     <string name="fetch_user_multireddit_failed">Could not fetch this user\'s MultiReddits</string>
     <string name="user_has_no_public_multireddit">This user has no public MultiReddits</string>
     <string name="save_user_multireddit_success">Saved %1$d MultiReddit(s)</string>
-    <string name="user_multireddits_activity_label">%1$s\'s MultiReddits</string>
+    <string name="user_multireddits_activity_label">%1$s MultiReddits</string>
 
     <string name="enable_nsfw">Enable NSFW</string>
     <string name="disable_nsfw">Disable NSFW</string>
