@@ -915,7 +915,7 @@
     <string name="follow_failed_user_blocked">You\'ve blocked u/%1$s. Unblock to follow.</string>
     <string name="follow_failed_user_cannot_be_followed">u/%1$s can\'t be followed</string>
     <string name="follow_failed_user_nsfw">u/%1$s has an NSFW profile. Enable NSFW in settings to follow.</string>
-    <string name="add_user_multireddit_title">Add user\'s MultiReddits</string>
+    <string name="add_user_multireddit_title">Add users MultiReddits</string>
     <string name="add_user_multireddit_username_hint">Username</string>
     <string name="fetch_user_multireddit_failed">Could not fetch this user\'s MultiReddits</string>
     <string name="user_has_no_public_multireddit">This user has no public MultiReddits</string>
