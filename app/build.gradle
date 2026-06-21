@@ -417,6 +417,7 @@ dependencies {
 spotless {
     java {
         target '**/*.java'
+        importOrder()
         removeUnusedImports()
         trimTrailingWhitespace()
         leadingTabsToSpaces(4)
