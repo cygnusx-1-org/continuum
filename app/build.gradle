@@ -151,6 +151,8 @@ android {
         animationsDisabled = true
         //execution 'ANDROIDX_TEST_ORCHESTRATOR'
         unitTests.returnDefaultValues = true
+        // Robolectric needs real merged resources to resolve string IDs in unit tests.
+        unitTests.includeAndroidResources = true
         unitTests.all {
             useJUnitPlatform()
         }
@@ -390,6 +392,17 @@ dependencies {
     testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
     testImplementation "io.qameta.allure:allure-junit5"
     agent "org.aspectj:aspectjweaver:$aspectJVersion"
+
+    // OAuthLoginHelper unit tests. The pure classification tests run on JUnit 5 (Jupiter); the
+    // message-formatting tests use Robolectric (a JUnit 4 runner) for real string resources, so the
+    // JUnit Vintage engine is needed to discover them on the JUnit Platform.
+    // allure-junit5 only exposes the Jupiter API at runtime, so declare it explicitly for compilation.
+    testImplementation platform("org.junit:junit-bom:5.10.3")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "junit:junit:4.13.2"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
+    testImplementation "org.robolectric:robolectric:4.14.1"
 
     androidTestImplementation "androidx.test.ext:junit:1.0.0"
     androidTestImplementation "androidx.test:rules:1.5.0"
