@@ -2,6 +2,14 @@
 
 ---
 
+8.2.5.9.3 / 2026-6-20
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Hardened OAuth login error handling with clear failure feedback
+* Registered external browser login redirect URIs for BaconReader, Boost, Continuum, Infinity, Joey, RedReader, Relay, RIF, and Slide
+* Convert API Keys and Customize Tabs in Main Page to a method that restarts on back button or back gesture
+
 8.2.5.9.2 / 2026-6-19
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
