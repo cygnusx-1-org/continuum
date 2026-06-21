@@ -123,8 +123,8 @@
     <string name="oauth_error_missing_tokens">Login response did not contain an access token — check your API Key setting</string>
     <string name="oauth_error_network">Network error during login. Check your connection and try again</string>
     <string name="oauth_login_failed_title">Login Failed</string>
-    <string name="oauth_error_login_page">Login failed — Reddit returned an error instead of completing login. Check your API Key and Redirect URI in Settings.</string>
-    <string name="oauth_error_redirect_uri_unregistered">The Redirect URI \"%1$s\" can\'t be received by a browser — no matching handler is registered in this app. Use the WebView login method instead, or set a supported Redirect URI in Settings.</string>
+    <string name="oauth_error_login_page">Login failed — Reddit returned an error instead of completing login. Check your client ID and redirect URI in Settings.</string>
+    <string name="oauth_error_redirect_uri_unregistered">The redirect URI \"%1$s\" can\'t be received by a browser — no matching handler is registered in this app. Use the WebView login method instead, or set a supported redirect URI in Settings.</string>
     <string name="something_went_wrong">Something went wrong. Try again later.</string>
     <string name="access_denied">Access denied</string>
     <string name="parse_user_info_error">Error occurred when parsing the user info</string>
