@@ -19,7 +19,7 @@ public class SubscribedSubredditViewModel extends ViewModel {
 
     public SubscribedSubredditViewModel(RedditDataRoomDatabase redditDataRoomDatabase, String accountName) {
         mSubscribedSubredditRepository = new SubscribedSubredditRepository(redditDataRoomDatabase, accountName);
-        searchQueryLiveData = new MutableLiveData<>("");
+        searchQueryLiveData = new MutableLiveData<>("%");
 
         mAllSubscribedSubreddits = Transformations.switchMap(searchQueryLiveData, mSubscribedSubredditRepository::getAllSubscribedSubredditsWithSearchQuery);
         mAllFavoriteSubscribedSubreddits = Transformations.switchMap(searchQueryLiveData, mSubscribedSubredditRepository::getAllFavoriteSubscribedSubredditsWithSearchQuery);

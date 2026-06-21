@@ -38,15 +38,16 @@ import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoPadd
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoShape
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorPixelShape
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorShapes
-import jp.wasabeef.glide.transformations.BlurTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy
 import ml.docilealligator.infinityforreddit.activities.BaseActivity
 import ml.docilealligator.infinityforreddit.comment.Comment
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
+import ml.docilealligator.infinityforreddit.databinding.ItemSharedCommentRowBinding
 import ml.docilealligator.infinityforreddit.databinding.SharedCommentBinding
 import ml.docilealligator.infinityforreddit.databinding.SharedPostBinding
+import ml.docilealligator.infinityforreddit.databinding.SharedPostWithCommentsBinding
 import ml.docilealligator.infinityforreddit.post.Post
 import java.io.File
 import java.io.FileOutputStream
@@ -60,6 +61,7 @@ fun sharePostAsScreenshot(
 ) {
     //val binding: SharedPostBinding = SharedPostBinding.inflate(LayoutInflater.from(ContextThemeWrapper(baseActivity, R.style.AppTheme)))
     val binding: SharedPostBinding = SharedPostBinding.inflate(LayoutInflater.from(baseActivity))
+    val fileName = screenshotFileName(post)
 
     binding.titleTextViewSharedPost.text = post.title
     binding.subredditNameTextViewSharedPost.text = post.subredditNamePrefixed
@@ -109,7 +111,6 @@ fun sharePostAsScreenshot(
                 binding.imageViewSharedPost.layoutParams.height = height
                 measureView(binding.getRoot())
 
-                val blurImage = post.isNSFW || post.isSpoiler
                 val url = preview.previewUrl
                 val imageRequestBuilder = Glide.with(baseActivity).load(url)
                     .listener(object : RequestListener<Drawable> {
@@ -121,7 +122,7 @@ fun sharePostAsScreenshot(
                         ): Boolean {
                             binding.imageViewSharedPost.visibility = View.GONE
                             measureView(binding.getRoot())
-                            shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+                            shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), fileName)
                             return false
                         }
 
@@ -133,32 +134,20 @@ fun sharePostAsScreenshot(
                             isFirstResource: Boolean
                         ): Boolean {
                             Handler(Looper.getMainLooper()).post {
-                                shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+                                shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), fileName)
                             }
 
                             return false
                         }
                     })
-                if (blurImage) {
-                    imageRequestBuilder.apply(
-                        RequestOptions.bitmapTransform(
-                            MultiTransformation(
-                                CenterCrop(),
-                                BlurTransformation(50, 10),
-                                RoundedCornersTransformation(4, 0)
-                            )
-                        )
-                    ).into(binding.imageViewSharedPost)
-                } else {
-                    imageRequestBuilder.apply(RequestOptions.bitmapTransform(
-                        MultiTransformation(
-                            CenterCrop(),
-                            RoundedCornersTransformation(50, 0)
-                        )
-                    )).downsample(
-                        saveMemoryCenterInsideDownsampleStrategy
-                    ).into(binding.imageViewSharedPost)
-                }
+                imageRequestBuilder.apply(RequestOptions.bitmapTransform(
+                    MultiTransformation(
+                        CenterCrop(),
+                        RoundedCornersTransformation(50, 0)
+                    )
+                )).downsample(
+                    saveMemoryCenterInsideDownsampleStrategy
+                ).into(binding.imageViewSharedPost)
                 return
             } else {
                 binding.imageViewSharedPost.visibility = View.GONE
@@ -179,7 +168,131 @@ fun sharePostAsScreenshot(
     }
 
     measureView(binding.getRoot())
-    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), fileName)
+}
+
+fun sharePostWithCommentsAsScreenshot(
+    baseActivity: BaseActivity, post: Post, comments: List<Comment>,
+    customThemeWrapper: CustomThemeWrapper, locale: Locale, timeFormatPattern: String,
+    saveMemoryCenterInsideDownsampleStrategy: SaveMemoryCenterInisdeDownsampleStrategy
+) {
+    val binding: SharedPostWithCommentsBinding = SharedPostWithCommentsBinding.inflate(LayoutInflater.from(baseActivity))
+    val fileName = screenshotFileName(post, withComments = true)
+
+    binding.titleTextViewSharedPostWithComments.text = post.title
+    binding.subredditNameTextViewSharedPostWithComments.text = post.subredditNamePrefixed
+    binding.userTextViewSharedPostWithComments.text = post.authorNamePrefixed
+    binding.postTimeTextViewSharedPostWithComments.text = Utils.getFormattedTime(locale, post.postTimeMillis, timeFormatPattern)
+    binding.scoreTextViewSharedPostWithComments.text = post.score.toString()
+    binding.commentsCountTextViewSharedPostWithComments.text = post.nComments.toString()
+
+    binding.root.setBackgroundTintList(ColorStateList.valueOf(customThemeWrapper.filledCardViewBackgroundColor))
+    binding.titleTextViewSharedPostWithComments.setTextColor(customThemeWrapper.postTitleColor)
+    binding.contentTextViewSharedPostWithComments.setTextColor(customThemeWrapper.postContentColor)
+    binding.subredditNameTextViewSharedPostWithComments.setTextColor(customThemeWrapper.subreddit)
+    binding.userTextViewSharedPostWithComments.setTextColor(customThemeWrapper.username)
+    binding.postTimeTextViewSharedPostWithComments.setTextColor(customThemeWrapper.secondaryTextColor)
+    binding.scoreTextViewSharedPostWithComments.setTextColor(customThemeWrapper.upvoted)
+    binding.commentsCountTextViewSharedPostWithComments.setTextColor(customThemeWrapper.postIconAndInfoColor)
+    binding.upvoteImageViewSharedPostWithComments.setColorFilter(customThemeWrapper.upvoted, PorterDuff.Mode.SRC_IN)
+    binding.commentImageViewSharedPostWithComments.setColorFilter(customThemeWrapper.postIconAndInfoColor, PorterDuff.Mode.SRC_IN)
+
+    binding.titleTextViewSharedPostWithComments.setTypeface(baseActivity.titleTypeface)
+    binding.contentTextViewSharedPostWithComments.setTypeface(baseActivity.contentTypeface)
+    binding.subredditNameTextViewSharedPostWithComments.setTypeface(baseActivity.titleTypeface)
+    binding.userTextViewSharedPostWithComments.setTypeface(baseActivity.titleTypeface)
+    binding.postTimeTextViewSharedPostWithComments.setTypeface(baseActivity.titleTypeface)
+    binding.scoreTextViewSharedPostWithComments.setTypeface(baseActivity.titleTypeface)
+    binding.commentsCountTextViewSharedPostWithComments.setTypeface(baseActivity.titleTypeface)
+
+    binding.qrCodeImageViewSharedPostWithComments.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, post.permalink))
+
+    val depthColors = intArrayOf(
+        customThemeWrapper.commentVerticalBarColor1,
+        customThemeWrapper.commentVerticalBarColor2,
+        customThemeWrapper.commentVerticalBarColor3,
+        customThemeWrapper.commentVerticalBarColor4,
+        customThemeWrapper.commentVerticalBarColor5,
+        customThemeWrapper.commentVerticalBarColor6,
+        customThemeWrapper.commentVerticalBarColor7,
+    )
+
+    for (comment in comments.take(10)) {
+        val rowBinding = ItemSharedCommentRowBinding.inflate(LayoutInflater.from(baseActivity))
+        rowBinding.authorTextViewItemSharedCommentRow.text = comment.author
+        rowBinding.scoreTextViewItemSharedCommentRow.text = comment.score.toString()
+        rowBinding.timeTextViewItemSharedCommentRow.text = Utils.getFormattedTime(locale, comment.commentTimeMillis, timeFormatPattern)
+        rowBinding.contentTextViewItemSharedCommentRow.text = comment.commentRawText
+
+        val depthColor = depthColors[comment.depth % depthColors.size]
+        rowBinding.depthIndicatorItemSharedCommentRow.setBackgroundColor(depthColor)
+        rowBinding.authorTextViewItemSharedCommentRow.setTextColor(customThemeWrapper.username)
+        rowBinding.scoreTextViewItemSharedCommentRow.setTextColor(customThemeWrapper.postIconAndInfoColor)
+        rowBinding.timeTextViewItemSharedCommentRow.setTextColor(customThemeWrapper.secondaryTextColor)
+        rowBinding.contentTextViewItemSharedCommentRow.setTextColor(customThemeWrapper.commentColor)
+
+        val depthPaddingPx = (comment.depth * 16 * baseActivity.resources.displayMetrics.density).toInt()
+        rowBinding.root.setPaddingRelative(depthPaddingPx, rowBinding.root.paddingTop, rowBinding.root.paddingEnd, rowBinding.root.paddingBottom)
+
+        if (baseActivity.typeface != null) {
+            rowBinding.authorTextViewItemSharedCommentRow.typeface = baseActivity.typeface
+            rowBinding.scoreTextViewItemSharedCommentRow.typeface = baseActivity.typeface
+            rowBinding.timeTextViewItemSharedCommentRow.typeface = baseActivity.typeface
+            rowBinding.contentTextViewItemSharedCommentRow.typeface = baseActivity.contentTypeface
+        }
+
+        binding.commentsContainerSharedPostWithComments.addView(rowBinding.root)
+    }
+
+    when (post.postType) {
+        Post.VIDEO_TYPE, Post.GIF_TYPE, Post.IMAGE_TYPE, Post.GALLERY_TYPE, Post.LINK_TYPE -> {
+            binding.contentTextViewSharedPostWithComments.visibility = View.GONE
+            val preview = if (post.previews.isNotEmpty()) post.previews[0] else null
+            if (preview != null) {
+                val height = (400 * baseActivity.resources.displayMetrics.density).toInt()
+                binding.imageViewSharedPostWithComments.setScaleType(ImageView.ScaleType.CENTER_CROP)
+                binding.imageViewSharedPostWithComments.layoutParams.height = height
+                measureView(binding.root)
+
+                val url = preview.previewUrl
+                val imageRequestBuilder = Glide.with(baseActivity).load(url)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
+                            binding.imageViewSharedPostWithComments.visibility = View.GONE
+                            measureView(binding.root)
+                            shareScreenshot(baseActivity, getBitmapFromView(binding.root), fileName)
+                            return false
+                        }
+
+                        override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                            Handler(Looper.getMainLooper()).post {
+                                shareScreenshot(baseActivity, getBitmapFromView(binding.root), fileName)
+                            }
+                            return false
+                        }
+                    })
+                imageRequestBuilder.apply(RequestOptions.bitmapTransform(MultiTransformation(CenterCrop(), RoundedCornersTransformation(50, 0)))).downsample(saveMemoryCenterInsideDownsampleStrategy).into(binding.imageViewSharedPostWithComments)
+                return
+            } else {
+                binding.imageViewSharedPostWithComments.visibility = View.GONE
+            }
+        }
+
+        Post.NO_PREVIEW_LINK_TYPE -> {
+            binding.contentTextViewSharedPostWithComments.text = post.url
+            binding.imageViewSharedPostWithComments.visibility = View.GONE
+        }
+
+        else -> {
+            if (post.selfTextPlainTrimmed != null && post.selfTextPlainTrimmed.isNotEmpty()) {
+                binding.contentTextViewSharedPostWithComments.text = post.selfTextPlainTrimmed
+            }
+            binding.imageViewSharedPostWithComments.visibility = View.GONE
+        }
+    }
+
+    measureView(binding.root)
+    shareScreenshot(baseActivity, getBitmapFromView(binding.root), fileName)
 }
 
 fun shareCommentAsScreenshot(
@@ -205,7 +318,7 @@ fun shareCommentAsScreenshot(
     binding.qrCodeImageViewSharedComment.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, comment.permalink))
 
     measureView(binding.getRoot())
-    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()))
+    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), screenshotFileName(comment))
 }
 
 private fun measureView(rootView: View) {
@@ -240,9 +353,10 @@ private fun generateQRCode(baseActivity: BaseActivity, customThemeWrapper: Custo
             )
             .setColors(
                 QrVectorColors(
-                    dark = QrVectorColor.Solid(customThemeWrapper.colorAccent),
-                    ball = QrVectorColor.Solid(customThemeWrapper.colorAccent),
-                    frame = QrVectorColor.Solid(customThemeWrapper.colorAccent)
+                    dark = QrVectorColor.Solid(Color.BLACK),
+                    light = QrVectorColor.Solid(Color.WHITE),
+                    ball = QrVectorColor.Solid(Color.BLACK),
+                    frame = QrVectorColor.Solid(Color.BLACK)
                 )
             )
             .setShapes(
@@ -255,14 +369,14 @@ private fun generateQRCode(baseActivity: BaseActivity, customThemeWrapper: Custo
     )
 }
 
-private fun shareScreenshot(context: Context, bitmap: Bitmap) {
+private fun shareScreenshot(context: Context, bitmap: Bitmap, fileName: String) {
     try {
         val cachePath = File(context.externalCacheDir, "images")
         if (!cachePath.exists()) {
             cachePath.mkdirs()
         }
 
-        val file = File(cachePath, "shared_view.png")
+        val file = File(cachePath, fileName)
         val stream = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         stream.close()
@@ -275,10 +389,23 @@ private fun shareScreenshot(context: Context, bitmap: Bitmap) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.setType("image/png")
         intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.clipData = ClipData.newRawUri("", uri)
+        intent.clipData = ClipData.newRawUri(fileName, uri)
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         context.startActivity(Intent.createChooser(intent, "Share"))
     } catch (e: IOException) {
         e.printStackTrace()
     }
+}
+
+// Names the shared screenshot after the post (and comments) so apps like Google Drive show a
+// meaningful filename instead of a generic one. Screenshots are always PNG renders of the card.
+private fun screenshotFileName(post: Post, withComments: Boolean = false): String {
+    val title = MediaFileNameUtils.sanitizeFilename(post.title)
+    val base = if (post.id.isNullOrEmpty()) title else "${title}_${post.id}"
+    return if (withComments) "${base}_comments.png" else "$base.png"
+}
+
+private fun screenshotFileName(comment: Comment): String {
+    val author = MediaFileNameUtils.sanitizeFilename(comment.author)
+    return if (comment.id.isNullOrEmpty()) "comment_$author.png" else "comment_${author}_${comment.id}.png"
 }

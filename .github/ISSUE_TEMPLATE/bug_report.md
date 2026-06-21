@@ -23,9 +23,12 @@ Steps to reproduce the behavior:
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 **Smartphone (please complete the following information):**
-- Device: [e.g. A72]
-- OS: [e.g. One UI]
-- Version: [e.g. 7.4.0.5]
+- Device make/model: [e.g. Samsung S24 Ultra]
+- Android flavor: [e.g. One UI]
+- Android Version: [e.g. 16]
+
+**Continuum**
+- Version: [e.g. 8.2.5.9.1]
 
 **Additional context**
 <!-- Add any other context about the problem here. -->

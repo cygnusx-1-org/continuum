@@ -17,6 +17,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 public class CustomFontEditTextPreference extends EditTextPreference implements CustomFontReceiver, CustomThemeWrapperReceiver {
     private CustomThemeWrapper customThemeWrapper;
     private Typeface typeface;
+    private Typeface summaryTypeface;
 
     public CustomFontEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -57,14 +58,35 @@ public class CustomFontEditTextPreference extends EditTextPreference implements 
             }
         }
 
+        // Setting explicit text colors above overrides the framework's disabled dimming,
+        // so dim the views ourselves to grey out the preference when it is disabled.
+        float alpha = isEnabled() ? 1.0f : 0.5f;
+        if (iconImageView != null) {
+            iconImageView.setAlpha(alpha);
+        }
+        if (titleTextView != null) {
+            titleTextView.setAlpha(alpha);
+        }
+        if (summaryTextView != null) {
+            summaryTextView.setAlpha(alpha);
+        }
+
         if (typeface != null) {
             if (titleTextView instanceof TextView) {
                 ((TextView) titleTextView).setTypeface(typeface);
             }
+        }
+        Typeface effectiveSummaryTypeface = summaryTypeface != null ? summaryTypeface : typeface;
+        if (effectiveSummaryTypeface != null) {
             if (summaryTextView instanceof TextView) {
-                ((TextView) summaryTextView).setTypeface(typeface);
+                ((TextView) summaryTextView).setTypeface(effectiveSummaryTypeface);
             }
         }
+    }
+
+    public void setSummaryTypeface(Typeface summaryTypeface) {
+        this.summaryTypeface = summaryTypeface;
+        notifyChanged();
     }
 
     @Override

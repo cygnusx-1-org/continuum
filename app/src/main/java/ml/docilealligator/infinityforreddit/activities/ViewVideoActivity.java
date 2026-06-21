@@ -4,6 +4,8 @@ import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -17,45 +19,46 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Matrix;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.ScaleGestureDetector;
+import android.view.TextureView;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.C;
-import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
-import androidx.media3.common.MimeTypes;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
@@ -73,19 +76,18 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
+import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerControlView;
-import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
-import com.otaliastudios.zoom.ZoomEngine;
-import com.otaliastudios.zoom.ZoomSurfaceView;
 
-import org.apache.commons.io.FilenameUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -94,16 +96,15 @@ import javax.inject.Provider;
 
 import app.futured.hauler.DragDirection;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
-import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
 import ml.docilealligator.infinityforreddit.Infinity;
+import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.VideoLinkFetcher;
-import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
+import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PlaybackSpeedBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
-import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoBinding;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoZoomableBinding;
 import ml.docilealligator.infinityforreddit.events.FinishViewMediaActivityEvent;
+import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.ContentFontStyle;
 import ml.docilealligator.infinityforreddit.font.FontFamily;
@@ -113,13 +114,16 @@ import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
-import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
+import ml.docilealligator.infinityforreddit.viewmodels.ViewVideoViewModel;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
+@UnstableApi
 public class ViewVideoActivity extends AppCompatActivity implements CustomFontReceiver {
 
     public static final int PLAYBACK_SPEED_25 = 25;
@@ -140,6 +144,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     public static final String EXTRA_STREAMABLE_SHORT_CODE = "ESSC";
     public static final String EXTRA_IS_NSFW = "EIN";
     public static final String EXTRA_VIDEO_TYPE = "EVT";
+    public static final int VIDEO_TYPE_MARKDOWN_PARSED = 8;
     public static final int VIDEO_TYPE_IMGUR = 7;
     public static final int VIDEO_TYPE_STREAMABLE = 5;
     public static final int VIDEO_TYPE_V_REDD_IT = 4;
@@ -148,24 +153,24 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private static final int VIDEO_TYPE_NORMAL = 0;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
-    private static final String IS_MUTE_STATE = "IMS";
+    /*private static final String IS_MUTE_STATE = "IMS";
     private static final String VIDEO_DOWNLOAD_URL_STATE = "VDUS";
     private static final String VIDEO_URI_STATE = "VUS";
     private static final String VIDEO_TYPE_STATE = "VTS";
     private static final String SUBREDDIT_NAME_STATE = "SNS";
     private static final String ID_STATE=  "IS";
     private static final String PLAYBACK_SPEED_STATE = "PSS";
-    private static final String SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE = "PSS";
+    private static final String SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE = "PSS";*/
 
     public Typeface typeface;
 
-    private Uri mVideoUri;
+    //private Uri mVideoUri;
     private ExoPlayer player;
     @UnstableApi
     private DefaultTrackSelector trackSelector;
     private DataSource.Factory dataSourceFactory;
 
-    private String videoDownloadUrl;
+    /*private String videoDownloadUrl;
     private String videoFileName;
     private String videoFallbackDirectUrl;
     private String subredditName;
@@ -173,17 +178,58 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private boolean wasPlaying;
     private boolean isDownloading = false;
     private boolean isMute = false;
-    private boolean isNSFW;
-    private long resumePosition = -1;
-    private int videoType;
+    private boolean isNSFW;*/
+    //private long resumePosition = -1;
+    /*private int videoType;
     private boolean isDataSavingMode;
     private int dataSavingModeDefaultResolution;
-    private int nonDataSavingModeDefaultResolution;
-    private boolean setDefaultResolutionAlready = false;
+    private int nonDataSavingModeDefaultResolution;*/
+    //private boolean setDefaultResolutionAlready = false;
     private Integer originalOrientation;
-    private int playbackSpeed = 100;
-    private boolean useBottomAppBar;
+    /*private int playbackSpeed = 100;
+    private boolean useBottomAppBar;*/
     private ViewVideoActivityBindingAdapter binding;
+    private static final String ROTATION_TAG = "VideoRotation";
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
+    // The video renders into a TextureView (not a SurfaceView): a TextureView is a real
+    // view-hierarchy element, so View.setRotation()/setScale()/setTranslation() on its parent
+    // frame actually transform the rendered pixels. A GLSurfaceView (the old ZoomSurfaceView)
+    // ignores rotation. This mirrors Slide's working implementation.
+    private AspectRatioFrameLayout videoFrame; // Sized to the video aspect; rotated/scaled/panned
+    private TextureView videoTextureView; // Video output surface
+    private PlayerControlView playerControlView; // Bottom playback controls (incl. timeline bar)
+
+    // Pinch-zoom / pan / rotation state (ported from Slide's ExoVideoView).
+    private ScaleGestureDetector scaleGestureDetector;
+    private float scaleFactor = 1.0f; // Current scale applied to videoFrame
+    private float rotationScaleFactor = 1.0f; // Auto-zoom scale needed to fit the current rotation
+    private boolean userZoomed = false; // True once the user has pinch-zoomed past the fit scale
+    private boolean wasScaling = false; // A pinch happened during the current gesture
+    private boolean wasDragging = false; // A pan happened during the current gesture
+    private boolean isDragging = false;
+    private float positionX = 0f; // Current pan translation
+    private float positionY = 0f;
+    private float lastTouchX;
+    private float lastTouchY;
+    private int originalVideoWidth = 0; // Video dimensions (with embedded rotation applied)
+    private int originalVideoHeight = 0;
+
+    // Default auto-hide delay for the controls, restored after a scrub keeps them pinned open.
+    private static final int CONTROLS_SHOW_TIMEOUT_MS = 5000;
+
+    // Horizontal swipe-to-scrub gesture state.
+    private int scrubTouchSlop;
+    // Width (px) of the left/right system back-gesture zones. A scrub starting inside one of
+    // these is ignored so an edge swipe goes to the system back gesture instead of scrubbing.
+    private int leftGestureInset;
+    private int rightGestureInset;
+    private float scrubStartX;
+    private float scrubStartY;
+    private long scrubStartPosition;
+    private boolean isScrubbing;
+    private boolean scrubGestureRejected; // a non-horizontal/multi-touch gesture won this touch sequence
+
+    public ViewVideoViewModel viewVideoViewModel;
 
     @Inject
     @Named("media3")
@@ -202,7 +248,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     Retrofit mVReddItRetrofit;
 
     @Inject
-    Provider<StreamableAPI> mStreamableApiProvider;
+    Provider<StreamableAPIKt> mStreamableApiProvider;
 
     @Inject
     @Named("default")
@@ -222,7 +268,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     @Inject
     SimpleCache mSimpleCache;
 
-    private Post post;
+    //private Post post;
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
@@ -230,6 +276,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+        } else {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
         int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, "2"));
@@ -272,17 +324,14 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         getTheme().applyStyle(TitleFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
         getTheme().applyStyle(ContentFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
 
-        boolean zoomable = mSharedPreferences.getBoolean(SharedPreferencesUtils.PINCH_TO_ZOOM_VIDEO, false);
-
-        if (zoomable) {
-            binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding.inflate(getLayoutInflater()));
-            setContentView(binding.getRoot());
-        } else {
-            binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoBinding.inflate(getLayoutInflater()));
-            setContentView(binding.getRoot());
-        }
+        binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding.inflate(getLayoutInflater()));
+        setContentView(binding.getRoot());
 
         EventBus.getDefault().register(this);
+
+        if (savedInstanceState != null) {
+            currentRotation = savedInstanceState.getInt("currentRotation", 0);
+        }
 
         applyCustomTheme();
 
@@ -296,88 +345,105 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         Resources resources = getResources();
 
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        getSupportActionBar().hide();
+        binding.getBottomAppBar().setVisibility(View.VISIBLE);
+        binding.getBackButton().setOnClickListener(view -> {
+            finish();
+        });
 
-        useBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
+        binding.getDownloadButton().setOnClickListener(view -> {
+            if (viewVideoViewModel.isDownloading()) {
+                return;
+            }
 
-        if (useBottomAppBar) {
-            getSupportActionBar().hide();
-            binding.getBottomAppBar().setVisibility(View.VISIBLE);
-            binding.getBackButton().setOnClickListener(view -> {
-                finish();
-            });
+            if (viewVideoViewModel.getVideoDownloadUrl() == null) {
+                Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            binding.getDownloadButton().setOnClickListener(view -> {
-                if (isDownloading) {
-                    return;
-                }
+            viewVideoViewModel.setDownloading(true);
+            requestPermissionAndDownload();
+        });
 
-                if (videoDownloadUrl == null) {
-                    Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        binding.getShareButton().setOnClickListener(view -> shareVideo());
 
-                isDownloading = true;
-                requestPermissionAndDownload();
-            });
+        binding.getPlaybackSpeedButton().setOnClickListener(view -> {
+            changePlaybackSpeed();
+        });
 
-            binding.getPlaybackSpeedButton().setOnClickListener(view -> {
-                changePlaybackSpeed();
-            });
-        } else {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = resources.getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(resources.getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
+        binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
+        binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
+
+        /*dataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"));
+        nonDataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"));*/
+
+        LinearLayout controllerLinearLayout = findViewById(R.id.linear_layout_exo_playback_control_view);
+        // Used when the platform reports no gesture inset (e.g. 3-button nav): still keep a small
+        // edge dead-zone so a swipe from the very edge isn't treated as a scrub.
+        final int fallbackGestureInset = (int) (32 * getResources().getDisplayMetrics().density);
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                Insets allInsets = Utils.getInsets(insets, false, false);
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) controllerLinearLayout.getLayoutParams();
+                params.bottomMargin = allInsets.bottom;
+                params.setMarginStart(allInsets.left);
+                params.setMarginEnd(allInsets.right);
+                controllerLinearLayout.setLayoutParams(params);
+                // Capture the exact system back-gesture zones so scrub can yield the screen edges
+                // to the back gesture. Auto-matches whatever edge sensitivity the user has set.
+                Insets gestureInsets = insets.getInsets(WindowInsetsCompat.Type.systemGestures());
+                leftGestureInset = Math.max(gestureInsets.left, fallbackGestureInset);
+                rightGestureInset = Math.max(gestureInsets.right, fallbackGestureInset);
+                return WindowInsetsCompat.CONSUMED;
+            }
+        });
+
+        Intent intent = getIntent();
+        Post post = intent.getParcelableExtra(EXTRA_POST);
+        if (post != null) {
+            binding.getTitleTextView().setText(post.getTitle());
+            /*videoFallbackDirectUrl = post.getVideoFallBackDirectUrl();*/
         }
 
         String dataSavingModeString = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
         int networkType = Utils.getConnectedNetwork(this);
-
+        boolean isDataSavingMode = false;
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
             isDataSavingMode = true;
         } else if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
             isDataSavingMode = networkType == Utils.NETWORK_TYPE_CELLULAR;
         }
 
-        dataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"));
-        nonDataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"));
+        viewVideoViewModel = new ViewModelProvider(
+                this,
+                ViewVideoViewModel.Companion.provideFactory(post,
+                        intent.getData(), intent.getStringExtra(EXTRA_VIDEO_DOWNLOAD_URL),
+                        post != null ? post.getVideoFallBackDirectUrl() : null,
+                        intent.getStringExtra(EXTRA_SUBREDDIT), intent.getStringExtra(EXTRA_ID),
+                        intent.getBooleanExtra(EXTRA_IS_NSFW, false),
+                        intent.getLongExtra(EXTRA_PROGRESS_SECONDS, -1),
+                        intent.getIntExtra(EXTRA_VIDEO_TYPE, VIDEO_TYPE_NORMAL),
+                        intent.getStringExtra(EXTRA_REDGIFS_ID),
+                        intent.getStringExtra(EXTRA_V_REDD_IT_URL),
+                        intent.getStringExtra(EXTRA_STREAMABLE_SHORT_CODE),
+                        isDataSavingMode, Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360")),
+                        Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0")),
+                        Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100"))
+                )
+        ).get(ViewVideoViewModel.class);
 
-        if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_IGNORE_NAV_BAR, false)) {
-            LinearLayout controllerLinearLayout = findViewById(R.id.linear_layout_exo_playback_control_view);
-            ViewCompat.setOnApplyWindowInsetsListener(controllerLinearLayout, new OnApplyWindowInsetsListener() {
-                @NonNull
-                @Override
-                public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                    Insets navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) controllerLinearLayout.getLayoutParams();
-                    params.bottomMargin = navigationBars.bottom;
-                    params.rightMargin = navigationBars.right;
-                    return WindowInsetsCompat.CONSUMED;
-                }
-            });
-        }
+        binding.getRoot().setOnDragDismissedListener(dragDirection -> {
+            player.stop();
+            int slide = dragDirection == DragDirection.UP ? R.anim.slide_out_up : R.anim.slide_out_down;
+            finish();
+            overridePendingTransition(0, slide);
+        });
 
-        if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
-            binding.getRoot().setOnDragDismissedListener(dragDirection -> {
-                player.stop();
-                int slide = dragDirection == DragDirection.UP ? R.anim.slide_out_up : R.anim.slide_out_down;
-                finish();
-                overridePendingTransition(0, slide);
-            });
-        } else {
-            binding.getRoot().setDragEnabled(false);
-        }
 
-        Intent intent = getIntent();
-        isNSFW = intent.getBooleanExtra(EXTRA_IS_NSFW, false);
-
+        /*isNSFW = intent.getBooleanExtra(EXTRA_IS_NSFW, false);*/
         if (savedInstanceState == null) {
-            resumePosition = intent.getLongExtra(EXTRA_PROGRESS_SECONDS, -1);
-
             if (mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION, false)) {
                 originalOrientation = resources.getConfiguration().orientation;
                 try {
@@ -411,20 +477,18 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             }
         }
 
-        post = intent.getParcelableExtra(EXTRA_POST);
-        if (post != null) {
-            binding.getTitleTextView().setText(post.getTitle());
-            videoFallbackDirectUrl = post.getVideoFallBackDirectUrl();
-        }
-
         trackSelector = new DefaultTrackSelector(this);
         player = new ExoPlayer.Builder(this)
                 .setTrackSelector(trackSelector)
                 .setRenderersFactory(new DefaultRenderersFactory(this).setEnableDecoderFallback(true))
+                .setSeekBackIncrementMs(VIDEO_SEEK_BACK_INCREMENT_MS)
+                .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
                 .build();
 
-        if (zoomable) {
-            PlayerControlView playerControlView = findViewById(R.id.player_control_view_view_video_activity);
+        scrubTouchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+
+        {
+            playerControlView = findViewById(R.id.player_control_view_view_video_activity);
             playerControlView.addVisibilityListener(visibility -> {
                 switch (visibility) {
                     case View.GONE:
@@ -443,80 +507,65 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                 }
             });
-            playerControlView.setPlayer(player);
+            playerControlView.setPlayer(new DurationAwareSeekPlayer(player));
 
-            ZoomSurfaceView zoomSurfaceView = findViewById(R.id.zoom_surface_view_view_video_activity);
+            videoFrame = findViewById(R.id.video_frame_view_video_activity);
+            videoTextureView = findViewById(R.id.texture_view_view_video_activity);
+            videoFrame.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+            // Fade the video in on the first frame to avoid a black flash while it sizes itself.
+            videoTextureView.setAlpha(0f);
+            scaleGestureDetector = new ScaleGestureDetector(this, new VideoScaleListener());
+
             player.addListener(new Player.Listener() {
                 @Override
                 public void onVideoSizeChanged(VideoSize videoSize) {
-                    zoomSurfaceView.setContentSize(videoSize.width, videoSize.height);
-                }
-            });
-            zoomSurfaceView.addCallback(new ZoomSurfaceView.Callback() {
-                @Override
-                public void onZoomSurfaceCreated(@NonNull ZoomSurfaceView zoomSurfaceView) {
-                    player.setVideoSurface(zoomSurfaceView.getSurface());
-                }
-
-                @Override
-                public void onZoomSurfaceDestroyed(@NonNull ZoomSurfaceView zoomSurfaceView) {
-
-                }
-            });
-            zoomSurfaceView.getEngine().addListener(new ZoomEngine.Listener() {
-                @Override
-                public void onUpdate(@NonNull ZoomEngine zoomEngine, @NonNull Matrix matrix) {
-                    if (zoomEngine.getZoom() < 1.00001) {
-                        binding.getRoot().setDragEnabled(true);
-                        binding.getNestedScrollView().setScrollEnabled(true);
-                    } else {
-                        binding.getRoot().setDragEnabled(false);
-                        binding.getNestedScrollView().setScrollEnabled(false);
+                    Log.d(ROTATION_TAG, "onVideoSizeChanged: width=" + videoSize.width
+                            + " height=" + videoSize.height
+                            + " unappliedRotationDegrees=" + videoSize.unappliedRotationDegrees
+                            + " currentRotation=" + currentRotation);
+                    if (videoSize.width > 0 && videoSize.height > 0) {
+                        originalVideoWidth = videoSize.width;
+                        originalVideoHeight = videoSize.height;
+                        float aspectRatio = (float) videoSize.width / videoSize.height;
+                        // Account for rotation embedded in the stream's metadata (this sample has
+                        // none, but other Reddit videos do): swap the aspect and stored dimensions.
+                        if (videoSize.unappliedRotationDegrees == 90
+                                || videoSize.unappliedRotationDegrees == 270) {
+                            aspectRatio = 1.0f / aspectRatio;
+                            originalVideoWidth = videoSize.height;
+                            originalVideoHeight = videoSize.width;
+                        }
+                        // Set the aspect ratio once; user rotation never changes it.
+                        videoFrame.setAspectRatio(aspectRatio);
+                        applyRotation();
                     }
                 }
 
                 @Override
-                public void onIdle(@NonNull ZoomEngine zoomEngine) {}
-            });
-            zoomSurfaceView.setOnClickListener(view -> {
-                if (playerControlView.isVisible()) {
-                    playerControlView.hide();
-                } else {
-                    playerControlView.show();
+                public void onPlayerError(@NonNull PlaybackException error) {
+                    Log.e(ROTATION_TAG, "onPlayerError: errorCode=" + error.errorCode
+                            + " (" + error.getErrorCodeName() + ") msg=" + error.getMessage(), error);
+                }
+
+                @Override
+                public void onRenderedFirstFrame() {
+                    if (videoTextureView != null) {
+                        videoTextureView.animate().alpha(1f).setDuration(150).start();
+                    }
                 }
             });
-        } else {
-            PlayerView videoPlayerView = findViewById(R.id.player_view_view_video_activity);
-            videoPlayerView.setPlayer(player);
-            videoPlayerView.setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
-                switch (visibility) {
-                    case View.GONE:
-                        getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
-                        break;
-                    case View.VISIBLE:
-                        getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-                }
-            });
+
+            player.setVideoTextureView(videoTextureView);
         }
 
-        if (savedInstanceState == null) {
-            mVideoUri = intent.getData();
+        /*if (savedInstanceState == null) {
+            *//*mVideoUri = intent.getData();
             videoType = getIntent().getIntExtra(EXTRA_VIDEO_TYPE, VIDEO_TYPE_NORMAL);
             subredditName = intent.getStringExtra(EXTRA_SUBREDDIT);
-            id = intent.getStringExtra(EXTRA_ID);
+            id = intent.getStringExtra(EXTRA_ID);*//*
             setPlaybackSpeed(Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100")));
         } else {
-            String videoUrl = savedInstanceState.getString(VIDEO_URI_STATE);
-
+            *//*String videoUrl = savedInstanceState.getString(VIDEO_URI_STATE);
             if (videoUrl != null) {
                 mVideoUri = Uri.parse(videoUrl);
             }
@@ -524,28 +573,30 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             videoType = savedInstanceState.getInt(VIDEO_TYPE_STATE);
             subredditName = savedInstanceState.getString(SUBREDDIT_NAME_STATE);
             id = savedInstanceState.getString(ID_STATE);
-            setDefaultResolutionAlready = savedInstanceState.getBoolean(SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE);
+            setDefaultResolutionAlready = savedInstanceState.getBoolean(SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE);*//*
             setPlaybackSpeed(savedInstanceState.getInt(PLAYBACK_SPEED_STATE, 100));
-        }
+        }*/
+
+        setPlaybackSpeed(viewVideoViewModel.getPlaybackSpeed());
 
         // If subredditName is null and we have a post object, get it from the post
-        if (subredditName == null && post != null) {
-            subredditName = post.getSubredditName();
-            Log.d("ViewVideoActivity", "Got subredditName from post: " + subredditName);
+        if (viewVideoViewModel.getSubredditName() == null && post != null) {
+            viewVideoViewModel.setSubredditName(post.getSubredditName());
+            Log.d("ViewVideoActivity", "Got subredditName from post: " + viewVideoViewModel.getSubredditName());
         }
 
         // If id is null and we have a post object, get it from the post
-        if (id == null && post != null) {
-            id = post.getId();
-            Log.d("ViewVideoActivity", "Got id from post: " + id);
+        if (viewVideoViewModel.getId() == null && post != null) {
+            viewVideoViewModel.setId(post.getId());
+            Log.d("ViewVideoActivity", "Got id from post: " + viewVideoViewModel.getId());
         }
 
         // If this is a Tumblr post, ensure videoType is VIDEO_TYPE_DIRECT
         // This handles cases where the calling intent might not set EXTRA_VIDEO_TYPE appropriately for Tumblr MP4s.
         if (post != null && post.isTumblr()) { // Assuming post.isTumblr() method exists
-            if (videoType != VIDEO_TYPE_DIRECT) {
-                Log.d("ViewVideoActivity", "Tumblr post detected. Overriding videoType to DIRECT. Original type: " + videoType);
-                videoType = VIDEO_TYPE_DIRECT;
+            if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_DIRECT) {
+                Log.d("ViewVideoActivity", "Tumblr post detected. Overriding videoType to DIRECT. Original type: " + viewVideoViewModel.getVideoType());
+                viewVideoViewModel.setVideoType(VIDEO_TYPE_DIRECT);
             }
         }
 
@@ -571,7 +622,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             public void onTracksChanged(@NonNull Tracks tracks) {
                 ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
                 if (!trackGroups.isEmpty()) {
-                    if (videoType == VIDEO_TYPE_NORMAL) {
+                    if (viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL
+                            || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) {
                         binding.getVideoQualityButton().setVisibility(View.VISIBLE);
                         binding.getVideoQualityButton().setOnClickListener(view -> {
                             TrackSelectionDialogBuilder builder = new TrackSelectionDialogBuilder(ViewVideoActivity.this, getString(R.string.select_video_quality), player, C.TRACK_TYPE_VIDEO);
@@ -586,15 +638,14 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                             }
                         });
 
-                        if (!setDefaultResolutionAlready) {
+                        if (!viewVideoViewModel.getSetDefaultResolutionAlready()) {
                             int desiredResolution = 0;
-
-                            if (isDataSavingMode) {
-                                if (dataSavingModeDefaultResolution > 0) {
-                                    desiredResolution = dataSavingModeDefaultResolution;
+                            if (viewVideoViewModel.isDataSavingMode()) {
+                                if (viewVideoViewModel.getDataSavingModeDefaultResolution() > 0) {
+                                    desiredResolution = viewVideoViewModel.getDataSavingModeDefaultResolution();
                                 }
-                            } else if (nonDataSavingModeDefaultResolution > 0) {
-                                desiredResolution = nonDataSavingModeDefaultResolution;
+                            } else if (viewVideoViewModel.getNonDataSavingModeDefaultResolution() > 0) {
+                                desiredResolution = viewVideoViewModel.getNonDataSavingModeDefaultResolution();
                             }
 
                             if (desiredResolution > 0) {
@@ -636,13 +687,14 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                                     player.setTrackSelectionParameters(player.getTrackSelectionParameters().buildUpon().addOverride(trackSelectionOverride).build());
                                 }
                             }
-                            setDefaultResolutionAlready = true;
+                            viewVideoViewModel.setSetDefaultResolutionAlready(true);
                         }
                     }
 
                     for (Tracks.Group trackGroup : tracks.getGroups()) {
                         if (trackGroup.getType() == C.TRACK_TYPE_AUDIO) {
-                            if (videoType == VIDEO_TYPE_NORMAL && trackGroup.length > 1) {
+                            if ((viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL
+                                    || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) && trackGroup.length > 1) {
                                 // Reddit video HLS usually has two audio tracks. The first is mono.
                                 // The second (index 1) is stereo.
                                 // Select the stereo audio track if possible.
@@ -651,12 +703,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                             if (binding.getMuteButton().getVisibility() != View.VISIBLE) {
                                 binding.getMuteButton().setVisibility(View.VISIBLE);
                                 binding.getMuteButton().setOnClickListener(view -> {
-                                    if (isMute) {
-                                        isMute = false;
+                                    if (viewVideoViewModel.isMute()) {
+                                        viewVideoViewModel.setMute(false);
                                         player.setVolume(1f);
                                         binding.getMuteButton().setIconResource(R.drawable.ic_unmute_24dp);
                                     } else {
-                                        isMute = true;
+                                        viewVideoViewModel.setMute(true);
                                         player.setVolume(0f);
                                         binding.getMuteButton().setIconResource(R.drawable.ic_mute_24dp);
                                     }
@@ -672,7 +724,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
-                loadFallbackVideo(savedInstanceState);
+                viewVideoViewModel.loadFallbackVideo(player.getCurrentMediaItem(), savedInstanceState);
             }
         });
 
@@ -680,37 +732,40 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         dataSourceFactory = new CacheDataSource.Factory().setCache(mSimpleCache).setUpstreamDataSourceFactory(new OkHttpDataSource.Factory(mOkHttpClient).setUserAgent(APIUtils.USER_AGENT));
 
         String redgifsId = null;
-
-        if (videoType == VIDEO_TYPE_STREAMABLE) {
-            if (savedInstanceState != null) {
+        /*if (videoType == VIDEO_TYPE_STREAMABLE) {
+            *//*if (savedInstanceState != null) {
                 videoDownloadUrl = savedInstanceState.getString(VIDEO_DOWNLOAD_URL_STATE);
             } else {
                 videoDownloadUrl = intent.getStringExtra(EXTRA_VIDEO_DOWNLOAD_URL);
-            }
+            }*//*
 
             String shortCode = intent.getStringExtra(EXTRA_STREAMABLE_SHORT_CODE);
         } else if (videoType == VIDEO_TYPE_REDGIFS) {
-            if (savedInstanceState != null) {
+            *//*if (savedInstanceState != null) {
                 videoDownloadUrl = savedInstanceState.getString(VIDEO_DOWNLOAD_URL_STATE);
             } else {
                 videoDownloadUrl = intent.getStringExtra(EXTRA_VIDEO_DOWNLOAD_URL);
-            }
+            }*//*
 
             redgifsId = intent.getStringExtra(EXTRA_REDGIFS_ID);
-            /*if (redgifsId != null && redgifsId.contains("-")) {
+            *//*if (redgifsId != null && redgifsId.contains("-")) {
                 redgifsId = redgifsId.substring(0, redgifsId.indexOf('-'));
-            }*/
+            }*//*
             videoFileName = "Redgifs-" + redgifsId + ".mp4";
         } else if (videoType == VIDEO_TYPE_DIRECT || videoType == VIDEO_TYPE_IMGUR) {
             videoDownloadUrl = mVideoUri.toString();
         } else {
-            videoDownloadUrl = intent.getStringExtra(EXTRA_VIDEO_DOWNLOAD_URL);
-        }
+            //videoDownloadUrl = intent.getStringExtra(EXTRA_VIDEO_DOWNLOAD_URL);
+            videoFileName = subredditName + "-" + id + ".mp4";
+        }*/
 
-        if (mVideoUri == null) {
+        /*if (mVideoUri == null) {
             binding.getLoadingIndicator().setVisibility(View.VISIBLE);
 
-            VideoLinkFetcher.fetchVideoLink(mExecutor, new Handler(getMainLooper()), mRetrofit, mVReddItRetrofit,
+            viewVideoViewModel.loadVideoLink(mRetrofit, mVReddItRetrofit, mRedgifsRetrofit,
+                    mStreamableApiProvider, mCurrentAccountSharedPreferences);
+
+            *//*VideoLinkFetcher.fetchVideoLink(mExecutor, new Handler(getMainLooper()), mRetrofit, mVReddItRetrofit,
                     mRedgifsRetrofit, mStreamableApiProvider, mCurrentAccountSharedPreferences, videoType,
                     redgifsId, getIntent().getStringExtra(EXTRA_V_REDD_IT_URL),
                     intent.getStringExtra(EXTRA_STREAMABLE_SHORT_CODE),
@@ -793,19 +848,18 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                         @Override
                         public void failed(@Nullable Integer messageRes) {
                             binding.getLoadingIndicator().setVisibility(View.GONE);
-
-                            if (videoType == VIDEO_TYPE_V_REDD_IT) {
+                            if (viewVideoViewModel.videoType == VIDEO_TYPE_V_REDD_IT) {
                                 if (messageRes != null) {
                                     Toast.makeText(ViewVideoActivity.this, messageRes, Toast.LENGTH_LONG).show();
                                 }
                             } else {
-                                loadFallbackVideo(savedInstanceState);
+                                viewVideoViewModel.loadFallbackVideo(player.getCurrentMediaItem(), savedInstanceState);
                             }
                         }
-                    });
+                    });*//*
         } else {
             binding.getLoadingIndicator().setVisibility(View.GONE);
-            if (videoType == VIDEO_TYPE_NORMAL) {
+            if (viewVideoViewModel.videoType == VIDEO_TYPE_NORMAL || viewVideoViewModel.videoType == VIDEO_TYPE_MARKDOWN_PARSED) {
                 // Prepare the player with the source.
                 player.prepare();
                 player.setMediaSource(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(mVideoUri)));
@@ -816,7 +870,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(mVideoUri)));
                 preparePlayer(savedInstanceState);
             }
-        }
+        }*/
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
@@ -824,6 +878,31 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 player.stop();
                 setEnabled(false);
                 getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
+
+        viewVideoViewModel.getVideoUriLiveData().observe(this, new Observer<Uri>() {
+            @Override
+            public void onChanged(Uri uri) {
+                if (uri == null) {
+                    binding.getLoadingIndicator().setVisibility(View.VISIBLE);
+
+                    viewVideoViewModel.loadVideoLink(mRetrofit, mVReddItRetrofit, mRedgifsRetrofit,
+                            mStreamableApiProvider, mCurrentAccountSharedPreferences);
+                } else {
+                    binding.getLoadingIndicator().setVisibility(View.GONE);
+                    if (viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) {
+                        // Prepare the player with the source.
+                        player.prepare();
+                        player.setMediaSource(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(uri)));
+                        preparePlayer(savedInstanceState);
+                    } else {
+                        // Prepare the player with the source.
+                        player.prepare();
+                        player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(uri)));
+                        preparePlayer(savedInstanceState);
+                    }
+                }
             }
         });
     }
@@ -839,21 +918,18 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         } else {
             player.setRepeatMode(Player.REPEAT_MODE_OFF);
         }
-
-        if (resumePosition > 0) {
-            player.seekTo(resumePosition);
+        if (viewVideoViewModel.getResumePosition() > 0) {
+            player.seekTo(viewVideoViewModel.getResumePosition());
         }
 
         player.setPlayWhenReady(true);
-        wasPlaying = true;
+        viewVideoViewModel.setWasPlaying(true);
 
         boolean muteVideo = mSharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_VIDEO, false) ||
-                (mSharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_NSFW_VIDEO, false) && isNSFW);
+                (mSharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_NSFW_VIDEO, false) && viewVideoViewModel.isNSFW());
 
         if (savedInstanceState != null) {
-            isMute = savedInstanceState.getBoolean(IS_MUTE_STATE);
-
-            if (isMute) {
+            if (viewVideoViewModel.isMute()) {
                 player.setVolume(0f);
                 binding.getMuteButton().setIconResource(R.drawable.ic_mute_24dp);
             } else {
@@ -861,7 +937,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 binding.getMuteButton().setIconResource(R.drawable.ic_unmute_24dp);
             }
         } else if (muteVideo) {
-            isMute = true;
+            viewVideoViewModel.setMute(true);
             player.setVolume(0f);
             binding.getMuteButton().setIconResource(R.drawable.ic_mute_24dp);
         } else {
@@ -872,39 +948,301 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private void changePlaybackSpeed() {
         PlaybackSpeedBottomSheetFragment playbackSpeedBottomSheetFragment = new PlaybackSpeedBottomSheetFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(PlaybackSpeedBottomSheetFragment.EXTRA_PLAYBACK_SPEED, playbackSpeed);
+        bundle.putInt(PlaybackSpeedBottomSheetFragment.EXTRA_PLAYBACK_SPEED, viewVideoViewModel.getPlaybackSpeed());
         playbackSpeedBottomSheetFragment.setArguments(bundle);
         playbackSpeedBottomSheetFragment.show(getSupportFragmentManager(), playbackSpeedBottomSheetFragment.getTag());
     }
 
-    @OptIn(markerClass = UnstableApi.class)
-    private int inferPrimaryTrackType(Format format) {
-        int trackType = MimeTypes.getTrackType(format.sampleMimeType);
-
-        if (trackType != C.TRACK_TYPE_UNKNOWN) {
-            return trackType;
-        }
-
-        if (MimeTypes.getVideoMediaMimeType(format.codecs) != null) {
-            return C.TRACK_TYPE_VIDEO;
-        }
-
-        if (MimeTypes.getAudioMediaMimeType(format.codecs) != null) {
-            return C.TRACK_TYPE_AUDIO;
-        }
-
-        if (format.width != Format.NO_VALUE || format.height != Format.NO_VALUE) {
-            return C.TRACK_TYPE_VIDEO;
-        }
-
-        if (format.channelCount != Format.NO_VALUE || format.sampleRate != Format.NO_VALUE) {
-            return C.TRACK_TYPE_AUDIO;
-        }
-
-        return C.TRACK_TYPE_UNKNOWN;
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        resetPosition(); // Reset panning when rotating
+        applyRotation();
     }
 
-    @OptIn(markerClass = UnstableApi.class)
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        resetPosition(); // Reset panning when rotating
+        applyRotation();
+    }
+
+    /**
+     * Rotates the video by rotating the {@link #videoFrame} that hosts the video {@link TextureView}.
+     * A TextureView is composited in the regular view hierarchy, so {@code setRotation()} (and
+     * {@code setScale}/{@code setTranslation}) actually transform the rendered pixels — unlike a
+     * SurfaceView/GLSurfaceView, whose buffer ignores view rotation. A compensating auto-zoom
+     * ({@link #rotationScaleFactor}) makes the sideways video fill the screen instead of being
+     * letterboxed. This mirrors Slide's working implementation.
+     */
+    private void applyRotation() {
+        if (videoFrame == null || originalVideoWidth <= 0 || originalVideoHeight <= 0) {
+            return;
+        }
+
+        videoFrame.setRotation(currentRotation);
+        videoFrame.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+
+        boolean isVerticalVideo = originalVideoHeight > originalVideoWidth;
+
+        if (currentRotation == 90 || currentRotation == 270) {
+            if (isVerticalVideo) {
+                // Zoom out so the vertical video's top/bottom edges fit the screen's width.
+                float screenWidth = getResources().getDisplayMetrics().widthPixels;
+                float screenHeight = getResources().getDisplayMetrics().heightPixels;
+                rotationScaleFactor = screenWidth / screenHeight;
+            } else {
+                // Zoom in so the horizontal video fills the screen's width when sideways.
+                rotationScaleFactor = (float) originalVideoWidth / originalVideoHeight;
+            }
+        } else {
+            // 0/180 degrees: back to the normal, un-zoomed view.
+            rotationScaleFactor = 1.0f;
+            scaleFactor = 1.0f;
+            userZoomed = false;
+            resetPosition();
+        }
+
+        // Apply the rotation auto-zoom unless the user has manually pinch-zoomed.
+        if (!userZoomed) {
+            scaleFactor = rotationScaleFactor;
+        }
+
+        videoFrame.setScaleX(scaleFactor);
+        videoFrame.setScaleY(scaleFactor);
+        setSwipeToDismissEnabled(scaleFactor <= 1.0f);
+    }
+
+    /** Resets the pan translation back to centre. */
+    private void resetPosition() {
+        positionX = 0f;
+        positionY = 0f;
+        if (videoFrame != null) {
+            videoFrame.setTranslationX(0f);
+            videoFrame.setTranslationY(0f);
+        }
+    }
+
+    /** Pinch-to-zoom handler applied to {@link #videoFrame} (ported from Slide). */
+    private class VideoScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            wasScaling = true;
+            userZoomed = true;
+            scaleFactor *= detector.getScaleFactor();
+            scaleFactor = Math.max(0.5f, Math.min(scaleFactor, 3.0f));
+            if (videoFrame != null) {
+                videoFrame.setScaleX(scaleFactor);
+                videoFrame.setScaleY(scaleFactor);
+            }
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            // Snap back to the rotation-aware fit scale when released near it.
+            if (Math.abs(scaleFactor - rotationScaleFactor) <= 0.05f) {
+                scaleFactor = rotationScaleFactor;
+                userZoomed = false;
+                if (videoFrame != null) {
+                    videoFrame.setScaleX(scaleFactor);
+                    videoFrame.setScaleY(scaleFactor);
+                }
+                resetPosition();
+            } else if (scaleFactor <= 0.6f) {
+                resetPosition();
+            }
+            setSwipeToDismissEnabled(scaleFactor <= 1.0f);
+        }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // Gesture routing for the video frame:
+        //  - Two fingers  -> pinch-to-zoom (scaleGestureDetector scales videoFrame).
+        //  - One finger while zoomed in (scaleFactor > 1) -> pan the frame.
+        //  - One finger horizontal drag while not zoomed -> scrub the timeline.
+        //  - One finger vertical drag while not zoomed -> HaulerView swipe-to-dismiss/scroll.
+        //  - A clean tap -> toggle the playback controls.
+        if (videoFrame != null && scaleGestureDetector != null) {
+            scaleGestureDetector.onTouchEvent(ev);
+            boolean scaling = scaleGestureDetector.isInProgress();
+
+            switch (ev.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    scrubStartX = ev.getX();
+                    scrubStartY = ev.getY();
+                    lastTouchX = ev.getX();
+                    lastTouchY = ev.getY();
+                    isScrubbing = false;
+                    isDragging = false;
+                    wasScaling = false;
+                    wasDragging = false;
+                    // Don't hijack touches that start on the controls (e.g. the timeline bar),
+                    // nor those starting in the system back-gesture zones at the screen edges:
+                    // leaving the edges to the back gesture stops accidental scrubs when the user
+                    // swipes in from an edge to go back.
+                    int rootWidth = binding.getRoot().getWidth();
+                    boolean inEdgeGestureZone = ev.getX() < leftGestureInset
+                            || (rootWidth > 0 && ev.getX() > rootWidth - rightGestureInset);
+                    scrubGestureRejected = isTouchInsideControls(ev) || inEdgeGestureZone;
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    // Second finger: this is a pinch, not a scrub.
+                    if (isScrubbing) {
+                        endScrub();
+                    }
+                    scrubGestureRejected = true;
+                    setSwipeToDismissEnabled(false);
+                    disallowParentIntercept(true);
+                    lastTouchX = ev.getX();
+                    lastTouchY = ev.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    // Pan while zoomed in (single finger, not mid-pinch).
+                    if (scaleFactor > 1.0f && !scaling && ev.getPointerCount() == 1) {
+                        float dx = ev.getX() - lastTouchX;
+                        float dy = ev.getY() - lastTouchY;
+                        if (!isDragging
+                                && (Math.abs(dx) > scrubTouchSlop || Math.abs(dy) > scrubTouchSlop)) {
+                            isDragging = true;
+                            setSwipeToDismissEnabled(false);
+                            disallowParentIntercept(true);
+                        }
+                        if (isDragging) {
+                            positionX += dx;
+                            positionY += dy;
+                            float maxDeltaX = (videoFrame.getWidth() * (scaleFactor - 1)) / 2f;
+                            float maxDeltaY = (videoFrame.getHeight() * (scaleFactor - 1)) / 2f;
+                            positionX = Math.max(-maxDeltaX, Math.min(maxDeltaX, positionX));
+                            positionY = Math.max(-maxDeltaY, Math.min(maxDeltaY, positionY));
+                            videoFrame.setTranslationX(positionX);
+                            videoFrame.setTranslationY(positionY);
+                            wasDragging = true;
+                            lastTouchX = ev.getX();
+                            lastTouchY = ev.getY();
+                            return true; // consume so parents don't also react
+                        }
+                        lastTouchX = ev.getX();
+                        lastTouchY = ev.getY();
+                    }
+                    // Otherwise consider a horizontal scrub (only when not zoomed in).
+                    if (!isScrubbing && !scrubGestureRejected && !scaling
+                            && ev.getPointerCount() == 1 && scaleFactor <= 1.0f
+                            && player != null && player.getDuration() > 0) {
+                        float dx = ev.getX() - scrubStartX;
+                        float dy = ev.getY() - scrubStartY;
+                        if (Math.abs(dx) > scrubTouchSlop && Math.abs(dx) > Math.abs(dy) * 1.5f) {
+                            beginScrub();
+                        } else if (Math.abs(dy) > scrubTouchSlop) {
+                            // A vertical gesture won; leave it to swipe-to-dismiss/scroll.
+                            scrubGestureRejected = true;
+                        }
+                    }
+                    if (isScrubbing) {
+                        updateScrub(ev.getX());
+                        return true; // consume so nothing else reacts
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (isScrubbing) {
+                        endScrub();
+                        return true; // consume so the tap doesn't toggle the controls
+                    }
+                    // A clean tap (no pinch/pan/scrub) toggles the controls.
+                    if (!wasScaling && !wasDragging && !scaling && !isTouchInsideControls(ev)) {
+                        toggleControls();
+                    }
+                    isDragging = false;
+                    setSwipeToDismissEnabled(scaleFactor <= 1.0f);
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    if (isScrubbing) {
+                        endScrub();
+                    }
+                    isDragging = false;
+                    setSwipeToDismissEnabled(scaleFactor <= 1.0f);
+                    break;
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private void toggleControls() {
+        if (playerControlView == null) {
+            return;
+        }
+        if (playerControlView.isVisible()) {
+            playerControlView.hide();
+        } else {
+            playerControlView.show();
+        }
+    }
+
+    private void disallowParentIntercept(boolean disallow) {
+        if (videoFrame != null && videoFrame.getParent() != null) {
+            videoFrame.getParent().requestDisallowInterceptTouchEvent(disallow);
+        }
+    }
+
+    private void beginScrub() {
+        isScrubbing = true;
+        // scrubStartX/scrubStartY were captured on ACTION_DOWN; the seek delta is measured
+        // from that original anchor so the gesture has no dead zone after the touch slop.
+        scrubStartPosition = player.getCurrentPosition();
+        setSwipeToDismissEnabled(false);
+        disallowParentIntercept(true);
+        // Pin the controls open so the timeline bar tracks the scrub for the whole gesture.
+        if (playerControlView != null) {
+            playerControlView.setShowTimeoutMs(0);
+            playerControlView.show();
+        }
+    }
+
+    private void updateScrub(float currentX) {
+        long duration = player.getDuration();
+        if (duration <= 0) {
+            return;
+        }
+        int width = binding.getRoot().getWidth();
+        if (width <= 0) {
+            width = getResources().getDisplayMetrics().widthPixels;
+        }
+        // Dragging the full width of the screen scrubs across the whole video; partial
+        // drags move proportionally, so any clip length stays reachable in one gesture.
+        float fraction = (currentX - scrubStartX) / width;
+        long target = scrubStartPosition + (long) (fraction * duration);
+        target = Math.max(0, Math.min(duration, target));
+        // The timeline bar in playerControlView follows the player position automatically.
+        player.seekTo(target);
+    }
+
+    private void endScrub() {
+        isScrubbing = false;
+        // Restore the normal auto-hide behaviour for the controls.
+        if (playerControlView != null) {
+            playerControlView.setShowTimeoutMs(CONTROLS_SHOW_TIMEOUT_MS);
+            playerControlView.show();
+        }
+        setSwipeToDismissEnabled(scaleFactor <= 1.0f);
+    }
+
+    private boolean isTouchInsideControls(MotionEvent ev) {
+        if (playerControlView == null || !playerControlView.isVisible()) {
+            return false;
+        }
+        int[] location = new int[2];
+        playerControlView.getLocationOnScreen(location);
+        float rawX = ev.getRawX();
+        float rawY = ev.getRawY();
+        return rawX >= location[0] && rawX <= location[0] + playerControlView.getWidth()
+                && rawY >= location[1] && rawY <= location[1] + playerControlView.getHeight();
+    }
+
+    private void setSwipeToDismissEnabled(boolean enabled) {
+        binding.getRoot().setDragEnabled(enabled);
+        binding.getNestedScrollView().setScrollEnabled(enabled);
+    }
+
+    /*@OptIn(markerClass = UnstableApi.class)
     private void loadFallbackVideo(Bundle savedInstanceState) {
         if (videoFallbackDirectUrl != null) {
             MediaItem mediaItem = player.getCurrentMediaItem();
@@ -919,7 +1257,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 preparePlayer(savedInstanceState);
             }
         }
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -949,18 +1287,21 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             finish();
             return true;
         } else if (itemId == R.id.action_download_view_video_activity) {
-            if (isDownloading) {
+            if (viewVideoViewModel.isDownloading()) {
                 return false;
             }
 
-            if (videoDownloadUrl == null) {
+            if (viewVideoViewModel.getVideoDownloadUrl() == null) {
                 Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
                 return true;
             }
 
-            isDownloading = true;
+            viewVideoViewModel.setDownloading(true);
             requestPermissionAndDownload();
 
+            return true;
+        } else if (itemId == R.id.action_share_view_video_activity) {
+            shareVideo();
             return true;
         } else if (itemId == R.id.action_playback_speed_view_video_activity) {
             changePlaybackSpeed();
@@ -970,8 +1311,49 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         return false;
     }
 
+    private void shareVideo() {
+        Post post = viewVideoViewModel.getPost();
+        if (post == null || viewVideoViewModel.getVideoDownloadUrl() == null) {
+            Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(this, R.string.preparing_video_for_sharing, Toast.LENGTH_SHORT).show();
+
+        // Share with the same filename scheme used by downloads.
+        String fileName = MediaFileNameUtils.getDownloadFileName(post, 0);
+        PersistableBundle extras = new PersistableBundle();
+
+        if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_NORMAL || post.isTumblr()) {
+            if (post.getPostType() == Post.GIF_TYPE) {
+                extras.putString(DownloadMediaService.EXTRA_URL, post.getVideoUrl());
+                extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_GIF);
+            } else {
+                extras.putString(DownloadMediaService.EXTRA_URL, viewVideoViewModel.getVideoDownloadUrl());
+                extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO);
+            }
+            extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
+            extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, viewVideoViewModel.getSubredditName());
+            extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
+            extras.putInt(DownloadMediaService.EXTRA_IS_SHARE, 1);
+
+            JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
+            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+        } else {
+            extras.putString(DownloadRedditVideoService.EXTRA_VIDEO_URL, viewVideoViewModel.getVideoDownloadUrl());
+            extras.putString(DownloadRedditVideoService.EXTRA_POST_ID, post.getId());
+            extras.putString(DownloadRedditVideoService.EXTRA_SUBREDDIT, viewVideoViewModel.getSubredditName());
+            extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
+            extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, fileName);
+            extras.putInt(DownloadRedditVideoService.EXTRA_IS_SHARE, 1);
+
+            JobInfo jobInfo = DownloadRedditVideoService.constructJobInfo(this, 5000000, extras);
+            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+        }
+    }
+
     public void setPlaybackSpeed(int speed100X) {
-        this.playbackSpeed = speed100X <= 0 ? 100 : speed100X;
+        viewVideoViewModel.setPlaybackSpeed(speed100X <= 0 ? 100 : speed100X);
         player.setPlaybackParameters(new PlaybackParameters((speed100X / 100.0f)));
     }
 
@@ -998,8 +1380,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     @Override
     protected void onStart() {
         super.onStart();
-
-        if (wasPlaying) {
+        if (viewVideoViewModel.getWasPlaying()) {
             player.setPlayWhenReady(true);
         }
     }
@@ -1007,7 +1388,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     @Override
     protected void onStop() {
         super.onStop();
-        wasPlaying = player.getPlayWhenReady();
+        viewVideoViewModel.setWasPlaying(player.getPlayWhenReady());
         player.setPlayWhenReady(false);
 
         if (originalOrientation != null) {
@@ -1024,21 +1405,19 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         if (requestCode == PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE && grantResults.length > 0) {
             if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 Toast.makeText(this, R.string.no_storage_permission, Toast.LENGTH_SHORT).show();
-            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED && isDownloading) {
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED && viewVideoViewModel.isDownloading()) {
                 download();
             }
-
-            isDownloading = false;
+            viewVideoViewModel.setDownloading(false);
         }
     }
 
     private void download() {
-        isDownloading = false;
+        viewVideoViewModel.setDownloading(false);
 
-                // Check download location before starting download
-        String downloadLocation = "";
-
-        if (isNSFW && mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
+        // Check download location before starting download
+        String downloadLocation;
+        if (viewVideoViewModel.isNSFW() && mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
             downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
         } else {
             downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
@@ -1051,37 +1430,35 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         PersistableBundle extras = new PersistableBundle();
 
+        Post post = viewVideoViewModel.getPost();
         if (post != null) {
-            String title = post.getTitle();
-            String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");
+            // Use the shared naming scheme so all download paths produce identical filenames.
+            String fileName = MediaFileNameUtils.getDownloadFileName(post, 0);
 
-            if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
-            if (sanitizedTitle.isEmpty()) sanitizedTitle = "video_" + System.currentTimeMillis();
-
-            if (videoType != VIDEO_TYPE_NORMAL || post.isTumblr()) {
+            if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_NORMAL || post.isTumblr()) {
                 if (post.getPostType() == Post.GIF_TYPE) {
                     extras.putString(DownloadMediaService.EXTRA_URL, post.getVideoUrl());
                     extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_GIF);
-                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, sanitizedTitle + ".gif");
+                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
                 } else {
-                    extras.putString(DownloadMediaService.EXTRA_URL, videoDownloadUrl);
+                    extras.putString(DownloadMediaService.EXTRA_URL, viewVideoViewModel.getVideoDownloadUrl());
                     extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO);
-                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, sanitizedTitle + ".mp4");
+                    extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
                 }
 
-                extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, subredditName);
-                extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, isNSFW ? 1 : 0);
+                extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, viewVideoViewModel.getSubredditName());
+                extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
 
                 //TODO: contentEstimatedBytes
                 JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
                 ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
             } else {
-                extras.putString(DownloadRedditVideoService.EXTRA_VIDEO_URL, videoDownloadUrl);
+                extras.putString(DownloadRedditVideoService.EXTRA_VIDEO_URL, viewVideoViewModel.getVideoDownloadUrl());
                 extras.putString(DownloadRedditVideoService.EXTRA_POST_ID, post.getId());
-                extras.putString(DownloadRedditVideoService.EXTRA_SUBREDDIT, subredditName);
-                extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, isNSFW ? 1 : 0);
+                extras.putString(DownloadRedditVideoService.EXTRA_SUBREDDIT, viewVideoViewModel.getSubredditName());
+                extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
 
-                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, sanitizedTitle + ".mp4");
+                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, fileName);
 
                 //TODO: contentEstimatedBytes
                 JobInfo jobInfo = DownloadRedditVideoService.constructJobInfo(this, 5000000, extras);
@@ -1093,6 +1470,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentRotation", currentRotation);
+    }
+
+    /*@Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(IS_MUTE_STATE, isMute);
@@ -1107,7 +1490,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         outState.putInt(PLAYBACK_SPEED_STATE, playbackSpeed);
         outState.putBoolean(SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE, setDefaultResolutionAlready);
-    }
+    }*/
 
     @Override
     public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
@@ -1117,5 +1500,20 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     @Subscribe
     public void onFinishViewMediaActivityEvent(FinishViewMediaActivityEvent e) {
         finish();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onShareMediaEvent(ShareMediaEvent event) {
+        try {
+            Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider",
+                    new File(event.filePath));
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            shareIntent.setType(event.mimeType);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.error_sharing_video, Toast.LENGTH_SHORT).show();
+        }
     }
 }

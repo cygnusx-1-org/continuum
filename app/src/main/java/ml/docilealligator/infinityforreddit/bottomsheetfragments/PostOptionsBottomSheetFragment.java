@@ -21,12 +21,15 @@ import androidx.fragment.app.Fragment;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.concurrent.Executor;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.PostModerationActionHandler;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
@@ -35,11 +38,16 @@ import ml.docilealligator.infinityforreddit.activities.ReportActivity;
 import ml.docilealligator.infinityforreddit.activities.SubmitCrosspostActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostOptionsBottomSheetBinding;
+import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.post.HidePost;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
@@ -67,6 +75,13 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
+    @Inject
+    RedditDataRoomDatabase mRedditDataRoomDatabase;
+    @Inject
+    Executor mExecutor;
+    @Inject
+    @Named("post_history")
+    SharedPreferences mPostHistorySharedPreferences;
 
     @Inject
     @Named("default")
@@ -116,7 +131,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ((Infinity) mBaseActivity.getApplication()).getAppComponent().inject(this);
         // Inflate the layout for this fragment
-        binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);
+        FragmentPostOptionsBottomSheetBinding binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);
 
         if (mPost != null) {
             switch (mPost.getPostType()) {
@@ -188,6 +203,11 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 dismiss();
             });
 
+            binding.copyTitleTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                CopyTextBottomSheetFragment.showCopyDialog(mBaseActivity, mPost.getTitle());
+                dismiss();
+            });
+
             binding.addToPostFilterTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                 Intent intent = new Intent(mBaseActivity, PostFilterPreferenceActivity.class);
                 intent.putExtra(PostFilterPreferenceActivity.EXTRA_POST, mPost);
@@ -198,7 +218,6 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
             if (mBaseActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 binding.commentTextViewPostOptionsBottomSheetFragment.setVisibility(View.GONE);
-                binding.hidePostTextViewPostOptionsBottomSheetFragment.setVisibility(View.GONE);
                 binding.crosspostTextViewPostOptionsBottomSheetFragment.setVisibility(View.GONE);
                 binding.reportTextViewPostOptionsBottomSheetFragment.setVisibility(View.GONE);
             } else {
@@ -219,52 +238,6 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                         dismiss();
                     });
                 }
-
-                if (mPost.isHidden()) {
-                    binding.hidePostTextViewPostOptionsBottomSheetFragment.setText(R.string.action_unhide_post);
-                } else {
-                    binding.hidePostTextViewPostOptionsBottomSheetFragment.setText(R.string.action_hide_post);
-                }
-
-                binding.hidePostTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
-                    if (mPost.isHidden()) {
-                        HidePost.unhidePost(mOauthRetrofit, mBaseActivity.accessToken, mPost.getFullName(), new HidePost.HidePostListener() {
-                            @Override
-                            public void success() {
-                                mPost.setHidden(false);
-                                Toast.makeText(mBaseActivity, R.string.post_unhide_success, Toast.LENGTH_SHORT).show();
-                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
-                                dismiss();
-                            }
-
-                            @Override
-                            public void failed() {
-                                mPost.setHidden(true);
-                                Toast.makeText(mBaseActivity, R.string.post_unhide_failed, Toast.LENGTH_SHORT).show();
-                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
-                                dismiss();
-                            }
-                        });
-                    } else {
-                        HidePost.hidePost(mOauthRetrofit, mBaseActivity.accessToken, mPost.getFullName(), new HidePost.HidePostListener() {
-                            @Override
-                            public void success() {
-                                mPost.setHidden(true);
-                                Toast.makeText(mBaseActivity, R.string.post_hide_success, Toast.LENGTH_SHORT).show();
-                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
-                                dismiss();
-                            }
-
-                            @Override
-                            public void failed() {
-                                mPost.setHidden(false);
-                                Toast.makeText(mBaseActivity, R.string.post_hide_failed, Toast.LENGTH_SHORT).show();
-                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
-                                dismiss();
-                            }
-                        });
-                    }
-                });
 
                 binding.crosspostTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                     Intent submitCrosspostIntent = new Intent(mBaseActivity, SubmitCrosspostActivity.class);
@@ -308,6 +281,73 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                     });
                 }
             }
+
+            if (mPost.isHidden()) {
+                binding.hidePostTextViewPostOptionsBottomSheetFragment.setText(R.string.action_unhide_post);
+            } else {
+                binding.hidePostTextViewPostOptionsBottomSheetFragment.setText(R.string.action_hide_post);
+            }
+
+            binding.hidePostTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                if (Account.ANONYMOUS_ACCOUNT.equals(mBaseActivity.accountName)) {
+                    if (mPost.isHidden()) {
+                        ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mBaseActivity.accountName,
+                                mPost.getId(), ReadPostType.ANONYMOUS_HIDDEN_POSTS);
+                        Toast.makeText(mBaseActivity, R.string.post_unhide_success, Toast.LENGTH_SHORT).show();
+                    } else {
+                        ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mBaseActivity.accountName,
+                                mPost.getId(), ReadPostType.ANONYMOUS_HIDDEN_POSTS,
+                                ReadPostsUtils.GetReadPostsLimit(mBaseActivity.accountName, mPostHistorySharedPreferences));
+                        Toast.makeText(mBaseActivity, R.string.post_hide_success, Toast.LENGTH_SHORT).show();
+                    }
+                    mPost.setHidden(!mPost.isHidden());
+                    EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
+                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(mPost));
+                    dismiss();
+                } else {
+                    if (mPost.isHidden()) {
+                        HidePost.unhidePost(mOauthRetrofit, mBaseActivity.accessToken, mPost.getFullName(), new HidePost.HidePostListener() {
+                            @Override
+                            public void success() {
+                                mPost.setHidden(false);
+                                Toast.makeText(mBaseActivity, R.string.post_unhide_success, Toast.LENGTH_SHORT).show();
+                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
+                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(mPost));
+                                dismiss();
+                            }
+
+                            @Override
+                            public void failed() {
+                                mPost.setHidden(true);
+                                Toast.makeText(mBaseActivity, R.string.post_unhide_failed, Toast.LENGTH_SHORT).show();
+                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
+                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(mPost));
+                                dismiss();
+                            }
+                        });
+                    } else {
+                        HidePost.hidePost(mOauthRetrofit, mBaseActivity.accessToken, mPost.getFullName(), new HidePost.HidePostListener() {
+                            @Override
+                            public void success() {
+                                mPost.setHidden(true);
+                                Toast.makeText(mBaseActivity, R.string.post_hide_success, Toast.LENGTH_SHORT).show();
+                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
+                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(mPost));
+                                dismiss();
+                            }
+
+                            @Override
+                            public void failed() {
+                                mPost.setHidden(false);
+                                Toast.makeText(mBaseActivity, R.string.post_hide_failed, Toast.LENGTH_SHORT).show();
+                                EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
+                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(mPost));
+                                dismiss();
+                            }
+                        });
+                    }
+                }
+            });
 
             if (mPost.isApproved()) {
                 binding.statusTextViewPostOptionsBottomSheetFragment.setText(getString(R.string.approved_status, mPost.getApprovedBy()));
@@ -439,13 +479,9 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, mPost.isNSFW() ? 1 : 0);
 
 
-                String title = (mPost != null) ? mPost.getTitle() : "reddit_video"; // Get title or use default
-                String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");
-                if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
-                if (sanitizedTitle.isEmpty()) sanitizedTitle = "reddit_video_" + System.currentTimeMillis();
-
-                String finalFileName = sanitizedTitle + ".mp4";
-                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, finalFileName);
+                // Use the shared naming scheme so all download paths produce identical filenames.
+                extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME,
+                        MediaFileNameUtils.getDownloadFileName(mPost, 0));
 
                 //TODO: contentEstimatedBytes
                 JobInfo jobInfo = DownloadRedditVideoService.constructJobInfo(mBaseActivity, 5000000, extras);

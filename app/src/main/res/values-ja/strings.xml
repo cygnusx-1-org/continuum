@@ -961,7 +961,6 @@ https://play.google.com/store/"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"ビデオとGIF投稿でのみプレビューを無効にする"</string>
     <string name="settings_enable_search_history_title">"検索履歴を有効化"</string>
     <string name="settings_post_history_title">"投稿履歴"</string>
-    <string name="settings_mark_posts_as_read_title">"投稿を既読にする"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"投票後に投稿を既読にする"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"スクロール時に投稿を既読にする"</string>
     <string name="settings_hide_read_posts_automatically_title">"自動で既読の投稿を非表示にする"</string>
@@ -1093,7 +1092,6 @@ https://play.google.com/store/"</string>
     <string name="settings_post_details_title">"投稿の詳細"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"縦画面で投稿とコメントを分割する"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"横画面で投稿とコメントを分割する"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"メディアビューアで下部ツールバーを使用する"</string>
     <string name="settings_secure_mode_title">"セキュアモード"</string>
     <string name="settings_secure_mode_summary">"スクリーンショットや画面録画は許可されません。アプリの履歴画面ではプレビューが表示されません。"</string>
     <string name="discard_dialog_button">"破棄"</string>
@@ -1111,8 +1109,6 @@ https://play.google.com/store/"</string>
     <string name="settings_link_handler_value_external_browser">"外部ブラウザ"</string>
     <string name="settings_link_handler_value_custom_tab">"カスタムタブ"</string>
     <string name="settings_link_handler_value_internal_browser">"内部ブラウザ"</string>
-    <string name="settings_pinch_to_zoom_video_title">"ピンチしてビデオをズームする"</string>
-    <string name="settings_experimental_feature">"実験的機能"</string>
     <string name="go_to_top">"トップへ"</string>
     <string name="contain_domain">"このドメインを含める"</string>
     <string name="app_lock_timeout_immediately">"即時"</string>

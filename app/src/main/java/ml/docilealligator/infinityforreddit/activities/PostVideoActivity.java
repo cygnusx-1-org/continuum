@@ -1,12 +1,18 @@
 package ml.docilealligator.infinityforreddit.activities;
 
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
+
+import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,9 +24,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -37,6 +47,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -54,6 +65,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
+import ml.docilealligator.infinityforreddit.asynctasks.FlairRequirementController;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
@@ -67,6 +79,7 @@ import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
 import retrofit2.Retrofit;
 
 public class PostVideoActivity extends BaseActivity implements FlairBottomSheetFragment.FlairSelectionCallback,
@@ -122,6 +135,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     private Uri videoUri;
     private boolean loadSubredditIconSuccessful = true;
     private boolean isPosting;
+    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
     private boolean wasPlaying;
     private int primaryTextColor;
     private int flairBackgroundColor;
@@ -138,6 +152,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     private RequestManager mGlide;
     private FlairBottomSheetFragment mFlairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
+    private FlairRequirementController flairController;
     private DataSource.Factory dataSourceFactory;
     private ExoPlayer player;
     private ActivityPostVideoBinding binding;
@@ -154,9 +169,22 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         binding = ActivityPostVideoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        requestCameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(), isGranted -> {
+                    if (isGranted) {
+                        captureVideo();
+                    } else {
+                        Snackbar.make(binding.coordinatorLayoutPostVideoActivity, R.string.camera_permission_required, Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+
         EventBus.getDefault().register(this);
 
         applyCustomTheme();
+
+        flairController = new FlairRequirementController(mOauthRetrofit,
+                R.id.action_send_post_video_activity,
+                this::applyFlairLabelStyle);
 
         if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             if (isChangeStatusBarIconColor()) {
@@ -192,8 +220,11 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
 
         mGlide = Glide.with(this);
 
-        player = new ExoPlayer.Builder(this).build();
-        binding.playerViewPostVideoActivity.setPlayer(player);
+        player = new ExoPlayer.Builder(this)
+                .setSeekBackIncrementMs(VIDEO_SEEK_BACK_INCREMENT_MS)
+                .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
+                .build();
+        binding.playerViewPostVideoActivity.setPlayer(new DurationAwareSeekPlayer(player));
         dataSourceFactory = new DefaultDataSourceFactory(this,
                 Util.getUserAgent(this, "Infinity"));
         if (mSharedPreferences.getBoolean(SharedPreferencesUtils.LOOP_VIDEO, true)) {
@@ -201,6 +232,24 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         } else {
             player.setRepeatMode(Player.REPEAT_MODE_OFF);
         }
+
+        Drawable playDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_play_arrow_24dp, null);
+        Drawable pauseDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_24dp, null);
+        MaterialButton playPauseButton = binding.getRoot().findViewById(R.id.exo_play_pause_button_exo_playback_control_view);
+        playPauseButton.setOnClickListener((view) -> {
+            Util.handlePlayPauseButtonAction(player);
+        });
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onEvents(@NonNull Player player, @NonNull Player.Events events) {
+                if (events.containsAny(
+                        Player.EVENT_PLAY_WHEN_READY_CHANGED,
+                        Player.EVENT_PLAYBACK_STATE_CHANGED,
+                        Player.EVENT_PLAYBACK_SUPPRESSION_REASON_CHANGED)) {
+                    playPauseButton.setIcon(Util.shouldShowPlayButton(player) ? playDrawable : pauseDrawable);
+                }
+            }
+        });
 
         mPostingSnackbar = Snackbar.make(binding.coordinatorLayoutPostVideoActivity, R.string.posting, Snackbar.LENGTH_INDEFINITE);
 
@@ -242,6 +291,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                 if (!loadSubredditIconSuccessful) {
                     loadSubredditIcon();
                 }
+                notifyControllerOfSubreddit();
             }
             displaySubredditIcon();
 
@@ -278,6 +328,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                 binding.subredditNameTextViewPostVideoActivity.setText(subredditName);
                 binding.flairCustomTextViewPostVideoActivity.setVisibility(View.VISIBLE);
                 loadSubredditIcon();
+                notifyControllerOfSubreddit();
             } else {
                 mGlide.load(R.drawable.subreddit_default_icon)
                         .transform(new RoundedCornersTransformation(72, 0))
@@ -326,10 +377,10 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                 mFlairSelectionBottomSheetFragment.setArguments(bundle);
                 mFlairSelectionBottomSheetFragment.show(getSupportFragmentManager(), mFlairSelectionBottomSheetFragment.getTag());
             } else {
-                binding.flairCustomTextViewPostVideoActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
-                binding.flairCustomTextViewPostVideoActivity.setTextColor(primaryTextColor);
-                binding.flairCustomTextViewPostVideoActivity.setText(getString(R.string.flair));
                 flair = null;
+                flairController.setHasFlair(false);
+                binding.flairCustomTextViewPostVideoActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
+                applyFlairLabelStyle();
             }
         });
 
@@ -364,11 +415,10 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         });
 
         binding.captureFabPostVideoActivity.setOnClickListener(view -> {
-            Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-            try {
-                startActivityForResult(takeVideoIntent, CAPTURE_VIDEO_REQUEST_CODE);
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                captureVideo();
+            } else {
+                requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
             }
         });
 
@@ -505,6 +555,15 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     }
 
     @OptIn(markerClass = UnstableApi.class)
+    private void captureVideo() {
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        try {
+            startActivityForResult(takeVideoIntent, CAPTURE_VIDEO_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void loadVideo() {
         binding.selectVideoConstraintLayoutPostVideoActivity.setVisibility(View.GONE);
         binding.selectAgainTextViewPostVideoActivity.setVisibility(View.VISIBLE);
@@ -526,6 +585,19 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                     .transform(new RoundedCornersTransformation(72, 0))
                     .into(binding.subredditIconGifImageViewPostVideoActivity);
         }
+    }
+
+    private void applyFlairLabelStyle() {
+        if (flair != null) return;
+        boolean required = flairController != null && flairController.isFlairRequired();
+        binding.flairCustomTextViewPostVideoActivity.setText(getString(required ? R.string.flair_required : R.string.flair));
+        binding.flairCustomTextViewPostVideoActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
+    }
+
+    private void notifyControllerOfSubreddit() {
+        String token = selectedAccount != null && selectedAccount.getAccessToken() != null
+                ? selectedAccount.getAccessToken() : accessToken;
+        flairController.onSubredditChanged(subredditName, subredditIsUser, token);
     }
 
     private void loadSubredditIcon() {
@@ -551,10 +623,8 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         getMenuInflater().inflate(R.menu.post_video_activity, menu);
         applyMenuItemTheme(menu);
         mMemu = menu;
-        if (isPosting) {
-            mMemu.findItem(R.id.action_send_post_video_activity).setEnabled(false);
-            mMemu.findItem(R.id.action_send_post_video_activity).getIcon().setAlpha(130);
-        }
+        flairController.setPosting(isPosting);
+        flairController.setMenu(menu);
         return true;
     }
 
@@ -581,9 +651,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
             }
 
             isPosting = true;
-
-            item.setEnabled(false);
-            item.getIcon().setAlpha(130);
+            flairController.setPosting(true);
 
             mPostingSnackbar.show();
 
@@ -689,11 +757,12 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                     binding.subredditNameTextViewPostVideoActivity.setText(subredditName);
                     displaySubredditIcon();
 
+                    flair = null;
+                    flairController.setHasFlair(false);
                     binding.flairCustomTextViewPostVideoActivity.setVisibility(View.VISIBLE);
                     binding.flairCustomTextViewPostVideoActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
-                    binding.flairCustomTextViewPostVideoActivity.setTextColor(primaryTextColor);
-                    binding.flairCustomTextViewPostVideoActivity.setText(getString(R.string.flair));
-                    flair = null;
+                    applyFlairLabelStyle();
+                    notifyControllerOfSubreddit();
                 }
             }
         } else if (requestCode == PICK_VIDEO_REQUEST_CODE) {
@@ -734,6 +803,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         binding.flairCustomTextViewPostVideoActivity.setBackgroundColor(flairBackgroundColor);
         binding.flairCustomTextViewPostVideoActivity.setBorderColor(flairBackgroundColor);
         binding.flairCustomTextViewPostVideoActivity.setTextColor(flairTextColor);
+        flairController.setHasFlair(true);
     }
 
     @Override
@@ -759,9 +829,8 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     @Subscribe
     public void onSubmitVideoPostEvent(SubmitVideoOrGifPostEvent submitVideoOrGifPostEvent) {
         isPosting = false;
+        flairController.setPosting(false);
         mPostingSnackbar.dismiss();
-        mMemu.findItem(R.id.action_send_post_video_activity).setEnabled(true);
-        mMemu.findItem(R.id.action_send_post_video_activity).getIcon().setAlpha(255);
 
         if (submitVideoOrGifPostEvent.postSuccess) {
             Intent intent = new Intent(this, ViewUserDetailActivity.class);

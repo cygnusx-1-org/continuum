@@ -16,6 +16,8 @@
 
 package ml.docilealligator.infinityforreddit.videoautoplay;
 
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
 import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.checkNotNull;
 
 import android.content.Context;
@@ -24,6 +26,7 @@ import android.os.Looper;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
+import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.LoadControl;
@@ -42,16 +45,27 @@ import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 public class ToroExoPlayer {
 
     private final ExoPlayer player;
+    private final Player durationAwareSeekPlayer;
 
     @OptIn(markerClass = UnstableApi.class)
     public ToroExoPlayer(Context context, RenderersFactory renderersFactory,
                          TrackSelector trackSelector, LoadControl loadControl, BandwidthMeter bandwidthMeter,
                          Looper looper) {
-        player = new ExoPlayer.Builder(context).setRenderersFactory(renderersFactory).setTrackSelector(trackSelector).setLoadControl(loadControl).setBandwidthMeter(bandwidthMeter).setLooper(looper).build();
+        player = new ExoPlayer.Builder(context)
+                .setRenderersFactory(renderersFactory)
+                .setTrackSelector(trackSelector)
+                .setLoadControl(loadControl)
+                .setBandwidthMeter(bandwidthMeter)
+                .setLooper(looper)
+                .setSeekBackIncrementMs(VIDEO_SEEK_BACK_INCREMENT_MS)
+                .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
+                .build();
+        durationAwareSeekPlayer = new DurationAwareSeekPlayer(player);
     }
 
     public ToroExoPlayer(ExoPlayer exoPlayer) {
         this.player = exoPlayer;
+        durationAwareSeekPlayer = new DurationAwareSeekPlayer(player);
     }
 
     private ToroPlayer.VolumeChangeListeners listeners;
@@ -100,5 +114,9 @@ public class ToroExoPlayer {
 
     public ExoPlayer getPlayer() {
         return player;
+    }
+
+    public Player getDurationAwareSeekPlayer() {
+        return durationAwareSeekPlayer;
     }
 }

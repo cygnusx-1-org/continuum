@@ -20,6 +20,8 @@ public class JSONUtils {
     public static final String KIND_KEY = "kind";
     public static final String KIND_VALUE_MORE = "more";
     public static final String DATA_KEY = "data";
+    public static final String IS_SUSPENDED_KEY = "is_suspended";
+    public static final String IS_BLOCKED_KEY = "is_blocked";
     public static final String AFTER_KEY = "after";
     public static final String CHILDREN_KEY = "children";
     public static final String COUNT_KEY = "count";
@@ -209,6 +211,7 @@ public class JSONUtils {
     public static final String THUMBNAIL_URL_KEY = "thumbnail_url";
     public static final String VIDEO_DOWNLOAD_URL = "videoDownloadUrl";
     public static final String EXPLANATION_KEY = "explanation";
+    public static final String SR_DETAIL_KEY = "sr_detail";
 
     @Nullable
     public static Map<String, MediaMetadata> parseMediaMetadata(JSONObject data) {

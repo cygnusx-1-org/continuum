@@ -98,6 +98,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeVoteButtonsPositionEven
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.events.ShowDividerInCompactLayoutPreferenceEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
+import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -121,6 +122,8 @@ public abstract class PostFragmentBase extends Fragment {
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     protected Executor mExecutor;
+    @Inject
+    protected VideoMuteManager mVideoMuteManager;
     protected BaseActivity mActivity;
     protected RequestManager mGlide;
     protected Window window;
@@ -129,8 +132,6 @@ public abstract class PostFragmentBase extends Fragment {
     protected StaggeredGridLayoutManager mStaggeredGridLayoutManager;
     protected boolean hasPost;
     protected long postFragmentId;
-    protected boolean rememberMutingOptionInPostFeed;
-    protected Boolean masterMutingOption;
     protected Handler lazyModeHandler;
     protected CountDownTimer resumeLazyModeCountDownTimer;
     protected RecyclerView.SmoothScroller smoothScroller;
@@ -163,8 +164,6 @@ public abstract class PostFragmentBase extends Fragment {
 
         window = mActivity.getWindow();
 
-        rememberMutingOptionInPostFeed = mSharedPreferences.getBoolean(SharedPreferencesUtils.REMEMBER_MUTING_OPTION_IN_POST_FEED, false);
-
         smoothScroller = new LinearSmoothScroller(mActivity) {
             @Override
             protected int getVerticalSnapPreference() {
@@ -182,8 +181,8 @@ public abstract class PostFragmentBase extends Fragment {
                         if (mLinearLayoutManager != null) {
                             setCurrentPosition(mLinearLayoutManager.findFirstVisibleItemPosition());
                         } else {
-                            int[] into = new int[2];
-                            setCurrentPosition(mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[1]);
+                            int[] into = new int[mStaggeredGridLayoutManager.getSpanCount()];
+                            setCurrentPosition(mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0]);
                         }
                     }
 
@@ -507,13 +506,14 @@ public abstract class PostFragmentBase extends Fragment {
 
     public abstract void changePostLayout(int postLayout, boolean temporary);
 
+    @Nullable
     public final Boolean getMasterMutingOption() {
-        return masterMutingOption;
+        return mVideoMuteManager.getMasterMutingOption();
     }
 
     public final void videoAutoplayChangeMutingOption(boolean isMute) {
-        if (rememberMutingOptionInPostFeed) {
-            masterMutingOption = isMute;
+        if (mVideoMuteManager.getRememberMuteOption()) {
+            mVideoMuteManager.setMuted(isMute);
         }
     }
 
@@ -724,6 +724,7 @@ public abstract class PostFragmentBase extends Fragment {
 
     @Subscribe
     public void onChangeMuteAutoplayingVideosEvent(ChangeMuteAutoplayingVideosEvent changeMuteAutoplayingVideosEvent) {
+        mVideoMuteManager.setMuted(changeMuteAutoplayingVideosEvent.muteAutoplayingVideos);
         if (getPostAdapter() != null) {
             getPostAdapter().setMuteAutoplayingVideos(changeMuteAutoplayingVideosEvent.muteAutoplayingVideos);
             refreshAdapter();
@@ -732,10 +733,7 @@ public abstract class PostFragmentBase extends Fragment {
 
     @Subscribe
     public void onChangeRememberMutingOptionInPostFeedEvent(ChangeRememberMutingOptionInPostFeedEvent event) {
-        rememberMutingOptionInPostFeed = event.rememberMutingOptionInPostFeedEvent;
-        if (!event.rememberMutingOptionInPostFeedEvent) {
-            masterMutingOption = null;
-        }
+        mVideoMuteManager.setRememberMuteOption(event.rememberMutingOptionInPostFeedEvent);
     }
 
     @Subscribe
@@ -991,40 +989,16 @@ public abstract class PostFragmentBase extends Fragment {
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardWithPreviewViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardGalleryTypeViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardTextTypeViewHolder) {
-                    if (mNColumns == 2) {
-                        if (spanIndex == 0) {
-                            outRect.set(-mHalfOffset, mCard3VerticalSpace, mCard3HorizontalSpace, mCard3VerticalSpace);
-                        } else {
-                            outRect.set(mCard3HorizontalSpace, mCard3VerticalSpace, -mHalfOffset, mCard3VerticalSpace);
-                        }
-                    } else if (mNColumns == 3) {
-                        if (spanIndex == 0) {
-                            outRect.set(-mHalfOffset, mCard3VerticalSpace, mCard3HorizontalSpace, mCard3VerticalSpace);
-                        } else if (spanIndex == 1) {
-                            outRect.set(mCard3HorizontalSpace, mCard3VerticalSpace, mCard3HorizontalSpace, mCard3VerticalSpace);
-                        } else {
-                            outRect.set(mCard3HorizontalSpace, mCard3VerticalSpace, -mHalfOffset, mCard3VerticalSpace);
-                        }
-                    }
+                    int cardLeft = (spanIndex == 0) ? -mHalfOffset : mCard3HorizontalSpace;
+                    int cardRight = (spanIndex == mNColumns - 1) ? -mHalfOffset : mCard3HorizontalSpace;
+                    outRect.set(cardLeft, mCard3VerticalSpace, cardRight, mCard3VerticalSpace);
                     return;
                 }
             }
 
-            if (mNColumns == 2) {
-                if (spanIndex == 0) {
-                    outRect.set(mHalfOffset, 0, mQuaterOffset, 0);
-                } else {
-                    outRect.set(mQuaterOffset, 0, mHalfOffset, 0);
-                }
-            } else if (mNColumns == 3) {
-                if (spanIndex == 0) {
-                    outRect.set(mHalfOffset, 0, mQuaterOffset, 0);
-                } else if (spanIndex == 1) {
-                    outRect.set(mQuaterOffset, 0, mQuaterOffset, 0);
-                } else {
-                    outRect.set(mQuaterOffset, 0, mHalfOffset, 0);
-                }
-            }
+            int left = (spanIndex == 0) ? mHalfOffset : mQuaterOffset;
+            int right = (spanIndex == mNColumns - 1) ? mHalfOffset : mQuaterOffset;
+            outRect.set(left, 0, right, 0);
         }
     }
 

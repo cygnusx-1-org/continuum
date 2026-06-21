@@ -51,11 +51,11 @@ import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFi
 import ml.docilealligator.infinityforreddit.databinding.FragmentSidebarBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
-import ml.docilealligator.infinityforreddit.markdown.EmoteCloseBracketInlineProcessor;
-import ml.docilealligator.infinityforreddit.markdown.EmotePlugin;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
-import ml.docilealligator.infinityforreddit.markdown.ImageAndGifEntry;
-import ml.docilealligator.infinityforreddit.markdown.ImageAndGifPlugin;
+import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
+import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
 import ml.docilealligator.infinityforreddit.subreddit.FetchSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
@@ -183,7 +183,7 @@ public class SidebarFragment extends Fragment {
         ImageAndGifPlugin imageAndGifPlugin = new ImageAndGifPlugin();
         imageAndGifEntry = new ImageAndGifEntry(mActivity,
                 Glide.with(this), SharedPreferencesUtils.EMBEDDED_MEDIA_ALL,
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId) -> {
                     Intent imageIntent = new Intent(mActivity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
                         imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, mediaMetadata.original.url);

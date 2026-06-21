@@ -8,10 +8,12 @@ import dagger.BindsInstance;
 import dagger.Component;
 import ml.docilealligator.infinityforreddit.activities.AccountPostsActivity;
 import ml.docilealligator.infinityforreddit.activities.AccountSavedThingActivity;
+import ml.docilealligator.infinityforreddit.activities.AppAuthLoginActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterUsageListingActivity;
 import ml.docilealligator.infinityforreddit.activities.CopyMultiRedditActivity;
+import ml.docilealligator.infinityforreddit.activities.UserMultiRedditsActivity;
 import ml.docilealligator.infinityforreddit.activities.CreateMultiRedditActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomThemeListingActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomThemePreviewActivity;
@@ -69,6 +71,7 @@ import ml.docilealligator.infinityforreddit.activities.WikiActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostOptionsBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.CustomThemeListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.FollowedUsersListingFragment;
@@ -83,7 +86,7 @@ import ml.docilealligator.infinityforreddit.fragments.SubscribedSubredditsListin
 import ml.docilealligator.infinityforreddit.fragments.UserListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurImageFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurVideoFragment;
-import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragment;
+import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryImageOrGifFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryVideoFragment;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
@@ -103,6 +106,7 @@ import ml.docilealligator.infinityforreddit.settings.MainPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MiscellaneousPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.NotificationPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.NsfwAndSpoilerFragment;
+import ml.docilealligator.infinityforreddit.settings.PostDetailsPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.PostHistoryFragment;
 import ml.docilealligator.infinityforreddit.settings.ProxyPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.SecurityPreferenceFragment;
@@ -115,6 +119,8 @@ import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
 @Singleton
 @Component(modules = {AppModule.class, NetworkModule.class})
 public interface AppComponent {
+    ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker apiCallTracker();
+
     void inject(MainActivity mainActivity);
 
     void inject(LoginActivity loginActivity);
@@ -178,6 +184,8 @@ public interface AppComponent {
     void inject(SearchActivity searchActivity);
 
     void inject(SearchHistoryActivity searchHistoryActivity);
+
+    void inject(ml.docilealligator.infinityforreddit.activities.ApiStatisticsActivity apiStatisticsActivity);
 
     void inject(SettingsActivity settingsActivity);
 
@@ -274,8 +282,6 @@ public interface AppComponent {
 
     void inject(ViewRedditGalleryImageOrGifFragment viewRedditGalleryImageOrGifFragment);
 
-    void inject(ViewPostDetailFragment viewPostDetailFragment);
-
     void inject(SuicidePreventionActivity suicidePreventionActivity);
 
     void inject(WebViewActivity webViewActivity);
@@ -322,9 +328,19 @@ public interface AppComponent {
 
     void inject(PostOptionsBottomSheetFragment postOptionsBottomSheetFragment);
 
+    void inject(ShareBottomSheetFragment shareBottomSheetFragment);
+
     void inject(ProxyPreferenceFragment proxyPreferenceFragment);
 
     void inject(CopyMultiRedditActivity copyMultiRedditActivity);
+
+    void inject(UserMultiRedditsActivity userMultiRedditsActivity);
+
+    void inject(AppAuthLoginActivity appAuthLoginActivity);
+
+    void inject(PostDetailsPreferenceFragment postDetailsPreferenceFragment);
+
+    void inject(ViewPostDetailFragmentNew viewPostDetailFragmentNew);
 
     @Component.Factory
     interface Factory {

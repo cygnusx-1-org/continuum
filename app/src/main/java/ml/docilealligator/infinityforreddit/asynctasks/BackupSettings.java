@@ -41,6 +41,7 @@ import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubr
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
+import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
@@ -152,6 +153,10 @@ public class BackupSettings {
             String accountsJson = new Gson().toJson(accounts);
             boolean res23 = saveDatabaseTableToFile(accountsJson, databaseDirFile.getAbsolutePath(), "/accounts.json");
 
+            List<ReadPost> readPosts = redditDataRoomDatabase.readPostDao().getAllReadPostsForBackup();
+            String readPostsJson = new Gson().toJson(readPosts);
+            boolean res24 = saveDatabaseTableToFile(readPostsJson, databaseDirFile.getAbsolutePath(), "/read_posts.json");
+
 
             boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri, password);
 
@@ -164,7 +169,7 @@ public class BackupSettings {
             handler.post(() -> {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
-                        && res18 && res19 && res20 && res21 && res22 && res23 && zipRes && resPrivate;
+                        && res18 && res19 && res20 && res21 && res22 && res23 && res24 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {

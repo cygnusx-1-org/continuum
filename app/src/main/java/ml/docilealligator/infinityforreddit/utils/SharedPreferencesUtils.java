@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
  */
 
 public class SharedPreferencesUtils {
+    public static final String API_MONITORING_ENABLED = "api_monitoring_enabled";
+    public static final String API_STATISTICS = "api_statistics";
     public static final String ENABLE_NOTIFICATION_KEY = "enable_notification";
     public static final String NOTIFICATION_INTERVAL_KEY = "notificaiton_interval";
     public static final String LAZY_MODE_INTERVAL_KEY = "lazy_mode_interval";
@@ -49,6 +51,7 @@ public class SharedPreferencesUtils {
     public static final String CUSTOM_TITLE_FONT_FAMILY_KEY = "custom_title_font_family";
     public static final String CUSTOM_CONTENT_FONT_FAMILY_KEY = "custom_content_font_family";
     public static final String HIDE_FAB_IN_POST_FEED = "hide_fab_in_post_feed";
+    public static final String FORCE_MAX_REFRESH_RATE_KEY = "force_max_refresh_rate";
 
     public static final String SORT_TYPE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.sort_type";
     public static final String SORT_TYPE_BEST_POST = "sort_type_best_post";
@@ -106,6 +109,11 @@ public class SharedPreferencesUtils {
     public static final String VOLUME_KEYS_NAVIGATE_POSTS = "volume_keys_navigate_posts";
     public static final String MUTE_VIDEO = "mute_video";
     public static final String LINK_HANDLER = "link_handler";
+    public static final String LINK_HANDLER_BASE = "_link_handler";
+    public static final String EPHEMERAL_CUSTOM_TAB_PACKAGE = "ephemeral_custom_tab_package";
+    public static final String EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE = "_ephemeral_custom_tab_package";
+    public static final String SPECIFIC_BROWSER_PACKAGE = "specific_browser_package";
+    public static final String SPECIFIC_BROWSER_PACKAGE_BASE = "_specific_browser_package";
     public static final String VIDEO_AUTOPLAY = "video_autoplay";
     public static final String VIDEO_AUTOPLAY_VALUE_ALWAYS_ON = "2";
     public static final String VIDEO_AUTOPLAY_VALUE_ON_WIFI = "1";
@@ -186,6 +194,8 @@ public class SharedPreferencesUtils {
     public static final String CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT = "click_to_show_media_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
+    public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
+    public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";
     public static final String HIDE_POST_FLAIR = "hide_post_flair";
     public static final String HIDE_SUBREDDIT_AND_USER_PREFIX = "hide_subreddit_and_user_prefix";
     public static final String HIDE_THE_NUMBER_OF_VOTES = "hide_the_number_of_votes";
@@ -204,7 +214,6 @@ public class SharedPreferencesUtils {
     public static final String VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION = "video_player_automatic_landscape_orientation";
     public static final String REMEMBER_MUTING_OPTION_IN_POST_FEED = "remember_muting_option_in_post_feed";
     public static final String DEFAULT_LINK_POST_LAYOUT_KEY = "default_link_post_layout";
-    public static final String USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER = "use_bottom_toolbar_in_media_viewer";
     public static final String HIDE_ACCOUNT_KARMA_NAV_BAR = "hide_account_karma";
     public static final String LOCK_SCREEN_ANIMATION = "lock_screen_animation";
     public static final String ENABLE_FOLD_SUPPORT = "enable_fold_support";
@@ -212,7 +221,6 @@ public class SharedPreferencesUtils {
     public static final String LOOP_VIDEO = "loop_video";
     public static final String DEFAULT_PLAYBACK_SPEED = "default_playback_speed";
     public static final String LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI = "legacy_autoplay_video_controller_ui";
-    public static final String PINCH_TO_ZOOM_VIDEO = "pinch_to_zoom_video";
     public static final String FIXED_HEIGHT_PREVIEW_IN_CARD = "fixed_height_preview_in_card";
     public static final String HIDE_TEXT_POST_CONTENT = "hide_text_post_content";
     public static final String SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD = "show_fewer_toolbar_options_threshold";
@@ -225,7 +233,6 @@ public class SharedPreferencesUtils {
     public static final String EASIER_TO_WATCH_IN_FULL_SCREEN = "easier_to_watch_in_full_screen";
     public static final String HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS = "hide_the_number_of_votes_in_comments";
     public static final String COMMENT_DIVIDER_TYPE = "comment_divider_type";
-    public static final String REMEMBER_COMMENT_SCROLL_POSITION = "remember_comment_scroll_position";
     public static final String SUBSCRIBED_THINGS_SYNC_TIME = "subscribed_things_sync_time";
     public static final String COMMENT_FILTER = "comment_filter";
     private static final String POST_DETAIL_FAB_PORTRAIT_X_BASE = "fab_portrait_x_";
@@ -243,6 +250,8 @@ public class SharedPreferencesUtils {
     public static final String SWIPE_RIGHT_TO_GO_BACK_SENSITIVITY = "swipe_right_to_go_back_sensitivity";
     public static final String SWIPE_ACTION_SENSITIVITY_IN_COMMENTS = "swipe_action_sensitivity_in_comments";
     public static final String NAVIGATION_DRAWER_SWIPE_AREA = "navigation_drawer_swipe_area";
+    public static final String COMMENT_THREAD_CONTINUITY_CAPACITY = "comment_thread_continuity_capacity";
+    public static final String CURRENT_VERSION = "current_version";
 
     public static String getPostDetailFabPortraitX(@Nullable Display display) {
         if (display == null) {
@@ -328,6 +337,8 @@ public class SharedPreferencesUtils {
     public static final int MAIN_PAGE_TAB_POST_TYPE_GILDED = 10;
     public static final String MAIN_PAGE_SHOW_MULTIREDDITS = "_main_page_show_multireddits";
     public static final String MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS = "_main_page_show_favorite_multireddits";
+    public static final String MAIN_PAGE_SHOW_USERS_MULTIREDDITS = "_main_page_show_users_multireddits";
+    public static final String MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS = "_main_page_show_favorite_users_multireddits";
     public static final String MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS = "_main_page_show_subscribed_subreddits";
     public static final String MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS = "_main_page_show_favorite_subscribed_subreddits";
 
@@ -363,6 +374,7 @@ public class SharedPreferencesUtils {
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_HIDDEN = 15;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SAVED = 16;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_GO_TO_TOP = 17;
+    public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT = 18;
 
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS = 0;
     public static final int MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_REFRESH = 1;
@@ -394,6 +406,7 @@ public class SharedPreferencesUtils {
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_HIDDEN = 16;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SAVED = 17;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP = 18;
+    public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT = 19;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS = 0;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_REFRESH = 1;
     public static final int OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_CHANGE_SORT_TYPE = 2;
@@ -427,6 +440,8 @@ public class SharedPreferencesUtils {
     public static final String ACCESS_TOKEN = "access_token";
     public static final String ACCOUNT_IMAGE_URL = "account_image_url";
     public static final String REDGIFS_ACCESS_TOKEN = "redgifs_access_token";
+    // Cached application-only (anonymous/userless) Reddit OAuth token
+    public static final String ANONYMOUS_ACCESS_TOKEN = "anonymous_access_token";
     public static final String INBOX_COUNT = "inbox_count";
 
     public static final String NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.navigation_drawer";
@@ -463,6 +478,11 @@ public class SharedPreferencesUtils {
     public static final String PROXY_PORT = "proxy_port";
     public static final String CLIENT_ID_PREF_KEY = "client_id_pref_key";
     public static final String GIPHY_API_KEY_PREF_KEY = "giphy_api_key_pref_key";
+    public static final String USER_AGENT_PREF_KEY = "user_agent_pref_key";
+    public static final String REDIRECT_URI_PREF_KEY = "redirect_uri_pref_key";
+    public static final String ENABLE_API_KEY_OVERRIDES_PREF_KEY = "enable_api_key_overrides_pref_key";
+
+    public static final String COOKIE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.cookie";
 
     //Legacy Settings
     public static final String MAIN_PAGE_TAB_1_TITLE_LEGACY = "main_page_tab_1_title";

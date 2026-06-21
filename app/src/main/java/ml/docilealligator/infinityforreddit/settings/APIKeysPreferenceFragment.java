@@ -3,21 +3,32 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
@@ -28,7 +39,9 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.QRCodeScannerActivity;
+import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
@@ -43,14 +56,28 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     SharedPreferences mSharedPreferences;
 
     private ActivityResultLauncher<Intent> qrCodeScannerLauncher;
-    private EditTextPreference clientIdPref;
+    private CustomFontEditTextPreference clientIdPref;
     private EditText currentClientIdEditText;
+
+    // Restart is deferred until the user leaves this screen, so a single restart covers
+    // however many keys they edited. This callback fires on back button / back gesture / Up.
+    private boolean mPendingRestart = false;
+    private OnBackPressedCallback mRestartOnBackCallback;
+    private TextView mRestartWarning;
 
     public APIKeysPreferenceFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mRestartOnBackCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                AppRestartHelper.triggerAppRestart(requireContext());
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, mRestartOnBackCallback);
 
         // Initialize the launcher for QR code scanning
         qrCodeScannerLauncher = registerForActivityResult(
@@ -73,6 +100,42 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 });
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View preferenceView = super.onCreateView(inflater, container, savedInstanceState);
+
+        // Wrap the preference list with a warning banner across the top, matching the
+        // "pending changes" affordance used elsewhere (e.g. CustomizeMainPageTabsFragment).
+        // The banner stays hidden until a restart-requiring key is edited.
+        LinearLayout wrapper = new LinearLayout(requireContext());
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+
+        mRestartWarning = new TextView(requireContext());
+        // Warning sign glyph in front (enlarged 2x) so the message reads as an alert at a glance.
+        String symbol = "⚠";
+        SpannableString warningText = new SpannableString(symbol + "  " + getString(R.string.app_will_restart));
+        warningText.setSpan(new RelativeSizeSpan(2f), 0, symbol.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mRestartWarning.setText(warningText);
+        mRestartWarning.setTypeface(mRestartWarning.getTypeface(), Typeface.BOLD);
+        int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16,
+                getResources().getDisplayMetrics());
+        mRestartWarning.setPadding(padding, padding, padding, padding);
+        if (mActivity != null && mActivity.customThemeWrapper != null) {
+            mRestartWarning.setBackgroundColor(mActivity.customThemeWrapper.getCardViewBackgroundColor());
+            // Accent is the theme's alert/attention color, so the text stands out.
+            mRestartWarning.setTextColor(mActivity.customThemeWrapper.getColorAccent());
+        }
+        mRestartWarning.setVisibility(mPendingRestart ? View.VISIBLE : View.GONE);
+
+        wrapper.addView(mRestartWarning, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        wrapper.addView(preferenceView, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        return wrapper;
+    }
+
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         PreferenceManager preferenceManager = getPreferenceManager();
@@ -83,15 +146,25 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
         setupClientIdPreference();
         setupGiphyApiKeyPreference();
+        setupUserAgentPreference();
+        setupRedirectUriPreference();
     }
 
     private void setupClientIdPreference() {
         clientIdPref = findPreference(SharedPreferencesUtils.CLIENT_ID_PREF_KEY);
         if (clientIdPref != null) {
+            android.graphics.Typeface robotoMonoMedium = ResourcesCompat.getFont(requireContext(), R.font.roboto_mono_medium);
+            if (robotoMonoMedium != null) {
+                clientIdPref.setSummaryTypeface(robotoMonoMedium);
+            }
+
             // Set input type to visible password to prevent suggestions, but allow any string
             clientIdPref.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                 editText.setSingleLine(true);
+                if (robotoMonoMedium != null) {
+                    editText.setTypeface(robotoMonoMedium);
+                }
 
                 // Store a reference to the current EditText
                 currentClientIdEditText = editText;
@@ -107,7 +180,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 // Otherwise, the EditText will automatically show the non-default current value
 
                 // Setup validation for the specific length
-                setupLengthValidation(editText, CLIENT_ID_LENGTH);
+                setupLengthValidation(editText, CLIENT_ID_LENGTH, true);
 
                 // Add QR code scanning button to dialog
                 View rootView = editText.getRootView();
@@ -171,7 +244,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 // Reset the current EditText reference since the dialog will be dismissed
                 currentClientIdEditText = null;
 
-                String value = (String) newValue;
+                String value = stripWhitespace((String) newValue);
 
                 // Final validation check (redundant due to button state, but safe)
                 if (value == null || value.length() != CLIENT_ID_LENGTH) {
@@ -187,9 +260,10 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
                 if (success) {
                     Log.i(TAG, "Client ID manually saved successfully.");
-                    // Update the summary provider manually since we return false
-                    preference.setSummaryProvider(clientIdPref.getSummaryProvider()); // Re-set to trigger update
-                    AppRestartHelper.triggerAppRestart(requireContext()); // Use the helper
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    clientIdPref.setText(value);
+                    markRestartPendingAndWarn();
                 } else {
                     Log.e(TAG, "Failed to save Client ID manually.");
                     Toast.makeText(getContext(), "Error saving Client ID.", Toast.LENGTH_SHORT).show();
@@ -221,7 +295,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 // No need to clear the text field like for client ID, as there's no "default" shown
 
                 // Setup validation for the specific length
-                setupLengthValidation(editText, GIPHY_API_KEY_LENGTH);
+                setupLengthValidation(editText, GIPHY_API_KEY_LENGTH, false);
             });
 
             // Set a summary provider that hides the default value but shows custom ones
@@ -283,8 +357,155 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
         }
     }
 
+    private void setupUserAgentPreference() {
+        EditTextPreference userAgentPref = findPreference(SharedPreferencesUtils.USER_AGENT_PREF_KEY);
+        if (userAgentPref != null) {
+            userAgentPref.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                editText.setSingleLine(true);
+
+                String currentValue = userAgentPref.getText();
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(APIUtils.DEFAULT_USER_AGENT)) {
+                    editText.setText("");
+                }
+            });
+
+            userAgentPref.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String currentValue = preference.getText();
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(APIUtils.DEFAULT_USER_AGENT)) {
+                    return preference.getContext().getString(R.string.tap_to_set_user_agent);
+                } else {
+                    return currentValue;
+                }
+            });
+
+            userAgentPref.setOnPreferenceChangeListener(((preference, newValue) -> {
+                String value = stripLeadingTrailingWhitespace((String) newValue);
+                if (value == null) {
+                    value = "";
+                }
+
+                SharedPreferences prefs = preference.getContext().getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(SharedPreferencesUtils.USER_AGENT_PREF_KEY, value);
+                boolean success = editor.commit();
+
+                if (success) {
+                    Log.i(TAG, "User Agent saved successfully.");
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    userAgentPref.setText(value);
+                    markRestartPendingAndWarn();
+                } else {
+                    Log.e(TAG, "Failed to save User Agent.");
+                    Toast.makeText(getContext(), "Error saving User Agent.", Toast.LENGTH_SHORT).show();
+                }
+
+                return false;
+            }));
+        } else {
+            Log.e(TAG, "Could not find User Agent preference: " + SharedPreferencesUtils.USER_AGENT_PREF_KEY);
+        }
+    }
+
+    private void setupRedirectUriPreference() {
+        EditTextPreference redirectUriPref = findPreference(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY);
+        if (redirectUriPref != null) {
+            redirectUriPref.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                editText.setSingleLine(true);
+
+                String currentValue = redirectUriPref.getText();
+                String defaultValue = editText.getContext().getString(R.string.default_redirect_uri);
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(defaultValue)) {
+                    editText.setText("");
+                }
+            });
+
+            redirectUriPref.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String currentValue = preference.getText();
+                String defaultValue = preference.getContext().getString(R.string.default_redirect_uri);
+                if (currentValue == null || currentValue.isEmpty() || currentValue.equals(defaultValue)) {
+                    return preference.getContext().getString(R.string.tap_to_set_redirect_uri);
+                } else {
+                    return currentValue;
+                }
+            });
+
+            redirectUriPref.setOnPreferenceChangeListener(((preference, newValue) -> {
+                String value = stripWhitespace((String) newValue);
+                if (value == null) {
+                    value = "";
+                }
+
+                SharedPreferences prefs = preference.getContext().getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY, value);
+                boolean success = editor.commit();
+
+                if (success) {
+                    Log.i(TAG, "Redirect URI saved successfully.");
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    redirectUriPref.setText(value);
+                    markRestartPendingAndWarn();
+                } else {
+                    Log.e(TAG, "Failed to save Redirect URI.");
+                    Toast.makeText(getContext(), "Error saving Redirect URI.", Toast.LENGTH_SHORT).show();
+                }
+
+                return false;
+            }));
+        } else {
+            Log.e(TAG, "Could not find Redirect URI preference: " + SharedPreferencesUtils.REDIRECT_URI_PREF_KEY);
+        }
+    }
+
+    // Records that a restart-requiring key changed, arms the back callback so leaving the
+    // screen restarts the app, and reveals the top banner so the deferred restart isn't a surprise.
+    private void markRestartPendingAndWarn() {
+        mPendingRestart = true;
+        if (mRestartOnBackCallback != null) {
+            mRestartOnBackCallback.setEnabled(true);
+        }
+        if (mRestartWarning != null) {
+            mRestartWarning.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // Strips all whitespace from the string (leading, trailing, and internal).
+    private static String stripWhitespace(String value) {
+        if (value == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (!Character.isWhitespace(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    // Strips only leading and trailing whitespace; preserves internal spaces (e.g. in user agents).
+    private static String stripLeadingTrailingWhitespace(String value) {
+        if (value == null) {
+            return null;
+        }
+        int start = 0;
+        int end = value.length();
+        while (start < end && Character.isWhitespace(value.charAt(start))) {
+            start++;
+        }
+        while (end > start && Character.isWhitespace(value.charAt(end - 1))) {
+            end--;
+        }
+        return value.substring(start, end);
+    }
+
     // Reusable helper method for setting up length validation on an EditTextPreference dialog
-    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength) {
+    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck) {
         // Add TextWatcher to enable/disable OK button based on length
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -299,7 +520,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 if (rootView != null) {
                     Button positiveButton = rootView.findViewById(android.R.id.button1);
                     if (positiveButton != null) {
-                        boolean isEnabled = s.length() == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && s.length() == 0); // Allow empty for Giphy
+                        int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(s.toString()).length() : s.length();
+                        boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
                         positiveButton.setEnabled(isEnabled);
                         positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f); // Adjust alpha for visual feedback
                     } else {
@@ -317,7 +539,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             if (rootView != null) {
                 Button positiveButton = rootView.findViewById(android.R.id.button1);
                 if (positiveButton != null) {
-                    boolean isEnabled = editText.getText().length() == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && editText.getText().length() == 0); // Allow empty for Giphy
+                    int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(editText.getText().toString()).length() : editText.getText().length();
+                    boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
                     positiveButton.setEnabled(isEnabled);
                     positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f);
                 } else {

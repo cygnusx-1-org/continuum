@@ -76,8 +76,8 @@
 
         <RelativeLayout
             android:id="@+id/image_view_wrapper_item_post_compact"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
+            android:layout_width="112dp"
+            android:layout_height="112dp"
             android:layout_marginStart="16dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -134,11 +134,18 @@
 
             <ImageView
                 android:id="@+id/image_view_no_preview_link_item_post_compact"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
+                android:layout_width="112dp"
+                android:layout_height="112dp"
                 android:scaleType="center"
                 android:src="@drawable/ic_link_day_night_24dp"
                 app:tint="@android:color/tab_indicator_text" />
+
+            <ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView
+                android:id="@+id/post_type_indicator_view_no_preview_item_post_compact"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="bottom|end"
+                android:visibility="gone" />
 
         </FrameLayout>
 

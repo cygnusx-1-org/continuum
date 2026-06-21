@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.activities;
 
+
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,11 +21,10 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.greenrobot.eventbus.EventBus;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +45,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityLoginChromeCustomTabBinding;
 import ml.docilealligator.infinityforreddit.events.NewUserLoggedInEvent;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Call;
@@ -107,15 +108,20 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarLoginChromeCustomTabActivity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        openLoginPage();
+        Intent intent = getIntent();
+        if (intent != null && intent.getData() != null) {
+            handleRedirectUri(intent.getData());
+        } else {
+            checkAndOpenLoginPage();
+        }
 
         binding.openWebpageButtonLoginChromeCustomTabActivity.setOnClickListener(view -> {
-            openLoginPage();
+            checkAndOpenLoginPage();
         });
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
 
         Uri uri = intent.getData();
@@ -125,90 +131,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
             return;
         }
 
-        binding.openWebpageButtonLoginChromeCustomTabActivity.setVisibility(View.GONE);
-
-        String authCode = uri.getQueryParameter("code");
-        if (authCode != null) {
-            String state = uri.getQueryParameter("state");
-
-            if (APIUtils.STATE.equals(state)) {
-                Map<String, String> params = new HashMap<>();
-                params.put(APIUtils.GRANT_TYPE_KEY, "authorization_code");
-                params.put("code", authCode);
-                params.put(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
-
-                RedditAPI api = mRetrofit.create(RedditAPI.class);
-                Call<String> accessTokenCall = api.getAccessToken(APIUtils.getHttpBasicAuthHeader(getApplicationContext()), params);
-                accessTokenCall.enqueue(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                        if (response.isSuccessful()) {
-                            try {
-                                String accountResponse = response.body();
-                                if (accountResponse == null) {
-                                    //Handle error
-                                    return;
-                                }
-
-                                JSONObject responseJSON = new JSONObject(accountResponse);
-                                String accessToken = responseJSON.getString(APIUtils.ACCESS_TOKEN_KEY);
-                                String refreshToken = responseJSON.getString(APIUtils.REFRESH_TOKEN_KEY);
-
-                                FetchMyInfo.fetchAccountInfo(mExecutor, mHandler, mOauthRetrofit,
-                                        mRedditDataRoomDatabase, accessToken,
-                                        new FetchMyInfo.FetchMyInfoListener() {
-                                            @Override
-                                            public void onFetchMyInfoSuccess(String name, String profileImageUrl, String bannerImageUrl, int karma, boolean isMod) {
-                                                mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, accessToken)
-                                                    .putString(SharedPreferencesUtils.ACCOUNT_NAME, name)
-                                                    .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, profileImageUrl).apply();
-                                                mCurrentAccountSharedPreferences.edit().remove(SharedPreferencesUtils.SUBSCRIBED_THINGS_SYNC_TIME).apply();
-                                                ParseAndInsertNewAccount.parseAndInsertNewAccount(mExecutor, new Handler(), name, accessToken, refreshToken, profileImageUrl, bannerImageUrl,
-                                                        karma, isMod, authCode, mRedditDataRoomDatabase.accountDao(),
-                                                        () -> {
-                                                            EventBus.getDefault().post(new NewUserLoggedInEvent());
-                                                            finish();
-                                                        });
-                                            }
-
-                                            @Override
-                                            public void onFetchMyInfoFailed(boolean parseFailed) {
-                                                if (parseFailed) {
-                                                    Toast.makeText(LoginChromeCustomTabActivity.this, R.string.parse_user_info_error, Toast.LENGTH_SHORT).show();
-                                                } else {
-                                                    Toast.makeText(LoginChromeCustomTabActivity.this, R.string.cannot_fetch_user_info, Toast.LENGTH_SHORT).show();
-                                                }
-
-                                                finish();
-                                            }
-                                        });
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Toast.makeText(LoginChromeCustomTabActivity.this, R.string.parse_json_response_error, Toast.LENGTH_SHORT).show();
-                                finish();
-                            }
-                        } else {
-                            Toast.makeText(LoginChromeCustomTabActivity.this, R.string.retrieve_token_error, Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                        Toast.makeText(LoginChromeCustomTabActivity.this, R.string.retrieve_token_error, Toast.LENGTH_SHORT).show();
-                        t.printStackTrace();
-                        finish();
-                    }
-                });
-            } else {
-                Toast.makeText(this, R.string.something_went_wrong, Toast.LENGTH_SHORT).show();
-                finish();
-            }
-
-        } else if ("access_denied".equals(uri.getQueryParameter("error"))) {
-            Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
-            finish();
-        }
+        handleRedirectUri(uri);
     }
 
     @Override
@@ -232,43 +155,197 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutLoginChromeCustomTabActivity, null, binding.toolbarLoginChromeCustomTabActivity);
         binding.openWebpageButtonLoginChromeCustomTabActivity.setTextColor(mCustomThemeWrapper.getButtonTextColor());
         binding.openWebpageButtonLoginChromeCustomTabActivity.setBackgroundColor(mCustomThemeWrapper.getColorPrimaryLightTheme());
-
         if (typeface != null) {
             binding.openWebpageButtonLoginChromeCustomTabActivity.setTypeface(typeface);
         }
     }
 
-    private void openLoginPage() {
+    private void handleRedirectUri(@NonNull Uri uri) {
+        binding.openWebpageButtonLoginChromeCustomTabActivity.setVisibility(View.GONE);
+
+        OAuthLoginHelper.RedirectResult redirect = OAuthLoginHelper.classifyRedirect(
+                uri.getQueryParameter("code"), uri.getQueryParameter("state"), uri.getQueryParameter("error"));
+        switch (redirect.action) {
+            case EXCHANGE_CODE:
+                exchangeCodeForToken(redirect.authCode);
+                break;
+            case ACCESS_DENIED:
+                Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
+                finish();
+                break;
+            case OAUTH_ERROR:
+                Toast.makeText(this, getString(R.string.oauth_error_reddit_error, redirect.errorValue), Toast.LENGTH_LONG).show();
+                finish();
+                break;
+            case STATE_MISMATCH:
+            case NONE:
+            default:
+                Toast.makeText(this, R.string.something_went_wrong, Toast.LENGTH_SHORT).show();
+                finish();
+                break;
+        }
+    }
+
+    private void exchangeCodeForToken(String authCode) {
+        Map<String, String> params = new HashMap<>();
+        params.put(APIUtils.GRANT_TYPE_KEY, "authorization_code");
+        params.put("code", authCode);
+        params.put(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
+
+        RedditAPI api = mRetrofit.create(RedditAPI.class);
+        Call<String> accessTokenCall = api.getAccessToken(APIUtils.getHttpBasicAuthHeader(getApplicationContext()), params);
+        accessTokenCall.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                OAuthLoginHelper.TokenResult result =
+                        OAuthLoginHelper.classifyTokenResponse(response);
+                if (!result.isSuccess()) {
+                    Toast.makeText(LoginChromeCustomTabActivity.this, OAuthLoginHelper.describeFailure(getApplicationContext(), result), Toast.LENGTH_LONG).show();
+                    finish();
+                    return;
+                }
+                String accessToken = result.accessToken;
+                String refreshToken = result.refreshToken;
+
+                FetchMyInfo.fetchAccountInfo(mExecutor, mHandler, mOauthRetrofit,
+                        mRedditDataRoomDatabase, accessToken,
+                        new FetchMyInfo.FetchMyInfoListener() {
+                            @Override
+                            public void onFetchMyInfoSuccess(String name, String profileImageUrl, String bannerImageUrl, int karma, boolean isMod) {
+                                mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, accessToken)
+                                    .putString(SharedPreferencesUtils.ACCOUNT_NAME, name)
+                                    .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, profileImageUrl).apply();
+                                mCurrentAccountSharedPreferences.edit().remove(SharedPreferencesUtils.SUBSCRIBED_THINGS_SYNC_TIME).apply();
+                                ParseAndInsertNewAccount.parseAndInsertNewAccount(mExecutor, new Handler(), name, accessToken, refreshToken, profileImageUrl, bannerImageUrl,
+                                        karma, isMod, authCode, mRedditDataRoomDatabase.accountDao(),
+                                        () -> {
+                                            EventBus.getDefault().post(new NewUserLoggedInEvent());
+                                            finish();
+                                        });
+                            }
+
+                            @Override
+                            public void onFetchMyInfoFailed(boolean parseFailed) {
+                                if (parseFailed) {
+                                    Toast.makeText(LoginChromeCustomTabActivity.this, R.string.parse_user_info_error, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(LoginChromeCustomTabActivity.this, R.string.cannot_fetch_user_info, Toast.LENGTH_SHORT).show();
+                                }
+
+                                finish();
+                            }
+                        });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                OAuthLoginHelper.TokenResult result = OAuthLoginHelper.classifyThrowable(t);
+                Toast.makeText(LoginChromeCustomTabActivity.this, OAuthLoginHelper.describeFailure(getApplicationContext(), result), Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
+    }
+
+    private void checkAndOpenLoginPage() {
+        // The browser/Custom Tab path relies on a static manifest intent filter to relaunch the app
+        // when Reddit redirects to the configured Redirect URI. If no filter matches it, the redirect
+        // would silently strand the browser, so warn up front instead of launching.
+        if (!isRedirectUriRegistered()) {
+            showUnsupportedRedirectUriDialog();
+            return;
+        }
+
+        Uri.Builder uriBuilder = Uri.parse(APIUtils.OAUTH_URL).buildUpon();
+        uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
+        uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);
+        uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, APIUtils.STATE);
+        uriBuilder.appendQueryParameter(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
+        uriBuilder.appendQueryParameter(APIUtils.DURATION_KEY, APIUtils.DURATION);
+        uriBuilder.appendQueryParameter(APIUtils.SCOPE_KEY, APIUtils.SCOPE);
+        Uri loginUri = uriBuilder.build();
+
         ArrayList<ResolveInfo> resolveInfos = getCustomTabsPackages(getPackageManager());
 
         if (!resolveInfos.isEmpty()) {
-            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-            // add share action to menu list
-            builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
-            builder.setDefaultColorSchemeParams(
-                new CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(mCustomThemeWrapper.getColorPrimary())
-                    .build());
-            CustomTabsIntent customTabsIntent = builder.build();
-            customTabsIntent.intent.setPackage(resolveInfos.get(0).activityInfo.packageName);
-            customTabsIntent.intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true);
+            String packageName = resolveInfos.get(0).activityInfo.packageName;
 
+            if (isFirefoxBrowser(packageName)) {
+                // Firefox Custom Tabs don't handle custom scheme redirects properly.
+                // Use a regular browser intent instead — the full browser will
+                // dispatch redreader://rr_oauth_redir via standard Android intent resolution.
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, loginUri);
+                browserIntent.setPackage(packageName);
+                try {
+                    startActivity(browserIntent);
+                } catch (ActivityNotFoundException e) {
+                    Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
+                }
+            } else {
+                CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                // add share action to menu list
+                builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
+                builder.setDefaultColorSchemeParams(
+                    new CustomTabColorSchemeParams.Builder()
+                        .setToolbarColor(mCustomThemeWrapper.getColorPrimary())
+                        .build());
+                CustomTabsIntent customTabsIntent = builder.build();
+                customTabsIntent.intent.setPackage(packageName);
+                customTabsIntent.intent.putExtra("com.google.android.apps.chrome.EXTRA_OPEN_NEW_INCOGNITO_TAB", true);
+
+                try {
+                    customTabsIntent.launchUrl(this, loginUri);
+                } catch (ActivityNotFoundException e) {
+                    Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            // No Custom Tabs browsers found — try opening in any available browser.
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, loginUri);
             try {
-                Uri.Builder uriBuilder = Uri.parse(APIUtils.OAUTH_URL).buildUpon();
-                uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
-                uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);
-                uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, APIUtils.STATE);
-                uriBuilder.appendQueryParameter(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
-                uriBuilder.appendQueryParameter(APIUtils.DURATION_KEY, APIUtils.DURATION);
-                uriBuilder.appendQueryParameter(APIUtils.SCOPE_KEY, APIUtils.SCOPE);
-
-                customTabsIntent.launchUrl(this, uriBuilder.build());
+                startActivity(browserIntent);
             } catch (ActivityNotFoundException e) {
                 Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
             }
-        } else {
-            Snackbar.make(binding.getRoot(), R.string.custom_tab_not_available, Snackbar.LENGTH_LONG).show();
         }
+    }
+
+    // Resolves the configured Redirect URI against this app's own manifest intent filters. Using the
+    // package manager (rather than a hardcoded string list) respects Android's exact scheme/host/
+    // port/path matching and can't drift from the manifest.
+    private boolean isRedirectUriRegistered() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(APIUtils.REDIRECT_URI));
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        List<ResolveInfo> resolveInfos = getPackageManager().queryIntentActivities(intent, 0);
+        for (ResolveInfo info : resolveInfos) {
+            if (info.activityInfo != null && getPackageName().equals(info.activityInfo.packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void showUnsupportedRedirectUriDialog() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        CharSequence message = OAuthLoginHelper.warningText(mCustomThemeWrapper.getColorAccent(),
+                getString(R.string.oauth_error_redirect_uri_unregistered, APIUtils.REDIRECT_URI));
+        new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                .setTitle(R.string.oauth_login_failed_title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok, null)
+                .setOnDismissListener(dialog -> finish())
+                .show();
+    }
+
+    private boolean isFirefoxBrowser(String packageName) {
+        return packageName != null && (
+            packageName.startsWith("org.mozilla.firefox") ||
+            packageName.startsWith("org.mozilla.fenix") ||
+            packageName.equals("org.mozilla.focus") ||
+            packageName.equals("org.mozilla.klar")
+        );
     }
 
     private ArrayList<ResolveInfo> getCustomTabsPackages(PackageManager pm) {

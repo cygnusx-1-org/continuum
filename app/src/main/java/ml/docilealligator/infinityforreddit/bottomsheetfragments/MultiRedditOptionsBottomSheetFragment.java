@@ -55,6 +55,10 @@ public class MultiRedditOptionsBottomSheetFragment extends LandscapeExpandedRoun
             dismiss();
         });
 
+        if (multiReddit != null && multiReddit.isFollowed()) {
+            binding.editMultiRedditTextViewMultiRedditOptionsBottomSheetFragment.setVisibility(View.GONE);
+        }
+
         binding.editMultiRedditTextViewMultiRedditOptionsBottomSheetFragment.setOnClickListener(view -> {
             if (multiReddit != null) {
                 Intent editIntent = new Intent(subscribedThingListingActivity, EditMultiRedditActivity.class);

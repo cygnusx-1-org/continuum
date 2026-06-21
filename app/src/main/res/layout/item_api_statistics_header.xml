@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="18dp"
+    android:paddingBottom="4dp">
+
+    <TextView
+        android:id="@+id/section_name_item_api_statistics_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        tools:text="listings" />
+
+    <TextView
+        android:id="@+id/section_summary_item_api_statistics_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="13sp"
+        tools:text="42 calls in the last week · 1 error" />
+
+    <TextView
+        android:id="@+id/combined_title_item_api_statistics_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:text="@string/api_statistics_combined_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.BarChartView
+        android:id="@+id/chart_item_api_statistics_header"
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:layout_marginTop="2dp" />
+
+</LinearLayout>

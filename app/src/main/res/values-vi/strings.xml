@@ -878,7 +878,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Chỉ tắt xem trước trong các bài đăng video và gif"</string>
     <string name="settings_enable_search_history_title">"Bật lịch sử tìm kiếm"</string>
     <string name="settings_post_history_title">"Lịch sử bài đăng"</string>
-    <string name="settings_mark_posts_as_read_title">"Đánh dấu các bài đăng là đã đọc"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"Đánh dấu các bài đăng là đã đọc sau khi vote"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"Đánh dấu các bài đăng là đã đọc khi cuộn"</string>
     <string name="settings_hide_read_posts_automatically_title">"Tự động ẩn các bài đăng đã đọc"</string>
@@ -1046,7 +1045,6 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_more_tabs_show_multireddits_title">"Show Multireddits"</string>
     <string name="settings_collapse_reddit_section_title">"Thu gọn khu vực Reddit"</string>
     <string name="settings_video_player_automatic_landscape_orientation">"Tự động chuyển sang màn hình ngang trong trình phát video"</string>
-    <string name="settings_remember_muting_option_in_post_feed">"Ghi nhớ tuỳ chọn tắt tiếng trong nguồn dữ liệu bài đăng"</string>
     <string name="link_post_layout_auto">"Tự động"</string>
     <string name="uploaded_images">"Đã tải hình ảnh"</string>
     <string name="select_image">"Chọn một hình ảnh"</string>
@@ -1068,7 +1066,6 @@ Nhấn để thử lại."</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Chia tách bài đăng và bình luận ở chế độ xoay dọc"</string>
     <string name="settings_separate_post_and_comments_in_landscape_mode_title">"Chia tách bài đăng và bình luận ở chế độ xoay ngang"</string>
     <string name="settings_separate_post_and_comments_summary">"Tự động phát video sẽ bị tắt trong trang chi tiết bài đăng"</string>
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Sử dụng thanh công cụ ở dưới trong trình xem phương tiện"</string>
     <string name="settings_secure_mode_title">"Chế độ bảo mật"</string>
     <string name="settings_secure_mode_summary">"Không cho phép chụp màn hình và quay video. Không có mục xem trước trong màn hình gần đây."</string>
     <string name="discard_dialog_button">"Bỏ"</string>
@@ -1097,8 +1094,6 @@ Nhấn để thử lại."</string>
     <string name="settings_link_handler_value_custom_tab">"Thẻ tùy chọn"</string>
     <string name="settings_link_handler_value_internal_browser">"Trình duyệt nội bộ"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Giao diện Trình điều khiển Video cũ"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Chạm để thu phóng Video"</string>
-    <string name="settings_experimental_feature">"Tính năng thử nghiệm"</string>
     <string name="theme_item_media_indicator_icon_color">"Màu biểu tượng chỉ phương tiện"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Đã áp dụng cho: xem trước bài đăng cho Video hoặc Thư viện "</string>
     <string name="theme_item_media_indicator_background_color">"Màu nền chỉ phương tiện"</string>

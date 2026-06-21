@@ -11,24 +11,25 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.lifecycle.ViewModelProvider;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -59,6 +60,7 @@ import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
 
 public class ViewRedditGalleryActivity extends AppCompatActivity implements SetAsWallpaperCallback, CustomFontReceiver {
 
@@ -76,15 +78,21 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
     private ArrayList<Post.Gallery> gallery;
     private String subredditName;
     private boolean isNsfw;
-    private boolean useBottomAppBar;
     private boolean isActionBarHidden = false;
     private ActivityViewRedditGalleryBinding binding;
+    ViewGalleryViewModel viewGalleryViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+        } else {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
         int systemThemeType = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, "2"));
@@ -141,17 +149,18 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
 
         EventBus.getDefault().register(this);
 
-        useBottomAppBar = sharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
+        getSupportActionBar().hide();
 
-        if (!useBottomAppBar) {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
-            setTitle(" ");
-        } else {
-            getSupportActionBar().hide();
-        }
+        viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                viewGalleryViewModel.setInsets(Utils.getInsets(insets, false, false));
+                return WindowInsetsCompat.CONSUMED;
+            }
+        });
 
         post = getIntent().getParcelableExtra(EXTRA_POST);
         if (post == null) {
@@ -179,37 +188,12 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         setupViewPager(savedInstanceState);
     }
 
-    public boolean isUseBottomAppBar() {
-        return useBottomAppBar;
-    }
-
     private void setupViewPager(Bundle savedInstanceState) {
-        if (!useBottomAppBar) {
-            setToolbarTitle(0);
-            binding.viewPagerViewRedditGalleryActivity.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int position) {
-                    setToolbarTitle(position);
-                }
-            });
-        }
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
         if (savedInstanceState == null) {
             binding.viewPagerViewRedditGalleryActivity.setCurrentItem(getIntent().getIntExtra(EXTRA_GALLERY_ITEM_INDEX, 0), false);
-        }
-    }
-
-    private void setToolbarTitle(int position) {
-        if (gallery != null && position >= 0 && position < gallery.size()) {
-            if (gallery.get(position).mediaType == Post.Gallery.TYPE_IMAGE) {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_reddit_gallery_activity_image_label, position + 1, gallery.size()) + "</font>")));
-            } else if (gallery.get(position).mediaType == Post.Gallery.TYPE_GIF) {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_reddit_gallery_activity_gif_label, position + 1, gallery.size()) + "</font>")));
-            } else {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_reddit_gallery_activity_video_label, position + 1, gallery.size()) + "</font>")));
-            }
         }
     }
 
@@ -228,55 +212,59 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
             finish();
             return true;
         } else if (item.getItemId() == R.id.action_download_all_gallery_media_view_reddit_gallery_activity) {
-            // Check if download locations are set for all media types
-            // Gallery can contain images, GIFs, and videos, so we need to check all relevant locations
-            String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-            String gifDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, "");
-            String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
-            String nsfwDownloadLocation = "";
-
-            boolean needsNsfwLocation = isNsfw &&
-                    sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
-
-            if (needsNsfwLocation) {
-                nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
-                if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            } else {
-                // Check for required download locations based on the gallery content
-                boolean hasImage = false;
-                boolean hasGif = false;
-                boolean hasVideo = false;
-
-                for (Post.Gallery galleryItem : gallery) {
-                    if (galleryItem.mediaType == Post.Gallery.TYPE_VIDEO) {
-                        hasVideo = true;
-                    } else if (galleryItem.mediaType == Post.Gallery.TYPE_GIF) {
-                        hasGif = true;
-                    } else {
-                        hasImage = true;
-                    }
-                }
-
-                if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
-                    (hasGif && (gifDownloadLocation == null || gifDownloadLocation.isEmpty())) ||
-                    (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            }
-
-            //TODO: contentEstimatedBytes
-            JobInfo jobInfo = DownloadMediaService.constructGalleryDownloadAllMediaJobInfo(this, 5000000L * gallery.size(), post);
-            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
-
-            Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
+            downloadAllGalleryMedia();
             return true;
         }
 
         return false;
+    }
+
+    public void downloadAllGalleryMedia() {
+        // Check if download locations are set for all media types
+        // Gallery can contain images, GIFs, and videos, so we need to check all relevant locations
+        String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+        String gifDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, "");
+        String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+        String nsfwDownloadLocation = "";
+
+        boolean needsNsfwLocation = isNsfw &&
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
+
+        if (needsNsfwLocation) {
+            nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
+            if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            // Check for required download locations based on the gallery content
+            boolean hasImage = false;
+            boolean hasGif = false;
+            boolean hasVideo = false;
+
+            for (Post.Gallery galleryItem : gallery) {
+                if (galleryItem.mediaType == Post.Gallery.TYPE_VIDEO) {
+                    hasVideo = true;
+                } else if (galleryItem.mediaType == Post.Gallery.TYPE_GIF) {
+                    hasGif = true;
+                } else {
+                    hasImage = true;
+                }
+            }
+
+            if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
+                (hasGif && (gifDownloadLocation == null || gifDownloadLocation.isEmpty())) ||
+                (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        //TODO: contentEstimatedBytes
+        JobInfo jobInfo = DownloadMediaService.constructGalleryDownloadAllMediaJobInfo(this, 5000000L * gallery.size(), post);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
     @Override

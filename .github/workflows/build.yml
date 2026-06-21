@@ -1,0 +1,14 @@
+# This workflow overrides the upstream build.yml for this fork.
+# It runs a no-op job so GitHub doesn't report "no jobs were run".
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Build workflow disabled for this fork"

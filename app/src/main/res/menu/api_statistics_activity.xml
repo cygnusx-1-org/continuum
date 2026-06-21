@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_refresh_api_statistics_activity"
+        android:title="@string/refresh"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_toggle_monitoring_api_statistics_activity"
+        android:checkable="true"
+        android:title="@string/api_statistics_enable_monitoring"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_clear_api_statistics_activity"
+        android:title="@string/api_statistics_clear"
+        app:showAsAction="never" />
+
+</menu>

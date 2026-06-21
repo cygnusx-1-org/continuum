@@ -963,7 +963,6 @@ Les onglets pourraient perdre tout leur contenu quand vous passez d'un onglet à
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Désactiver uniquement l'aperçu dans les publications vidéo et gif"</string>
     <string name="settings_enable_search_history_title">"Activer l'historique de recherche"</string>
     <string name="settings_post_history_title">"Historique des posts"</string>
-    <string name="settings_mark_posts_as_read_title">"Marquer les posts comme lus"</string>
     <string name="settings_mark_posts_as_read_after_voting_title">"Marquer les posts comme lus après avoir voté"</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">"Marquer les publications comme lues lors du défilement"</string>
     <string name="settings_hide_read_posts_automatically_title">"Cacher les posts lus automatiquement"</string>
@@ -1147,7 +1146,6 @@ Sinon, renommez-les avant d'activer Material You."</string>
     <string name="settings_more_tabs_show_multireddits_title">"Montrer les Multireddits"</string>
     <string name="settings_collapse_reddit_section_title">"Réduire Section Reddit"</string>
     <string name="settings_video_player_automatic_landscape_orientation">"Basculer automatiquement vers l'orientation paysage dans le lecteur vidéo"</string>
-    <string name="settings_remember_muting_option_in_post_feed">"N'oubliez pas l'option de mise en sourdine dans le flux de publication"</string>
     <string name="link_post_layout_auto">"Auto"</string>
     <string name="uploaded_images">"Images uploadées"</string>
     <string name="select_image">"Sélectionner une image"</string>
@@ -1171,7 +1169,6 @@ Cliquer pour réessayer."</string>
     <string name="settings_separate_post_and_comments_summary">"La lecture automatique de la vidéo sera désactivée dans la page de détail de la publication"</string>
 
     <!-- Fuzzy -->
-    <string name="settings_use_bottom_toolbar_in_media_viewer_title">"Utiliser la barre d'outil en bas dans le lecteur multimédia"</string>
     <string name="settings_secure_mode_title">"Mode sécurisé"</string>
     <string name="settings_secure_mode_summary">"Les captures d'écran et les enregistrements vidéo ne sont pas autorisés. Aucun aperçu dans l'écran de l'application récente."</string>
     <string name="discard_dialog_button">"Annuler"</string>
@@ -1200,8 +1197,6 @@ Cliquer pour réessayer."</string>
     <string name="settings_link_handler_value_custom_tab">"Onglet personnalisé"</string>
     <string name="settings_link_handler_value_internal_browser">"Navigateur interne"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Interface Héritée du Contrôleur Vidéo"</string>
-    <string name="settings_pinch_to_zoom_video_title">"Pincer pour zoomer"</string>
-    <string name="settings_experimental_feature">"Fonctionnalités expérimentales"</string>
     <string name="theme_item_media_indicator_icon_color">"Couleur d'Icône de l'Indicateur Média"</string>
     <string name="theme_item_media_indicator_icon_color_detail">"Appliqué à : Vidéo ou Icône de Galerie dans l'aperçu de l'article"</string>
     <string name="theme_item_media_indicator_background_color">"Couleur d'Arrière-Plan de l'Indicateur Média"</string>
@@ -1318,7 +1313,6 @@ Cliquer pour réessayer."</string>
     <!-- Si quelqu'un trouve une formulation plus courte -->
     <!-- Fuzzy -->
     <string name="awardee_karma">"Karma pour obtention de récompenses:"</string>
-    <string name="history_activity_label">"Historique"</string>
     <string name="history">"Historique"</string>
     <string name="settings_easier_to_watch_in_full_screen_title">"Plus facile à regarder en plein écran"</string>
     <string name="clear_user_flair">"Effacer le Flair"</string>

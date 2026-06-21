@@ -12,21 +12,27 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.UriPermission;
 import android.media.MediaScannerConnection;
 import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
 
-import org.apache.commons.io.FilenameUtils;
+import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,11 +56,14 @@ import ml.docilealligator.infinityforreddit.apis.DownloadFile;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.DownloadedMediaDeleteActionBroadcastReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
@@ -70,9 +79,15 @@ public class DownloadMediaService extends JobService {
     public static final String EXTRA_REDGIFS_ID = "EGI";
     public static final String EXTRA_STREAMABLE_SHORT_CODE = "ESSC";
     public static final String EXTRA_IS_ALL_GALLERY_MEDIA = "EIAGM";
+    // When set, the media is written to the cache and shared instead of being saved to the
+    // user's download folder.
+    public static final String EXTRA_IS_SHARE = "EIS";
     public static final int EXTRA_MEDIA_TYPE_IMAGE = 0;
     public static final int EXTRA_MEDIA_TYPE_GIF = 1;
     public static final int EXTRA_MEDIA_TYPE_VIDEO = 2;
+
+    public static final String EXTRA_POST_ID = "EPI";
+    public static final String EXTRA_COMMENT_ID = "ECI";
 
     public static final String EXTRA_ALL_GALLERY_IMAGE_URLS = "EAGIU";
     public static final String EXTRA_ALL_GALLERY_IMAGE_MEDIA_TYPES = "EAGIMT";
@@ -108,86 +123,6 @@ public class DownloadMediaService extends JobService {
     Executor mExecutor;
     private NotificationManagerCompat notificationManager;
 
-    private static String sanitizeFilename(String inputName) {
-        if (inputName == null || inputName.isEmpty()) {
-            return "reddit_media"; // Default name if title is missing
-        }
-
-        // Remove characters that are invalid in filenames on most systems
-        String sanitized = inputName.replaceAll("[\\\\/:*?\"<>|]", "_");
-        // Replace multiple spaces/underscores with a single underscore
-        sanitized = sanitized.replaceAll("[\\s_]+", "_");
-        // Trim leading/trailing underscores
-        sanitized = sanitized.replaceAll("^_+|_+$", "");
-        // Limit length to avoid issues with max path length
-        int maxLength = 100; // Adjust max length as needed
-
-        if (sanitized.length() > maxLength) {
-            sanitized = sanitized.substring(0, maxLength);
-            // Ensure we don't cut in the middle of a multi-byte character if needed,
-            // but for simplicity, basic substring is often sufficient.
-            // Re-trim in case the cut resulted in a trailing underscore
-            sanitized = sanitized.replaceAll("_+$", "");
-        }
-
-        // Handle case where sanitization results in an empty string
-        if (sanitized.isEmpty()) {
-            return "reddit_media_" + System.currentTimeMillis();
-        }
-        return sanitized;
-    }
-
-    // Helper function to get file extension (overload for Post)
-    private static String getExtension(String url, int mediaType, String defaultFileName) {
-        return getExtensionInternal(url, mediaType, defaultFileName);
-    }
-
-    // Helper function to get file extension (overload for ImgurMedia)
-    private static String getExtension(ImgurMedia imgurMedia) {
-        // ImgurMedia already has a reasonable filename with extension
-        String fileName = imgurMedia.getFileName();
-        String extension = FilenameUtils.getExtension(fileName);
-        if (extension != null && !extension.isEmpty()) {
-            // Limit extension length
-            return "." + extension.toLowerCase().substring(0, Math.min(extension.length(), 5));
-        }
-        // Fallback based on type if filename lacks extension
-        return getExtensionInternal(imgurMedia.getLink(),
-                imgurMedia.getType() == ImgurMedia.TYPE_VIDEO ? EXTRA_MEDIA_TYPE_VIDEO : EXTRA_MEDIA_TYPE_IMAGE,
-                null);
-    }
-
-    // Internal helper for extension logic
-    private static String getExtensionInternal(String url, int mediaType, String defaultFileName) {
-        String extension = FilenameUtils.getExtension(url);
-        if (extension != null && !extension.isEmpty()) {
-            // Basic validation for common image/video extensions
-            if (extension.matches("(?i)(jpg|jpeg|png|gif|mp4|webm|mov|avi)")) {
-                 // Limit extension length to prevent abuse
-                return "." + extension.toLowerCase().substring(0, Math.min(extension.length(), 5));
-            }
-        }
-        // Fallback based on media type or default filename
-        switch (mediaType) {
-            case EXTRA_MEDIA_TYPE_IMAGE:
-                return ".jpg";
-            case EXTRA_MEDIA_TYPE_GIF:
-                return ".gif";
-            case EXTRA_MEDIA_TYPE_VIDEO:
-                return ".mp4";
-            default:
-                // Try extracting from defaultFileName if provided
-                if (defaultFileName != null && defaultFileName.contains(".")) {
-                    String defaultExt = FilenameUtils.getExtension(defaultFileName);
-                    if (defaultExt != null && !defaultExt.isEmpty()) {
-                        return "." + defaultExt.toLowerCase().substring(0, Math.min(defaultExt.length(), 5));
-                    }
-                }
-                return ".unknown"; // Default if no extension found
-        }
-    }
-
-
     public DownloadMediaService() {
     }
 
@@ -201,9 +136,7 @@ public class DownloadMediaService extends JobService {
      */
     public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, Post post, int galleryIndex) {
         PersistableBundle extras = new PersistableBundle();
-        String sanitizedTitle = sanitizeFilename(post.getTitle());
         String url = "";
-        String extension = "";
         int currentMediaType = -1;
 
         if (post.getPostType() == Post.IMAGE_TYPE) {
@@ -228,8 +161,6 @@ public class DownloadMediaService extends JobService {
                 } else {
                     extras.putString(EXTRA_STREAMABLE_SHORT_CODE, post.getStreamableShortCode());
                 }
-
-                extras.putString(EXTRA_FILE_NAME, "Streamable-" + post.getStreamableShortCode() + ".mp4");
             } else if (post.isRedgifs()) {
                 extras.putString(EXTRA_URL, post.getVideoUrl());
                 extras.putString(EXTRA_REDGIFS_ID, post.getRedgifsId());
@@ -268,26 +199,8 @@ public class DownloadMediaService extends JobService {
             extras.putInt(EXTRA_IS_NSFW, post.isNSFW() ? 1 : 0);
         }
 
-        // Determine extension based on URL and media type
-        extension = getExtension(url, currentMediaType, null); // Pass null for defaultFileName initially
-
-        // Construct filename: title + (optional index for gallery) + extension
-        String finalFileName = sanitizedTitle +
-                (post.getPostType() == Post.GALLERY_TYPE && galleryIndex >= 0 ? "_" + (galleryIndex + 1) : "") + // Use 1-based index for galleries
-                extension;
-
-        // Set the final filename in extras
-        extras.putString(EXTRA_FILE_NAME, finalFileName);
-
-        // Re-fetch extension if it was based on a potentially incorrect default, now using the final name
-        if (url == null || url.isEmpty()) { // Especially for Redgifs/Streamable where URL might be fetched later
-            extension = getExtension(url, currentMediaType, finalFileName);
-            finalFileName = sanitizedTitle +
-                (post.getPostType() == Post.GALLERY_TYPE && galleryIndex >= 0 ? "_" + (galleryIndex + 1) : "") +
-                extension;
-             extras.putString(EXTRA_FILE_NAME, finalFileName); // Update again if extension changed
-        }
-
+        // Construct the filename using the shared naming scheme so downloads and shares match.
+        extras.putString(EXTRA_FILE_NAME, MediaFileNameUtils.getDownloadFileName(post, galleryIndex));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             return new JobInfo.Builder(JOB_ID++, new ComponentName(context, DownloadMediaService.class))
@@ -320,7 +233,6 @@ public class DownloadMediaService extends JobService {
                 Post.Gallery media = gallery.get(i);
                 String url = "";
                 int currentMediaType = -1;
-                String sanitizedTitle = sanitizeFilename(post.getTitle()); // Sanitize title once
 
                 if (media.mediaType == Post.Gallery.TYPE_VIDEO) {
                     url = media.url;
@@ -334,9 +246,8 @@ public class DownloadMediaService extends JobService {
                     concatMediaTypesBuilder.append(currentMediaType).append(" ");
                 }
 
-                // Construct filename for this gallery item
-                String extension = getExtension(url, currentMediaType, media.fileName); // Use original media.fileName as fallback hint
-                String finalFileName = sanitizedTitle + "_" + (i + 1) + extension; // Use 1-based index
+                // Construct the filename for this gallery item using the shared naming scheme.
+                String finalFileName = MediaFileNameUtils.getDownloadFileName(post, i);
                 concatFileNamesBuilder.append(finalFileName).append(" ");
             }
 
@@ -381,11 +292,8 @@ public class DownloadMediaService extends JobService {
             title = imgurMedia.getId(); // Fallback to ID if title is missing
         }
 
-        String sanitizedTitle = sanitizeFilename(title); // Use static sanitize helper
-        String extension = getExtension(imgurMedia); // Use static ImgurMedia extension helper
-        String finalFileName = sanitizedTitle + extension;
-
-        extras.putString(EXTRA_FILE_NAME, finalFileName); // Set the constructed filename
+        // Construct the filename using the shared naming scheme so downloads and shares match.
+        extras.putString(EXTRA_FILE_NAME, MediaFileNameUtils.getDownloadFileName(imgurMedia, title));
 
         if (imgurMedia.getType() == ImgurMedia.TYPE_VIDEO) {
             extras.putInt(EXTRA_MEDIA_TYPE, EXTRA_MEDIA_TYPE_VIDEO);
@@ -443,9 +351,7 @@ public class DownloadMediaService extends JobService {
                 title = media.getId(); // Fallback to ID
             }
 
-            String sanitizedTitle = sanitizeFilename(title);
-            String extension = getExtension(media);
-            String finalFileName = sanitizedTitle + "_" + (i + 1) + extension; // Add 1-based index
+            String finalFileName = MediaFileNameUtils.getDownloadFileName(media, title, i); // 1-based index applied internally
             concatFileNamesBuilder.append(finalFileName).append(" ");
         }
 
@@ -763,85 +669,80 @@ public class DownloadMediaService extends JobService {
         try {
             response = retrofit.create(DownloadFile.class).downloadFile(fileUrl).execute();
             if (response.isSuccessful() && response.body() != null) {
+                if (intent.getInt(EXTRA_IS_SHARE, 0) == 1) {
+                    // Share-only: write to the cache and hand the file to the requesting activity.
+                    return shareMediaFromCache(params, builder, mediaType, randomNotificationIdOffset,
+                            response.body(), fileName, mimeType);
+                }
+
                 String destinationFileDirectory = getDownloadLocation(mediaType, isNsfw);
                 Log.d("ImgurDownload", "Got download location: " + destinationFileDirectory + " for mediaType=" + mediaType + ", isNsfw=" + isNsfw);
 
-                if (destinationFileDirectory == null || destinationFileDirectory.isEmpty()) {
-                    Log.e("ImgurDownload", "Download location is empty! mediaType=" + mediaType + ", isNsfw=" + isNsfw);
-                    downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
-                            null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, multipleDownloads);
-                    return false;
-                }
-                isDefaultDestination = false;
-                DocumentFile picFile;
-                DocumentFile dir;
+                DocumentFile picFile = null;
 
-                if (separateDownloadFolder && subredditName != null && !subredditName.equals("")) {
-                    dir = DocumentFile.fromTreeUri(DownloadMediaService.this, Uri.parse(destinationFileDirectory));
-                    if (dir == null) {
-                        Log.e("ImgurDownload", "Could not get tree URI from destination directory");
-                        downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
-                                null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, multipleDownloads);
-
-                        return false;
-                    }
-                    dir = dir.findFile(subredditName);
-                    if (dir == null) {
-                        dir = DocumentFile.fromTreeUri(DownloadMediaService.this, Uri.parse(destinationFileDirectory)).createDirectory(subredditName);
-                        if (dir == null) {
-                            Log.e("ImgurDownload", "Could not create subreddit directory");
-                            downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
-                                    null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, multipleDownloads);
-
-                            return false;
+                // Try to write into the user-chosen folder. This can fail if the persisted URI
+                // permission was lost (revoked, or granted to a different app build). We check the
+                // grant up front so we skip straight to the fallback instead of provoking a
+                // SecurityException deep inside DocumentsContract.
+                if (destinationFileDirectory != null && !destinationFileDirectory.isEmpty()
+                        && hasPersistedWritePermission(Uri.parse(destinationFileDirectory))) {
+                    try {
+                        DocumentFile dir;
+                        if (separateDownloadFolder && subredditName != null && !subredditName.isEmpty()) {
+                            DocumentFile treeDir = DocumentFile.fromTreeUri(DownloadMediaService.this, Uri.parse(destinationFileDirectory));
+                            dir = treeDir == null ? null : treeDir.findFile(subredditName);
+                            if (dir == null && treeDir != null) {
+                                dir = treeDir.createDirectory(subredditName);
+                            }
+                        } else {
+                            dir = DocumentFile.fromTreeUri(DownloadMediaService.this, Uri.parse(destinationFileDirectory));
                         }
+
+                        if (dir != null) {
+                            int dotIndex = fileName.lastIndexOf('.');
+                            String baseName = (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+                            String extension = (dotIndex == -1) ? "" : fileName.substring(dotIndex);
+
+                            DocumentFile[] files = dir.listFiles();
+                            HashSet<String> existingFileNames = new HashSet<>();
+                            if (files != null) {
+                                for (DocumentFile file : files) {
+                                    if (file.getName() != null) {
+                                        existingFileNames.add(file.getName().toLowerCase());
+                                    }
+                                }
+                            }
+
+                            if (existingFileNames.contains(fileName.toLowerCase())) {
+                                int num = 1;
+                                String newFileName;
+                                do {
+                                    newFileName = baseName + " (" + num + ")" + extension;
+                                    num++;
+                                } while (existingFileNames.contains(newFileName.toLowerCase()));
+                                fileName = newFileName;
+                            }
+
+                            picFile = dir.createFile(mimeType, fileName);
+                        }
+                    } catch (SecurityException e) {
+                        Log.e("ImgurDownload", "Lost permission for chosen download folder: " + e.getMessage());
                     }
+                }
+
+                if (picFile != null) {
+                    isDefaultDestination = false;
+                    destinationFileUriString = picFile.getUri().toString();
+                    Log.d("ImgurDownload", "File created successfully at: " + destinationFileUriString);
                 } else {
-                    dir = DocumentFile.fromTreeUri(DownloadMediaService.this, Uri.parse(destinationFileDirectory));
-                    if (dir == null) {
-                        Log.e("ImgurDownload", "Could not get tree URI from destination directory (no subreddit)");
-                        downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
-                                null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, multipleDownloads);
-
-                        return false;
-                    }
+                    // The chosen folder is unusable. Save to the default media location so the
+                    // download still succeeds, and prompt the user to re-select their folder.
+                    Log.w("ImgurDownload", "Falling back to the default download location.");
+                    showReselectDownloadFolderToast(multipleDownloads);
+                    isDefaultDestination = true;
+                    destinationFileUriString = getDefaultDownloadPath(mediaType,
+                            separateDownloadFolder ? subredditName : null, fileName);
                 }
-
-                int dotIndex = fileName.lastIndexOf('.');
-                final String baseName = (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
-                final String extension = (dotIndex == -1) ? "" : fileName.substring(dotIndex);
-
-                DocumentFile[] files = dir.listFiles();
-                HashSet<String> existingFileNames = new HashSet<>();
-                if (files != null) {
-                    for (DocumentFile file : files) {
-                        if (file.getName() != null) {
-                            existingFileNames.add(file.getName().toLowerCase());
-                        }
-                    }
-                }
-
-                if (existingFileNames.contains(fileName.toLowerCase())) {
-                    int num = 1;
-                    String newFileName;
-                    do {
-                        newFileName = baseName + " (" + num + ")" + extension;
-                        num++;
-                    } while (existingFileNames.contains(newFileName.toLowerCase()));
-                    fileName = newFileName;
-                }
-
-                picFile = dir.createFile(mimeType, fileName);
-
-                if (picFile == null) {
-                    Log.e("ImgurDownload", "Could not create file: " + fileName);
-                    downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
-                            null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, multipleDownloads);
-                    return false;
-                }
-
-                destinationFileUriString = picFile.getUri().toString();
-                Log.d("ImgurDownload", "File created successfully at: " + destinationFileUriString);
             } else {
                 Log.e("ImgurDownload", "Download response not successful: " + response.code());
                 downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType, null,
@@ -1095,6 +996,107 @@ public class DownloadMediaService extends JobService {
             }
         }
         return Uri.parse(destinationFileUriString);
+    }
+
+    /**
+     * Returns true if the app still holds a persisted write grant for the given tree URI. SAF
+     * permissions can be lost (revoked by the user, or originally granted to a different app build),
+     * so checking before use lets us fall back cleanly instead of hitting a SecurityException.
+     */
+    private boolean hasPersistedWritePermission(Uri treeUri) {
+        try {
+            for (UriPermission permission : getContentResolver().getPersistedUriPermissions()) {
+                if (permission.isWritePermission() && permission.getUri().equals(treeUri)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            Log.e("ImgurDownload", "Failed to read persisted URI permissions: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Writes the downloaded media into a cache folder and posts a {@link ShareMediaEvent} so the
+     * foreground activity can launch the share sheet. Used for "share only" (no save to gallery).
+     */
+    private boolean shareMediaFromCache(JobParameters params, NotificationCompat.Builder builder, int mediaType,
+                                        int randomNotificationIdOffset, ResponseBody body, String fileName, String mimeType) {
+        File cacheDir = Utils.getCacheDir(this);
+        if (cacheDir == null) {
+            downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
+                    null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, false);
+            return false;
+        }
+
+        File shareDir = new File(cacheDir, "shared_media");
+        if (!shareDir.exists()) {
+            shareDir.mkdirs();
+        }
+
+        File outFile = new File(shareDir, fileName);
+        try (InputStream in = body.byteStream(); OutputStream out = new FileOutputStream(outFile)) {
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
+                    null, ERROR_FILE_CANNOT_SAVE, false);
+            return false;
+        }
+
+        EventBus.getDefault().post(new ShareMediaEvent(outFile.getAbsolutePath(), mimeType));
+        notificationManager.cancel(getNotificationId(mediaType, randomNotificationIdOffset));
+        jobFinished(params, false);
+        return true;
+    }
+
+    private void showReselectDownloadFolderToast(boolean multipleDownloads) {
+        // Avoid spamming a toast per item when downloading a whole gallery/album.
+        if (multipleDownloads) {
+            return;
+        }
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(getApplicationContext(),
+                        R.string.download_folder_permission_lost, Toast.LENGTH_LONG).show());
+    }
+
+    /**
+     * Returns a destination for the default media location, used when the user's chosen folder is
+     * unavailable. On Android Q+ this is a MediaStore {@code RELATIVE_PATH}; on older versions it is
+     * an absolute file path (with parent directories created and name collisions resolved).
+     */
+    private String getDefaultDownloadPath(int mediaType, String subredditName, String fileName) {
+        String topDir = mediaType == EXTRA_MEDIA_TYPE_VIDEO
+                ? Environment.DIRECTORY_MOVIES : Environment.DIRECTORY_PICTURES;
+        String subFolder = (subredditName != null && !subredditName.isEmpty()) ? subredditName : null;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // MediaStore resolves name collisions on its own for RELATIVE_PATH destinations.
+            return subFolder == null ? topDir : topDir + File.separator + subFolder;
+        }
+
+        File baseDir = Environment.getExternalStoragePublicDirectory(topDir);
+        if (subFolder != null) {
+            baseDir = new File(baseDir, subFolder);
+        }
+        if (!baseDir.exists()) {
+            baseDir.mkdirs();
+        }
+
+        File outFile = new File(baseDir, fileName);
+        int dotIndex = fileName.lastIndexOf('.');
+        String baseName = (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+        String extension = (dotIndex == -1) ? "" : fileName.substring(dotIndex);
+        int num = 1;
+        while (outFile.exists()) {
+            outFile = new File(baseDir, baseName + " (" + num + ")" + extension);
+            num++;
+        }
+        return outFile.getAbsolutePath();
     }
 
     private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, int mediaType, int randomNotificationIdOffset, String mimeType, Uri destinationFileUri, int errorCode, boolean multipleDownloads) {

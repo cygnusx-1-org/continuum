@@ -42,42 +42,70 @@ ${VERSION_NAME} / ${DATE}
 ${VERSION_SEPARATOR}
 ${RELEVANT_COMMIT_MESSAGES}"
 
-# Update CHANGELOG automatically
-awk -v sep="${SEPARATOR}" -v new_entry="${CHANGELOG_ENTRY}" '
-  # Print each line of the file
-  {
-    print $0
-    # After finding the separator line (even with spaces around it), insert the new entry
-    if ($0 ~ /^[[:space:]]*---[[:space:]]*$/) {
-      print new_entry
+# Section 1: everything before "./gradlew assembleRelease"
+1() {
+  # Update CHANGELOG automatically
+  awk -v sep="${SEPARATOR}" -v new_entry="${CHANGELOG_ENTRY}" '
+    # Print each line of the file
+    {
+      print $0
+      # After finding the separator line (even with spaces around it), insert the new entry
+      if ($0 ~ /^[[:space:]]*---[[:space:]]*$/) {
+        print new_entry
+      }
     }
-  }
-' "${CHANGELOG_FILENAME}" > "${CHANGELOG_FILENAME}.tmp" && mv "${CHANGELOG_FILENAME}.tmp" "${CHANGELOG_FILENAME}"
+  ' "${CHANGELOG_FILENAME}" > "${CHANGELOG_FILENAME}.tmp" && mv "${CHANGELOG_FILENAME}.tmp" "${CHANGELOG_FILENAME}"
 
 
-# commit
-git add "${BUILD_GRADLE_FILENAME}" "${CHANGELOG_FILENAME}"
+  # commit
+  git add "${BUILD_GRADLE_FILENAME}" "${CHANGELOG_FILENAME}"
 
-COMMIT_MESSAGE="Updated ${CHANGELOG_FILENAME}"
+  COMMIT_MESSAGE="Updated ${CHANGELOG_FILENAME}"
 
-# Make a new commit for a new release
-git commit -m "${COMMIT_MESSAGE}"
+  # Make a new commit for a new release
+  git commit -m "${COMMIT_MESSAGE}"
 
-# Creating new tag for the new release
-git tag -a "${VERSION_NAME}" -m "Version ${VERSION_NAME}"
+  # Creating new tag for the new release
+  git tag -a "${VERSION_NAME}" -m "Version ${VERSION_NAME}"
 
-# Push tags to the git repository
-git push --tags
+  # Push tags to the git repository
+  git push --tags
+}
 
-# Creating apk in app/build/outputs/apk/Release
-./gradlew assembleRelease
+# Section 2: "./gradlew assembleRelease"
+2() {
+  # Creating apk in app/build/outputs/apk/Release
+  ./gradlew assembleRelease
 
-RC="${?}"
+  RC="${?}"
 
-# Check return code, and exit with the return code if it is not zero.
-if [ "${RC}" -ne 0 ]; then
-  exit "${RC}"
-fi
+  # Check return code, and exit with the return code if it is not zero.
+  if [ "${RC}" -ne 0 ]; then
+    exit "${RC}"
+  fi
+}
 
-# Creating .apk in app/build/outputs/apk/Release, and uploading it to git repository in GitHub as a new release.
-scripts/release-github.sh "${RELEVANT_COMMIT_MESSAGES}"
+# Section 3: everything after "./gradlew assembleRelease"
+3() {
+  # Creating .apk in app/build/outputs/apk/Release, and uploading it to git repository in GitHub as a new release.
+  scripts/release-github.sh "${RELEVANT_COMMIT_MESSAGES}"
+
+  git push
+}
+
+# Dispatch: run all sections in order by default, or an individual section
+# when its name is passed as the first argument.
+case "${1}" in
+  1) 1 ;;
+  2) 2 ;;
+  3) 3 ;;
+  ""|all)
+    1
+    2
+    3
+    ;;
+  *)
+    echo "Usage: ${0} [1|2|3|all]"
+    exit 1
+    ;;
+esac

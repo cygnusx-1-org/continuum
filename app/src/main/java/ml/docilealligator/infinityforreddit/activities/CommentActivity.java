@@ -73,10 +73,10 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityCommentBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
-import ml.docilealligator.infinityforreddit.markdown.EmoteCloseBracketInlineProcessor;
-import ml.docilealligator.infinityforreddit.markdown.EmotePlugin;
-import ml.docilealligator.infinityforreddit.markdown.ImageAndGifEntry;
-import ml.docilealligator.infinityforreddit.markdown.ImageAndGifPlugin;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
+import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
+import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
 import ml.docilealligator.infinityforreddit.network.AnyAccountAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.repositories.CommentActivityRepository;
@@ -278,7 +278,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
                 });
             ImageAndGifPlugin imageAndGifPlugin = new ImageAndGifPlugin();
-            imageAndGifEntry = new ImageAndGifEntry(this, mGlide, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL, mediaMetadata -> {
+            imageAndGifEntry = new ImageAndGifEntry(this, mGlide, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL, (mediaMetadata, commentId, postId) -> {
                 Intent imageIntent = new Intent(this, ViewImageOrGifActivity.class);
 
                 if (mediaMetadata.isGIF) {
@@ -612,9 +612,13 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
 
                     return;
                 }
-                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit, accessToken, binding.commentCommentEditText, binding.commentCoordinatorLayout, data.getData(), uploadedImages);
+                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
+                        accessToken, binding.commentCommentEditText,
+                        binding.commentCoordinatorLayout, data.getData(), uploadedImages);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
-                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit, accessToken, binding.commentCommentEditText, binding.commentCoordinatorLayout, capturedImageUri, uploadedImages);
+                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
+                        accessToken, binding.commentCommentEditText,
+                        binding.commentCoordinatorLayout, capturedImageUri, uploadedImages);
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 sendComment(mMenu == null ? null : mMenu.findItem(R.id.action_send_comment_activity));
             }

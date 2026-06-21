@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -67,8 +69,10 @@ import ml.docilealligator.infinityforreddit.customviews.GlideGifImageViewFactory
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewRedditGalleryImageOrGifBinding;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
 
 public class ViewRedditGalleryImageOrGifFragment extends Fragment {
 
@@ -77,6 +81,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
     public static final String EXTRA_INDEX = "EI";
     public static final String EXTRA_MEDIA_COUNT = "EMC";
     public static final String EXTRA_IS_NSFW = "EIN";
+    private static final String ROTATION_STATE = "RS";
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
     @Inject
@@ -95,7 +100,9 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
     private boolean isUseBottomCaption = false;
     private boolean isFallback = false;
     private Handler handler;
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
     private FragmentViewRedditGalleryImageOrGifBinding binding;
+    ViewGalleryViewModel viewGalleryViewModel;
 
     public ViewRedditGalleryImageOrGifFragment() {
         // Required empty public constructor
@@ -116,6 +123,10 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         isNsfw = getArguments().getBoolean(EXTRA_IS_NSFW, false);
         glide = Glide.with(activity);
         handler = new Handler(Looper.getMainLooper());
+
+        if (savedInstanceState != null) {
+            currentRotation = savedInstanceState.getInt(ROTATION_STATE, 0);
+        }
 
         if (activity.typeface != null) {
             binding.titleTextViewViewRedditGalleryImageOrGifFragment.setTypeface(activity.typeface);
@@ -165,6 +176,9 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                             view.setDoubleTapZoomDpi(240);
                             view.setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_FIXED);
                             view.setQuickScaleEnabled(true);
+                            if (currentRotation != 0) {
+                                view.setOrientation(currentRotation);
+                            }
                             view.resetScaleAndCenter();
                         }
 
@@ -205,9 +219,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
             if (activity.isActionBarHidden()) {
                 activity.getWindow().getDecorView().setSystemUiVisibility(0);
                 activity.setActionBarHidden(false);
-                if (activity.isUseBottomAppBar()) {
-                    binding.bottomAppBarMenuViewRedditGalleryImageOrGifFragment.setVisibility(View.VISIBLE);
-                }
+                binding.bottomAppBarMenuViewRedditGalleryImageOrGifFragment.setVisibility(View.VISIBLE);
                 if (captionTextOrUrlIsNotEmpty) {
                     binding.captionLayoutViewRedditGalleryImageOrGifFragment.setVisibility(View.VISIBLE);
                 }
@@ -224,40 +236,37 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
             loadImage();
         });
 
-        if (activity.isUseBottomAppBar()) {
-            binding.bottomAppBarMenuViewRedditGalleryImageOrGifFragment.setVisibility(View.VISIBLE);
-            if (media.mediaType == Post.Gallery.TYPE_GIF) {
-                binding.titleTextViewViewRedditGalleryImageOrGifFragment.setText(getString(R.string.view_reddit_gallery_activity_gif_label,
-                        getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
-            } else {
-                binding.titleTextViewViewRedditGalleryImageOrGifFragment.setText(getString(R.string.view_reddit_gallery_activity_image_label,
-                        getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
-            }
-            binding.downloadImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> {
-                if (isDownloading) {
-                    return;
-                }
-                isDownloading = true;
-                requestPermissionAndDownload();
-            });
-            binding.shareImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> {
-                if (media.mediaType == Post.Gallery.TYPE_GIF) {
-                    shareGif();
-                } else {
-                    shareImage();
-                }
-            });
-            binding.wallpaperImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> {
-                setWallpaper();
-            });
+        binding.bottomAppBarMenuViewRedditGalleryImageOrGifFragment.setVisibility(View.VISIBLE);
+        if (media.mediaType == Post.Gallery.TYPE_GIF) {
+            binding.titleTextViewViewRedditGalleryImageOrGifFragment.setText(getString(R.string.view_reddit_gallery_activity_gif_label,
+                    getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
+        } else {
+            binding.titleTextViewViewRedditGalleryImageOrGifFragment.setText(getString(R.string.view_reddit_gallery_activity_image_label,
+                    getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
         }
+        binding.downloadImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> {
+            if (isDownloading) {
+                return;
+            }
+            isDownloading = true;
+            requestPermissionAndDownload();
+        });
+        binding.shareImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> {
+            if (media.mediaType == Post.Gallery.TYPE_GIF) {
+                shareGif();
+            } else {
+                shareImage();
+            }
+        });
+        binding.wallpaperImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> {
+            setWallpaper();
+        });
+        binding.rotateLeftImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> rotateLeft());
+        binding.rotateRightImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> rotateRight());
+        binding.overflowImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(this::showOverflowMenu);
 
         if (captionTextOrUrlIsNotEmpty) {
             isUseBottomCaption = true;
-
-            if (!activity.isUseBottomAppBar()) {
-                binding.bottomAppBarMenuViewRedditGalleryImageOrGifFragment.setVisibility(View.GONE);
-            }
 
             binding.captionLayoutViewRedditGalleryImageOrGifFragment.setVisibility(View.VISIBLE);
 
@@ -300,7 +309,67 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
             binding.captionLayoutViewRedditGalleryImageOrGifFragment.setVisibility(View.GONE);
         }
 
+        viewGalleryViewModel = new ViewModelProvider(requireActivity()).get(ViewGalleryViewModel.class);
+        viewGalleryViewModel.getInsets().observe(getViewLifecycleOwner(), insets -> {
+            ViewGroup.LayoutParams lp = binding.bottomNavigationViewRedditGalleryImageOrGifFragment.getLayoutParams();
+            if (lp instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) lp;
+
+                marginParams.bottomMargin = insets.bottom;
+                marginParams.setMarginStart(insets.left);
+                marginParams.setMarginEnd(insets.right);
+
+                binding.bottomNavigationViewRedditGalleryImageOrGifFragment.setLayoutParams(marginParams);
+            }
+        });
+
         return binding.getRoot();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(ROTATION_STATE, currentRotation);
+    }
+
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        applyRotation();
+    }
+
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        applyRotation();
+    }
+
+    private void applyRotation() {
+        SubsamplingScaleImageView ssiv = binding.imageViewViewRedditGalleryImageOrGifFragment.getSSIV();
+        if (media.mediaType != Post.Gallery.TYPE_GIF && ssiv != null) {
+            // Static images: let the subsampling view re-render at the new orientation
+            ssiv.setOrientation(currentRotation);
+            ssiv.resetScaleAndCenter();
+        } else {
+            // Animated GIFs are rendered by BigImageView's image-view factory, not the
+            // subsampling view, so rotate the whole widget at the view level.
+            binding.imageViewViewRedditGalleryImageOrGifFragment.setRotation(currentRotation);
+        }
+    }
+
+    private void showOverflowMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(activity, anchor);
+        popupMenu.getMenuInflater().inflate(R.menu.view_reddit_gallery_activity, popupMenu.getMenu());
+        Menu menu = popupMenu.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            Utils.setTitleWithCustomFontToMenuItem(activity.typeface, menu.getItem(i), null);
+        }
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_download_all_gallery_media_view_reddit_gallery_activity) {
+                activity.downloadAllGalleryMedia();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
     }
 
     private void hideAppBar() {
@@ -312,9 +381,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
         activity.setActionBarHidden(true);
-        if (activity.isUseBottomAppBar()) {
-            binding.bottomAppBarMenuViewRedditGalleryImageOrGifFragment.setVisibility(View.GONE);
-        }
+        binding.bottomAppBarMenuViewRedditGalleryImageOrGifFragment.setVisibility(View.GONE);
         binding.captionLayoutViewRedditGalleryImageOrGifFragment.setVisibility(View.GONE);
     }
 
@@ -323,6 +390,11 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
             binding.imageViewViewRedditGalleryImageOrGifFragment.showImage(Uri.parse(media.fallbackUrl));
         } else {
             binding.imageViewViewRedditGalleryImageOrGifFragment.showImage(Uri.parse(media.url));
+        }
+        // Static images re-apply rotation in the SSIV onImageLoaded callback; GIFs are
+        // rotated at the view level, which persists on the BigImageView itself.
+        if (currentRotation != 0 && media.mediaType == Post.Gallery.TYPE_GIF) {
+            binding.imageViewViewRedditGalleryImageOrGifFragment.setRotation(currentRotation);
         }
     }
 
@@ -466,6 +538,15 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         Toast.makeText(activity, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
+    // Use the same filename scheme as the download path so saved and shared files match.
+    private String getShareFileName() {
+        Post parentPost = activity.getPost();
+        if (parentPost != null) {
+            return MediaFileNameUtils.getDownloadFileName(parentPost, getArguments().getInt(EXTRA_INDEX, 0));
+        }
+        return media.fileName;
+    }
+
     //TODO: Find a way to share original image, Glide messes with the size and quality,
     // compression should be up to the app being shared with (WhatsApp for example)
     private void shareImage() {
@@ -476,7 +557,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                 if (cacheDir != null) {
                     Toast.makeText(activity, R.string.save_image_first, Toast.LENGTH_SHORT).show();
                     SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, handler, resource, cacheDir.getPath(),
-                            media.fileName,
+                            getShareFileName(),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {
@@ -521,7 +602,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
             public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
                 File cacheDir = Utils.getCacheDir(activity);
                 if (cacheDir != null) {
-                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), media.fileName,
+                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), getShareFileName(),
                             new SaveGIFToFile.SaveGIFToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {

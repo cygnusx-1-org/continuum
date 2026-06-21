@@ -59,6 +59,7 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityViewMultiRedditD
 import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.RefreshMultiRedditsEvent;
+import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.FragmentCommunicator;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
@@ -70,7 +71,9 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
-import ml.docilealligator.infinityforreddit.readpost.InsertReadPost;
+import ml.docilealligator.infinityforreddit.post.PostType;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
@@ -98,6 +101,9 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
+    @Inject
+    @Named("no_oauth")
+    Retrofit mRetrofit;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -494,7 +500,10 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         mFragment = new PostFragment();
         Bundle bundle = new Bundle();
         bundle.putString(PostFragment.EXTRA_NAME, multiPath);
-        bundle.putInt(PostFragment.EXTRA_POST_TYPE, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? PostPagingSource.TYPE_ANONYMOUS_MULTIREDDIT : PostPagingSource.TYPE_MULTI_REDDIT);
+        boolean isAnonymousLocalMulti = accountName.equals(Account.ANONYMOUS_ACCOUNT)
+                && multiPath != null && multiPath.startsWith("/user/-/m/");
+        bundle.putInt(PostFragment.EXTRA_POST_TYPE,
+                isAnonymousLocalMulti ? PostType.ANONYMOUS_MULTIREDDIT : PostType.MULTIREDDIT);
         mFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
     }
@@ -590,6 +599,12 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 startActivity(intent);
                 break;
             }
+            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT: {
+                boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+                mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, newValue).apply();
+                EventBus.getDefault().post(new ShowThumbnailOnTheLeftInCompactLayoutEvent(newValue));
+                break;
+            }
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
             default: {
                 if (mFragment instanceof PostFragment) {
@@ -638,6 +653,8 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 return R.drawable.ic_lock_day_night_24dp;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SAVED:
                 return R.drawable.ic_bookmarks_day_night_24dp;
+            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT:
+                return R.drawable.ic_thumbnail_left_day_night_24dp;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
             default:
                 return R.drawable.ic_keyboard_double_arrow_up_day_night_24dp;
@@ -701,6 +718,10 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
             @Override
             public void afterTextChanged(Editable editable) {
+                if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
+                    return;
+                }
+
                 String currentQuery = editable.toString().trim();
                 if (!currentQuery.isEmpty()) {
                     autoCompleteRunnable = () -> {
@@ -793,12 +814,25 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.view_multi_reddit_detail_activity, menu);
+        boolean isFollowedEntry = multiReddit != null && multiReddit.isFollowed();
+        boolean isNotOwned;
         if (multiReddit == null && multiPath != null) {
             String[] segments = multiPath.split("/");
-            if (segments.length > 2 && !segments[1].equals(accountName)) {
-                menu.findItem(R.id.action_edit_view_multi_reddit_detail_activity).setVisible(false);
+            isNotOwned = segments.length > 2 && !segments[1].equals(accountName);
+        } else {
+            isNotOwned = isFollowedEntry;
+        }
+        if (isNotOwned) {
+            menu.findItem(R.id.action_edit_view_multi_reddit_detail_activity).setVisible(false);
+            menu.findItem(R.id.action_copy_view_multi_reddit_detail_activity).setVisible(true);
+            if (isFollowedEntry) {
+                // Already saved locally: allow removing it, hide the Reddit-side delete and the save action.
                 menu.findItem(R.id.action_delete_view_multi_reddit_detail_activity).setVisible(false);
-                menu.findItem(R.id.action_copy_view_multi_reddit_detail_activity).setVisible(true);
+                menu.findItem(R.id.action_remove_followed_view_multi_reddit_detail_activity).setVisible(true);
+            } else {
+                // Someone else's feed we are only viewing: offer to save it locally, nothing to delete.
+                menu.findItem(R.id.action_delete_view_multi_reddit_detail_activity).setVisible(false);
+                menu.findItem(R.id.action_save_locally_view_multi_reddit_detail_activity).setVisible(true);
             }
         }
         applyMenuItemTheme(menu);
@@ -855,7 +889,11 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                     }
                 };
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                    FetchMultiRedditInfo.anonymousFetchMultiRedditInfo(mExecutor, new Handler(), mRedditDataRoomDatabase, multiPath, listener);
+                    if (multiPath != null && multiPath.startsWith("/user/-/m/")) {
+                        FetchMultiRedditInfo.anonymousFetchMultiRedditInfo(mExecutor, new Handler(), mRedditDataRoomDatabase, multiPath, listener);
+                    } else {
+                        FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
+                    }
                 } else {
                     FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
                 }
@@ -903,8 +941,57 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         } else if (itemId == R.id.action_copy_view_multi_reddit_detail_activity) {
             CopyMultiRedditActivity.Companion.start(this, multiPath);
             return true;
+        } else if (itemId == R.id.action_save_locally_view_multi_reddit_detail_activity) {
+            if (multiReddit != null) {
+                saveFollowedMultiReddit(multiReddit);
+            } else {
+                FetchMultiRedditInfo.FetchMultiRedditInfoListener listener = new FetchMultiRedditInfo.FetchMultiRedditInfoListener() {
+                    @Override
+                    public void success(MultiReddit fetchedMultiReddit) {
+                        saveFollowedMultiReddit(fetchedMultiReddit);
+                    }
+
+                    @Override
+                    public void failed() {
+                        Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
+                    }
+                };
+                if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                    FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
+                } else {
+                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
+                }
+            }
+            return true;
+        } else if (itemId == R.id.action_remove_followed_view_multi_reddit_detail_activity) {
+            new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                    .setTitle(R.string.remove_followed_multi_reddit)
+                    .setMessage(R.string.remove_followed_multi_reddit_dialog_message)
+                    .setPositiveButton(R.string.remove, (dialogInterface, i) -> mExecutor.execute(() -> {
+                        mRedditDataRoomDatabase.multiRedditDao().deleteFollowedMultiReddit(multiPath, accountName);
+                        new Handler(getMainLooper()).post(() -> {
+                            Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.remove_followed_multi_reddit_success, Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    }))
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
+            return true;
         }
         return false;
+    }
+
+    private void saveFollowedMultiReddit(MultiReddit source) {
+        MultiReddit followed = new MultiReddit(source.getPath(), source.getDisplayName(),
+                source.getName(), source.getDescription(), source.getCopiedFrom(), source.getIconUrl(),
+                source.getVisibility(), accountName, source.getNSubscribers(), source.getCreatedUTC(),
+                source.isOver18(), false, false);
+        followed.setFollowed(true);
+        mExecutor.execute(() -> {
+            mRedditDataRoomDatabase.multiRedditDao().insert(followed);
+            new Handler(getMainLooper()).post(() ->
+                    Toast.makeText(ViewMultiRedditDetailActivity.this, R.string.save_multi_reddit_locally_success, Toast.LENGTH_SHORT).show());
+        });
     }
 
     private void showListSubredditsDialog(ArrayList<ExpandedSubredditInMultiReddit> subreddits) {
@@ -1016,7 +1103,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     @Override
     public void markPostAsRead(Post post) {
         int readPostsLimit = ReadPostsUtils.GetReadPostsLimit(accountName, mPostHistorySharedPreferences);
-        InsertReadPost.insertReadPost(mRedditDataRoomDatabase, mExecutor, accountName, post.getId(), readPostsLimit);
+        ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, accountName, post.getId(), ReadPostType.READ_POSTS, readPostsLimit);
     }
 
     @Override

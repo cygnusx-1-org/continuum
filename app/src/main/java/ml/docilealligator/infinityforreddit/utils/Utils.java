@@ -5,7 +5,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -35,7 +37,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.text.HtmlCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
@@ -48,9 +49,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,22 +84,95 @@ public final class Utils {
             //Matches preview.redd.it and i.redd.it media
             //For i.redd.it media, it only matches [caption](image-link. Notice there is no ) at the end.
             //i.redd.it: (\\[(?:(?!((?<!\\\\)\\[)).)*?]\\()?https://i.redd.it/\\w+.(jpg|png|jpeg|gif)"
-            Pattern.compile("((?:\\[(?:(?!(?:(?<!\\\\)\\[)).)*?]\\()?https://preview.redd.it/\\w+.(?:jpg|png|jpeg)(?:(?:\\?+[-a-zA-Z0-9()@:%_+.~#?&/=]*)|))|((?:\\[(?:(?!(?:(?<!\\\\)\\[)).)*?]\\()?https://i.redd.it/\\w+.(?:jpg|png|jpeg|gif))"),
+            Pattern.compile("((?:\\[(.*?)]\\()?(https://preview.redd.it/(\\w+).(?:jpg|png|jpeg)(?:\\?+[-a-zA-Z0-9()@:%_+.~#?&/=]*|)))|((?:\\[(.*?)]\\()?(https://i.redd.it/(\\w+).(?:jpg|png|jpeg|gif)))"),
+            Pattern.compile("(?:\\[(.*?)]\\()?(https://reddit\\.com/link/([^/]+)/video/([^/]+)/player)")
     };
 
     public static String modifyMarkdown(String markdown) {
-        String regexed = REGEX_PATTERNS[0].matcher(markdown).replaceAll("[$0](https://www.reddit.com$0)");
-        regexed = REGEX_PATTERNS[1].matcher(regexed).replaceAll("[$0](https://www.reddit.com/$0)");
+        String regexed = replaceOutsideMarkdownLinks(markdown, REGEX_PATTERNS[0], "[$0](https://www.reddit.com$0)");
+        regexed = replaceOutsideMarkdownLinks(regexed, REGEX_PATTERNS[1], "[$0](https://www.reddit.com/$0)");
         regexed = REGEX_PATTERNS[2].matcher(regexed).replaceAll("^");
 
         return regexed;
     }
 
+    /**
+     * Performs regex replacement only on text that is not inside the text portion of a markdown
+     * link (i.e., not inside the [...] of [...](url)). This prevents corrupting existing
+     * markdown links by nesting link syntax inside them.
+     */
+    private static String replaceOutsideMarkdownLinks(String text, Pattern pattern, String replacement) {
+        Pattern markdownLinkPattern = Pattern.compile("\\[(?:[^\\[\\]]|\\\\\\[|\\\\\\])*]\\([^)]*\\)");
+        Matcher linkMatcher = markdownLinkPattern.matcher(text);
+
+        List<int[]> linkRanges = new ArrayList<>();
+        while (linkMatcher.find()) {
+            linkRanges.add(new int[]{linkMatcher.start(), linkMatcher.end()});
+        }
+
+        if (linkRanges.isEmpty()) {
+            return pattern.matcher(text).replaceAll(replacement);
+        }
+
+        Matcher matcher = pattern.matcher(text);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            boolean insideLink = false;
+            for (int[] range : linkRanges) {
+                if (matcher.start() >= range[0] && matcher.end() <= range[1]) {
+                    insideLink = true;
+                    break;
+                }
+            }
+            if (insideLink) {
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group()));
+            } else {
+                matcher.appendReplacement(sb, replacement);
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
     private static final Pattern PROCESSING_IMG_PATTERN = Pattern.compile("\\*?Processing img (\\w+)\\.{3}\\*?");
 
-    public static String parseRedditImagesBlock(String markdown, @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
+    public static ParseRedditMediaBlockResult parseRedditImagesBlock(String markdown, @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         if (mediaMetadataMap == null) {
-            return markdown;
+            StringBuilder markdownStringBuilder = new StringBuilder(markdown);
+            int start = 0;
+            while (true) {
+                Matcher videoMatcher = REGEX_PATTERNS[4].matcher(markdownStringBuilder);
+
+                if (videoMatcher.find(start)) {
+                    String id = videoMatcher.group(4);
+                    String linkId = videoMatcher.group(3);
+                    String caption = videoMatcher.group(1);
+
+                    if (mediaMetadataMap == null) {
+                        mediaMetadataMap = new HashMap<>();
+                    }
+
+                    MediaMetadata.MediaItem item = new MediaMetadata.MediaItem(0, 0, "https://v.redd.it/link/" + linkId + "/asset/" + id + "/HLSPlaylist.m3u8", null);
+                    MediaMetadata mediaMetadata = new MediaMetadata(id, "Video", item, item);
+                    mediaMetadataMap.put(id, mediaMetadata);
+
+                    mediaMetadata.caption = caption;
+
+                    if (markdownStringBuilder.charAt(videoMatcher.start()) == '[') {
+                        //Has caption
+                        markdownStringBuilder.insert(videoMatcher.start(), '!');
+                        start = videoMatcher.end() + 1;
+                    } else {
+                        String replacingText = "![](" + videoMatcher.group(2) + ")";
+                        markdownStringBuilder.replace(videoMatcher.start(), videoMatcher.end(), replacingText);
+                        start = replacingText.length() + videoMatcher.start();
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            return new ParseRedditMediaBlockResult(markdownStringBuilder.toString(), mediaMetadataMap);
         }
 
         // Replace "Processing img <id>..." placeholders with the actual URL from media_metadata.
@@ -115,85 +190,96 @@ public final class Utils {
         markdown = sb.toString();
 
         StringBuilder markdownStringBuilder = new StringBuilder(markdown);
-        Pattern previewReddItAndIReddItImagePattern = REGEX_PATTERNS[3];
-        Matcher matcher = previewReddItAndIReddItImagePattern.matcher(markdownStringBuilder);
         int start = 0;
-        int previewReddItLength = "https://preview.redd.it/".length();
-        int iReddItLength = "https://i.redd.it/".length();
-        while (matcher.find(start)) {
-            if (matcher.group(1) != null) {
-                String id;
-                String caption = null;
-                if (markdownStringBuilder.charAt(matcher.start()) == '[') {
-                    //Has caption
-                    int urlStartIndex = markdownStringBuilder.lastIndexOf("https://preview.redd.it/", matcher.end());
-                    id = markdownStringBuilder.substring(previewReddItLength + urlStartIndex,
-                            markdownStringBuilder.indexOf(".", previewReddItLength + urlStartIndex));
-                    //Minus "](".length()
-                    caption = markdownStringBuilder.substring(matcher.start() + 1, urlStartIndex - 2);
+        while (true) {
+            Matcher previewReddItAndIReddItImageMatcher = REGEX_PATTERNS[3].matcher(markdownStringBuilder);
+            Matcher videoMatcher = REGEX_PATTERNS[4].matcher(markdownStringBuilder);
+
+            if (previewReddItAndIReddItImageMatcher.find(start)) {
+                if (previewReddItAndIReddItImageMatcher.group(1) != null) {
+                    String id = previewReddItAndIReddItImageMatcher.group(4);
+                    String caption = previewReddItAndIReddItImageMatcher.group(2);
+
+                    MediaMetadata mediaMetadata = mediaMetadataMap.get(id);
+                    if (mediaMetadata == null) {
+                        start = previewReddItAndIReddItImageMatcher.end();
+                        continue;
+                    }
+
+                    mediaMetadata.caption = caption;
+
+                    if (markdownStringBuilder.charAt(previewReddItAndIReddItImageMatcher.start()) == '[') {
+                        //Has caption
+                        markdownStringBuilder.insert(previewReddItAndIReddItImageMatcher.start(), '!');
+                        start = previewReddItAndIReddItImageMatcher.end() + 1;
+                    } else {
+                        String replacingText = "![](" + previewReddItAndIReddItImageMatcher.group(3) + ")";
+                        markdownStringBuilder.replace(previewReddItAndIReddItImageMatcher.start(), previewReddItAndIReddItImageMatcher.end(), replacingText);
+                        start = replacingText.length() + previewReddItAndIReddItImageMatcher.start();
+                    }
+                } else if (previewReddItAndIReddItImageMatcher.group(2) != null) {
+                    String id = previewReddItAndIReddItImageMatcher.group(8);
+                    String caption = previewReddItAndIReddItImageMatcher.group(6);
+
+                    MediaMetadata mediaMetadata = mediaMetadataMap.get(id);
+                    if (mediaMetadata == null) {
+                        start = previewReddItAndIReddItImageMatcher.end();
+                        continue;
+                    }
+
+                    mediaMetadata.caption = caption;
+
+                    if (markdownStringBuilder.charAt(previewReddItAndIReddItImageMatcher.start()) == '[') {
+                        //Has caption
+                        markdownStringBuilder.insert(previewReddItAndIReddItImageMatcher.start(), '!');
+                        start = previewReddItAndIReddItImageMatcher.end() + 1;
+                    } else {
+                        String replacingText = "![](" + previewReddItAndIReddItImageMatcher.group(7) + ")";
+                        markdownStringBuilder.replace(previewReddItAndIReddItImageMatcher.start(), previewReddItAndIReddItImageMatcher.end(), replacingText);
+                        start = replacingText.length() + previewReddItAndIReddItImageMatcher.start();
+                    }
                 } else {
-                    id = markdownStringBuilder.substring(matcher.start() + previewReddItLength,
-                            markdownStringBuilder.indexOf(".", matcher.start() + previewReddItLength));
+                    start = previewReddItAndIReddItImageMatcher.end();
                 }
+            } else if (videoMatcher.find(start)) {
+                String id = videoMatcher.group(4);
+                String linkId = videoMatcher.group(3);
+                String caption = videoMatcher.group(1);
 
                 MediaMetadata mediaMetadata = mediaMetadataMap.get(id);
                 if (mediaMetadata == null) {
-                    start = matcher.end();
-                    continue;
+                    MediaMetadata.MediaItem item = new MediaMetadata.MediaItem(0, 0, "https://v.redd.it/link/" + linkId + "/asset/" + id + "/HLSPlaylist.m3u8", null);
+                    mediaMetadata = new MediaMetadata(id, "Video", item, item);
+                    mediaMetadataMap.put(id, mediaMetadata);
                 }
 
                 mediaMetadata.caption = caption;
 
-                if (markdownStringBuilder.charAt(matcher.start()) == '[') {
+                if (markdownStringBuilder.charAt(videoMatcher.start()) == '[') {
                     //Has caption
-                    markdownStringBuilder.insert(matcher.start(), '!');
-                    start = matcher.end() + 1;
+                    markdownStringBuilder.insert(videoMatcher.start(), '!');
+                    start = videoMatcher.end() + 1;
                 } else {
-                    String replacingText = "![](" + markdownStringBuilder.substring(matcher.start(), matcher.end()) + ")";
-                    markdownStringBuilder.replace(matcher.start(), matcher.end(), replacingText);
-                    start = replacingText.length() + matcher.start();
+                    String replacingText = "![](" + videoMatcher.group(2) + ")";
+                    markdownStringBuilder.replace(videoMatcher.start(), videoMatcher.end(), replacingText);
+                    start = replacingText.length() + videoMatcher.start();
                 }
-
-                matcher = previewReddItAndIReddItImagePattern.matcher(markdownStringBuilder);
-            } else if (matcher.group(2) != null) {
-                String id;
-                String caption = null;
-                if (markdownStringBuilder.charAt(matcher.start()) == '[') {
-                    //Has caption
-                    int urlStartIndex = markdownStringBuilder.lastIndexOf("https://i.redd.it/", matcher.end());
-                    id = markdownStringBuilder.substring(iReddItLength + urlStartIndex,
-                            markdownStringBuilder.indexOf(".", iReddItLength + urlStartIndex));
-                    //Minus "](".length()
-                    caption = markdownStringBuilder.substring(matcher.start() + 1, urlStartIndex - 2);
-                } else {
-                    id = markdownStringBuilder.substring(matcher.start() + iReddItLength, markdownStringBuilder.indexOf(".", matcher.start() + iReddItLength));
-                }
-
-                MediaMetadata mediaMetadata = mediaMetadataMap.get(id);
-                if (mediaMetadata == null) {
-                    start = matcher.end();
-                    continue;
-                }
-
-                mediaMetadata.caption = caption;
-
-                if (markdownStringBuilder.charAt(matcher.start()) == '[') {
-                    //Has caption
-                    markdownStringBuilder.insert(matcher.start(), '!');
-                    start = matcher.end() + 1;
-                } else {
-                    String replacingText = "![](" + markdownStringBuilder.substring(matcher.start(), matcher.end()) + ")";
-                    markdownStringBuilder.replace(matcher.start(), matcher.end(), replacingText);
-                    start = replacingText.length() + matcher.start();
-                }
-
-                matcher = previewReddItAndIReddItImagePattern.matcher(markdownStringBuilder);
             } else {
-                start = matcher.end();
+                break;
             }
         }
 
-        return markdownStringBuilder.toString();
+        return new ParseRedditMediaBlockResult(markdownStringBuilder.toString(), mediaMetadataMap);
+    }
+
+    public final static class ParseRedditMediaBlockResult {
+        public String parsedMarkdown;
+        public Map<String, MediaMetadata> mediaMetadataMap;
+
+        public ParseRedditMediaBlockResult(String parsedMarkdown, Map<String, MediaMetadata> mediaMetadataMap) {
+            this.parsedMarkdown = parsedMarkdown;
+            this.mediaMetadataMap = mediaMetadataMap;
+        }
     }
 
     public static String trimTrailingWhitespace(String source) {
@@ -370,6 +456,24 @@ public final class Utils {
         return false;
     }
 
+    public static boolean isConnectedToInternet(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Network network = connectivityManager.getActiveNetwork();
+                if (network == null) {
+                    return false;
+                }
+                NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
+                return networkCapabilities != null && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            } else {
+                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                return networkInfo != null && networkInfo.isConnected();
+            }
+        }
+        return false;
+    }
+
     public static void displaySortTypeInToolbar(SortType sortType, Toolbar toolbar) {
         if (sortType != null) {
             if (sortType.getTime() != null) {
@@ -417,8 +521,8 @@ public final class Utils {
         Handler handler = new Handler();
         executor.execute(() -> {
             try {
-                Bitmap bitmap = Glide.with(context).asBitmap().load(imageUri).submit().get();
-                String imageKeyOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit, accessToken, bitmap, true);
+                String imageKeyOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
+                        context.getContentResolver(), accessToken, imageUri, true);
                 handler.post(() -> {
                     if (imageKeyOrError != null && !imageKeyOrError.startsWith("Error: ")) {
                         String fileName = Utils.getFileName(context, imageUri);
@@ -444,9 +548,6 @@ public final class Utils {
                         Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show();
                     }
                 });
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-                handler.post(() -> Toast.makeText(context, R.string.get_image_bitmap_failed, Toast.LENGTH_LONG).show());
             } catch (XmlPullParserException | JSONException | IOException e) {
                 e.printStackTrace();
                 handler.post(() -> Toast.makeText(context, R.string.error_processing_image, Toast.LENGTH_LONG).show());
@@ -532,22 +633,61 @@ public final class Utils {
 
     @Nullable
     public static File getCacheDir(Context context) {
+        // getExternalCacheDir() can return a non-null File that points at a directory the
+        // system failed to prepare (e.g. "Failed to prepare .../Android/data/<pkg>/cache" on
+        // some devices). Writing there then fails, so each candidate must be checked for
+        // usability before being returned, falling back to internal storage when needed.
         File cacheDir = context.getExternalCacheDir();
-        if (cacheDir != null) {
+        if (isUsableDir(cacheDir)) {
             return cacheDir;
         }
 
         cacheDir = context.getCacheDir();
-        if (cacheDir != null) {
+        if (isUsableDir(cacheDir)) {
             return cacheDir;
         }
 
         cacheDir = context.getExternalFilesDir(null);
-        if (cacheDir != null) {
+        if (isUsableDir(cacheDir)) {
             return cacheDir;
         }
 
         return context.getFilesDir();
+    }
+
+    private static boolean isUsableDir(@Nullable File dir) {
+        return dir != null && (dir.isDirectory() || dir.mkdirs()) && dir.canWrite();
+    }
+
+    // Sample the four corners of a loaded bitmap to decide whether a thumbnail has
+    // a transparent background. Used so dark logos on transparent PNGs don't disappear
+    // against a dark theme card surface.
+    public static boolean previewLikelyHasTransparentBackground(@Nullable Drawable drawable) {
+        if (!(drawable instanceof BitmapDrawable)) {
+            return false;
+        }
+        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+        if (bitmap == null || bitmap.isRecycled() || !bitmap.hasAlpha()) {
+            return false;
+        }
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        if (width < 2 || height < 2) {
+            return false;
+        }
+        int[] samples = new int[]{
+                bitmap.getPixel(0, 0),
+                bitmap.getPixel(width - 1, 0),
+                bitmap.getPixel(0, height - 1),
+                bitmap.getPixel(width - 1, height - 1),
+        };
+        int transparentCount = 0;
+        for (int color : samples) {
+            if (Color.alpha(color) < 128) {
+                transparentCount++;
+            }
+        }
+        return transparentCount >= 3;
     }
 
     public static Insets getInsets(WindowInsetsCompat insets, boolean includeIME, boolean forcedImmersiveMode) {

@@ -2,6 +2,283 @@
 
 ---
 
+8.2.5.9.3 / 2026-6-20
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Hardened OAuth login error handling with clear failure feedback
+* Registered external browser login redirect URIs for BaconReader, Boost, Continuum, Infinity, Joey, RedReader, Relay, RIF, and Slide
+* Convert API Keys and Customize Tabs in Main Page to a method that restarts on back button or back gesture
+
+8.2.5.9.2 / 2026-6-19
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Custom Feeds not visible #299
+* Added an Add button to Subreddits and Users in Subscriptions
+* Added Show Users MultiReddits" and "Show Favorite Users MultiReddits"
+toggles in "Settings | Interface | Customize Tabs in Main Page"
+* Fixed tabs to auto-fit the screen width
+* Excluded favorites from the non-favorite tabs to avoid duplicate tabs
+* Changed the "Multireddits" label to "MultiReddits" in the navigation drawer
+* Fixed add button in Subscriptions | Subreddits to say "Add Subreddit"
+
+8.2.5.9.1 / 2026-6-17
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Force maximum refresh rate #297
+* Fixed Unable to select and copy post titles now #296
+
+Used 8.2.5.9.1 instead of 8.2.5.10 to avoid a bug in GitHub's release page
+where it will get the order wrong.
+
+8.2.5.9 / 2026-6-15
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented a prefix toggle search of subscriptions
+* Fixed gallery layout columns #290
+* Added Hide Post Type Icon and Hide Image Count in Gallery options
+* Fixed lazy-mode crash with >2 gallery columns by sizing span array to span count
+
+8.2.5.8 / 2026-6-10
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* The new default is the RedReader client ID.
+
+* New Enable Overrides toggle, off by default, to still allow overriding the client ID, user agent, and redirect URI
+
+
+Most users' client IDs have been removed by Reddit. If yours was removed, log out of each account and login again.
+
+Check your https://old.reddit.com/prefs/apps/, some still exist. The override will still let you use it.
+
+8.2.5.7 / 2026-6-6
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Video scrub conflicts with android back gesture #279
+* Fixed App crashes when loading certain posts since 8.2.5 #277
+
+8.2.5.6 / 2026-6-6
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Missing child comments indicator #272
+* Fixed Hiding comment votes also hides child count if only top level comments are shown #219
+* Fixed Downloads name randomizer broken for downloaded images/gifs from comments. #278
+* Restored Compact comment defaults
+* Restored Hide user prefix in comments
+* Restored APNG animated avatars
+* Restored Disable profile avatar animation
+* Restored Crosspost thumbnails
+* Restored Preview quality in split view
+* Restored Swap content/comments on Fold
+* Restored Remember comment scroll position
+* Restored Share as Image with Comments
+
+8.2.5.5 / 2026-6-5
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Comments collapse lag animation #275
+* Fixed issue with loading previews of gifs in Reddit Galleries
+
+8.2.5.4 / 2026-6-5
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed loading of first image of Reddit Galleries when horitzonal swiping between posts
+* Switched Reddit Gallery static images to using all preview images for the quick swipe viewing in the feed
+* Added English descriptions to most sections of Settings
+* Fixed video rotation
+* Restored the overflow menu media views where appropriate
+* Added an API Statistics section to Settings
+
+8.2.5.3 / 2026-6-3
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Swipe action not working #267
+* Disabled "Enable Swipe Action" when "Swipe Between Posts" is enabled, because they conflict with each other
+* Fixed greyed out toggles showing they are greyed out
+* Fixed Navbar background #265
+* Fixed login_chrome_required to include mention of Firefox
+* Fixed Apply download naming convention to Share Media #268
+* Added support for sharing videos
+* Removed blur on screenshots for NSFW and Spoiler
+* Fixed Crash after playing videos #269
+* Fixed IndexOutOfBoundsException opening a post when the setting "show author avatar" is enabled. Docile-Alligator/Infinity-For-Reddit #1926
+
+8.2.5.2 / 2026-6-2
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added a video scrub with a hortizontal back and forth gesture in videos(Disabled in Galleries)
+
+8.2.5.1 / 2026-6-1
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Updated to 8.2.5
+
+8.2.4.2 / 2026-6-1
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Extended pinch to zoom to gifs
+* Deconflicted swipe up/down to dismiss from pinch to zoom
+* Removed pinch to zoom preference, it is the new default
+* Added rotation support to images, videos, and galleries
+* Removed the media view bottom bar option and made it the default
+
+8.2.4.1 / 2026-6-1
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Update to 8.2.4
+
+8.2.1.10 / 2026-5-31
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* More Anonymous Home tab fixes
+
+8.2.1.9 / 2026-5-31
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed multiple subreddits for the Anonymous user
+
+8.2.1.8 / 2026-5-30
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Home tab fails to fetch subscriptions in anonymous mode #263
+* Blocked subscribing to NSFW subreddits for Anonymous users(Because it doesn't work)
+* Fixed crash caused by a permissions problem when trying to record a video for a video post submission
+* Fixed issue with uploading video files from an SD card with sanitization.
+
+8.2.1.7 / 2026-5-29
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Posts and Subreddits won't load in Anonymous mode #261
+* Fixed exact restoration of the position and layout for Home and Subreddits
+
+8.2.1.6 / 2026-5-29
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Posts and Subreddits won't load in Anonymous mode #261
+* Fixed exact restoration of the position and layout for Home and Subreddits
+
+8.2.1.5 / 2026-5-26
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Adaptive Icon #260
+* Added ability to long press the back arrow to return to Home
+* Implemented Switch accounts by holding profile icon on homepage #237
+
+8.2.1.4 / 2026-5-24
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Replaced more Infinity for Reddit icons with Continuum icons
+* Made a subreddit flair required obvious for cross-posts, and all post types
+* Disabled the submit button for cross-posts and all posts types when a flair hasn't been set when required
+* Feat/specific browser link handler per account
+
+8.2.1.3 / 2026-5-12
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed issue with cookie dialog on the login page when using WebView
+
+8.2.1.2 / 2026-5-11
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed accessing users' multi-reddits in Anonymous mode
+* Added Anonymous local data like upvotes, saved, and history to the backup
+* Fixed crash with multi-reddits in Anonymous mode
+
+8.2.1.1 / 2026-5-10
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Update to 8.1.2
+* Fixed Create multireddit function broken for Anonymous #193
+* Fixed Some links don't open inside the app #254
+* Fixed crash when opening a saved post in Anonymous mode
+* Fixed [Bug] history/saved/upvoted/downvoted posts sometimes don't work in the local "saved on device"
+
+8.1.4.7 / 2026-5-3
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Implemented Add support for ephemeral customTabs #147
+* Implemented Feature request: Adjust seek interval for video player controls #239
+* Added "Show Thumbnail on the Left" as "Toggle Thumbnail Side" in the "Bottom Navigation Bar"
+* Fixed issue with transparent pngs as preview or thumbnails images
+
+8.1.4.6 / 2026-4-18
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed issue with the redirect URI when it defined but blank
+* Fixed issue with the user agent when it is defined but blank
+* Added whitespace trimming for the client ID and redirect URI
+* Added leading and trailing only whitespace trimming to the user agent
+* Changed the font used for client IDs to make typos less likely
+
+8.1.4.5 / 2026-4-9
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed issue with the Reddit account's interface language being anything
+other than English at WebView login. Thanks to @wchill
+* Fixed Jump to Next Top-level Comment #244
+
+8.1.4.4 / 2026-4-3
+===========
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added support for configuring the user agent and redirect uri directly in the app
+* Added support for logging in with Firefox as the external browser
+
+8.1.4.3 / 2026-3-31
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed WebView login
+
+8.1.4.2 / 2026-3-27
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Added "Share as Image with Comments" and "Share as Image with this Comment Thread"
+* Fixed the colors of the "Share as Image" QR codes to always be white/black for usability with the Android Camera app
+
+8.1.4.1 / 2026-3-27
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Updated to 8.1.4
+* Added the ability to search Settings
+* Added post ids or post ids + comment ids to saved filenames
+
+8.1.3.1 / 2026-3-16
+============
+Note v8a is the 64-bit build, and should be considered the default choose.
+
+* Fixed Link in comment doesnt render/link properly #238
+* Fixed Ability to swap both the content and comments on Fold when unfolded #232
+* Improved the user experience when adding a user to a multi-reddit
+
 8.1.2.4 / 2026-3-6
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.

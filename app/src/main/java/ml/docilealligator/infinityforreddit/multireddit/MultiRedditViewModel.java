@@ -19,8 +19,12 @@ public class MultiRedditViewModel extends ViewModel {
     private final MutableLiveData<String> searchQueryLiveData;
 
     public MultiRedditViewModel(RedditDataRoomDatabase redditDataRoomDatabase, String accountName) {
-        mMultiRedditRepository = new MultiRedditRepository(redditDataRoomDatabase, accountName);
-        searchQueryLiveData = new MutableLiveData<>("");
+        this(redditDataRoomDatabase, accountName, false);
+    }
+
+    public MultiRedditViewModel(RedditDataRoomDatabase redditDataRoomDatabase, String accountName, boolean followed) {
+        mMultiRedditRepository = new MultiRedditRepository(redditDataRoomDatabase, accountName, followed);
+        searchQueryLiveData = new MutableLiveData<>("%");
 
         mAllMultiReddits = Transformations.switchMap(searchQueryLiveData, searchQuery -> mMultiRedditRepository.getAllMultiRedditsWithSearchQuery(searchQuery));
         mAllFavoriteMultiReddits = Transformations.switchMap(searchQueryLiveData, searchQuery -> mMultiRedditRepository.getAllFavoriteMultiRedditsWithSearchQuery(searchQuery));
@@ -41,16 +45,22 @@ public class MultiRedditViewModel extends ViewModel {
     public static class Factory extends ViewModelProvider.NewInstanceFactory {
         private final RedditDataRoomDatabase mRedditDataRoomDatabase;
         private final String mAccountName;
+        private final boolean mFollowed;
 
         public Factory(RedditDataRoomDatabase redditDataRoomDatabase, String accountName) {
+            this(redditDataRoomDatabase, accountName, false);
+        }
+
+        public Factory(RedditDataRoomDatabase redditDataRoomDatabase, String accountName, boolean followed) {
             mRedditDataRoomDatabase = redditDataRoomDatabase;
             mAccountName = accountName;
+            mFollowed = followed;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-            return (T) new MultiRedditViewModel(mRedditDataRoomDatabase, mAccountName);
+            return (T) new MultiRedditViewModel(mRedditDataRoomDatabase, mAccountName, mFollowed);
         }
     }
 }
