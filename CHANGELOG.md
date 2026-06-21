@@ -2,6 +2,19 @@
 
 ---
 
+8.2.5.9.4 / 2026-6-21
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Suggestion to Use Color Markers for Differentiating Video and Image Content #169
+* New setting, "Settings | Interface | Post | Post Type Triangle Indicator" for compact layouts
+* Increased thumbnail size from 96dp to 112dp
+* Added slide://localhost and slide://127.0.0.1 to AndroidManifest.xml for external browsers
+
+Post types now have assigned colors for the card layout badge. The triangle
+colors match the badge colors.
+* 
+
 8.2.5.9.3 / 2026-6-20
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
