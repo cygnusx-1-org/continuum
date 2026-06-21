@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.content.SharedPreferences;
-
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 
 public class CustomThemeSharedPreferencesUtils {

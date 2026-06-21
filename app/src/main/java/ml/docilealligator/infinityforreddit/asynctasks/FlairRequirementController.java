@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.view.Menu;
 import android.view.MenuItem;
-
 import retrofit2.Retrofit;
 
 /**

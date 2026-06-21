@@ -4,13 +4,10 @@ import android.content.Context;
 import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.bumptech.glide.Glide;
 import com.github.piasy.biv.metadata.ImageInfoExtractor;
 import com.github.piasy.biv.view.ImageViewFactory;
-
 import java.io.File;
-
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 
 public class GlideGifImageViewFactory extends ImageViewFactory {

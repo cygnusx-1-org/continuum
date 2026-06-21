@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.apis;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import okhttp3.MultipartBody;

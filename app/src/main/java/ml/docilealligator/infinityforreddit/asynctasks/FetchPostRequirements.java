@@ -1,11 +1,9 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
 import androidx.annotation.NonNull;
-
-import org.json.JSONObject;
-
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

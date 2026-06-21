@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.thing;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 
 public class GiphyGif implements Parcelable {

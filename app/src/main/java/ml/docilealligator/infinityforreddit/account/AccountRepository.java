@@ -1,10 +1,8 @@
 package ml.docilealligator.infinityforreddit.account;
 
 import androidx.lifecycle.LiveData;
-
 import java.util.List;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class AccountRepository {

@@ -22,7 +22,6 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.checkN
 
 import android.content.Context;
 import android.os.Looper;
-
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
@@ -33,7 +32,6 @@ import androidx.media3.exoplayer.LoadControl;
 import androidx.media3.exoplayer.RenderersFactory;
 import androidx.media3.exoplayer.trackselection.TrackSelector;
 import androidx.media3.exoplayer.upstream.BandwidthMeter;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 
 /**

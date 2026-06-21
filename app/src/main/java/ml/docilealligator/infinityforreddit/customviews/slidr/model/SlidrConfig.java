@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.customviews.slidr.model;
 
 
 import android.graphics.Color;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.customview.widget.ViewDragHelper;

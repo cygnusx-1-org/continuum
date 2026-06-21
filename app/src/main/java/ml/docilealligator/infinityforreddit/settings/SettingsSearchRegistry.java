@@ -1,11 +1,9 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import ml.docilealligator.infinityforreddit.R;
 
 /**

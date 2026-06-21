@@ -2,11 +2,9 @@ package ml.docilealligator.infinityforreddit.markdown.spoiler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import io.noties.markwon.inlineparser.InlineProcessor;
 import org.commonmark.node.Node;
 import org.commonmark.node.Text;
-
-import io.noties.markwon.inlineparser.InlineProcessor;
 
 /**
  * Parses spoiler opening markdown ({@code >!}). Relies on {@link SpoilerClosingInlineProcessor}

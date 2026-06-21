@@ -2,11 +2,9 @@ package ml.docilealligator.infinityforreddit.thing;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
-
 import java.util.ArrayList;
 import java.util.List;
 

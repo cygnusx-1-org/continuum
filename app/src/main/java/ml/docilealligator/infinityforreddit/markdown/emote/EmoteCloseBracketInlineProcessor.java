@@ -3,18 +3,15 @@ package ml.docilealligator.infinityforreddit.markdown.emote;
 import static io.noties.markwon.inlineparser.InlineParserUtils.mergeChildTextNodes;
 
 import androidx.annotation.Nullable;
-
+import io.noties.markwon.inlineparser.InlineProcessor;
+import java.util.Map;
+import java.util.regex.Pattern;
+import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import org.commonmark.internal.Bracket;
 import org.commonmark.internal.util.Escaping;
 import org.commonmark.node.Link;
 import org.commonmark.node.LinkReferenceDefinition;
 import org.commonmark.node.Node;
-
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import io.noties.markwon.inlineparser.InlineProcessor;
-import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 
 public class EmoteCloseBracketInlineProcessor extends InlineProcessor {
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");

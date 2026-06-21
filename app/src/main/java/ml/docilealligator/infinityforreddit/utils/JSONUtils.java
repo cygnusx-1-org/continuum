@@ -1,16 +1,13 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import androidx.annotation.Nullable;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by alex on 2/25/18.

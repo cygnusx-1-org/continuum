@@ -2,12 +2,8 @@ package ml.docilealligator.infinityforreddit.markdown;
 
 import android.content.Context;
 import android.text.util.Linkify;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import org.commonmark.ext.gfm.tables.TableBlock;
-
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
@@ -36,6 +32,7 @@ import ml.docilealligator.infinityforreddit.markdown.uploadedimage.UploadedImage
 import ml.docilealligator.infinityforreddit.markdown.video.VideoBlock;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
+import org.commonmark.ext.gfm.tables.TableBlock;
 
 public class MarkdownUtils {
     /**

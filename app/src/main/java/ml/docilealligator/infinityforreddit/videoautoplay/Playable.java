@@ -34,10 +34,8 @@ import androidx.media3.exoplayer.metadata.MetadataOutput;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.text.TextOutput;
 import androidx.media3.ui.PlayerView;
-
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.annotations.RemoveIn;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;

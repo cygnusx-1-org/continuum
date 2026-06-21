@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.readpost;
 
 import android.content.SharedPreferences;
-
 import androidx.annotation.Nullable;
-
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 

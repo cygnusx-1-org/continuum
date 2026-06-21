@@ -2,17 +2,14 @@ package ml.docilealligator.infinityforreddit.commentfilter;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-
 import ml.docilealligator.infinityforreddit.comment.Comment;
 
 @Entity(tableName = "comment_filter")

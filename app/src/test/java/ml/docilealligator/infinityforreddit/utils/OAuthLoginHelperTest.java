@@ -5,19 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-
 import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.FailureType;
 import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.RedirectAction;
 import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.RedirectResult;
 import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.TokenResult;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
+import org.junit.jupiter.api.Test;
 import retrofit2.Response;
 
 /**

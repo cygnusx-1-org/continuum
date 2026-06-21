@@ -3,14 +3,11 @@ package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;

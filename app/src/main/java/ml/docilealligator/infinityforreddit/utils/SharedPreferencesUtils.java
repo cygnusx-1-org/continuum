@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.view.Display;
-
 import androidx.annotation.Nullable;
 
 /**

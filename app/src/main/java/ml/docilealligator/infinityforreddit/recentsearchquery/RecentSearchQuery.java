@@ -5,9 +5,8 @@ import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-
-import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 
 @Entity(tableName = "recent_search_queries", primaryKeys = {"username", "search_query"},
         foreignKeys = @ForeignKey(entity = Account.class, parentColumns = "username",

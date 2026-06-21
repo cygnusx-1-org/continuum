@@ -5,14 +5,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Application;
-
+import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.FailureType;
+import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.TokenResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.FailureType;
-import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper.TokenResult;
 import retrofit2.Response;
 
 /**

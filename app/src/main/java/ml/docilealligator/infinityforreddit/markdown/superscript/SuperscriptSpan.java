@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.markdown.superscript;
 
 import android.text.TextPaint;
 import android.text.style.MetricAffectingSpan;
-
 import androidx.annotation.NonNull;
 
 public class SuperscriptSpan extends MetricAffectingSpan {

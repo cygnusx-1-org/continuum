@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.markdown.spoiler;
 
 import androidx.annotation.Nullable;
-
 import org.commonmark.internal.Delimiter;
 import org.commonmark.node.Node;
 

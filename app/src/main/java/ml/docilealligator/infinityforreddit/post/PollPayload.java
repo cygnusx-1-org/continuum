@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.post;
 
 import com.google.gson.annotations.SerializedName;
-
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 
 public class PollPayload {

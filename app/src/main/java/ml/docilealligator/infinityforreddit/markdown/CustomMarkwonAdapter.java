@@ -8,26 +8,22 @@ import android.widget.HorizontalScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import org.commonmark.node.Node;
-
-import java.util.Collections;
-import java.util.List;
-
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonReducer;
 import io.noties.markwon.recycler.MarkwonAdapter;
 import io.noties.markwon.recycler.SimpleEntry;
+import java.util.Collections;
+import java.util.List;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifBlock;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
+import org.commonmark.node.Node;
 
 public class CustomMarkwonAdapter extends MarkwonAdapter {
     private BaseActivity activity;

@@ -3,20 +3,14 @@ package ml.docilealligator.infinityforreddit;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.annotation.WorkerThread;
 import androidx.media3.common.util.UnstableApi;
-
-import org.apache.commons.io.FilenameUtils;
-
 import java.util.List;
 import java.util.concurrent.Executor;
-
 import javax.inject.Provider;
-
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
@@ -26,6 +20,7 @@ import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.FetchRedgifsVideoLinks;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
+import org.apache.commons.io.FilenameUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

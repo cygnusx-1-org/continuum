@@ -1,7 +1,10 @@
 package ml.docilealligator.infinityforreddit.markdown.imageandgif;
 
 import androidx.annotation.Nullable;
-
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import org.commonmark.node.Block;
 import org.commonmark.parser.block.AbstractBlockParser;
 import org.commonmark.parser.block.AbstractBlockParserFactory;
@@ -9,12 +12,6 @@ import org.commonmark.parser.block.BlockContinue;
 import org.commonmark.parser.block.BlockStart;
 import org.commonmark.parser.block.MatchedBlockParser;
 import org.commonmark.parser.block.ParserState;
-
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 
 public class ImageAndGifBlockParser extends AbstractBlockParser {
 

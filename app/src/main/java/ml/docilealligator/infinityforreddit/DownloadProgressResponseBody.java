@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit;
 
 import java.io.IOException;
-
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import okio.Buffer;

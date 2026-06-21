@@ -5,9 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import ml.docilealligator.infinityforreddit.R;
 
 public class ShareDataResolverActivity extends AppCompatActivity {

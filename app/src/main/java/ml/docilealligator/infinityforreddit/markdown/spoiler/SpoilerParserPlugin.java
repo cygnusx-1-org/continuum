@@ -3,25 +3,21 @@ package ml.docilealligator.infinityforreddit.markdown.spoiler;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
-import org.commonmark.node.Block;
-import org.commonmark.node.BlockQuote;
-import org.commonmark.node.HtmlBlock;
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.MarkwonSpansFactory;
 import io.noties.markwon.MarkwonVisitor;
 import io.noties.markwon.core.CorePlugin;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import ml.docilealligator.infinityforreddit.markdown.BlockQuoteWithExceptionParser;
+import org.commonmark.node.Block;
+import org.commonmark.node.BlockQuote;
+import org.commonmark.node.HtmlBlock;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
 
 public class SpoilerParserPlugin extends AbstractMarkwonPlugin {
     private final int textColor;

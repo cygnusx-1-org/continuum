@@ -6,10 +6,8 @@ import android.text.Spannable;
 import android.text.style.ClickableSpan;
 import android.view.MotionEvent;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 
 /**

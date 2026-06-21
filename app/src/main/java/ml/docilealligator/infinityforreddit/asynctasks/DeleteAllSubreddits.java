@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.os.Handler;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class DeleteAllSubreddits {

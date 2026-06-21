@@ -18,17 +18,14 @@ package ml.docilealligator.infinityforreddit.videoautoplay.widget;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 
 /**

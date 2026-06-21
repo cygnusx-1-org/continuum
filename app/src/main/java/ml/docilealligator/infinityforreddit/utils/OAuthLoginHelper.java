@@ -6,16 +6,12 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import java.io.IOException;
+import ml.docilealligator.infinityforreddit.R;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-
-import ml.docilealligator.infinityforreddit.R;
 import retrofit2.Response;
 
 /**

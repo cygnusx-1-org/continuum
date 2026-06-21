@@ -1,14 +1,11 @@
 package ml.docilealligator.infinityforreddit.comment;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import retrofit2.Retrofit;
 

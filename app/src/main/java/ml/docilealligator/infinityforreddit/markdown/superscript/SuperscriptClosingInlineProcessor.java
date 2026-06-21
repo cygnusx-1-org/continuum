@@ -4,10 +4,8 @@ import static io.noties.markwon.inlineparser.InlineParserUtils.mergeChildTextNod
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import org.commonmark.node.Node;
-
 import io.noties.markwon.inlineparser.InlineProcessor;
+import org.commonmark.node.Node;
 
 public class SuperscriptClosingInlineProcessor extends InlineProcessor {
     @NonNull

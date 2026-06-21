@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
@@ -10,10 +9,8 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
-
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-
 import ml.docilealligator.infinityforreddit.account.Account;
 
 @Entity(tableName = "multi_reddits", primaryKeys = {"path", "username"},

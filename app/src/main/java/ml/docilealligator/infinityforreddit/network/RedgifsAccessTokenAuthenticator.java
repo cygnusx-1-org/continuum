@@ -1,20 +1,16 @@
 package ml.docilealligator.infinityforreddit.network;
 
 import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-
 import ml.docilealligator.infinityforreddit.apis.RedgifsAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.Response;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;

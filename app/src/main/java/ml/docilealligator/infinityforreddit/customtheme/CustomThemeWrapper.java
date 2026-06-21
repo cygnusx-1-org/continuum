@@ -6,9 +6,7 @@ import static ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPrefer
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 
