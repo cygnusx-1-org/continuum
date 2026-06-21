@@ -106,6 +106,16 @@
                     android:host="www.ccrama.me"
                     android:scheme="http" />
             </intent-filter>
+            <!-- Slide's custom-scheme redirect URI (slide://localhost). localhost + 127.0.0.1. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="slide" android:host="localhost" />
+                <data android:scheme="slide" android:host="127.0.0.1" />
+            </intent-filter>
             <!-- Reddit is Fun (RIF) redirect URI (redditisfun://auth). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
