@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.markdown.imageandgif;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Outline;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.SpannableString;
@@ -11,13 +12,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.bitmap.CenterInside;
 import com.bumptech.glide.request.RequestListener;
@@ -26,12 +28,12 @@ import com.bumptech.glide.request.target.Target;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.recycler.MarkwonAdapter;
 import jp.wasabeef.glide.transformations.BlurTransformation;
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.databinding.MarkdownImageAndGifBlockBinding;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -116,47 +118,40 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
 
         holder.binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.VISIBLE);
 
-        if (node.mediaMetadata.isGIF) {
-            ViewGroup.LayoutParams params = holder.binding.imageViewMarkdownImageAndGifBlock.getLayoutParams();
-            params.width = (int) Utils.convertDpToPixel(160, baseActivity);
-            holder.binding.imageViewMarkdownImageAndGifBlock.setLayoutParams(params);
-
-            FrameLayout.LayoutParams progressBarParams = (FrameLayout.LayoutParams) holder.binding.progressBarMarkdownImageAndGifBlock.getLayoutParams();
-            progressBarParams.gravity = Gravity.CENTER_VERTICAL;
-            progressBarParams.leftMargin = (int) Utils.convertDpToPixel(56, baseActivity);
-            holder.binding.progressBarMarkdownImageAndGifBlock.setLayoutParams(progressBarParams);
-        }
-
         RequestBuilder<Drawable> imageRequestBuilder;
+        int srcWidth;
+        int srcHeight;
         if (dataSavingMode) {
             if (disableImagePreview) {
                 showImageAsUrl(holder, node);
                 return;
             } else {
                 imageRequestBuilder = glide.load(node.mediaMetadata.downscaled.url).listener(holder.requestListener);
-                holder.binding.imageViewMarkdownImageAndGifBlock.setRatio((float) node.mediaMetadata.downscaled.y / node.mediaMetadata.downscaled.x);
+                srcWidth = node.mediaMetadata.downscaled.x;
+                srcHeight = node.mediaMetadata.downscaled.y;
             }
         } else if ((node.mediaMetadata.isGIF && !canShowGif) || (!node.mediaMetadata.isGIF && !canShowImage)) {
             showImageAsUrl(holder, node);
             return;
         } else {
             imageRequestBuilder = glide.load(node.mediaMetadata.original.url).listener(holder.requestListener);
-            holder.binding.imageViewMarkdownImageAndGifBlock.setRatio((float) node.mediaMetadata.original.y / node.mediaMetadata.original.x);
+            srcWidth = node.mediaMetadata.original.x;
+            srcHeight = node.mediaMetadata.original.y;
         }
 
+        // Size images and gifs to a uniform on-screen area (preserving aspect ratio); the box is
+        // re-corrected from the real drawable in onResourceReady. See issue #4.
+        applyBoundedSize(holder.binding.imageViewMarkdownImageAndGifBlock, srcWidth, srcHeight);
+
+        // Rounded corners are applied at the view level (clipToOutline) so they're identical for
+        // static images and animated gifs, which ignore Glide bitmap transformations. See issue #4.
         if (blurImage && !node.mediaMetadata.isGIF) {
             imageRequestBuilder
-                    .apply(RequestOptions.bitmapTransform(
-                            new MultiTransformation<>(
-                                    new BlurTransformation(100, 4),
-                                    new RoundedCornersTransformation(8, 0))))
+                    .apply(RequestOptions.bitmapTransform(new BlurTransformation(100, 4)))
                     .into(holder.binding.imageViewMarkdownImageAndGifBlock);
         } else {
             imageRequestBuilder
-                    .apply(RequestOptions.bitmapTransform(
-                            new MultiTransformation<>(
-                                    new CenterInside(),
-                                    new RoundedCornersTransformation(16, 0))))
+                    .apply(RequestOptions.bitmapTransform(new CenterInside()))
                     .downsample(saveMemoryCenterInsideDownsampleStrategy)
                     .into(holder.binding.imageViewMarkdownImageAndGifBlock);
         }
@@ -165,6 +160,54 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
             holder.binding.captionTextViewMarkdownImageAndGifBlock.setVisibility(View.VISIBLE);
             holder.binding.captionTextViewMarkdownImageAndGifBlock.setText(node.mediaMetadata.caption);
         }
+    }
+
+    /**
+     * Target rendered area for embedded comment media, expressed as a reference box in dp. Each
+     * image/gif is scaled (keeping its aspect ratio) so its area roughly matches this box's area,
+     * so a wide image and a tall image take up about the same amount of space. See issue #4.
+     */
+    private static final int COMMENT_MEDIA_TARGET_WIDTH_DP = 270;
+    private static final int COMMENT_MEDIA_TARGET_HEIGHT_DP = 165;
+
+    private void applyBoundedSize(AspectRatioGifImageView imageView, int srcWidth, int srcHeight) {
+        int[] size = boundedSize(srcWidth, srcHeight);
+        // Disable the aspect-ratio-derived measurement so the explicit pixel size below is used.
+        imageView.setRatio(0);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) imageView.getLayoutParams();
+        if (params.width != size[0] || params.height != size[1] || params.gravity != Gravity.NO_GRAVITY) {
+            params.width = size[0];
+            params.height = size[1];
+            params.gravity = Gravity.NO_GRAVITY;
+            imageView.setLayoutParams(params);
+        }
+    }
+
+    /**
+     * Display size for media: scaled (preserving aspect ratio) so the rendered area roughly matches
+     * the target box's area, so every image/gif occupies about the same amount of space regardless
+     * of shape. Small sources are upscaled and large ones downscaled to hit that area; the width is
+     * then capped at the screen width so very wide images don't overflow.
+     */
+    private int[] boundedSize(int width, int height) {
+        float targetWidthPx = Utils.convertDpToPixel(COMMENT_MEDIA_TARGET_WIDTH_DP, baseActivity);
+        float targetHeightPx = Utils.convertDpToPixel(COMMENT_MEDIA_TARGET_HEIGHT_DP, baseActivity);
+        double targetArea = (double) targetWidthPx * targetHeightPx;
+        if (width <= 0 || height <= 0) {
+            return new int[]{(int) targetWidthPx, (int) targetHeightPx};
+        }
+        // scale^2 * (width * height) == targetArea  ->  same rendered area, aspect ratio preserved.
+        double scale = Math.sqrt(targetArea / ((double) width * height));
+        int w = (int) (width * scale);
+        int h = (int) (height * scale);
+        // A wide image can still exceed the screen width; cap it (keeping ratio).
+        int screen = baseActivity.getResources().getDisplayMetrics().widthPixels;
+        if (screen > 0 && w > screen) {
+            h = (int) ((long) h * screen / w);
+            w = screen;
+        }
+        return new int[]{Math.max(1, w), Math.max(1, h)};
     }
 
     private void showImageAsUrl(@NonNull Holder holder, @NonNull ImageAndGifBlock node) {
@@ -180,8 +223,10 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     public void onViewRecycled(@NonNull Holder holder) {
         super.onViewRecycled(holder);
         holder.binding.imageWrapperRelativeLayoutMarkdownImageAndGifBlock.setVisibility(View.VISIBLE);
-        ViewGroup.LayoutParams params = holder.binding.imageViewMarkdownImageAndGifBlock.getLayoutParams();
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) holder.binding.imageViewMarkdownImageAndGifBlock.getLayoutParams();
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        params.gravity = Gravity.NO_GRAVITY;
         holder.binding.imageViewMarkdownImageAndGifBlock.setLayoutParams(params);
 
         FrameLayout.LayoutParams progressBarParams = (FrameLayout.LayoutParams) holder.binding.progressBarMarkdownImageAndGifBlock.getLayoutParams();
@@ -238,6 +283,17 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
                 binding.captionTextViewMarkdownImageAndGifBlock.setTypeface(baseActivity.contentTypeface);
             }
 
+            // Round the corners at the view level so static images and animated gifs (which ignore
+            // Glide bitmap transformations) get identical rounded corners. See issue #4.
+            final float cornerRadius = Utils.convertDpToPixel(8, baseActivity);
+            binding.imageViewMarkdownImageAndGifBlock.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(@NonNull View view, @NonNull Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
+                }
+            });
+            binding.imageViewMarkdownImageAndGifBlock.setClipToOutline(true);
+
             requestListener = new RequestListener<>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -249,6 +305,14 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
                 @Override
                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                     binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.GONE);
+                    AspectRatioGifImageView iv = binding.imageViewMarkdownImageAndGifBlock;
+                    // The media metadata is unreliable (giphy gifs report a square 480x480 even when
+                    // they're 16:9), which makes the box the wrong shape and the media fill only part
+                    // of it. Re-size from the real drawable so every image/gif fills its box at the
+                    // same target area. See issue #4.
+                    if (resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                        applyBoundedSize(iv, resource.getIntrinsicWidth(), resource.getIntrinsicHeight());
+                    }
                     return false;
                 }
             };
