@@ -333,7 +333,8 @@ public class SharedPreferencesUtils {
     public static final int MAIN_PAGE_TAB_POST_TYPE_DOWNVOTED = 7;
     public static final int MAIN_PAGE_TAB_POST_TYPE_HIDDEN = 8;
     public static final int MAIN_PAGE_TAB_POST_TYPE_SAVED = 9;
-    public static final int MAIN_PAGE_TAB_POST_TYPE_GILDED = 10;
+    public static final int MAIN_PAGE_TAB_POST_TYPE_SAVED_COMMENTS = 10;
+    public static final int MAIN_PAGE_TAB_POST_TYPE_GILDED = 11;
     public static final String MAIN_PAGE_SHOW_MULTIREDDITS = "_main_page_show_multireddits";
     public static final String MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS = "_main_page_show_favorite_multireddits";
     public static final String MAIN_PAGE_SHOW_USERS_MULTIREDDITS = "_main_page_show_users_multireddits";

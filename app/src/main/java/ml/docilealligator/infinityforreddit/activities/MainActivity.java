@@ -101,6 +101,7 @@ import ml.docilealligator.infinityforreddit.events.NewUserLoggedInEvent;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
+import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
@@ -1531,6 +1532,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             PostFragment fragment = sectionsPagerAdapter.getFragmentAtPosition(position);
             if (fragment != null) {
                 fragment.goBackToTop();
+                return;
+            }
+            Fragment rawFragment = sectionsPagerAdapter.getRawFragmentAtPosition(position);
+            if (rawFragment instanceof CommentsListingFragment) {
+                ((CommentsListingFragment) rawFragment).goBackToTop();
             }
         }
     }
@@ -2284,6 +2290,14 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
                 fragment.setArguments(bundle);
                 return fragment;
+            } else if (postType == SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SAVED_COMMENTS
+                    && !accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                CommentsListingFragment fragment = new CommentsListingFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString(CommentsListingFragment.EXTRA_USERNAME, accountName);
+                bundle.putBoolean(CommentsListingFragment.EXTRA_ARE_SAVED_COMMENTS, true);
+                fragment.setArguments(bundle);
+                return fragment;
             } else {
                 PostFragment fragment = new PostFragment();
                 Bundle bundle = new Bundle();
@@ -2314,6 +2328,14 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
 
         @Nullable
+        private Fragment getCurrentRawFragment() {
+            if (fragmentManager == null) {
+                return null;
+            }
+            return fragmentManager.findFragmentByTag("f" + binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
+        }
+
+        @Nullable
         private PostFragment getFragmentAtPosition(int position) {
             if (fragmentManager == null) {
                 return null;
@@ -2323,6 +2345,14 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 return (PostFragment) fragment;
             }
             return null;
+        }
+
+        @Nullable
+        private Fragment getRawFragmentAtPosition(int position) {
+            if (fragmentManager == null) {
+                return null;
+            }
+            return fragmentManager.findFragmentByTag("f" + position);
         }
 
         boolean handleKeyDown(int keyCode) {
@@ -2354,6 +2384,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             PostFragment currentFragment = getCurrentFragment();
             if (currentFragment != null) {
                 currentFragment.refresh();
+                return;
+            }
+            Fragment rawFragment = getCurrentRawFragment();
+            if (rawFragment instanceof CommentsListingFragment) {
+                ((CommentsListingFragment) rawFragment).refresh();
             }
         }
 
@@ -2377,6 +2412,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             PostFragment currentFragment = getCurrentFragment();
             if (currentFragment != null) {
                 currentFragment.goBackToTop();
+                return;
+            }
+            Fragment rawFragment = getCurrentRawFragment();
+            if (rawFragment instanceof CommentsListingFragment) {
+                ((CommentsListingFragment) rawFragment).goBackToTop();
             }
         }
 

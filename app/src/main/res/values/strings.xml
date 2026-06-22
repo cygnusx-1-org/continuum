@@ -168,6 +168,8 @@
     <string name="downvoted">Downvoted</string>
     <string name="hidden">Hidden</string>
     <string name="saved">Saved</string>
+    <string name="saved_posts">Saved Posts</string>
+    <string name="saved_comments">Saved Comments</string>
     <string name="settings">Settings</string>
     <string name="subscribers_number_detail">Subscribers: %1$,d</string>
     <string name="online_subscribers_number_detail">Online: %1$,d</string>
