@@ -35,14 +35,44 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
+            android:ellipsize="end"
             android:fontFamily="?attr/font_family"
+            android:maxLines="1"
+            android:textSize="?attr/font_default"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/name_divider_text_view_item_post_compact_2_right_thumbnail"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/icon_gif_image_view_item_post_compact_2_right_thumbnail"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/name_divider_text_view_item_post_compact_2_right_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="?attr/font_family"
+            android:textSize="?attr/font_default"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/username_text_view_item_post_compact_2_right_thumbnail"
+            app:layout_constraintStart_toEndOf="@id/name_text_view_item_post_compact_2_right_thumbnail"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/username_text_view_item_post_compact_2_right_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="4dp"
+            android:ellipsize="end"
+            android:fontFamily="?attr/font_family"
+            android:maxLines="1"
             android:textSize="?attr/font_default"
             app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/stickied_post_image_view_item_post_compact_2_right_thumbnail"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toEndOf="@id/icon_gif_image_view_item_post_compact_2_right_thumbnail"
+            app:layout_constraintStart_toEndOf="@id/name_divider_text_view_item_post_compact_2_right_thumbnail"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView

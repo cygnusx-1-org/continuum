@@ -1169,6 +1169,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     } else {
                         ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getSubredditNamePrefixed());
                     }
+
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setTextColor(
+                            post.isModerator() ? mModeratorColor : mUsernameColor);
+                    if (mHideSubredditAndUserPrefix) {
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthor());
+                    } else {
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthorNamePrefixed());
+                    }
+                    ((PostCompactBaseViewHolder) holder).nameDividerTextView.setVisibility(View.VISIBLE);
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.VISIBLE);
                 } else {
                     ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(
                             post.isModerator() ? mModeratorColor : mUsernameColor);
@@ -1178,6 +1188,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     } else {
                         ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getAuthorNamePrefixed());
                     }
+                    ((PostCompactBaseViewHolder) holder).nameDividerTextView.setVisibility(View.GONE);
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.GONE);
                 }
 
                 if (((PostCompactBaseViewHolder) holder).bottomConstraintLayout != null) {
@@ -3235,6 +3247,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             super(itemView);
         }
 
+        void setupSubredditUserDivider(TextView divider) {
+            if (mActivity.typeface != null) {
+                divider.setTypeface(mActivity.typeface);
+            }
+            divider.setTextColor(mSecondaryTextColor);
+        }
+
         void setBaseView(AspectRatioGifImageView iconGifImageView,
                         TextView subredditTextView,
                         TextView userTextView,
@@ -3589,6 +3608,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.commentsCountButtonItemPostVideoTypeAutoplay,
                     binding.saveButtonItemPostVideoTypeAutoplay,
                     binding.shareButtonItemPostVideoTypeAutoplay);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostVideoTypeAutoplay);
         }
 
         @Override
@@ -3630,6 +3650,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.commentsCountButtonItemPostVideoTypeAutoplay,
                     binding.saveButtonItemPostVideoTypeAutoplay,
                     binding.shareButtonItemPostVideoTypeAutoplay);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostVideoTypeAutoplay);
         }
 
         @Override
@@ -3658,6 +3679,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         PostWithPreviewTypeViewHolder(@NonNull ItemPostWithPreviewBinding binding) {
             super(binding.getRoot());
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostWithPreview);
             setBaseView(
                     binding.iconGifImageViewItemPostWithPreview,
                     binding.subredditNameTextViewItemPostWithPreview,
@@ -4071,6 +4093,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.commentsCountButtonItemPostGalleryType,
                     binding.saveButtonItemPostGalleryType,
                     binding.shareButtonItemPostGalleryType);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostGalleryType);
         }
 
         @Override
@@ -4088,6 +4111,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         PostTextTypeViewHolder(@NonNull ItemPostTextBinding binding) {
             super(binding.getRoot());
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostTextType);
             setBaseView(
                     binding.iconGifImageViewItemPostTextType,
                     binding.subredditNameTextViewItemPostTextType,
@@ -4171,6 +4195,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public class PostCompactBaseViewHolder extends PostViewHolder {
         TextView nameTextView;
+        TextView nameDividerTextView;
+        TextView usernameTextView;
         @Nullable TextView linkTextView;
         RelativeLayout relativeLayout;
         LoadingIndicator loadingIndicator;
@@ -4186,6 +4212,36 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         PostCompactBaseViewHolder(View itemView) {
             super(itemView);
+        }
+
+        void setupNameViews(TextView nameDividerTextView, TextView usernameTextView) {
+            this.nameDividerTextView = nameDividerTextView;
+            this.usernameTextView = usernameTextView;
+
+            if (mActivity.typeface != null) {
+                nameDividerTextView.setTypeface(mActivity.typeface);
+                usernameTextView.setTypeface(mActivity.typeface);
+            }
+            nameDividerTextView.setText("    •    ");
+            nameDividerTextView.setTextColor(mSecondaryTextColor);
+
+            usernameTextView.setOnClickListener(view -> {
+                if (!canStartActivity) {
+                    return;
+                }
+                int position = getBindingAdapterPosition();
+                if (position < 0) {
+                    return;
+                }
+                Post post = getItem(position);
+                if (post == null || post.isAuthorDeleted()) {
+                    return;
+                }
+                canStartActivity = false;
+                Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
+                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, post.getAuthor());
+                mActivity.startActivity(intent);
+            });
         }
 
         void setBaseView(AspectRatioGifImageView iconGifImageView,
@@ -4501,6 +4557,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.saveButtonItemPostCompact,
                     binding.shareButtonItemPostCompact,
                     binding.dividerItemPostCompact);
+            setupNameViews(binding.nameDividerTextViewItemPostCompact,
+                    binding.usernameTextViewItemPostCompact);
         }
     }
 
@@ -4537,6 +4595,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.saveButtonItemPostCompactRightThumbnail,
                     binding.shareButtonItemPostCompactRightThumbnail,
                     binding.dividerItemPostCompactRightThumbnail);
+            setupNameViews(binding.nameDividerTextViewItemPostCompactRightThumbnail,
+                    binding.usernameTextViewItemPostCompactRightThumbnail);
         }
     }
 
@@ -4573,6 +4633,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     binding.dividerItemPostCompact2);
+            setupNameViews(binding.nameDividerTextViewItemPostCompact2,
+                    binding.usernameTextViewItemPostCompact2);
         }
     }
 
@@ -4609,6 +4671,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     binding.dividerItemPostCompact2RightThumbnail);
+            setupNameViews(binding.nameDividerTextViewItemPostCompact2RightThumbnail,
+                    binding.usernameTextViewItemPostCompact2RightThumbnail);
         }
     }
 
@@ -4961,6 +5025,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.shareButtonItemPostCard2VideoAutoplay);
 
             binding.dividerItemPostCard2VideoAutoplay.setBackgroundColor(mDividerColor);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard2VideoAutoplay);
         }
 
         @Override
@@ -5004,6 +5069,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.shareButtonItemPostCard2VideoAutoplay);
 
             binding.dividerItemPostCard2VideoAutoplay.setBackgroundColor(mDividerColor);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard2VideoAutoplay);
         }
 
         @Override
@@ -5016,6 +5082,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         PostCard2WithPreviewViewHolder(@NonNull ItemPostCard2WithPreviewBinding binding) {
             super(binding.getRoot());
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard2WithPreview);
             setBaseView(
                     binding.iconGifImageViewItemPostCard2WithPreview,
                     binding.subredditNameTextViewItemPostCard2WithPreview,
@@ -5085,6 +5152,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.shareButtonItemPostCard2GalleryType);
 
             binding.dividerItemPostCard2GalleryType.setBackgroundColor(mDividerColor);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard2GalleryType);
         }
 
         @Override
@@ -5096,6 +5164,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     class PostCard2TextTypeViewHolder extends PostTextTypeViewHolder {
         PostCard2TextTypeViewHolder(@NonNull ItemPostCard2TextBinding binding) {
             super(binding.getRoot());
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard2Text);
 
             setBaseView(
                     binding.iconGifImageViewItemPostCard2Text,
@@ -5162,6 +5231,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.commentsCountButtonItemPostCard3VideoTypeAutoplay,
                     binding.saveButtonItemPostCard3VideoTypeAutoplay,
                     binding.shareButtonItemPostCard3VideoTypeAutoplay);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard3VideoTypeAutoplay);
         }
 
         @Override
@@ -5203,6 +5273,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.commentsCountButtonItemPostCard3VideoTypeAutoplay,
                     binding.saveButtonItemPostCard3VideoTypeAutoplay,
                     binding.shareButtonItemPostCard3VideoTypeAutoplay);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard3VideoTypeAutoplay);
         }
 
         @Override
@@ -5214,6 +5285,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public class PostMaterial3CardWithPreviewViewHolder extends PostWithPreviewTypeViewHolder {
         PostMaterial3CardWithPreviewViewHolder(@NonNull ItemPostCard3WithPreviewBinding binding) {
             super(binding.getRoot());
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard3WithPreview);
             setBaseView(binding.iconGifImageViewItemPostCard3WithPreview,
                     binding.subredditNameTextViewItemPostCard3WithPreview,
                     binding.userTextViewItemPostCard3WithPreview,
@@ -5277,6 +5349,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.commentsCountButtonItemPostCard3GalleryType,
                     binding.saveButtonItemPostCard3GalleryType,
                     binding.shareButtonItemPostCard3GalleryType);
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard3GalleryType);
         }
 
         @Override
@@ -5288,6 +5361,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public class PostMaterial3CardTextTypeViewHolder extends PostTextTypeViewHolder {
         PostMaterial3CardTextTypeViewHolder(@NonNull ItemPostCard3TextBinding binding) {
             super(binding.getRoot());
+            setupSubredditUserDivider(binding.subredditUserDividerTextViewItemPostCard3TextType);
             setBaseView(
                     binding.iconGifImageViewItemPostCard3TextType,
                     binding.subredditNameTextViewItemPostCard3TextType,

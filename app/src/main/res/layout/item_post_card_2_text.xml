@@ -153,6 +153,15 @@
             android:fontFamily="?attr/font_family" />
 
         <TextView
+            android:id="@+id/subreddit_user_divider_text_view_item_post_card_2_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="•"
+            android:textColor="?attr/secondaryTextColor"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family" />
+
+        <TextView
             android:id="@+id/user_text_view_item_post_card_2_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
