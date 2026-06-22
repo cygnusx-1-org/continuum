@@ -2,6 +2,18 @@
 
 ---
 
+8.2.5.9.5 / 2026-6-22
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemeneted Show comments in saved tab #61
+* Implemented preview images for self-text posts
+* Implemented Feature request: Scale embedded images in comments uniformly #4
+* Fixed Backup not working. #300
+* Fixed Usernames visible in compact view #144
+* Moved Usernames to the right of subreddits instead of under them in layouts
+* Moved link hostname to the end of the badge row in the card layout
+
 8.2.5.9.4 / 2026-6-21
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
