@@ -491,6 +491,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                     default:
+                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
+                        // body with an OpenGraph image). Show it in the feed like Slide does.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
+                            return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
+                        }
                         return VIEW_TYPE_POST_CARD_TEXT_TYPE;
                 }
             }
@@ -592,6 +597,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                     default:
+                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
+                        // body with an OpenGraph image). Show it in the feed like Slide does.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
+                            return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
+                        }
                         return VIEW_TYPE_POST_CARD_2_TEXT_TYPE;
                 }
             }
@@ -646,6 +656,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                     default:
+                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
+                        // body with an OpenGraph image). Show it in the feed like Slide does.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
+                            return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
+                        }
                         return VIEW_TYPE_POST_CARD_3_TEXT_TYPE;
                 }
             }
@@ -1036,6 +1051,19 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
                             ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(R.drawable.ic_link_day_night_24dp);
                         }
+                    } else if (post.getPostType() == Post.TEXT_TYPE) {
+                        if (((PostWithPreviewTypeViewHolder) holder).typeTextView != null) {
+                            ((PostWithPreviewTypeViewHolder) holder).typeTextView.setText(mActivity.getString(R.string.text));
+                        }
+                        // Text post that also has a preview: keep the selftext snippet alongside the
+                        // image, honouring the "Hide Text Post Content" setting like the text holder.
+                        TextView contentTextView = ((PostWithPreviewTypeViewHolder) holder).contentTextView;
+                        if (contentTextView != null && !mHideTextPostContent && !post.isSpoiler()
+                                && post.getSelfTextPlainTrimmed() != null && !post.getSelfTextPlainTrimmed().isEmpty()) {
+                            contentTextView.setTextColor(mHandleReadPost && post.isRead() ? mReadPostContentColor : mPostContentColor);
+                            contentTextView.setText(post.getSelfTextPlainTrimmed());
+                            contentTextView.setVisibility(View.VISIBLE);
+                        }
                     }
                     applyTypeColor(((PostWithPreviewTypeViewHolder) holder).typeTextView, post.getPostType());
 
@@ -1170,7 +1198,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostCompactBaseViewHolder) holder).divider.setVisibility(View.GONE);
                 }
 
-                if (post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE && !(mDataSavingMode && mDisableImagePreview)) {
+                boolean textPostWithPreview = post.getPostType() == Post.TEXT_TYPE
+                        && post.getPreviews() != null && !post.getPreviews().isEmpty();
+                if (((post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE) || textPostWithPreview)
+                        && !(mDataSavingMode && mDisableImagePreview)) {
                     ((PostCompactBaseViewHolder) holder).relativeLayout.setVisibility(View.VISIBLE);
                     if (post.getPostType() == Post.GALLERY_TYPE && post.getPreviews() != null && post.getPreviews().isEmpty()) {
                         ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.VISIBLE);
@@ -1893,6 +1924,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostWithPreviewTypeViewHolder) holder).loadingIndicator.setVisibility(View.GONE);
                     ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.GONE);
                     ((PostWithPreviewTypeViewHolder) holder).linkTextView.setVisibility(View.GONE);
+                    if (((PostWithPreviewTypeViewHolder) holder).contentTextView != null) {
+                        ((PostWithPreviewTypeViewHolder) holder).contentTextView.setText("");
+                        ((PostWithPreviewTypeViewHolder) holder).contentTextView.setVisibility(View.GONE);
+                    }
                 } else if (holder instanceof PostBaseGalleryTypeViewHolder) {
                     ((PostBaseGalleryTypeViewHolder) holder).frameLayout.setVisibility(View.GONE);
                     ((PostBaseGalleryTypeViewHolder) holder).noPreviewImageView.setVisibility(View.GONE);
@@ -2143,6 +2178,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
                 mActivity.startActivity(intent);
+            } else {
+                // Text posts have no media viewer (they can still carry a preview image). Releasing
+                // the guard lets the holder's click handler open the post detail instead of stalling.
+                canStartActivity = true;
             }
         }
     }
@@ -3608,6 +3647,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Nullable
         FrameLayout imageWrapperFrameLayout;
         AspectRatioGifImageView imageView;
+        // Selftext snippet, shown only for text posts that also carry a preview image.
+        @Nullable
+        TextView contentTextView;
         RequestListener<Drawable> glideRequestListener;
 
         PostWithPreviewTypeViewHolder(@NonNull View itemView) {
@@ -3644,6 +3686,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.loadImageErrorTextViewItemPostWithPreview,
                     binding.imageWrapperRelativeLayoutItemPostWithPreview,
                     binding.imageViewItemPostWithPreview);
+            contentTextView = binding.contentTextViewItemPostWithPreview;
         }
 
         void setBaseView(AspectRatioGifImageView iconGifImageView,
@@ -3723,7 +3766,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 Post post = getItem(position);
                 if (post != null) {
                     markPostRead(post, true);
-                    openMedia(post);
+                    if (post.getPostType() == Post.TEXT_TYPE) {
+                        // Preview image on a self/text post; open the post like tapping the card.
+                        openViewPostDetailActivity(post, position);
+                    } else {
+                        openMedia(post);
+                    }
                 }
             });
 
@@ -4340,7 +4388,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 Post post = getItem(position);
                 if (post != null) {
                     markPostRead(post, true);
-                    openMedia(post);
+                    if (post.getPostType() == Post.TEXT_TYPE) {
+                        // Preview thumbnail on a self/text post; open the post like tapping the row.
+                        openViewPostDetailActivity(post, position);
+                    } else {
+                        openMedia(post);
+                    }
                 }
             });
 
@@ -4991,6 +5044,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.loadImageErrorTextViewItemPostCard2WithPreview,
                     null,
                     binding.imageViewItemPostCard2WithPreview);
+            contentTextView = binding.contentTextViewItemPostCard2WithPreview;
 
             binding.dividerItemPostCard2WithPreview.setBackgroundColor(mDividerColor);
         }
@@ -5187,6 +5241,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.loadImageErrorTextViewItemPostCard3WithPreview,
                     binding.imageWrapperRelativeLayoutItemPostCard3WithPreview,
                     binding.imageViewItemPostCard3WithPreview);
+            contentTextView = binding.contentTextViewItemPostCard3WithPreview;
         }
 
         @Override

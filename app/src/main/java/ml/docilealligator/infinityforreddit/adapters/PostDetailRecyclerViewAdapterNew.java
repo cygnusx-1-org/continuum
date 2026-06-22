@@ -523,6 +523,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             case Post.GALLERY_TYPE:
                 return VIEW_TYPE_POST_DETAIL_GALLERY;
             default:
+                // Self/text posts can carry a Reddit-generated preview (e.g. a link in the body
+                // with an OpenGraph image). Reuse the link holder to show it; the base holder still
+                // renders the selftext below, so nothing is lost.
+                if (getSuitablePreview(mPost.getPreviews()) != null) {
+                    return VIEW_TYPE_POST_DETAIL_LINK;
+                }
                 return VIEW_TYPE_POST_DETAIL_TEXT_TYPE;
         }
     }
@@ -888,8 +894,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     loadImage((PostDetailImageAndGifAutoplayViewHolder) holder, preview);
                 }
             } else if (holder instanceof PostDetailLinkViewHolder) {
-                String domain = Uri.parse(mPost.getUrl()).getHost();
-                ((PostDetailLinkViewHolder) holder).binding.linkTextViewItemPostDetailLink.setText(domain);
+                if (mPost.getPostType() == Post.TEXT_TYPE) {
+                    // Self/text post showing its Reddit preview: keep the text chip and don't show a
+                    // domain line (the post url is just the self permalink).
+                    if (!mHidePostType) {
+                        ((PostDetailLinkViewHolder) holder).binding.typeTextViewItemPostDetailLink.setText(R.string.text);
+                    }
+                    ((PostDetailLinkViewHolder) holder).binding.linkTextViewItemPostDetailLink.setVisibility(View.GONE);
+                } else {
+                    String domain = Uri.parse(mPost.getUrl()).getHost();
+                    ((PostDetailLinkViewHolder) holder).binding.linkTextViewItemPostDetailLink.setText(domain);
+                }
                 Post.Preview preview = getSuitablePreview(mPost.getPreviews());
                 if (preview != null) {
                     ((PostDetailLinkViewHolder) holder).binding.imageViewItemPostDetailLink.setRatio((float) preview.getPreviewHeight() / (float) preview.getPreviewWidth());
@@ -2536,6 +2551,21 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
             binding.imageViewItemPostDetailLink.setOnClickListener(view -> {
                 if (mPost == null) {
+                    return;
+                }
+
+                if (mPost.getPostType() == Post.TEXT_TYPE) {
+                    // Self/text post: the url is the self permalink, so open the preview image itself
+                    // rather than resolving a link.
+                    Post.Preview preview = getSuitablePreview(mPost.getPreviews());
+                    if (preview != null) {
+                        Intent imageIntent = new Intent(mActivity, ViewImageOrGifActivity.class);
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_IMAGE_URL_KEY, preview.getPreviewUrl());
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mPost.getSubredditName() + "-" + mPost.getId() + ".jpg");
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, mPost.getSubredditName());
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, mPost.isNSFW());
+                        mActivity.startActivity(imageIntent);
+                    }
                     return;
                 }
 
