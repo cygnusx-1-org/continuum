@@ -178,39 +178,26 @@ public class BackupSettings {
     }
 
     private static boolean saveMapToFile(Map<String, ?> mapToSave, String backupDir, String fileName) {
-        boolean result = false;
-
-        ObjectOutputStream output = null;
-        try {
-            output = new ObjectOutputStream(new FileOutputStream(backupDir + "/" + fileName + ".txt"));
+        try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(backupDir + "/" + fileName + ".txt"))) {
             output.writeObject(mapToSave);
-
-            result = true;
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (output != null) {
-                    output.flush();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            return false;
         }
-        return result;
     }
 
     private static boolean saveDatabaseTableToFile(String dataJson, String backupDir, String fileName) {
-        File anonymousSubscribedSubredditsFile = new File(backupDir + fileName);
-        try {
-            anonymousSubscribedSubredditsFile.createNewFile();
-            try (PrintWriter out = new PrintWriter(anonymousSubscribedSubredditsFile.getAbsolutePath())) {
-                out.println(dataJson);
-            } catch (IOException e) {
-                e.printStackTrace();
+        File databaseTableFile = new File(backupDir + fileName);
+        try (PrintWriter out = new PrintWriter(databaseTableFile.getAbsolutePath())) {
+            out.println(dataJson);
+            // PrintWriter swallows IO errors; surface them so a failed dump fails the backup.
+            if (out.checkError()) {
+                return false;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
         return true;
     }
@@ -222,11 +209,12 @@ public class BackupSettings {
             String time = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(System.currentTimeMillis()));
             String fileName = "Continuum_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
             String filePath = cacheDir + "/Backup/" + fileName;
-            ZipFile zip = new ZipFile(filePath, password.toCharArray());
-            ZipParameters zipParameters = new ZipParameters();
-            zipParameters.setEncryptFiles(true);
-            zipParameters.setEncryptionMethod(EncryptionMethod.AES);
-            zip.addFolder(new File(cacheDir + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
+            try (ZipFile zip = new ZipFile(filePath, password.toCharArray())) {
+                ZipParameters zipParameters = new ZipParameters();
+                zipParameters.setEncryptFiles(true);
+                zipParameters.setEncryptionMethod(EncryptionMethod.AES);
+                zip.addFolder(new File(cacheDir + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
+            }
 
             DocumentFile dir = DocumentFile.fromTreeUri(context, destinationDirUri);
             if (dir == null) {
@@ -248,15 +236,16 @@ public class BackupSettings {
 
             byte[] fileReader = new byte[1024];
 
-            FileInputStream inputStream = new FileInputStream(filePath);
-            while (true) {
-                int read = inputStream.read(fileReader);
+            try (FileInputStream inputStream = new FileInputStream(filePath)) {
+                while (true) {
+                    int read = inputStream.read(fileReader);
 
-                if (read == -1) {
-                    break;
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileReader, 0, read);
                 }
-
-                outputStream.write(fileReader, 0, read);
             }
             result = true;
         } catch (IOException e) {
@@ -266,8 +255,13 @@ public class BackupSettings {
             if (outputStream != null) {
                 try {
                     outputStream.flush();
+                    // close() is required for SAF/cloud providers (e.g. Google Drive)
+                    // to actually commit the bytes; flush() alone leaves a 0-byte file.
+                    outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    // The bytes never committed, so the backup is not valid.
+                    result = false;
                 }
             }
         }
