@@ -1169,6 +1169,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     } else {
                         ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getSubredditNamePrefixed());
                     }
+
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setTextColor(
+                            post.isModerator() ? mModeratorColor : mUsernameColor);
+                    if (mHideSubredditAndUserPrefix) {
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthor());
+                    } else {
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthorNamePrefixed());
+                    }
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.VISIBLE);
                 } else {
                     ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(
                             post.isModerator() ? mModeratorColor : mUsernameColor);
@@ -1178,6 +1187,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     } else {
                         ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getAuthorNamePrefixed());
                     }
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.GONE);
                 }
 
                 if (((PostCompactBaseViewHolder) holder).bottomConstraintLayout != null) {
@@ -4171,6 +4181,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public class PostCompactBaseViewHolder extends PostViewHolder {
         TextView nameTextView;
+        TextView usernameTextView;
         @Nullable TextView linkTextView;
         RelativeLayout relativeLayout;
         LoadingIndicator loadingIndicator;
@@ -4186,6 +4197,32 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         PostCompactBaseViewHolder(View itemView) {
             super(itemView);
+        }
+
+        void setupUsernameView(TextView usernameTextView) {
+            this.usernameTextView = usernameTextView;
+
+            if (mActivity.typeface != null) {
+                usernameTextView.setTypeface(mActivity.typeface);
+            }
+
+            usernameTextView.setOnClickListener(view -> {
+                if (!canStartActivity) {
+                    return;
+                }
+                int position = getBindingAdapterPosition();
+                if (position < 0) {
+                    return;
+                }
+                Post post = getItem(position);
+                if (post == null || post.isAuthorDeleted()) {
+                    return;
+                }
+                canStartActivity = false;
+                Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
+                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, post.getAuthor());
+                mActivity.startActivity(intent);
+            });
         }
 
         void setBaseView(AspectRatioGifImageView iconGifImageView,
@@ -4501,6 +4538,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.saveButtonItemPostCompact,
                     binding.shareButtonItemPostCompact,
                     binding.dividerItemPostCompact);
+            setupUsernameView(binding.usernameTextViewItemPostCompact);
         }
     }
 
@@ -4537,6 +4575,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.saveButtonItemPostCompactRightThumbnail,
                     binding.shareButtonItemPostCompactRightThumbnail,
                     binding.dividerItemPostCompactRightThumbnail);
+            setupUsernameView(binding.usernameTextViewItemPostCompactRightThumbnail);
         }
     }
 
@@ -4573,6 +4612,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     binding.dividerItemPostCompact2);
+            setupUsernameView(binding.usernameTextViewItemPostCompact2);
         }
     }
 
@@ -4609,6 +4649,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     binding.dividerItemPostCompact2RightThumbnail);
+            setupUsernameView(binding.usernameTextViewItemPostCompact2RightThumbnail);
         }
     }
 
