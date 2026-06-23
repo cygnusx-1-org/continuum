@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="isTablet">false</bool>
+    <!-- When true, the subreddit and username are always stacked on two lines (no separator)
+         for consistency and to avoid any text compression. Flipped to false at sw450dp (see
+         values-sw450dp) where there is room to show them on a single line. Tune the breakpoint
+         by moving the override to a different values-swNNNdp folder. -->
+    <bool name="stack_subreddit_username">true</bool>
 
     <declare-styleable name="FontStyle">
         <attr name="font_default" format="dimension"/>

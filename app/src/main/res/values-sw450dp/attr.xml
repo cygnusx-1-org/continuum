@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- At >= 450dp smallest width there is room for the subreddit and username on one line. -->
+    <bool name="stack_subreddit_username">false</bool>
+</resources>
