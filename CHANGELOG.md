@@ -2,6 +2,29 @@
 
 ---
 
+8.2.5.9.6 / 2026-6-23
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Reverted the layout changes
+* Added usernames to the compact layouts as their own line like "Card layout"
+
+The backstory:
+The original goals where to add the usernames to the compact layout, and make
+all the card and compact layouts more compact. But it didn't work as intended
+as planned on devices with a UI scaling bigger than my phone.
+
+My original fix was going to be a hybrid solution where the new style would
+work, but it would work like the old way for most people. The catch is that
+the max length of a subreddit is 21 and the max length of a username is 20.
+So after doing the math based on those, the font sizes, upper case vs lower
+case, the UI scaling, other text, etc it wouldn't work even on my phone in
+the worst case scenario. 
+
+Examples:
+subreddit AAAAAAAAAAAAAAAAAAAAA 21
+username  PaleRulerGoingAlone7  20 
+
 8.2.5.9.5 / 2026-6-22
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
