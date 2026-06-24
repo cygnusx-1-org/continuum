@@ -4,37 +4,118 @@
 
 There can be issues with `Android System Webview`. See [Common errors](/SETUP.md#common-errors) in [SETUP.md](/SETUP.md).
 
-There is a known issue with the `Reddit` login JavaScript. It was discovered by wchill. It prevents logging in when the language if the language is anything other than `English`. So you need to set the language of your `Reddit` account to `English`.
+Things to try:
+1. Trying using a VPN, or try not using one if you are. Also try from a USA server.
+2. Try different Internet connections like cellular Internet access, WiFi internet access
+3. Try the WebView and external browser options
+4. Try a different Reddit account
 
-I have implemented a hack to workaround the issue in `8.1.4.5`, but it has a few issues.
+## Why can't I view `NSFW` content?
 
-1. It could break at anytime if `Reddit` rewrites their JavaScript.
-2. The hack only works in the WebView not Chrome, Brave or Firefox.
+1. Lack of show mature (18+) content block it in search
+2. Lack of moderator gets you the Go to Reddit to view mature content message when you visit a NSFW subreddit
+3. The app settings block it in search, as in Go to Subreddit
 
-## How to change the Reddit account interface language
-1. Go to https://old.reddit.com/prefs/
-2. Change the `interface language`
+Do 1 and 2 per Reddit account.
 
+### Website
 <p align="center">
   <picture>
     <source
-      width="1053x"
+      width="512x"
       media="(prefers-color-scheme: dark)"
-      srcset="assets/screenshots/reddit_account_language.png"
+      srcset="assets/screenshots/nsfw-old-reddit-com-prefs.png"
     >
     <img
-      width="1053px"
-      src="assets/screenshots/reddit_account_language.png"
+      width="512px"
+      src="assets/screenshots/nsfw-old-reddit-com-prefs.png"
+    >
+  </picture>
+</p>
+<p align="center">
+  <picture>
+    <source
+      width="1024x"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/nsfw-hide-images-for-nsfw-content.png"
+    >
+    <img
+      width="1024px"
+      src="assets/screenshots/nsfw-hide-images-for-nsfw-content.png"
+    >
+  </picture>
+</p>
+<p align="center">
+  <picture>
+    <source
+      width="1024x"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/nsfw-show-mature-content.png"
+    >
+    <img
+      width="1024px"
+      src="assets/screenshots/nsfw-show-mature-content.png"
     >
   </picture>
 </p>
 
-Sometimes there can be popups on the login page, like a cookies popup, that block the keyboard appearing. Real browsers deal with these better than `Android System WebView`.
-
-There is also a button in the bottom right of the login screen that lets you use your default browser instead of `Android System WebView`. But the browser needs to be `Chrome` based like `Chrome`, `Chromium`, or `Brave` to work. It has been tested with `Firefox`, and it doesn't work.
-
-Using a VPN from a location other than your actual location, or if already using a VPN, not using a VPN. You may also get difference results on different internet connections, like your home, friend's home, grocery store, work, etc. Also if wifi isn't working try the cell connection. If the cell connection isn't working, try wifi.
-
-## Why can't I view `NSFW` content even through I have enabled the settings in `Settings | Content NSFW Filter`?
-
-The behavior of this seems to be per account. The known fix, when it is an issue, is to make a subreddit via the website as the user you want to use in `Continuum`. This makes you a `moderator` of your new subreddit. This seems to set a flag on the account that then solves the problem.
+### Continuum
+<p align="center">
+  <picture>
+    <source
+      width="192x"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/nsfw-navigation-bar.png"
+    >
+    <img
+      width="192px"
+      src="assets/screenshots/nsfw-navigation-bar.png"
+    >
+  </picture>
+  <picture>
+    <source
+      width="192x"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/nsfw-settings-content-nsfw-filter.png"
+    >
+    <img
+      width="192px"
+      src="assets/screenshots/nsfw-settings-content-nsfw-filter.png"
+    >
+  </picture>
+  <picture>
+    <source
+      width="192x"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/nsfw-settings-nsfw-connect.png"
+    >
+    <img
+      width="192px"
+      src="assets/screenshots/nsfw-settings-nsfw-connect.png"
+    >
+  </picture>
+  <picture>
+    <source
+      width="192x"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/nsfw-go-tos-subreddit.png"
+    >
+    <img
+      width="192px"
+      src="assets/screenshots/nsfw-go-tos-subreddit.png"
+    >
+  </picture>
+</p>
+<p align="center">
+  <picture>
+    <source
+      width="256x"
+      media="(prefers-color-scheme: dark)"
+      srcset="assets/screenshots/nsfw-gonewild.png"
+    >
+    <img
+      width="256px"
+      src="assets/screenshots/nsfw-gonewild.png"
+    >
+  </picture>
+</p>
