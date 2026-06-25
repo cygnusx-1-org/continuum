@@ -995,8 +995,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
             // Style the child comment count badges as rounded bubbles. Each badge needs its
             // own drawable instance since a shared Drawable would share bounds between views.
+            // No vertical padding: it would make the badge taller than the sibling score text
+            // and inflate the wrap_content row, so the comment jumps up when the badge is
+            // hidden on expand.
             int badgeHorizontalPadding = (int) Utils.convertDpToPixel(4, mActivity);
-            int badgeVerticalPadding = (int) Utils.convertDpToPixel(2, mActivity);
             int badgeInset = (int) Utils.convertDpToPixel(1, mActivity);
             for (TextView childCountBadge : new TextView[]{topChildCountTextView, childCountTextView}) {
                 GradientDrawable badgeBackground = new GradientDrawable();
@@ -1004,7 +1006,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 badgeBackground.setCornerRadius(Utils.convertDpToPixel(8, mActivity));
                 badgeBackground.setColor(mUsernameColor);
                 childCountBadge.setBackground(new InsetDrawable(badgeBackground, badgeInset));
-                childCountBadge.setPadding(badgeHorizontalPadding, badgeVerticalPadding, badgeHorizontalPadding, badgeVerticalPadding);
+                childCountBadge.setPadding(badgeHorizontalPadding, 0, badgeHorizontalPadding, 0);
                 childCountBadge.setTextColor(mCommentBackgroundColor);
                 if (mActivity.typeface != null) {
                     childCountBadge.setTypeface(mActivity.typeface);
