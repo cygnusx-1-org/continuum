@@ -681,6 +681,47 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     TransitionManager.beginDelayedTransition(binding.recyclerViewPostFragment, new AutoTransition());
                 }
             });
+        } else if (postType == PostType.DUPLICATES) {
+            // The post id is carried in EXTRA_NAME and used as the duplicates listing key.
+            subredditName = getArguments().getString(EXTRA_NAME);
+            if (savedInstanceState == null) {
+                postFragmentId += subredditName.hashCode();
+            }
+
+            usage = PostFilterUsage.HOME_TYPE;
+            nameOfUsage = PostFilterUsage.NO_USAGE;
+
+            // The duplicates endpoint has its own ordering and ignores the standard sort params; the
+            // ViewModel still needs a non-null SortType, so use a neutral default.
+            sortType = new SortType(SortType.Type.BEST);
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
+
+            mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
+                    mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mCustomThemeWrapper, locale,
+                    mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
+                    mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
+                    mExoCreator, new PostRecyclerViewAdapter.Callback() {
+                @Override
+                public void typeChipClicked(int filter) {}
+
+                @Override
+                public void flairChipClicked(String flair) {}
+
+                @Override
+                public void nsfwChipClicked() {}
+
+                @Override
+                public void currentlyBindItem(int position) {
+                    if (maxPosition < position) {
+                        maxPosition = position;
+                    }
+                }
+
+                @Override
+                public void delayTransition() {
+                    TransitionManager.beginDelayedTransition(binding.recyclerViewPostFragment, new AutoTransition());
+                }
+            });
         } else {
             usage = PostFilterUsage.HOME_TYPE;
             nameOfUsage = PostFilterUsage.NO_USAGE;
@@ -943,7 +984,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, subredditName,
                     query, trendingSource, postType, sortType, postFilter, readPostsList)
             ).get(PostViewModel.class);
-        } else if (postType == PostType.SUBREDDIT) {
+        } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
@@ -1023,7 +1064,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     mPostFeedScrolledPositionSharedPreferences, null, subredditName,
                     query, trendingSource, postType, sortType, postFilter, readPostsList)
             ).get(PostViewModel.class);
-        } else if (postType == PostType.SUBREDDIT) {
+        } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
             mPostViewModel = new ViewModelProvider(this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName,
                     mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,

@@ -332,6 +332,9 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 String usernamePrefixed = "u/" + name;
                 getSupportActionBar().setTitle(usernamePrefixed);
                 break;
+            case PostType.DUPLICATES:
+                getSupportActionBar().setTitle(R.string.other_discussions);
+                break;
         }
 
         if (initializeFragment) {
@@ -343,7 +346,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 bundle.putString(PostFragment.EXTRA_USER_NAME, name);
                 bundle.putString(PostFragment.EXTRA_USER_WHERE, userWhere);
             } else if (postType == PostType.SUBREDDIT || postType == PostType.MULTIREDDIT
-                    || postType == PostType.ANONYMOUS_MULTIREDDIT) {
+                    || postType == PostType.ANONYMOUS_MULTIREDDIT || postType == PostType.DUPLICATES) {
                 bundle.putString(PostFragment.EXTRA_NAME, name);
             } else if (postType == PostType.SEARCH) {
                 bundle.putString(PostFragment.EXTRA_NAME, name);
@@ -377,7 +380,8 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         getMenuInflater().inflate(R.menu.filtered_posts_activity, menu);
         applyMenuItemTheme(menu);
         mMenu = menu;
-        if (userWhere != null && !PostPagingSource.USER_WHERE_SUBMITTED.equals(userWhere)) {
+        if ((userWhere != null && !PostPagingSource.USER_WHERE_SUBMITTED.equals(userWhere))
+                || postType == PostType.DUPLICATES) {
             mMenu.findItem(R.id.action_sort_filtered_thing_activity).setVisible(false);
         }
         return true;

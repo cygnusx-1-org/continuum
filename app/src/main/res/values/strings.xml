@@ -370,6 +370,9 @@
     <string name="best">Best</string>
     <string name="search">Search</string>
 
+    <string name="other_discussions">Other Discussions</string>
+    <string name="other_discussions_self_post">Text posts have no other discussions</string>
+
     <string name="posting_video">Posting Video</string>
     <string name="posting_image">Posting Image</string>
     <string name="posting_gallery">Posting Gallery</string>

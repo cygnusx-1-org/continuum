@@ -10,6 +10,7 @@ import androidx.annotation.IntDef
     PostType.Companion.MULTIREDDIT,
     PostType.Companion.ANONYMOUS_FRONT_PAGE,
     PostType.Companion.ANONYMOUS_MULTIREDDIT,
+    PostType.Companion.DUPLICATES,
     PostType.Companion.READ_POSTS,
 )
 @Retention(AnnotationRetention.SOURCE)
@@ -22,6 +23,7 @@ annotation class PostType {
         const val MULTIREDDIT: Int = 4
         const val ANONYMOUS_FRONT_PAGE: Int = 5
         const val ANONYMOUS_MULTIREDDIT: Int = 6
+        const val DUPLICATES: Int = 7
         const val READ_POSTS: Int = 100
     }
 }

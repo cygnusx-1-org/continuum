@@ -305,6 +305,7 @@ public class PostViewModel extends ViewModel {
             case PostType.SUBREDDIT:
             case PostType.ANONYMOUS_FRONT_PAGE:
             case PostType.ANONYMOUS_MULTIREDDIT:
+            case PostType.DUPLICATES:
                 paging3PagingSource = new PostPagingSource(executor, retrofit, redditDataRoomDatabase,
                         accessToken, accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
                         name, postType, sortType, postFilter, readPostsList);
@@ -506,7 +507,7 @@ public class PostViewModel extends ViewModel {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
                         postHistorySharedPreferences, name, query, trendingSource, postType, sortType, postFilter, readPostsList);
-            } else if (postType == PostType.SUBREDDIT) {
+            } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
                         postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList);

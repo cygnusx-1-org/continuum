@@ -319,6 +319,14 @@ public interface RedditAPI {
                                                                     @Query("sort") SortType.Type sortType, @Query("t") SortType.Time sortTime,
                                                                     @Query("limit") int limit);
 
+    @GET("duplicates/{id}.json?raw_json=1&limit=100&sr_detail=1")
+    ListenableFuture<Response<String>> getDuplicatesOauthListenableFuture(@Path("id") String id, @Query("after") String after,
+                                                                          @HeaderMap Map<String, String> headers);
+
+    @GET("duplicates/{id}.json?raw_json=1&limit=100&sr_detail=1")
+    ListenableFuture<Response<String>> getDuplicatesListenableFuture(@Path("id") String id, @Query("after") String after,
+                                                                     @Header("User-Agent") String userAgent);
+
     @GET("search.json?include_over_18=1&raw_json=1&limit=100&type=link&sr_detail=1")
     ListenableFuture<Response<String>> searchPostsOauthListenableFuture(@Query("q") String query, @Query("after") String after,
                                   @Query("sort") SortType.Type sort, @Query("t") SortType.Time sortTime,

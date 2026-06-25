@@ -81,6 +81,29 @@ public class ParsePost {
         }
     }
 
+    // The /duplicates/{id} endpoint returns a two-element array: index 0 is the original post and
+    // index 1 is the listing of other submissions of the same URL. Pull element 1 and parse it as a
+    // normal posts listing.
+    public static LinkedHashSet<Post> parseDuplicatePostsSync(String response, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+        try {
+            String duplicatesListing = new JSONArray(response).getJSONObject(1).toString();
+            return parsePostsSync(duplicatesListing, -1, postFilter, readPostsList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getDuplicatesLastItem(String response) {
+        try {
+            JSONObject object = new JSONArray(response).getJSONObject(1).getJSONObject(JSONUtils.DATA_KEY);
+            return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public static void parsePost(Executor executor, Handler handler, String response, ParsePostListener parsePostListener) {
         executor.execute(() -> {

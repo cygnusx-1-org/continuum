@@ -669,8 +669,32 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         } else if (item.getItemId() == R.id.action_previous_parent_comment_view_post_detail_activity) {
             scrollToPreviousParentComment();
             return true;
+        } else if (item.getItemId() == R.id.action_other_discussions_view_post_detail_activity) {
+            openOtherDiscussions();
+            return true;
         }
         return false;
+    }
+
+    private void openOtherDiscussions() {
+        Post currentPost = this.post;
+        ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
+        if (fragment != null && fragment.getPost() != null) {
+            currentPost = fragment.getPost();
+        }
+        if (currentPost == null) {
+            Toast.makeText(this, R.string.load_post_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // The duplicates endpoint matches by URL, so self/text posts have no other discussions.
+        if (currentPost.getPostType() == Post.TEXT_TYPE) {
+            Toast.makeText(this, R.string.other_discussions_self_post, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(this, FilteredPostsActivity.class);
+        intent.putExtra(FilteredPostsActivity.EXTRA_POST_TYPE, PostType.DUPLICATES);
+        intent.putExtra(FilteredPostsActivity.EXTRA_NAME, currentPost.getId());
+        startActivity(intent);
     }
 
     @Override

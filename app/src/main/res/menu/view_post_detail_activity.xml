@@ -18,4 +18,10 @@
         android:orderInCategory="102"
         android:title="@string/action_previous_parent_comment"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_other_discussions_view_post_detail_activity"
+        android:orderInCategory="103"
+        android:title="@string/other_discussions"
+        app:showAsAction="never" />
 </menu>

@@ -1270,6 +1270,11 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         return postListPosition;
     }
 
+    @Nullable
+    public Post getPost() {
+        return mPost;
+    }
+
     @Subscribe
     public void onPostUpdateEvent(PostUpdateEventToPostDetailFragment event) {
         if (mPost.getId().equals(event.post.getId())) {
