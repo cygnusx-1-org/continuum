@@ -769,6 +769,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
         if (fragment != null) {
             fragment.changeSortType(sortType);
+            binding.toolbarViewPostDetailActivity.setTitle(sortType.getType().fullName);
         }
     }
 
