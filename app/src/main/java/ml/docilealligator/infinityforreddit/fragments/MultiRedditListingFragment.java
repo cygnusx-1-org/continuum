@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import me.zhanghai.android.fastscroll.FastScrollerBuilder;
 import ml.docilealligator.infinityforreddit.Infinity;
+import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -85,6 +86,7 @@ public class MultiRedditListingFragment extends Fragment implements FragmentComm
                     Insets allInsets = Utils.getInsets(insets, false, mActivity.isForcedImmersiveInterface());
                     binding.recyclerViewMultiRedditListingFragment.setPadding(
                             0, 0, 0, allInsets.bottom
+                                    + getResources().getDimensionPixelSize(R.dimen.fab_clearance)
                     );
                     return WindowInsetsCompat.CONSUMED;
                 }
