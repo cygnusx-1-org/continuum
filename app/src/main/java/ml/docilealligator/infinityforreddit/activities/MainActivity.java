@@ -79,6 +79,7 @@ import ml.docilealligator.infinityforreddit.adapters.SubredditAutocompleteRecycl
 import ml.docilealligator.infinityforreddit.adapters.navigationdrawer.NavigationDrawerRecyclerViewMergedAdapter;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.asynctasks.AccountManagement;
+import ml.docilealligator.infinityforreddit.asynctasks.InsertMultireddit;
 import ml.docilealligator.infinityforreddit.asynctasks.InsertSubscribedThings;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FABMoreOptionsBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostLayoutBottomSheetFragment;
@@ -104,6 +105,7 @@ import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
+import ml.docilealligator.infinityforreddit.multireddit.FetchMyMultiReddits;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiRedditViewModel;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
@@ -148,6 +150,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     private static final String FETCH_USER_INFO_STATE = "FUIS";
     private static final String FETCH_SUBSCRIPTIONS_STATE = "FSS";
+    private static final String FETCH_MULTIREDDITS_STATE = "FMS";
     private static final String DRAWER_ON_ACCOUNT_SWITCH_STATE = "DOASS";
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
@@ -221,6 +224,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private Call<String> subredditAutocompleteCall;
     private boolean mFetchUserInfoSuccess = false;
     private boolean mFetchSubscriptionsSuccess = false;
+    private boolean mFetchMultiredditsSuccess = false;
     private boolean mDrawerOnAccountSwitch = false;
     private String mMessageFullname;
     private String mNewAccountName;
@@ -434,6 +438,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         if (savedInstanceState != null) {
             mFetchUserInfoSuccess = savedInstanceState.getBoolean(FETCH_USER_INFO_STATE);
             mFetchSubscriptionsSuccess = savedInstanceState.getBoolean(FETCH_SUBSCRIPTIONS_STATE);
+            mFetchMultiredditsSuccess = savedInstanceState.getBoolean(FETCH_MULTIREDDITS_STATE);
             mDrawerOnAccountSwitch = savedInstanceState.getBoolean(DRAWER_ON_ACCOUNT_SWITCH_STATE);
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
             mNewAccountName = savedInstanceState.getString(NEW_ACCOUNT_NAME_STATE);
@@ -560,6 +565,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                 accessToken = newAccount.getAccessToken();
                                 accountName = newAccount.getAccountName();
                             }
+
+                            // Force a fresh sync of the newly selected account's subreddits and multireddits.
+                            mFetchSubscriptionsSuccess = false;
+                            mFetchMultiredditsSuccess = false;
 
                             setNotification(workManager, notificationInterval, timeUnit, enableNotification);
 
@@ -1266,6 +1275,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         handleGoHomeIntent(getIntent());
 
         loadSubscriptions();
+        loadMultiReddits();
 
         multiRedditViewModel = new ViewModelProvider(this, new MultiRedditViewModel.Factory(
                 mRedditDataRoomDatabase, accountName))
@@ -1429,10 +1439,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     }
 
     private void loadSubscriptions() {
-        if (System.currentTimeMillis() - mCurrentAccountSharedPreferences.getLong(SharedPreferencesUtils.SUBSCRIBED_THINGS_SYNC_TIME, 0L) < 24 * 60 * 60 * 1000) {
-            return;
-        }
-
         if (!accountName.equals(Account.ANONYMOUS_ACCOUNT) && !mFetchSubscriptionsSuccess) {
             FetchSubscribedThing.fetchSubscribedThing(mExecutor, mHandler, mOauthRetrofit, accessToken, accountName, null,
                     new ArrayList<>(), new ArrayList<>(),
@@ -1457,6 +1463,24 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         @Override
                         public void onFetchSubscribedThingFail() {
                             mFetchSubscriptionsSuccess = false;
+                        }
+                    });
+        }
+    }
+
+    private void loadMultiReddits() {
+        if (!accountName.equals(Account.ANONYMOUS_ACCOUNT) && !mFetchMultiredditsSuccess) {
+            FetchMyMultiReddits.fetchMyMultiReddits(mExecutor, mHandler, mOauthRetrofit, accessToken,
+                    new FetchMyMultiReddits.FetchMyMultiRedditsListener() {
+                        @Override
+                        public void success(ArrayList<MultiReddit> multiReddits) {
+                            InsertMultireddit.insertMultireddits(mExecutor, new Handler(), mRedditDataRoomDatabase,
+                                    multiReddits, accountName, () -> mFetchMultiredditsSuccess = true);
+                        }
+
+                        @Override
+                        public void failed() {
+                            mFetchMultiredditsSuccess = false;
                         }
                     });
         }
@@ -1638,6 +1662,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         super.onSaveInstanceState(outState);
         outState.putBoolean(FETCH_USER_INFO_STATE, mFetchUserInfoSuccess);
         outState.putBoolean(FETCH_SUBSCRIPTIONS_STATE, mFetchSubscriptionsSuccess);
+        outState.putBoolean(FETCH_MULTIREDDITS_STATE, mFetchMultiredditsSuccess);
         outState.putBoolean(DRAWER_ON_ACCOUNT_SWITCH_STATE, mDrawerOnAccountSwitch);
         outState.putString(MESSAGE_FULLNAME_STATE, mMessageFullname);
         outState.putString(NEW_ACCOUNT_NAME_STATE, mNewAccountName);
