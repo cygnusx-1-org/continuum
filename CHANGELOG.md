@@ -2,6 +2,16 @@
 
 ---
 
+8.2.5.9.7 / 2026-6-25
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed an inset bugs in Subscriptions tabs
+* Implemented Feature Request: Add “Other Discussions” #45
+* Implemented subreddits and multireddits should be synced automatically with the official reddit app/website #42
+* Implemented Improvement: Reduce click depth to choose comment sorting #307
+* Fixed API Client ID stays blank even after clicking "OK" #304
+
 8.2.5.9.6 / 2026-6-23
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
