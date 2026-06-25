@@ -176,8 +176,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 }
                 // Otherwise, the EditText will automatically show the non-default current value
 
-                // Setup validation for the specific length
-                setupLengthValidation(editText, CLIENT_ID_LENGTH, true);
+                // Setup validation for the specific length, disallowing the default Client ID
+                setupLengthValidation(editText, CLIENT_ID_LENGTH, true, defaultValue);
 
                 // Add QR code scanning button to dialog
                 View rootView = editText.getRootView();
@@ -244,7 +244,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 String value = stripWhitespace((String) newValue);
 
                 // Final validation check (redundant due to button state, but safe)
-                if (value == null || value.length() != CLIENT_ID_LENGTH) {
+                String defaultValue = preference.getContext().getString(R.string.default_client_id);
+                if (value == null || value.length() != CLIENT_ID_LENGTH || value.equals(defaultValue)) {
                     return false; // Should not happen if button logic is correct
                 }
 
@@ -503,6 +504,16 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
     // Reusable helper method for setting up length validation on an EditTextPreference dialog
     private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck) {
+        setupLengthValidation(editText, requiredLength, stripWhitespaceBeforeCheck, null);
+    }
+
+    /**
+     * Enables/disables the dialog's OK button based on the entered text.
+     *
+     * @param disallowedValue if non-null, the OK button stays disabled while the (whitespace-stripped)
+     *                        entered value equals this value. Used to prevent saving the default Client ID.
+     */
+    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck, final String disallowedValue) {
         // Add TextWatcher to enable/disable OK button based on length
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -513,40 +524,33 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
             @Override
             public void afterTextChanged(Editable s) {
-                View rootView = editText.getRootView();
-                if (rootView != null) {
-                    Button positiveButton = rootView.findViewById(android.R.id.button1);
-                    if (positiveButton != null) {
-                        int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(s.toString()).length() : s.length();
-                        boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
-                        positiveButton.setEnabled(isEnabled);
-                        positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f); // Adjust alpha for visual feedback
-                    } else {
-                        Log.w(TAG, "Could not find positive button (android.R.id.button1) in dialog root view (afterTextChanged).");
-                    }
-                } else {
-                    Log.w(TAG, "Could not get root view from EditText to find positive button (afterTextChanged).");
-                }
+                updatePositiveButtonState(editText, requiredLength, stripWhitespaceBeforeCheck, disallowedValue, "afterTextChanged");
             }
         });
 
         // Ensure the button state is correct initially based on the current value
-        editText.post(() -> {
-            View rootView = editText.getRootView();
-            if (rootView != null) {
-                Button positiveButton = rootView.findViewById(android.R.id.button1);
-                if (positiveButton != null) {
-                    int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(editText.getText().toString()).length() : editText.getText().length();
-                    boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
-                    positiveButton.setEnabled(isEnabled);
-                    positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f);
-                } else {
-                    Log.w(TAG, "Could not find positive button (android.R.id.button1) in dialog root view (post).");
-                }
-            } else {
-                Log.w(TAG, "Could not get root view from EditText to find positive button (post).");
-            }
-        });
+        editText.post(() -> updatePositiveButtonState(editText, requiredLength, stripWhitespaceBeforeCheck, disallowedValue, "post"));
+    }
+
+    private void updatePositiveButtonState(android.widget.EditText editText, final int requiredLength,
+                                           final boolean stripWhitespaceBeforeCheck, final String disallowedValue,
+                                           final String caller) {
+        View rootView = editText.getRootView();
+        if (rootView == null) {
+            Log.w(TAG, "Could not get root view from EditText to find positive button (" + caller + ").");
+            return;
+        }
+        Button positiveButton = rootView.findViewById(android.R.id.button1);
+        if (positiveButton == null) {
+            Log.w(TAG, "Could not find positive button (android.R.id.button1) in dialog root view (" + caller + ").");
+            return;
+        }
+        String effectiveValue = stripWhitespaceBeforeCheck ? stripWhitespace(editText.getText().toString()) : editText.getText().toString();
+        boolean lengthOk = effectiveValue.length() == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveValue.isEmpty()); // Allow empty for Giphy
+        boolean isDisallowed = disallowedValue != null && disallowedValue.equals(effectiveValue);
+        boolean isEnabled = lengthOk && !isDisallowed;
+        positiveButton.setEnabled(isEnabled);
+        positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f); // Adjust alpha for visual feedback
     }
 
     // Inject dependencies
