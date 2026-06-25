@@ -560,7 +560,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
             if (uiState.getSortType() != null) {
                 SortType.Type sortType = uiState.getSortType();
-                mActivity.setTitle(sortType.fullName);
                 binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.GONE);
                 mGlide.clear(binding.fetchPostInfoImageViewViewPostDetailFragment);
 
