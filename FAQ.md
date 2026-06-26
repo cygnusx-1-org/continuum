@@ -6,7 +6,7 @@ There can be issues with `Android System Webview`. See [Common errors](/SETUP.md
 
 Things to try:
 1. Trying using a VPN, or try not using one if you are. Also try from a USA server.
-2. Try different Internet connections like cellular Internet access, WiFi internet access
+2. Try different Internet connections like cellular Internet access, and WiFi internet access
 3. Try the WebView and external browser options
 4. Try a different Reddit account
 
