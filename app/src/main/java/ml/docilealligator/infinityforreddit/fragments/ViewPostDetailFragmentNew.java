@@ -559,8 +559,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             }
 
             if (uiState.getSortType() != null) {
-                SortType.Type sortType = uiState.getSortType();
-                mActivity.setTitle(sortType.fullName);
+                sortType = uiState.getSortType();
+                mActivity.displayToolbarSortAndTitle(this);
                 binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.GONE);
                 mGlide.clear(binding.fetchPostInfoImageViewViewPostDetailFragment);
 
@@ -573,6 +573,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         viewPostDetailFragmentViewModel.getDataState().observe(getViewLifecycleOwner(), dataState -> {
             if (dataState.getPost() != null) {
                 mPost = dataState.getPost();
+                mActivity.displayToolbarSortAndTitle(this);
                 if (mPostAdapter != null) {
                     mPostAdapter.updatePost(dataState.getPost());
                 }
@@ -1274,6 +1275,11 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     @Nullable
     public Post getPost() {
         return mPost;
+    }
+
+    @Nullable
+    public SortType.Type getCommentSortType() {
+        return sortType;
     }
 
     @Subscribe

@@ -349,8 +349,17 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         });
     }
 
-    public void setTitle(String title) {
-        binding.toolbarViewPostDetailActivity.setTitle(title);
+    public void displayToolbarSortAndTitle(ViewPostDetailFragmentNew fragment) {
+        if (mSectionsPagerAdapter != null && fragment == mSectionsPagerAdapter.getCurrentFragment()) {
+            updateToolbar(fragment);
+        }
+    }
+
+    private void updateToolbar(ViewPostDetailFragmentNew fragment) {
+        Post post = fragment.getPost();
+        binding.toolbarViewPostDetailActivity.setTitle(post == null ? getString(R.string.comments) : post.getSubredditNamePrefixed());
+        SortType.Type sortType = fragment.getCommentSortType();
+        binding.toolbarViewPostDetailActivity.setSubtitle(sortType == null ? null : sortType.fullName);
     }
 
     public void showFab() {
@@ -474,6 +483,14 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                             userWhere, multiPath, query, sortType, sortTime, postFilter,
                             readPostType, readPostsList
                     );
+                }
+                ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
+                if (fragment != null) {
+                    updateToolbar(fragment);
+                } else if (posts != null && position == posts.size()) {
+                    // Trailing "more posts" page has no post; clear the stale subreddit/sort.
+                    binding.toolbarViewPostDetailActivity.setTitle("");
+                    binding.toolbarViewPostDetailActivity.setSubtitle(null);
                 }
             }
         });
@@ -769,7 +786,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
         if (fragment != null) {
             fragment.changeSortType(sortType);
-            binding.toolbarViewPostDetailActivity.setTitle(sortType.getType().fullName);
+            binding.toolbarViewPostDetailActivity.setSubtitle(sortType.getType().fullName);
         }
     }
 
