@@ -98,7 +98,7 @@ android {
             }
         }
 
-        minSdk 21
+        minSdk 24
         targetSdk 35
         versionCode 223
         versionName "8.2.5.9.7" + gitVersionSuffix()
@@ -224,38 +224,38 @@ dependencies {
 /** AndroidX **/
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.biometric:biometric:1.2.0-alpha05'
-    implementation 'androidx.browser:browser:1.9.0'
+    implementation 'androidx.browser:browser:1.10.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.activity:activity:1.10.1'
-    implementation 'androidx.fragment:fragment:1.8.8'
-    implementation 'androidx.core:core-ktx:1.17.0'
-    def lifecycleVersion = "2.9.4"
+    implementation 'androidx.activity:activity:1.13.0'
+    implementation 'androidx.fragment:fragment:1.8.9'
+    implementation 'androidx.core:core-ktx:1.18.0'
+    def lifecycleVersion = "2.10.0"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-process:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-runtime:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycleVersion"
 
-    def pagingVersion = '3.3.6'
+    def pagingVersion = '3.5.0'
     implementation "androidx.paging:paging-runtime:$pagingVersion"
     implementation "androidx.paging:paging-guava:$pagingVersion"
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'androidx.webkit:webkit:1.14.0'
-    def roomVersion = "2.7.2"
+    implementation 'androidx.webkit:webkit:1.16.0'
+    def roomVersion = "2.8.4"
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-guava:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
-    implementation 'androidx.work:work-runtime:2.9.0'
-    implementation 'com.google.android.material:material:1.14.0-alpha01'
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-beta01"
+    implementation 'androidx.work:work-runtime:2.11.2'
+    implementation 'com.google.android.material:material:1.14.0'
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0"
 
 /** ExoPlayer **/
-    def media3_version = "1.8.0"
+    def media3_version = "1.10.1"
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
@@ -275,10 +275,10 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
     implementation "com.squareup.retrofit2:adapter-guava:$retrofitVersion"
-    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
+    implementation 'com.squareup.okhttp3:okhttp:5.4.0'
 
     // Dependency injection
-    def daggerVersion = '2.59.2'
+    def daggerVersion = '2.60'
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
@@ -322,7 +322,7 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
     implementation "com.github.bumptech.glide:compose:1.0.0-beta09"
     implementation 'com.github.santalu:aspect-ratio-imageview:1.0.9'
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.29'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.32'
     // APNG animation support for profile avatars
     implementation 'com.github.penfeizhou.android.animation:glide-plugin:3.0.5'
     def bivVersion = "1.8.1"
@@ -342,7 +342,7 @@ dependencies {
     implementation 'me.saket:better-link-movement-method:2.2.0'
 
     // Animations
-    implementation 'com.airbnb.android:lottie:6.4.1'
+    implementation 'com.airbnb.android:lottie:6.7.1'
 
     // Loading ProgressBar
     implementation 'com.lsjwzh:materialloadingprogressbar:0.5.8-RELEASE'
