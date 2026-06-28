@@ -820,8 +820,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     }
 
     public void changeSortType(SortType sortType) {
-        viewPostDetailFragmentViewModel.updateSortType(sortType.getType());
-        viewPostDetailFragmentViewModel.fetchCommentsRespectRecommendedSort(sortType.getType(), false);
+        viewPostDetailFragmentViewModel.fetchCommentsWithSortType(sortType.getType(), false);
     }
 
     public void goToTop() {

@@ -475,6 +475,16 @@ abstract class RenameApksTask extends DefaultTask {
 
     @TaskAction
     void taskAction() {
+        // Remove APKs left by previous builds before producing this build's outputs.
+        // Filenames embed the versionName, so a new build creates new files instead of
+        // overwriting old ones; without this, stale older-version APKs accumulate in the
+        // output folder (and would otherwise be picked up by the GitHub release upload).
+        outFolder.get().asFile.listFiles()?.each { File f ->
+            if (f.name.endsWith(".apk")) {
+                f.delete()
+            }
+        }
+
         transformationRequest.get().submit(
             this,
             workerExecutor.noIsolation(),
