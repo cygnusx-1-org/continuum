@@ -33,7 +33,6 @@ class CommentsStatusRecyclerViewAdapter(
     var isInitiallyLoadingFailed: Boolean = false
     var emptyComments: Boolean = false
 
-    private val circularProgressBarBackgroundColor = activity.customThemeWrapper.circularProgressBarBackground
     private val colorAccent = activity.customThemeWrapper.colorAccent
     private val secondaryTextColor = activity.customThemeWrapper.secondaryTextColor
     private val commentBackgroundColor = activity.customThemeWrapper.commentBackgroundColor
@@ -66,7 +65,6 @@ class CommentsStatusRecyclerViewAdapter(
                             parent.getContext()
                         ), parent, false
                     ),
-                    circularProgressBarBackgroundColor,
                     colorAccent
                 )
             VIEW_TYPE_FIRST_LOADING_FAILED ->
@@ -123,19 +121,13 @@ class CommentsStatusRecyclerViewAdapter(
 
     class LoadCommentsViewHolder internal constructor(
         binding: ItemLoadCommentsBinding,
-        circularProgressBarBackgroundColor: Int,
         colorAccent: Int
     ) : RecyclerView.ViewHolder(binding.getRoot()) {
         var binding: ItemLoadCommentsBinding?
 
         init {
             this.binding = binding
-            binding.commentProgressBarItemLoadComments.setBackgroundTintList(
-                ColorStateList.valueOf(
-                    circularProgressBarBackgroundColor
-                )
-            )
-            binding.commentProgressBarItemLoadComments.setColorSchemeColors(colorAccent)
+            binding.commentProgressBarItemLoadComments.setIndicatorColor(colorAccent)
         }
     }
 

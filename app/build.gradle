@@ -344,12 +344,6 @@ dependencies {
     // Animations
     implementation 'com.airbnb.android:lottie:6.7.1'
 
-    // Loading ProgressBar
-    implementation 'com.lsjwzh:materialloadingprogressbar:0.5.8-RELEASE'
-
-    // Customizable TextView
-    implementation files("Modules/customtextview-2.1.aar")
-
     // Dismiss gesturing
     implementation 'app.futured.hauler:hauler:5.0.0'
 

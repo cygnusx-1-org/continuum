@@ -55,9 +55,6 @@ public class AcknowledgementFragment extends Fragment {
         acknowledgements.add(new Acknowledgement("Aspect Ratio ImageView",
                 "A simple imageview which scales the width or height aspect with the given ratio",
                 Uri.parse("https://github.com/santalu/aspect-ratio-imageview")));
-        acknowledgements.add(new Acknowledgement("MaterialLoadingProgressBar",
-                "A styled ProgressBar",
-                Uri.parse("https://github.com/lsjwzh/MaterialLoadingProgressBar")));
         acknowledgements.add(new Acknowledgement("Markwon",
                 "A markdown library for Android",
                 Uri.parse("https://github.com/noties/Markwon")));

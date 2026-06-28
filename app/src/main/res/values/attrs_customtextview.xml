@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Attributes for com.libRG.CustomTextView. Trimmed to the rounded-shape feature this app uses. -->
+    <declare-styleable name="CustomTextView">
+
+        <attr name="android:padding" />
+        <attr name="android:paddingLeft" />
+        <attr name="android:paddingRight" />
+        <attr name="android:paddingTop" />
+        <attr name="android:paddingBottom" />
+        <attr name="lib_setRadius" format="dimension" />
+        <attr name="lib_setRoundedView" format="boolean" />
+        <attr name="lib_setRoundedBorderColor" format="color" />
+        <attr name="lib_setRoundedBGColor" format="color" />
+        <attr name="lib_setStrokeWidth" format="dimension" />
+        <attr name="lib_setShape" format="enum">
+            <enum name="rectangle" value="0" />
+            <enum name="oval" value="1" />
+        </attr>
+
+    </declare-styleable>
+
+</resources>
