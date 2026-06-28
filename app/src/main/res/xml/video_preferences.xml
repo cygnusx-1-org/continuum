@@ -88,6 +88,12 @@
         app:title="@string/settings_autoplay_nsfw_videos_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="autoplay_comment_gif"
+        app:title="@string/settings_autoplay_comment_gif_title"
+        app:summary="@string/settings_autoplay_comment_gif_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="easier_to_watch_in_full_screen"
         app:title="@string/settings_easier_to_watch_in_full_screen_title" />

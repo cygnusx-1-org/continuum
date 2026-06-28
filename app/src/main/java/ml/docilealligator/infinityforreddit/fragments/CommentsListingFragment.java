@@ -45,6 +45,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AdjustableTouchSlopItemTouchHelper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentCommentsListingBinding;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.thing.ReplyNotificationsToggle;
 import ml.docilealligator.infinityforreddit.thing.SortType;
@@ -462,6 +463,14 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
                 mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
                 refreshAdapter(binding.recyclerViewCommentsListingFragment, mAdapter);
             }
+        }
+    }
+
+    @Subscribe
+    public void onChangeAutoplayCommentGifEvent(ChangeAutoplayCommentGifEvent event) {
+        if (mAdapter != null) {
+            mAdapter.setAutoplayCommentGif(event.autoplayCommentGif);
+            refreshAdapter(binding.recyclerViewCommentsListingFragment, mAdapter);
         }
     }
 

@@ -1047,6 +1047,15 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             ((PostDetailImageAndGifAutoplayViewHolder) holder).binding.loadWrapperItemPostDetailImageAndGifAutoplay.setVisibility(View.GONE);
+                            // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                            // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                            // otherwise letterbox the image with black against the card background. Skip
+                            // when the preview had no dimensions, since bindView intentionally uses a
+                            // fixed-height CENTER_CROP layout in that case.
+                            if (preview.getPreviewWidth() > 0 && preview.getPreviewHeight() > 0
+                                    && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                                ((PostDetailImageAndGifAutoplayViewHolder) holder).binding.imageViewItemPostDetailImageAndGifAutoplay.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                            }
                             return false;
                         }
                     });
@@ -1074,6 +1083,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             ((PostDetailVideoAndGifPreviewHolder) holder).binding.loadWrapperItemPostDetailVideoAndGifPreview.setVisibility(View.GONE);
+                            // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                            // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                            // otherwise letterbox the image with black against the card background.
+                            if (resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                                ((PostDetailVideoAndGifPreviewHolder) holder).binding.imageViewItemPostDetailVideoAndGifPreview.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                            }
                             return false;
                         }
                     });
@@ -1102,6 +1117,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             ((PostDetailLinkViewHolder) holder).binding.loadWrapperItemPostDetailLink.setVisibility(View.GONE);
+                            // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                            // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                            // otherwise letterbox the image with black against the card background.
+                            if (resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                                ((PostDetailLinkViewHolder) holder).binding.imageViewItemPostDetailLink.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                            }
                             return false;
                         }
                     });
@@ -1142,6 +1163,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mDataSavingMode = dataSavingMode;
         mEmotePlugin.setDataSavingMode(dataSavingMode);
         mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    }
+
+    public void setAutoplayCommentGif(boolean autoplayCommentGif) {
+        mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
     }
 
     public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int direction, int swipeLeftAction, int swipeRightAction) {

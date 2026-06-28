@@ -3818,6 +3818,21 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     loadingIndicator.setVisibility(View.GONE);
+                    // A link post's preview is supplementary, and reddit-link previews can be
+                    // unavailable. When one fails, collapse the oversized ratio-reserved box to the
+                    // compact no-preview link tile instead of leaving a giant black rectangle. Media
+                    // posts keep the box (the preview is the content, and failures there are usually
+                    // transient), preserving the previous behaviour for them.
+                    int position = getBindingAdapterPosition();
+                    Post post = position >= 0 ? getItem(position) : null;
+                    if (post != null && (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE)) {
+                        if (imageWrapperFrameLayout != null) {
+                            imageWrapperFrameLayout.setVisibility(View.GONE);
+                        }
+                        imageView.setVisibility(View.GONE);
+                        imageViewNoPreviewGallery.setImageResource(R.drawable.ic_link_day_night_24dp);
+                        imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
+                    }
                     return false;
                 }
 
@@ -3825,6 +3840,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                     loadImageErrorTextView.setVisibility(View.GONE);
                     loadingIndicator.setVisibility(View.GONE);
+                    // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                    // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                    // otherwise letterbox the image with black against the card background. Only do
+                    // this in ratio mode; the fixed-height-preview path uses CENTER_CROP + a fixed
+                    // height and must not be switched to ratio sizing.
+                    boolean ratioMode = !mFixedHeightPreviewInCard && preview != null
+                            && preview.getPreviewWidth() > 0 && preview.getPreviewHeight() > 0;
+                    if (ratioMode && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                        imageView.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                    }
                     if (Utils.previewLikelyHasTransparentBackground(resource)) {
                         imageView.setBackgroundResource(R.drawable.transparent_image_backdrop);
                     }

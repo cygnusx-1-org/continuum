@@ -398,6 +398,9 @@ public class SettingsSearchRegistry {
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_autoplay_nsfw_videos_title), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
+        add(items, c.getString(R.string.settings_autoplay_comment_gif_title),
+                c.getString(R.string.settings_autoplay_comment_gif_summary), bc,
+                VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_easier_to_watch_in_full_screen_title), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_start_autoplay_visible_area_offset_portrait_title), null, bc,

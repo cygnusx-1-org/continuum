@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.markdown.imageandgif;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Outline;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -53,6 +54,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     private final int linkColor;
     private final boolean canShowImage;
     private final boolean canShowGif;
+    private boolean autoplayCommentGif;
 
     public ImageAndGifEntry(BaseActivity baseActivity, RequestManager glide, int embeddedMediaType,
                             OnItemClickListener onItemClickListener) {
@@ -68,6 +70,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         linkColor = baseActivity.getCustomThemeWrapper().getLinkColor();
         canShowImage = SharedPreferencesUtils.canShowImage(embeddedMediaType);
         canShowGif = SharedPreferencesUtils.canShowGif(embeddedMediaType);
+        autoplayCommentGif = sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_COMMENT_GIF, true);
 
         String dataSavingModeString = sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
@@ -102,6 +105,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         linkColor = baseActivity.getCustomThemeWrapper().getLinkColor();
         canShowImage = SharedPreferencesUtils.canShowImage(embeddedMediaType);
         canShowGif = SharedPreferencesUtils.canShowGif(embeddedMediaType);
+        autoplayCommentGif = sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_COMMENT_GIF, true);
     }
 
     @NonNull
@@ -118,7 +122,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
 
         holder.binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.VISIBLE);
 
-        RequestBuilder<Drawable> imageRequestBuilder;
+        String url;
         int srcWidth;
         int srcHeight;
         if (dataSavingMode) {
@@ -126,7 +130,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
                 showImageAsUrl(holder, node);
                 return;
             } else {
-                imageRequestBuilder = glide.load(node.mediaMetadata.downscaled.url).listener(holder.requestListener);
+                url = node.mediaMetadata.downscaled.url;
                 srcWidth = node.mediaMetadata.downscaled.x;
                 srcHeight = node.mediaMetadata.downscaled.y;
             }
@@ -134,7 +138,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
             showImageAsUrl(holder, node);
             return;
         } else {
-            imageRequestBuilder = glide.load(node.mediaMetadata.original.url).listener(holder.requestListener);
+            url = node.mediaMetadata.original.url;
             srcWidth = node.mediaMetadata.original.x;
             srcHeight = node.mediaMetadata.original.y;
         }
@@ -143,17 +147,30 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         // re-corrected from the real drawable in onResourceReady. See issue #4.
         applyBoundedSize(holder.binding.imageViewMarkdownImageAndGifBlock, srcWidth, srcHeight);
 
-        // Rounded corners are applied at the view level (clipToOutline) so they're identical for
-        // static images and animated gifs, which ignore Glide bitmap transformations. See issue #4.
-        if (blurImage && !node.mediaMetadata.isGIF) {
-            imageRequestBuilder
-                    .apply(RequestOptions.bitmapTransform(new BlurTransformation(100, 4)))
-                    .into(holder.binding.imageViewMarkdownImageAndGifBlock);
-        } else {
-            imageRequestBuilder
+        if (node.mediaMetadata.isGIF && !autoplayCommentGif) {
+            // Autoplay-gifs-in-comments is off: load only the first frame so the gif stays still.
+            // The animated-image decoder ignores Glide's dontAnimate(), but asBitmap() always
+            // yields a single frame. Tapping it still opens the animated gif in the media viewer.
+            glide.asBitmap()
+                    .load(url)
+                    .listener(holder.bitmapRequestListener)
                     .apply(RequestOptions.bitmapTransform(new CenterInside()))
                     .downsample(saveMemoryCenterInsideDownsampleStrategy)
                     .into(holder.binding.imageViewMarkdownImageAndGifBlock);
+        } else {
+            RequestBuilder<Drawable> imageRequestBuilder = glide.load(url).listener(holder.requestListener);
+            // Rounded corners are applied at the view level (clipToOutline) so they're identical for
+            // static images and animated gifs, which ignore Glide bitmap transformations. See issue #4.
+            if (blurImage && !node.mediaMetadata.isGIF) {
+                imageRequestBuilder
+                        .apply(RequestOptions.bitmapTransform(new BlurTransformation(100, 4)))
+                        .into(holder.binding.imageViewMarkdownImageAndGifBlock);
+            } else {
+                imageRequestBuilder
+                        .apply(RequestOptions.bitmapTransform(new CenterInside()))
+                        .downsample(saveMemoryCenterInsideDownsampleStrategy)
+                        .into(holder.binding.imageViewMarkdownImageAndGifBlock);
+            }
         }
 
         if (node.mediaMetadata.caption != null) {
@@ -260,9 +277,14 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         this.blurImage = blurImage;
     }
 
+    public void setAutoplayCommentGif(boolean autoplayCommentGif) {
+        this.autoplayCommentGif = autoplayCommentGif;
+    }
+
     public class Holder extends MarkwonAdapter.Holder {
         public MarkdownImageAndGifBlockBinding binding;
         RequestListener<Drawable> requestListener;
+        RequestListener<Bitmap> bitmapRequestListener;
         ImageAndGifBlock imageAndGifBlock;
         String commentId;
         String postId;
@@ -312,6 +334,26 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
                     // same target area. See issue #4.
                     if (resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
                         applyBoundedSize(iv, resource.getIntrinsicWidth(), resource.getIntrinsicHeight());
+                    }
+                    return false;
+                }
+            };
+
+            // Used for the still first-frame load when comment-gif autoplay is off; mirrors
+            // requestListener but reads dimensions off the Bitmap instead of a Drawable.
+            bitmapRequestListener = new RequestListener<>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                    binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.GONE);
+                    binding.loadImageErrorTextViewMarkdownImageAndGifBlock.setVisibility(View.VISIBLE);
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                    binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.GONE);
+                    if (resource.getWidth() > 0 && resource.getHeight() > 0) {
+                        applyBoundedSize(binding.imageViewMarkdownImageAndGifBlock, resource.getWidth(), resource.getHeight());
                     }
                     return false;
                 }

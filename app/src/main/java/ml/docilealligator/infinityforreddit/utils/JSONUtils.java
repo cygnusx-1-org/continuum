@@ -48,6 +48,7 @@ public class JSONUtils {
     public static final String HEIGHT_KEY = "height";
     public static final String SOURCE_KEY = "source";
     public static final String URL_KEY = "url";
+    public static final String DOMAIN_KEY = "domain";
     public static final String MEDIA_KEY = "media";
     public static final String REDDIT_VIDEO_KEY = "reddit_video";
     public static final String HLS_URL_KEY = "hls_url";
