@@ -89,6 +89,8 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView;
+import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkBinding;
+import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkRightThumbnailBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2GalleryTypeBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2TextBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2VideoAutoplayBinding;
@@ -160,6 +162,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private static final int VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE = 14;
     private static final int VIEW_TYPE_POST_CARD_3_GALLERY_TYPE = 15;
     private static final int VIEW_TYPE_POST_CARD_3_TEXT_TYPE = 16;
+    private static final int VIEW_TYPE_POST_CARD_2_COMPACT_LINK = 17;
 
     private static final DiffUtil.ItemCallback<Post> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
         @Override
@@ -554,7 +557,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         if (mAutoplay) {
@@ -568,20 +571,20 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     case Post.GIF_TYPE:
                     case Post.IMAGE_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                     case Post.GALLERY_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         return VIEW_TYPE_POST_CARD_2_GALLERY_TYPE;
                     case Post.LINK_TYPE:
                     case Post.NO_PREVIEW_LINK_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         switch (mDefaultLinkPostLayout) {
@@ -592,7 +595,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                                 return VIEW_TYPE_POST_GALLERY;
                             case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                                return VIEW_TYPE_POST_COMPACT;
+                                return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                             case SharedPreferencesUtils.POST_LAYOUT_COMPACT_2:
                                 return VIEW_TYPE_POST_COMPACT_2;
                         }
@@ -700,6 +703,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return new PostCompact2LeftThumbnailViewHolder(ItemPostCompact2Binding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             } else {
                 return new PostCompact2RightThumbnailViewHolder(ItemPostCompact2RightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            }
+        } else if (viewType == VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
+            if (mShowThumbnailOnTheLeftInCompactLayout) {
+                return new PostCard2CompactLinkLeftThumbnailViewHolder(ItemPostCard2CompactLinkBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            } else {
+                return new PostCard2CompactLinkRightThumbnailViewHolder(ItemPostCard2CompactLinkRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             }
         } else if (viewType == VIEW_TYPE_POST_GALLERY) {
             return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -4677,6 +4686,80 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.shareButtonItemPostCompactRightThumbnail,
                     binding.dividerItemPostCompactRightThumbnail);
             setupUsernameView(binding.usernameTextViewItemPostCompactRightThumbnail);
+        }
+    }
+
+    class PostCard2CompactLinkRightThumbnailViewHolder extends PostCompactBaseViewHolder {
+        PostCard2CompactLinkRightThumbnailViewHolder(@NonNull ItemPostCard2CompactLinkRightThumbnailBinding binding) {
+            super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCard2CompactLinkRightThumbnail;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCard2CompactLinkRightThumbnail;
+
+            setBaseView(binding.iconGifImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.nameTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.stickiedPostImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.postTimeTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.titleTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.typeTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.archivedImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.lockedImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.crosspostImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.nsfwTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.spoilerCustomTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.flairCustomTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.linkTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.imageViewWrapperItemPostCard2CompactLinkRightThumbnail,
+                    binding.progressBarItemPostCard2CompactLinkRightThumbnail,
+                    binding.imageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.playButtonImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.frameLayoutImageViewNoPreviewLinkItemPostCard2CompactLinkRightThumbnail,
+                    binding.imageViewNoPreviewLinkItemPostCard2CompactLinkRightThumbnail,
+                    binding.bottomConstraintLayoutItemPostCard2CompactLinkRightThumbnail,
+                    binding.upvoteButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.scoreTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.downvoteButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.commentsCountButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.saveButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.shareButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.dividerItemPostCard2CompactLinkRightThumbnail);
+            setupUsernameView(binding.usernameTextViewItemPostCard2CompactLinkRightThumbnail);
+        }
+    }
+
+    class PostCard2CompactLinkLeftThumbnailViewHolder extends PostCompactBaseViewHolder {
+        PostCard2CompactLinkLeftThumbnailViewHolder(@NonNull ItemPostCard2CompactLinkBinding binding) {
+            super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCard2CompactLink;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCard2CompactLink;
+
+            setBaseView(binding.iconGifImageViewItemPostCard2CompactLink,
+                    binding.nameTextViewItemPostCard2CompactLink,
+                    binding.stickiedPostImageViewItemPostCard2CompactLink,
+                    binding.postTimeTextViewItemPostCard2CompactLink,
+                    binding.titleTextViewItemPostCard2CompactLink,
+                    binding.typeTextViewItemPostCard2CompactLink,
+                    binding.archivedImageViewItemPostCard2CompactLink,
+                    binding.lockedImageViewItemPostCard2CompactLink,
+                    binding.crosspostImageViewItemPostCard2CompactLink,
+                    binding.nsfwTextViewItemPostCard2CompactLink,
+                    binding.spoilerCustomTextViewItemPostCard2CompactLink,
+                    binding.flairCustomTextViewItemPostCard2CompactLink,
+                    binding.linkTextViewItemPostCard2CompactLink,
+                    binding.imageViewWrapperItemPostCard2CompactLink,
+                    binding.progressBarItemPostCard2CompactLink,
+                    binding.imageViewItemPostCard2CompactLink,
+                    binding.playButtonImageViewItemPostCard2CompactLink,
+                    binding.frameLayoutImageViewNoPreviewLinkItemPostCard2CompactLink,
+                    binding.imageViewNoPreviewLinkItemPostCard2CompactLink,
+                    binding.bottomConstraintLayoutItemPostCard2CompactLink,
+                    binding.upvoteButtonItemPostCard2CompactLink,
+                    binding.scoreTextViewItemPostCard2CompactLink,
+                    binding.downvoteButtonItemPostCard2CompactLink,
+                    binding.commentsCountButtonItemPostCard2CompactLink,
+                    binding.saveButtonItemPostCard2CompactLink,
+                    binding.shareButtonItemPostCard2CompactLink,
+                    binding.dividerItemPostCard2CompactLink);
+            setupUsernameView(binding.usernameTextViewItemPostCard2CompactLink);
         }
     }
 
