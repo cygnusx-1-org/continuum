@@ -18,9 +18,8 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.42.0'
     id 'com.github.breadmoirai.github-release' version '2.5.2'
     id 'com.diffplug.spotless' version '7.0.2'
-    id 'org.jetbrains.kotlin.android'
     id("io.qameta.allure") version "4.1.0"
-    id 'org.jetbrains.kotlin.kapt'
+    id 'com.android.legacy-kapt'
     id 'kotlin-parcelize'
     id("org.jetbrains.kotlin.plugin.compose") version '2.2.10'
 }
@@ -154,6 +153,9 @@ android {
         buildConfig = true
         viewBinding = true
         compose = true
+        // Required because build types use resValue (release/debug app_name); the global
+        // android.defaults.buildfeatures.resvalues default is off in AGP 9.
+        resValues = true
     }
 
     lint {
@@ -176,9 +178,6 @@ android {
         kotlinCompilerExtensionVersion = "1.5.14"
     }
 
-    kotlinOptions {
-        jvmTarget = '21'
-    }
 }
 
 def githubPropertiesFile = rootProject.file("github.properties")
