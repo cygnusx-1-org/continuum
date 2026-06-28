@@ -12,11 +12,9 @@ Things to try:
 
 ## Why can't I view `NSFW` content?
 
-1. Lack of show mature (18+) content block it in search
-2. Lack of moderator gets you the Go to Reddit to view mature content message when you visit a NSFW subreddit
-3. The app settings block it in search, as in Go to Subreddit
-
-Do 1 and 2 per Reddit account.
+1. Lack of `show mature (18+) content` blocks it in search. So enable it per account.
+2. Lack of being a `moderator` gets you the `Go to Reddit to view mature content` message when you visit a `NSFW` subreddit. So create a subreddit to become a `moderator`. Either one subreddit per `Reddit` account or one subreddit and make all your accounts `moderators` of it.
+3. The app settings block it in search, as in `Go to Subreddit`.
 
 ### Website
 <p align="center">
