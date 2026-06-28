@@ -1,3 +1,17 @@
+import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.artifact.ArtifactTransformationRequest
+import com.android.build.api.variant.BuiltArtifact
+import com.android.build.api.variant.FilterConfiguration
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
+import org.gradle.workers.WorkerExecutor
+import javax.inject.Inject
+import java.io.Serializable
+
 plugins {
     id 'com.android.application'
     id 'com.gladed.androidgitversion' version '0.4.14'
@@ -5,21 +19,16 @@ plugins {
     id 'com.github.breadmoirai.github-release' version '2.5.2'
     id 'com.diffplug.spotless' version '7.0.2'
     id 'org.jetbrains.kotlin.android'
-    id("io.qameta.allure") version "2.12.0"
+    id("io.qameta.allure") version "4.1.0"
     id 'org.jetbrains.kotlin.kapt'
     id 'kotlin-parcelize'
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
+    id("org.jetbrains.kotlin.plugin.compose") version '2.2.10'
 }
 
-def allureVersion = "2.16.0"
-def aspectJVersion = '1.9.21'
+def allureVersion = "2.35.2"
+def aspectJVersion = '1.9.25.1'
 
 configurations {
-    agent {
-        canBeResolved = true
-        canBeConsumed = true
-    }
-
     all {
         exclude module: 'httpclient'
     }
@@ -68,27 +77,10 @@ android {
         println("Warning: test.properties file not found. Using default test values.")
     }
 
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            def appName = "continuum"
-            def baseAbiVersion = output.getFilter(com.android.build.OutputFile.ABI)
-            def buildType = variant.buildType
-            def versionCode = variant.versionCode
-            def versionName = variant.versionName
-            def artifactName = "${appName}-${versionName}(${versionCode})"
+    // Custom APK names are applied via the new Variant API below (see the androidComponents block at
+    // the end of this file). AGP 9's new DSL removed applicationVariants.outputs.outputFileName.
 
-            if (buildType == "debug") {
-                artifactName = "${appName}-${buildType}-${baseAbiVersion}-${versionName}"
-            } else {
-                artifactName = "${appName}-${baseAbiVersion}-${versionName}"
-            }
-
-            // Assign the apk filename
-            output.outputFileName = "${artifactName}.apk"
-        }
-    }
-
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId "org.cygnusx1.continuum"
@@ -119,7 +111,7 @@ android {
                 println("Warning: keystore.properties file not found. Skipping signing configuration for release.")
             }
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "app_name", "Continuum"
         }
         minifiedRelease {
@@ -220,6 +212,15 @@ if (githubPropertiesFile.exists()) {
 } else {
     println("Warning: github.properties file not found. Skipping GitHub release configuration.")
 }
+
+allure {
+    adapter {
+        // Allure attaches aspectjweaver as the test -javaagent. Pin it to a JDK 25-capable release;
+        // the plugin's default bundles an ASM that can't read class file major version 69 (Java 25).
+        aspectjVersion = aspectJVersion
+    }
+}
+
 dependencies {
 /** AndroidX **/
     implementation 'androidx.appcompat:appcompat:1.7.1'
@@ -230,8 +231,8 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.activity:activity:1.13.0'
     implementation 'androidx.fragment:fragment:1.8.9'
-    implementation 'androidx.core:core-ktx:1.18.0'
-    def lifecycleVersion = "2.10.0"
+    implementation 'androidx.core:core-ktx:1.19.0'
+    def lifecycleVersion = "2.11.0"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-process:$lifecycleVersion"
@@ -391,7 +392,6 @@ dependencies {
 
     testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
     testImplementation "io.qameta.allure:allure-junit5"
-    agent "org.aspectj:aspectjweaver:$aspectJVersion"
 
     // OAuthLoginHelper unit tests. The pure classification tests run on JUnit 5 (Jupiter); the
     // message-formatting tests use Robolectric (a JUnit 4 runner) for real string resources, so the
@@ -402,7 +402,7 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
     testImplementation "junit:junit:4.13.2"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
-    testImplementation "org.robolectric:robolectric:4.14.1"
+    testImplementation "org.robolectric:robolectric:4.16.1"
 
     androidTestImplementation "androidx.test.ext:junit:1.0.0"
     androidTestImplementation "androidx.test:rules:1.5.0"
@@ -431,5 +431,71 @@ spotless {
         target '**/*.xml'
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
+    }
+}
+
+// Replaces the legacy applicationVariants APK-renaming (removed by AGP 9's new DSL). For each
+// variant, transforms the APK artifact so each per-ABI output becomes
+// "continuum-<abi>-<versionName>.apk" (versionName already carries the git/build-type suffixes).
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def renameProvider = tasks.register("rename${variant.name.capitalize()}Apks", RenameApksTask)
+        def request = variant.artifacts.use(renameProvider)
+            .wiredWithDirectories(
+                { it.getApkFolder() } as kotlin.jvm.functions.Function1,
+                { it.getOutFolder() } as kotlin.jvm.functions.Function1)
+            .toTransformMany(SingleArtifact.APK.INSTANCE)
+        renameProvider.configure { it.transformationRequest.set(request) }
+    }
+}
+
+interface CopyApkParameters extends WorkParameters, Serializable {
+    RegularFileProperty getInputApkFile()
+    RegularFileProperty getOutputApkFile()
+}
+
+abstract class CopyApkWorkAction implements WorkAction<CopyApkParameters> {
+    @Override
+    void execute() {
+        def output = parameters.outputApkFile.get().asFile
+        output.delete()
+        java.nio.file.Files.copy(parameters.inputApkFile.get().asFile.toPath(), output.toPath())
+    }
+}
+
+abstract class RenameApksTask extends DefaultTask {
+    @InputFiles
+    abstract DirectoryProperty getApkFolder()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutFolder()
+
+    @Internal
+    abstract Property<ArtifactTransformationRequest<RenameApksTask>> getTransformationRequest()
+
+    private final WorkerExecutor workerExecutor
+
+    @Inject
+    RenameApksTask(WorkerExecutor workerExecutor) {
+        this.workerExecutor = workerExecutor
+    }
+
+    @TaskAction
+    void taskAction() {
+        transformationRequest.get().submit(
+            this,
+            workerExecutor.noIsolation(),
+            CopyApkWorkAction.class,
+            { BuiltArtifact builtArtifact, Directory outputLocation, CopyApkParameters params ->
+                def abi = builtArtifact.filters.find {
+                    it.filterType == FilterConfiguration.FilterType.ABI
+                }?.identifier
+                def abiPart = abi ? "-${abi}" : ""
+                def newName = "continuum${abiPart}-${builtArtifact.versionName}.apk"
+                params.inputApkFile.set(new File(builtArtifact.outputFile))
+                params.outputApkFile.set(new File(outputLocation.asFile, newName as String))
+                return params.outputApkFile.get().asFile
+            } as kotlin.jvm.functions.Function3
+        )
     }
 }
