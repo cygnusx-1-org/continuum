@@ -2,6 +2,13 @@
 
 ---
 
+8.2.5.9.9 / 2026-6-28
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Added a setting to enable and disable autoplay of GIFs in comments(`Settings | Video | Autoplay GIFs in Comments`)
+* Fixed restore of the the current at the time account in a backup
+
 8.2.5.9.8 / 2026-6-27
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
