@@ -36,6 +36,11 @@ public class RedditSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         this.itemClickListener = itemClickListener;
     }
 
+    public void setCollapseRedditSection(boolean collapseRedditSection) {
+        this.collapseRedditSection = collapseRedditSection;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemViewType(int position) {
         return position == 0 ? VIEW_TYPE_MENU_GROUP_TITLE : VIEW_TYPE_MENU_ITEM;

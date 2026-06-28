@@ -1765,6 +1765,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         mShowThumbnailOnTheLeftInCompactLayout = showThumbnailOnTheLeftInCompactLayout;
     }
 
+    public void setLegacyAutoplayVideoControllerUI(boolean legacyAutoplayVideoControllerUI) {
+        mLegacyAutoplayVideoControllerUI = legacyAutoplayVideoControllerUI;
+    }
+
     public void setStartAutoplayVisibleAreaOffset(double startAutoplayVisibleAreaOffset) {
         this.mStartAutoplayVisibleAreaOffset = startAutoplayVisibleAreaOffset / 100.0;
     }
@@ -1823,6 +1827,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setNColumns(int nColumns) {
         mNColumns = nColumns;
+    }
+
+    public void setMarkPostsAsReadSettings(boolean markPostsAsRead, boolean markPostsAsReadAfterVoting,
+                                           boolean markPostsAsReadOnScroll) {
+        mMarkPostsAsRead = markPostsAsRead;
+        mMarkPostsAsReadAfterVoting = markPostsAsReadAfterVoting;
+        mMarkPostsAsReadOnScroll = markPostsAsReadOnScroll;
     }
 
     public void setHideTextPostContent(boolean hideTextPostContent) {

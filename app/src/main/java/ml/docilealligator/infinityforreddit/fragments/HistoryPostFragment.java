@@ -46,6 +46,7 @@ import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFi
 import ml.docilealligator.infinityforreddit.databinding.FragmentHistoryPostBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
 import ml.docilealligator.infinityforreddit.post.HistoryPostViewModel;
@@ -577,6 +578,12 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         if (mAdapter != null) {
             mAdapter.setCanPlayVideo(hasWindowsFocus);
         }
+    }
+
+    @Subscribe
+    public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
+        // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
+        changePostLayout(postLayout, true);
     }
 
     @Subscribe

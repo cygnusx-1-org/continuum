@@ -12,6 +12,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.customviews.preference.SliderPreference;
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayNsfwVideosEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayVideoControllerUIEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeEasierToWatchInFullScreenEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeMuteAutoplayingVideosEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeMuteNSFWVideoEvent;
@@ -39,6 +40,7 @@ public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         SwitchPreference muteNSFWVideosSwitchPreference = findPreference(SharedPreferencesUtils.MUTE_NSFW_VIDEO);
         SwitchPreference autoplayNsfwVideosSwitchPreference = findPreference(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS);
         SwitchPreference easierToWatchInFullScreenSwitchPreference = findPreference(SharedPreferencesUtils.EASIER_TO_WATCH_IN_FULL_SCREEN);
+        SwitchPreference legacyAutoplayVideoControllerUISwitchPreference = findPreference(SharedPreferencesUtils.LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI);
         SliderPreference startAutoplayVisibleAreaOffsetPortrait = findPreference(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_PORTRAIT);
         SliderPreference startAutoplayVisibleAreaOffsetLandscape = findPreference(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_LANDSCAPE);
 
@@ -57,6 +59,13 @@ public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         if (easierToWatchInFullScreenSwitchPreference != null) {
             easierToWatchInFullScreenSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeEasierToWatchInFullScreenEvent((Boolean) newValue));
+                return true;
+            });
+        }
+
+        if (legacyAutoplayVideoControllerUISwitchPreference != null) {
+            legacyAutoplayVideoControllerUISwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeAutoplayVideoControllerUIEvent((Boolean) newValue));
                 return true;
             });
         }

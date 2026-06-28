@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,8 +23,10 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.databinding.FragmentCustomizeBottomAppBarBinding;
+import ml.docilealligator.infinityforreddit.events.ChangeBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
 
 public class CustomizeBottomAppBarFragment extends Fragment {
 
@@ -133,6 +134,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         mainActivityOptionCount = (i + 1) * 2;
                         sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, mainActivityOptionCount).apply();
                         binding.mainActivityOptionCountTextViewCustomizeBottomAppBarFragment.setText(Integer.toString(mainActivityOptionCount));
+                        EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
                     })
                     .show();
@@ -146,6 +148,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption1;
                         sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, optionToSaveToPreference).apply();
                         binding.mainActivityOption1TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
+                        EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
                     })
                     .show();
@@ -159,6 +162,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption2;
                         sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, optionToSaveToPreference).apply();
                         binding.mainActivityOption2TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
+                        EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
                     })
                     .show();
@@ -172,6 +176,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption3;
                         sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, optionToSaveToPreference).apply();
                         binding.mainActivityOption3TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
+                        EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
                     })
                     .show();
@@ -185,6 +190,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption4;
                         sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, optionToSaveToPreference).apply();
                         binding.mainActivityOption4TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
+                        EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
                     })
                     .show();
@@ -207,6 +213,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         }
                         sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, optionToSaveToPreference).apply();
                         binding.mainActivityFabTextViewCustomizeBottomAppBarFragment.setText(fabOptions[mainActivityFAB]);
+                        EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
                     })
                     .show();
@@ -346,9 +353,6 @@ public class CustomizeBottomAppBarFragment extends Fragment {
         int primaryTextColor = mActivity.customThemeWrapper.getPrimaryTextColor();
         int secondaryTextColor = mActivity.customThemeWrapper.getSecondaryTextColor();
         int accentColor = mActivity.customThemeWrapper.getColorAccent();
-        binding.infoTextViewCustomizeBottomAppBarFragment.setTextColor(secondaryTextColor);
-        Drawable infoDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_info_preference_day_night_24dp, mActivity.customThemeWrapper.getPrimaryIconColor());
-        binding.infoTextViewCustomizeBottomAppBarFragment.setCompoundDrawablesWithIntrinsicBounds(infoDrawable, null, null, null);
         binding.mainActivityGroupSummaryCustomizeBottomAppBarFragment.setTextColor(accentColor);
         binding.mainActivityOptionCountTitleTextViewCustomizeBottomAppBarFragment.setTextColor(primaryTextColor);
         binding.mainActivityOptionCountTextViewCustomizeBottomAppBarFragment.setTextColor(secondaryTextColor);
