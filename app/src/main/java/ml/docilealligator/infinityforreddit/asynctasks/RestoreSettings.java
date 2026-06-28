@@ -199,19 +199,29 @@ public class RestoreSettings {
                                     if (accounts != null) {
                                         // Clear existing accounts before inserting restored ones
                                         redditDataRoomDatabase.accountDao().deleteAllAccounts();
+                                        // Inserted rows keep the is_current_user flag from the backup, so more
+                                        // than one account can come in marked current. Track which account should
+                                        // be the current one, preferring the backed-up current user.
+                                        Account currentAccount = null;
                                         for (Account account : accounts) {
                                             redditDataRoomDatabase.accountDao().insert(account);
+                                            if (account.isCurrentUser()) {
+                                                currentAccount = account;
+                                            }
                                         }
-                                        // Optionally, mark the first restored account as current, or restore the 'is_current_user' flag if it was backed up.
-                                        // If accounts list is not empty, mark the first one as current
-                                        if (!accounts.isEmpty()) {
-                                            redditDataRoomDatabase.accountDao().markAccountCurrent(accounts.get(0).getAccountName());
+                                        if (currentAccount == null && !accounts.isEmpty()) {
+                                            currentAccount = accounts.get(0);
+                                        }
+                                        if (currentAccount != null) {
+                                            // Reset every account's flag first so exactly one stays current;
+                                            // otherwise non-current accounts are hidden from the account switcher.
+                                            redditDataRoomDatabase.accountDao().markAllAccountsNonCurrent();
+                                            redditDataRoomDatabase.accountDao().markAccountCurrent(currentAccount.getAccountName());
                                             // Also update the current account shared preferences for immediate effect
-                                            Account firstAccount = accounts.get(0);
                                             currentAccountSharedPreferences.edit()
-                                                .putString(SharedPreferencesUtils.ACCOUNT_NAME, firstAccount.getAccountName())
-                                                .putString(SharedPreferencesUtils.ACCESS_TOKEN, firstAccount.getAccessToken())
-                                                .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, firstAccount.getProfileImageUrl())
+                                                .putString(SharedPreferencesUtils.ACCOUNT_NAME, currentAccount.getAccountName())
+                                                .putString(SharedPreferencesUtils.ACCESS_TOKEN, currentAccount.getAccessToken())
+                                                .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, currentAccount.getProfileImageUrl())
                                                 .apply();
                                         }
                                     }

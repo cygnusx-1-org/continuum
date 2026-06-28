@@ -11,6 +11,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.customviews.preference.SliderPreference;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayNsfwVideosEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayVideoControllerUIEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeEasierToWatchInFullScreenEvent;
@@ -39,6 +40,7 @@ public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         SwitchPreference rememberMutingOptionInPostFeedSwitchPreference = findPreference(SharedPreferencesUtils.REMEMBER_MUTING_OPTION_IN_POST_FEED);
         SwitchPreference muteNSFWVideosSwitchPreference = findPreference(SharedPreferencesUtils.MUTE_NSFW_VIDEO);
         SwitchPreference autoplayNsfwVideosSwitchPreference = findPreference(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS);
+        SwitchPreference autoplayCommentGifSwitchPreference = findPreference(SharedPreferencesUtils.AUTOPLAY_COMMENT_GIF);
         SwitchPreference easierToWatchInFullScreenSwitchPreference = findPreference(SharedPreferencesUtils.EASIER_TO_WATCH_IN_FULL_SCREEN);
         SwitchPreference legacyAutoplayVideoControllerUISwitchPreference = findPreference(SharedPreferencesUtils.LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI);
         SliderPreference startAutoplayVisibleAreaOffsetPortrait = findPreference(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_PORTRAIT);
@@ -52,6 +54,13 @@ public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat 
 
             autoplayNsfwVideosSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeAutoplayNsfwVideosEvent((Boolean) newValue));
+                return true;
+            });
+        }
+
+        if (autoplayCommentGifSwitchPreference != null) {
+            autoplayCommentGifSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeAutoplayCommentGifEvent((Boolean) newValue));
                 return true;
             });
         }

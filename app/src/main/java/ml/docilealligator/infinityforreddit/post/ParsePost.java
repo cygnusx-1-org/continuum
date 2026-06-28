@@ -253,9 +253,17 @@ public class ParsePost {
         String thumbnailUrl = data.isNull(JSONUtils.THUMBNAIL_KEY) ? "" : data.getString(JSONUtils.THUMBNAIL_KEY);
         ArrayList<Post.Preview> previews = new ArrayList<>();
 
+        // A link post that points at another Reddit post carries that post's image as a preview, but
+        // served from the external-preview host. That host isn't reliably loadable here, while the
+        // canonical preview.redd.it host (the same signed asset, used by the linked post itself) is.
+        // Rewrite only for reddit links so genuine external-link previews (news sites, etc.) keep
+        // their external-preview URLs. See the r/bestof -> r/MadeMeSmile case.
+        String linkDomain = data.optString(JSONUtils.DOMAIN_KEY, "");
+        boolean linksToReddit = linkDomain.equals("reddit.com") || linkDomain.endsWith(".reddit.com");
+
         if (data.has(JSONUtils.PREVIEW_KEY)) {
             JSONObject images = data.getJSONObject(JSONUtils.PREVIEW_KEY).getJSONArray(JSONUtils.IMAGES_KEY).getJSONObject(0);
-            String previewUrl = images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY);
+            String previewUrl = normalizeRedditPreviewHost(images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY), linksToReddit);
             int previewWidth = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.WIDTH_KEY);
             int previewHeight = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.HEIGHT_KEY);
             previews.add(new Post.Preview(previewUrl, previewWidth, previewHeight, "", ""));
@@ -264,7 +272,7 @@ public class ParsePost {
 
             for (int i = 0; i < thumbnailPreviews.length(); i++) {
                 JSONObject thumbnailPreview = thumbnailPreviews.getJSONObject(i);
-                String thumbnailPreviewUrl = thumbnailPreview.getString(JSONUtils.URL_KEY);
+                String thumbnailPreviewUrl = normalizeRedditPreviewHost(thumbnailPreview.getString(JSONUtils.URL_KEY), linksToReddit);
                 int thumbnailPreviewWidth = thumbnailPreview.getInt(JSONUtils.WIDTH_KEY);
                 int thumbnailPreviewHeight = thumbnailPreview.getInt(JSONUtils.HEIGHT_KEY);
 
@@ -334,6 +342,13 @@ public class ParsePost {
                     canModPost, approved, approvedAtUTC, approvedBy, spam, distinguished, suggestedSort,
                     thumbnailUrl);
         }
+    }
+
+    private static String normalizeRedditPreviewHost(String url, boolean linksToReddit) {
+        if (linksToReddit && url != null) {
+            return url.replace("://external-preview.redd.it/", "://preview.redd.it/");
+        }
+        return url;
     }
 
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,

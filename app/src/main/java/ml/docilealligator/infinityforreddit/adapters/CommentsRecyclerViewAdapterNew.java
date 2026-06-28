@@ -806,6 +806,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mImageAndGifEntry.setDataSavingMode(dataSavingMode);
     }
 
+    public void setAutoplayCommentGif(boolean autoplayCommentGif) {
+        mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
+    }
+
     public void updatePost(@NonNull Post post) {
         mPost = post;
         mImageAndGifEntry.setBlurImage(

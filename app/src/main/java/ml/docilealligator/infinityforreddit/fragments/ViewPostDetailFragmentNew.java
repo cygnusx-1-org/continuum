@@ -82,6 +82,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AdjustableTouchSlopItemTouchHelper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewPostDetailBinding;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWBlurEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSpoilerBlurEvent;
@@ -1312,6 +1313,24 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
         } else {
             refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+        }
+    }
+
+    @Subscribe
+    public void onChangeAutoplayCommentGifEvent(ChangeAutoplayCommentGifEvent event) {
+        if (mPostAdapter != null) {
+            mPostAdapter.setAutoplayCommentGif(event.autoplayCommentGif);
+        }
+        if (mCommentsAdapter != null) {
+            mCommentsAdapter.setAutoplayCommentGif(event.autoplayCommentGif);
+        }
+        if (mCommentsRecyclerView == null) {
+            refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+        } else {
+            if (mPostAdapter != null) {
+                refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+            }
+            refreshAdapter(mCommentsRecyclerView);
         }
     }
 
