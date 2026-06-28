@@ -2,6 +2,30 @@
 
 ---
 
+8.2.5.9.8 / 2026-6-27
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Removed all references except Post Filters to requiring a restart on change
+* Convert API Keys and Customize Tabs in Main Page to a method that restarts on back button or back gesture
+* Updated dependencies and raised minSdk to 24(Android 7.0)
+* Moved the post view sort to a toolbar subtitle under the subreddit name
+* Restored the child-count pill on re-collapsed comments via a shared styleChildCountBadge helper
+* Aligned the fully-collapsed comment row to the header to remove the username jump and avatar crowding
+
+`Continuum`'s minimum version of `Android` is now `7.0`. The previous minimum
+was `5.0`.
+
+This was done to allow the modernization of various libraries. The biggest
+being an upgrade of the main video library from 1.8.0 to 1.10.1(latest). 
+
+The other big thing in this release is no need to restart the app a lot less.
+Most settings now just work. The big exception is `Post Filters`, which would
+require a completely rewrite
+
+The restart in `API Keys` is now once for all changes on going back instead of
+once per change.
+
 8.2.5.9.7 / 2026-6-25
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
