@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1162,6 +1163,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
                 mCallback.currentlyBindItem(holder.getBindingAdapterPosition());
             } else if (holder instanceof PostCompactBaseViewHolder) {
+                ((PostCompactBaseViewHolder) holder).applyCompactItemLayoutParams();
+
                 if (mDisplaySubredditName) {
                     ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(mSubredditColor);
                     if (mHideSubredditAndUserPrefix) {
@@ -1202,7 +1205,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
                 }
 
-                if (mShowDividerInCompactLayout) {
+                if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2 || mShowDividerInCompactLayout) {
                     ((PostCompactBaseViewHolder) holder).divider.setVisibility(View.VISIBLE);
                 } else {
                     ((PostCompactBaseViewHolder) holder).divider.setVisibility(View.GONE);
@@ -1577,6 +1580,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             default:
                 return mTextTypeBackgroundColor;
         }
+    }
+
+    private GradientDrawable createRoundedBackground(int color, float cornerRadiusDp) {
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setColor(color);
+        background.setCornerRadius(cornerRadiusDp * mScale);
+        return background;
     }
 
     private void applyTypeColor(CustomTextView typeTextView, int postType) {
@@ -4230,6 +4241,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Nullable PostTypeIndicatorView noPreviewPostTypeIndicatorView;
         View divider;
         RequestListener<Drawable> requestListener;
+        GradientDrawable itemViewBackground;
 
         PostCompactBaseViewHolder(View itemView) {
             super(itemView);
@@ -4370,7 +4382,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 titleTextView.setTypeface(mActivity.titleTypeface);
             }
 
-            itemView.setBackgroundColor(mCardViewBackgroundColor);
+            applyCompactItemLayoutParams();
+            applyCompactItemBackground(false);
             postTimeTextView.setTextColor(mSecondaryTextColor);
             titleTextView.setTextColor(mPostTitleColor);
             stickiedPostImageView.setColorFilter(mStickiedPostIconTint, PorterDuff.Mode.SRC_IN);
@@ -4408,7 +4421,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             playButtonImageView.setBackgroundTintList(ColorStateList.valueOf(mMediaIndicatorBackgroundColor));
             loadingIndicator.setIndicatorColor(mColorAccent);
             loadingIndicator.setVisibility(View.GONE);
-            noPreviewLinkImageView.setBackgroundColor(mNoPreviewPostTypeBackgroundColor);
+            noPreviewLinkImageFrameLayout.setBackground(createRoundedBackground(
+                    mNoPreviewPostTypeBackgroundColor,
+                    mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD ? 16 :
+                            mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? 12 : 8));
+            noPreviewLinkImageView.setBackground(null);
             noPreviewLinkImageView.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
             upvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
             scoreTextView.setTextColor(mPostIconAndInfoColor);
@@ -4506,6 +4523,54 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             };
         }
 
+        void applyCompactItemLayoutParams() {
+            ViewGroup.LayoutParams params = itemView.getLayoutParams();
+            if (!(params instanceof ViewGroup.MarginLayoutParams)) {
+                return;
+            }
+
+            int horizontalMargin = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (16 * mScale) : 0;
+            int verticalMargin = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (8 * mScale) : 0;
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) params;
+
+            if (marginLayoutParams.leftMargin == horizontalMargin
+                    && marginLayoutParams.rightMargin == horizontalMargin
+                    && marginLayoutParams.topMargin == verticalMargin
+                    && marginLayoutParams.bottomMargin == verticalMargin) {
+                return;
+            }
+
+            marginLayoutParams.setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin);
+            itemView.setLayoutParams(marginLayoutParams);
+        }
+
+        void applyCompactItemBackground(boolean isReadPost) {
+            if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD) {
+                int backgroundColor = isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor;
+                setRoundedItemViewBackground(backgroundColor, 16);
+            } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3) {
+                int backgroundColor = isReadPost ? mReadPostFilledCardViewBackgroundColor : mFilledCardViewBackgroundColor;
+                setRoundedItemViewBackground(backgroundColor, 12);
+            } else {
+                itemView.setClipToOutline(false);
+                int backgroundColor = isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor;
+                itemView.setBackgroundColor(backgroundColor);
+            }
+        }
+
+        private void setRoundedItemViewBackground(int color, float cornerRadiusDp) {
+            // Reuse a single GradientDrawable per holder and only swap its color, so we don't
+            // allocate a new drawable on every bind/recycle while scrolling. The corner radius is
+            // fixed for the lifetime of the holder because mPostLayout never changes.
+            if (itemViewBackground == null) {
+                itemViewBackground = createRoundedBackground(color, cornerRadiusDp);
+                itemView.setBackground(itemViewBackground);
+                itemView.setClipToOutline(true);
+            } else {
+                itemViewBackground.setColor(color);
+            }
+        }
+
         void showPostOptions() {
             Post post = getItem(getBindingAdapterPosition());
             if (post == null) {
@@ -4519,7 +4584,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         @Override
         void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundColor(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor);
+            applyCompactItemBackground(isReadPost);
         }
 
         @Override
@@ -4531,7 +4596,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (!post.isRead() && mMarkPostsAsRead) {
                 post.markAsRead();
                 if (changePostItemColor) {
-                    itemView.setBackgroundColor(mReadPostCardViewBackgroundColor);
+                    applyCompactItemBackground(true);
                     titleTextView.setTextColor(mReadPostTitleColor);
                 }
                 if (mActivity != null && mActivity instanceof MarkPostAsReadInterface) {
