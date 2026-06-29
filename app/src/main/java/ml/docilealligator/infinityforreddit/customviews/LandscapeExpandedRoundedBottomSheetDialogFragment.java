@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.customviews;
 
 import android.view.View;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 

@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
 
 public class MultiRedditJSONModel {

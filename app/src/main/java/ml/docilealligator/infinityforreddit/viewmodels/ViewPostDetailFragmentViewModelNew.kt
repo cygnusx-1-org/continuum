@@ -177,6 +177,23 @@ class ViewPostDetailFragmentViewModelNew(
         }
     }
 
+    /**
+     * Called when the user explicitly picks a comment sort type. The chosen sort
+     * must always be honored, so stop respecting the subreddit's recommended sort
+     * for this view; otherwise the recommended sort would immediately override the
+     * user's choice (and again on every refresh).
+     */
+    fun fetchCommentsWithSortType(
+        sortType: SortType.Type,
+        changeRefreshState: Boolean
+    ) {
+        respectSubredditRecommendedSortType = false
+        updateSortType(sortType)
+        viewModelScope.launch {
+            fetchComments(sortType, changeRefreshState)
+        }
+    }
+
     suspend fun fetchCommentsRespectRecommendedSortSync(
         changeRefreshState: Boolean
     ) {

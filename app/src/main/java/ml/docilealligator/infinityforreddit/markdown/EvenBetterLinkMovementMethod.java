@@ -18,7 +18,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
-
 import ml.docilealligator.infinityforreddit.R;
 
 public class EvenBetterLinkMovementMethod extends LinkMovementMethod {

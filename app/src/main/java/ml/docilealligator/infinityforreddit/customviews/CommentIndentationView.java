@@ -7,11 +7,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
-
 import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class CommentIndentationView extends LinearLayout {

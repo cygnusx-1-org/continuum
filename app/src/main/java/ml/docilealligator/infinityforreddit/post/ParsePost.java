@@ -4,14 +4,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.text.Html;
 import android.text.TextUtils;
-
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -19,12 +13,14 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by alex on 3/21/18.
@@ -78,6 +74,29 @@ public class ParsePost {
     public static String getLastItem(String response) {
         try {
             JSONObject object = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
+            return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // The /duplicates/{id} endpoint returns a two-element array: index 0 is the original post and
+    // index 1 is the listing of other submissions of the same URL. Pull element 1 and parse it as a
+    // normal posts listing.
+    public static LinkedHashSet<Post> parseDuplicatePostsSync(String response, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+        try {
+            String duplicatesListing = new JSONArray(response).getJSONObject(1).toString();
+            return parsePostsSync(duplicatesListing, -1, postFilter, readPostsList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getDuplicatesLastItem(String response) {
+        try {
+            JSONObject object = new JSONArray(response).getJSONObject(1).getJSONObject(JSONUtils.DATA_KEY);
             return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -234,9 +253,17 @@ public class ParsePost {
         String thumbnailUrl = data.isNull(JSONUtils.THUMBNAIL_KEY) ? "" : data.getString(JSONUtils.THUMBNAIL_KEY);
         ArrayList<Post.Preview> previews = new ArrayList<>();
 
+        // A link post that points at another Reddit post carries that post's image as a preview, but
+        // served from the external-preview host. That host isn't reliably loadable here, while the
+        // canonical preview.redd.it host (the same signed asset, used by the linked post itself) is.
+        // Rewrite only for reddit links so genuine external-link previews (news sites, etc.) keep
+        // their external-preview URLs. See the r/bestof -> r/MadeMeSmile case.
+        String linkDomain = data.optString(JSONUtils.DOMAIN_KEY, "");
+        boolean linksToReddit = linkDomain.equals("reddit.com") || linkDomain.endsWith(".reddit.com");
+
         if (data.has(JSONUtils.PREVIEW_KEY)) {
             JSONObject images = data.getJSONObject(JSONUtils.PREVIEW_KEY).getJSONArray(JSONUtils.IMAGES_KEY).getJSONObject(0);
-            String previewUrl = images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY);
+            String previewUrl = normalizeRedditPreviewHost(images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY), linksToReddit);
             int previewWidth = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.WIDTH_KEY);
             int previewHeight = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.HEIGHT_KEY);
             previews.add(new Post.Preview(previewUrl, previewWidth, previewHeight, "", ""));
@@ -245,7 +272,7 @@ public class ParsePost {
 
             for (int i = 0; i < thumbnailPreviews.length(); i++) {
                 JSONObject thumbnailPreview = thumbnailPreviews.getJSONObject(i);
-                String thumbnailPreviewUrl = thumbnailPreview.getString(JSONUtils.URL_KEY);
+                String thumbnailPreviewUrl = normalizeRedditPreviewHost(thumbnailPreview.getString(JSONUtils.URL_KEY), linksToReddit);
                 int thumbnailPreviewWidth = thumbnailPreview.getInt(JSONUtils.WIDTH_KEY);
                 int thumbnailPreviewHeight = thumbnailPreview.getInt(JSONUtils.HEIGHT_KEY);
 
@@ -259,10 +286,22 @@ public class ParsePost {
             //Cross post
             JSONObject parentData = data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0);
 
+            // If the parent embeds its own media inline in the body (e.g. a self/text post with
+            // images), inherit its media_metadata so the crosspost renders those images inline just
+            // like the parent does, and drop the Reddit-generated preview — which would otherwise
+            // show only a blurry duplicate of the same image above the body. See issue #317.
+            Map<String, MediaMetadata> parentMediaMetadataMap = JSONUtils.parseMediaMetadata(parentData);
+            boolean parentEmbedsInlineMedia = parentMediaMetadataMap != null && !parentMediaMetadataMap.isEmpty();
+            if (parentEmbedsInlineMedia) {
+                mediaMetadataMap = parentMediaMetadataMap;
+                previews = new ArrayList<>();
+                parentData.remove(JSONUtils.PREVIEW_KEY);
+            }
+
             // Extract previews from parent post if available
             ArrayList<Post.Preview> parentPreviews = new ArrayList<>();
 
-            if (parentData.has(JSONUtils.PREVIEW_KEY)) {
+            if (!parentEmbedsInlineMedia && parentData.has(JSONUtils.PREVIEW_KEY)) {
                 JSONObject images = parentData.getJSONObject(JSONUtils.PREVIEW_KEY).getJSONArray(JSONUtils.IMAGES_KEY).getJSONObject(0);
                 String previewUrl = images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY);
                 int previewWidth = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.WIDTH_KEY);
@@ -286,10 +325,13 @@ public class ParsePost {
                 previews = parentPreviews;
             }
 
-            // Use parent thumbnail if current post doesn't have a valid thumbnail
+            // Use parent thumbnail if current post doesn't have a valid thumbnail — but not when the
+            // parent embeds its media inline: the body shows it, and the small thumbnail would only
+            // be upscaled into a blurry duplicate above the body (issue #317).
             String parentThumbnailUrl = parentData.isNull(JSONUtils.THUMBNAIL_KEY) ? "" : parentData.getString(JSONUtils.THUMBNAIL_KEY);
 
-            if ((thumbnailUrl == null || thumbnailUrl.isEmpty() || thumbnailUrl.equals("self") || thumbnailUrl.equals("default"))
+            if (!parentEmbedsInlineMedia
+                && (thumbnailUrl == null || thumbnailUrl.isEmpty() || thumbnailUrl.equals("self") || thumbnailUrl.equals("default"))
                 && parentThumbnailUrl != null && !parentThumbnailUrl.isEmpty() && !parentThumbnailUrl.equals("self") && !parentThumbnailUrl.equals("default")) {
                 thumbnailUrl = parentThumbnailUrl;
             }
@@ -315,6 +357,13 @@ public class ParsePost {
                     canModPost, approved, approvedAtUTC, approvedBy, spam, distinguished, suggestedSort,
                     thumbnailUrl);
         }
+    }
+
+    private static String normalizeRedditPreviewHost(String url, boolean linksToReddit) {
+        if (linksToReddit && url != null) {
+            return url.replace("://external-preview.redd.it/", "://preview.redd.it/");
+        }
+        return url;
     }
 
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,

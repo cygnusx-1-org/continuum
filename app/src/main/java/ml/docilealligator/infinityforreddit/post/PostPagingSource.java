@@ -1,31 +1,23 @@
 package ml.docilealligator.infinityforreddit.post;
 
 import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.paging.ListenableFuturePagingSource;
 import androidx.paging.PagingState;
-
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -36,6 +28,9 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.HttpException;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -223,6 +218,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 return loadUserPosts(loadParams, api);
             case PostType.SEARCH:
                 return loadSearchPosts(loadParams, api);
+            case PostType.DUPLICATES:
+                return loadDuplicatesPosts(loadParams, api);
             case PostType.MULTIREDDIT:
                 return loadMultiRedditPosts(loadParams, api);
             default:
@@ -412,6 +409,66 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
         return Futures.catching(partialLoadResultFuture,
                 IOException.class, LoadResult.Error::new, executor);
+    }
+
+    private ListenableFuture<LoadResult<String, Post>> loadDuplicatesPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
+        ListenableFuture<Response<String>> duplicatesPosts;
+        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            duplicatesPosts = api.getDuplicatesListenableFuture(subredditOrUserName, loadParams.getKey(),
+                    APIUtils.ANONYMOUS_USER_AGENT);
+        } else {
+            duplicatesPosts = api.getDuplicatesOauthListenableFuture(subredditOrUserName, loadParams.getKey(),
+                    APIUtils.getOAuthHeader(accessToken));
+        }
+
+        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(duplicatesPosts, this::transformDuplicatesData, executor);
+
+        ListenableFuture<LoadResult<String, Post>> partialLoadResultFuture =
+                Futures.catching(pageFuture, HttpException.class,
+                        LoadResult.Error::new, executor);
+
+        return Futures.catching(partialLoadResultFuture,
+                IOException.class, LoadResult.Error::new, executor);
+    }
+
+    // Mirrors transformData() but reads the duplicates listing (element 1 of the response array)
+    // rather than a top-level listing object.
+    public LoadResult<String, Post> transformDuplicatesData(Response<String> response) {
+        if (response.isSuccessful()) {
+            String responseString = response.body();
+            LinkedHashSet<Post> newPosts = ParsePost.parseDuplicatePostsSync(responseString, postFilter, readPostsList);
+            String lastItem = ParsePost.getDuplicatesLastItem(responseString);
+            if (newPosts == null) {
+                return new LoadResult.Error<>(new Exception("Error parsing posts"));
+            } else {
+                int currentPostsSize = posts.size();
+                if (lastItem != null && lastItem.equals(previousLastItem)) {
+                    lastItem = null;
+                }
+                previousLastItem = lastItem;
+
+                if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
+                    setMetadataToAnonymousPosts(newPosts);
+                }
+
+                for (Post p : newPosts) {
+                    if (existingPostIds.contains(p.getId())) {
+                        continue;
+                    }
+
+                    existingPostIds.add(p.getId());
+                    posts.add(p);
+                }
+
+                if (currentPostsSize == posts.size()) {
+                    return new LoadResult.Page<>(new ArrayList<>(), null, lastItem);
+                } else {
+                    return new LoadResult.Page<>(posts.subList(currentPostsSize, posts.size()), null, lastItem);
+                }
+            }
+        } else {
+            return new LoadResult.Error<>(new Exception("Error getting response"));
+        }
     }
 
     private ListenableFuture<LoadResult<String, Post>> loadMultiRedditPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {

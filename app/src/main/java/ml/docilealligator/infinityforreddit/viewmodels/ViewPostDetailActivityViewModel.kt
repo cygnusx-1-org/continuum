@@ -82,6 +82,15 @@ class ViewPostDetailActivityViewModel(
                 return@launch
             }
 
+            // The duplicates ("Other Discussions") listing is loaded up front by PostPagingSource and
+            // there is no duplicates endpoint on this swipe-detail "load more" path. Mark the list as
+            // complete instead of falling through to the home Best feed (which would append unrelated
+            // posts). The guard above then stops further fetches.
+            if (postType == PostType.DUPLICATES) {
+                _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.NO_MORE_POSTS)
+                return@launch
+            }
+
             _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.LOADING)
 
             if (postType != PostType.READ_POSTS) {

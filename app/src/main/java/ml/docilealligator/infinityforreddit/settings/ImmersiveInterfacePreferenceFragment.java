@@ -1,15 +1,12 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.os.Bundle;
-
 import androidx.preference.SwitchPreference;
-
-import org.greenrobot.eventbus.EventBus;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import org.greenrobot.eventbus.EventBus;
 
 public class ImmersiveInterfacePreferenceFragment extends CustomFontPreferenceFragmentCompat {
 

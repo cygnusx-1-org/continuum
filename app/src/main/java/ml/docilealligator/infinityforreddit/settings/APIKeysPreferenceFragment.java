@@ -3,29 +3,36 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.QRCodeScannerActivity;
@@ -49,11 +56,25 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     private CustomFontEditTextPreference clientIdPref;
     private EditText currentClientIdEditText;
 
+    // Restart is deferred until the user leaves this screen, so a single restart covers
+    // however many keys they edited. This callback fires on back button / back gesture / Up.
+    private boolean mPendingRestart = false;
+    private OnBackPressedCallback mRestartOnBackCallback;
+    private TextView mRestartWarning;
+
     public APIKeysPreferenceFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mRestartOnBackCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                AppRestartHelper.triggerAppRestart(requireContext());
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, mRestartOnBackCallback);
 
         // Initialize the launcher for QR code scanning
         qrCodeScannerLauncher = registerForActivityResult(
@@ -74,6 +95,42 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                         }
                     }
                 });
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View preferenceView = super.onCreateView(inflater, container, savedInstanceState);
+
+        // Wrap the preference list with a warning banner across the top, matching the
+        // "pending changes" affordance used elsewhere (e.g. CustomizeMainPageTabsFragment).
+        // The banner stays hidden until a restart-requiring key is edited.
+        LinearLayout wrapper = new LinearLayout(requireContext());
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+
+        mRestartWarning = new TextView(requireContext());
+        // Warning sign glyph in front (enlarged 2x) so the message reads as an alert at a glance.
+        String symbol = "⚠";
+        SpannableString warningText = new SpannableString(symbol + "  " + getString(R.string.app_will_restart));
+        warningText.setSpan(new RelativeSizeSpan(2f), 0, symbol.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        mRestartWarning.setText(warningText);
+        mRestartWarning.setTypeface(mRestartWarning.getTypeface(), Typeface.BOLD);
+        int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16,
+                getResources().getDisplayMetrics());
+        mRestartWarning.setPadding(padding, padding, padding, padding);
+        if (mActivity != null && mActivity.customThemeWrapper != null) {
+            mRestartWarning.setBackgroundColor(mActivity.customThemeWrapper.getCardViewBackgroundColor());
+            // Accent is the theme's alert/attention color, so the text stands out.
+            mRestartWarning.setTextColor(mActivity.customThemeWrapper.getColorAccent());
+        }
+        mRestartWarning.setVisibility(mPendingRestart ? View.VISIBLE : View.GONE);
+
+        wrapper.addView(mRestartWarning, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        wrapper.addView(preferenceView, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        return wrapper;
     }
 
     @Override
@@ -119,8 +176,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 }
                 // Otherwise, the EditText will automatically show the non-default current value
 
-                // Setup validation for the specific length
-                setupLengthValidation(editText, CLIENT_ID_LENGTH, true);
+                // Setup validation for the specific length, disallowing the default Client ID
+                setupLengthValidation(editText, CLIENT_ID_LENGTH, true, defaultValue);
 
                 // Add QR code scanning button to dialog
                 View rootView = editText.getRootView();
@@ -187,7 +244,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 String value = stripWhitespace((String) newValue);
 
                 // Final validation check (redundant due to button state, but safe)
-                if (value == null || value.length() != CLIENT_ID_LENGTH) {
+                String defaultValue = preference.getContext().getString(R.string.default_client_id);
+                if (value == null || value.length() != CLIENT_ID_LENGTH || value.equals(defaultValue)) {
                     return false; // Should not happen if button logic is correct
                 }
 
@@ -200,9 +258,10 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
                 if (success) {
                     Log.i(TAG, "Client ID manually saved successfully.");
-                    // Update the summary provider manually since we return false
-                    preference.setSummaryProvider(clientIdPref.getSummaryProvider()); // Re-set to trigger update
-                    AppRestartHelper.triggerAppRestart(requireContext()); // Use the helper
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    clientIdPref.setText(value);
+                    markRestartPendingAndWarn();
                 } else {
                     Log.e(TAG, "Failed to save Client ID manually.");
                     Toast.makeText(getContext(), "Error saving Client ID.", Toast.LENGTH_SHORT).show();
@@ -331,8 +390,10 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
                 if (success) {
                     Log.i(TAG, "User Agent saved successfully.");
-                    preference.setSummaryProvider(userAgentPref.getSummaryProvider());
-                    AppRestartHelper.triggerAppRestart(requireContext());
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    userAgentPref.setText(value);
+                    markRestartPendingAndWarn();
                 } else {
                     Log.e(TAG, "Failed to save User Agent.");
                     Toast.makeText(getContext(), "Error saving User Agent.", Toast.LENGTH_SHORT).show();
@@ -382,8 +443,10 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
                 if (success) {
                     Log.i(TAG, "Redirect URI saved successfully.");
-                    preference.setSummaryProvider(redirectUriPref.getSummaryProvider());
-                    AppRestartHelper.triggerAppRestart(requireContext());
+                    // Push the value into the preference so getText() and the summary reflect it;
+                    // we return false, so the framework won't store it for us.
+                    redirectUriPref.setText(value);
+                    markRestartPendingAndWarn();
                 } else {
                     Log.e(TAG, "Failed to save Redirect URI.");
                     Toast.makeText(getContext(), "Error saving Redirect URI.", Toast.LENGTH_SHORT).show();
@@ -393,6 +456,18 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             }));
         } else {
             Log.e(TAG, "Could not find Redirect URI preference: " + SharedPreferencesUtils.REDIRECT_URI_PREF_KEY);
+        }
+    }
+
+    // Records that a restart-requiring key changed, arms the back callback so leaving the
+    // screen restarts the app, and reveals the top banner so the deferred restart isn't a surprise.
+    private void markRestartPendingAndWarn() {
+        mPendingRestart = true;
+        if (mRestartOnBackCallback != null) {
+            mRestartOnBackCallback.setEnabled(true);
+        }
+        if (mRestartWarning != null) {
+            mRestartWarning.setVisibility(View.VISIBLE);
         }
     }
 
@@ -429,6 +504,16 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
     // Reusable helper method for setting up length validation on an EditTextPreference dialog
     private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck) {
+        setupLengthValidation(editText, requiredLength, stripWhitespaceBeforeCheck, null);
+    }
+
+    /**
+     * Enables/disables the dialog's OK button based on the entered text.
+     *
+     * @param disallowedValue if non-null, the OK button stays disabled while the (whitespace-stripped)
+     *                        entered value equals this value. Used to prevent saving the default Client ID.
+     */
+    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck, final String disallowedValue) {
         // Add TextWatcher to enable/disable OK button based on length
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -439,40 +524,33 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
             @Override
             public void afterTextChanged(Editable s) {
-                View rootView = editText.getRootView();
-                if (rootView != null) {
-                    Button positiveButton = rootView.findViewById(android.R.id.button1);
-                    if (positiveButton != null) {
-                        int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(s.toString()).length() : s.length();
-                        boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
-                        positiveButton.setEnabled(isEnabled);
-                        positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f); // Adjust alpha for visual feedback
-                    } else {
-                        Log.w(TAG, "Could not find positive button (android.R.id.button1) in dialog root view (afterTextChanged).");
-                    }
-                } else {
-                    Log.w(TAG, "Could not get root view from EditText to find positive button (afterTextChanged).");
-                }
+                updatePositiveButtonState(editText, requiredLength, stripWhitespaceBeforeCheck, disallowedValue, "afterTextChanged");
             }
         });
 
         // Ensure the button state is correct initially based on the current value
-        editText.post(() -> {
-            View rootView = editText.getRootView();
-            if (rootView != null) {
-                Button positiveButton = rootView.findViewById(android.R.id.button1);
-                if (positiveButton != null) {
-                    int effectiveLength = stripWhitespaceBeforeCheck ? stripWhitespace(editText.getText().toString()).length() : editText.getText().length();
-                    boolean isEnabled = effectiveLength == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveLength == 0); // Allow empty for Giphy
-                    positiveButton.setEnabled(isEnabled);
-                    positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f);
-                } else {
-                    Log.w(TAG, "Could not find positive button (android.R.id.button1) in dialog root view (post).");
-                }
-            } else {
-                Log.w(TAG, "Could not get root view from EditText to find positive button (post).");
-            }
-        });
+        editText.post(() -> updatePositiveButtonState(editText, requiredLength, stripWhitespaceBeforeCheck, disallowedValue, "post"));
+    }
+
+    private void updatePositiveButtonState(android.widget.EditText editText, final int requiredLength,
+                                           final boolean stripWhitespaceBeforeCheck, final String disallowedValue,
+                                           final String caller) {
+        View rootView = editText.getRootView();
+        if (rootView == null) {
+            Log.w(TAG, "Could not get root view from EditText to find positive button (" + caller + ").");
+            return;
+        }
+        Button positiveButton = rootView.findViewById(android.R.id.button1);
+        if (positiveButton == null) {
+            Log.w(TAG, "Could not find positive button (android.R.id.button1) in dialog root view (" + caller + ").");
+            return;
+        }
+        String effectiveValue = stripWhitespaceBeforeCheck ? stripWhitespace(editText.getText().toString()) : editText.getText().toString();
+        boolean lengthOk = effectiveValue.length() == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveValue.isEmpty()); // Allow empty for Giphy
+        boolean isDisallowed = disallowedValue != null && disallowedValue.equals(effectiveValue);
+        boolean isEnabled = lengthOk && !isDisallowed;
+        positiveButton.setEnabled(isEnabled);
+        positiveButton.setAlpha(isEnabled ? 1.0f : 0.5f); // Adjust alpha for visual feedback
     }
 
     // Inject dependencies

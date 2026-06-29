@@ -1,10 +1,8 @@
 package ml.docilealligator.infinityforreddit.markdown.redditheading;
 
 import androidx.annotation.NonNull;
-
-import org.commonmark.parser.Parser;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
+import org.commonmark.parser.Parser;
 
 /**
  * Replaces CommonMark heading parsing with Reddit-style parsing that does not require space after #

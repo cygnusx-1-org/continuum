@@ -2,19 +2,15 @@ package ml.docilealligator.infinityforreddit;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
-
+import dagger.Module;
+import dagger.Provides;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
 import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
 import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;

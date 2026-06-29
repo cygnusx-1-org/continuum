@@ -1,15 +1,12 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.PageKeyedDataSource;
-
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import retrofit2.Retrofit;

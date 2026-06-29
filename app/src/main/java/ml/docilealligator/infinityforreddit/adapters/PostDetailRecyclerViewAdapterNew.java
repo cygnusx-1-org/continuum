@@ -24,7 +24,6 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -47,7 +46,6 @@ import androidx.media3.ui.TrackSelectionDialogBuilder;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
@@ -58,20 +56,17 @@ import com.bumptech.glide.request.target.Target;
 import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
 import com.libRG.CustomTextView;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.Executor;
-import java.util.function.Supplier;
-
-import javax.inject.Provider;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
+import javax.inject.Provider;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
@@ -79,7 +74,6 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.account.Account;
-import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.FilteredPostsActivity;
@@ -97,6 +91,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.CopyTextBottomS
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostOptionsBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
@@ -113,12 +108,12 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostDetailVideoAutop
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
+import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
+import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
-import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
-import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
@@ -212,7 +207,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final int mSecondaryTextColor;
     private final int mPostTitleColor;
     private final int mPrimaryTextColor;
-    private final int mPostTypeBackgroundColor;
+    private final int mTextTypeBackgroundColor;
+    private final int mImageTypeBackgroundColor;
+    private final int mLinkTypeBackgroundColor;
+    private final int mVideoTypeBackgroundColor;
+    private final int mGifTypeBackgroundColor;
+    private final int mGalleryTypeBackgroundColor;
     private final int mPostTypeTextColor;
     private final int mSubredditColor;
     private final int mUsernameColor;
@@ -338,7 +338,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mCardViewColor = customThemeWrapper.getCardViewBackgroundColor();
         mPostTitleColor = customThemeWrapper.getPostTitleColor();
         mPrimaryTextColor = customThemeWrapper.getPrimaryTextColor();
-        mPostTypeBackgroundColor = customThemeWrapper.getPostTypeBackgroundColor();
+        mTextTypeBackgroundColor = customThemeWrapper.getTextTypeBackgroundColor();
+        mImageTypeBackgroundColor = customThemeWrapper.getImageTypeBackgroundColor();
+        mLinkTypeBackgroundColor = customThemeWrapper.getLinkTypeBackgroundColor();
+        mVideoTypeBackgroundColor = customThemeWrapper.getVideoTypeBackgroundColor();
+        mGifTypeBackgroundColor = customThemeWrapper.getGifTypeBackgroundColor();
+        mGalleryTypeBackgroundColor = customThemeWrapper.getGalleryTypeBackgroundColor();
         mPostTypeTextColor = customThemeWrapper.getPostTypeTextColor();
         mAuthorFlairTextColor = customThemeWrapper.getAuthorFlairTextColor();
         mSpoilerBackgroundColor = customThemeWrapper.getSpoilerBackgroundColor();
@@ -518,6 +523,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             case Post.GALLERY_TYPE:
                 return VIEW_TYPE_POST_DETAIL_GALLERY;
             default:
+                // Self/text posts can carry a Reddit-generated preview (e.g. a link in the body
+                // with an OpenGraph image). Reuse the link holder to show it; the base holder still
+                // renders the selftext below, so nothing is lost. But if the body already embeds the
+                // image inline, the preview just duplicates it (issue #317) — show plain text.
+                if (getSuitablePreview(mPost.getPreviews()) != null && !mPost.embedsInlineBodyMedia()) {
+                    return VIEW_TYPE_POST_DETAIL_LINK;
+                }
                 return VIEW_TYPE_POST_DETAIL_TEXT_TYPE;
         }
     }
@@ -580,6 +592,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 return;
             }
             ((PostDetailBaseViewHolder) holder).titleTextView.setText(mPost.getTitle());
+            applyTypeColor(((PostDetailBaseViewHolder) holder).typeTextView, mPost.getPostType());
             if (mPost.getSubredditNamePrefixed().startsWith("u/")) {
                 if (mPost.getAuthorIconUrl() == null) {
                     String authorName = mPost.isAuthorDeleted() ? mPost.getSubredditNamePrefixed().substring(2) : mPost.getAuthor();
@@ -882,8 +895,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     loadImage((PostDetailImageAndGifAutoplayViewHolder) holder, preview);
                 }
             } else if (holder instanceof PostDetailLinkViewHolder) {
-                String domain = Uri.parse(mPost.getUrl()).getHost();
-                ((PostDetailLinkViewHolder) holder).binding.linkTextViewItemPostDetailLink.setText(domain);
+                if (mPost.getPostType() == Post.TEXT_TYPE) {
+                    // Self/text post showing its Reddit preview: keep the text chip and don't show a
+                    // domain line (the post url is just the self permalink).
+                    if (!mHidePostType) {
+                        ((PostDetailLinkViewHolder) holder).binding.typeTextViewItemPostDetailLink.setText(R.string.text);
+                    }
+                    ((PostDetailLinkViewHolder) holder).binding.linkTextViewItemPostDetailLink.setVisibility(View.GONE);
+                } else {
+                    String domain = Uri.parse(mPost.getUrl()).getHost();
+                    ((PostDetailLinkViewHolder) holder).binding.linkTextViewItemPostDetailLink.setText(domain);
+                }
                 Post.Preview preview = getSuitablePreview(mPost.getPreviews());
                 if (preview != null) {
                     ((PostDetailLinkViewHolder) holder).binding.imageViewItemPostDetailLink.setRatio((float) preview.getPreviewHeight() / (float) preview.getPreviewWidth());
@@ -1026,6 +1048,15 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             ((PostDetailImageAndGifAutoplayViewHolder) holder).binding.loadWrapperItemPostDetailImageAndGifAutoplay.setVisibility(View.GONE);
+                            // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                            // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                            // otherwise letterbox the image with black against the card background. Skip
+                            // when the preview had no dimensions, since bindView intentionally uses a
+                            // fixed-height CENTER_CROP layout in that case.
+                            if (preview.getPreviewWidth() > 0 && preview.getPreviewHeight() > 0
+                                    && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                                ((PostDetailImageAndGifAutoplayViewHolder) holder).binding.imageViewItemPostDetailImageAndGifAutoplay.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                            }
                             return false;
                         }
                     });
@@ -1053,6 +1084,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             ((PostDetailVideoAndGifPreviewHolder) holder).binding.loadWrapperItemPostDetailVideoAndGifPreview.setVisibility(View.GONE);
+                            // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                            // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                            // otherwise letterbox the image with black against the card background.
+                            if (resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                                ((PostDetailVideoAndGifPreviewHolder) holder).binding.imageViewItemPostDetailVideoAndGifPreview.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                            }
                             return false;
                         }
                     });
@@ -1081,6 +1118,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             ((PostDetailLinkViewHolder) holder).binding.loadWrapperItemPostDetailLink.setVisibility(View.GONE);
+                            // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                            // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                            // otherwise letterbox the image with black against the card background.
+                            if (resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                                ((PostDetailLinkViewHolder) holder).binding.imageViewItemPostDetailLink.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                            }
                             return false;
                         }
                     });
@@ -1123,6 +1166,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mImageAndGifEntry.setDataSavingMode(dataSavingMode);
     }
 
+    public void setAutoplayCommentGif(boolean autoplayCommentGif) {
+        mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
+    }
+
     public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int direction, int swipeLeftAction, int swipeRightAction) {
         if (viewHolder instanceof PostDetailBaseViewHolder) {
             if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.START) {
@@ -1139,6 +1186,44 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 }
             }
         }
+    }
+
+    public void addOneComment() {
+        if (mPost != null) {
+            mPost.setNComments(mPost.getNComments() + 1);
+            notifyItemChanged(0);
+        }
+    }
+
+    private void applyTypeColor(CustomTextView typeTextView, int postType) {
+        if (typeTextView == null) return;
+        int color;
+        switch (postType) {
+            case Post.VIDEO_TYPE:
+                color = mVideoTypeBackgroundColor;
+                break;
+            case Post.GIF_TYPE:
+                color = mGifTypeBackgroundColor;
+                break;
+            case Post.IMAGE_TYPE:
+                color = mImageTypeBackgroundColor;
+                break;
+            case Post.LINK_TYPE:
+            case Post.NO_PREVIEW_LINK_TYPE:
+                color = mLinkTypeBackgroundColor;
+                break;
+            case Post.GALLERY_TYPE:
+                color = mGalleryTypeBackgroundColor;
+                break;
+            case Post.TEXT_TYPE:
+                color = mTextTypeBackgroundColor;
+                break;
+            default:
+                color = mTextTypeBackgroundColor;
+                break;
+        }
+        typeTextView.setBackgroundColor(color);
+        typeTextView.setBorderColor(color);
     }
 
     private void openMedia(Post post) {
@@ -1873,8 +1958,6 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             authorFlairTextView.setTextColor(mAuthorFlairTextColor);
             postTimeTextView.setTextColor(mSecondaryTextColor);
             titleTextView.setTextColor(mPostTitleColor);
-            typeTextView.setBackgroundColor(mPostTypeBackgroundColor);
-            typeTextView.setBorderColor(mPostTypeBackgroundColor);
             typeTextView.setTextColor(mPostTypeTextColor);
             spoilerTextView.setBackgroundColor(mSpoilerBackgroundColor);
             spoilerTextView.setBorderColor(mSpoilerBackgroundColor);
@@ -2494,6 +2577,21 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
             binding.imageViewItemPostDetailLink.setOnClickListener(view -> {
                 if (mPost == null) {
+                    return;
+                }
+
+                if (mPost.getPostType() == Post.TEXT_TYPE) {
+                    // Self/text post: the url is the self permalink, so open the preview image itself
+                    // rather than resolving a link.
+                    Post.Preview preview = getSuitablePreview(mPost.getPreviews());
+                    if (preview != null) {
+                        Intent imageIntent = new Intent(mActivity, ViewImageOrGifActivity.class);
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_IMAGE_URL_KEY, preview.getPreviewUrl());
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mPost.getSubredditName() + "-" + mPost.getId() + ".jpg");
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, mPost.getSubredditName());
+                        imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, mPost.isNSFW());
+                        mActivity.startActivity(imageIntent);
+                    }
                     return;
                 }
 

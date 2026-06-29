@@ -6,23 +6,14 @@ import android.text.Spanned;
 import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-
-import org.commonmark.node.Link;
-import org.commonmark.node.Node;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonSpansFactory;
@@ -35,10 +26,14 @@ import io.noties.markwon.image.AsyncDrawableLoader;
 import io.noties.markwon.image.AsyncDrawableScheduler;
 import io.noties.markwon.image.DrawableUtils;
 import io.noties.markwon.image.ImageProps;
-import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
+import java.util.HashMap;
+import java.util.Map;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
+import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.commonmark.node.Link;
+import org.commonmark.node.Node;
 
 public class EmotePlugin extends AbstractMarkwonPlugin {
     private final AsyncDrawableLoader asyncDrawableLoader;

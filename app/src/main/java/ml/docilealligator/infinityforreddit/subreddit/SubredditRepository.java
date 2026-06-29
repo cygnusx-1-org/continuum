@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import androidx.lifecycle.LiveData;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class SubredditRepository {

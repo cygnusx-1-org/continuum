@@ -13,26 +13,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PersistableBundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
 import com.bumptech.glide.Glide;
-
-import org.greenrobot.eventbus.EventBus;
-
 import java.io.FileNotFoundException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import jp.wasabeef.glide.transformations.CropTransformation;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -42,6 +35,7 @@ import ml.docilealligator.infinityforreddit.events.SubmitChangeBannerEvent;
 import ml.docilealligator.infinityforreddit.events.SubmitSaveProfileEvent;
 import ml.docilealligator.infinityforreddit.utils.EditProfileUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
+import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
 
 public class EditProfileService extends JobService {

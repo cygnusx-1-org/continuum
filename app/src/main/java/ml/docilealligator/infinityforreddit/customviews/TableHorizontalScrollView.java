@@ -8,10 +8,8 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.widget.HorizontalScrollView;
-
 import androidx.annotation.Nullable;
 import androidx.viewpager2.widget.ViewPager2;
-
 import ml.docilealligator.infinityforreddit.customviews.slidr.widget.SliderPanel;
 
 public class TableHorizontalScrollView extends HorizontalScrollView {

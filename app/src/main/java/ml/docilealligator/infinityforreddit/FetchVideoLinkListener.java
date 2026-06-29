@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit;
 
 import androidx.annotation.Nullable;
-
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 

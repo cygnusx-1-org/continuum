@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.customtheme;
 
 import androidx.lifecycle.LiveData;
-
 import java.util.List;
-
 import kotlinx.coroutines.flow.Flow;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 

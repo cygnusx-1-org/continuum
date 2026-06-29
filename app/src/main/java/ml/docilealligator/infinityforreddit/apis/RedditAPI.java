@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.apis;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import okhttp3.MultipartBody;
@@ -197,6 +195,12 @@ public interface RedditAPI {
     @GET("/api/multi/mine?expand_srs=true")
     Call<String> getMyMultiReddits(@HeaderMap Map<String, String> headers);
 
+    @GET("/api/multi/user/{username}?expand_srs=true&raw_json=1")
+    Call<String> getUserMultiReddits(@HeaderMap Map<String, String> headers, @Path("username") String username);
+
+    @GET("/api/multi/user/{username}?expand_srs=true&raw_json=1")
+    Call<String> getPublicUserMultiReddits(@Path("username") String username);
+
     @FormUrlEncoded
     @POST("/api/multi/favorite?raw_json=1&gilding_detail=1")
     Call<String> favoriteMultiReddit(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
@@ -314,6 +318,14 @@ public interface RedditAPI {
     ListenableFuture<Response<String>> getUserPostsListenableFuture(@Path("username") String username, @Query("after") String lastItem,
                                                                     @Query("sort") SortType.Type sortType, @Query("t") SortType.Time sortTime,
                                                                     @Query("limit") int limit);
+
+    @GET("duplicates/{id}.json?raw_json=1&limit=100&sr_detail=1")
+    ListenableFuture<Response<String>> getDuplicatesOauthListenableFuture(@Path("id") String id, @Query("after") String after,
+                                                                          @HeaderMap Map<String, String> headers);
+
+    @GET("duplicates/{id}.json?raw_json=1&limit=100&sr_detail=1")
+    ListenableFuture<Response<String>> getDuplicatesListenableFuture(@Path("id") String id, @Query("after") String after,
+                                                                     @Header("User-Agent") String userAgent);
 
     @GET("search.json?include_over_18=1&raw_json=1&limit=100&type=link&sr_detail=1")
     ListenableFuture<Response<String>> searchPostsOauthListenableFuture(@Query("q") String query, @Query("after") String after,

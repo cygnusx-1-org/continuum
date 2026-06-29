@@ -7,18 +7,14 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
-
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
+import org.greenrobot.eventbus.EventBus;
 
 public class MaterialYouUtils {
     public interface CheckThemeNameListener {

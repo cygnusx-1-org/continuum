@@ -9,9 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AlertDialog;
-
 import ml.docilealligator.infinityforreddit.R;
 
 public class ColorPickerDialog extends AlertDialog {

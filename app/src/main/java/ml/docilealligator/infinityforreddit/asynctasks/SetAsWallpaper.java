@@ -8,10 +8,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
-
 import java.io.IOException;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.WallpaperSetter;
 
 public class SetAsWallpaper {

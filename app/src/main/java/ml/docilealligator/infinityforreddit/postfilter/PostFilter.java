@@ -2,19 +2,16 @@ package ml.docilealligator.infinityforreddit.postfilter;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
 import ml.docilealligator.infinityforreddit.post.Post;
 
 @Entity(tableName = "post_filter")

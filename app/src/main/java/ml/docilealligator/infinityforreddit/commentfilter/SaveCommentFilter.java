@@ -1,10 +1,8 @@
 package ml.docilealligator.infinityforreddit.commentfilter;
 
 import android.os.Handler;
-
 import java.util.List;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class SaveCommentFilter {

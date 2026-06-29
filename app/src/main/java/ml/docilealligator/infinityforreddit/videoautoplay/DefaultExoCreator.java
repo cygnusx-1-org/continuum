@@ -22,7 +22,6 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.checkN
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.util.UnstableApi;
@@ -42,9 +41,7 @@ import androidx.media3.exoplayer.source.MediaSourceEventListener;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelector;
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
-
 import java.io.IOException;
-
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 
 /**

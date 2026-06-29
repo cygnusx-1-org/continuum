@@ -3,9 +3,7 @@ package ml.docilealligator.infinityforreddit.customviews.slidr;
 import android.animation.ArgbEvaluator;
 import android.app.Activity;
 import android.os.Build;
-
 import androidx.annotation.ColorInt;
-
 import ml.docilealligator.infinityforreddit.customviews.slidr.widget.SliderPanel;
 
 

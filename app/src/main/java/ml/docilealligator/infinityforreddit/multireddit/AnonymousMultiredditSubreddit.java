@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-
 import ml.docilealligator.infinityforreddit.account.Account;
 
 @Entity(tableName = "anonymous_multireddit_subreddits", primaryKeys = {"path", "username", "subreddit_name"},

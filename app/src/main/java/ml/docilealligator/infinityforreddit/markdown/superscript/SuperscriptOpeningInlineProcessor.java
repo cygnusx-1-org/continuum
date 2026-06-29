@@ -2,11 +2,9 @@ package ml.docilealligator.infinityforreddit.markdown.superscript;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import io.noties.markwon.inlineparser.InlineProcessor;
 import org.commonmark.node.Node;
 import org.commonmark.node.Text;
-
-import io.noties.markwon.inlineparser.InlineProcessor;
 
 public class SuperscriptOpeningInlineProcessor extends InlineProcessor {
     @NonNull

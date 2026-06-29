@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.readpost;
 
 import androidx.annotation.WorkerThread;
-
 import java.util.HashSet;
 import java.util.List;
 

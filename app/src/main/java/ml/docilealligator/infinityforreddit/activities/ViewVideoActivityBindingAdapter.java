@@ -2,16 +2,13 @@ package ml.docilealligator.infinityforreddit.activities;
 
 import android.widget.ImageButton;
 import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-
+import app.futured.hauler.HaulerView;
+import app.futured.hauler.LockableNestedScrollView;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.loadingindicator.LoadingIndicator;
-
-import app.futured.hauler.HaulerView;
-import app.futured.hauler.LockableNestedScrollView;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoBinding;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoZoomableBinding;

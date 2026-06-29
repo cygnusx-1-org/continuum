@@ -1,11 +1,9 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import ml.docilealligator.infinityforreddit.R;
 
 /**
@@ -255,6 +253,12 @@ public class SettingsSearchRegistry {
                 PostPreferenceFragment.class, R.string.settings_category_post_title);
         add(items, c.getString(R.string.settings_click_to_show_media_in_gallery_layout), null, bc,
                 PostPreferenceFragment.class, R.string.settings_category_post_title);
+        add(items, c.getString(R.string.settings_hide_post_type_indicator_title),
+                c.getString(R.string.settings_hide_post_type_indicator_summary), bc,
+                PostPreferenceFragment.class, R.string.settings_category_post_title);
+        add(items, c.getString(R.string.settings_hide_image_count_in_gallery_title),
+                c.getString(R.string.settings_hide_image_count_in_gallery_summary), bc,
+                PostPreferenceFragment.class, R.string.settings_category_post_title);
     }
 
     // -------------------------------------------------------------------------
@@ -393,6 +397,9 @@ public class SettingsSearchRegistry {
         add(items, c.getString(R.string.settings_remember_mute), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_autoplay_nsfw_videos_title), null, bc,
+                VideoPreferenceFragment.class, R.string.settigns_video_title);
+        add(items, c.getString(R.string.settings_autoplay_comment_gif_title),
+                c.getString(R.string.settings_autoplay_comment_gif_summary), bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);
         add(items, c.getString(R.string.settings_easier_to_watch_in_full_screen_title), null, bc,
                 VideoPreferenceFragment.class, R.string.settigns_video_title);

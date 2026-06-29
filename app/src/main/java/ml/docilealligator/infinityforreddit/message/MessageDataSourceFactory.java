@@ -1,14 +1,11 @@
 package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
-
 import java.util.Locale;
 import java.util.concurrent.Executor;
-
 import retrofit2.Retrofit;
 
 class MessageDataSourceFactory extends DataSource.Factory {

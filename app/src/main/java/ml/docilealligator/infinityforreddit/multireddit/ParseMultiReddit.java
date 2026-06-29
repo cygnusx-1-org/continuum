@@ -1,16 +1,13 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Handler;
-
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.concurrent.Executor;
-
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
-import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 
 public class ParseMultiReddit {
     interface ParseMultiRedditsListListener {

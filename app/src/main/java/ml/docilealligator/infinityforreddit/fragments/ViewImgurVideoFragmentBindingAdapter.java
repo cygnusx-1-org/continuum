@@ -2,12 +2,9 @@ package ml.docilealligator.infinityforreddit.fragments;
 
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.media3.ui.PlayerView;
-
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewImgurVideoBinding;
 

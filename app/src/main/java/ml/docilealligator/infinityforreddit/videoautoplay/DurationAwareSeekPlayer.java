@@ -10,7 +10,6 @@ import androidx.media3.common.C;
 import androidx.media3.common.ForwardingPlayer;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
-
 import java.util.concurrent.TimeUnit;
 
 @OptIn(markerClass = UnstableApi.class)

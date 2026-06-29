@@ -15,7 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
@@ -31,20 +30,13 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import ml.docilealligator.infinityforreddit.FetchPostFilterAndConcatenatedSubredditNames;
@@ -66,9 +58,12 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.FABMoreOptionsB
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayVideoControllerUIEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
+import ml.docilealligator.infinityforreddit.events.ChangePostHistorySettingsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
@@ -90,6 +85,9 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.jetbrains.annotations.NotNull;
 import retrofit2.Retrofit;
 
 
@@ -686,6 +684,47 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     TransitionManager.beginDelayedTransition(binding.recyclerViewPostFragment, new AutoTransition());
                 }
             });
+        } else if (postType == PostType.DUPLICATES) {
+            // The post id is carried in EXTRA_NAME and used as the duplicates listing key.
+            subredditName = getArguments().getString(EXTRA_NAME);
+            if (savedInstanceState == null) {
+                postFragmentId += subredditName.hashCode();
+            }
+
+            usage = PostFilterUsage.HOME_TYPE;
+            nameOfUsage = PostFilterUsage.NO_USAGE;
+
+            // The duplicates endpoint has its own ordering and ignores the standard sort params; the
+            // ViewModel still needs a non-null SortType, so use a neutral default.
+            sortType = new SortType(SortType.Type.BEST);
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
+
+            mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
+                    mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mCustomThemeWrapper, locale,
+                    mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
+                    mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
+                    mExoCreator, new PostRecyclerViewAdapter.Callback() {
+                @Override
+                public void typeChipClicked(int filter) {}
+
+                @Override
+                public void flairChipClicked(String flair) {}
+
+                @Override
+                public void nsfwChipClicked() {}
+
+                @Override
+                public void currentlyBindItem(int position) {
+                    if (maxPosition < position) {
+                        maxPosition = position;
+                    }
+                }
+
+                @Override
+                public void delayTransition() {
+                    TransitionManager.beginDelayedTransition(binding.recyclerViewPostFragment, new AutoTransition());
+                }
+            });
         } else {
             usage = PostFilterUsage.HOME_TYPE;
             nameOfUsage = PostFilterUsage.NO_USAGE;
@@ -743,6 +782,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         int nColumns = getNColumns(resources);
+        if (mAdapter != null) {
+            mAdapter.setNColumns(nColumns);
+        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             binding.recyclerViewPostFragment.setLayoutManager(mLinearLayoutManager);
@@ -945,7 +987,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, subredditName,
                     query, trendingSource, postType, sortType, postFilter, readPostsList)
             ).get(PostViewModel.class);
-        } else if (postType == PostType.SUBREDDIT) {
+        } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
@@ -1025,7 +1067,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     mPostFeedScrolledPositionSharedPreferences, null, subredditName,
                     query, trendingSource, postType, sortType, postFilter, readPostsList)
             ).get(PostViewModel.class);
-        } else if (postType == PostType.SUBREDDIT) {
+        } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
             mPostViewModel = new ViewModelProvider(this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName,
                     mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
@@ -1437,6 +1479,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             previousPosition = mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0];
         }
         int nColumns = getNColumns(getResources());
+        if (mAdapter != null) {
+            mAdapter.setNColumns(nColumns);
+        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             if (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {
@@ -1541,6 +1586,30 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             return ((FilteredPostsActivity) mActivity).isNsfwSubreddit();
         } else {
             return false;
+        }
+    }
+
+    @Subscribe
+    public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
+        // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
+        changePostLayout(postLayout, true);
+    }
+
+    @Subscribe
+    public void onChangePostHistorySettingsEvent(ChangePostHistorySettingsEvent event) {
+        if (mAdapter != null) {
+            mAdapter.setMarkPostsAsReadSettings(event.markPostsAsRead, event.markPostsAsReadAfterVoting,
+                    event.markPostsAsReadOnScroll);
+        }
+    }
+
+    @Subscribe
+    public void onChangeAutoplayVideoControllerUIEvent(ChangeAutoplayVideoControllerUIEvent event) {
+        if (mAdapter != null) {
+            // The controller UI is chosen in onCreateViewHolder, so re-attach the adapter to
+            // recreate the view holders with the new layout.
+            mAdapter.setLegacyAutoplayVideoControllerUI(event.legacyAutoplayVideoControllerUI);
+            refreshAdapter();
         }
     }
 

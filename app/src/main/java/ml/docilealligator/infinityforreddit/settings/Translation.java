@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.R;
 
 public class Translation {

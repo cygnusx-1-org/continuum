@@ -11,14 +11,12 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/restart_button_customize_main_page_tabs"
+        <TextView
+            android:id="@+id/restart_warning_customize_main_page_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/restart_app_to_apply_changes"
-            android:visibility="gone"
-            app:icon="@android:drawable/ic_menu_rotate" />
+            android:padding="16dp"
+            android:visibility="gone" />
 
 
         <View
@@ -937,6 +935,68 @@
 
             <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
                 android:id="@+id/show_multireddits_switch_material_customize_main_page_tabs_fragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/show_favorite_users_multireddits_linear_layout_customize_main_page_tabs_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingStart="72dp"
+            android:paddingEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/show_favorite_users_multireddits_title_text_view_customize_main_page_tabs_fragment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
+                android:layout_gravity="center_vertical"
+                android:text="@string/settings_more_tabs_show_favorite_users_multireddits_title"
+                android:textSize="?attr/font_16"
+                android:fontFamily="?attr/font_family" />
+
+            <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
+                android:id="@+id/show_favorite_users_multireddits_switch_material_customize_main_page_tabs_fragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/show_users_multireddits_linear_layout_customize_main_page_tabs_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingStart="72dp"
+            android:paddingEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/show_users_multireddits_title_text_view_customize_main_page_tabs_fragment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
+                android:layout_gravity="center_vertical"
+                android:text="@string/settings_more_tabs_show_users_multireddits_title"
+                android:textSize="?attr/font_16"
+                android:fontFamily="?attr/font_family" />
+
+            <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
+                android:id="@+id/show_users_multireddits_switch_material_customize_main_page_tabs_fragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical" />

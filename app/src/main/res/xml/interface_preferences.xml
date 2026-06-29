@@ -86,4 +86,14 @@
         app:key="show_absolute_number_of_votes"
         app:title="@string/settings_show_absolute_number_of_votes_title" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
+        app:key="display_category"
+        app:title="@string/settings_category_display_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="force_max_refresh_rate"
+        app:title="@string/settings_force_max_refresh_rate_title"
+        app:summary="@string/settings_force_max_refresh_rate_summary" />
+
 </PreferenceScreen>

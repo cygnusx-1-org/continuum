@@ -1,11 +1,9 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.content.Context;
-
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
 import ml.docilealligator.infinityforreddit.R;
 
 public class NotificationUtils {

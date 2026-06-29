@@ -10,15 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity;
@@ -104,7 +101,18 @@ public class CopyTextBottomSheetFragment extends LandscapeExpandedRoundedBottomS
     }
 
     private void showCopyDialog(String text) {
-        AppCompatActivity activity = baseActivity == null ? viewRedditGalleryActivity : baseActivity;
+        showCopyDialog(baseActivity == null ? viewRedditGalleryActivity : baseActivity, text);
+    }
+
+    private void copyText(String text) {
+        copyText(baseActivity == null ? viewRedditGalleryActivity : baseActivity, text);
+    }
+
+    /**
+     * Show the copy dialog directly, letting the user select a subset of the text or copy all of
+     * it. Use this to skip the intermediate bottom sheet when there is only raw text to copy.
+     */
+    public static void showCopyDialog(@NonNull AppCompatActivity activity, String text) {
         LayoutInflater inflater = activity.getLayoutInflater();
         View layout = inflater.inflate(R.layout.copy_text_material_dialog, null);
         TextView textView = layout.findViewById(R.id.text_view_copy_text_material_dialog);
@@ -112,13 +120,12 @@ public class CopyTextBottomSheetFragment extends LandscapeExpandedRoundedBottomS
         new MaterialAlertDialogBuilder(activity, R.style.CopyTextMaterialAlertDialogTheme)
                 .setTitle(R.string.copy_text)
                 .setView(layout)
-                .setPositiveButton(R.string.copy_all, (dialogInterface, i) -> copyText(text))
+                .setPositiveButton(R.string.copy_all, (dialogInterface, i) -> copyText(activity, text))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
-    private void copyText(String text) {
-        AppCompatActivity activity = baseActivity == null ? viewRedditGalleryActivity : baseActivity;
+    private static void copyText(@NonNull AppCompatActivity activity, String text) {
         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard != null) {
             ClipData clip = ClipData.newPlainText("simple text", text);

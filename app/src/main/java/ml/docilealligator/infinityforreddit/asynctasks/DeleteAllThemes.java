@@ -2,9 +2,7 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.content.SharedPreferences;
 import android.os.Handler;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class DeleteAllThemes {

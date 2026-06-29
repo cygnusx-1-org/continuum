@@ -19,7 +19,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
@@ -35,23 +34,16 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.evernote.android.state.State;
 import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.glide.GlideImageLoader;
 import com.google.android.material.snackbar.Snackbar;
 import com.livefront.bridge.Bridge;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -78,6 +70,8 @@ import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Retrofit;
 
 public class ViewPostDetailActivity extends BaseActivity implements SortTypeSelectionCallback, ActivityToolbarInterface {
@@ -355,8 +349,17 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         });
     }
 
-    public void setTitle(String title) {
-        binding.toolbarViewPostDetailActivity.setTitle(title);
+    public void displayToolbarSortAndTitle(ViewPostDetailFragmentNew fragment) {
+        if (mSectionsPagerAdapter != null && fragment == mSectionsPagerAdapter.getCurrentFragment()) {
+            updateToolbar(fragment);
+        }
+    }
+
+    private void updateToolbar(ViewPostDetailFragmentNew fragment) {
+        Post post = fragment.getPost();
+        binding.toolbarViewPostDetailActivity.setTitle(post == null ? getString(R.string.comments) : post.getSubredditNamePrefixed());
+        SortType.Type sortType = fragment.getCommentSortType();
+        binding.toolbarViewPostDetailActivity.setSubtitle(sortType == null ? null : sortType.fullName);
     }
 
     public void showFab() {
@@ -480,6 +483,14 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                             userWhere, multiPath, query, sortType, sortTime, postFilter,
                             readPostType, readPostsList
                     );
+                }
+                ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
+                if (fragment != null) {
+                    updateToolbar(fragment);
+                } else if (posts != null && position == posts.size()) {
+                    // Trailing "more posts" page has no post; clear the stale subreddit/sort.
+                    binding.toolbarViewPostDetailActivity.setTitle("");
+                    binding.toolbarViewPostDetailActivity.setSubtitle(null);
                 }
             }
         });
@@ -675,8 +686,32 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         } else if (item.getItemId() == R.id.action_previous_parent_comment_view_post_detail_activity) {
             scrollToPreviousParentComment();
             return true;
+        } else if (item.getItemId() == R.id.action_other_discussions_view_post_detail_activity) {
+            openOtherDiscussions();
+            return true;
         }
         return false;
+    }
+
+    private void openOtherDiscussions() {
+        Post currentPost = this.post;
+        ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
+        if (fragment != null && fragment.getPost() != null) {
+            currentPost = fragment.getPost();
+        }
+        if (currentPost == null) {
+            Toast.makeText(this, R.string.load_post_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // The duplicates endpoint matches by URL, so self/text posts have no other discussions.
+        if (currentPost.getPostType() == Post.TEXT_TYPE) {
+            Toast.makeText(this, R.string.other_discussions_self_post, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(this, FilteredPostsActivity.class);
+        intent.putExtra(FilteredPostsActivity.EXTRA_POST_TYPE, PostType.DUPLICATES);
+        intent.putExtra(FilteredPostsActivity.EXTRA_NAME, currentPost.getId());
+        startActivity(intent);
     }
 
     @Override
@@ -751,7 +786,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
         if (fragment != null) {
             fragment.changeSortType(sortType);
-            binding.toolbarViewPostDetailActivity.setTitle(sortType.getType().fullName);
+            binding.toolbarViewPostDetailActivity.setSubtitle(sortType.getType().fullName);
         }
     }
 

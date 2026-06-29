@@ -2,6 +2,134 @@
 
 ---
 
+8.2.5.9.9 / 2026-6-28
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Added a setting to enable and disable autoplay of GIFs in comments(`Settings | Video | Autoplay GIFs in Comments`)
+* Fixed restore of the the current at the time account in a backup
+
+8.2.5.9.8 / 2026-6-27
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Removed all references except Post Filters to requiring a restart on change
+* Convert API Keys and Customize Tabs in Main Page to a method that restarts on back button or back gesture
+* Updated dependencies and raised minSdk to 24(Android 7.0)
+* Moved the post view sort to a toolbar subtitle under the subreddit name
+* Restored the child-count pill on re-collapsed comments via a shared styleChildCountBadge helper
+* Aligned the fully-collapsed comment row to the header to remove the username jump and avatar crowding
+
+`Continuum`'s minimum version of `Android` is now `7.0`. The previous minimum
+was `5.0`.
+
+This was done to allow the modernization of various libraries. The biggest
+being an upgrade of the main video library from 1.8.0 to 1.10.1(latest). 
+
+The other big thing in this release is no need to restart the app a lot less.
+Most settings now just work. The big exception is `Post Filters`, which would
+require a completely rewrite
+
+The restart in `API Keys` is now once for all changes on going back instead of
+once per change.
+
+8.2.5.9.7 / 2026-6-25
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed an inset bugs in Subscriptions tabs
+* Implemented Feature Request: Add “Other Discussions” #45
+* Implemented subreddits and multireddits should be synced automatically with the official reddit app/website #42
+* Implemented Improvement: Reduce click depth to choose comment sorting #307
+* Fixed API Client ID stays blank even after clicking "OK" #304
+
+8.2.5.9.6 / 2026-6-23
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Reverted the layout changes
+* Added usernames to the compact layouts as their own line like "Card layout"
+
+The backstory:
+The original goals where to add the usernames to the compact layout, and make
+all the card and compact layouts more compact. But it didn't work as intended
+as planned on devices with a UI scaling bigger than my phone.
+
+My original fix was going to be a hybrid solution where the new style would
+work, but it would work like the old way for most people. The catch is that
+the max length of a subreddit is 21 and the max length of a username is 20.
+So after doing the math based on those, the font sizes, upper case vs lower
+case, the UI scaling, other text, etc it wouldn't work even on my phone in
+the worst case scenario. 
+
+Examples:
+subreddit AAAAAAAAAAAAAAAAAAAAA 21
+username  PaleRulerGoingAlone7  20 
+
+8.2.5.9.5 / 2026-6-22
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemeneted Show comments in saved tab #61
+* Implemented preview images for self-text posts
+* Implemented Feature request: Scale embedded images in comments uniformly #4
+* Fixed Backup not working. #300
+* Fixed Usernames visible in compact view #144
+* Moved Usernames to the right of subreddits instead of under them in layouts
+* Moved link hostname to the end of the badge row in the card layout
+
+8.2.5.9.4 / 2026-6-21
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Suggestion to Use Color Markers for Differentiating Video and Image Content #169
+* New setting, "Settings | Interface | Post | Post Type Triangle Indicator" for compact layouts
+* Increased thumbnail size from 96dp to 112dp
+* Added slide://localhost and slide://127.0.0.1 to AndroidManifest.xml for external browsers
+
+Post types now have assigned colors for the card layout badge. The triangle
+colors match the badge colors.
+
+8.2.5.9.3 / 2026-6-20
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Hardened OAuth login error handling with clear failure feedback
+* Registered external browser login redirect URIs for BaconReader, Boost, Continuum, Infinity, Joey, RedReader, Relay, RIF, and Slide
+* Convert API Keys and Customize Tabs in Main Page to a method that restarts on back button or back gesture
+
+8.2.5.9.2 / 2026-6-19
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Custom Feeds not visible #299
+* Added an Add button to Subreddits and Users in Subscriptions
+* Added Show Users MultiReddits" and "Show Favorite Users MultiReddits"
+toggles in "Settings | Interface | Customize Tabs in Main Page"
+* Fixed tabs to auto-fit the screen width
+* Excluded favorites from the non-favorite tabs to avoid duplicate tabs
+* Changed the "Multireddits" label to "MultiReddits" in the navigation drawer
+* Fixed add button in Subscriptions | Subreddits to say "Add Subreddit"
+
+8.2.5.9.1 / 2026-6-17
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Force maximum refresh rate #297
+* Fixed Unable to select and copy post titles now #296
+
+Used 8.2.5.9.1 instead of 8.2.5.10 to avoid a bug in GitHub's release page
+where it will get the order wrong.
+
+8.2.5.9 / 2026-6-15
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented a prefix toggle search of subscriptions
+* Fixed gallery layout columns #290
+* Added Hide Post Type Icon and Hide Image Count in Gallery options
+* Fixed lazy-mode crash with >2 gallery columns by sizing span array to span count
+
 8.2.5.8 / 2026-6-10
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.

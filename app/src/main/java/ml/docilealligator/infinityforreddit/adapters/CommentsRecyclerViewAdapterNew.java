@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -26,21 +25,18 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.google.android.material.button.MaterialButton;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -64,12 +60,12 @@ import ml.docilealligator.infinityforreddit.databinding.ItemCommentFullyCollapse
 import ml.docilealligator.infinityforreddit.databinding.ItemLoadMoreCommentsPlaceholderBinding;
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
+import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
+import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
-import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
-import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -810,6 +806,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mImageAndGifEntry.setDataSavingMode(dataSavingMode);
     }
 
+    public void setAutoplayCommentGif(boolean autoplayCommentGif) {
+        mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
+    }
+
     public void updatePost(@NonNull Post post) {
         mPost = post;
         mImageAndGifEntry.setBlurImage(
@@ -997,22 +997,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             saveButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
             replyButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
 
-            // Style the child comment count badges as rounded bubbles. Each badge needs its
-            // own drawable instance since a shared Drawable would share bounds between views.
-            int badgeHorizontalPadding = (int) Utils.convertDpToPixel(4, mActivity);
-            int badgeVerticalPadding = (int) Utils.convertDpToPixel(2, mActivity);
-            int badgeInset = (int) Utils.convertDpToPixel(1, mActivity);
+            // Style the child comment count badges as rounded bubbles.
             for (TextView childCountBadge : new TextView[]{topChildCountTextView, childCountTextView}) {
-                GradientDrawable badgeBackground = new GradientDrawable();
-                badgeBackground.setShape(GradientDrawable.RECTANGLE);
-                badgeBackground.setCornerRadius(Utils.convertDpToPixel(8, mActivity));
-                badgeBackground.setColor(mUsernameColor);
-                childCountBadge.setBackground(new InsetDrawable(badgeBackground, badgeInset));
-                childCountBadge.setPadding(badgeHorizontalPadding, badgeVerticalPadding, badgeHorizontalPadding, badgeVerticalPadding);
-                childCountBadge.setTextColor(mCommentBackgroundColor);
-                if (mActivity.typeface != null) {
-                    childCountBadge.setTypeface(mActivity.typeface);
-                }
+                styleChildCountBadge(childCountBadge, 2);
             }
 
             authorFlairTextView.setOnClickListener(view -> authorTextView.performClick());
@@ -1449,6 +1436,30 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         }
     }
 
+    // Styles a child-comment-count badge ("+N") as a rounded pill. Shared by the normal comment
+    // row and the fully-collapsed row so the badge looks the same in every collapsed state: a
+    // comment re-collapsed after being expanded switches to the fully-collapsed row, which would
+    // otherwise lose the pill. Each badge needs its own drawable instance since a shared Drawable
+    // would share bounds between views.
+    // verticalPaddingDp is per-caller: the normal row uses 2dp for breathing room, but the
+    // fully-collapsed row passes 0 so the badge never grows taller than the 24dp avatar and
+    // re-inflates the row (which would reintroduce the username jump on collapse).
+    private void styleChildCountBadge(TextView childCountBadge, int verticalPaddingDp) {
+        int badgeHorizontalPadding = (int) Utils.convertDpToPixel(4, mActivity);
+        int badgeVerticalPadding = (int) Utils.convertDpToPixel(verticalPaddingDp, mActivity);
+        int badgeInset = (int) Utils.convertDpToPixel(1, mActivity);
+        GradientDrawable badgeBackground = new GradientDrawable();
+        badgeBackground.setShape(GradientDrawable.RECTANGLE);
+        badgeBackground.setCornerRadius(Utils.convertDpToPixel(8, mActivity));
+        badgeBackground.setColor(mUsernameColor);
+        childCountBadge.setBackground(new InsetDrawable(badgeBackground, badgeInset));
+        childCountBadge.setPadding(badgeHorizontalPadding, badgeVerticalPadding, badgeHorizontalPadding, badgeVerticalPadding);
+        childCountBadge.setTextColor(mCommentBackgroundColor);
+        if (mActivity.typeface != null) {
+            childCountBadge.setTypeface(mActivity.typeface);
+        }
+    }
+
     class CommentFullyCollapsedViewHolder extends RecyclerView.ViewHolder {
         ItemCommentFullyCollapsedBinding binding;
 
@@ -1458,13 +1469,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
             if (mActivity.typeface != null) {
                 binding.userNameTextViewItemCommentFullyCollapsed.setTypeface(mActivity.typeface);
-                binding.childCountTextViewItemCommentFullyCollapsed.setTypeface(mActivity.typeface);
                 binding.scoreTextViewItemCommentFullyCollapsed.setTypeface(mActivity.typeface);
                 binding.timeTextViewItemCommentFullyCollapsed.setTypeface(mActivity.typeface);
             }
             itemView.setBackgroundColor(mFullyCollapsedCommentBackgroundColor);
             binding.userNameTextViewItemCommentFullyCollapsed.setTextColor(mUsernameColor);
-            binding.childCountTextViewItemCommentFullyCollapsed.setTextColor(mSecondaryTextColor);
+            styleChildCountBadge(binding.childCountTextViewItemCommentFullyCollapsed, 0);
             binding.scoreTextViewItemCommentFullyCollapsed.setTextColor(mSecondaryTextColor);
             binding.timeTextViewItemCommentFullyCollapsed.setTextColor(mSecondaryTextColor);
 

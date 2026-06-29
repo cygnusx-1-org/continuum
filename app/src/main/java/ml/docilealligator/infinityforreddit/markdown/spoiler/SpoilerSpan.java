@@ -6,9 +6,7 @@ import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 
 public class SpoilerSpan extends ClickableSpan {

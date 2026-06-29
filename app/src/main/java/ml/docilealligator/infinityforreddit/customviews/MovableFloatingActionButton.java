@@ -10,11 +10,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-
 import androidx.annotation.Nullable;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import ml.docilealligator.infinityforreddit.customviews.slidr.widget.SliderPanel;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 

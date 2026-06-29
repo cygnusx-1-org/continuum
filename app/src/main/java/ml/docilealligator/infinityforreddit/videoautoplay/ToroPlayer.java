@@ -17,14 +17,11 @@
 package ml.docilealligator.infinityforreddit.videoautoplay;
 
 import android.view.View;
-
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.CopyOnWriteArraySet;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;

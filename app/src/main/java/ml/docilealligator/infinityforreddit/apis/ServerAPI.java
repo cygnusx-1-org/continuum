@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.apis;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.Map;
-
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.Field;

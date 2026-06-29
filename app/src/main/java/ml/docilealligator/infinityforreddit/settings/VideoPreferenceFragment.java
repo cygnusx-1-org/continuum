@@ -3,20 +3,17 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
-
-import org.greenrobot.eventbus.EventBus;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.customviews.preference.SliderPreference;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayNsfwVideosEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayVideoControllerUIEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeEasierToWatchInFullScreenEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeMuteAutoplayingVideosEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeMuteNSFWVideoEvent;
@@ -24,6 +21,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeRememberMutingOptionInP
 import ml.docilealligator.infinityforreddit.events.ChangeStartAutoplayVisibleAreaOffsetEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeVideoAutoplayEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import org.greenrobot.eventbus.EventBus;
 
 public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
@@ -42,7 +40,9 @@ public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         SwitchPreference rememberMutingOptionInPostFeedSwitchPreference = findPreference(SharedPreferencesUtils.REMEMBER_MUTING_OPTION_IN_POST_FEED);
         SwitchPreference muteNSFWVideosSwitchPreference = findPreference(SharedPreferencesUtils.MUTE_NSFW_VIDEO);
         SwitchPreference autoplayNsfwVideosSwitchPreference = findPreference(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS);
+        SwitchPreference autoplayCommentGifSwitchPreference = findPreference(SharedPreferencesUtils.AUTOPLAY_COMMENT_GIF);
         SwitchPreference easierToWatchInFullScreenSwitchPreference = findPreference(SharedPreferencesUtils.EASIER_TO_WATCH_IN_FULL_SCREEN);
+        SwitchPreference legacyAutoplayVideoControllerUISwitchPreference = findPreference(SharedPreferencesUtils.LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI);
         SliderPreference startAutoplayVisibleAreaOffsetPortrait = findPreference(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_PORTRAIT);
         SliderPreference startAutoplayVisibleAreaOffsetLandscape = findPreference(SharedPreferencesUtils.START_AUTOPLAY_VISIBLE_AREA_OFFSET_LANDSCAPE);
 
@@ -58,9 +58,23 @@ public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat 
             });
         }
 
+        if (autoplayCommentGifSwitchPreference != null) {
+            autoplayCommentGifSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeAutoplayCommentGifEvent((Boolean) newValue));
+                return true;
+            });
+        }
+
         if (easierToWatchInFullScreenSwitchPreference != null) {
             easierToWatchInFullScreenSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeEasierToWatchInFullScreenEvent((Boolean) newValue));
+                return true;
+            });
+        }
+
+        if (legacyAutoplayVideoControllerUISwitchPreference != null) {
+            legacyAutoplayVideoControllerUISwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeAutoplayVideoControllerUIEvent((Boolean) newValue));
                 return true;
             });
         }

@@ -1,10 +1,9 @@
 package ml.docilealligator.infinityforreddit.markdown.emote;
 
+import io.noties.markwon.inlineparser.InlineProcessor;
 import org.commonmark.internal.Bracket;
 import org.commonmark.node.Node;
 import org.commonmark.node.Text;
-
-import io.noties.markwon.inlineparser.InlineProcessor;
 
 public class EmoteInlineProcessor extends InlineProcessor {
     @Override

@@ -3,25 +3,21 @@ package ml.docilealligator.infinityforreddit.markdown.superscript;
 import android.text.Spannable;
 import android.text.Spanned;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
-import org.commonmark.ext.gfm.tables.TableCell;
-import org.commonmark.node.Link;
-import org.commonmark.node.Node;
-import org.commonmark.node.Paragraph;
-import org.commonmark.node.Text;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.MarkwonSpansFactory;
 import io.noties.markwon.MarkwonVisitor;
 import io.noties.markwon.core.spans.CodeSpan;
 import io.noties.markwon.core.spans.TextViewSpan;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
+import java.util.ArrayList;
+import java.util.List;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerNode;
+import org.commonmark.ext.gfm.tables.TableCell;
+import org.commonmark.node.Link;
+import org.commonmark.node.Node;
+import org.commonmark.node.Paragraph;
+import org.commonmark.node.Text;
 
 public class SuperscriptPlugin extends AbstractMarkwonPlugin {
     private final SuperscriptOpeningStorage superscriptOpeningBracketStorage;

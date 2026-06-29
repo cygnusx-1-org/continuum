@@ -1,7 +1,13 @@
 package ml.docilealligator.infinityforreddit.markdown.giphygif;
 
 import androidx.annotation.Nullable;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import ml.docilealligator.infinityforreddit.thing.GiphyGif;
+import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import org.commonmark.node.Block;
 import org.commonmark.parser.block.AbstractBlockParser;
 import org.commonmark.parser.block.AbstractBlockParserFactory;
@@ -9,15 +15,6 @@ import org.commonmark.parser.block.BlockContinue;
 import org.commonmark.parser.block.BlockStart;
 import org.commonmark.parser.block.MatchedBlockParser;
 import org.commonmark.parser.block.ParserState;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import ml.docilealligator.infinityforreddit.thing.GiphyGif;
-import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 
 public class GiphyGifBlockParser extends AbstractBlockParser {
     private final GiphyGifBlock giphyGifBlock;

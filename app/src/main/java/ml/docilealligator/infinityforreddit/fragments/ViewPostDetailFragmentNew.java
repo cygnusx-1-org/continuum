@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.MenuItemImpl;
@@ -44,26 +43,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.evernote.android.state.State;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.livefront.bridge.Bridge;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-
 import kotlin.Unit;
 import ml.docilealligator.infinityforreddit.CommentModerationActionHandler;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -91,6 +82,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AdjustableTouchSlopItemTouchHelper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewPostDetailBinding;
+import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWBlurEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSpoilerBlurEvent;
@@ -110,6 +102,9 @@ import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailFragmentViewModelNew;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.jetbrains.annotations.NotNull;
 import retrofit2.Retrofit;
 
 public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommunicator, PostModerationActionHandler, CommentModerationActionHandler {
@@ -565,8 +560,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             }
 
             if (uiState.getSortType() != null) {
-                SortType.Type sortType = uiState.getSortType();
-                mActivity.setTitle(sortType.fullName);
+                sortType = uiState.getSortType();
+                mActivity.displayToolbarSortAndTitle(this);
                 binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.GONE);
                 mGlide.clear(binding.fetchPostInfoImageViewViewPostDetailFragment);
 
@@ -579,6 +574,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         viewPostDetailFragmentViewModel.getDataState().observe(getViewLifecycleOwner(), dataState -> {
             if (dataState.getPost() != null) {
                 mPost = dataState.getPost();
+                mActivity.displayToolbarSortAndTitle(this);
                 if (mPostAdapter != null) {
                     mPostAdapter.updatePost(dataState.getPost());
                 }
@@ -824,8 +820,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     }
 
     public void changeSortType(SortType sortType) {
-        viewPostDetailFragmentViewModel.updateSortType(sortType.getType());
-        viewPostDetailFragmentViewModel.fetchCommentsRespectRecommendedSort(sortType.getType(), false);
+        viewPostDetailFragmentViewModel.fetchCommentsWithSortType(sortType.getType(), false);
     }
 
     public void goToTop() {
@@ -1277,6 +1272,16 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         return postListPosition;
     }
 
+    @Nullable
+    public Post getPost() {
+        return mPost;
+    }
+
+    @Nullable
+    public SortType.Type getCommentSortType() {
+        return sortType;
+    }
+
     @Subscribe
     public void onPostUpdateEvent(PostUpdateEventToPostDetailFragment event) {
         if (mPost.getId().equals(event.post.getId())) {
@@ -1307,6 +1312,24 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
         } else {
             refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+        }
+    }
+
+    @Subscribe
+    public void onChangeAutoplayCommentGifEvent(ChangeAutoplayCommentGifEvent event) {
+        if (mPostAdapter != null) {
+            mPostAdapter.setAutoplayCommentGif(event.autoplayCommentGif);
+        }
+        if (mCommentsAdapter != null) {
+            mCommentsAdapter.setAutoplayCommentGif(event.autoplayCommentGif);
+        }
+        if (mCommentsRecyclerView == null) {
+            refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+        } else {
+            if (mPostAdapter != null) {
+                refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+            }
+            refreshAdapter(mCommentsRecyclerView);
         }
     }
 

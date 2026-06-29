@@ -1,12 +1,10 @@
 package ml.docilealligator.infinityforreddit.customviews;
 
 import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
-
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.videoautoplay.Config;
 import ml.docilealligator.infinityforreddit.videoautoplay.DefaultExoCreator;

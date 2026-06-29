@@ -1,13 +1,10 @@
 package ml.docilealligator.infinityforreddit.markdown.imageandgif;
 
 import androidx.annotation.NonNull;
-
-import org.commonmark.parser.Parser;
-
-import java.util.Map;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
+import java.util.Map;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
+import org.commonmark.parser.Parser;
 
 public class ImageAndGifPlugin extends AbstractMarkwonPlugin {
 

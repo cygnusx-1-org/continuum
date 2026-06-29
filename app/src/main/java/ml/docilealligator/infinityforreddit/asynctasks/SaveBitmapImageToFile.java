@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

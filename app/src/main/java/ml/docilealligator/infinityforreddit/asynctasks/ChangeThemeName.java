@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class ChangeThemeName {

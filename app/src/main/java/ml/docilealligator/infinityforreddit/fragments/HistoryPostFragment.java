@@ -13,7 +13,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
@@ -27,19 +26,13 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-
 import ml.docilealligator.infinityforreddit.FetchPostFilterAndConcatenatedSubredditNames;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -53,6 +46,7 @@ import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFi
 import ml.docilealligator.infinityforreddit.databinding.FragmentHistoryPostBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
 import ml.docilealligator.infinityforreddit.post.HistoryPostViewModel;
@@ -66,6 +60,8 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Retrofit;
 
 public class HistoryPostFragment extends PostFragmentBase implements FragmentCommunicator {
@@ -263,6 +259,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         });
 
         int nColumns = getNColumns(resources);
+        if (mAdapter != null) {
+            mAdapter.setNColumns(nColumns);
+        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             binding.recyclerViewHistoryPostFragment.setLayoutManager(mLinearLayoutManager);
@@ -482,6 +481,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             previousPosition = mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0];
         }
         int nColumns = getNColumns(getResources());
+        if (mAdapter != null) {
+            mAdapter.setNColumns(nColumns);
+        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             if (binding.recyclerViewHistoryPostFragment.getItemDecorationCount() > 0) {
@@ -576,6 +578,12 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         if (mAdapter != null) {
             mAdapter.setCanPlayVideo(hasWindowsFocus);
         }
+    }
+
+    @Subscribe
+    public void onChangeNColumnsEvent(ChangeNColumnsEvent changeNColumnsEvent) {
+        // Re-apply the current layout so getNColumns() is re-read and the layout manager rebuilt.
+        changePostLayout(postLayout, true);
     }
 
     @Subscribe

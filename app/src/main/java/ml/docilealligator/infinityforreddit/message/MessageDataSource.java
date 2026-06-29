@@ -1,16 +1,13 @@
 package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.PageKeyedDataSource;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.NetworkState;
 import retrofit2.Retrofit;
 

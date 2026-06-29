@@ -23,16 +23,13 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.widget.Common.f
 
 import android.view.View;
 import android.view.View.OnLongClickListener;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;

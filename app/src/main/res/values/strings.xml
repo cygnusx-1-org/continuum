@@ -61,6 +61,7 @@
     <string name="action_unsave_post">Unsave post</string>
     <string name="action_view_crosspost_parent">View crosspost parent</string>
     <string name="action_search">Search</string>
+    <string name="action_match_prefix_only">Match prefix only</string>
     <string name="action_start_lazy_mode">Start Lazy Mode</string>
     <string name="action_stop_lazy_mode">Stop Lazy Mode</string>
     <string name="action_send">Send</string>
@@ -113,6 +114,17 @@
 
     <string name="parse_json_response_error">Error occurred when parsing the JSON response</string>
     <string name="retrieve_token_error">Error Retrieving the token</string>
+    <string name="oauth_error_invalid_credentials">Invalid API Client ID or credentials — check your API Key in Settings (HTTP %1$d)</string>
+    <string name="oauth_error_rate_limited">Reddit is rate-limiting login. Wait a moment and try again (HTTP 429)</string>
+    <string name="oauth_error_server">Reddit server error. Try again later (HTTP %1$d)</string>
+    <string name="oauth_error_http_generic">Could not retrieve login token (HTTP %1$d)</string>
+    <string name="oauth_error_empty_response">Reddit returned an empty login response</string>
+    <string name="oauth_error_reddit_error">Login rejected by Reddit: %1$s</string>
+    <string name="oauth_error_missing_tokens">Login response did not contain an access token — check your API Key setting</string>
+    <string name="oauth_error_network">Network error during login. Check your connection and try again</string>
+    <string name="oauth_login_failed_title">Login Failed</string>
+    <string name="oauth_error_login_page">Login failed — Reddit returned an error instead of completing login. Check your client ID and redirect URI in Settings.</string>
+    <string name="oauth_error_redirect_uri_unregistered">The redirect URI \"%1$s\" can\'t be received by a browser — no matching handler is registered in this app. Use the WebView login method instead, or set a supported redirect URI in Settings.</string>
     <string name="something_went_wrong">Something went wrong. Try again later.</string>
     <string name="access_denied">Access denied</string>
     <string name="parse_user_info_error">Error occurred when parsing the user info</string>
@@ -156,6 +168,8 @@
     <string name="downvoted">Downvoted</string>
     <string name="hidden">Hidden</string>
     <string name="saved">Saved</string>
+    <string name="saved_posts">Saved Posts</string>
+    <string name="saved_comments">Saved Comments</string>
     <string name="settings">Settings</string>
     <string name="subscribers_number_detail">Subscribers: %1$,d</string>
     <string name="online_subscribers_number_detail">Online: %1$,d</string>
@@ -252,6 +266,7 @@
     <string name="subreddits">Subreddits</string>
     <string name="users">Users</string>
     <string name="multi_reddits">MultiReddits</string>
+    <string name="users_multireddits">Users MultiReddits</string>
     <string name="posts">Posts</string>
     <string name="comments">Comments</string>
     <string name="about">About</string>
@@ -355,6 +370,9 @@
     <string name="best">Best</string>
     <string name="search">Search</string>
 
+    <string name="other_discussions">Other Discussions</string>
+    <string name="other_discussions_self_post">Text posts have no other discussions</string>
+
     <string name="posting_video">Posting Video</string>
     <string name="posting_image">Posting Image</string>
     <string name="posting_gallery">Posting Gallery</string>
@@ -384,6 +402,7 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="save">Save</string>
     <string name="edit_success">Edit successfully</string>
     <string name="delete_post_success">Delete successfully</string>
     <string name="delete_post_failed">Delete failed</string>
@@ -431,6 +450,8 @@
     <string name="settings_simultaneous_autoplay_limit_title">Simultaneous Autoplay Limit</string>
     <string name="settings_mute_autoplaying_videos_title">Mute Autoplaying Videos</string>
     <string name="settings_autoplay_nsfw_videos_title">Autoplay NSFW Videos</string>
+    <string name="settings_autoplay_comment_gif_title">Autoplay GIFs in Comments</string>
+    <string name="settings_autoplay_comment_gif_summary">When off, GIFs in comments show a still frame; tap to view them animated</string>
     <string name="settings_start_autoplay_visible_area_offset_portrait_title">Autoplay Videos Visible Area Offset (Portrait)</string>
     <string name="settings_start_autoplay_visible_area_offset_portrait_summary">Start autoplaying videos when %1$d%% of them are visible</string>
     <string name="settings_start_autoplay_visible_area_offset_landscape_title">Autoplay Videos Visible Area Offset (Landscape)</string>
@@ -459,6 +480,9 @@
     <string name="settings_fully_collapse_comment_title">Fully Collapse Comment</string>
     <string name="settings_comment_toolbar_hidden">Comment Toolbar Hidden by Default</string>
     <string name="settings_show_absolute_number_of_votes_title">Show Absolute Number of Votes</string>
+    <string name="settings_category_display_title">Display</string>
+    <string name="settings_force_max_refresh_rate_title">Force Maximum Refresh Rate</string>
+    <string name="settings_force_max_refresh_rate_summary">Request the highest refresh rate your screen supports for smoother scrolling. This is best effort. Whether it takes effect depends on your device\'s make and model.</string>
     <string name="settings_show_elapsed_time">Show Elapsed Time in Posts and Comments</string>
     <string name="settings_time_format_title">Time Format</string>
     <string name="settings_category_post_title">Post</string>
@@ -557,7 +581,7 @@
     <string name="settings_delete_all_legacy_settings_title">Delete All Legacy Settings</string>
     <string name="settings_reset_all_settings_title">Reset All Settings</string>
     <string name="restart_app_see_changes">Restart the app to see the changes</string>
-    <string name="app_will_restart">If you go back to the previous screen after changing the configuration, the app will restart</string>
+    <string name="app_will_restart">Going back after changing a value will cause the app to restart.</string>
     <string name="settings_tab_count">Tab Count</string>
     <string name="settings_show_tab_names">Show Tab Names</string>
     <string name="settings_tab_1_summary">Tab 1</string>
@@ -568,8 +592,10 @@
     <string name="settings_tab_6_summary">Tab 6</string>
     <string name="settings_more_tabs_summary">More Tabs</string>
     <string name="settings_more_tabs_info_summary">Enabling the following options will cause an unintended behaviour:\nTabs may lose all the content after switching to others. This is the same as refreshing the page.</string>
-    <string name="settings_more_tabs_show_favorite_multireddits_title">Show Favorite Multireddits</string>
-    <string name="settings_more_tabs_show_multireddits_title">Show Multireddits</string>
+    <string name="settings_more_tabs_show_favorite_multireddits_title">Show Favorite MultiReddits</string>
+    <string name="settings_more_tabs_show_multireddits_title">Show MultiReddits</string>
+    <string name="settings_more_tabs_show_favorite_users_multireddits_title">Show Favorite Users MultiReddits</string>
+    <string name="settings_more_tabs_show_users_multireddits_title">Show Users MultiReddits</string>
     <string name="settings_more_tabs_show_favorite_subscribed_subreddits_title">Show Favorite Subscribed Subreddits</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">Show Subscribed Subreddits</string>
     <string name="settings_tab_title">Title</string>
@@ -612,7 +638,7 @@
     <string name="settings_credits_national_flags">National Flags</string>
     <string name="settings_credits_national_flags_summary">Icon made by Freepik from www.flaticon.com</string>
     <string name="settings_miscellaneous_title">Miscellaneous</string>
-    <string name="settings_respect_subreddit_recommended_comment_sort_type_title">Respect Subreddit Recommended Comment Sort Type</string>
+    <string name="settings_respect_subreddit_recommended_comment_sort_type_title">Respect Subreddit Recommended Comment Sort Type By Default</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">Comment sort type will not be saved</string>
     <string name="settings_post_filter_title">Post Filter</string>
     <string name="settings_subreddit_filter_category">Hide Subreddits</string>
@@ -646,6 +672,12 @@
     <string name="settings_user_default_sort_time_title">User Default Sort Time</string>
     <string name="settings_click_to_show_media_in_gallery_layout">Click to Show Media in Gallery Layout</string>
     <string name="settings_hide_post_type">Hide Post Type</string>
+    <string name="settings_post_type_triangle_indicator">Post Type Triangle Indicator</string>
+    <string name="settings_post_type_triangle_indicator_summary">Show post type as a colored triangle on the thumbnail in compact layout instead of a text badge</string>
+    <string name="settings_hide_post_type_indicator_title">Hide Post Type Icon</string>
+    <string name="settings_hide_post_type_indicator_summary">Hide the play and link icons overlaid on thumbnails in all post layouts</string>
+    <string name="settings_hide_image_count_in_gallery_title">Hide Image Count in Gallery</string>
+    <string name="settings_hide_image_count_in_gallery_summary">Hide the image count badge on gallery posts in all post layouts</string>
     <string name="settings_hide_post_flair">Hide Post Flair</string>
     <string name="settings_hide_subreddit_and_user_prefix">Hide Subreddit and User Prefix</string>
     <string name="settings_hide_the_number_of_votes">Hide the Number of Votes</string>
@@ -852,6 +884,7 @@
     <string name="share_gif_link">Share Gif Link</string>
     <string name="share_video_link">Share Video Link</string>
     <string name="share_link">Share Link</string>
+    <string name="copy_title">Copy Title</string>
     <string name="copy_post_link">Copy Post Link</string>
     <string name="copy_image_link">Copy Image Link</string>
     <string name="copy_gif_link">Copy Gif Link</string>
@@ -893,6 +926,23 @@
     <string name="delete_multi_reddit_failed">Delete failed</string>
     <string name="delete_multi_reddit_dialog_message">Are you sure?</string>
     <string name="copy_multi_reddit_failed">Cannot copy this multireddit.</string>
+    <string name="action_save_multi_reddit_locally">Save Multireddit locally</string>
+    <string name="save_multi_reddit_locally_success">Saved to Users MultiReddits</string>
+    <string name="remove_followed_multi_reddit">Remove from Users MultiReddits</string>
+    <string name="remove_followed_multi_reddit_dialog_message">Remove this saved multireddit? The original is not affected.</string>
+    <string name="remove_followed_multi_reddit_success">Removed</string>
+    <string name="add_user_title">Follow user</string>
+    <string name="follow_failed_user_suspended">u/%1$s is suspended and can\'t be followed</string>
+    <string name="follow_failed_user_not_found">u/%1$s doesn\'t exist or was deleted</string>
+    <string name="follow_failed_user_blocked">You\'ve blocked u/%1$s. Unblock to follow.</string>
+    <string name="follow_failed_user_cannot_be_followed">u/%1$s can\'t be followed</string>
+    <string name="follow_failed_user_nsfw">u/%1$s has an NSFW profile. Enable NSFW in settings to follow.</string>
+    <string name="add_user_multireddit_title">Add to Users MultiReddits</string>
+    <string name="add_user_multireddit_username_hint">Username</string>
+    <string name="fetch_user_multireddit_failed">Could not fetch this user\'s MultiReddits</string>
+    <string name="user_has_no_public_multireddit">This user has no public MultiReddits</string>
+    <string name="save_user_multireddit_success">Saved %1$d MultiReddit(s)</string>
+    <string name="user_multireddits_activity_label">%1$s MultiReddits</string>
 
     <string name="enable_nsfw">Enable NSFW</string>
     <string name="disable_nsfw">Disable NSFW</string>
@@ -1003,6 +1053,18 @@
     <string name="theme_item_post_type_background_color_detail">Applied to: Background of the post type (IMAGE, TEXT, VIDEO, GIF, LINK)</string>
     <string name="theme_item_post_type_text_color">Post Type Text Color</string>
     <string name="theme_item_post_type_text_color_detail">Applied to: Text color of the post type (IMAGE, TEXT, VIDEO, GIF LINK)</string>
+    <string name="theme_item_text_type_background_color">Text Type Background Color</string>
+    <string name="theme_item_text_type_background_color_detail">Applied to: Background of the TEXT post type badge</string>
+    <string name="theme_item_image_type_background_color">Image Type Background Color</string>
+    <string name="theme_item_image_type_background_color_detail">Applied to: Background of the IMAGE post type badge</string>
+    <string name="theme_item_link_type_background_color">Link Type Background Color</string>
+    <string name="theme_item_link_type_background_color_detail">Applied to: Background of the LINK post type badge</string>
+    <string name="theme_item_video_type_background_color">Video Type Background Color</string>
+    <string name="theme_item_video_type_background_color_detail">Applied to: Background of the VIDEO post type badge</string>
+    <string name="theme_item_gif_type_background_color">GIF Type Background Color</string>
+    <string name="theme_item_gif_type_background_color_detail">Applied to: Background of the GIF post type badge</string>
+    <string name="theme_item_gallery_type_background_color">Gallery Type Background Color</string>
+    <string name="theme_item_gallery_type_background_color_detail">Applied to: Background of the GALLERY post type badge</string>
     <string name="theme_item_spoiler_background_color">Spoiler Background Color</string>
     <string name="theme_item_spoiler_background_color_detail">Applied to: Background of the spoiler tag</string>
     <string name="theme_item_spoiler_text_color">Spoiler Text Color</string>
@@ -1267,6 +1329,7 @@
     <string name="leave">Leave</string>
 
     <string name="go_to_subreddit">Go to Subreddit</string>
+    <string name="add_subreddit">Add Subreddit</string>
     <string name="go_to_user">Go to User</string>
     <string name="go_to_thing_hint">Name</string>
     <string name="go_to_top">Go To Top</string>

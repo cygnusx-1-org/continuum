@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.os.Handler;
-
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

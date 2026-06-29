@@ -22,14 +22,12 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.visibl
 import static ml.docilealligator.infinityforreddit.videoautoplay.annotations.Sorted.Order.ASCENDING;
 
 import androidx.annotation.NonNull;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.annotations.Sorted;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 

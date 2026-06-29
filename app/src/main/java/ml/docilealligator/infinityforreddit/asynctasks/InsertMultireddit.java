@@ -1,14 +1,11 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;

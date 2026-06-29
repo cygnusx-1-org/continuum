@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.markdown.emote;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.RenderProps;
 import io.noties.markwon.SpanFactory;

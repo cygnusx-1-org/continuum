@@ -1,10 +1,8 @@
 package ml.docilealligator.infinityforreddit;
 
 import android.os.Handler;
-
 import java.util.List;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;

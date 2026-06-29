@@ -1,13 +1,10 @@
 package ml.docilealligator.infinityforreddit.markdown.uploadedimage;
 
 import androidx.annotation.NonNull;
-
-import org.commonmark.parser.Parser;
-
-import java.util.List;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
+import java.util.List;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
+import org.commonmark.parser.Parser;
 
 public class UploadedImagePlugin extends AbstractMarkwonPlugin {
     private final UploadedImageBlockParser.Factory factory;

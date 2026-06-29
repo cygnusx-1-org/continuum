@@ -2,14 +2,11 @@ package ml.docilealligator.infinityforreddit.markdown.giphygif;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import org.commonmark.parser.Parser;
-
-import java.util.List;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
+import java.util.List;
 import ml.docilealligator.infinityforreddit.thing.GiphyGif;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
+import org.commonmark.parser.Parser;
 
 public class GiphyGifPlugin extends AbstractMarkwonPlugin {
     private final GiphyGifBlockParser.Factory factory;

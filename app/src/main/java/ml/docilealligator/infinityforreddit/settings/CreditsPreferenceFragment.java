@@ -4,10 +4,8 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;

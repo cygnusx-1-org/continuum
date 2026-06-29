@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.postfilter;
 
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class SavePostFilterUsage {

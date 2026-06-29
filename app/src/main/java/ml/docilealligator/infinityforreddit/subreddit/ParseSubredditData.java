@@ -1,18 +1,14 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
-
 import androidx.annotation.Nullable;
-
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.concurrent.Executor;
-
-import ml.docilealligator.infinityforreddit.utils.JSONUtils;
-import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class ParseSubredditData {
     public static void parseSubredditDataSync(Handler handler, @Nullable String response,

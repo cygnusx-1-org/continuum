@@ -2,12 +2,9 @@ package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 
 public class UserWithSelection implements Parcelable {

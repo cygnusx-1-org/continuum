@@ -22,7 +22,6 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.checkN
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -32,14 +31,12 @@ import androidx.core.util.Pools;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.exoplayer.ExoPlayer;
-
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 

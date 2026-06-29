@@ -28,4 +28,3 @@ public class SuperscriptOpeningBracket {
         this.start = null;
     }
 }
-

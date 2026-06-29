@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.InboxActivity;
@@ -43,6 +41,11 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
         collapseAccountSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_ACCOUNT_SECTION, false);
         this.isLoggedIn = isLoggedIn;
         this.itemClickListener = itemClickListener;
+    }
+
+    public void setCollapseAccountSection(boolean collapseAccountSection) {
+        this.collapseAccountSection = collapseAccountSection;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -136,7 +139,9 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
             }
 
             if (stringId != 0) {
-                ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(stringId);
+                // Display the plural label for the multireddit row, but keep stringId as the click key.
+                int labelId = stringId == R.string.multi_reddit ? R.string.multi_reddits : stringId;
+                ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(labelId);
                 ((MenuItemViewHolder) holder).binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, drawableId));
             }
             if (setOnClickListener) {

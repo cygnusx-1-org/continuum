@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.view.Display;
-
 import androidx.annotation.Nullable;
 
 /**
@@ -51,6 +50,7 @@ public class SharedPreferencesUtils {
     public static final String CUSTOM_TITLE_FONT_FAMILY_KEY = "custom_title_font_family";
     public static final String CUSTOM_CONTENT_FONT_FAMILY_KEY = "custom_content_font_family";
     public static final String HIDE_FAB_IN_POST_FEED = "hide_fab_in_post_feed";
+    public static final String FORCE_MAX_REFRESH_RATE_KEY = "force_max_refresh_rate";
 
     public static final String SORT_TYPE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.sort_type";
     public static final String SORT_TYPE_BEST_POST = "sort_type_best_post";
@@ -120,6 +120,7 @@ public class SharedPreferencesUtils {
     public static final String SIMULTANEOUS_AUTOPLAY_LIMIT = "simultaneous_autoplay_limit";
     public static final String MUTE_AUTOPLAYING_VIDEOS = "mute_autoplaying_videos";
     public static final String AUTOPLAY_NSFW_VIDEOS = "autoplay_nsfw_videos";
+    public static final String AUTOPLAY_COMMENT_GIF = "autoplay_comment_gif";
     public static final String LOCK_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON = "lock_jump_to_next_top_level_comment_button";
     public static final String SWAP_TAP_AND_LONG_COMMENTS = "swap_tap_and_long_in_comments";
     public static final String SWIPE_UP_TO_HIDE_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON = "swipe_up_to_hide_jump_to_next_top_level_comments_button";
@@ -192,6 +193,9 @@ public class SharedPreferencesUtils {
     public static final String USER_DEFAULT_SORT_TIME = "user_default_sort_time";
     public static final String CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT = "click_to_show_media_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
+    public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
+    public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
+    public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";
     public static final String HIDE_POST_FLAIR = "hide_post_flair";
     public static final String HIDE_SUBREDDIT_AND_USER_PREFIX = "hide_subreddit_and_user_prefix";
     public static final String HIDE_THE_NUMBER_OF_VOTES = "hide_the_number_of_votes";
@@ -330,9 +334,12 @@ public class SharedPreferencesUtils {
     public static final int MAIN_PAGE_TAB_POST_TYPE_DOWNVOTED = 7;
     public static final int MAIN_PAGE_TAB_POST_TYPE_HIDDEN = 8;
     public static final int MAIN_PAGE_TAB_POST_TYPE_SAVED = 9;
-    public static final int MAIN_PAGE_TAB_POST_TYPE_GILDED = 10;
+    public static final int MAIN_PAGE_TAB_POST_TYPE_SAVED_COMMENTS = 10;
+    public static final int MAIN_PAGE_TAB_POST_TYPE_GILDED = 11;
     public static final String MAIN_PAGE_SHOW_MULTIREDDITS = "_main_page_show_multireddits";
     public static final String MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS = "_main_page_show_favorite_multireddits";
+    public static final String MAIN_PAGE_SHOW_USERS_MULTIREDDITS = "_main_page_show_users_multireddits";
+    public static final String MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS = "_main_page_show_favorite_users_multireddits";
     public static final String MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS = "_main_page_show_subscribed_subreddits";
     public static final String MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS = "_main_page_show_favorite_subscribed_subreddits";
 

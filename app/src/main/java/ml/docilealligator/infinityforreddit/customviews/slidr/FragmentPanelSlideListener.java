@@ -2,10 +2,8 @@ package ml.docilealligator.infinityforreddit.customviews.slidr;
 
 
 import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
-
 import ml.docilealligator.infinityforreddit.customviews.slidr.model.SlidrConfig;
 import ml.docilealligator.infinityforreddit.customviews.slidr.widget.SliderPanel;
 

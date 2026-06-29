@@ -3,15 +3,11 @@ package ml.docilealligator.infinityforreddit.adapters.navigationdrawer;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.RequestManager;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -31,7 +27,7 @@ public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends Recy
     private final int primaryTextColor;
     private final int secondaryTextColor;
     private boolean collapseFavoriteSubredditsSection;
-    private final boolean hideFavoriteSubredditsSection;
+    private boolean hideFavoriteSubredditsSection;
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
     private ArrayList<SubscribedSubredditData> favoriteSubscribedSubreddits = new ArrayList<>();
 
@@ -46,6 +42,16 @@ public class FavoriteSubscribedSubredditsSectionRecyclerViewAdapter extends Recy
         collapseFavoriteSubredditsSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_FAVORITE_SUBREDDITS_SECTION, false);
         hideFavoriteSubredditsSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAVORITE_SUBREDDITS_SECTION, false);
         this.itemClickListener = itemClickListener;
+    }
+
+    public void setCollapseFavoriteSubredditsSection(boolean collapseFavoriteSubredditsSection) {
+        this.collapseFavoriteSubredditsSection = collapseFavoriteSubredditsSection;
+        notifyDataSetChanged();
+    }
+
+    public void setHideFavoriteSubredditsSection(boolean hideFavoriteSubredditsSection) {
+        this.hideFavoriteSubredditsSection = hideFavoriteSubredditsSection;
+        notifyDataSetChanged();
     }
 
     @Override

@@ -17,13 +17,11 @@
 package ml.docilealligator.infinityforreddit.videoautoplay;
 
 import static android.text.TextUtils.isEmpty;
-
 import static androidx.media3.common.util.Util.inferContentType;
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;

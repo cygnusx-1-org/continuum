@@ -2,13 +2,11 @@ package ml.docilealligator.infinityforreddit.readpost;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-
 import ml.docilealligator.infinityforreddit.account.Account;
 
 @Entity(tableName = "read_posts", primaryKeys = {"username", "id", "read_post_type"},

@@ -7,16 +7,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.adapters.AcknowledgementRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
@@ -58,9 +55,6 @@ public class AcknowledgementFragment extends Fragment {
         acknowledgements.add(new Acknowledgement("Aspect Ratio ImageView",
                 "A simple imageview which scales the width or height aspect with the given ratio",
                 Uri.parse("https://github.com/santalu/aspect-ratio-imageview")));
-        acknowledgements.add(new Acknowledgement("MaterialLoadingProgressBar",
-                "A styled ProgressBar",
-                Uri.parse("https://github.com/lsjwzh/MaterialLoadingProgressBar")));
         acknowledgements.add(new Acknowledgement("Markwon",
                 "A markdown library for Android",
                 Uri.parse("https://github.com/noties/Markwon")));

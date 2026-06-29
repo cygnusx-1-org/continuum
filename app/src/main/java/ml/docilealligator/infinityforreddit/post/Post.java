@@ -2,14 +2,11 @@ package ml.docilealligator.infinityforreddit.post;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
-
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 
@@ -767,6 +764,16 @@ public class Post implements Parcelable {
     @Nullable
     public Map<String, MediaMetadata> getMediaMetadataMap() {
         return mediaMetadataMap;
+    }
+
+    /**
+     * True when the post body embeds Reddit-hosted media (images/video) that is rendered inline in
+     * the selftext. For text posts this means a separate Reddit-generated preview would just
+     * duplicate what the body already shows, so callers should not surface it as a standalone
+     * preview image. See issue #317.
+     */
+    public boolean embedsInlineBodyMedia() {
+        return mediaMetadataMap != null && !mediaMetadataMap.isEmpty();
     }
 
     public void setMediaMetadataMap(@Nullable Map<String, MediaMetadata> mediaMetadataMap) {

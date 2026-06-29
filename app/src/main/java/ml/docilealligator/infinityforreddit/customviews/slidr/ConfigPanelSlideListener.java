@@ -2,9 +2,7 @@ package ml.docilealligator.infinityforreddit.customviews.slidr;
 
 
 import android.app.Activity;
-
 import androidx.annotation.NonNull;
-
 import ml.docilealligator.infinityforreddit.customviews.slidr.model.SlidrConfig;
 
 

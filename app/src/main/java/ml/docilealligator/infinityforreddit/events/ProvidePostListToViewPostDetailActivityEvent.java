@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.events;
 
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
