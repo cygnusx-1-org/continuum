@@ -90,7 +90,11 @@ abstract class NetworkModule {
 
     @Provides
     static ConnectionPool provideConnectionPool() {
-        return new ConnectionPool(0, 1, TimeUnit.NANOSECONDS);
+        // OkHttp's default pool: keep up to 5 idle connections alive for 5 minutes so requests
+        // reuse warm TCP/TLS connections instead of paying a fresh DNS+TCP+TLS handshake every call.
+        // The previous ConnectionPool(0, 1, NANOSECONDS) disabled keep-alive entirely as a 2020-era
+        // workaround for stale-connection timeouts in okhttp3, which modern OkHttp (5.x) handles.
+        return new ConnectionPool();
     }
 
     @Provides
