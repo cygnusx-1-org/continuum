@@ -2,6 +2,20 @@
 
 ---
 
+8.2.5.9.9.1 / 2026-6-29
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Posts loading very slowly #252
+* Fixed Duplicate images shown in posts, first image appears blurry before full resolution #317
+* Implemented Cannot change comment sort type in subreddits with a recommended sort type #316
+* Renamed "Respect Subreddit Recommended Comment Sort Type" to "Respect Subreddit Recommended Comment Sort Type By Default"
+* Fixed Wrong Style in Card Layout #314
+
+We will go back to the old versioning scheme once upstream drops 8.3.0.
+Apparently the latest new feature upstream is working on is reminders.
+Before that it was video in markdown.
+
 8.2.5.9.9 / 2026-6-28
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
