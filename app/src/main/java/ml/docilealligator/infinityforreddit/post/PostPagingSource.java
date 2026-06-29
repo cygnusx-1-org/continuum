@@ -52,6 +52,13 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     private static final int HTTP_INTERNAL_SERVER_ERROR = 500;
 
+    // Saved/upvoted/downvoted/hidden listings interleave posts (t3) and comments (t1). A page that
+    // contains only comments parses to zero posts, which would make us hand Paging an empty page with
+    // a non-null next key — Paging 3 does not reliably continue from an empty page, so pagination
+    // stalls wherever a run of saved comments begins. Skip such comment-only pages by fetching ahead,
+    // bounded so an extreme run of comments can't trigger unbounded requests.
+    private static final int MAX_EMPTY_PAGE_SKIPS = 10;
+
     private final Executor executor;
     private final Retrofit retrofit;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
@@ -360,24 +367,35 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 IOException.class, LoadResult.Error::new, executor);
     }
 
-    private ListenableFuture<LoadResult<String, Post>> loadUserPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
-        ListenableFuture<Response<String>> userPosts;
+    private ListenableFuture<Response<String>> fetchUserPosts(RedditAPI api, String afterKey) {
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            userPosts = api.getUserPostsListenableFuture(subredditOrUserName, loadParams.getKey(), sortType.getType(),
+            return api.getUserPostsListenableFuture(subredditOrUserName, afterKey, sortType.getType(),
                     sortType.getTime(), 100);
         } else {
-            userPosts = api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken,
-                    subredditOrUserName, userWhere, loadParams.getKey(), USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null, 100);
+            return api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken,
+                    subredditOrUserName, userWhere, afterKey, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null, 100);
         }
+    }
 
-        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(userPosts, this::transformData, executor);
+    private ListenableFuture<LoadResult<String, Post>> loadUserPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
+        return catchErrors(loadUserPostsWithKey(api, loadParams.getKey(), 0));
+    }
 
-        ListenableFuture<LoadResult<String, Post>> partialLoadResultFuture =
-                Futures.catching(pageFuture, HttpException.class,
-                        LoadResult.Error::new, executor);
-
-        return Futures.catching(partialLoadResultFuture,
-                IOException.class, LoadResult.Error::new, executor);
+    // Fetches a page of user posts and, if the page parsed to no new posts but Reddit reports more
+    // items (a comment-only page in a saved/upvoted/etc. listing), follows the next key rather than
+    // returning an empty page that would stall Paging. See MAX_EMPTY_PAGE_SKIPS.
+    private ListenableFuture<LoadResult<String, Post>> loadUserPostsWithKey(RedditAPI api, String afterKey, int depth) {
+        ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
+        return Futures.transformAsync(userPosts, response -> {
+            LoadResult<String, Post> result = transformData(response);
+            if (result instanceof LoadResult.Page) {
+                LoadResult.Page<String, Post> page = (LoadResult.Page<String, Post>) result;
+                if (page.getData().isEmpty() && page.getNextKey() != null && depth < MAX_EMPTY_PAGE_SKIPS) {
+                    return loadUserPostsWithKey(api, page.getNextKey(), depth + 1);
+                }
+            }
+            return Futures.immediateFuture(result);
+        }, executor);
     }
 
     private ListenableFuture<LoadResult<String, Post>> loadSearchPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
