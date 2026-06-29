@@ -496,8 +496,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                     default:
                         // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
-                        // body with an OpenGraph image). Show it in the feed like Slide does.
-                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
+                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
+                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
+                                && !post.embedsInlineBodyMedia()) {
                             return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                         }
                         return VIEW_TYPE_POST_CARD_TEXT_TYPE;
@@ -602,8 +604,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                     default:
                         // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
-                        // body with an OpenGraph image). Show it in the feed like Slide does.
-                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
+                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
+                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
+                                && !post.embedsInlineBodyMedia()) {
                             return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                         }
                         return VIEW_TYPE_POST_CARD_2_TEXT_TYPE;
@@ -661,8 +665,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                     default:
                         // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
-                        // body with an OpenGraph image). Show it in the feed like Slide does.
-                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
+                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
+                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
+                                && !post.embedsInlineBodyMedia()) {
                             return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                         }
                         return VIEW_TYPE_POST_CARD_3_TEXT_TYPE;
@@ -1221,7 +1227,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
 
                 boolean textPostWithPreview = post.getPostType() == Post.TEXT_TYPE
-                        && post.getPreviews() != null && !post.getPreviews().isEmpty();
+                        && post.getPreviews() != null && !post.getPreviews().isEmpty()
+                        && !post.embedsInlineBodyMedia();
                 if (((post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE) || textPostWithPreview)
                         && !(mDataSavingMode && mDisableImagePreview)) {
                     ((PostCompactBaseViewHolder) holder).relativeLayout.setVisibility(View.VISIBLE);

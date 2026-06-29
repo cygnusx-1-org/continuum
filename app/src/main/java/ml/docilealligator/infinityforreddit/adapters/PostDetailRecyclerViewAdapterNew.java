@@ -525,8 +525,9 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             default:
                 // Self/text posts can carry a Reddit-generated preview (e.g. a link in the body
                 // with an OpenGraph image). Reuse the link holder to show it; the base holder still
-                // renders the selftext below, so nothing is lost.
-                if (getSuitablePreview(mPost.getPreviews()) != null) {
+                // renders the selftext below, so nothing is lost. But if the body already embeds the
+                // image inline, the preview just duplicates it (issue #317) — show plain text.
+                if (getSuitablePreview(mPost.getPreviews()) != null && !mPost.embedsInlineBodyMedia()) {
                     return VIEW_TYPE_POST_DETAIL_LINK;
                 }
                 return VIEW_TYPE_POST_DETAIL_TEXT_TYPE;

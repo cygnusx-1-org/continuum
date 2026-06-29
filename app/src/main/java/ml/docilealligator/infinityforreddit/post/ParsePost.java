@@ -286,10 +286,22 @@ public class ParsePost {
             //Cross post
             JSONObject parentData = data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0);
 
+            // If the parent embeds its own media inline in the body (e.g. a self/text post with
+            // images), inherit its media_metadata so the crosspost renders those images inline just
+            // like the parent does, and drop the Reddit-generated preview — which would otherwise
+            // show only a blurry duplicate of the same image above the body. See issue #317.
+            Map<String, MediaMetadata> parentMediaMetadataMap = JSONUtils.parseMediaMetadata(parentData);
+            boolean parentEmbedsInlineMedia = parentMediaMetadataMap != null && !parentMediaMetadataMap.isEmpty();
+            if (parentEmbedsInlineMedia) {
+                mediaMetadataMap = parentMediaMetadataMap;
+                previews = new ArrayList<>();
+                parentData.remove(JSONUtils.PREVIEW_KEY);
+            }
+
             // Extract previews from parent post if available
             ArrayList<Post.Preview> parentPreviews = new ArrayList<>();
 
-            if (parentData.has(JSONUtils.PREVIEW_KEY)) {
+            if (!parentEmbedsInlineMedia && parentData.has(JSONUtils.PREVIEW_KEY)) {
                 JSONObject images = parentData.getJSONObject(JSONUtils.PREVIEW_KEY).getJSONArray(JSONUtils.IMAGES_KEY).getJSONObject(0);
                 String previewUrl = images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY);
                 int previewWidth = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.WIDTH_KEY);
@@ -313,10 +325,13 @@ public class ParsePost {
                 previews = parentPreviews;
             }
 
-            // Use parent thumbnail if current post doesn't have a valid thumbnail
+            // Use parent thumbnail if current post doesn't have a valid thumbnail — but not when the
+            // parent embeds its media inline: the body shows it, and the small thumbnail would only
+            // be upscaled into a blurry duplicate above the body (issue #317).
             String parentThumbnailUrl = parentData.isNull(JSONUtils.THUMBNAIL_KEY) ? "" : parentData.getString(JSONUtils.THUMBNAIL_KEY);
 
-            if ((thumbnailUrl == null || thumbnailUrl.isEmpty() || thumbnailUrl.equals("self") || thumbnailUrl.equals("default"))
+            if (!parentEmbedsInlineMedia
+                && (thumbnailUrl == null || thumbnailUrl.isEmpty() || thumbnailUrl.equals("self") || thumbnailUrl.equals("default"))
                 && parentThumbnailUrl != null && !parentThumbnailUrl.isEmpty() && !parentThumbnailUrl.equals("self") && !parentThumbnailUrl.equals("default")) {
                 thumbnailUrl = parentThumbnailUrl;
             }

@@ -766,6 +766,16 @@ public class Post implements Parcelable {
         return mediaMetadataMap;
     }
 
+    /**
+     * True when the post body embeds Reddit-hosted media (images/video) that is rendered inline in
+     * the selftext. For text posts this means a separate Reddit-generated preview would just
+     * duplicate what the body already shows, so callers should not surface it as a standalone
+     * preview image. See issue #317.
+     */
+    public boolean embedsInlineBodyMedia() {
+        return mediaMetadataMap != null && !mediaMetadataMap.isEmpty();
+    }
+
     public void setMediaMetadataMap(@Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         this.mediaMetadataMap = mediaMetadataMap;
     }
