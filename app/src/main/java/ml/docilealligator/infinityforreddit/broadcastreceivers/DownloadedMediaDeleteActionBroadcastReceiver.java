@@ -30,6 +30,8 @@ public class DownloadedMediaDeleteActionBroadcastReceiver extends BroadcastRecei
         }
 
         NotificationManager manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        manager.cancel(intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1));
+        if (manager != null) {
+            manager.cancel(intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1));
+        }
     }
 }

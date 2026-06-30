@@ -46,7 +46,7 @@ public class FetchUserData {
 
             try {
                 Response<String> response = userInfo.execute();
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     processFetchUserDataResponse(response, handler, redditDataRoomDatabase, fetchUserDataListener);
                 } else {
                     if (oauthRetrofit == null || isOauth) {
@@ -93,7 +93,7 @@ public class FetchUserData {
             Response<String> response = oauthRetrofit.create(RedditAPI.class).getUserDataOauth(
                     APIUtils.getOAuthHeader(accessToken), username
             ).execute();
-            if (response.isSuccessful()) {
+            if (response.isSuccessful() && response.body() != null) {
                 processFetchUserDataResponse(response, handler, redditDataRoomDatabase, fetchUserDataListener);
             } else {
                 handler.post(fetchUserDataListener::onFetchUserDataFailed);
@@ -113,7 +113,7 @@ public class FetchUserData {
         userInfo.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     executor.execute(() -> {
                         try {
                             responseString[0] = response.body();

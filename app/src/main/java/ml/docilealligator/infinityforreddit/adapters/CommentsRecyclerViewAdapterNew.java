@@ -1034,6 +1034,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     thread.add(comment);
                     for (int i = commentPos + 1; i < currentList.size() && thread.size() < 10; i++) {
                         Comment child = currentList.get(i);
+                        if (child == null) break;
                         if (child.getDepth() <= comment.getDepth()) break;
                         thread.add(child);
                     }

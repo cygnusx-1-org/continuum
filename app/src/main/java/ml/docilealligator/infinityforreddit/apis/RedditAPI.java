@@ -305,7 +305,10 @@ public interface RedditAPI {
                                                                              @Query("t") SortType.Time sortTime, @Query("after") String lastItem, @Query("limit") int limit,
                                                                                                @Header("User-Agent") String userAgent);
 
-    @GET("user/{username}/{where}.json?type=links&raw_json=1&sr_detail=1")
+    // No type=links filter: on mixed listings (saved/upvoted/downvoted/hidden) Reddit's server-side
+    // type filter terminates deep pagination early (~400 items), so we fetch the full post+comment
+    // listing and drop comments client-side in ParsePost (t3 check). submitted is links-only anyway.
+    @GET("user/{username}/{where}.json?raw_json=1&sr_detail=1")
     ListenableFuture<Response<String>> getUserPostsOauthListenableFuture(@Header(APIUtils.AUTHORIZATION_KEY) String authorization,
                                                                          @Path("username") String username,
                                                                          @Path("where") String where,

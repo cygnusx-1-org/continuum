@@ -257,7 +257,9 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 if (currentPostsSize == posts.size()) {
                     return new LoadResult.Page<>(new ArrayList<>(), null, lastItem);
                 } else {
-                    return new LoadResult.Page<>(posts.subList(currentPostsSize, posts.size()), null, lastItem);
+                    // Copy the slice: subList() is a live view of posts, which a later load()
+                    // structurally modifies via add(), invalidating the view (CME on iteration).
+                    return new LoadResult.Page<>(new ArrayList<>(posts.subList(currentPostsSize, posts.size())), null, lastItem);
                 }
             }
         } else {
@@ -360,24 +362,39 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 IOException.class, LoadResult.Error::new, executor);
     }
 
-    private ListenableFuture<LoadResult<String, Post>> loadUserPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
-        ListenableFuture<Response<String>> userPosts;
+    private ListenableFuture<Response<String>> fetchUserPosts(RedditAPI api, String afterKey) {
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            userPosts = api.getUserPostsListenableFuture(subredditOrUserName, loadParams.getKey(), sortType.getType(),
+            return api.getUserPostsListenableFuture(subredditOrUserName, afterKey, sortType.getType(),
                     sortType.getTime(), 100);
         } else {
-            userPosts = api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken,
-                    subredditOrUserName, userWhere, loadParams.getKey(), USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null, 100);
+            return api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken,
+                    subredditOrUserName, userWhere, afterKey, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getType() : null, USER_WHERE_SUBMITTED.equals(userWhere) ? sortType.getTime() : null, 100);
         }
+    }
 
-        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(userPosts, this::transformData, executor);
+    private ListenableFuture<LoadResult<String, Post>> loadUserPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
+        return catchErrors(loadUserPostsWithKey(api, loadParams.getKey()));
+    }
 
-        ListenableFuture<LoadResult<String, Post>> partialLoadResultFuture =
-                Futures.catching(pageFuture, HttpException.class,
-                        LoadResult.Error::new, executor);
-
-        return Futures.catching(partialLoadResultFuture,
-                IOException.class, LoadResult.Error::new, executor);
+    // Saved/upvoted/downvoted/hidden listings interleave posts (t3) and comments (t1). A page that
+    // contains only comments parses to zero posts, which would make us hand Paging an empty page with
+    // a non-null next key — Paging 3 does not reliably continue from an empty page, so pagination
+    // would stall wherever a run of saved comments begins. When that happens, keep following the next
+    // key until a page yields at least one post or the listing ends (next key becomes null). The
+    // listing is finite and transformData's previousLastItem guard nulls a repeated key, so this
+    // terminates.
+    private ListenableFuture<LoadResult<String, Post>> loadUserPostsWithKey(RedditAPI api, String afterKey) {
+        ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
+        return Futures.transformAsync(userPosts, response -> {
+            LoadResult<String, Post> result = transformData(response);
+            if (result instanceof LoadResult.Page) {
+                LoadResult.Page<String, Post> page = (LoadResult.Page<String, Post>) result;
+                if (page.getData().isEmpty() && page.getNextKey() != null) {
+                    return loadUserPostsWithKey(api, page.getNextKey());
+                }
+            }
+            return Futures.immediateFuture(result);
+        }, executor);
     }
 
     private ListenableFuture<LoadResult<String, Post>> loadSearchPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
@@ -463,7 +480,9 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 if (currentPostsSize == posts.size()) {
                     return new LoadResult.Page<>(new ArrayList<>(), null, lastItem);
                 } else {
-                    return new LoadResult.Page<>(posts.subList(currentPostsSize, posts.size()), null, lastItem);
+                    // Copy the slice: subList() is a live view of posts, which a later load()
+                    // structurally modifies via add(), invalidating the view (CME on iteration).
+                    return new LoadResult.Page<>(new ArrayList<>(posts.subList(currentPostsSize, posts.size())), null, lastItem);
                 }
             }
         } else {

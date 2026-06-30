@@ -120,6 +120,14 @@ public class DownloadRedditVideoService extends JobService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(DownloadRedditVideoService.this, NotificationUtils.CHANNEL_ID_DOWNLOAD_REDDIT_VIDEO);
 
         PersistableBundle intent = params.getExtras();
+        if (intent == null) {
+            return false;
+        }
+
+        String videoUrl = intent.getString(EXTRA_VIDEO_URL);
+        if (videoUrl == null) {
+            return false;
+        }
 
         String subredditName = intent.getString(EXTRA_SUBREDDIT);
         String postId = intent.getString(EXTRA_POST_ID);
@@ -152,8 +160,6 @@ public class DownloadRedditVideoService extends JobService {
             notificationManager.notify(NotificationUtils.DOWNLOAD_REDDIT_VIDEO_NOTIFICATION_ID + randomNotificationIdOffset,
                     createNotification(builder, notificationTitle)); // Use notificationTitle
         }
-
-        String videoUrl = intent.getString(EXTRA_VIDEO_URL);
 
         String audioUrlPrefix = Build.VERSION.SDK_INT > Build.VERSION_CODES.N ? videoUrl.substring(0, videoUrl.lastIndexOf('/')) : null;
 

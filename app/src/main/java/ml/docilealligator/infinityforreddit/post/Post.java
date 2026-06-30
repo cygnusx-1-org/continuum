@@ -290,6 +290,9 @@ public class Post implements Parcelable {
         previews = in.createTypedArrayList(Preview.CREATOR);
         mediaMetadataMap = (Map<String, MediaMetadata>) in.readValue(getClass().getClassLoader());
         gallery = in.createTypedArrayList(Gallery.CREATOR);
+        if (gallery == null) {
+            gallery = new ArrayList<>();
+        }
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
@@ -785,7 +788,7 @@ public class Post implements Parcelable {
     }
 
     public void setGallery(ArrayList<Gallery> gallery) {
-        this.gallery = gallery;
+        this.gallery = gallery != null ? gallery : new ArrayList<>();
     }
 
     public String getMp4Variant() {

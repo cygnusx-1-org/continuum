@@ -338,7 +338,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 try {
                     Response<String> response = mOauthRetrofit.create(RedditAPI.class)
                             .editPostOrComment(APIUtils.getOAuthHeader(mAccessToken), params).execute();
-                    if (response.isSuccessful()) {
+                    if (response.isSuccessful() && response.body() != null) {
                         Comment comment = ParseComment.parseSingleComment(new JSONObject(response.body()), 0);
                         handler.post(() -> {
                             isSubmitting = false;
@@ -346,7 +346,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
                             Intent returnIntent = new Intent();
                             returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, comment);
-                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getExtras().getInt(EXTRA_POSITION));
+                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
                             setResult(RESULT_OK, returnIntent);
 
                             editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
@@ -374,7 +374,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
                         Intent returnIntent = new Intent();
                         returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(content));
-                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getExtras().getInt(EXTRA_POSITION));
+                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
                         setResult(RESULT_OK, returnIntent);
 
                         editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {

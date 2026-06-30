@@ -782,7 +782,7 @@
     <string name="settings_api_keys_summary">Enter your own API keys, including your Client ID</string>
     <string name="enable_api_key_overrides_pref_key" translatable="false">enable_api_key_overrides_pref_key</string>
     <string name="settings_enable_api_key_overrides_title">Enable Overrides</string>
-    <string name="settings_enable_api_key_overrides_summary">Use your custom Client ID, User Agent, and Redirect URI instead of the built-in defaults</string>
+    <string name="settings_enable_api_key_overrides_summary">Use your custom Client ID, User Agent, and Redirect URI instead of the built-in defaults, which are RedReader</string>
     <string name="client_id_pref_key" translatable="false">client_id_pref_key</string>
     <string name="settings_client_id_title">Reddit API Client ID</string>
     <string name="settings_client_id_summary">Use a custom Client ID for the Reddit API</string>

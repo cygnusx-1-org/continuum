@@ -5,6 +5,7 @@ import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.Gravity;
@@ -245,9 +246,14 @@ public class EditProfileActivity extends BaseActivity {
                 break;
         }*/
 
+        Uri mediaUri = data.getData();
+        if (mediaUri == null) {
+            return;
+        }
+
         int contentEstimatedBytes = 0;
         PersistableBundle extras = new PersistableBundle();
-        extras.putString(EditProfileService.EXTRA_MEDIA_URI, data.getData().toString());
+        extras.putString(EditProfileService.EXTRA_MEDIA_URI, mediaUri.toString());
         extras.putString(EditProfileService.EXTRA_ACCOUNT_NAME, accountName);
         extras.putString(EditProfileService.EXTRA_ACCESS_TOKEN, accessToken);
         switch (requestCode) {

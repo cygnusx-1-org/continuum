@@ -330,9 +330,13 @@ public class ViewImgurVideoFragment extends Fragment {
     private void download() {
         isDownloading = false;
 
-        String subredditName = getArguments().getString(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME);
-        boolean isNsfw = getArguments().getBoolean(ViewImgurMediaActivity.EXTRA_IS_NSFW);
-        String title = getArguments().getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY);
+        Bundle arguments = getArguments();
+        if (arguments == null) {
+            return;
+        }
+        String subredditName = arguments.getString(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME);
+        boolean isNsfw = arguments.getBoolean(ViewImgurMediaActivity.EXTRA_IS_NSFW);
+        String title = arguments.getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY);
 
         // Check if download location is set
         String downloadLocation;
@@ -410,7 +414,11 @@ public class ViewImgurVideoFragment extends Fragment {
                 ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
                 if (!trackGroups.isEmpty()) {
                     for (int i = 0; i < trackGroups.size(); i++) {
-                        String mimeType = trackGroups.get(i).getTrackFormat(0).sampleMimeType;
+                        Tracks.Group group = trackGroups.get(i);
+                        if (group.length == 0) {
+                            continue;
+                        }
+                        String mimeType = group.getTrackFormat(0).sampleMimeType;
                         if (mimeType != null && mimeType.contains("audio")) {
                             binding.getMuteButton().setVisibility(View.VISIBLE);
                             binding.getMuteButton().setOnClickListener(view -> {

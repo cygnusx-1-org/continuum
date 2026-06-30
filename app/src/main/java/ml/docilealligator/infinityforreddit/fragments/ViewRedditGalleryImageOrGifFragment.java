@@ -452,18 +452,20 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         isDownloading = false;
 
         Post parentPost = activity.getPost();
-        int galleryIndex = getArguments().getInt(EXTRA_INDEX, 0);
+        Bundle arguments = getArguments();
 
-        if (parentPost == null) {
+        if (parentPost == null || arguments == null) {
             Toast.makeText(activity, R.string.downloading_media_failed_cannot_download_media, Toast.LENGTH_SHORT).show();
             return; // Cannot proceed without the parent post object
         }
+
+        int galleryIndex = arguments.getInt(EXTRA_INDEX, 0);
 
         // Check if download location is set
         String downloadLocation;
 
         // Determine which download location to use
-        boolean isNsfw = getArguments().getBoolean(EXTRA_IS_NSFW, false);
+        boolean isNsfw = arguments.getBoolean(EXTRA_IS_NSFW, false);
 
         int mediaType = media.mediaType == Post.Gallery.TYPE_VIDEO ?
                 DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO :
@@ -536,8 +538,9 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
     // Use the same filename scheme as the download path so saved and shared files match.
     private String getShareFileName() {
         Post parentPost = activity.getPost();
-        if (parentPost != null) {
-            return MediaFileNameUtils.getDownloadFileName(parentPost, getArguments().getInt(EXTRA_INDEX, 0));
+        Bundle arguments = getArguments();
+        if (parentPost != null && arguments != null) {
+            return MediaFileNameUtils.getDownloadFileName(parentPost, arguments.getInt(EXTRA_INDEX, 0));
         }
         return media.fileName;
     }

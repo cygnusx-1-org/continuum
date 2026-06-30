@@ -28,7 +28,7 @@ public class ReplyMessage {
 
             try {
                 Response<String> response = oauthRetrofit.create(RedditAPI.class).sendCommentOrReplyToMessage(headers, params).execute();
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     try {
                         JSONObject messageJSON = new JSONObject(response.body()).getJSONObject(JSONUtils.JSON_KEY)
                                 .getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.THINGS_KEY).getJSONObject(0);

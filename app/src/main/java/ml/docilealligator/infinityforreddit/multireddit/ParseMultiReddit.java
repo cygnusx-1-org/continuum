@@ -23,6 +23,10 @@ public class ParseMultiReddit {
     public static void parseMultiRedditsList(Executor executor, Handler handler, String response,
                                              ParseMultiRedditsListListener parseMultiRedditsListListener) {
         executor.execute(() -> {
+            if (response == null) {
+                handler.post(parseMultiRedditsListListener::failed);
+                return;
+            }
             try {
                 JSONArray arrayResponse = new JSONArray(response);
                 ArrayList<MultiReddit> multiReddits = new ArrayList<>();
@@ -45,6 +49,10 @@ public class ParseMultiReddit {
     public static void parseAndSaveMultiReddit(Executor executor, Handler handler, String response, RedditDataRoomDatabase redditDataRoomDatabase,
                                                ParseMultiRedditListener parseMultiRedditListener) {
         executor.execute(() -> {
+            if (response == null) {
+                handler.post(parseMultiRedditListener::failed);
+                return;
+            }
             try {
                 MultiReddit multiReddit = parseMultiReddit(new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY));
                 redditDataRoomDatabase.multiRedditDao().insert(multiReddit);

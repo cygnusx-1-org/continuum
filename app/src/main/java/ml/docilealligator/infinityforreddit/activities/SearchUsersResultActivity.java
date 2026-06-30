@@ -102,7 +102,7 @@ public class SearchUsersResultActivity extends BaseActivity implements ActivityT
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSearchUsersResultActivity);
 
-        String query = getIntent().getExtras().getString(EXTRA_QUERY);
+        String query = getIntent().getStringExtra(EXTRA_QUERY);
 
         if (savedInstanceState == null) {
             mFragment = new UserListingFragment();

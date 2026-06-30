@@ -109,7 +109,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
             }
         }
 
-        mUserWhere = getIntent().getExtras().getString(EXTRA_USER_WHERE);
+        mUserWhere = getIntent().getStringExtra(EXTRA_USER_WHERE);
         switch (Objects.requireNonNull(mUserWhere)) {
             case PostPagingSource.USER_WHERE_UPVOTED ->
                     binding.accountPostsToolbar.setTitle(R.string.upvoted);

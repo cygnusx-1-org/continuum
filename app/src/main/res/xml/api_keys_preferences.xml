@@ -2,11 +2,13 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- Summary is set in code (APIKeysPreferenceFragment) so the "RedReader" word can be colored;
+         setting it here too would block the spanned version (Preference.setSummary compares with
+         TextUtils.equals, which ignores spans, so identical text is treated as no change). -->
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="@string/enable_api_key_overrides_pref_key"
         app:iconSpaceReserved="false"
-        app:summary="@string/settings_enable_api_key_overrides_summary"
         app:title="@string/settings_enable_api_key_overrides_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
