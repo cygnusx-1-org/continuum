@@ -2,21 +2,19 @@ package ml.docilealligator.infinityforreddit;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.module.AppGlideModule;
-
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
-
+import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
+import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import okhttp3.OkHttpClient;
 
@@ -28,6 +26,14 @@ public class ProxyEnabledGlideModule extends AppGlideModule {
                 .readTimeout(30, TimeUnit.SECONDS)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS);
+
+        // Instrument image retrieval so it shows up in API/media statistics. Glide builds its own
+        // OkHttpClient, so the base-client EventListener does not reach it otherwise.
+        Context applicationContext = context.getApplicationContext();
+        if (applicationContext instanceof Infinity) {
+            ApiCallTracker apiCallTracker = ((Infinity) applicationContext).getAppComponent().apiCallTracker();
+            builder.eventListenerFactory(new ApiMonitorEventListener.Factory(apiCallTracker));
+        }
         SharedPreferences mProxySharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
         boolean proxyEnabled = mProxySharedPreferences.getBoolean(SharedPreferencesUtils.PROXY_ENABLED, false);
         if (proxyEnabled) {

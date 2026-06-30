@@ -2,18 +2,14 @@ package ml.docilealligator.infinityforreddit.account;
 
 import android.os.Handler;
 import android.text.Html;
-
 import androidx.annotation.NonNull;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -21,13 +17,13 @@ import retrofit2.Retrofit;
 
 public class FetchMyInfo {
 
-    public static void fetchAccountInfo(final Executor executor, final Handler handler, final Retrofit retrofit,
+    public static void fetchAccountInfo(final Executor executor, final Handler handler, final Retrofit oauthRetrofit,
                                         final RedditDataRoomDatabase redditDataRoomDatabase,
                                         final String accessToken, final FetchMyInfoListener fetchMyInfoListener) {
-        retrofit.create(RedditAPI.class).getMyInfo(APIUtils.getOAuthHeader(accessToken)).enqueue(new Callback<>() {
+        oauthRetrofit.create(RedditAPI.class).getMyInfo(APIUtils.getOAuthHeader(accessToken)).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     executor.execute(() -> {
                         try {
                             JSONObject jsonResponse = new JSONObject(response.body());

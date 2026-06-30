@@ -6,9 +6,7 @@ import static ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPrefer
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 
@@ -242,6 +240,36 @@ public class CustomThemeWrapper {
     public int getPostTypeTextColor() {
         return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.POST_TYPE_TEXT_COLOR,
                 getDefaultColor("#FFFFFF", "#FFFFFF", "#FFFFFF"));
+    }
+
+    public int getTextTypeBackgroundColor() {
+        return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.TEXT_TYPE_BACKGROUND_COLOR,
+                getDefaultColor("#6A737D", "#6A737D", "#6A737D"));
+    }
+
+    public int getImageTypeBackgroundColor() {
+        return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.IMAGE_TYPE_BACKGROUND_COLOR,
+                getDefaultColor("#2EA44F", "#2EA44F", "#2EA44F"));
+    }
+
+    public int getLinkTypeBackgroundColor() {
+        return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.LINK_TYPE_BACKGROUND_COLOR,
+                getDefaultColor("#0969DA", "#0969DA", "#0969DA"));
+    }
+
+    public int getVideoTypeBackgroundColor() {
+        return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.VIDEO_TYPE_BACKGROUND_COLOR,
+                getDefaultColor("#CF222E", "#CF222E", "#CF222E"));
+    }
+
+    public int getGifTypeBackgroundColor() {
+        return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.GIF_TYPE_BACKGROUND_COLOR,
+                getDefaultColor("#BF3989", "#BF3989", "#BF3989"));
+    }
+
+    public int getGalleryTypeBackgroundColor() {
+        return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.GALLERY_TYPE_BACKGROUND_COLOR,
+                getDefaultColor("#8250DF", "#8250DF", "#8250DF"));
     }
 
     public int getSpoilerBackgroundColor() {
@@ -574,6 +602,12 @@ public class CustomThemeWrapper {
         customTheme.postIconAndInfoColor = Color.parseColor("#FF586E75");
         customTheme.postTitleColor = Color.parseColor("#FFE4E4E4");
         customTheme.postTypeBackgroundColor = Color.parseColor("#FF268BD2");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFE4E4E4");
         customTheme.primaryIconColor = Color.parseColor("#FFE4E4E4");
         customTheme.primaryTextColor = Color.parseColor("#FFE4E4E4");
@@ -654,6 +688,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#002BF0");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -749,6 +789,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#0336FF");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -844,6 +890,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#0336FF");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -939,6 +991,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#002BF0");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -1034,6 +1092,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#0336FF");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -1129,6 +1193,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#0336FF");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -1224,6 +1294,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#002BF0");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -1319,6 +1395,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#0336FF");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -1414,6 +1496,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#0336FF");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -1509,6 +1597,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF008C");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#0336FF");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");
@@ -1604,6 +1698,12 @@ public class CustomThemeWrapper {
         customTheme.upvoted = Color.parseColor("#FF1868");
         customTheme.downvoted = Color.parseColor("#007DDE");
         customTheme.postTypeBackgroundColor = Color.parseColor("#002BF0");
+        customTheme.textTypeBackgroundColor = Color.parseColor("#6A737D");
+        customTheme.imageTypeBackgroundColor = Color.parseColor("#2EA44F");
+        customTheme.linkTypeBackgroundColor = Color.parseColor("#0969DA");
+        customTheme.videoTypeBackgroundColor = Color.parseColor("#CF222E");
+        customTheme.gifTypeBackgroundColor = Color.parseColor("#BF3989");
+        customTheme.galleryTypeBackgroundColor = Color.parseColor("#8250DF");
         customTheme.postTypeTextColor = Color.parseColor("#FFFFFF");
         customTheme.spoilerBackgroundColor = Color.parseColor("#EE02EB");
         customTheme.spoilerTextColor = Color.parseColor("#FFFFFF");

@@ -4,11 +4,9 @@ package ml.docilealligator.infinityforreddit.customviews.slidr;
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.slidr.model.SlidrConfig;
 import ml.docilealligator.infinityforreddit.customviews.slidr.model.SlidrInterface;

@@ -1,12 +1,14 @@
 package ml.docilealligator.infinityforreddit.fragments;
 
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
+
 import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Build;
@@ -17,18 +19,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.Tracks;
+import androidx.media3.common.VideoSize;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
@@ -41,13 +44,10 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelector;
 import androidx.media3.ui.PlayerView;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity;
@@ -58,6 +58,8 @@ import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
+import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
 import okhttp3.OkHttpClient;
 
 public class ViewImgurVideoFragment extends Fragment {
@@ -69,6 +71,7 @@ public class ViewImgurVideoFragment extends Fragment {
     private static final String IS_MUTE_STATE = "IMS";
     private static final String POSITION_STATE = "PS";
     private static final String PLAYBACK_SPEED_STATE = "PSS";
+    private static final String ROTATION_STATE = "RS";
 
     private ViewImgurMediaActivity activity;
     private ImgurMedia imgurMedia;
@@ -88,6 +91,9 @@ public class ViewImgurVideoFragment extends Fragment {
     @Inject
     SimpleCache mSimpleCache;
     private ViewImgurVideoFragmentBindingAdapter binding;
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
+    private View rotatableVideoView; // The video surface to rotate (excludes playback controls)
+    ViewGalleryViewModel viewGalleryViewModel;
 
     public ViewImgurVideoFragment() {
         // Required empty public constructor
@@ -111,41 +117,22 @@ public class ViewImgurVideoFragment extends Fragment {
 
         imgurMedia = getArguments().getParcelable(EXTRA_IMGUR_VIDEO);
 
-        if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_IGNORE_NAV_BAR, false)) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT || getResources().getBoolean(R.bool.isTablet)) {
-                //Set player controller bottom margin in order to display it above the navbar
-                int resourceId = getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-                LinearLayout controllerLinearLayout = binding.getRoot().findViewById(R.id.linear_layout_exo_playback_control_view);
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) controllerLinearLayout.getLayoutParams();
-                params.bottomMargin = getResources().getDimensionPixelSize(resourceId);
-            } else {
-                //Set player controller right margin in order to display it above the navbar
-                int resourceId = getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-                LinearLayout controllerLinearLayout = binding.getRoot().findViewById(R.id.linear_layout_exo_playback_control_view);
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) controllerLinearLayout.getLayoutParams();
-                params.rightMargin = getResources().getDimensionPixelSize(resourceId);
-            }
-        }
-
-        binding.getRoot().setControllerVisibilityListener(new PlayerView.ControllerVisibilityListener() {
-            @Override
-            public void onVisibilityChanged(int visibility) {
-                switch (visibility) {
-                    case View.GONE:
-                        activity.getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
-                        break;
-                    case View.VISIBLE:
-                        activity.getWindow().getDecorView().setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-                }
+        binding.getRoot().setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
+            switch (visibility) {
+                case View.GONE:
+                    activity.getWindow().getDecorView().setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE);
+                    break;
+                case View.VISIBLE:
+                    activity.getWindow().getDecorView().setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             }
         });
 
@@ -153,8 +140,19 @@ public class ViewImgurVideoFragment extends Fragment {
         player = new ExoPlayer.Builder(activity)
                 .setTrackSelector(trackSelector)
                 .setRenderersFactory(new DefaultRenderersFactory(activity).setEnableDecoderFallback(true))
+                .setSeekBackIncrementMs(VIDEO_SEEK_BACK_INCREMENT_MS)
+                .setSeekForwardIncrementMs(VIDEO_SEEK_FORWARD_INCREMENT_MS)
                 .build();
-        binding.getRoot().setPlayer(player);
+        binding.getRoot().setPlayer(new DurationAwareSeekPlayer(player));
+        rotatableVideoView = binding.getRoot().getVideoSurfaceView();
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onVideoSizeChanged(@NonNull VideoSize videoSize) {
+                if (currentRotation != 0) {
+                    applyRotation();
+                }
+            }
+        });
         dataSourceFactory = new CacheDataSource.Factory().setCache(mSimpleCache)
                 .setUpstreamDataSourceFactory(new OkHttpDataSource.Factory(mOkHttpClient).setUserAgent(APIUtils.USER_AGENT));
         player.prepare();
@@ -162,6 +160,7 @@ public class ViewImgurVideoFragment extends Fragment {
 
         if (savedInstanceState != null) {
             playbackSpeed = savedInstanceState.getInt(PLAYBACK_SPEED_STATE);
+            currentRotation = savedInstanceState.getInt(ROTATION_STATE);
         }
         setPlaybackSpeed(Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100")));
         preparePlayer(savedInstanceState);
@@ -169,27 +168,96 @@ public class ViewImgurVideoFragment extends Fragment {
         binding.getTitleTextView().setText(getString(R.string.view_imgur_media_activity_video_label,
                 getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
 
-        if (activity.isUseBottomAppBar()) {
-            binding.getBottomAppBar().setVisibility(View.VISIBLE);
+        binding.getBottomAppBar().setVisibility(View.VISIBLE);
 
-            binding.getBackButton().setOnClickListener(view -> {
-                activity.finish();
-            });
+        binding.getBackButton().setOnClickListener(view -> {
+            activity.finish();
+        });
 
-            binding.getDownloadButton().setOnClickListener(view -> {
-                if (isDownloading) {
-                    return;
-                }
-                isDownloading = true;
-                requestPermissionAndDownload();
-            });
+        binding.getDownloadButton().setOnClickListener(view -> {
+            if (isDownloading) {
+                return;
+            }
+            isDownloading = true;
+            requestPermissionAndDownload();
+        });
 
-            binding.getPlaybackSpeedButton().setOnClickListener(view -> {
-                changePlaybackSpeed();
-            });
-        }
+        binding.getPlaybackSpeedButton().setOnClickListener(view -> {
+            changePlaybackSpeed();
+        });
+
+        binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
+        binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
+        binding.getOverflowButton().setVisibility(View.VISIBLE);
+        binding.getOverflowButton().setOnClickListener(this::showOverflowMenu);
+
+        viewGalleryViewModel = new ViewModelProvider(requireActivity()).get(ViewGalleryViewModel.class);
+        viewGalleryViewModel.getInsets().observe(getViewLifecycleOwner(), insets -> {
+            ViewGroup.LayoutParams lp = binding.getController().getLayoutParams();
+            if (lp instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) lp;
+
+                marginParams.bottomMargin = insets.bottom;
+                marginParams.setMarginStart(insets.left);
+                marginParams.setMarginEnd(insets.right);
+
+                binding.getController().setLayoutParams(marginParams);
+            }
+        });
 
         return binding.getRoot();
+    }
+
+    private void showOverflowMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(activity, anchor);
+        popupMenu.getMenuInflater().inflate(R.menu.view_imgur_media_activity, popupMenu.getMenu());
+        Menu menu = popupMenu.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            Utils.setTitleWithCustomFontToMenuItem(activity.typeface, menu.getItem(i), null);
+        }
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_download_all_imgur_album_media_view_imgur_media_activity) {
+                activity.downloadAllImgurAlbumMedia();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
+    }
+
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        applyRotation();
+    }
+
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        applyRotation();
+    }
+
+    private void applyRotation() {
+        if (rotatableVideoView == null) {
+            return;
+        }
+
+        rotatableVideoView.setRotation(currentRotation);
+
+        VideoSize videoSize = player != null ? player.getVideoSize() : VideoSize.UNKNOWN;
+        float scale = 1.0f;
+        if ((currentRotation == 90 || currentRotation == 270)
+                && videoSize.width > 0 && videoSize.height > 0) {
+            boolean isVerticalVideo = videoSize.height > videoSize.width;
+            if (isVerticalVideo) {
+                float screenWidth = getResources().getDisplayMetrics().widthPixels;
+                float screenHeight = getResources().getDisplayMetrics().heightPixels;
+                scale = screenWidth / screenHeight;
+            } else {
+                scale = (float) videoSize.width / videoSize.height;
+            }
+        }
+
+        rotatableVideoView.setScaleX(scale);
+        rotatableVideoView.setScaleY(scale);
     }
 
     private void changePlaybackSpeed() {
@@ -262,9 +330,13 @@ public class ViewImgurVideoFragment extends Fragment {
     private void download() {
         isDownloading = false;
 
-        String subredditName = getArguments().getString(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME);
-        boolean isNsfw = getArguments().getBoolean(ViewImgurMediaActivity.EXTRA_IS_NSFW);
-        String title = getArguments().getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY);
+        Bundle arguments = getArguments();
+        if (arguments == null) {
+            return;
+        }
+        String subredditName = arguments.getString(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME);
+        boolean isNsfw = arguments.getBoolean(ViewImgurMediaActivity.EXTRA_IS_NSFW);
+        String title = arguments.getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY);
 
         // Check if download location is set
         String downloadLocation;
@@ -342,7 +414,11 @@ public class ViewImgurVideoFragment extends Fragment {
                 ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
                 if (!trackGroups.isEmpty()) {
                     for (int i = 0; i < trackGroups.size(); i++) {
-                        String mimeType = trackGroups.get(i).getTrackFormat(0).sampleMimeType;
+                        Tracks.Group group = trackGroups.get(i);
+                        if (group.length == 0) {
+                            continue;
+                        }
+                        String mimeType = group.getTrackFormat(0).sampleMimeType;
                         if (mimeType != null && mimeType.contains("audio")) {
                             binding.getMuteButton().setVisibility(View.VISIBLE);
                             binding.getMuteButton().setOnClickListener(view -> {
@@ -387,6 +463,7 @@ public class ViewImgurVideoFragment extends Fragment {
         outState.putBoolean(IS_MUTE_STATE, isMute);
         outState.putLong(POSITION_STATE, player.getCurrentPosition());
         outState.putInt(PLAYBACK_SPEED_STATE, playbackSpeed);
+        outState.putInt(ROTATION_STATE, currentRotation);
     }
 
     @Override

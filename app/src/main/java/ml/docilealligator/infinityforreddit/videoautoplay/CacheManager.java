@@ -19,9 +19,7 @@ package ml.docilealligator.infinityforreddit.videoautoplay;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.LinkedHashMap;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 
 /**

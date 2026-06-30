@@ -5,10 +5,8 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceViewHolder;
-
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiver;

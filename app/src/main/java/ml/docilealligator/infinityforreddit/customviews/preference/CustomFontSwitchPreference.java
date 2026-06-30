@@ -6,13 +6,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreference;
-
 import com.google.android.material.materialswitch.MaterialSwitch;
-
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
@@ -59,6 +56,10 @@ public class CustomFontSwitchPreference extends SwitchPreference implements Cust
         View summaryTextView = holder.findViewById(android.R.id.summary);
         materialSwitch = (MaterialSwitch) holder.findViewById(R.id.material_switch_switch_preference);
         materialSwitch.setChecked(isChecked());
+        materialSwitch.setEnabled(isEnabled());
+        // ThemedMaterialSwitch tints the thumb/track with a solid accent color that has no
+        // disabled state, so dim the whole switch here to convey the disabled appearance.
+        materialSwitch.setAlpha(isEnabled() ? 1.0f : 0.5f);
         materialSwitch.setOnClickListener(view -> {
             onClick();
         });
@@ -72,7 +73,7 @@ public class CustomFontSwitchPreference extends SwitchPreference implements Cust
                 }
             }
             if (titleTextView instanceof TextView) {
-                ((TextView) titleTextView).setTextColor(customThemeWrapper.getPrimaryTextColor());
+                ((TextView) titleTextView).setTextColor(isEnabled() ? customThemeWrapper.getPrimaryTextColor() : customThemeWrapper.getSecondaryTextColor());
             }
             if (summaryTextView instanceof TextView) {
                 ((TextView) summaryTextView).setTextColor(customThemeWrapper.getSecondaryTextColor());

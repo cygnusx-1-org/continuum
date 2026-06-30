@@ -1,19 +1,16 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
-import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -46,15 +43,14 @@ public class FetchSubredditData {
         });
     }
 
-    static void fetchSubredditListingData(Executor executor, Handler handler, Retrofit retrofit, String query,
+    static void fetchSubredditListingData(Executor executor, Handler handler, Retrofit retrofit,
+                                          Retrofit oauthRetrofit, String query,
                                           String after, SortType.Type sortType, @Nullable String accessToken,
                                           @NonNull String accountName, boolean nsfw,
                                           final FetchSubredditListingDataListener fetchSubredditListingDataListener) {
         executor.execute(() -> {
-            RedditAPI api = retrofit.create(RedditAPI.class);
-
-            Map<String, String> map = new HashMap<>();
-            Map<String, String> headers = accountName.equals(Account.ANONYMOUS_ACCOUNT) ? map : APIUtils.getOAuthHeader(accessToken);
+            RedditAPI api = (Account.ANONYMOUS_ACCOUNT.equals(accountName) ? retrofit : oauthRetrofit).create(RedditAPI.class);
+            Map<String, String> headers = Account.ANONYMOUS_ACCOUNT.equals(accountName) ? new HashMap<>() : APIUtils.getOAuthHeader(accessToken);
             Call<String> subredditDataCall = api.searchSubreddits(query, after, sortType, nsfw ? 1 : 0, headers);
             try {
                 Response<String> response = subredditDataCall.execute();

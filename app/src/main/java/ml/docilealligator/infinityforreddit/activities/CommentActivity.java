@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -27,7 +26,6 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.giphy.sdk.core.models.Media;
@@ -36,24 +34,18 @@ import com.giphy.sdk.ui.Giphy;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
+import javax.inject.Named;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import kotlin.Unit;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -73,11 +65,11 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityCommentBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
-import ml.docilealligator.infinityforreddit.markdown.EmoteCloseBracketInlineProcessor;
-import ml.docilealligator.infinityforreddit.markdown.EmotePlugin;
-import ml.docilealligator.infinityforreddit.markdown.ImageAndGifEntry;
-import ml.docilealligator.infinityforreddit.markdown.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
+import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
+import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.network.AnyAccountAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.repositories.CommentActivityRepository;
 import ml.docilealligator.infinityforreddit.thing.GiphyGif;
@@ -88,6 +80,8 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.CommentActivityViewModel;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Retrofit;
 
 public class CommentActivity extends BaseActivity implements UploadImageEnabledActivity,
@@ -169,7 +163,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
         EventBus.getDefault().register(this);
 
         Intent intent = getIntent();
-        isReplying = intent.getExtras().getBoolean(EXTRA_IS_REPLYING_KEY);
+        isReplying = intent.getBooleanExtra(EXTRA_IS_REPLYING_KEY, false);
         applyCustomTheme();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -278,7 +272,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
                 });
             ImageAndGifPlugin imageAndGifPlugin = new ImageAndGifPlugin();
-            imageAndGifEntry = new ImageAndGifEntry(this, mGlide, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL, mediaMetadata -> {
+            imageAndGifEntry = new ImageAndGifEntry(this, mGlide, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL, (mediaMetadata, commentId, postId) -> {
                 Intent imageIntent = new Intent(this, ViewImageOrGifActivity.class);
 
                 if (mediaMetadata.isGIF) {
@@ -305,8 +299,8 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             markwonAdapter.notifyDataSetChanged();
         }
         parentFullname = intent.getStringExtra(EXTRA_PARENT_FULLNAME_KEY);
-        parentDepth = intent.getExtras().getInt(EXTRA_PARENT_DEPTH_KEY);
-        parentPosition = intent.getExtras().getInt(EXTRA_PARENT_POSITION_KEY);
+        parentDepth = intent.getIntExtra(EXTRA_PARENT_DEPTH_KEY, 0);
+        parentPosition = intent.getIntExtra(EXTRA_PARENT_POSITION_KEY, 0);
 
         if (isReplying) {
             binding.commentToolbar.setTitle(getString(R.string.comment_activity_label_is_replying));
@@ -612,9 +606,13 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
 
                     return;
                 }
-                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit, accessToken, binding.commentCommentEditText, binding.commentCoordinatorLayout, data.getData(), uploadedImages);
+                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
+                        accessToken, binding.commentCommentEditText,
+                        binding.commentCoordinatorLayout, data.getData(), uploadedImages);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
-                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit, accessToken, binding.commentCommentEditText, binding.commentCoordinatorLayout, capturedImageUri, uploadedImages);
+                Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
+                        accessToken, binding.commentCommentEditText,
+                        binding.commentCoordinatorLayout, capturedImageUri, uploadedImages);
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 sendComment(mMenu == null ? null : mMenu.findItem(R.id.action_send_comment_activity));
             }

@@ -7,12 +7,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import com.bumptech.glide.Glide;
-
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.CustomThemePreviewActivity;
@@ -49,8 +46,8 @@ public class ThemePreviewPostsFragment extends Fragment {
         binding.titleTextViewBestThemePreviewPostsFragment.setTextColor(customTheme.postTitleColor);
         binding.contentTextViewThemePreviewPostsFragment.setTextColor(customTheme.postContentColor);
         binding.stickiedPostImageViewThemePreviewPostsFragment.setColorFilter(customTheme.stickiedPostIconTint, PorterDuff.Mode.SRC_IN);
-        binding.typeTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.postTypeBackgroundColor);
-        binding.typeTextViewThemePreviewPostsFragment.setBorderColor(customTheme.postTypeBackgroundColor);
+        binding.typeTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.linkTypeBackgroundColor);
+        binding.typeTextViewThemePreviewPostsFragment.setBorderColor(customTheme.linkTypeBackgroundColor);
         binding.typeTextViewThemePreviewPostsFragment.setTextColor(customTheme.postTypeTextColor);
         binding.spoilerCustomTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.spoilerBackgroundColor);
         binding.spoilerCustomTextViewThemePreviewPostsFragment.setBorderColor(customTheme.spoilerBackgroundColor);

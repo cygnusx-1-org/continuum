@@ -5,17 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
-
 import androidx.documentfile.provider.DocumentFile;
-
 import com.google.gson.Gson;
-
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.model.enums.EncryptionMethod;
-
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,11 +16,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -41,11 +31,16 @@ import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubr
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
+import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
+import org.apache.commons.io.FileUtils;
 
 public class BackupSettings {
     public static void backupSettings(Context context, Executor executor, Handler handler,
@@ -152,6 +147,10 @@ public class BackupSettings {
             String accountsJson = new Gson().toJson(accounts);
             boolean res23 = saveDatabaseTableToFile(accountsJson, databaseDirFile.getAbsolutePath(), "/accounts.json");
 
+            List<ReadPost> readPosts = redditDataRoomDatabase.readPostDao().getAllReadPostsForBackup();
+            String readPostsJson = new Gson().toJson(readPosts);
+            boolean res24 = saveDatabaseTableToFile(readPostsJson, databaseDirFile.getAbsolutePath(), "/read_posts.json");
+
 
             boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri, password);
 
@@ -164,7 +163,7 @@ public class BackupSettings {
             handler.post(() -> {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
-                        && res18 && res19 && res20 && res21 && res22 && res23 && zipRes && resPrivate;
+                        && res18 && res19 && res20 && res21 && res22 && res23 && res24 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {
@@ -179,39 +178,26 @@ public class BackupSettings {
     }
 
     private static boolean saveMapToFile(Map<String, ?> mapToSave, String backupDir, String fileName) {
-        boolean result = false;
-
-        ObjectOutputStream output = null;
-        try {
-            output = new ObjectOutputStream(new FileOutputStream(backupDir + "/" + fileName + ".txt"));
+        try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(backupDir + "/" + fileName + ".txt"))) {
             output.writeObject(mapToSave);
-
-            result = true;
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (output != null) {
-                    output.flush();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            return false;
         }
-        return result;
     }
 
     private static boolean saveDatabaseTableToFile(String dataJson, String backupDir, String fileName) {
-        File anonymousSubscribedSubredditsFile = new File(backupDir + fileName);
-        try {
-            anonymousSubscribedSubredditsFile.createNewFile();
-            try (PrintWriter out = new PrintWriter(anonymousSubscribedSubredditsFile.getAbsolutePath())) {
-                out.println(dataJson);
-            } catch (IOException e) {
-                e.printStackTrace();
+        File databaseTableFile = new File(backupDir + fileName);
+        try (PrintWriter out = new PrintWriter(databaseTableFile.getAbsolutePath())) {
+            out.println(dataJson);
+            // PrintWriter swallows IO errors; surface them so a failed dump fails the backup.
+            if (out.checkError()) {
+                return false;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
         return true;
     }
@@ -223,11 +209,12 @@ public class BackupSettings {
             String time = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(System.currentTimeMillis()));
             String fileName = "Continuum_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
             String filePath = cacheDir + "/Backup/" + fileName;
-            ZipFile zip = new ZipFile(filePath, password.toCharArray());
-            ZipParameters zipParameters = new ZipParameters();
-            zipParameters.setEncryptFiles(true);
-            zipParameters.setEncryptionMethod(EncryptionMethod.AES);
-            zip.addFolder(new File(cacheDir + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
+            try (ZipFile zip = new ZipFile(filePath, password.toCharArray())) {
+                ZipParameters zipParameters = new ZipParameters();
+                zipParameters.setEncryptFiles(true);
+                zipParameters.setEncryptionMethod(EncryptionMethod.AES);
+                zip.addFolder(new File(cacheDir + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
+            }
 
             DocumentFile dir = DocumentFile.fromTreeUri(context, destinationDirUri);
             if (dir == null) {
@@ -249,15 +236,16 @@ public class BackupSettings {
 
             byte[] fileReader = new byte[1024];
 
-            FileInputStream inputStream = new FileInputStream(filePath);
-            while (true) {
-                int read = inputStream.read(fileReader);
+            try (FileInputStream inputStream = new FileInputStream(filePath)) {
+                while (true) {
+                    int read = inputStream.read(fileReader);
 
-                if (read == -1) {
-                    break;
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileReader, 0, read);
                 }
-
-                outputStream.write(fileReader, 0, read);
             }
             result = true;
         } catch (IOException e) {
@@ -267,8 +255,13 @@ public class BackupSettings {
             if (outputStream != null) {
                 try {
                     outputStream.flush();
+                    // close() is required for SAF/cloud providers (e.g. Google Drive)
+                    // to actually commit the bytes; flush() alone leaves a 0-byte file.
+                    outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    // The bytes never committed, so the backup is not valid.
+                    result = false;
                 }
             }
         }

@@ -18,7 +18,6 @@ package ml.docilealligator.infinityforreddit.videoautoplay;
 
 import android.content.Context;
 import android.net.Uri;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.exoplayer.ExoPlayer;

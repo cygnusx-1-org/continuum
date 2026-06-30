@@ -4,14 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.util.Base64;
-
 import androidx.annotation.NonNull;
-
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
-import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import okhttp3.MediaType;
@@ -43,7 +40,8 @@ public class APIUtils {
     public static final String STATE_KEY = "state";
     public static final String STATE = "23ro8xlxvzp4asqd";
     public static final String REDIRECT_URI_KEY = "redirect_uri";
-    public static final String REDIRECT_URI = "continuum://localhost";
+    public static final String DEFAULT_REDIRECT_URI = "redreader://rr_oauth_redir";
+    public static String REDIRECT_URI = DEFAULT_REDIRECT_URI;
     public static final String DURATION_KEY = "duration";
     public static final String DURATION = "permanent";
     public static final String SCOPE_KEY = "scope";
@@ -57,18 +55,27 @@ public class APIUtils {
     public static final String SCOPE = String.join(" ", SCOPE_LIST);
 
     public static final String ACCESS_TOKEN_KEY = "access_token";
+    public static final String ERROR_KEY = "error";
 
     public static final String AUTHORIZATION_KEY = "Authorization";
     public static final String AUTHORIZATION_BASE = "bearer ";
     public static final String USER_AGENT_KEY = "User-Agent";
-    public static final String USER_AGENT = "android:org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
-    public static final String ANONYMOUS_USER_AGENT = "android:org.cygnusx1.continuum:" + BuildConfig.VERSION_NAME + " (by /u/edgan)";
+    public static String ANONYMOUS_USER_AGENT = "org.quantumbadger.redreader/1.25.2";
+    public static final String DEFAULT_USER_AGENT = "org.quantumbadger.redreader/1.25.2";
+    public static String USER_AGENT = DEFAULT_USER_AGENT;
     public static final String USERNAME_KEY = "username";
 
     public static final String GRANT_TYPE_KEY = "grant_type";
     public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+    // Application-only ("userless") OAuth grant for installed apps. Used for anonymous browsing
+    // now that Reddit has shut down the unauthenticated www.reddit.com/*.json endpoints.
+    public static final String GRANT_TYPE_INSTALLED_CLIENT = "https://oauth.reddit.com/grants/installed_client";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
+
+    public static final String DEVICE_ID_KEY = "device_id";
+    // Privacy-respecting sentinel accepted by Reddit in place of a unique per-device id.
+    public static final String DEVICE_ID_DO_NOT_TRACK = "DO_NOT_TRACK_THIS_DEVICE";
 
     public static final String DIR_KEY = "dir";
     public static final String ID_KEY = "id";
@@ -132,12 +139,55 @@ public class APIUtils {
     public static final String REFERER_KEY = "Referer";
     public static final String REVEDDIT_REFERER = "https://www.reveddit.com/";
 
+    // Whether the user has opted in to using their custom Client ID / User Agent / Redirect URI.
+    // Defaults to false, so the built-in defaults are used unless overrides are explicitly enabled.
+    private static boolean areOverridesEnabled(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY, false);
+    }
+
     // Method to retrieve Client ID from SharedPreferences
     public static String getClientId(Context context) {
         // Explicitly get SharedPreferences by file name to ensure consistency with the PreferenceFragment
         SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
 
-        return sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, context.getString(R.string.default_client_id));
+        String defaultClientId = context.getString(R.string.default_client_id);
+        if (!areOverridesEnabled(sharedPreferences)) {
+            return defaultClientId;
+        }
+        return sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, defaultClientId);
+    }
+
+    // Method to retrieve User Agent from SharedPreferences
+    public static String getUserAgent(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        if (!areOverridesEnabled(sharedPreferences)) {
+            return DEFAULT_USER_AGENT;
+        }
+        String userAgent = sharedPreferences.getString(SharedPreferencesUtils.USER_AGENT_PREF_KEY, DEFAULT_USER_AGENT);
+        if (userAgent == null || userAgent.isEmpty()) {
+            return DEFAULT_USER_AGENT;
+        }
+        return userAgent;
+    }
+
+    // Method to retrieve Redirect URI from SharedPreferences
+    public static String getRedirectUri(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        String defaultRedirectUri = context.getString(R.string.default_redirect_uri);
+        if (!areOverridesEnabled(sharedPreferences)) {
+            return defaultRedirectUri;
+        }
+        String redirectUri = sharedPreferences.getString(SharedPreferencesUtils.REDIRECT_URI_PREF_KEY, defaultRedirectUri);
+        if (redirectUri == null || redirectUri.isEmpty()) {
+            return defaultRedirectUri;
+        }
+        return redirectUri;
+    }
+
+    // Initialize mutable configurable fields from SharedPreferences at app startup
+    public static void initConfigurableFields(Context context) {
+        USER_AGENT = getUserAgent(context);
+        REDIRECT_URI = getRedirectUri(context);
     }
 
     // Method to retrieve Giphy API Key from SharedPreferences
@@ -215,8 +265,33 @@ public class APIUtils {
     }
 
     // Concatenated subreddit name works too
-    public static int subredditAPICallLimit(String subredditName) {
+    public static int subredditAPICallLimit(@Nullable String subredditName) {
         return 100;
+    }
+
+    // Application-only (anonymous/userless) Reddit OAuth token management
+    public static final AtomicReference<ApplicationOnlyToken> ANONYMOUS_TOKEN = new AtomicReference<>(new ApplicationOnlyToken("", 0));
+
+    public static class ApplicationOnlyToken {
+        @NonNull public final String token;
+        private final long expireAt;
+
+        private ApplicationOnlyToken(@NonNull String token, final long expireAt) {
+            this.token = token;
+            this.expireAt = expireAt;
+        }
+
+        // Reddit application-only tokens are valid for expiresInSeconds (typically 3600s / 1 hour).
+        // Expire a few minutes early to give a safety margin before the real expiry.
+        public static ApplicationOnlyToken expireIn(@NonNull String token, long expiresInSeconds) {
+            long leewayMillis = 5 * 60 * 1000;
+            long lifetimeMillis = Math.max(0, expiresInSeconds * 1000 - leewayMillis);
+            return new ApplicationOnlyToken(token, SystemClock.uptimeMillis() + lifetimeMillis);
+        }
+
+        public boolean isValid() {
+            return !token.isEmpty() && expireAt > SystemClock.uptimeMillis();
+        }
     }
 
     // RedGifs token management

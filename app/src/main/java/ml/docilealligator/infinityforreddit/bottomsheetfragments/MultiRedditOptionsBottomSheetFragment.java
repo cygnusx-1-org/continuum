@@ -9,10 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.EditMultiRedditActivity;
 import ml.docilealligator.infinityforreddit.activities.SubscribedThingListingActivity;
@@ -54,6 +52,10 @@ public class MultiRedditOptionsBottomSheetFragment extends LandscapeExpandedRoun
             }
             dismiss();
         });
+
+        if (multiReddit != null && multiReddit.isFollowed()) {
+            binding.editMultiRedditTextViewMultiRedditOptionsBottomSheetFragment.setVisibility(View.GONE);
+        }
 
         binding.editMultiRedditTextViewMultiRedditOptionsBottomSheetFragment.setOnClickListener(view -> {
             if (multiReddit != null) {

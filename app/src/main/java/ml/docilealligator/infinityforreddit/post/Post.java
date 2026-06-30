@@ -2,13 +2,11 @@ package ml.docilealligator.infinityforreddit.post;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Map;
-
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 
@@ -176,6 +174,64 @@ public class Post implements Parcelable {
         isRead = false;
     }
 
+    public Post(@NonNull Post postToBeCopied) {
+        this.id = postToBeCopied.id;
+        this.fullName = postToBeCopied.fullName;
+        this.subredditName = postToBeCopied.subredditName;
+        this.subredditNamePrefixed = postToBeCopied.subredditNamePrefixed;
+        this.subredditIconUrl = postToBeCopied.subredditIconUrl;
+        this.author = postToBeCopied.author;
+        this.authorNamePrefixed = postToBeCopied.authorNamePrefixed;
+        this.authorIconUrl = postToBeCopied.authorIconUrl;
+        this.authorFlair = postToBeCopied.authorFlair;
+        this.authorFlairHTML = postToBeCopied.authorFlairHTML;
+        this.title = postToBeCopied.title;
+        this.selfText = postToBeCopied.selfText;
+        this.selfTextPlain = postToBeCopied.selfTextPlain;
+        this.selfTextPlainTrimmed = postToBeCopied.selfTextPlainTrimmed;
+        this.url = postToBeCopied.url;
+        this.videoUrl = postToBeCopied.videoUrl;
+        this.videoDownloadUrl = postToBeCopied.videoDownloadUrl;
+        this.videoFallBackDirectUrl = postToBeCopied.videoFallBackDirectUrl;
+        this.redgifsId = postToBeCopied.redgifsId;
+        this.streamableShortCode = postToBeCopied.streamableShortCode;
+        this.isImgur = postToBeCopied.isImgur;
+        this.isRedgifs = postToBeCopied.isRedgifs;
+        this.isStreamable = postToBeCopied.isStreamable;
+        this.loadedStreamableVideoAlready = postToBeCopied.loadedStreamableVideoAlready;
+        this.permalink = postToBeCopied.permalink;
+        this.flair = postToBeCopied.flair;
+        this.postTimeMillis = postToBeCopied.postTimeMillis;
+        this.score = postToBeCopied.score;
+        this.postType = postToBeCopied.postType;
+        this.voteType = postToBeCopied.voteType;
+        this.nComments = postToBeCopied.nComments;
+        this.upvoteRatio = postToBeCopied.upvoteRatio;
+        this.hidden = postToBeCopied.hidden;
+        this.spoiler = postToBeCopied.spoiler;
+        this.nsfw = postToBeCopied.nsfw;
+        this.stickied = postToBeCopied.stickied;
+        this.archived = postToBeCopied.archived;
+        this.locked = postToBeCopied.locked;
+        this.saved = postToBeCopied.saved;
+        this.sendReplies = postToBeCopied.sendReplies;
+        this.isCrosspost = postToBeCopied.isCrosspost;
+        this.isRead = postToBeCopied.isRead;
+        this.crosspostParentId = postToBeCopied.crosspostParentId;
+        this.distinguished = postToBeCopied.distinguished;
+        this.suggestedSort = postToBeCopied.suggestedSort;
+        this.mp4Variant = postToBeCopied.mp4Variant;
+        this.previews = postToBeCopied.previews;
+        this.mediaMetadataMap = postToBeCopied.mediaMetadataMap;
+        this.gallery = postToBeCopied.gallery;
+        this.canModPost = postToBeCopied.canModPost;
+        this.approved = postToBeCopied.approved;
+        this.approvedAtUTC = postToBeCopied.approvedAtUTC;
+        this.approvedBy = postToBeCopied.approvedBy;
+        this.removed = postToBeCopied.removed;
+        this.spam = postToBeCopied.spam;
+    }
+
     protected Post(Parcel in) {
         id = in.readString();
         fullName = in.readString();
@@ -234,6 +290,9 @@ public class Post implements Parcelable {
         previews = in.createTypedArrayList(Preview.CREATOR);
         mediaMetadataMap = (Map<String, MediaMetadata>) in.readValue(getClass().getClassLoader());
         gallery = in.createTypedArrayList(Gallery.CREATOR);
+        if (gallery == null) {
+            gallery = new ArrayList<>();
+        }
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
@@ -710,6 +769,16 @@ public class Post implements Parcelable {
         return mediaMetadataMap;
     }
 
+    /**
+     * True when the post body embeds Reddit-hosted media (images/video) that is rendered inline in
+     * the selftext. For text posts this means a separate Reddit-generated preview would just
+     * duplicate what the body already shows, so callers should not surface it as a standalone
+     * preview image. See issue #317.
+     */
+    public boolean embedsInlineBodyMedia() {
+        return mediaMetadataMap != null && !mediaMetadataMap.isEmpty();
+    }
+
     public void setMediaMetadataMap(@Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         this.mediaMetadataMap = mediaMetadataMap;
     }
@@ -719,7 +788,7 @@ public class Post implements Parcelable {
     }
 
     public void setGallery(ArrayList<Gallery> gallery) {
-        this.gallery = gallery;
+        this.gallery = gallery != null ? gallery : new ArrayList<>();
     }
 
     public String getMp4Variant() {
@@ -735,12 +804,30 @@ public class Post implements Parcelable {
         if (!(obj instanceof Post)) {
             return false;
         }
-        return ((Post) obj).id.equals(id);
+        return ((Post) obj).id.equals(id)
+                && nsfw == ((Post) obj).nsfw
+                && spoiler == ((Post) obj).spoiler
+                && isRead == ((Post) obj).isRead
+                && saved == ((Post) obj).saved
+                && hidden == ((Post) obj).hidden
+                && voteType == ((Post) obj).voteType
+                && stickied == ((Post) obj).stickied
+                && approved == ((Post) obj).approved
+                && approvedAtUTC == ((Post) obj).approvedAtUTC
+                && Objects.equals(approvedBy, ((Post) obj).approvedBy)
+                && removed == ((Post) obj).removed
+                && spam == ((Post) obj).spam
+                && locked == ((Post) obj).locked
+                && Objects.equals(distinguished, ((Post) obj).distinguished);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Objects.hash(
+                id, nsfw, spoiler, isRead, saved, hidden, voteType,
+                stickied, approved, approvedAtUTC, approvedBy, removed,
+                spam, locked, distinguished
+        );
     }
 
     public static class Gallery implements Parcelable {
@@ -752,6 +839,10 @@ public class Post implements Parcelable {
         public String url;
         public String fallbackUrl;
         private boolean hasFallback;
+        // A smaller, resolution-bounded preview used only when rendering the gallery inline in the
+        // feed/post-detail card. The full-screen media view keeps using `url` (the source). Null for
+        // GIFs/videos and for images that have no usable preview.
+        public String feedPreviewUrl;
         public String fileName;
         public int mediaType;
         public String caption;
@@ -778,6 +869,7 @@ public class Post implements Parcelable {
             url = in.readString();
             fallbackUrl = in.readString();
             hasFallback = in.readByte() != 0;
+            feedPreviewUrl = in.readString();
             fileName = in.readString();
             mediaType = in.readInt();
             caption = in.readString();
@@ -807,6 +899,7 @@ public class Post implements Parcelable {
             parcel.writeString(url);
             parcel.writeString(fallbackUrl);
             parcel.writeByte((byte) (hasFallback ? 1 : 0));
+            parcel.writeString(feedPreviewUrl);
             parcel.writeString(fileName);
             parcel.writeInt(mediaType);
             parcel.writeString(caption);

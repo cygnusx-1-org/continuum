@@ -23,7 +23,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,36 +32,25 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
-import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.Infinity;
-import ml.docilealligator.infinityforreddit.post.PollPayload;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
-import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
-import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
+import ml.docilealligator.infinityforreddit.asynctasks.FlairRequirementController;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
@@ -73,8 +61,15 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityPostPollBinding;
 import ml.docilealligator.infinityforreddit.events.SubmitPollPostEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.markdown.RichTextJSONConverter;
+import ml.docilealligator.infinityforreddit.post.PollPayload;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
+import ml.docilealligator.infinityforreddit.subreddit.Flair;
+import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
+import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
 import retrofit2.Retrofit;
 
 public class PostPollActivity extends BaseActivity implements FlairBottomSheetFragment.FlairSelectionCallback,
@@ -145,6 +140,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
     private ActivityPostPollBinding binding;
+    private FlairRequirementController flairController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +155,10 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         EventBus.getDefault().register(this);
 
         applyCustomTheme();
+
+        flairController = new FlairRequirementController(mOauthRetrofit,
+                R.id.action_send_post_poll_activity,
+                this::applyFlairLabelStyle);
 
         if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             if (isChangeStatusBarIconColor()) {
@@ -232,6 +232,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                 if (!loadSubredditIconSuccessful) {
                     loadSubredditIcon();
                 }
+                notifyControllerOfSubreddit();
             }
             displaySubredditIcon();
 
@@ -268,6 +269,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                 binding.subredditNameTextViewPostPollActivity.setText(subredditName);
                 binding.flairCustomTextViewPostPollActivity.setVisibility(View.VISIBLE);
                 loadSubredditIcon();
+                notifyControllerOfSubreddit();
             } else {
                 mGlide.load(R.drawable.subreddit_default_icon)
                         .transform(new RoundedCornersTransformation(72, 0))
@@ -311,10 +313,10 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                 flairSelectionBottomSheetFragment.setArguments(bundle);
                 flairSelectionBottomSheetFragment.show(getSupportFragmentManager(), flairSelectionBottomSheetFragment.getTag());
             } else {
-                binding.flairCustomTextViewPostPollActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
-                binding.flairCustomTextViewPostPollActivity.setTextColor(primaryTextColor);
-                binding.flairCustomTextViewPostPollActivity.setText(getString(R.string.flair));
                 flair = null;
+                flairController.setHasFlair(false);
+                binding.flairCustomTextViewPostPollActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
+                applyFlairLabelStyle();
             }
         });
 
@@ -557,6 +559,19 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         }
     }
 
+    private void applyFlairLabelStyle() {
+        if (flair != null) return;
+        boolean required = flairController != null && flairController.isFlairRequired();
+        binding.flairCustomTextViewPostPollActivity.setText(getString(required ? R.string.flair_required : R.string.flair));
+        binding.flairCustomTextViewPostPollActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
+    }
+
+    private void notifyControllerOfSubreddit() {
+        String token = selectedAccount != null && selectedAccount.getAccessToken() != null
+                ? selectedAccount.getAccessToken() : accessToken;
+        flairController.onSubredditChanged(subredditName, subredditIsUser, token);
+    }
+
     private void loadSubredditIcon() {
         LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
@@ -581,10 +596,8 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         getMenuInflater().inflate(R.menu.post_poll_activity, menu);
         applyMenuItemTheme(menu);
         mMenu = menu;
-        if (isPosting) {
-            mMenu.findItem(R.id.action_send_post_poll_activity).setEnabled(false);
-            mMenu.findItem(R.id.action_send_post_poll_activity).getIcon().setAlpha(130);
-        }
+        flairController.setPosting(isPosting);
+        flairController.setMenu(menu);
         return true;
     }
 
@@ -651,9 +664,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         }
 
         isPosting = true;
-
-        item.setEnabled(false);
-        item.getIcon().setAlpha(130);
+        flairController.setPosting(true);
 
         mPostingSnackbar.show();
 
@@ -726,21 +737,24 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                 binding.subredditNameTextViewPostPollActivity.setText(subredditName);
                 displaySubredditIcon();
 
+                flair = null;
+                flairController.setHasFlair(false);
                 binding.flairCustomTextViewPostPollActivity.setVisibility(View.VISIBLE);
                 binding.flairCustomTextViewPostPollActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
-                binding.flairCustomTextViewPostPollActivity.setTextColor(primaryTextColor);
-                binding.flairCustomTextViewPostPollActivity.setText(getString(R.string.flair));
-                flair = null;
+                applyFlairLabelStyle();
+                notifyControllerOfSubreddit();
             } else if (requestCode == PICK_IMAGE_REQUEST_CODE) {
                 if (data == null) {
                     Toast.makeText(PostPollActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
                     return;
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
-                        accessToken, binding.postContentEditTextPostPollActivity, binding.coordinatorLayoutPostPollActivity, data.getData(), uploadedImages);
+                        accessToken, binding.postContentEditTextPostPollActivity,
+                        binding.coordinatorLayoutPostPollActivity, data.getData(), uploadedImages);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
-                        accessToken, binding.postContentEditTextPostPollActivity, binding.coordinatorLayoutPostPollActivity, capturedImageUri, uploadedImages);
+                        accessToken, binding.postContentEditTextPostPollActivity,
+                        binding.coordinatorLayoutPostPollActivity, capturedImageUri, uploadedImages);
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 submitPost(mMenu.findItem(R.id.action_send_post_poll_activity));
             }
@@ -754,6 +768,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         binding.flairCustomTextViewPostPollActivity.setBackgroundColor(flairBackgroundColor);
         binding.flairCustomTextViewPostPollActivity.setBorderColor(flairBackgroundColor);
         binding.flairCustomTextViewPostPollActivity.setTextColor(flairTextColor);
+        flairController.setHasFlair(true);
     }
 
     @Override
@@ -819,6 +834,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     @Subscribe
     public void onSubmitPollPostEvent(SubmitPollPostEvent submitPollPostEvent) {
         isPosting = false;
+        flairController.setPosting(false);
         mPostingSnackbar.dismiss();
         if (submitPollPostEvent.postSuccess) {
             Intent intent = new Intent(this, LinkResolverActivity.class);
@@ -826,8 +842,6 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             startActivity(intent);
             finish();
         } else {
-            mMenu.findItem(R.id.action_send_post_poll_activity).setEnabled(true);
-            mMenu.findItem(R.id.action_send_post_poll_activity).getIcon().setAlpha(255);
             if (submitPollPostEvent.errorMessage == null || submitPollPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostPollActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {

@@ -1,17 +1,11 @@
 package ml.docilealligator.infinityforreddit.network;
 
 import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -22,6 +16,8 @@ import okhttp3.Headers;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 

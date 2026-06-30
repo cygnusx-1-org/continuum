@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -11,9 +10,7 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import retrofit2.Retrofit;
@@ -26,10 +23,11 @@ public class SubredditListingViewModel extends ViewModel {
     private final LiveData<PagedList<SubredditData>> subreddits;
     private final MutableLiveData<SortType> sortTypeLiveData;
 
-    public SubredditListingViewModel(Executor executor, Handler handler, Retrofit retrofit, String query, SortType sortType,
+    public SubredditListingViewModel(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
+                                     String query, SortType sortType,
                                      @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
-        subredditListingDataSourceFactory = new SubredditListingDataSourceFactory(executor, handler, retrofit, query,
-                sortType, accessToken, accountName, nsfw);
+        subredditListingDataSourceFactory = new SubredditListingDataSourceFactory(executor, handler,
+                retrofit, oauthRetrofit, query, sortType, accessToken, accountName, nsfw);
 
         initialLoadingState = Transformations.switchMap(subredditListingDataSourceFactory.getSubredditListingDataSourceMutableLiveData(),
                 SubredditListingDataSource::getInitialLoadStateLiveData);
@@ -84,6 +82,7 @@ public class SubredditListingViewModel extends ViewModel {
         private final Executor executor;
         private final Handler handler;
         private final Retrofit retrofit;
+        private final Retrofit oauthRetrofit;
         private final String query;
         private final SortType sortType;
         @Nullable
@@ -92,11 +91,13 @@ public class SubredditListingViewModel extends ViewModel {
         private final String accountName;
         private final boolean nsfw;
 
-        public Factory(Executor executor, Handler handler, Retrofit retrofit, String query, SortType sortType,
+        public Factory(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
+                       String query, SortType sortType,
                        @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
             this.executor = executor;
             this.handler = handler;
             this.retrofit = retrofit;
+            this.oauthRetrofit = oauthRetrofit;
             this.query = query;
             this.sortType = sortType;
             this.accessToken = accessToken;
@@ -107,7 +108,8 @@ public class SubredditListingViewModel extends ViewModel {
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-            return (T) new SubredditListingViewModel(executor, handler, retrofit, query, sortType, accessToken,accountName, nsfw);
+            return (T) new SubredditListingViewModel(executor, handler, retrofit, oauthRetrofit,
+                    query, sortType, accessToken,accountName, nsfw);
         }
     }
 }

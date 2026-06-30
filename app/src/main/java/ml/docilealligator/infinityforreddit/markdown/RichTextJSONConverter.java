@@ -1,9 +1,22 @@
 package ml.docilealligator.infinityforreddit.markdown;
 
 import android.content.Context;
-
 import androidx.annotation.Nullable;
-
+import io.noties.markwon.Markwon;
+import io.noties.markwon.MarkwonReducer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import ml.docilealligator.infinityforreddit.markdown.giphygif.GiphyGifBlock;
+import ml.docilealligator.infinityforreddit.markdown.giphygif.GiphyGifPlugin;
+import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerNode;
+import ml.docilealligator.infinityforreddit.markdown.superscript.Superscript;
+import ml.docilealligator.infinityforreddit.markdown.uploadedimage.UploadedImageBlock;
+import ml.docilealligator.infinityforreddit.markdown.uploadedimage.UploadedImagePlugin;
+import ml.docilealligator.infinityforreddit.thing.GiphyGif;
+import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import org.commonmark.ext.gfm.strikethrough.Strikethrough;
 import org.commonmark.ext.gfm.tables.TableBlock;
 import org.commonmark.ext.gfm.tables.TableBody;
@@ -38,17 +51,6 @@ import org.commonmark.node.Visitor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import io.noties.markwon.Markwon;
-import io.noties.markwon.MarkwonReducer;
-import ml.docilealligator.infinityforreddit.thing.GiphyGif;
-import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 
 public class RichTextJSONConverter implements Visitor {
     private static final int BOLD = 1;

@@ -22,7 +22,6 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackI
 import static ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo.TIME_UNSET;
 
 import android.net.Uri;
-
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,7 +32,6 @@ import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.ui.PlayerView;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 
@@ -91,7 +89,7 @@ class PlayableImpl implements Playable {
             this.playerView.setPlayer(null);
         } else {
             if (this.player != null) {
-                PlayerView.switchTargetView(this.player.getPlayer(), this.playerView, playerView);
+                PlayerView.switchTargetView(this.player.getDurationAwareSeekPlayer(), this.playerView, playerView);
             }
         }
 
@@ -268,7 +266,9 @@ class PlayableImpl implements Playable {
     }
 
     private void ensurePlayerView() {
-        if (playerView != null && playerView.getPlayer() != player.getPlayer()) playerView.setPlayer(player.getPlayer());
+        if (playerView != null && playerView.getPlayer() != player.getDurationAwareSeekPlayer()) {
+            playerView.setPlayer(player.getDurationAwareSeekPlayer());
+        }
     }
 
     // TODO [20180822] Double check this.

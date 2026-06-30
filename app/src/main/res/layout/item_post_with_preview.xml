@@ -194,6 +194,19 @@
             android:fontFamily="?attr/font_family"
             android:visibility="gone" />
 
+        <TextView
+            android:id="@+id/content_text_view_item_post_with_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:maxLines="4"
+            android:visibility="gone"
+            android:textSize="?attr/content_font_default"
+            android:fontFamily="?attr/content_font_family"
+            android:ellipsize="end" />
+
         <FrameLayout
             android:id="@+id/image_wrapper_relative_layout_item_post_with_preview"
             android:layout_width="match_parent"

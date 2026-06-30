@@ -8,19 +8,12 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -32,6 +25,7 @@ import ml.docilealligator.infinityforreddit.events.FlairSelectedEvent;
 import ml.docilealligator.infinityforreddit.subreddit.FetchFlairs;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
 
 
@@ -126,6 +120,12 @@ public class FlairBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mActivity = (BaseActivity) context;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 
     public interface FlairSelectionCallback {

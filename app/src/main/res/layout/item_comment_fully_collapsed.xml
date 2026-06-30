@@ -16,7 +16,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="16dp"
+            android:paddingBottom="12dp">
 
             <ImageView
                 android:id="@+id/author_icon_image_view_item_comment_fully_collapsed"
@@ -35,21 +36,18 @@
                 android:ellipsize="end"
                 android:fontFamily="?attr/font_family"
                 android:paddingStart="8dp"
-                android:paddingTop="12dp"
+                android:paddingTop="0dp"
                 android:paddingEnd="8dp"
-                android:paddingBottom="12dp"
+                android:paddingBottom="0dp"
                 android:textSize="?attr/font_default" />
 
+            <!-- Padding and pill background are applied in code via styleChildCountBadge(). -->
             <TextView
                 android:id="@+id/child_count_text_view_item_comment_fully_collapsed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:fontFamily="?attr/font_family"
-                android:paddingStart="16dp"
-                android:paddingTop="12dp"
-                android:paddingEnd="8dp"
-                android:paddingBottom="12dp"
                 android:textSize="?attr/font_default" />
 
             <TextView
@@ -59,9 +57,9 @@
                 android:layout_gravity="center_vertical"
                 android:fontFamily="?attr/font_family"
                 android:paddingStart="8dp"
-                android:paddingTop="12dp"
+                android:paddingTop="0dp"
                 android:paddingEnd="8dp"
-                android:paddingBottom="12dp"
+                android:paddingBottom="0dp"
                 android:textSize="?attr/font_default" />
 
             <TextView
@@ -71,9 +69,9 @@
                 android:layout_gravity="center_vertical|end"
                 android:fontFamily="?attr/font_family"
                 android:paddingStart="8dp"
-                android:paddingTop="12dp"
+                android:paddingTop="0dp"
                 android:paddingEnd="16dp"
-                android:paddingBottom="12dp"
+                android:paddingBottom="0dp"
                 android:textSize="?attr/font_default" />
 
         </LinearLayout>

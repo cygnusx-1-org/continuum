@@ -3,9 +3,7 @@ package ml.docilealligator.infinityforreddit.thing;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.subreddit.Rule;
 

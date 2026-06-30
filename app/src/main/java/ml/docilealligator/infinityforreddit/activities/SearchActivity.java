@@ -15,7 +15,6 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -28,20 +27,15 @@ import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -61,6 +55,8 @@ import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -90,6 +86,9 @@ public class SearchActivity extends BaseActivity {
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
+    @Inject
+    @Named("no_oauth")
+    Retrofit mRetrofit;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -234,13 +233,20 @@ public class SearchActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
+                    return;
+                }
+
                 String currentQuery = s.toString().trim();
                 if (!currentQuery.isEmpty()) {
                     binding.clearSearchEditViewSearchActivity.setVisibility(View.VISIBLE);
 
                     if (!searchOnlyUsers) {
                         autoCompleteRunnable = () -> {
-                            subredditAutocompleteCall = mOauthRetrofit.create(RedditAPI.class).subredditAutocomplete(APIUtils.getOAuthHeader(accessToken),
+                            boolean anonymous = accountName.equals(Account.ANONYMOUS_ACCOUNT);
+                            Retrofit autocompleteRetrofit = anonymous ? mRetrofit : mOauthRetrofit;
+                            Map<String, String> autocompleteHeaders = anonymous ? new HashMap<>() : APIUtils.getOAuthHeader(accessToken);
+                            subredditAutocompleteCall = autocompleteRetrofit.create(RedditAPI.class).subredditAutocomplete(autocompleteHeaders,
                                     currentQuery, nsfw);
                             subredditAutocompleteCall.enqueue(new Callback<>() {
                                 @Override

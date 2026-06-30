@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -17,22 +16,20 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import me.zhanghai.android.fastscroll.FastScrollerBuilder;
 import ml.docilealligator.infinityforreddit.Infinity;
+import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.SubscribedThingListingActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewMultiRedditDetailActivity;
+import ml.docilealligator.infinityforreddit.adapters.FollowedMultiRedditListingRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.adapters.MultiRedditListingRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.MultiRedditOptionsBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
@@ -47,6 +44,7 @@ import retrofit2.Retrofit;
 public class MultiRedditListingFragment extends Fragment implements FragmentCommunicator {
 
     public static final String EXTRA_IS_MULTIREDDIT_SELECTION = "EIMS";
+    public static final String EXTRA_IS_FOLLOWED = "EIF";
 
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
@@ -88,6 +86,7 @@ public class MultiRedditListingFragment extends Fragment implements FragmentComm
                     Insets allInsets = Utils.getInsets(insets, false, mActivity.isForcedImmersiveInterface());
                     binding.recyclerViewMultiRedditListingFragment.setPadding(
                             0, 0, 0, allInsets.bottom
+                                    + getResources().getDimensionPixelSize(R.dimen.fab_clearance)
                     );
                     return WindowInsetsCompat.CONSUMED;
                 }
@@ -102,7 +101,9 @@ public class MultiRedditListingFragment extends Fragment implements FragmentComm
             }
         }*/
 
-        boolean isGettingMultiredditInfo = getArguments().getBoolean(EXTRA_IS_MULTIREDDIT_SELECTION, false);
+        Bundle arguments = getArguments();
+        boolean isGettingMultiredditInfo = arguments != null && arguments.getBoolean(EXTRA_IS_MULTIREDDIT_SELECTION, false);
+        boolean isFollowed = arguments != null && arguments.getBoolean(EXTRA_IS_FOLLOWED, false);
 
         if (mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             binding.swipeRefreshLayoutMultiRedditListingFragment.setEnabled(false);
@@ -112,9 +113,9 @@ public class MultiRedditListingFragment extends Fragment implements FragmentComm
 
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
         binding.recyclerViewMultiRedditListingFragment.setLayoutManager(mLinearLayoutManager);
-        MultiRedditListingRecyclerViewAdapter adapter = new MultiRedditListingRecyclerViewAdapter(mActivity,
-                mExecutor, mOauthRetrofit, mRedditDataRoomDatabase, mCustomThemeWrapper, mActivity.accessToken,
-                mActivity.accountName, new MultiRedditListingRecyclerViewAdapter.OnItemClickListener() {
+
+        MultiRedditListingRecyclerViewAdapter.OnItemClickListener clickListener =
+                new MultiRedditListingRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onClick(MultiReddit multiReddit) {
                 if (isGettingMultiredditInfo) {
@@ -136,8 +137,8 @@ public class MultiRedditListingFragment extends Fragment implements FragmentComm
                     showOptionsBottomSheetFragment(multiReddit);
                 }
             }
-        });
-        binding.recyclerViewMultiRedditListingFragment.setAdapter(adapter);
+        };
+
         if (mActivity instanceof SubscribedThingListingActivity) {
             binding.recyclerViewMultiRedditListingFragment.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -154,8 +155,33 @@ public class MultiRedditListingFragment extends Fragment implements FragmentComm
         new FastScrollerBuilder(binding.recyclerViewMultiRedditListingFragment).useMd2Style().build();
 
         mMultiRedditViewModel = new ViewModelProvider(this,
-                new MultiRedditViewModel.Factory(mRedditDataRoomDatabase, mActivity.accountName))
+                new MultiRedditViewModel.Factory(mRedditDataRoomDatabase, mActivity.accountName, isFollowed))
                 .get(MultiRedditViewModel.class);
+
+        if (isFollowed) {
+            FollowedMultiRedditListingRecyclerViewAdapter followedAdapter = new FollowedMultiRedditListingRecyclerViewAdapter(
+                    mActivity, mExecutor, mRedditDataRoomDatabase, mCustomThemeWrapper, clickListener);
+            binding.recyclerViewMultiRedditListingFragment.setAdapter(followedAdapter);
+
+            mMultiRedditViewModel.getAllMultiReddits().observe(getViewLifecycleOwner(), multiReddits -> {
+                if (multiReddits == null || multiReddits.isEmpty()) {
+                    binding.recyclerViewMultiRedditListingFragment.setVisibility(View.GONE);
+                    binding.fetchMultiRedditListingInfoLinearLayoutMultiRedditListingFragment.setVisibility(View.VISIBLE);
+                } else {
+                    binding.fetchMultiRedditListingInfoLinearLayoutMultiRedditListingFragment.setVisibility(View.GONE);
+                    binding.recyclerViewMultiRedditListingFragment.setVisibility(View.VISIBLE);
+                    mGlide.clear(binding.fetchMultiRedditListingInfoImageViewMultiRedditListingFragment);
+                }
+                followedAdapter.setMultiReddits(multiReddits);
+            });
+
+            return binding.getRoot();
+        }
+
+        MultiRedditListingRecyclerViewAdapter adapter = new MultiRedditListingRecyclerViewAdapter(mActivity,
+                mExecutor, mOauthRetrofit, mRedditDataRoomDatabase, mCustomThemeWrapper, mActivity.accessToken,
+                mActivity.accountName, clickListener);
+        binding.recyclerViewMultiRedditListingFragment.setAdapter(adapter);
 
         mMultiRedditViewModel.getAllMultiReddits().observe(getViewLifecycleOwner(), multiReddits -> {
             if (multiReddits == null || multiReddits.size() == 0) {

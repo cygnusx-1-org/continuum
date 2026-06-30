@@ -1,10 +1,8 @@
 package ml.docilealligator.infinityforreddit.post;
 
 import androidx.annotation.NonNull;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import retrofit2.Call;

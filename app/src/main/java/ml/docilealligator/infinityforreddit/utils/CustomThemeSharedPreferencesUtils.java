@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.content.SharedPreferences;
-
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 
 public class CustomThemeSharedPreferencesUtils {
@@ -53,6 +52,12 @@ public class CustomThemeSharedPreferencesUtils {
     public static final String DOWNVOTED = "downvoted";
     public static final String POST_TYPE_BACKGROUND_COLOR = "postTypeBackgroundColor";
     public static final String POST_TYPE_TEXT_COLOR = "postTypeTextColor";
+    public static final String TEXT_TYPE_BACKGROUND_COLOR = "textTypeBackgroundColor";
+    public static final String IMAGE_TYPE_BACKGROUND_COLOR = "imageTypeBackgroundColor";
+    public static final String LINK_TYPE_BACKGROUND_COLOR = "linkTypeBackgroundColor";
+    public static final String VIDEO_TYPE_BACKGROUND_COLOR = "videoTypeBackgroundColor";
+    public static final String GIF_TYPE_BACKGROUND_COLOR = "gifTypeBackgroundColor";
+    public static final String GALLERY_TYPE_BACKGROUND_COLOR = "galleryTypeBackgroundColor";
     public static final String SPOILER_BACKGROUND_COLOR = "spoilerBackgroundColor";
     public static final String SPOILER_TEXT_COLOR = "spoilerTextColor";
     public static final String NSFW_BACKGROUND_COLOR = "nsfwBackgroundColor";
@@ -139,6 +144,12 @@ public class CustomThemeSharedPreferencesUtils {
         editor.putInt(DOWNVOTED, customTheme.downvoted);
         editor.putInt(POST_TYPE_BACKGROUND_COLOR, customTheme.postTypeBackgroundColor);
         editor.putInt(POST_TYPE_TEXT_COLOR, customTheme.postTypeTextColor);
+        editor.putInt(TEXT_TYPE_BACKGROUND_COLOR, customTheme.textTypeBackgroundColor);
+        editor.putInt(IMAGE_TYPE_BACKGROUND_COLOR, customTheme.imageTypeBackgroundColor);
+        editor.putInt(LINK_TYPE_BACKGROUND_COLOR, customTheme.linkTypeBackgroundColor);
+        editor.putInt(VIDEO_TYPE_BACKGROUND_COLOR, customTheme.videoTypeBackgroundColor);
+        editor.putInt(GIF_TYPE_BACKGROUND_COLOR, customTheme.gifTypeBackgroundColor);
+        editor.putInt(GALLERY_TYPE_BACKGROUND_COLOR, customTheme.galleryTypeBackgroundColor);
         editor.putInt(SPOILER_BACKGROUND_COLOR, customTheme.spoilerBackgroundColor);
         editor.putInt(SPOILER_TEXT_COLOR, customTheme.spoilerTextColor);
         editor.putInt(NSFW_BACKGROUND_COLOR, customTheme.nsfwBackgroundColor);

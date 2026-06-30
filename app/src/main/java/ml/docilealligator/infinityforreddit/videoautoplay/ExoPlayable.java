@@ -21,7 +21,6 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.ToroExo.toro;
 
 import android.net.Uri;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -37,9 +36,7 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
 import androidx.media3.exoplayer.trackselection.TrackSelector;
 import androidx.media3.ui.PlayerView;
-
 import com.google.common.collect.ImmutableList;
-
 import ml.docilealligator.infinityforreddit.R;
 
 /**

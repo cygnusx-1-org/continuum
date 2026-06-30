@@ -6,26 +6,21 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.preference.Preference;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import ml.docilealligator.infinityforreddit.Infinity;
-import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
-import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-
-// Imports for long click handling
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.preference.Preference;
 import androidx.recyclerview.widget.RecyclerView;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import javax.inject.Inject;
+import javax.inject.Named;
+import ml.docilealligator.infinityforreddit.Infinity;
+import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFragmentCompat {
     private static final int IMAGE_DOWNLOAD_LOCATION_REQUEST_CODE = 10;

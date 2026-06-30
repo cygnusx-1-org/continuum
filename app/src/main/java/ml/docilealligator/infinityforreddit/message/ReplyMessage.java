@@ -1,19 +1,16 @@
 package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
@@ -31,7 +28,7 @@ public class ReplyMessage {
 
             try {
                 Response<String> response = oauthRetrofit.create(RedditAPI.class).sendCommentOrReplyToMessage(headers, params).execute();
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     try {
                         JSONObject messageJSON = new JSONObject(response.body()).getJSONObject(JSONUtils.JSON_KEY)
                                 .getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.THINGS_KEY).getJSONObject(0);

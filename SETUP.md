@@ -9,38 +9,18 @@ See [here](/GIPHY.md).
 ## Reddit Client ID
 A Reddit Client ID is needed to access Reddit from 3rd party clients.
 
-### Reddit Client ID creation steps
-
-
 > [!IMPORTANT]
 >
-> Reddit has recently changed the guidelines to create api key
-> [see here](https://www.reddit.com/r/redditdev/comments/1oug31u/introducing_the_responsible_builder_policy_new/)
-> we are not sure how it wll affect the app in the future but currently it seems most users are unable to create new api keys
-
-![Create application](assets/screenshots/create_application.png)
-
-1. Go to [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps) and login if
-necessary
-2. Click `create another app...`. Do not re-use any Client ID for any app other
-than Continuum.
-3. Set the name to Continuum
-4. Set the type to `installed app`
-5. Set redirect uri to `continuum://localhost`. If the redirect uri is set
-incorrectly it won't work.
-6. Complete the `reCAPTCHA`
-7. Click `create app`
-8. Copy the Client ID of your newly created app. It is recommended to save it
-in the notes of your entry for Reddit in your password manager.
-
-![Client ID](assets/screenshots/client_id.png)
-
-> [!NOTE]
+> Reddit has changed the guidelines to create client ID/API key. It means you effectively can no longer create new client IDs/API keys.
+> See [here](https://www.reddit.com/r/redditdev/comments/1oug31u/introducing_the_responsible_builder_policy_new/) for details.
 >
-> This is just an example Client ID. It was created and deleted. Keep
-> yours private.
+> It is recommended not to delete any existing client IDs. You can swap an existing client IDs from one application to another by changing
+> the redirect URI, and using the update button.
 >
-> *It is reccomended to create the Client ID using a non banned account.*
+> Continuum now allows you to enter any client ID, redirect URI, and user agent. When using a client ID need to using the matching
+> redirect URI. It is also wise to use the matching user agent.
+>
+> If you have no client ID, look [here](https://old.reddit.com/r/continuumreddit/comments/1scwgcx/custom_api_workaround/).
 
 ### Adding a Reddit Client ID to Continuum
 The method of adding a Client ID to Continuum depends on whether this is the

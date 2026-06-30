@@ -1,16 +1,13 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import androidx.annotation.Nullable;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by alex on 2/25/18.
@@ -20,6 +17,8 @@ public class JSONUtils {
     public static final String KIND_KEY = "kind";
     public static final String KIND_VALUE_MORE = "more";
     public static final String DATA_KEY = "data";
+    public static final String IS_SUSPENDED_KEY = "is_suspended";
+    public static final String IS_BLOCKED_KEY = "is_blocked";
     public static final String AFTER_KEY = "after";
     public static final String CHILDREN_KEY = "children";
     public static final String COUNT_KEY = "count";
@@ -49,6 +48,7 @@ public class JSONUtils {
     public static final String HEIGHT_KEY = "height";
     public static final String SOURCE_KEY = "source";
     public static final String URL_KEY = "url";
+    public static final String DOMAIN_KEY = "domain";
     public static final String MEDIA_KEY = "media";
     public static final String REDDIT_VIDEO_KEY = "reddit_video";
     public static final String HLS_URL_KEY = "hls_url";
@@ -209,6 +209,7 @@ public class JSONUtils {
     public static final String THUMBNAIL_URL_KEY = "thumbnail_url";
     public static final String VIDEO_DOWNLOAD_URL = "videoDownloadUrl";
     public static final String EXPLANATION_KEY = "explanation";
+    public static final String SR_DETAIL_KEY = "sr_detail";
 
     @Nullable
     public static Map<String, MediaMetadata> parseMediaMetadata(JSONObject data) {

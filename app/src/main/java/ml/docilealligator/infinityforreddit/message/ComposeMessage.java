@@ -1,13 +1,11 @@
 package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import retrofit2.Response;

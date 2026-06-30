@@ -23,7 +23,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -42,7 +41,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -54,23 +52,17 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.concurrent.Executor;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.concurrent.Executor;
+import javax.inject.Inject;
+import javax.inject.Named;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -93,9 +85,11 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSh
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewSubredditDetailBinding;
+import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
+import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.fragments.SidebarFragment;
@@ -106,7 +100,9 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
-import ml.docilealligator.infinityforreddit.readpost.InsertReadPost;
+import ml.docilealligator.infinityforreddit.post.PostType;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.subreddit.FetchSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
@@ -120,6 +116,8 @@ import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -138,6 +136,13 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private static final String FETCH_SUBREDDIT_INFO_STATE = "FSIS";
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
+    private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
+    private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
+
+    // Tracked by the AppBar OffsetChangedListener so we can persist the collapsed/expanded
+    // state across rotation. Without this, the AppBarLayout resets to fully expanded on
+    // every recreate, pushing the post feed down even when the user was scrolled mid-feed.
+    private boolean mAppBarCollapsed = false;
     public SubredditViewModel mSubredditViewModel;
 
     @Inject
@@ -335,11 +340,13 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                     @Override
                     public void onStateChanged(AppBarLayout appBarLayout, AppBarStateChangeListener.State state) {
                         if (state == State.COLLAPSED) {
+                            mAppBarCollapsed = true;
                             decorView.setSystemUiVisibility(getSystemVisibilityToolbarCollapsed());
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                             binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
                         } else if (state == State.EXPANDED) {
+                            mAppBarCollapsed = false;
                             decorView.setSystemUiVisibility(getSystemVisibilityToolbarExpanded());
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
@@ -352,10 +359,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                     @Override
                     public void onStateChanged(AppBarLayout appBarLayout, State state) {
                         if (state == State.COLLAPSED) {
+                            mAppBarCollapsed = true;
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                             binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
                         } else if (state == State.EXPANDED) {
+                            mAppBarCollapsed = false;
                             binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
                             binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
                             binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
@@ -368,10 +377,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 @Override
                 public void onStateChanged(AppBarLayout appBarLayout, State state) {
                     if (state == State.EXPANDED) {
+                        mAppBarCollapsed = false;
                         binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(expandedTabTextColor, expandedTabTextColor);
                         binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(expandedTabIndicatorColor);
                         binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(expandedTabBackgroundColor);
                     } else if (state == State.COLLAPSED) {
+                        mAppBarCollapsed = true;
                         binding.tabLayoutViewSubredditDetailActivity.setTabTextColors(collapsedTabTextColor, collapsedTabTextColor);
                         binding.tabLayoutViewSubredditDetailActivity.setSelectedTabIndicatorColor(collapsedTabIndicatorColor);
                         binding.tabLayoutViewSubredditDetailActivity.setBackgroundColor(collapsedTabBackgroundColor);
@@ -394,6 +405,22 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             mFetchSubredditInfoSuccess = savedInstanceState.getBoolean(FETCH_SUBREDDIT_INFO_STATE);
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
             mNewAccountName = savedInstanceState.getString(NEW_ACCOUNT_NAME_STATE);
+            mAppBarCollapsed = savedInstanceState.getBoolean(APP_BAR_COLLAPSED_STATE, false);
+            if (mAppBarCollapsed) {
+                // Restore the collapsed AppBar without animation, so the post feed isn't
+                // pushed down by the re-expanded subreddit header on rotation.
+                binding.appbarLayoutViewSubredditDetailActivity.setExpanded(false, false);
+            }
+            if (savedInstanceState.getBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, false)
+                    && navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
+                // The bottom app bar and its FAB auto-hide on scroll but reset to shown on
+                // recreate. Re-hide both so they match the pre-rotation state.
+                navigationWrapper.bottomAppBar.post(
+                        () -> {
+                            navigationWrapper.bottomAppBar.performHide(false);
+                            navigationWrapper.hideFab();
+                        });
+            }
         }
 
         sectionsPagerAdapter = new SectionsPagerAdapter(this);
@@ -766,6 +793,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 startActivity(intent);
                 break;
             }
+            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT: {
+                boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+                mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, newValue).apply();
+                EventBus.getDefault().post(new ShowThumbnailOnTheLeftInCompactLayoutEvent(newValue));
+                break;
+            }
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
             default: {
                 if (sectionsPagerAdapter != null) {
@@ -814,6 +847,8 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 return R.drawable.ic_lock_day_night_24dp;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SAVED:
                 return R.drawable.ic_bookmarks_day_night_24dp;
+            case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_SHOW_THUMBNAIL_ON_THE_LEFT:
+                return R.drawable.ic_thumbnail_left_day_night_24dp;
             case SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_GO_TO_TOP:
             default:
                 return R.drawable.ic_keyboard_double_arrow_up_day_night_24dp;
@@ -1046,11 +1081,18 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                                         binding.subscribeSubredditChipViewSubredditDetailActivity.setChipBackgroundColor(ColorStateList.valueOf(subscribedColor));
                                         makeSnackbar(R.string.subscribed, false);
                                         subscriptionReady = true;
+                                        EventBus.getDefault().post(new ChangeAnonymousSubredditSubscriptionEvent());
                                     }
 
                                     @Override
                                     public void onSubredditSubscriptionFail() {
                                         makeSnackbar(R.string.subscribe_failed, false);
+                                        subscriptionReady = true;
+                                    }
+
+                                    @Override
+                                    public void onSubredditSubscriptionNSFWBlocked() {
+                                        makeSnackbar(R.string.cannot_subscribe_nsfw_subreddit_anonymous, false);
                                         subscriptionReady = true;
                                     }
                                 });
@@ -1064,6 +1106,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                                         binding.subscribeSubredditChipViewSubredditDetailActivity.setChipBackgroundColor(ColorStateList.valueOf(unsubscribedColor));
                                         makeSnackbar(R.string.unsubscribed, false);
                                         subscriptionReady = true;
+                                        EventBus.getDefault().post(new ChangeAnonymousSubredditSubscriptionEvent());
                                     }
 
                                     @Override
@@ -1315,6 +1358,11 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         outState.putBoolean(FETCH_SUBREDDIT_INFO_STATE, mFetchSubredditInfoSuccess);
         outState.putString(MESSAGE_FULLNAME_STATE, mMessageFullname);
         outState.putString(NEW_ACCOUNT_NAME_STATE, mNewAccountName);
+        outState.putBoolean(APP_BAR_COLLAPSED_STATE, mAppBarCollapsed);
+        boolean bottomAppBarHidden = navigationWrapper != null
+                && navigationWrapper.bottomAppBar != null
+                && navigationWrapper.bottomAppBar.getTranslationY() > 0;
+        outState.putBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, bottomAppBarHidden);
     }
 
     @Override
@@ -1570,6 +1618,10 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
             @Override
             public void afterTextChanged(Editable editable) {
+                if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
+                    return;
+                }
+
                 String currentQuery = editable.toString().trim();
                 if (!currentQuery.isEmpty()) {
                     autoCompleteRunnable = () -> {
@@ -1662,7 +1714,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Override
     public void markPostAsRead(Post post) {
         int readPostsLimit = ReadPostsUtils.GetReadPostsLimit(accountName, mPostHistorySharedPreferences);
-        InsertReadPost.insertReadPost(mRedditDataRoomDatabase, mExecutor, accountName, post.getId(), readPostsLimit);
+        ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, accountName, post.getId(), ReadPostType.READ_POSTS, readPostsLimit);
     }
 
     @Override
@@ -1692,7 +1744,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 PostFragment fragment = new PostFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString(PostFragment.EXTRA_NAME, subredditName);
-                bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostPagingSource.TYPE_SUBREDDIT);
+                bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostType.SUBREDDIT);
                 fragment.setArguments(bundle);
                 return fragment;
             }

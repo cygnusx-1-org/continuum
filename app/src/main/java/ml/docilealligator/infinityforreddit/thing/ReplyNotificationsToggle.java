@@ -1,12 +1,9 @@
 package ml.docilealligator.infinityforreddit.thing;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;

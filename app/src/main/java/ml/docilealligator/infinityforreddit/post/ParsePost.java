@@ -4,14 +4,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.text.Html;
 import android.text.TextUtils;
-
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -19,12 +13,14 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by alex on 3/21/18.
@@ -33,6 +29,9 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 public class ParsePost {
     @WorkerThread
     public static LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+        if (response == null) {
+            return null;
+        }
         LinkedHashSet<Post> newPosts = new LinkedHashSet<>();
         try {
             JSONObject jsonResponse = new JSONObject(response);
@@ -76,8 +75,34 @@ public class ParsePost {
     }
 
     public static String getLastItem(String response) {
+        if (response == null) {
+            return null;
+        }
         try {
             JSONObject object = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
+            return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // The /duplicates/{id} endpoint returns a two-element array: index 0 is the original post and
+    // index 1 is the listing of other submissions of the same URL. Pull element 1 and parse it as a
+    // normal posts listing.
+    public static LinkedHashSet<Post> parseDuplicatePostsSync(String response, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+        try {
+            String duplicatesListing = new JSONArray(response).getJSONObject(1).toString();
+            return parsePostsSync(duplicatesListing, -1, postFilter, readPostsList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getDuplicatesLastItem(String response) {
+        try {
+            JSONObject object = new JSONArray(response).getJSONObject(1).getJSONObject(JSONUtils.DATA_KEY);
             return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -150,6 +175,20 @@ public class ParsePost {
         String fullName = data.getString(JSONUtils.NAME_KEY);
         String subredditName = data.getString(JSONUtils.SUBREDDIT_KEY);
         String subredditNamePrefixed = data.getString(JSONUtils.SUBREDDIT_NAME_PREFIX_KEY);
+        String subredditIconUrl = null;
+        try {
+            JSONObject srDetail = data.getJSONObject(JSONUtils.SR_DETAIL_KEY);
+            if (srDetail.isNull(JSONUtils.COMMUNITY_ICON_KEY)) {
+                subredditIconUrl = "";
+            } else {
+                subredditIconUrl = srDetail.getString(JSONUtils.COMMUNITY_ICON_KEY);
+            }
+            if (subredditIconUrl.isEmpty() && !srDetail.isNull(JSONUtils.ICON_IMG_KEY)) {
+                subredditIconUrl = srDetail.getString(JSONUtils.ICON_IMG_KEY);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         String author = data.getString(JSONUtils.AUTHOR_KEY);
         StringBuilder authorFlairHTMLBuilder = new StringBuilder();
         if (data.has(JSONUtils.AUTHOR_FLAIR_RICHTEXT_KEY)) {
@@ -220,9 +259,17 @@ public class ParsePost {
         String thumbnailUrl = data.isNull(JSONUtils.THUMBNAIL_KEY) ? "" : data.getString(JSONUtils.THUMBNAIL_KEY);
         ArrayList<Post.Preview> previews = new ArrayList<>();
 
+        // A link post that points at another Reddit post carries that post's image as a preview, but
+        // served from the external-preview host. That host isn't reliably loadable here, while the
+        // canonical preview.redd.it host (the same signed asset, used by the linked post itself) is.
+        // Rewrite only for reddit links so genuine external-link previews (news sites, etc.) keep
+        // their external-preview URLs. See the r/bestof -> r/MadeMeSmile case.
+        String linkDomain = data.optString(JSONUtils.DOMAIN_KEY, "");
+        boolean linksToReddit = linkDomain.equals("reddit.com") || linkDomain.endsWith(".reddit.com");
+
         if (data.has(JSONUtils.PREVIEW_KEY)) {
             JSONObject images = data.getJSONObject(JSONUtils.PREVIEW_KEY).getJSONArray(JSONUtils.IMAGES_KEY).getJSONObject(0);
-            String previewUrl = images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY);
+            String previewUrl = normalizeRedditPreviewHost(images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY), linksToReddit);
             int previewWidth = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.WIDTH_KEY);
             int previewHeight = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.HEIGHT_KEY);
             previews.add(new Post.Preview(previewUrl, previewWidth, previewHeight, "", ""));
@@ -231,7 +278,7 @@ public class ParsePost {
 
             for (int i = 0; i < thumbnailPreviews.length(); i++) {
                 JSONObject thumbnailPreview = thumbnailPreviews.getJSONObject(i);
-                String thumbnailPreviewUrl = thumbnailPreview.getString(JSONUtils.URL_KEY);
+                String thumbnailPreviewUrl = normalizeRedditPreviewHost(thumbnailPreview.getString(JSONUtils.URL_KEY), linksToReddit);
                 int thumbnailPreviewWidth = thumbnailPreview.getInt(JSONUtils.WIDTH_KEY);
                 int thumbnailPreviewHeight = thumbnailPreview.getInt(JSONUtils.HEIGHT_KEY);
 
@@ -245,10 +292,22 @@ public class ParsePost {
             //Cross post
             JSONObject parentData = data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0);
 
+            // If the parent embeds its own media inline in the body (e.g. a self/text post with
+            // images), inherit its media_metadata so the crosspost renders those images inline just
+            // like the parent does, and drop the Reddit-generated preview — which would otherwise
+            // show only a blurry duplicate of the same image above the body. See issue #317.
+            Map<String, MediaMetadata> parentMediaMetadataMap = JSONUtils.parseMediaMetadata(parentData);
+            boolean parentEmbedsInlineMedia = parentMediaMetadataMap != null && !parentMediaMetadataMap.isEmpty();
+            if (parentEmbedsInlineMedia) {
+                mediaMetadataMap = parentMediaMetadataMap;
+                previews = new ArrayList<>();
+                parentData.remove(JSONUtils.PREVIEW_KEY);
+            }
+
             // Extract previews from parent post if available
             ArrayList<Post.Preview> parentPreviews = new ArrayList<>();
 
-            if (parentData.has(JSONUtils.PREVIEW_KEY)) {
+            if (!parentEmbedsInlineMedia && parentData.has(JSONUtils.PREVIEW_KEY)) {
                 JSONObject images = parentData.getJSONObject(JSONUtils.PREVIEW_KEY).getJSONArray(JSONUtils.IMAGES_KEY).getJSONObject(0);
                 String previewUrl = images.getJSONObject(JSONUtils.SOURCE_KEY).getString(JSONUtils.URL_KEY);
                 int previewWidth = images.getJSONObject(JSONUtils.SOURCE_KEY).getInt(JSONUtils.WIDTH_KEY);
@@ -272,17 +331,22 @@ public class ParsePost {
                 previews = parentPreviews;
             }
 
-            // Use parent thumbnail if current post doesn't have a valid thumbnail
+            // Use parent thumbnail if current post doesn't have a valid thumbnail — but not when the
+            // parent embeds its media inline: the body shows it, and the small thumbnail would only
+            // be upscaled into a blurry duplicate above the body (issue #317).
             String parentThumbnailUrl = parentData.isNull(JSONUtils.THUMBNAIL_KEY) ? "" : parentData.getString(JSONUtils.THUMBNAIL_KEY);
 
-            if ((thumbnailUrl == null || thumbnailUrl.isEmpty() || thumbnailUrl.equals("self") || thumbnailUrl.equals("default"))
+            if (!parentEmbedsInlineMedia
+                && (thumbnailUrl == null || thumbnailUrl.isEmpty() || thumbnailUrl.equals("self") || thumbnailUrl.equals("default"))
                 && parentThumbnailUrl != null && !parentThumbnailUrl.isEmpty() && !parentThumbnailUrl.equals("self") && !parentThumbnailUrl.equals("default")) {
                 thumbnailUrl = parentThumbnailUrl;
             }
 
-            Post crosspostParent = parseBasicData(parentData);
-            Post post = parseData(parentData, permalink, id, fullName, subredditName, subredditNamePrefixed,
-                    author, authorFlair, authorFlairHTMLBuilder.toString(),
+            //data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0) out of bounds????????????
+            data = data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0);
+            Post crosspostParent = parseBasicData(data);
+            Post post = parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
+                    subredditIconUrl, author, authorFlair, authorFlairHTMLBuilder.toString(),
                     postTime, title, previews, mediaMetadataMap,
                     score, voteType, nComments, upvoteRatio, flair, hidden, spoiler, nsfw, stickied,
                     archived, locked, saved, sendReplies, deleted, removed, true, canModPost, approved,
@@ -292,7 +356,7 @@ public class ParsePost {
             return post;
         } else {
             return parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
-                    author, authorFlair, authorFlairHTMLBuilder.toString(),
+                    subredditIconUrl, author, authorFlair, authorFlairHTMLBuilder.toString(),
                     postTime, title, previews, mediaMetadataMap,
                     score, voteType, nComments, upvoteRatio, flair, hidden,
                     spoiler, nsfw, stickied, archived, locked, saved, sendReplies, deleted, removed, false,
@@ -301,23 +365,33 @@ public class ParsePost {
         }
     }
 
+    private static String normalizeRedditPreviewHost(String url, boolean linksToReddit) {
+        if (linksToReddit && url != null) {
+            return url.replace("://external-preview.redd.it/", "://preview.redd.it/");
+        }
+        return url;
+    }
+
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,
-                                  String subredditName, String subredditNamePrefixed, String author,
-                                  String authorFlair, String authorFlairHTML, long postTimeMillis, String title,
-                                  ArrayList<Post.Preview> previews, Map<String, MediaMetadata> mediaMetadataMap,
-                                  int score, int voteType, int nComments, int upvoteRatio, String flair,
-                                  boolean hidden, boolean spoiler, boolean nsfw,
-                                  boolean stickied, boolean archived, boolean locked, boolean saved,
-                                  boolean sendReplies, boolean deleted, boolean removed, boolean isCrosspost,
-                                  boolean canModPost, boolean approved, long approvedAtUTC, String approvedBy,
-                                  boolean spam, String distinguished, String suggestedSort,
-                                  String thumbnailUrl) throws JSONException {
+                                  String subredditName, String subredditNamePrefixed, String subredditIconUrl,
+                                  String author, String authorFlair, String authorFlairHTML,
+                                  long postTimeMillis, String title, ArrayList<Post.Preview> previews,
+                                  Map<String, MediaMetadata> mediaMetadataMap, int score, int voteType,
+                                  int nComments, int upvoteRatio, String flair, boolean hidden,
+                                  boolean spoiler, boolean nsfw, boolean stickied, boolean archived,
+                                  boolean locked, boolean saved, boolean sendReplies, boolean deleted,
+                                  boolean removed, boolean isCrosspost, boolean canModPost, boolean approved,
+                                  long approvedAtUTC, String approvedBy, boolean spam,
+                                  String distinguished, String suggestedSort, String thumbnailUrl) throws JSONException {
         Post post;
 
         boolean isVideo = data.getBoolean(JSONUtils.IS_VIDEO_KEY);
         String url = Html.fromHtml(data.getString(JSONUtils.URL_KEY)).toString();
         Uri uri = Uri.parse(url);
         String path = uri.getPath();
+        if (path == null) {
+            path = "";
+        }
 
         if (!data.has(JSONUtils.PREVIEW_KEY) && previews.isEmpty()) {
             if (url.contains(permalink)) {
@@ -383,7 +457,17 @@ public class ParsePost {
                         if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                             post.setSelfText("");
                         } else {
-                            post.setSelfText(Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap));
+                            Utils.ParseRedditMediaBlockResult result =
+                                    Utils.parseRedditImagesBlock(
+                                            Utils.modifyMarkdown(
+                                                    Utils.trimTrailingWhitespace(
+                                                            data.getString(JSONUtils.SELFTEXT_KEY)
+                                                    )
+                                            ),
+                                            mediaMetadataMap
+                                    );
+                            post.setSelfText(result.parsedMarkdown);
+                            mediaMetadataMap = result.mediaMetadataMap;
                         }
 
                         String authority = uri.getAuthority();
@@ -470,7 +554,7 @@ public class ParsePost {
                     String authority = uri.getAuthority();
 
                     // The hls stream inside REDDIT_VIDEO_PREVIEW_KEY can sometimes lack an audio track
-                    if (authority.contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
+                    if (authority != null && authority.contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
                         if (path.endsWith(".gifv")) {
                             url = url.substring(0, url.length() - 5) + ".mp4";
                         }
@@ -548,7 +632,7 @@ public class ParsePost {
                                 post.setMp4Variant(mp4Variant);
                             }
                         } catch (Exception ignore) {}
-                    } else if (uri.getAuthority().contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
+                    } else if (uri.getAuthority() != null && uri.getAuthority().contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
                         // Imgur gifv/mp4
                         int postType = Post.VIDEO_TYPE;
 
@@ -607,7 +691,17 @@ public class ParsePost {
                             if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                                 post.setSelfText("");
                             } else {
-                                post.setSelfText(Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap));
+                                Utils.ParseRedditMediaBlockResult result =
+                                        Utils.parseRedditImagesBlock(
+                                                Utils.modifyMarkdown(
+                                                        Utils.trimTrailingWhitespace(
+                                                                data.getString(JSONUtils.SELFTEXT_KEY)
+                                                        )
+                                                ),
+                                                mediaMetadataMap
+                                        );
+                                post.setSelfText(result.parsedMarkdown);
+                                mediaMetadataMap = result.mediaMetadataMap;
                             }
 
                             post.setPreviews(previews);
@@ -689,7 +783,17 @@ public class ParsePost {
                     if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                         post.setSelfText("");
                     } else {
-                        post.setSelfText(Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap));
+                        Utils.ParseRedditMediaBlockResult result =
+                                Utils.parseRedditImagesBlock(
+                                        Utils.modifyMarkdown(
+                                                Utils.trimTrailingWhitespace(
+                                                        data.getString(JSONUtils.SELFTEXT_KEY)
+                                                )
+                                        ),
+                                        mediaMetadataMap
+                                );
+                        post.setSelfText(result.parsedMarkdown);
+                        mediaMetadataMap = result.mediaMetadataMap;
                     }
 
                     String authority = uri.getAuthority();
@@ -797,6 +901,31 @@ public class ParsePost {
                             postGalleryItem.setHasFallback(true);
                         }
 
+                        // Pick a resolution-bounded preview (Reddit caps `p` at 1080 wide) for
+                        // inline feed/post-detail rendering. This avoids decoding the full-size
+                        // source (often several thousand px) into a bitmap on every bind, which
+                        // keeps the result in Glide's memory cache far longer. For GIFs/videos the
+                        // `p` previews are static stills, which is exactly what the feed wants — the
+                        // feed never animates the source, and decoding the full animated GIF inline
+                        // can fail outright. The full-screen media view is unaffected: it always
+                        // loads `url` (the source) directly, never feedPreviewUrl.
+                        if (singleGalleryObject.has(JSONUtils.P_KEY)) {
+                            JSONArray previewsArray = singleGalleryObject.getJSONArray(JSONUtils.P_KEY);
+                            String bestPreviewUrl = null;
+                            int bestPreviewWidth = -1;
+                            for (int p = 0; p < previewsArray.length(); p++) {
+                                JSONObject previewObject = previewsArray.getJSONObject(p);
+                                if (previewObject.has(JSONUtils.U_KEY) && previewObject.has(JSONUtils.X_KEY)) {
+                                    int previewWidth = previewObject.getInt(JSONUtils.X_KEY);
+                                    if (previewWidth > bestPreviewWidth) {
+                                        bestPreviewWidth = previewWidth;
+                                        bestPreviewUrl = previewObject.getString(JSONUtils.U_KEY);
+                                    }
+                                }
+                            }
+                            postGalleryItem.feedPreviewUrl = bestPreviewUrl;
+                        }
+
                         gallery.add(postGalleryItem);
                     }
 
@@ -857,7 +986,16 @@ public class ParsePost {
             if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                 post.setSelfText("");
             } else {
-                String selfText = Utils.parseRedditImagesBlock(Utils.modifyMarkdown(Utils.trimTrailingWhitespace(data.getString(JSONUtils.SELFTEXT_KEY))), mediaMetadataMap);
+                Utils.ParseRedditMediaBlockResult result = Utils.parseRedditImagesBlock(
+                        Utils.modifyMarkdown(
+                                Utils.trimTrailingWhitespace(
+                                        data.getString(JSONUtils.SELFTEXT_KEY)
+                                )
+                        ),
+                        mediaMetadataMap
+                );
+                String selfText = result.parsedMarkdown;
+                mediaMetadataMap = result.mediaMetadataMap;
                 post.setSelfText(selfText);
 
                 if (data.isNull(JSONUtils.SELFTEXT_HTML_KEY)) {
@@ -889,7 +1027,7 @@ public class ParsePost {
 
         post.setThumbnailUrl(thumbnailUrl);
         post.setMediaMetadataMap(mediaMetadataMap);
-
+        post.setSubredditIconUrl(subredditIconUrl);
         return post;
     }
 

@@ -1,9 +1,7 @@
 package ml.docilealligator.infinityforreddit.recentsearchquery;
 
 import android.os.Handler;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 

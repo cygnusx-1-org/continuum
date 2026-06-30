@@ -4,9 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.R;
 
 public class CustomThemeSettingsItem implements Parcelable {
@@ -405,6 +403,30 @@ public class CustomThemeSettingsItem implements Parcelable {
                 context.getString(R.string.theme_item_nav_bar_color),
                 context.getString(R.string.theme_item_nav_bar_color_detail),
                 customTheme.navBarColor));
+        customThemeSettingsItems.add(new CustomThemeSettingsItem(
+                context.getString(R.string.theme_item_text_type_background_color),
+                context.getString(R.string.theme_item_text_type_background_color_detail),
+                customTheme.textTypeBackgroundColor));
+        customThemeSettingsItems.add(new CustomThemeSettingsItem(
+                context.getString(R.string.theme_item_image_type_background_color),
+                context.getString(R.string.theme_item_image_type_background_color_detail),
+                customTheme.imageTypeBackgroundColor));
+        customThemeSettingsItems.add(new CustomThemeSettingsItem(
+                context.getString(R.string.theme_item_link_type_background_color),
+                context.getString(R.string.theme_item_link_type_background_color_detail),
+                customTheme.linkTypeBackgroundColor));
+        customThemeSettingsItems.add(new CustomThemeSettingsItem(
+                context.getString(R.string.theme_item_video_type_background_color),
+                context.getString(R.string.theme_item_video_type_background_color_detail),
+                customTheme.videoTypeBackgroundColor));
+        customThemeSettingsItems.add(new CustomThemeSettingsItem(
+                context.getString(R.string.theme_item_gif_type_background_color),
+                context.getString(R.string.theme_item_gif_type_background_color_detail),
+                customTheme.gifTypeBackgroundColor));
+        customThemeSettingsItems.add(new CustomThemeSettingsItem(
+                context.getString(R.string.theme_item_gallery_type_background_color),
+                context.getString(R.string.theme_item_gallery_type_background_color_detail),
+                customTheme.galleryTypeBackgroundColor));
         customThemeSettingsItems.add(new CustomThemeSettingsItem(
                 context.getString(R.string.theme_item_light_status_bar),
                 customTheme.isLightStatusBar));

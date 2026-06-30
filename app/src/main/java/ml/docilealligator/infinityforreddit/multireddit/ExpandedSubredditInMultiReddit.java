@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 
 public class ExpandedSubredditInMultiReddit implements Parcelable {

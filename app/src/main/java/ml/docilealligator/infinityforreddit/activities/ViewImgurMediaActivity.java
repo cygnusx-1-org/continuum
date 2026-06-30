@@ -5,39 +5,32 @@ import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import androidx.lifecycle.ViewModelProvider;
+import app.futured.hauler.DragDirection;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import app.futured.hauler.DragDirection;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -59,6 +52,10 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -79,7 +76,6 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     public Typeface typeface;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ArrayList<ImgurMedia> mImages;
-    private boolean useBottomAppBar;
     private String subredditName;
     private String postTitle;
     private boolean isNsfw;
@@ -95,12 +91,19 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     Executor executor;
     private Handler handler;
     private ActivityViewImgurMediaBinding binding;
+    ViewGalleryViewModel viewGalleryViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+        } else {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
 
         getTheme().applyStyle(R.style.Theme_Normal, true);
 
@@ -125,24 +128,20 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
         binding = ActivityViewImgurMediaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-
         handler = new Handler(Looper.getMainLooper());
 
-        useBottomAppBar = sharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
+        getSupportActionBar().hide();
 
-        if (!useBottomAppBar) {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
-            setTitle(" ");
-        } else {
-            getSupportActionBar().hide();
-        }
+        viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
+                viewGalleryViewModel.setInsets(Utils.getInsets(insets, false, false));
+                return WindowInsetsCompat.CONSUMED;
+            }
+        });
 
         String imgurId = getIntent().getStringExtra(EXTRA_IMGUR_ID);
         if (imgurId == null) {
@@ -177,10 +176,6 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
         }
 
         binding.loadImageErrorLinearLayoutViewImgurMediaActivity.setOnClickListener(view -> fetchImgurMedia(imgurId));
-    }
-
-    public boolean isUseBottomAppBar() {
-        return useBottomAppBar;
     }
 
     private void fetchImgurMedia(String imgurId) {
@@ -291,28 +286,9 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     }
 
     private void setupViewPager() {
-        if (!useBottomAppBar) {
-            setToolbarTitle(0);
-            binding.viewPagerViewImgurMediaActivity.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int position) {
-                    setToolbarTitle(position);
-                }
-            });
-        }
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewImgurMediaActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewImgurMediaActivity.setOffscreenPageLimit(3);
-    }
-
-    private void setToolbarTitle(int position) {
-        if (mImages != null && position >= 0 && position < mImages.size()) {
-            if (mImages.get(position).getType() == ImgurMedia.TYPE_VIDEO) {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_imgur_media_activity_video_label, position + 1, mImages.size()) + "</font>")));
-            } else {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.view_imgur_media_activity_image_label, position + 1, mImages.size()) + "</font>")));
-            }
-        }
     }
 
     @Override
@@ -330,67 +306,70 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
             finish();
             return true;
         } else if (item.getItemId() == R.id.action_download_all_imgur_album_media_view_imgur_media_activity) {
-            // Check if download locations are set for all media types
-            // Imgur album can contain images and videos
-            String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-            String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
-            String nsfwDownloadLocation = "";
-
-            boolean needsNsfwLocation = isNsfw &&
-                    sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
-
-            Log.d("ImgurDownload", "ViewImgurMediaActivity - Starting download of album with " + mImages.size() +
-                  " items, isNsfw=" + isNsfw + ", needsNsfwLocation=" + needsNsfwLocation);
-
-            Log.d("ImgurDownload", "Download location prefs - IMAGE: " +
-                  (imageDownloadLocation.isEmpty() ? "EMPTY" : "SET") +
-                  ", VIDEO: " + (videoDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
-
-            if (needsNsfwLocation) {
-                nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
-                Log.d("ImgurDownload", "NSFW location: " + (nsfwDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
-
-                if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
-                    Log.e("ImgurDownload", "NSFW download location not set but required");
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            } else {
-                // Check for required download locations based on the album content
-                boolean hasImage = false;
-                boolean hasVideo = false;
-
-                for (ImgurMedia media : mImages) {
-                    if (media.getType() == ImgurMedia.TYPE_VIDEO) {
-                        hasVideo = true;
-                    } else {
-                        hasImage = true;
-                    }
-                }
-
-                Log.d("ImgurDownload", "Album content - hasImage: " + hasImage + ", hasVideo: " + hasVideo);
-
-                if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
-                    (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
-                    Log.e("ImgurDownload", "Required download location not set - " +
-                          (hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty()) ? "IMAGE missing" : "") +
-                          (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()) ? "VIDEO missing" : ""));
-                    Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            }
-
-            JobInfo jobInfo = DownloadMediaService.constructImgurAlbumDownloadAllMediaJobInfo(this, 5000000L * mImages.size(), mImages, subredditName, isNsfw, title);
-            ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
-
-            Log.d("ImgurDownload", "Download job scheduled successfully");
-
-            Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
-
+            downloadAllImgurAlbumMedia();
             return true;
         }
 
         return false;
+    }
+
+    public void downloadAllImgurAlbumMedia() {
+        // Check if download locations are set for all media types
+        // Imgur album can contain images and videos
+        String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+        String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+        String nsfwDownloadLocation = "";
+
+        boolean needsNsfwLocation = isNsfw &&
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
+
+        Log.d("ImgurDownload", "ViewImgurMediaActivity - Starting download of album with " + mImages.size() +
+              " items, isNsfw=" + isNsfw + ", needsNsfwLocation=" + needsNsfwLocation);
+
+        Log.d("ImgurDownload", "Download location prefs - IMAGE: " +
+              (imageDownloadLocation.isEmpty() ? "EMPTY" : "SET") +
+              ", VIDEO: " + (videoDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
+
+        if (needsNsfwLocation) {
+            nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
+            Log.d("ImgurDownload", "NSFW location: " + (nsfwDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
+
+            if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
+                Log.e("ImgurDownload", "NSFW download location not set but required");
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            // Check for required download locations based on the album content
+            boolean hasImage = false;
+            boolean hasVideo = false;
+
+            for (ImgurMedia media : mImages) {
+                if (media.getType() == ImgurMedia.TYPE_VIDEO) {
+                    hasVideo = true;
+                } else {
+                    hasImage = true;
+                }
+            }
+
+            Log.d("ImgurDownload", "Album content - hasImage: " + hasImage + ", hasVideo: " + hasVideo);
+
+            if ((hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty())) ||
+                (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()))) {
+                Log.e("ImgurDownload", "Required download location not set - " +
+                      (hasImage && (imageDownloadLocation == null || imageDownloadLocation.isEmpty()) ? "IMAGE missing" : "") +
+                      (hasVideo && (videoDownloadLocation == null || videoDownloadLocation.isEmpty()) ? "VIDEO missing" : ""));
+                Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        JobInfo jobInfo = DownloadMediaService.constructImgurAlbumDownloadAllMediaJobInfo(this, 5000000L * mImages.size(), mImages, subredditName, isNsfw, title);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+        Log.d("ImgurDownload", "Download job scheduled successfully");
+
+        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -21,12 +21,10 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.checkN
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
 import androidx.annotation.CallSuper;
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.RestrictTo;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.annotations.RemoveIn;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;

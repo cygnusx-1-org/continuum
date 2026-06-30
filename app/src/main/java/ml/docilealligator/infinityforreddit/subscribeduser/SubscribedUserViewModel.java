@@ -6,9 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-
 import java.util.List;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
 public class SubscribedUserViewModel extends ViewModel {
@@ -19,7 +17,7 @@ public class SubscribedUserViewModel extends ViewModel {
 
     public SubscribedUserViewModel(RedditDataRoomDatabase redditDataRoomDatabase, String accountName) {
         mSubscribedUserRepository = new SubscribedUserRepository(redditDataRoomDatabase, accountName);
-        searchQueryLiveData = new MutableLiveData<>("");
+        searchQueryLiveData = new MutableLiveData<>("%");
 
         mAllSubscribedUsers = Transformations.switchMap(searchQueryLiveData, mSubscribedUserRepository::getAllSubscribedUsersWithSearchQuery);
         mAllFavoriteSubscribedUsers = Transformations.switchMap(searchQueryLiveData, mSubscribedUserRepository::getAllFavoriteSubscribedUsersWithSearchQuery);

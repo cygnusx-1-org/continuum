@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.thing;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -20,7 +19,7 @@ public class MediaMetadata implements Parcelable {
     public MediaMetadata(String id, String e, MediaItem original, MediaItem downscaled) {
         this.id = id;
         this.e = e;
-        isGIF = !e.equalsIgnoreCase("image");
+        isGIF = !e.equalsIgnoreCase("image") && !e.equalsIgnoreCase("video");
         String path = Uri.parse(original.url).getPath();
         this.fileName = path == null ? (isGIF ? "Animated.gif" : "Image.jpg") : path.substring(path.lastIndexOf('/') + 1);
         this.original = original;

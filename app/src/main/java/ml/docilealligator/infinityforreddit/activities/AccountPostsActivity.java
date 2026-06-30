@@ -9,22 +9,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-
 import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import java.util.Objects;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostLayoutBottomSheetFragment;
@@ -36,10 +29,13 @@ import ml.docilealligator.infinityforreddit.fragments.FragmentCommunicator;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
+import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class AccountPostsActivity extends BaseActivity implements SortTypeSelectionCallback,
         PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, ActivityToolbarInterface {
@@ -113,7 +109,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
             }
         }
 
-        mUserWhere = getIntent().getExtras().getString(EXTRA_USER_WHERE);
+        mUserWhere = getIntent().getStringExtra(EXTRA_USER_WHERE);
         switch (Objects.requireNonNull(mUserWhere)) {
             case PostPagingSource.USER_WHERE_UPVOTED ->
                     binding.accountPostsToolbar.setTitle(R.string.upvoted);
@@ -175,7 +171,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
     private void initializeFragment() {
         mFragment = new PostFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostPagingSource.TYPE_USER);
+        bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostType.USER);
         bundle.putString(PostFragment.EXTRA_USER_NAME, accountName);
         bundle.putString(PostFragment.EXTRA_USER_WHERE, mUserWhere);
         bundle.putBoolean(PostFragment.EXTRA_DISABLE_READ_POSTS, true);

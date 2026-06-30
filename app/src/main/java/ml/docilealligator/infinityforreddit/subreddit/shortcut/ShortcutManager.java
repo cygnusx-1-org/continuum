@@ -3,12 +3,10 @@ package ml.docilealligator.infinityforreddit.subreddit.shortcut;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
-
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.activities.ViewSubredditDetailActivity;
 
@@ -34,4 +32,3 @@ public class ShortcutManager {
         return ShortcutManagerCompat.requestPinShortcut(context, getInfo(context, subreddit, icon), null);
     }
 }
-

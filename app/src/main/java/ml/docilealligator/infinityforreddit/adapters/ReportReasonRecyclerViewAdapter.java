@@ -3,16 +3,13 @@ package ml.docilealligator.infinityforreddit.adapters;
 import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
-
-import ml.docilealligator.infinityforreddit.thing.ReportReason;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemReportReasonBinding;
+import ml.docilealligator.infinityforreddit.thing.ReportReason;
 
 public class ReportReasonRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 

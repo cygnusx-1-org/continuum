@@ -2,21 +2,21 @@ package ml.docilealligator.infinityforreddit;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import androidx.annotation.NonNull;
-
+import dagger.Module;
+import dagger.Provides;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
+import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
+import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
+import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.network.AccessTokenAuthenticator;
+import ml.docilealligator.infinityforreddit.network.AnonymousAccessTokenInterceptor;
 import ml.docilealligator.infinityforreddit.network.RedgifsAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.ServerAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.SortTypeConverterFactory;
@@ -38,13 +38,15 @@ abstract class NetworkModule {
     @Provides
     @Named("base")
     @Singleton
-    static OkHttpClient provideBaseOkhttp(@Named("proxy") SharedPreferences mProxySharedPreferences) {
+    static OkHttpClient provideBaseOkhttp(@Named("proxy") SharedPreferences mProxySharedPreferences,
+                                          ApiCallTracker apiCallTracker) {
         boolean proxyEnabled = mProxySharedPreferences.getBoolean(SharedPreferencesUtils.PROXY_ENABLED, false);
 
         var builder = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
+                .eventListenerFactory(new ApiMonitorEventListener.Factory(apiCallTracker))
                 .addInterceptor(chain -> {
                     if (chain.request().header("User-Agent") == null) {
                         return chain.proceed(
@@ -88,13 +90,19 @@ abstract class NetworkModule {
 
     @Provides
     static ConnectionPool provideConnectionPool() {
-        return new ConnectionPool(0, 1, TimeUnit.NANOSECONDS);
+        // OkHttp's default pool: keep up to 5 idle connections alive for 5 minutes so requests
+        // reuse warm TCP/TLS connections instead of paying a fresh DNS+TCP+TLS handshake every call.
+        // The previous ConnectionPool(0, 1, NANOSECONDS) disabled keep-alive entirely as a 2020-era
+        // workaround for stale-connection timeouts in okhttp3, which modern OkHttp (5.x) handles.
+        return new ConnectionPool();
     }
 
     @Provides
     @Named("no_oauth")
-    static Retrofit provideRetrofit(@Named("base") Retrofit retrofit) {
-        return retrofit;
+    static Retrofit provideRetrofit(@Named("base") Retrofit retrofit, @Named("anonymous") OkHttpClient okHttpClient) {
+        return retrofit.newBuilder()
+                .client(okHttpClient)
+                .build();
     }
 
     @Provides
@@ -103,6 +111,23 @@ abstract class NetworkModule {
         @Named("default") OkHttpClient okHttpClient) {
 
         return retrofit.newBuilder().baseUrl(APIUtils.OAUTH_API_BASE_URI).client(okHttpClient).build();
+    }
+
+    @Provides
+    @Named("anonymous")
+    @Singleton
+    static OkHttpClient provideCookieOkHttpClient(Context context,
+                                            @Named("base") OkHttpClient httpClient,
+                                            @Named("base") Retrofit retrofit,
+                                            RedditDataRoomDatabase redditDataRoomDatabase,
+                                            ConnectionPool connectionPool) {
+        AnonymousAccessTokenInterceptor anonymousAccessTokenInterceptor
+                = new AnonymousAccessTokenInterceptor(context, retrofit, redditDataRoomDatabase);
+
+        return httpClient.newBuilder()
+                .addInterceptor(anonymousAccessTokenInterceptor)
+                .connectionPool(connectionPool)
+                .build();
     }
 
     @Provides
@@ -277,5 +302,11 @@ abstract class NetworkModule {
     @Singleton
     static StreamableAPI provideStreamableApi(@Named("streamable") Retrofit streamableRetrofit) {
         return streamableRetrofit.create(StreamableAPI.class);
+    }
+
+    @Provides
+    @Singleton
+    static StreamableAPIKt provideStreamableApiKt(@Named("streamable") Retrofit streamableRetrofit) {
+        return streamableRetrofit.create(StreamableAPIKt.class);
     }
 }

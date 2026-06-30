@@ -5,11 +5,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -45,6 +43,11 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         isNSFWEnabled = nsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false);
         collapsePreferencesSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION, false);
         this.itemClickListener = itemClickListener;
+    }
+
+    public void setCollapsePreferencesSection(boolean collapsePreferencesSection) {
+        this.collapsePreferencesSection = collapsePreferencesSection;
+        notifyDataSetChanged();
     }
 
     @Override

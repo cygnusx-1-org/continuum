@@ -17,7 +17,6 @@
 package ml.docilealligator.infinityforreddit.videoautoplay;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.util.UnstableApi;

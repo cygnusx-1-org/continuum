@@ -20,14 +20,15 @@
         android:id="@+id/action_save_view_post_detail_fragment"
         android:orderInCategory="3"
         android:title="@string/action_save_post"
-        app:showAsAction="ifRoom"
+        app:showAsAction="never"
         android:visible="false" />
 
     <item
         android:id="@+id/action_sort_view_post_detail_fragment"
         android:orderInCategory="4"
         android:title="@string/action_sort"
-        app:showAsAction="never"
+        android:icon="@drawable/ic_sort_toolbar_24dp"
+        app:showAsAction="ifRoom"
         android:visible="false" />
 
     <item

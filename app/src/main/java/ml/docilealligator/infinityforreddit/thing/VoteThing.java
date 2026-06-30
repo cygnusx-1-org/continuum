@@ -2,12 +2,9 @@ package ml.docilealligator.infinityforreddit.thing;
 
 import android.content.Context;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import retrofit2.Call;

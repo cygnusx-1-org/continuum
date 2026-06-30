@@ -8,14 +8,10 @@ import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.greenrobot.eventbus.EventBus;
-
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonConfiguration;
@@ -38,13 +34,14 @@ import ml.docilealligator.infinityforreddit.databinding.ItemFooterErrorBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterLoadingBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemMessageBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
-import ml.docilealligator.infinityforreddit.markdown.RedditHeadingPlugin;
-import ml.docilealligator.infinityforreddit.markdown.SpoilerAwareMovementMethod;
-import ml.docilealligator.infinityforreddit.markdown.SpoilerParserPlugin;
-import ml.docilealligator.infinityforreddit.markdown.SuperscriptPlugin;
+import ml.docilealligator.infinityforreddit.markdown.redditheading.RedditHeadingPlugin;
+import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerAwareMovementMethod;
+import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerParserPlugin;
+import ml.docilealligator.infinityforreddit.markdown.superscript.SuperscriptPlugin;
 import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
+import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
 
 public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, RecyclerView.ViewHolder> {
@@ -178,7 +175,9 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 }
 
                 ((DataViewHolder) holder).binding.authorTextViewItemMessage.setText(recipientUsername);
-                String subject = displayedMessage.getSubject().substring(0, 1).toUpperCase() + displayedMessage.getSubject().substring(1);
+                String subjectRaw = displayedMessage.getSubject();
+                String subject = (subjectRaw == null || subjectRaw.isEmpty()) ? "" :
+                        subjectRaw.substring(0, 1).toUpperCase() + subjectRaw.substring(1);
                 ((DataViewHolder) holder).binding.subjectTextViewItemMessage.setText(subject);
                 mMarkwon.setMarkdown(((DataViewHolder) holder).binding.contentCustomMarkwonViewItemMessage, displayedMessage.getBody());
             }

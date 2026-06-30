@@ -2,9 +2,7 @@ package ml.docilealligator.infinityforreddit.network;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import java.io.IOException;
-
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import retrofit2.Converter;
 

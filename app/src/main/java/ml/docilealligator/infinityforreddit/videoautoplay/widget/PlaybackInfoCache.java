@@ -21,17 +21,14 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.widget.Common.O
 
 import android.annotation.SuppressLint;
 import android.util.SparseArray;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;

@@ -3,9 +3,7 @@ package ml.docilealligator.infinityforreddit.utils;
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.widget.Toast;
-
 import java.util.Locale;
-
 import ml.docilealligator.infinityforreddit.R;
 
 public class TextToSpeechHelper {

@@ -1,18 +1,15 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.os.Bundle;
-
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
-
-import org.greenrobot.eventbus.EventBus;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeDataSavingModeEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDisableImagePreviewEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeOnlyDisablePreviewInVideoAndGifPostsEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import org.greenrobot.eventbus.EventBus;
 
 public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragmentCompat {
 

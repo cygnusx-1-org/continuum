@@ -20,14 +20,12 @@ import static ml.docilealligator.infinityforreddit.videoautoplay.ToroExo.with;
 import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.checkNotNull;
 
 import android.net.Uri;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.annotations.RemoveIn;
 import ml.docilealligator.infinityforreddit.videoautoplay.helper.ToroPlayerHelper;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;

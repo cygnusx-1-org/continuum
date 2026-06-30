@@ -20,7 +20,6 @@ import static androidx.media3.exoplayer.DefaultRenderersFactory.EXTENSION_RENDER
 import static ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil.checkNotNull;
 
 import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;

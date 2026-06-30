@@ -2,11 +2,8 @@ package ml.docilealligator.infinityforreddit.post;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
-
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 
 public class RedditGalleryPayload {

@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -50,7 +50,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
@@ -63,19 +62,15 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.common.collect.ImmutableList;
 import com.libRG.CustomTextView;
-
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.Executor;
-
 import javax.inject.Provider;
-
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -93,6 +88,9 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomShee
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView;
+import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkBinding;
+import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkRightThumbnailBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2GalleryTypeBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2TextBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2VideoAutoplayBinding;
@@ -119,7 +117,10 @@ import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
-import ml.docilealligator.infinityforreddit.post.PostPagingSource;
+import ml.docilealligator.infinityforreddit.post.PostType;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
@@ -135,6 +136,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
+import org.greenrobot.eventbus.EventBus;
 import pl.droidsonroids.gif.GifImageView;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -160,6 +162,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private static final int VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE = 14;
     private static final int VIEW_TYPE_POST_CARD_3_GALLERY_TYPE = 15;
     private static final int VIEW_TYPE_POST_CARD_3_TEXT_TYPE = 16;
+    private static final int VIEW_TYPE_POST_CARD_2_COMPACT_LINK = 17;
 
     private static final DiffUtil.ItemCallback<Post> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
         @Override
@@ -177,6 +180,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private PostFragmentBase mFragment;
     private SharedPreferences mSharedPreferences;
     private SharedPreferences mCurrentAccountSharedPreferences;
+    @Nullable
+    private SharedPreferences mPostHistorySharedPreferences;
+    private RedditDataRoomDatabase mRedditDataRoomDatabase;
     private Executor mExecutor;
     private Retrofit mOauthRetrofit;
     private Retrofit mRedgifsRetrofit;
@@ -190,6 +196,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private Locale mLocale;
     private boolean canStartActivity = true;
     private boolean mDisableSwipingBetweenTabs;
+    @PostType
     private int mPostType;
     private int mPostLayout;
     private int mDefaultLinkPostLayout;
@@ -205,7 +212,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private int mReadPostTitleColor;
     private int mReadPostContentColor;
     private int mStickiedPostIconTint;
-    private int mPostTypeBackgroundColor;
+    private int mTextTypeBackgroundColor;
+    private int mImageTypeBackgroundColor;
+    private int mLinkTypeBackgroundColor;
+    private int mVideoTypeBackgroundColor;
+    private int mGifTypeBackgroundColor;
+    private int mGalleryTypeBackgroundColor;
     private int mPostTypeTextColor;
     private int mSubredditColor;
     private int mUsernameColor;
@@ -242,6 +254,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mAutoplayNsfwVideos;
     private boolean mMuteAutoplayingVideos;
     private boolean mShowThumbnailOnTheLeftInCompactLayout;
+    private boolean mHidePostTypeIndicator;
+    private boolean mHideImageCountInGallery;
     private double mStartAutoplayVisibleAreaOffset;
     private boolean mMuteNSFWVideo;
     private boolean mLongPressToHideToolbarInCompactLayout;
@@ -253,12 +267,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mMarkPostsAsReadAfterVoting;
     private boolean mMarkPostsAsReadOnScroll;
     private boolean mHidePostType;
+    private boolean mPostTypeTriangleIndicator;
     private boolean mHidePostFlair;
     private boolean mHideSubredditAndUserPrefix;
     private boolean mHideTheNumberOfVotes;
     private boolean mHideTheNumberOfComments;
     private boolean mLegacyAutoplayVideoControllerUI;
     private boolean mFixedHeightPreviewInCard;
+    private int mNColumns = 2;
     private boolean mHideTextPostContent;
     private boolean mEasierToWatchInFullScreen;
     private boolean mDisableProfileAvatarAnimation;
@@ -275,10 +291,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private MultiPlayPlayerSelector multiPlayPlayerSelector;
 
     // postHistorySharedPreferences will be null when being used in HistoryPostFragment.
-    public PostRecyclerViewAdapter(BaseActivity activity, PostFragmentBase fragment, Executor executor, Retrofit oauthRetrofit,
+    public PostRecyclerViewAdapter(BaseActivity activity, PostFragmentBase fragment, RedditDataRoomDatabase redditDataRoomDatabase,
+                                Executor executor, Retrofit oauthRetrofit,
                                 Retrofit redgifsRetrofit, Provider<StreamableAPI> streamableApiProvider,
                                 CustomThemeWrapper customThemeWrapper, Locale locale,
-                                @Nullable String accessToken, @NonNull String accountName, int postType, int postLayout, boolean displaySubredditName,
+                                @Nullable String accessToken, @NonNull String accountName, int postType,
+                                int postLayout, boolean displaySubredditName,
                                 SharedPreferences sharedPreferences, SharedPreferences currentAccountSharedPreferences,
                                 SharedPreferences nsfwAndSpoilerSharedPreferences,
                                 @Nullable SharedPreferences postHistorySharedPreferences,
@@ -289,6 +307,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mFragment = fragment;
             mSharedPreferences = sharedPreferences;
             mCurrentAccountSharedPreferences = currentAccountSharedPreferences;
+            mRedditDataRoomDatabase = redditDataRoomDatabase;
             mExecutor = executor;
             mOauthRetrofit = oauthRetrofit;
             mRedgifsRetrofit = redgifsRetrofit;
@@ -316,6 +335,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mMuteAutoplayingVideos = sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_AUTOPLAYING_VIDEOS, true);
             mShowThumbnailOnTheLeftInCompactLayout = sharedPreferences.getBoolean(
                     SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+            mHidePostTypeIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE_INDICATOR, false);
+            mHideImageCountInGallery = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_IMAGE_COUNT_IN_GALLERY, false);
 
             Resources resources = activity.getResources();
             mStartAutoplayVisibleAreaOffset = resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
@@ -338,14 +359,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
             mDisableSwipingBetweenTabs = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
 
+            mPostHistorySharedPreferences = postHistorySharedPreferences;
             if (postHistorySharedPreferences != null) {
-                mMarkPostsAsRead = postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false);
-                mMarkPostsAsReadAfterVoting = postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_AFTER_VOTING_BASE, false);
-                mMarkPostsAsReadOnScroll = postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MARK_POSTS_AS_READ_ON_SCROLL_BASE, false);
+                mMarkPostsAsRead = postHistorySharedPreferences.getBoolean(accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false);
+                mMarkPostsAsReadAfterVoting = postHistorySharedPreferences.getBoolean(accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_AFTER_VOTING_BASE, false);
+                mMarkPostsAsReadOnScroll = postHistorySharedPreferences.getBoolean(accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_ON_SCROLL_BASE, false);
                 mHandleReadPost = true;
             }
 
             mHidePostType = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
+            mPostTypeTriangleIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false);
             mHidePostFlair = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
             mHideSubredditAndUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
             mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES, false);
@@ -373,7 +396,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mReadPostTitleColor = customThemeWrapper.getReadPostTitleColor();
             mReadPostContentColor = customThemeWrapper.getReadPostContentColor();
             mStickiedPostIconTint = customThemeWrapper.getStickiedPostIconTint();
-            mPostTypeBackgroundColor = customThemeWrapper.getPostTypeBackgroundColor();
+            mTextTypeBackgroundColor = customThemeWrapper.getTextTypeBackgroundColor();
+            mImageTypeBackgroundColor = customThemeWrapper.getImageTypeBackgroundColor();
+            mLinkTypeBackgroundColor = customThemeWrapper.getLinkTypeBackgroundColor();
+            mVideoTypeBackgroundColor = customThemeWrapper.getVideoTypeBackgroundColor();
+            mGifTypeBackgroundColor = customThemeWrapper.getGifTypeBackgroundColor();
+            mGalleryTypeBackgroundColor = customThemeWrapper.getGalleryTypeBackgroundColor();
             mPostTypeTextColor = customThemeWrapper.getPostTypeTextColor();
             mSubredditColor = customThemeWrapper.getSubreddit();
             mUsernameColor = customThemeWrapper.getUsername();
@@ -467,6 +495,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                     default:
+                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
+                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
+                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
+                                && !post.embedsInlineBodyMedia()) {
+                            return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
+                        }
                         return VIEW_TYPE_POST_CARD_TEXT_TYPE;
                 }
             }
@@ -524,7 +559,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         if (mAutoplay) {
@@ -538,20 +573,20 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     case Post.GIF_TYPE:
                     case Post.IMAGE_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                     case Post.GALLERY_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         return VIEW_TYPE_POST_CARD_2_GALLERY_TYPE;
                     case Post.LINK_TYPE:
                     case Post.NO_PREVIEW_LINK_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                         }
 
                         switch (mDefaultLinkPostLayout) {
@@ -562,12 +597,19 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                                 return VIEW_TYPE_POST_GALLERY;
                             case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                                return VIEW_TYPE_POST_COMPACT;
+                                return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
                             case SharedPreferencesUtils.POST_LAYOUT_COMPACT_2:
                                 return VIEW_TYPE_POST_COMPACT_2;
                         }
                         return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                     default:
+                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
+                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
+                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
+                                && !post.embedsInlineBodyMedia()) {
+                            return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
+                        }
                         return VIEW_TYPE_POST_CARD_2_TEXT_TYPE;
                 }
             }
@@ -622,6 +664,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                     default:
+                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
+                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
+                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
+                                && !post.embedsInlineBodyMedia()) {
+                            return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
+                        }
                         return VIEW_TYPE_POST_CARD_3_TEXT_TYPE;
                 }
             }
@@ -660,6 +709,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return new PostCompact2LeftThumbnailViewHolder(ItemPostCompact2Binding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             } else {
                 return new PostCompact2RightThumbnailViewHolder(ItemPostCompact2RightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            }
+        } else if (viewType == VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
+            if (mShowThumbnailOnTheLeftInCompactLayout) {
+                return new PostCard2CompactLinkLeftThumbnailViewHolder(ItemPostCard2CompactLinkBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            } else {
+                return new PostCard2CompactLinkRightThumbnailViewHolder(ItemPostCard2CompactLinkRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
             }
         } else if (viewType == VIEW_TYPE_POST_GALLERY) {
             return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -865,13 +920,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
             ((PostViewHolder) holder).titleTextView.setText(post.getTitle());
             if (!mHideTheNumberOfVotes) {
-                ((PostViewHolder) holder).scoreTextView.setText(Utils.getNVotes(mShowAbsoluteNumberOfVotes, post.getScore() + post.getVoteType()));
+                ((PostViewHolder) holder).scoreTextView.setText(Utils.getNVotes(mShowAbsoluteNumberOfVotes,
+                        post.getScore() + (Account.ANONYMOUS_ACCOUNT.equals(mAccountName) ? 0 : post.getVoteType())));
             } else {
                 ((PostViewHolder) holder).scoreTextView.setText(mActivity.getString(R.string.vote));
             }
 
             if (((PostViewHolder) holder).typeTextView != null) {
-                if (mHidePostType) {
+                if (mHidePostType || (mPostTypeTriangleIndicator && holder instanceof PostCompactBaseViewHolder)) {
                     ((PostViewHolder) holder).typeTextView.setVisibility(View.GONE);
                 } else {
                     ((PostViewHolder) holder).typeTextView.setVisibility(View.VISIBLE);
@@ -928,7 +984,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     break;
             }
 
-            if (mPostType == PostPagingSource.TYPE_SUBREDDIT && !mDisplaySubredditName && post.isStickied()) {
+            if (mPostType == PostType.SUBREDDIT && !mDisplaySubredditName && post.isStickied()) {
                 ((PostViewHolder) holder).stickiedPostImageView.setVisibility(View.VISIBLE);
                 mGlide.load(R.drawable.ic_thumbtack_24dp).into(((PostViewHolder) holder).stickiedPostImageView);
             }
@@ -980,16 +1036,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
 
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.loadVideo(position);
+                    applyTypeColor(((PostBaseVideoAutoplayViewHolder) holder).typeTextView, post.getPostType());
                 } else if (holder instanceof PostWithPreviewTypeViewHolder) {
                     if (post.getPostType() == Post.VIDEO_TYPE) {
-                        ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.VISIBLE);
+                        ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                         ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
                         if (((PostWithPreviewTypeViewHolder) holder).typeTextView != null) {
                             ((PostWithPreviewTypeViewHolder) holder).typeTextView.setText(mActivity.getString(R.string.video));
                         }
                     } else if (post.getPostType() == Post.GIF_TYPE) {
                         if (!mAutoplay) {
-                            ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.VISIBLE);
+                            ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                             ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
                         }
                         if (((PostWithPreviewTypeViewHolder) holder).typeTextView != null) {
@@ -1010,7 +1067,21 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
                             ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(R.drawable.ic_link_day_night_24dp);
                         }
+                    } else if (post.getPostType() == Post.TEXT_TYPE) {
+                        if (((PostWithPreviewTypeViewHolder) holder).typeTextView != null) {
+                            ((PostWithPreviewTypeViewHolder) holder).typeTextView.setText(mActivity.getString(R.string.text));
+                        }
+                        // Text post that also has a preview: keep the selftext snippet alongside the
+                        // image, honouring the "Hide Text Post Content" setting like the text holder.
+                        TextView contentTextView = ((PostWithPreviewTypeViewHolder) holder).contentTextView;
+                        if (contentTextView != null && !mHideTextPostContent && !post.isSpoiler()
+                                && post.getSelfTextPlainTrimmed() != null && !post.getSelfTextPlainTrimmed().isEmpty()) {
+                            contentTextView.setTextColor(mHandleReadPost && post.isRead() ? mReadPostContentColor : mPostContentColor);
+                            contentTextView.setText(post.getSelfTextPlainTrimmed());
+                            contentTextView.setVisibility(View.VISIBLE);
+                        }
                     }
+                    applyTypeColor(((PostWithPreviewTypeViewHolder) holder).typeTextView, post.getPostType());
 
                     if (mDataSavingMode && mDisableImagePreview) {
                         ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
@@ -1094,6 +1165,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(
                                 (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler));
                     }
+                    applyTypeColor(((PostBaseGalleryTypeViewHolder) holder).typeTextView, post.getPostType());
                 } else if (holder instanceof PostTextTypeViewHolder) {
                     if (!mHideTextPostContent && !post.isSpoiler() && post.getSelfTextPlainTrimmed() != null && !post.getSelfTextPlainTrimmed().isEmpty()) {
                         ((PostTextTypeViewHolder) holder).contentTextView.setVisibility(View.VISIBLE);
@@ -1102,9 +1174,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         ((PostTextTypeViewHolder) holder).contentTextView.setText(post.getSelfTextPlainTrimmed());
                     }
+                    applyTypeColor(((PostTextTypeViewHolder) holder).typeTextView, post.getPostType());
                 }
                 mCallback.currentlyBindItem(holder.getBindingAdapterPosition());
             } else if (holder instanceof PostCompactBaseViewHolder) {
+                ((PostCompactBaseViewHolder) holder).applyCompactItemLayoutParams();
+
                 if (mDisplaySubredditName) {
                     ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(mSubredditColor);
                     if (mHideSubredditAndUserPrefix) {
@@ -1112,6 +1187,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     } else {
                         ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getSubredditNamePrefixed());
                     }
+
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setTextColor(
+                            post.isModerator() ? mModeratorColor : mUsernameColor);
+                    if (mHideSubredditAndUserPrefix) {
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthor());
+                    } else {
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthorNamePrefixed());
+                    }
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.VISIBLE);
                 } else {
                     ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(
                             post.isModerator() ? mModeratorColor : mUsernameColor);
@@ -1121,6 +1205,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     } else {
                         ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getAuthorNamePrefixed());
                     }
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.GONE);
                 }
 
                 if (((PostCompactBaseViewHolder) holder).bottomConstraintLayout != null) {
@@ -1135,13 +1220,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
                 }
 
-                if (mShowDividerInCompactLayout) {
+                if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2 || mShowDividerInCompactLayout) {
                     ((PostCompactBaseViewHolder) holder).divider.setVisibility(View.VISIBLE);
                 } else {
                     ((PostCompactBaseViewHolder) holder).divider.setVisibility(View.GONE);
                 }
 
-                if (post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE && !(mDataSavingMode && mDisableImagePreview)) {
+                boolean textPostWithPreview = post.getPostType() == Post.TEXT_TYPE
+                        && post.getPreviews() != null && !post.getPreviews().isEmpty()
+                        && !post.embedsInlineBodyMedia();
+                if (((post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE) || textPostWithPreview)
+                        && !(mDataSavingMode && mDisableImagePreview)) {
                     ((PostCompactBaseViewHolder) holder).relativeLayout.setVisibility(View.VISIBLE);
                     if (post.getPostType() == Post.GALLERY_TYPE && post.getPreviews() != null && post.getPreviews().isEmpty()) {
                         ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.VISIBLE);
@@ -1189,7 +1278,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.VISIBLE);
                             ((PostCompactBaseViewHolder) holder).noPreviewPostImageView.setImageResource(R.drawable.ic_image_day_night_24dp);
                         } else {
-                            ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(View.VISIBLE);
+                            ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                             ((PostCompactBaseViewHolder) holder).playButtonImageView.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_24dp));
                         }
                         break;
@@ -1201,7 +1290,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.VISIBLE);
                             ((PostCompactBaseViewHolder) holder).noPreviewPostImageView.setImageResource(R.drawable.ic_video_day_night_24dp);
                         } else {
-                            ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(View.VISIBLE);
+                            ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                             ((PostCompactBaseViewHolder) holder).playButtonImageView.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_24dp));
                         }
                         break;
@@ -1227,7 +1316,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.VISIBLE);
                             ((PostCompactBaseViewHolder) holder).noPreviewPostImageView.setImageResource(R.drawable.ic_gallery_day_night_24dp);
                         } else {
-                            ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(View.VISIBLE);
+                            ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                             ((PostCompactBaseViewHolder) holder).playButtonImageView.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_gallery_day_night_24dp));
                         }
                         break;
@@ -1237,6 +1326,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         break;
                 }
+                applyTypeColor(((PostCompactBaseViewHolder) holder).typeTextView, post.getPostType());
+                applyTriangleIndicator((PostCompactBaseViewHolder) holder, post.getPostType());
 
                 mCallback.currentlyBindItem(holder.getBindingAdapterPosition());
             }
@@ -1273,7 +1364,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setVisibility(View.VISIBLE);
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    int height = (int) (400 * mScale);
+                                    int height = getGalleryFixedPreviewHeight();
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
                                 } else {
@@ -1304,11 +1395,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).preview = preview;
                                 if (preview != null) {
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setVisibility(View.VISIBLE);
-                                    ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(View.VISIBLE);
+                                    ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                                     ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
 
                                     if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                        int height = (int) (400 * mScale);
+                                        int height = getGalleryFixedPreviewHeight();
                                         ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
                                         ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
                                     } else {
@@ -1334,11 +1425,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostGalleryViewHolder) holder).preview = preview;
                             if (preview != null) {
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setVisibility(View.VISIBLE);
-                                ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(View.VISIBLE);
+                                ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                                 ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    int height = (int) (400 * mScale);
+                                    int height = getGalleryFixedPreviewHeight();
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
                                 } else {
@@ -1365,11 +1456,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostGalleryViewHolder) holder).preview = preview;
                             if (preview != null) {
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setVisibility(View.VISIBLE);
-                                ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(View.VISIBLE);
+                                ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                                 ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_link_post_type_indicator_day_night_24dp));
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    int height = (int) (400 * mScale);
+                                    int height = getGalleryFixedPreviewHeight();
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
                                 } else {
@@ -1439,6 +1530,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
+    // Fixed-height gallery tiles historically used a flat 400dp height at every column count,
+    // which becomes a tall sliver once cells get narrow. Keep that 400dp at 1-2 columns (the
+    // historical defaults) and scale it down proportionally at 3+ columns so tiles keep a
+    // consistent aspect ratio in narrow cells.
+    private int getGalleryFixedPreviewHeight() {
+        return (int) (400 * mScale * 2 / Math.max(2, mNColumns));
+    }
+
     @Nullable
     private Post.Preview getSuitablePreview(ArrayList<Post.Preview> previews) {
         Post.Preview preview;
@@ -1480,9 +1579,62 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return (post.getPreviews() == null || post.getPreviews().isEmpty()) && !hasValidThumbnailFallback(post.getThumbnailUrl());
     }
 
+    private int getTypeColor(int postType) {
+        switch (postType) {
+            case Post.VIDEO_TYPE:
+                return mVideoTypeBackgroundColor;
+            case Post.GIF_TYPE:
+                return mGifTypeBackgroundColor;
+            case Post.IMAGE_TYPE:
+                return mImageTypeBackgroundColor;
+            case Post.LINK_TYPE:
+            case Post.NO_PREVIEW_LINK_TYPE:
+                return mLinkTypeBackgroundColor;
+            case Post.GALLERY_TYPE:
+                return mGalleryTypeBackgroundColor;
+            case Post.TEXT_TYPE:
+            default:
+                return mTextTypeBackgroundColor;
+        }
+    }
+
+    private GradientDrawable createRoundedBackground(int color, float cornerRadiusDp) {
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setColor(color);
+        background.setCornerRadius(cornerRadiusDp * mScale);
+        return background;
+    }
+
+    private void applyTypeColor(CustomTextView typeTextView, int postType) {
+        if (typeTextView == null) return;
+        int color = getTypeColor(postType);
+        typeTextView.setBackgroundColor(color);
+        typeTextView.setBorderColor(color);
+    }
+
+    private void applyTriangleIndicator(PostCompactBaseViewHolder holder, int postType) {
+        // The indicator lives in both the preview-image wrapper and the no-preview placeholder
+        // frame; only one of those frames is visible at a time, so colouring both keeps the
+        // triangle visible whether or not the post has a usable preview image.
+        applyTriangleIndicator(holder.postTypeIndicatorView, postType);
+        applyTriangleIndicator(holder.noPreviewPostTypeIndicatorView, postType);
+    }
+
+    private void applyTriangleIndicator(@Nullable PostTypeIndicatorView indicatorView, int postType) {
+        if (indicatorView == null) return;
+        if (mPostTypeTriangleIndicator && !mHidePostType) {
+            indicatorView.setIndicatorColor(getTypeColor(postType));
+            indicatorView.setVisibility(View.VISIBLE);
+        } else {
+            indicatorView.setVisibility(View.GONE);
+        }
+    }
+
     private void loadImage(final RecyclerView.ViewHolder holder) {
         if (holder instanceof PostWithPreviewTypeViewHolder) {
             ((PostWithPreviewTypeViewHolder) holder).loadingIndicator.setVisibility(View.VISIBLE);
+            ((PostWithPreviewTypeViewHolder) holder).imageView.setBackground(null);
             Post post = ((PostWithPreviewTypeViewHolder) holder).post;
             Post.Preview preview = ((PostWithPreviewTypeViewHolder) holder).preview;
             if (preview != null) {
@@ -1503,6 +1655,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
         } else if (holder instanceof PostCompactBaseViewHolder) {
             Post post = ((PostCompactBaseViewHolder) holder).post;
+            ((PostCompactBaseViewHolder) holder).imageView.setBackground(null);
             String postCompactThumbnailPreviewUrl = null;
             ArrayList<Post.Preview> previews = post.getPreviews();
             if (previews != null && !previews.isEmpty()) {
@@ -1531,6 +1684,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
         } else if (holder instanceof PostGalleryViewHolder) {
             ((PostGalleryViewHolder) holder).binding.progressBarItemPostGallery.setVisibility(View.VISIBLE);
+            ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setBackground(null);
             Post post = ((PostGalleryViewHolder) holder).post;
             Post.Preview preview = ((PostGalleryViewHolder) holder).preview;
             if (preview != null) {
@@ -1638,6 +1792,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         mShowThumbnailOnTheLeftInCompactLayout = showThumbnailOnTheLeftInCompactLayout;
     }
 
+    public void setLegacyAutoplayVideoControllerUI(boolean legacyAutoplayVideoControllerUI) {
+        mLegacyAutoplayVideoControllerUI = legacyAutoplayVideoControllerUI;
+    }
+
     public void setStartAutoplayVisibleAreaOffset(double startAutoplayVisibleAreaOffset) {
         this.mStartAutoplayVisibleAreaOffset = startAutoplayVisibleAreaOffset / 100.0;
     }
@@ -1692,6 +1850,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setFixedHeightPreviewInCard(boolean fixedHeightPreviewInCard) {
         mFixedHeightPreviewInCard = fixedHeightPreviewInCard;
+    }
+
+    public void setNColumns(int nColumns) {
+        mNColumns = nColumns;
+    }
+
+    public void setMarkPostsAsReadSettings(boolean markPostsAsRead, boolean markPostsAsReadAfterVoting,
+                                           boolean markPostsAsReadOnScroll) {
+        mMarkPostsAsRead = markPostsAsRead;
+        mMarkPostsAsReadAfterVoting = markPostsAsReadAfterVoting;
+        mMarkPostsAsReadOnScroll = markPostsAsReadOnScroll;
     }
 
     public void setHideTextPostContent(boolean hideTextPostContent) {
@@ -1803,6 +1972,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostWithPreviewTypeViewHolder) holder).loadingIndicator.setVisibility(View.GONE);
                     ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.GONE);
                     ((PostWithPreviewTypeViewHolder) holder).linkTextView.setVisibility(View.GONE);
+                    if (((PostWithPreviewTypeViewHolder) holder).contentTextView != null) {
+                        ((PostWithPreviewTypeViewHolder) holder).contentTextView.setText("");
+                        ((PostWithPreviewTypeViewHolder) holder).contentTextView.setVisibility(View.GONE);
+                    }
                 } else if (holder instanceof PostBaseGalleryTypeViewHolder) {
                     ((PostBaseGalleryTypeViewHolder) holder).frameLayout.setVisibility(View.GONE);
                     ((PostBaseGalleryTypeViewHolder) holder).noPreviewImageView.setVisibility(View.GONE);
@@ -1822,6 +1995,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 ((PostCompactBaseViewHolder) holder).imageView.setVisibility(View.GONE);
                 ((PostCompactBaseViewHolder) holder).playButtonImageView.setVisibility(View.GONE);
                 ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.GONE);
+                if (((PostCompactBaseViewHolder) holder).postTypeIndicatorView != null) {
+                    ((PostCompactBaseViewHolder) holder).postTypeIndicatorView.setVisibility(View.GONE);
+                }
+                if (((PostCompactBaseViewHolder) holder).noPreviewPostTypeIndicatorView != null) {
+                    ((PostCompactBaseViewHolder) holder).noPreviewPostTypeIndicatorView.setVisibility(View.GONE);
+                }
             }
         } else if (holder instanceof PostGalleryViewHolder) {
             if (mHandleReadPost && mMarkPostsAsReadOnScroll) {
@@ -1996,6 +2175,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, post.getSubredditName()
                         + "-" + post.getId() + ".jpg");
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                 intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                 mActivity.startActivity(intent);
@@ -2020,6 +2200,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             + "-" + post.getId() + ".gif");
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, post.getVideoUrl());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
                     mActivity.startActivity(intent);
@@ -2045,6 +2226,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
                 mActivity.startActivity(intent);
+            } else {
+                // Text posts have no media viewer (they can still carry a preview image). Releasing
+                // the guard lets the holder's click handler open the post detail instead of stalling.
+                canStartActivity = true;
             }
         }
     }
@@ -2300,18 +2485,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
                 Post post = getItem(position);
                 if (post != null) {
-                    if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                        Toast.makeText(mActivity, R.string.login_first, Toast.LENGTH_SHORT).show();
-                        return;
+                    if (!Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
+                        if (post.isArchived()) {
+                            Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     }
 
                     if (mMarkPostsAsReadAfterVoting) {
                         markPostRead(post, true);
-                    }
-
-                    if (post.isArchived()) {
-                        Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
-                        return;
                     }
 
                     ColorStateList previousUpvoteButtonIconTint = upvoteButton.getIconTint();
@@ -2342,8 +2524,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         scoreTextView.setTextColor(mPostIconAndInfoColor);
                     }
 
-                    if (!mHideTheNumberOfVotes) {
-                        scoreTextView.setText(Utils.getNVotes(mShowAbsoluteNumberOfVotes, post.getScore() + post.getVoteType()));
+                    if (Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
+                        ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                post.getId(), ReadPostType.ANONYMOUS_UPVOTED_POSTS,
+                                ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                        EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                        return;
+                    } else {
+                        if (!mHideTheNumberOfVotes) {
+                            scoreTextView.setText(Utils.getNVotes(mShowAbsoluteNumberOfVotes, post.getScore() + post.getVoteType()));
+                        }
                     }
 
                     VoteThing.voteThing(mActivity, mOauthRetrofit, mAccessToken, new VoteThing.VoteThingListener() {
@@ -2409,18 +2599,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
                 Post post = getItem(position);
                 if (post != null) {
-                    if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                        Toast.makeText(mActivity, R.string.login_first, Toast.LENGTH_SHORT).show();
-                        return;
+                    if (!Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
+                        if (post.isArchived()) {
+                            Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     }
 
                     if (mMarkPostsAsReadAfterVoting) {
                         markPostRead(post, true);
-                    }
-
-                    if (post.isArchived()) {
-                        Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
-                        return;
                     }
 
                     ColorStateList previousUpvoteButtonIconTint = upvoteButton.getIconTint();
@@ -2451,8 +2638,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         scoreTextView.setTextColor(mPostIconAndInfoColor);
                     }
 
-                    if (!mHideTheNumberOfVotes) {
-                        scoreTextView.setText(Utils.getNVotes(mShowAbsoluteNumberOfVotes, post.getScore() + post.getVoteType()));
+                    if (Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
+                        ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                post.getId(), ReadPostType.ANONYMOUS_DOWNVOTED_POSTS,
+                                ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                        EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                        return;
+                    } else {
+                        if (!mHideTheNumberOfVotes) {
+                            scoreTextView.setText(Utils.getNVotes(mShowAbsoluteNumberOfVotes, post.getScore() + post.getVoteType()));
+                        }
                     }
 
                     VoteThing.voteThing(mActivity, mOauthRetrofit, mAccessToken, new VoteThing.VoteThingListener() {
@@ -2519,59 +2714,71 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
                     Post post = getItem(position);
                     if (post != null) {
-                        if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                            Toast.makeText(mActivity, R.string.login_first, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
                         if (post.isSaved()) {
                             saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
-                            SaveThing.unsaveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
-                                    new SaveThing.SaveThingListener() {
-                                        @Override
-                                        public void success() {
-                                            post.setSaved(false);
-                                            if (getBindingAdapterPosition() == position) {
-                                                saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
+                            if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                                ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                        post.getId(), ReadPostType.ANONYMOUS_SAVED_POSTS);
+                                post.setSaved(!post.isSaved());
+                                Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
+                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                            } else {
+                                SaveThing.unsaveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
+                                        new SaveThing.SaveThingListener() {
+                                            @Override
+                                            public void success() {
+                                                post.setSaved(false);
+                                                if (getBindingAdapterPosition() == position) {
+                                                    saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
+                                                }
+                                                Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
+                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
                                             }
-                                            Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
-                                            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                        }
 
-                                        @Override
-                                        public void failed() {
-                                            post.setSaved(true);
-                                            if (getBindingAdapterPosition() == position) {
-                                                saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
+                                            @Override
+                                            public void failed() {
+                                                post.setSaved(true);
+                                                if (getBindingAdapterPosition() == position) {
+                                                    saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
+                                                }
+                                                Toast.makeText(mActivity, R.string.post_unsaved_failed, Toast.LENGTH_SHORT).show();
+                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
                                             }
-                                            Toast.makeText(mActivity, R.string.post_unsaved_failed, Toast.LENGTH_SHORT).show();
-                                            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                        }
-                                    });
+                                        });
+                            }
                         } else {
                             saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
-                            SaveThing.saveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
-                                    new SaveThing.SaveThingListener() {
-                                        @Override
-                                        public void success() {
-                                            post.setSaved(true);
-                                            if (getBindingAdapterPosition() == position) {
-                                                saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
+                            if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                                ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                        post.getId(), ReadPostType.ANONYMOUS_SAVED_POSTS,
+                                        ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                                post.setSaved(!post.isSaved());
+                                Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
+                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                            } else {
+                                SaveThing.saveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
+                                        new SaveThing.SaveThingListener() {
+                                            @Override
+                                            public void success() {
+                                                post.setSaved(true);
+                                                if (getBindingAdapterPosition() == position) {
+                                                    saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
+                                                }
+                                                Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
+                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
                                             }
-                                            Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
-                                            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                        }
 
-                                        @Override
-                                        public void failed() {
-                                            post.setSaved(false);
-                                            if (getBindingAdapterPosition() == position) {
-                                                saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
+                                            @Override
+                                            public void failed() {
+                                                post.setSaved(false);
+                                                if (getBindingAdapterPosition() == position) {
+                                                    saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
+                                                }
+                                                Toast.makeText(mActivity, R.string.post_saved_failed, Toast.LENGTH_SHORT).show();
+                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
                                             }
-                                            Toast.makeText(mActivity, R.string.post_saved_failed, Toast.LENGTH_SHORT).show();
-                                            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                        }
-                                    });
+                                        });
+                            }
                         }
                     }
                 });
@@ -3171,8 +3378,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             stickiedPostImageView.setColorFilter(mStickiedPostIconTint, PorterDuff.Mode.SRC_IN);
 
             if (typeTextView != null) {
-                typeTextView.setBackgroundColor(mPostTypeBackgroundColor);
-                typeTextView.setBorderColor(mPostTypeBackgroundColor);
                 typeTextView.setTextColor(mPostTypeTextColor);
             }
 
@@ -3248,7 +3453,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return;
             }
 
-            if (!mAccountName.equals(Account.ANONYMOUS_ACCOUNT) && !post.isRead() && mMarkPostsAsRead) {
+            if (!post.isRead() && mMarkPostsAsRead) {
                 post.markAsRead();
                 if (changePostItemColor) {
                     setItemViewBackgroundColor(true);
@@ -3490,6 +3695,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Nullable
         FrameLayout imageWrapperFrameLayout;
         AspectRatioGifImageView imageView;
+        // Selftext snippet, shown only for text posts that also carry a preview image.
+        @Nullable
+        TextView contentTextView;
         RequestListener<Drawable> glideRequestListener;
 
         PostWithPreviewTypeViewHolder(@NonNull View itemView) {
@@ -3526,6 +3734,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.loadImageErrorTextViewItemPostWithPreview,
                     binding.imageWrapperRelativeLayoutItemPostWithPreview,
                     binding.imageViewItemPostWithPreview);
+            contentTextView = binding.contentTextViewItemPostWithPreview;
         }
 
         void setBaseView(AspectRatioGifImageView iconGifImageView,
@@ -3605,7 +3814,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 Post post = getItem(position);
                 if (post != null) {
                     markPostRead(post, true);
-                    openMedia(post);
+                    if (post.getPostType() == Post.TEXT_TYPE) {
+                        // Preview image on a self/text post; open the post like tapping the card.
+                        openViewPostDetailActivity(post, position);
+                    } else {
+                        openMedia(post);
+                    }
                 }
             });
 
@@ -3621,12 +3835,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return false;
             });
 
-            loadImageErrorTextView.setOnClickListener(view -> {
-                loadingIndicator.setVisibility(View.VISIBLE);
-                loadImageErrorTextView.setVisibility(View.GONE);
-                loadImage(this);
-            });
-
             imageViewNoPreviewGallery.setOnClickListener(view -> {
                 imageView.performClick();
             });
@@ -3637,7 +3845,21 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     loadingIndicator.setVisibility(View.GONE);
-                    loadImageErrorTextView.setVisibility(View.VISIBLE);
+                    // A link post's preview is supplementary, and reddit-link previews can be
+                    // unavailable. When one fails, collapse the oversized ratio-reserved box to the
+                    // compact no-preview link tile instead of leaving a giant black rectangle. Media
+                    // posts keep the box (the preview is the content, and failures there are usually
+                    // transient), preserving the previous behaviour for them.
+                    int position = getBindingAdapterPosition();
+                    Post post = position >= 0 ? getItem(position) : null;
+                    if (post != null && (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE)) {
+                        if (imageWrapperFrameLayout != null) {
+                            imageWrapperFrameLayout.setVisibility(View.GONE);
+                        }
+                        imageView.setVisibility(View.GONE);
+                        imageViewNoPreviewGallery.setImageResource(R.drawable.ic_link_day_night_24dp);
+                        imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
+                    }
                     return false;
                 }
 
@@ -3645,6 +3867,19 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                     loadImageErrorTextView.setVisibility(View.GONE);
                     loadingIndicator.setVisibility(View.GONE);
+                    // Re-correct the reserved aspect ratio from the actual drawable: the preview
+                    // metadata ratio can differ from the bitmap Reddit actually serves, which would
+                    // otherwise letterbox the image with black against the card background. Only do
+                    // this in ratio mode; the fixed-height-preview path uses CENTER_CROP + a fixed
+                    // height and must not be switched to ratio sizing.
+                    boolean ratioMode = !mFixedHeightPreviewInCard && preview != null
+                            && preview.getPreviewWidth() > 0 && preview.getPreviewHeight() > 0;
+                    if (ratioMode && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
+                        imageView.setRatio((float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth());
+                    }
+                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
+                        imageView.setBackgroundResource(R.drawable.transparent_image_backdrop);
+                    }
                     return false;
                 }
             };
@@ -3721,6 +3956,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             imageIndexTextView.setTextColor(mMediaIndicatorIconTint);
             imageIndexTextView.setBackgroundColor(mMediaIndicatorBackgroundColor);
             imageIndexTextView.setBorderColor(mMediaIndicatorBackgroundColor);
+            if (mHideImageCountInGallery) {
+                imageIndexTextView.setVisibility(View.GONE);
+            }
             if (mActivity.typeface != null) {
                 imageIndexTextView.setTypeface(mActivity.typeface);
             }
@@ -3733,6 +3971,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             galleryRecyclerView.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(galleryRecyclerView);
             galleryRecyclerView.setRecycledViewPool(mGalleryRecycledViewPool);
+            // Keep neighbouring gallery pages attached so swiping one over and back doesn't recycle
+            // (and glide.clear()) the previous image, which forces a reload. Default is 2.
+            galleryRecyclerView.setItemViewCacheSize(3);
             LinearLayoutManagerBugFixed layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
             galleryRecyclerView.setLayoutManager(layoutManager);
             galleryRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -4003,6 +4244,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public class PostCompactBaseViewHolder extends PostViewHolder {
         TextView nameTextView;
+        TextView usernameTextView;
         @Nullable TextView linkTextView;
         RelativeLayout relativeLayout;
         LoadingIndicator loadingIndicator;
@@ -4011,11 +4253,40 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         FrameLayout noPreviewPostImageFrameLayout;
         ImageView noPreviewPostImageView;
         @Nullable ConstraintLayout bottomConstraintLayout;
+        @Nullable PostTypeIndicatorView postTypeIndicatorView;
+        @Nullable PostTypeIndicatorView noPreviewPostTypeIndicatorView;
         View divider;
         RequestListener<Drawable> requestListener;
+        GradientDrawable itemViewBackground;
 
         PostCompactBaseViewHolder(View itemView) {
             super(itemView);
+        }
+
+        void setupUsernameView(TextView usernameTextView) {
+            this.usernameTextView = usernameTextView;
+
+            if (mActivity.typeface != null) {
+                usernameTextView.setTypeface(mActivity.typeface);
+            }
+
+            usernameTextView.setOnClickListener(view -> {
+                if (!canStartActivity) {
+                    return;
+                }
+                int position = getBindingAdapterPosition();
+                if (position < 0) {
+                    return;
+                }
+                Post post = getItem(position);
+                if (post == null || post.isAuthorDeleted()) {
+                    return;
+                }
+                canStartActivity = false;
+                Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
+                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, post.getAuthor());
+                mActivity.startActivity(intent);
+            });
         }
 
         void setBaseView(AspectRatioGifImageView iconGifImageView,
@@ -4127,13 +4398,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 titleTextView.setTypeface(mActivity.titleTypeface);
             }
 
-            itemView.setBackgroundColor(mCardViewBackgroundColor);
+            applyCompactItemLayoutParams();
+            applyCompactItemBackground(false);
             postTimeTextView.setTextColor(mSecondaryTextColor);
             titleTextView.setTextColor(mPostTitleColor);
             stickiedPostImageView.setColorFilter(mStickiedPostIconTint, PorterDuff.Mode.SRC_IN);
             if (typeTextView != null) {
-                typeTextView.setBackgroundColor(mPostTypeBackgroundColor);
-                typeTextView.setBorderColor(mPostTypeBackgroundColor);
                 typeTextView.setTextColor(mPostTypeTextColor);
             }
             if (spoilerTextView != null) {
@@ -4167,7 +4437,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             playButtonImageView.setBackgroundTintList(ColorStateList.valueOf(mMediaIndicatorBackgroundColor));
             loadingIndicator.setIndicatorColor(mColorAccent);
             loadingIndicator.setVisibility(View.GONE);
-            noPreviewLinkImageView.setBackgroundColor(mNoPreviewPostTypeBackgroundColor);
+            noPreviewLinkImageFrameLayout.setBackground(createRoundedBackground(
+                    mNoPreviewPostTypeBackgroundColor,
+                    mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD ? 16 :
+                            mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? 12 : 8));
+            noPreviewLinkImageView.setBackground(null);
             noPreviewLinkImageView.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
             upvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
             scoreTextView.setTextColor(mPostIconAndInfoColor);
@@ -4220,7 +4494,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 Post post = getItem(position);
                 if (post != null) {
                     markPostRead(post, true);
-                    openMedia(post);
+                    if (post.getPostType() == Post.TEXT_TYPE) {
+                        // Preview thumbnail on a self/text post; open the post like tapping the row.
+                        openViewPostDetailActivity(post, position);
+                    } else {
+                        openMedia(post);
+                    }
                 }
             });
 
@@ -4252,9 +4531,60 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
                     loadingIndicator.setVisibility(View.GONE);
+                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
+                        imageView.setBackgroundResource(R.drawable.transparent_image_backdrop);
+                    }
                     return false;
                 }
             };
+        }
+
+        void applyCompactItemLayoutParams() {
+            ViewGroup.LayoutParams params = itemView.getLayoutParams();
+            if (!(params instanceof ViewGroup.MarginLayoutParams)) {
+                return;
+            }
+
+            int horizontalMargin = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (16 * mScale) : 0;
+            int verticalMargin = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (8 * mScale) : 0;
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) params;
+
+            if (marginLayoutParams.leftMargin == horizontalMargin
+                    && marginLayoutParams.rightMargin == horizontalMargin
+                    && marginLayoutParams.topMargin == verticalMargin
+                    && marginLayoutParams.bottomMargin == verticalMargin) {
+                return;
+            }
+
+            marginLayoutParams.setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin);
+            itemView.setLayoutParams(marginLayoutParams);
+        }
+
+        void applyCompactItemBackground(boolean isReadPost) {
+            if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD) {
+                int backgroundColor = isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor;
+                setRoundedItemViewBackground(backgroundColor, 16);
+            } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3) {
+                int backgroundColor = isReadPost ? mReadPostFilledCardViewBackgroundColor : mFilledCardViewBackgroundColor;
+                setRoundedItemViewBackground(backgroundColor, 12);
+            } else {
+                itemView.setClipToOutline(false);
+                int backgroundColor = isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor;
+                itemView.setBackgroundColor(backgroundColor);
+            }
+        }
+
+        private void setRoundedItemViewBackground(int color, float cornerRadiusDp) {
+            // Reuse a single GradientDrawable per holder and only swap its color, so we don't
+            // allocate a new drawable on every bind/recycle while scrolling. The corner radius is
+            // fixed for the lifetime of the holder because mPostLayout never changes.
+            if (itemViewBackground == null) {
+                itemViewBackground = createRoundedBackground(color, cornerRadiusDp);
+                itemView.setBackground(itemViewBackground);
+                itemView.setClipToOutline(true);
+            } else {
+                itemViewBackground.setColor(color);
+            }
         }
 
         void showPostOptions() {
@@ -4270,7 +4600,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         @Override
         void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundColor(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor);
+            applyCompactItemBackground(isReadPost);
         }
 
         @Override
@@ -4279,10 +4609,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return;
             }
 
-            if (!mAccountName.equals(Account.ANONYMOUS_ACCOUNT) && !post.isRead() && mMarkPostsAsRead) {
+            if (!post.isRead() && mMarkPostsAsRead) {
                 post.markAsRead();
                 if (changePostItemColor) {
-                    itemView.setBackgroundColor(mReadPostCardViewBackgroundColor);
+                    applyCompactItemBackground(true);
                     titleTextView.setTextColor(mReadPostTitleColor);
                 }
                 if (mActivity != null && mActivity instanceof MarkPostAsReadInterface) {
@@ -4295,6 +4625,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     class PostCompactLeftThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompactLeftThumbnailViewHolder(@NonNull ItemPostCompactBinding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompact;
 
             setBaseView(binding.iconGifImageViewItemPostCompact,
                     binding.nameTextViewItemPostCompact,
@@ -4323,12 +4655,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.saveButtonItemPostCompact,
                     binding.shareButtonItemPostCompact,
                     binding.dividerItemPostCompact);
+            setupUsernameView(binding.usernameTextViewItemPostCompact);
         }
     }
 
     class PostCompactRightThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompactRightThumbnailViewHolder(@NonNull ItemPostCompactRightThumbnailBinding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompactRightThumbnail;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompactRightThumbnail;
 
             setBaseView(binding.iconGifImageViewItemPostCompactRightThumbnail,
                     binding.nameTextViewItemPostCompactRightThumbnail,
@@ -4357,12 +4692,89 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.saveButtonItemPostCompactRightThumbnail,
                     binding.shareButtonItemPostCompactRightThumbnail,
                     binding.dividerItemPostCompactRightThumbnail);
+            setupUsernameView(binding.usernameTextViewItemPostCompactRightThumbnail);
+        }
+    }
+
+    class PostCard2CompactLinkRightThumbnailViewHolder extends PostCompactBaseViewHolder {
+        PostCard2CompactLinkRightThumbnailViewHolder(@NonNull ItemPostCard2CompactLinkRightThumbnailBinding binding) {
+            super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCard2CompactLinkRightThumbnail;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCard2CompactLinkRightThumbnail;
+
+            setBaseView(binding.iconGifImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.nameTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.stickiedPostImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.postTimeTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.titleTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.typeTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.archivedImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.lockedImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.crosspostImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.nsfwTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.spoilerCustomTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.flairCustomTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.linkTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.imageViewWrapperItemPostCard2CompactLinkRightThumbnail,
+                    binding.progressBarItemPostCard2CompactLinkRightThumbnail,
+                    binding.imageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.playButtonImageViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.frameLayoutImageViewNoPreviewLinkItemPostCard2CompactLinkRightThumbnail,
+                    binding.imageViewNoPreviewLinkItemPostCard2CompactLinkRightThumbnail,
+                    binding.bottomConstraintLayoutItemPostCard2CompactLinkRightThumbnail,
+                    binding.upvoteButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.scoreTextViewItemPostCard2CompactLinkRightThumbnail,
+                    binding.downvoteButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.commentsCountButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.saveButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.shareButtonItemPostCard2CompactLinkRightThumbnail,
+                    binding.dividerItemPostCard2CompactLinkRightThumbnail);
+            setupUsernameView(binding.usernameTextViewItemPostCard2CompactLinkRightThumbnail);
+        }
+    }
+
+    class PostCard2CompactLinkLeftThumbnailViewHolder extends PostCompactBaseViewHolder {
+        PostCard2CompactLinkLeftThumbnailViewHolder(@NonNull ItemPostCard2CompactLinkBinding binding) {
+            super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCard2CompactLink;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCard2CompactLink;
+
+            setBaseView(binding.iconGifImageViewItemPostCard2CompactLink,
+                    binding.nameTextViewItemPostCard2CompactLink,
+                    binding.stickiedPostImageViewItemPostCard2CompactLink,
+                    binding.postTimeTextViewItemPostCard2CompactLink,
+                    binding.titleTextViewItemPostCard2CompactLink,
+                    binding.typeTextViewItemPostCard2CompactLink,
+                    binding.archivedImageViewItemPostCard2CompactLink,
+                    binding.lockedImageViewItemPostCard2CompactLink,
+                    binding.crosspostImageViewItemPostCard2CompactLink,
+                    binding.nsfwTextViewItemPostCard2CompactLink,
+                    binding.spoilerCustomTextViewItemPostCard2CompactLink,
+                    binding.flairCustomTextViewItemPostCard2CompactLink,
+                    binding.linkTextViewItemPostCard2CompactLink,
+                    binding.imageViewWrapperItemPostCard2CompactLink,
+                    binding.progressBarItemPostCard2CompactLink,
+                    binding.imageViewItemPostCard2CompactLink,
+                    binding.playButtonImageViewItemPostCard2CompactLink,
+                    binding.frameLayoutImageViewNoPreviewLinkItemPostCard2CompactLink,
+                    binding.imageViewNoPreviewLinkItemPostCard2CompactLink,
+                    binding.bottomConstraintLayoutItemPostCard2CompactLink,
+                    binding.upvoteButtonItemPostCard2CompactLink,
+                    binding.scoreTextViewItemPostCard2CompactLink,
+                    binding.downvoteButtonItemPostCard2CompactLink,
+                    binding.commentsCountButtonItemPostCard2CompactLink,
+                    binding.saveButtonItemPostCard2CompactLink,
+                    binding.shareButtonItemPostCard2CompactLink,
+                    binding.dividerItemPostCard2CompactLink);
+            setupUsernameView(binding.usernameTextViewItemPostCard2CompactLink);
         }
     }
 
     class PostCompact2LeftThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompact2LeftThumbnailViewHolder(@NonNull ItemPostCompact2Binding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact2;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompact2;
 
             setBaseView(binding.iconGifImageViewItemPostCompact2,
                     binding.nameTextViewItemPostCompact2,
@@ -4391,12 +4803,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     binding.dividerItemPostCompact2);
+            setupUsernameView(binding.usernameTextViewItemPostCompact2);
         }
     }
 
     class PostCompact2RightThumbnailViewHolder extends PostCompactBaseViewHolder {
         PostCompact2RightThumbnailViewHolder(@NonNull ItemPostCompact2RightThumbnailBinding binding) {
             super(binding.getRoot());
+            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact2RightThumbnail;
+            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompact2RightThumbnail;
 
             setBaseView(binding.iconGifImageViewItemPostCompact2RightThumbnail,
                     binding.nameTextViewItemPostCompact2RightThumbnail,
@@ -4425,6 +4840,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     binding.dividerItemPostCompact2RightThumbnail);
+            setupUsernameView(binding.usernameTextViewItemPostCompact2RightThumbnail);
         }
     }
 
@@ -4490,12 +4906,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return true;
             });
 
-            binding.loadImageErrorTextViewItemGallery.setOnClickListener(view -> {
-                binding.progressBarItemPostGallery.setVisibility(View.VISIBLE);
-                binding.loadImageErrorTextViewItemGallery.setVisibility(View.GONE);
-                loadImage(this);
-            });
-
             binding.imageViewNoPreviewItemPostGallery.setOnClickListener(view -> {
                 itemView.performClick();
             });
@@ -4504,7 +4914,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     binding.progressBarItemPostGallery.setVisibility(View.GONE);
-                    binding.loadImageErrorTextViewItemGallery.setVisibility(View.VISIBLE);
                     return false;
                 }
 
@@ -4512,6 +4921,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                     binding.loadImageErrorTextViewItemGallery.setVisibility(View.GONE);
                     binding.progressBarItemPostGallery.setVisibility(View.GONE);
+                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
+                        binding.imageViewItemPostGallery.setBackgroundResource(R.drawable.transparent_image_backdrop);
+                    }
                     return false;
                 }
             };
@@ -4522,7 +4934,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return;
             }
 
-            if (!mAccountName.equals(Account.ANONYMOUS_ACCOUNT) && !post.isRead() && mMarkPostsAsRead) {
+            if (!post.isRead() && mMarkPostsAsRead) {
                 post.markAsRead();
                 if (changePostItemColor) {
                     itemView.setBackgroundTintList(ColorStateList.valueOf(mReadPostCardViewBackgroundColor));
@@ -4573,12 +4985,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             imageIndexTextView.setTextColor(mMediaIndicatorIconTint);
             imageIndexTextView.setBackgroundColor(mMediaIndicatorBackgroundColor);
             imageIndexTextView.setBorderColor(mMediaIndicatorBackgroundColor);
+            if (mHideImageCountInGallery) {
+                imageIndexTextView.setVisibility(View.GONE);
+            }
 
             adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface,
                     mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor, mScale);
             recyclerView.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(recyclerView);
             recyclerView.setRecycledViewPool(mGalleryRecycledViewPool);
+            // Keep neighbouring gallery pages attached so swiping one over and back doesn't recycle
+            // (and glide.clear()) the previous image, which forces a reload. Default is 2.
+            recyclerView.setItemViewCacheSize(3);
             layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -4719,7 +5137,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return;
             }
 
-            if (!mAccountName.equals(Account.ANONYMOUS_ACCOUNT) && !post.isRead() && mMarkPostsAsRead) {
+            if (!post.isRead() && mMarkPostsAsRead) {
                 post.markAsRead();
                 if (changePostItemColor) {
                     itemView.setBackgroundTintList(ColorStateList.valueOf(mReadPostCardViewBackgroundColor));
@@ -4858,6 +5276,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.loadImageErrorTextViewItemPostCard2WithPreview,
                     null,
                     binding.imageViewItemPostCard2WithPreview);
+            contentTextView = binding.contentTextViewItemPostCard2WithPreview;
 
             binding.dividerItemPostCard2WithPreview.setBackgroundColor(mDividerColor);
         }
@@ -5054,6 +5473,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.loadImageErrorTextViewItemPostCard3WithPreview,
                     binding.imageWrapperRelativeLayoutItemPostCard3WithPreview,
                     binding.imageViewItemPostCard3WithPreview);
+            contentTextView = binding.contentTextViewItemPostCard3WithPreview;
         }
 
         @Override

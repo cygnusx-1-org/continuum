@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.customviews;
 
 import android.content.Context;
 import android.view.View;
-
 import androidx.annotation.Nullable;
 
 public class SwipeLockLinearLayoutManager extends LinearLayoutManagerBugFixed {

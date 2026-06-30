@@ -1,14 +1,11 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;

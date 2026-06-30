@@ -1,18 +1,14 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
-
 import androidx.annotation.Nullable;
-
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.concurrent.Executor;
-
-import ml.docilealligator.infinityforreddit.utils.JSONUtils;
-import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class ParseSubredditData {
     public static void parseSubredditDataSync(Handler handler, @Nullable String response,
@@ -99,7 +95,7 @@ public class ParseSubredditData {
     }
 
     @Nullable
-    private static SubredditData parseSubredditDataSync(JSONObject subredditDataJsonObject, boolean nsfw) throws JSONException {
+    public static SubredditData parseSubredditDataSync(JSONObject subredditDataJsonObject, boolean nsfw) throws JSONException {
         boolean isNSFW = !subredditDataJsonObject.isNull(JSONUtils.OVER18_KEY) && subredditDataJsonObject.getBoolean(JSONUtils.OVER18_KEY);
         if (!nsfw && isNSFW) {
             return null;

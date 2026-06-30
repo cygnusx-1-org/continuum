@@ -39,9 +39,19 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:label">
         <activity
+            android:name=".activities.AppAuthLoginActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".activities.CopyMultiRedditActivity"
             android:exported="false"
             android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activities.UserMultiRedditsActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.SubscribedThingListingActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.LoginChromeCustomTabActivity"
@@ -57,8 +67,112 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="localhost"
-                    android:scheme="continuum" />
+                    android:host="rr_oauth_redir"
+                    android:scheme="redreader" />
+            </intent-filter>
+            <!-- Continuum's own OAuth redirect URI (continuum://localhost). The Custom Tab / external
+                 browser path relies on this static filter to relaunch the app; without it a custom
+                 redirect URI leaves the browser stranded on Reddit's "Redirecting to..." page.
+                 Both localhost and the 127.0.0.1 equivalent are declared. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="continuum" android:host="localhost" />
+                <data android:scheme="continuum" android:host="127.0.0.1" />
+            </intent-filter>
+            <!-- Infinity for Reddit's redirect URI (infinity://localhost). These forks share
+                 well-known client-ID/redirect pairs, so declaring it lets the Custom Tab path
+                 complete when a user reuses Infinity's credentials. localhost + 127.0.0.1. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="infinity" android:host="localhost" />
+                <data android:scheme="infinity" android:host="127.0.0.1" />
+            </intent-filter>
+            <!-- Slide's redirect URI (http://www.ccrama.me). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.ccrama.me"
+                    android:scheme="http" />
+            </intent-filter>
+            <!-- Slide's custom-scheme redirect URI (slide://localhost). localhost + 127.0.0.1. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="slide" android:host="localhost" />
+                <data android:scheme="slide" android:host="127.0.0.1" />
+            </intent-filter>
+            <!-- Reddit is Fun (RIF) redirect URI (redditisfun://auth). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:scheme="redditisfun" />
+            </intent-filter>
+            <!-- Relay redirect URI (dbrady://relay). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="relay"
+                    android:scheme="dbrady" />
+            </intent-filter>
+            <!-- Boost redirect URI (http://rubenmayayo.com). Bare host per the app's spec. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="rubenmayayo.com"
+                    android:scheme="http" />
+            </intent-filter>
+            <!-- BaconReader redirect URI (http://baconreader.com/auth). Path-scoped. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="baconreader.com"
+                    android:path="/auth"
+                    android:scheme="http" />
+            </intent-filter>
+            <!-- Joey redirect URI (https://127.0.0.1:65023/authorize_callback). Port + path scoped. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="127.0.0.1"
+                    android:port="65023"
+                    android:path="/authorize_callback"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity
@@ -82,7 +196,6 @@
         <activity
             android:name=".activities.HistoryActivity"
             android:exported="false"
-            android:label="@string/history_activity_label"
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.Slidable" />
         <activity
@@ -368,6 +481,11 @@
             android:label="@string/search_history"
             android:parentActivityName=".activities.SearchActivity"
             android:theme="@style/AppTheme.Slidable" />
+        <activity
+            android:name=".activities.ApiStatisticsActivity"
+            android:label="@string/api_statistics_activity_label"
+            android:parentActivityName=".activities.SettingsActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.RulesActivity"
             android:label="@string/rules_activity_label"

@@ -4,15 +4,11 @@ import static ml.docilealligator.infinityforreddit.utils.Utils.HOSTNAME_REGEX;
 
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceManager;
-
 import com.google.common.net.InetAddresses;
-
 import java.util.regex.Pattern;
-
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;

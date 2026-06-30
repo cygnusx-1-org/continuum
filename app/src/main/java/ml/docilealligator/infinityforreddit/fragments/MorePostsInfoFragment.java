@@ -5,18 +5,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import javax.inject.Inject;
-
 import ml.docilealligator.infinityforreddit.Infinity;
-import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.FragmentMorePostsInfoBinding;
+import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus;
 
 public class MorePostsInfoFragment extends Fragment {
 
@@ -70,6 +67,9 @@ public class MorePostsInfoFragment extends Fragment {
             case LoadingMorePostsStatus.NO_MORE_POSTS:
                 binding.infoTextViewMorePostsInfoFragment.setText(R.string.no_more_posts);
                 binding.progressBarViewMorePostsInfoFragment.setVisibility(View.GONE);
+            case LoadingMorePostsStatus.LOADED:
+                binding.progressBarViewMorePostsInfoFragment.setVisibility(View.GONE);
+                break;
         }
     }
 

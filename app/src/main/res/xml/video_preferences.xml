@@ -69,8 +69,7 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="legacy_autoplay_video_controller_ui"
-        app:title="@string/settings_legacy_autoplay_video_controller_ui_title"
-        app:summary="@string/restart_app_see_changes" />
+        app:title="@string/settings_legacy_autoplay_video_controller_ui_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
@@ -81,12 +80,18 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="remember_muting_option_in_post_feed"
-        app:title="@string/settings_remember_muting_option_in_post_feed" />
+        app:title="@string/settings_remember_mute" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="autoplay_nsfw_videos"
         app:title="@string/settings_autoplay_nsfw_videos_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="autoplay_comment_gif"
+        app:title="@string/settings_autoplay_comment_gif_title"
+        app:summary="@string/settings_autoplay_comment_gif_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"

@@ -19,14 +19,11 @@ package ml.docilealligator.infinityforreddit.videoautoplay.widget;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
 import androidx.annotation.NonNull;
 import androidx.collection.ArraySet;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import ml.docilealligator.infinityforreddit.videoautoplay.PlayerDispatcher;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 

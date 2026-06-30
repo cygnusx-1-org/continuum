@@ -2,11 +2,38 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <EditTextPreference
+    <!-- Summary is set in code (APIKeysPreferenceFragment) so the "RedReader" word can be colored;
+         setting it here too would block the spanned version (Preference.setSummary compares with
+         TextUtils.equals, which ignores spans, so identical text is treated as no change). -->
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="@string/enable_api_key_overrides_pref_key"
+        app:iconSpaceReserved="false"
+        app:title="@string/settings_enable_api_key_overrides_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
         android:defaultValue="@string/default_client_id"
+        android:dependency="@string/enable_api_key_overrides_pref_key"
         android:key="@string/client_id_pref_key"
         android:summary="@string/tap_to_set_client_id"
         android:title="@string/settings_client_id_title"
+        app:iconSpaceReserved="false"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
+        android:dependency="@string/enable_api_key_overrides_pref_key"
+        android:key="@string/user_agent_pref_key"
+        android:title="@string/settings_user_agent_title"
+        android:summary="@string/tap_to_set_user_agent"
+        app:iconSpaceReserved="false"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
+        android:defaultValue="@string/default_redirect_uri"
+        android:dependency="@string/enable_api_key_overrides_pref_key"
+        android:key="@string/redirect_uri_pref_key"
+        android:title="@string/settings_redirect_uri_title"
+        android:summary="@string/tap_to_set_redirect_uri"
         app:iconSpaceReserved="false"
         app:useSimpleSummaryProvider="true" />
 

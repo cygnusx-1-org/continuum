@@ -2,21 +2,17 @@ package ml.docilealligator.infinityforreddit.thing;
 
 import android.content.SharedPreferences;
 import android.os.Handler;
-
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
 import ml.docilealligator.infinityforreddit.apis.RedgifsAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;

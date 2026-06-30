@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,29 +22,20 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.giphy.sdk.core.models.Media;
 import com.giphy.sdk.ui.GPHContentType;
 import com.giphy.sdk.ui.Giphy;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import kotlin.Unit;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -68,6 +58,10 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.EditCommentActivityViewModel;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
@@ -344,7 +338,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 try {
                     Response<String> response = mOauthRetrofit.create(RedditAPI.class)
                             .editPostOrComment(APIUtils.getOAuthHeader(mAccessToken), params).execute();
-                    if (response.isSuccessful()) {
+                    if (response.isSuccessful() && response.body() != null) {
                         Comment comment = ParseComment.parseSingleComment(new JSONObject(response.body()), 0);
                         handler.post(() -> {
                             isSubmitting = false;
@@ -352,7 +346,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
                             Intent returnIntent = new Intent();
                             returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, comment);
-                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getExtras().getInt(EXTRA_POSITION));
+                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
                             setResult(RESULT_OK, returnIntent);
 
                             editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
@@ -380,7 +374,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
                         Intent returnIntent = new Intent();
                         returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(content));
-                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getExtras().getInt(EXTRA_POSITION));
+                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
                         setResult(RESULT_OK, returnIntent);
 
                         editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
@@ -427,10 +421,12 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                     return;
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
-                        mAccessToken, binding.commentEditTextEditCommentActivity, binding.coordinatorLayoutEditCommentActivity, data.getData(), uploadedImages);
+                        mAccessToken, binding.commentEditTextEditCommentActivity,
+                        binding.coordinatorLayoutEditCommentActivity, data.getData(), uploadedImages);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
-                        mAccessToken, binding.commentEditTextEditCommentActivity, binding.coordinatorLayoutEditCommentActivity, capturedImageUri, uploadedImages);
+                        mAccessToken, binding.commentEditTextEditCommentActivity,
+                        binding.coordinatorLayoutEditCommentActivity, capturedImageUri, uploadedImages);
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 editComment();
             }

@@ -225,7 +225,8 @@
         <item>@string/upvoted</item>
         <item>@string/downvoted</item>
         <item>@string/hidden</item>
-        <item>@string/saved</item>
+        <item>@string/saved_posts</item>
+        <item>@string/saved_comments</item>
     </string-array>
 
     <string-array name="settings_tab_post_type_anonymous">
@@ -292,6 +293,11 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
     </string-array>
 
     <string-array name="settings_main_page_tab_count">
@@ -327,6 +333,7 @@
         <item>@string/hidden</item>
         <item>@string/saved</item>
         <item>@string/go_to_top</item>
+        <item>@string/bottom_app_bar_option_toggle_thumbnail_side</item>
     </string-array>
 
     <string-array name="settings_main_activity_bottom_app_bar_options_anonymous">
@@ -340,6 +347,7 @@
         <item>@string/go_to_user</item>
         <item>@string/filter_posts</item>
         <item>@string/go_to_top</item>
+        <item>@string/bottom_app_bar_option_toggle_thumbnail_side</item>
     </string-array>
 
     <string-array name="settings_main_activity_bottom_app_bar_options_anonymous_values">
@@ -351,7 +359,8 @@
         <item>8</item>
         <item>9</item>
         <item>10</item>
-        <item>13</item>
+        <item>12</item>
+        <item>17</item>
         <item>18</item>
     </string-array>
 
@@ -375,6 +384,7 @@
         <item>@string/hidden</item>
         <item>@string/saved</item>
         <item>@string/go_to_top</item>
+        <item>@string/bottom_app_bar_option_toggle_thumbnail_side</item>
     </string-array>
 
     <string-array name="settings_other_activities_bottom_app_bar_options_anonymous">
@@ -389,6 +399,7 @@
         <item>@string/go_to_user</item>
         <item>@string/filter_posts</item>
         <item>@string/go_to_top</item>
+        <item>@string/bottom_app_bar_option_toggle_thumbnail_side</item>
     </string-array>
 
     <string-array name="settings_other_activities_bottom_app_bar_options_anonymous_values">
@@ -401,7 +412,8 @@
         <item>9</item>
         <item>10</item>
         <item>11</item>
-        <item>14</item>
+        <item>13</item>
+        <item>18</item>
         <item>19</item>
     </string-array>
 
@@ -668,13 +680,17 @@
     <string-array name="link_handler">
         <item>@string/settings_link_handler_value_external_browser</item>
         <item>@string/settings_link_handler_value_custom_tab</item>
+        <item>@string/settings_link_handler_value_ephemeral_custom_tab</item>
         <item>@string/settings_link_handler_value_internal_browser</item>
+        <item>@string/settings_link_handler_value_specific_browser</item>
     </string-array>
 
     <string-array name="link_handler_values">
         <item>0</item>
         <item>1</item>
+        <item>3</item>
         <item>2</item>
+        <item>4</item>
     </string-array>
 
     <string-array name="settings_reddit_video_default_resolution">

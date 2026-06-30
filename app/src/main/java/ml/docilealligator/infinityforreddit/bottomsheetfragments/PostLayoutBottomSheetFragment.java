@@ -6,10 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostLayoutBottomSheetBinding;
@@ -21,8 +19,8 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
  */
 public class PostLayoutBottomSheetFragment extends LandscapeExpandedRoundedBottomSheetDialogFragment {
 
-    private FragmentPostLayoutBottomSheetBinding binding;
     private BaseActivity activity;
+
     public PostLayoutBottomSheetFragment() {
         // Required empty public constructor
     }
@@ -32,7 +30,7 @@ public class PostLayoutBottomSheetFragment extends LandscapeExpandedRoundedBotto
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = FragmentPostLayoutBottomSheetBinding.inflate(inflater, container, false);
+        FragmentPostLayoutBottomSheetBinding binding = FragmentPostLayoutBottomSheetBinding.inflate(inflater, container, false);
 
         binding.cardLayoutTextViewPostLayoutBottomSheetFragment.setOnClickListener(view -> {
             ((PostLayoutSelectionCallback) activity).postLayoutSelected(SharedPreferencesUtils.POST_LAYOUT_CARD);
@@ -74,5 +72,4 @@ public class PostLayoutBottomSheetFragment extends LandscapeExpandedRoundedBotto
     public interface PostLayoutSelectionCallback {
         void postLayoutSelected(int postLayout);
     }
-
 }

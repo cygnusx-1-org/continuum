@@ -5,17 +5,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
-
 import androidx.annotation.Nullable;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-
-import net.lingala.zip4j.ZipFile;
-
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -39,12 +31,15 @@ import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubr
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
+import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
-import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
+import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import net.lingala.zip4j.ZipFile;
+import org.apache.commons.io.FileUtils;
 
 public class RestoreSettings {
     public static void restoreSettings(Context context, Executor executor, Handler handler,
@@ -158,6 +153,7 @@ public class RestoreSettings {
                                 File commentFiltersFile = new File(f.getAbsolutePath() + "/comment_filters.json");
                                 File commentFilterUsageFile = new File(f.getAbsolutePath() + "/comment_filter_usage.json");
                                 File accountsFile = new File(f.getAbsolutePath() + "/accounts.json");
+                                File readPostsFile = new File(f.getAbsolutePath() + "/read_posts.json");
 
                                 if (anonymousSubscribedSubredditsFile.exists()) {
                                     List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
@@ -203,21 +199,38 @@ public class RestoreSettings {
                                     if (accounts != null) {
                                         // Clear existing accounts before inserting restored ones
                                         redditDataRoomDatabase.accountDao().deleteAllAccounts();
+                                        // Inserted rows keep the is_current_user flag from the backup, so more
+                                        // than one account can come in marked current. Track which account should
+                                        // be the current one, preferring the backed-up current user.
+                                        Account currentAccount = null;
                                         for (Account account : accounts) {
                                             redditDataRoomDatabase.accountDao().insert(account);
+                                            if (account.isCurrentUser()) {
+                                                currentAccount = account;
+                                            }
                                         }
-                                        // Optionally, mark the first restored account as current, or restore the 'is_current_user' flag if it was backed up.
-                                        // If accounts list is not empty, mark the first one as current
-                                        if (!accounts.isEmpty()) {
-                                            redditDataRoomDatabase.accountDao().markAccountCurrent(accounts.get(0).getAccountName());
+                                        if (currentAccount == null && !accounts.isEmpty()) {
+                                            currentAccount = accounts.get(0);
+                                        }
+                                        if (currentAccount != null) {
+                                            // Reset every account's flag first so exactly one stays current;
+                                            // otherwise non-current accounts are hidden from the account switcher.
+                                            redditDataRoomDatabase.accountDao().markAllAccountsNonCurrent();
+                                            redditDataRoomDatabase.accountDao().markAccountCurrent(currentAccount.getAccountName());
                                             // Also update the current account shared preferences for immediate effect
-                                            Account firstAccount = accounts.get(0);
                                             currentAccountSharedPreferences.edit()
-                                                .putString(SharedPreferencesUtils.ACCOUNT_NAME, firstAccount.getAccountName())
-                                                .putString(SharedPreferencesUtils.ACCESS_TOKEN, firstAccount.getAccessToken())
-                                                .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, firstAccount.getProfileImageUrl())
+                                                .putString(SharedPreferencesUtils.ACCOUNT_NAME, currentAccount.getAccountName())
+                                                .putString(SharedPreferencesUtils.ACCESS_TOKEN, currentAccount.getAccessToken())
+                                                .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, currentAccount.getProfileImageUrl())
                                                 .apply();
                                         }
+                                    }
+                                }
+                                // Restore read_posts after accounts so the FK on username is satisfied.
+                                if (readPostsFile.exists()) {
+                                    List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
+                                    if (readPosts != null) {
+                                        redditDataRoomDatabase.readPostDao().insertAll(readPosts);
                                     }
                                 }
                             }

@@ -1,12 +1,8 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.os.Bundle;
-
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
-
-import org.greenrobot.eventbus.EventBus;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
@@ -15,6 +11,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeSwipeActionEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSwipeActionThresholdEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeVibrateWhenActionTriggeredEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import org.greenrobot.eventbus.EventBus;
 
 public class SwipeActionPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
@@ -30,6 +27,14 @@ public class SwipeActionPreferenceFragment extends CustomFontPreferenceFragmentC
         ListPreference swipeActionThresholdListPreference = findPreference(SharedPreferencesUtils.SWIPE_ACTION_THRESHOLD);
 
         if (enableSwipeActionSwitch != null) {
+            // Comment swipe actions cannot coexist with Swipe Between Posts (both consume
+            // horizontal swipes); Swipe Between Posts wins, so disable this when it is on.
+            boolean swipeBetweenPostsEnabled = getPreferenceManager().getSharedPreferences()
+                    .getBoolean(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS, false);
+            if (swipeBetweenPostsEnabled) {
+                enableSwipeActionSwitch.setEnabled(false);
+                enableSwipeActionSwitch.setSummary(R.string.settings_enable_swipe_action_disabled_by_swipe_between_posts_summary);
+            }
             enableSwipeActionSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeEnableSwipeActionSwitchEvent((Boolean) newValue));
                 return true;

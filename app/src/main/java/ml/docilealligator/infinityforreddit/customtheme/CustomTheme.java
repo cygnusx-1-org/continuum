@@ -3,12 +3,10 @@ package ml.docilealligator.infinityforreddit.customtheme;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -18,7 +16,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -114,6 +111,18 @@ public class CustomTheme implements Parcelable {
     public int postTypeBackgroundColor;
     @ColumnInfo(name = "post_type_text_color")
     public int postTypeTextColor;
+    @ColumnInfo(name = "text_type_background_color", defaultValue = "-9800835")
+    public int textTypeBackgroundColor;
+    @ColumnInfo(name = "image_type_background_color", defaultValue = "-13720497")
+    public int imageTypeBackgroundColor;
+    @ColumnInfo(name = "link_type_background_color", defaultValue = "-16160294")
+    public int linkTypeBackgroundColor;
+    @ColumnInfo(name = "video_type_background_color", defaultValue = "-3202514")
+    public int videoTypeBackgroundColor;
+    @ColumnInfo(name = "gif_type_background_color", defaultValue = "-4245111")
+    public int gifTypeBackgroundColor;
+    @ColumnInfo(name = "gallery_type_background_color", defaultValue = "-8236833")
+    public int galleryTypeBackgroundColor;
     @ColumnInfo(name = "spoiler_background_color")
     public int spoilerBackgroundColor;
     @ColumnInfo(name = "spoiler_text_color")
@@ -259,6 +268,12 @@ public class CustomTheme implements Parcelable {
         downvoted = in.readInt();
         postTypeBackgroundColor = in.readInt();
         postTypeTextColor = in.readInt();
+        textTypeBackgroundColor = in.readInt();
+        imageTypeBackgroundColor = in.readInt();
+        linkTypeBackgroundColor = in.readInt();
+        videoTypeBackgroundColor = in.readInt();
+        gifTypeBackgroundColor = in.readInt();
+        galleryTypeBackgroundColor = in.readInt();
         spoilerBackgroundColor = in.readInt();
         spoilerTextColor = in.readInt();
         nsfwBackgroundColor = in.readInt();
@@ -430,9 +445,15 @@ public class CustomTheme implements Parcelable {
         customTheme.commentVerticalBarColor6 = customThemeSettingsItems.get(83).colorValue;
         customTheme.commentVerticalBarColor7 = customThemeSettingsItems.get(84).colorValue;
         customTheme.navBarColor = customThemeSettingsItems.get(85).colorValue;
-        customTheme.isLightStatusBar = customThemeSettingsItems.get(86).isEnabled;
-        customTheme.isLightNavBar = customThemeSettingsItems.get(87).isEnabled;
-        customTheme.isChangeStatusBarIconColorAfterToolbarCollapsedInImmersiveInterface = customThemeSettingsItems.get(88).isEnabled;
+        customTheme.textTypeBackgroundColor = customThemeSettingsItems.get(86).colorValue;
+        customTheme.imageTypeBackgroundColor = customThemeSettingsItems.get(87).colorValue;
+        customTheme.linkTypeBackgroundColor = customThemeSettingsItems.get(88).colorValue;
+        customTheme.videoTypeBackgroundColor = customThemeSettingsItems.get(89).colorValue;
+        customTheme.gifTypeBackgroundColor = customThemeSettingsItems.get(90).colorValue;
+        customTheme.galleryTypeBackgroundColor = customThemeSettingsItems.get(91).colorValue;
+        customTheme.isLightStatusBar = customThemeSettingsItems.get(92).isEnabled;
+        customTheme.isLightNavBar = customThemeSettingsItems.get(93).isEnabled;
+        customTheme.isChangeStatusBarIconColorAfterToolbarCollapsedInImmersiveInterface = customThemeSettingsItems.get(94).isEnabled;
 
         return customTheme;
     }
@@ -487,6 +508,12 @@ public class CustomTheme implements Parcelable {
         dest.writeInt(downvoted);
         dest.writeInt(postTypeBackgroundColor);
         dest.writeInt(postTypeTextColor);
+        dest.writeInt(textTypeBackgroundColor);
+        dest.writeInt(imageTypeBackgroundColor);
+        dest.writeInt(linkTypeBackgroundColor);
+        dest.writeInt(videoTypeBackgroundColor);
+        dest.writeInt(gifTypeBackgroundColor);
+        dest.writeInt(galleryTypeBackgroundColor);
         dest.writeInt(spoilerBackgroundColor);
         dest.writeInt(spoilerTextColor);
         dest.writeInt(nsfwBackgroundColor);

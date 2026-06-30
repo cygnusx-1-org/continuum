@@ -5,15 +5,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.paging.LoadState;
 import androidx.paging.LoadStateAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.loadingindicator.LoadingIndicator;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;

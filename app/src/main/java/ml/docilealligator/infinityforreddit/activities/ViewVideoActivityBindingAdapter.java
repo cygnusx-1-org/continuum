@@ -2,16 +2,13 @@ package ml.docilealligator.infinityforreddit.activities;
 
 import android.widget.ImageButton;
 import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-
+import app.futured.hauler.HaulerView;
+import app.futured.hauler.LockableNestedScrollView;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.loadingindicator.LoadingIndicator;
-
-import app.futured.hauler.HaulerView;
-import app.futured.hauler.LockableNestedScrollView;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoBinding;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoZoomableBinding;
@@ -31,7 +28,10 @@ public class ViewVideoActivityBindingAdapter {
     private final TextView titleTextView;
     private final MaterialButton backButton;
     private final MaterialButton downloadButton;
+    private final MaterialButton shareButton;
     private final MaterialButton playbackSpeedButton;
+    private final MaterialButton rotateLeftButton;
+    private final MaterialButton rotateRightButton;
 
     public ViewVideoActivityBindingAdapter(ActivityViewVideoBinding binding) {
         this.binding = binding;
@@ -44,7 +44,10 @@ public class ViewVideoActivityBindingAdapter {
         titleTextView = binding.getRoot().findViewById(R.id.title_text_view_exo_playback_control_view);
         backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
+        shareButton = binding.getRoot().findViewById(R.id.share_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
+        rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
+        rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
     }
 
     public ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding binding) {
@@ -58,7 +61,10 @@ public class ViewVideoActivityBindingAdapter {
         titleTextView = binding.getRoot().findViewById(R.id.title_text_view_exo_playback_control_view);
         backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
+        shareButton = binding.getRoot().findViewById(R.id.share_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
+        rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
+        rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
     }
 
     public HaulerView getRoot() {
@@ -109,8 +115,20 @@ public class ViewVideoActivityBindingAdapter {
         return downloadButton;
     }
 
+    public MaterialButton getShareButton() {
+        return shareButton;
+    }
+
     public MaterialButton getPlaybackSpeedButton() {
         return playbackSpeedButton;
+    }
+
+    public MaterialButton getRotateLeftButton() {
+        return rotateLeftButton;
+    }
+
+    public MaterialButton getRotateRightButton() {
+        return rotateRightButton;
     }
 
     public LockableNestedScrollView getNestedScrollView() {

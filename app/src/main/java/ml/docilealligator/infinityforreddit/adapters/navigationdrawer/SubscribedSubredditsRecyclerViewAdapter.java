@@ -3,15 +3,11 @@ package ml.docilealligator.infinityforreddit.adapters.navigationdrawer;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.RequestManager;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -31,7 +27,7 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
     private final int primaryTextColor;
     private final int secondaryTextColor;
     private boolean collapseSubscribedSubredditsSection;
-    private final boolean hideSubscribedSubredditsSection;
+    private boolean hideSubscribedSubredditsSection;
     private ArrayList<SubscribedSubredditData> subscribedSubreddits = new ArrayList<>();
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
 
@@ -46,6 +42,16 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
         collapseSubscribedSubredditsSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION, false);
         hideSubscribedSubredditsSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS, false);
         this.itemClickListener = itemClickListener;
+    }
+
+    public void setCollapseSubscribedSubredditsSection(boolean collapseSubscribedSubredditsSection) {
+        this.collapseSubscribedSubredditsSection = collapseSubscribedSubredditsSection;
+        notifyDataSetChanged();
+    }
+
+    public void setHideSubscribedSubredditsSection(boolean hideSubscribedSubredditsSection) {
+        this.hideSubscribedSubredditsSection = hideSubscribedSubredditsSection;
+        notifyDataSetChanged();
     }
 
     @Override

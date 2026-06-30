@@ -18,7 +18,6 @@ package ml.docilealligator.infinityforreddit.videoautoplay.media;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 
 /**

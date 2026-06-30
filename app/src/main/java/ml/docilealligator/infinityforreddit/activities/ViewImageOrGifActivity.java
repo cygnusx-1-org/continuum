@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -24,15 +23,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
@@ -46,16 +42,10 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.ImageLoader;
 import com.github.piasy.biv.loader.glide.GlideImageLoader;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import java.io.File;
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -79,8 +69,11 @@ import ml.docilealligator.infinityforreddit.font.FontStyle;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWallpaperCallback, CustomFontReceiver {
 
@@ -89,6 +82,8 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     public static final String EXTRA_FILE_NAME_KEY = "EFNK";
     public static final String EXTRA_SUBREDDIT_OR_USERNAME_KEY = "ESOUK";
     public static final String EXTRA_POST_TITLE_KEY = "EPTK";
+    public static final String EXTRA_POST_ID_KEY = "EPIK";
+    public static final String EXTRA_COMMENT_ID_KEY = "ECIK";
     public static final String EXTRA_IS_NSFW = "EIN";
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
@@ -109,6 +104,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     private Typeface typeface;
     private Handler handler;
     private ActivityViewImageOrGifBinding binding;
+    private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,6 +152,10 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         handler = new Handler(Looper.getMainLooper());
 
+        if (savedInstanceState != null) {
+            currentRotation = savedInstanceState.getInt("currentRotation", 0);
+        }
+
         Intent intent = getIntent();
         mImageUrl = intent.getStringExtra(EXTRA_GIF_URL_KEY);
         if (mImageUrl == null) {
@@ -179,45 +179,31 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             isApng = true;
         }
 
-        boolean useBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false);
         if (postTitle != null) {
             Spanned title = Html.fromHtml(String.format("<font color=\"#FFFFFF\"><small>%s</small></font>", postTitle));
-            if (useBottomAppBar) {
-                binding.titleTextViewViewImageOrGifActivity.setText(title);
-            } else {
-                setTitle(Utils.getTabTextWithCustomFont(typeface, title));
-            }
-        } else {
-            if (!useBottomAppBar) {
-                setTitle("");
-            }
+            binding.titleTextViewViewImageOrGifActivity.setText(title);
         }
 
-        if (useBottomAppBar) {
-            getSupportActionBar().hide();
-            binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
-            binding.downloadImageViewViewImageOrGifActivity.setOnClickListener(view -> {
-                if (isDownloading) {
-                    return;
-                }
-                isDownloading = true;
-                requestPermissionAndDownload();
-            });
-            binding.shareImageViewViewImageOrGifActivity.setOnClickListener(view -> {
-                if (isGif || isApng)
-                    shareGif();
-                else
-                    shareImage();
-            });
-            binding.wallpaperImageViewViewImageOrGifActivity.setOnClickListener(view -> {
-                setWallpaper();
-            });
-        } else {
-            ActionBar actionBar = getSupportActionBar();
-            Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
-            actionBar.setHomeAsUpIndicator(upArrow);
-            actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.transparentActionBarAndExoPlayerControllerColor)));
-        }
+        getSupportActionBar().hide();
+        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
+        binding.downloadImageViewViewImageOrGifActivity.setOnClickListener(view -> {
+            if (isDownloading) {
+                return;
+            }
+            isDownloading = true;
+            requestPermissionAndDownload();
+        });
+        binding.shareImageViewViewImageOrGifActivity.setOnClickListener(view -> {
+            if (isGif || isApng)
+                shareGif();
+            else
+                shareImage();
+        });
+        binding.wallpaperImageViewViewImageOrGifActivity.setOnClickListener(view -> {
+            setWallpaper();
+        });
+        binding.rotateLeftImageViewViewImageOrGifActivity.setOnClickListener(view -> rotateLeft());
+        binding.rotateRightImageViewViewImageOrGifActivity.setOnClickListener(view -> rotateRight());
 
         binding.loadImageErrorLinearLayoutViewImageOrGifActivity.setOnClickListener(view -> {
             binding.progressBarViewImageOrGifActivity.setVisibility(View.VISIBLE);
@@ -232,9 +218,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                 isActionBarHidden = false;
-                if (useBottomAppBar) {
-                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
-                }
+                binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
             } else {
                 getWindow().getDecorView().setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -244,9 +228,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
                 isActionBarHidden = true;
-                if (useBottomAppBar) {
-                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
-                }
+                binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
             }
         });
 
@@ -292,6 +274,9 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                             view.setDoubleTapZoomDpi(240);
                             view.setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_FIXED);
                             view.setQuickScaleEnabled(true);
+                            if (currentRotation != 0) {
+                                view.setOrientation(currentRotation);
+                            }
                             view.resetScaleAndCenter();
                         }
                     });
@@ -331,6 +316,10 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
             binding.progressBarViewImageOrGifActivity.setVisibility(View.GONE);
 
+            if (currentRotation != 0) {
+                binding.apngImageViewViewImageOrGifActivity.setRotation(currentRotation);
+            }
+
             binding.apngImageViewViewImageOrGifActivity.setOnClickListener(view -> {
                 if (isActionBarHidden) {
                     getWindow().getDecorView().setSystemUiVisibility(
@@ -338,9 +327,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                     isActionBarHidden = false;
-                    if (mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false)) {
-                        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
-                    }
+                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
                 } else {
                     getWindow().getDecorView().setSystemUiVisibility(
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -350,9 +337,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                                     | View.SYSTEM_UI_FLAG_IMMERSIVE);
                     isActionBarHidden = true;
-                    if (mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER, false)) {
-                        binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
-                    }
+                    binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
                 }
             });
         } else {
@@ -397,6 +382,41 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         }
 
         return false;
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentRotation", currentRotation);
+    }
+
+    private void rotateLeft() {
+        currentRotation = (currentRotation - 90 + 360) % 360;
+        applyRotation();
+    }
+
+    private void rotateRight() {
+        currentRotation = (currentRotation + 90) % 360;
+        applyRotation();
+    }
+
+    private void applyRotation() {
+        if (isApng) {
+            // APNG/avatar path renders into a plain animated ImageView
+            binding.apngImageViewViewImageOrGifActivity.setRotation(currentRotation);
+            return;
+        }
+
+        SubsamplingScaleImageView ssiv = binding.imageViewViewImageOrGifActivity.getSSIV();
+        if (!isGif && ssiv != null) {
+            // Static images: let the subsampling view re-render at the new orientation
+            ssiv.setOrientation(currentRotation);
+            ssiv.resetScaleAndCenter();
+        } else {
+            // Animated GIFs are rendered by BigImageView's image-view factory, not the
+            // subsampling view, so rotate the whole widget at the view level.
+            binding.imageViewViewImageOrGifActivity.setRotation(currentRotation);
+        }
     }
 
     private void requestPermissionAndDownload() {
@@ -446,20 +466,35 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, mSubredditName);
         extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, isNsfw ? 1 : 0);
 
-        // Reconstruct filename using post title passed in intent
+        extras.putString(DownloadMediaService.EXTRA_FILE_NAME, buildDownloadFileName());
+
+        //TODO: contentEstimatedBytes
+        JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
+    }
+
+    // Builds the filename using the post title passed in the intent, mirroring the download path so
+    // that the save and share actions produce identical filenames.
+    private String buildDownloadFileName() {
         String postTitle = getIntent().getStringExtra(EXTRA_POST_TITLE_KEY);
-        String title = (postTitle != null && !postTitle.isEmpty()) ? postTitle : ((isGif || isApng) ? "reddit_gif" : "reddit_image");
+        String commentId = getIntent().getStringExtra(EXTRA_COMMENT_ID_KEY);
+        String postId = getIntent().getStringExtra(EXTRA_POST_ID_KEY);
+        String title = (postTitle != null && !postTitle.isEmpty()) ? postTitle
+                : ((isGif || isApng) ? "reddit_gif" : "reddit_image");
+        if (postId != null && !postId.isEmpty()) {
+            title = title + "_" + postId;
+        }
+        if (commentId != null && !commentId.isEmpty()) {
+            title = title + "_" + commentId;
+        }
 
-        // Basic sanitization (similar to DownloadMediaService)
-        String sanitizedTitle = title.replaceAll("[\\\\/:*?\"<>|]", "_").replaceAll("[\\s_]+", "_").replaceAll("^_+|_+$", "");
-        if (sanitizedTitle.length() > 100) sanitizedTitle = sanitizedTitle.substring(0, 100).replaceAll("_+$", "");
-        if (sanitizedTitle.isEmpty()) sanitizedTitle = ((isGif || isApng) ? "reddit_gif_" : "reddit_image_") + System.currentTimeMillis();
+        String sanitizedTitle = MediaFileNameUtils.sanitizeFilename(title);
 
-        // Basic extension determination
-        String extension = ".unknown";
+        String extension;
         if (mImageUrl != null) {
             String urlExt = org.apache.commons.io.FilenameUtils.getExtension(mImageUrl);
-
             if (urlExt != null && !urlExt.isEmpty() && urlExt.matches("(?i)(jpg|jpeg|png|apng|gif|mp4|webm|mov|avi)")) {
                 extension = "." + urlExt.toLowerCase().substring(0, Math.min(urlExt.length(), 5));
             } else if (isApng) {
@@ -477,14 +512,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             extension = ".jpg";
         }
 
-        String finalFileName = sanitizedTitle + extension;
-        extras.putString(DownloadMediaService.EXTRA_FILE_NAME, finalFileName);
-
-        //TODO: contentEstimatedBytes
-        JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
-        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
-
-        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
+        return sanitizedTitle + extension;
     }
 
     private void shareImage() {
@@ -496,7 +524,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                 if (cacheDir != null) {
                     Toast.makeText(ViewImageOrGifActivity.this, R.string.save_image_first, Toast.LENGTH_SHORT).show();
                     SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, handler, resource,
-                            cacheDir.getPath(), mImageFileName,
+                            cacheDir.getPath(), buildDownloadFileName(),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {
@@ -541,7 +569,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
                 File cacheDir = Utils.getCacheDir(ViewImageOrGifActivity.this);
                 if (cacheDir != null) {
-                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), mImageFileName,
+                    SaveGIFToFile.saveGifToFile(mExecutor, handler, resource, cacheDir.getPath(), buildDownloadFileName(),
                             new SaveGIFToFile.SaveGIFToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {

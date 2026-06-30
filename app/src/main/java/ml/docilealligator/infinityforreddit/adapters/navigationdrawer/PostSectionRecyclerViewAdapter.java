@@ -3,11 +3,9 @@ package ml.docilealligator.infinityforreddit.adapters.navigationdrawer;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
@@ -26,19 +24,22 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
     private final int secondaryTextColor;
     private final int primaryIconColor;
     private boolean collapsePostSection;
-    private final boolean isLoggedIn;
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
 
     public PostSectionRecyclerViewAdapter(BaseActivity baseActivity, CustomThemeWrapper customThemeWrapper,
                                           SharedPreferences navigationDrawerSharedPreferences,
-                                          boolean isLoggedIn, NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener) {
+                                          NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener) {
         this.baseActivity = baseActivity;
         primaryTextColor = customThemeWrapper.getPrimaryTextColor();
         secondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         collapsePostSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_POST_SECTION, false);
-        this.isLoggedIn = isLoggedIn;
         this.itemClickListener = itemClickListener;
+    }
+
+    public void setCollapsePostSection(boolean collapsePostSection) {
+        this.collapsePostSection = collapsePostSection;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -82,25 +83,23 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
             int stringId = 0;
             int drawableId = 0;
 
-            if (isLoggedIn) {
-                switch (position) {
-                    case 1:
-                        stringId = R.string.upvoted;
-                        drawableId = R.drawable.ic_arrow_upward_day_night_24dp;
-                        break;
-                    case 2:
-                        stringId = R.string.downvoted;
-                        drawableId = R.drawable.ic_arrow_downward_day_night_24dp;
-                        break;
-                    case 3:
-                        stringId = R.string.hidden;
-                        drawableId = R.drawable.ic_lock_day_night_24dp;
-                        break;
-                    case 4:
-                        stringId = R.string.account_saved_thing_activity_label;
-                        drawableId = R.drawable.ic_bookmarks_day_night_24dp;
-                        break;
-                }
+            switch (position) {
+                case 1:
+                    stringId = R.string.upvoted;
+                    drawableId = R.drawable.ic_arrow_upward_day_night_24dp;
+                    break;
+                case 2:
+                    stringId = R.string.downvoted;
+                    drawableId = R.drawable.ic_arrow_downward_day_night_24dp;
+                    break;
+                case 3:
+                    stringId = R.string.hidden;
+                    drawableId = R.drawable.ic_lock_day_night_24dp;
+                    break;
+                case 4:
+                    stringId = R.string.account_saved_thing_activity_label;
+                    drawableId = R.drawable.ic_bookmarks_day_night_24dp;
+                    break;
             }
 
             ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(stringId);
@@ -112,7 +111,7 @@ public class PostSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
 
     @Override
     public int getItemCount() {
-        return isLoggedIn ? (collapsePostSection ? 1: POST_SECTION_ITEMS + 1) : 0;
+        return collapsePostSection ? 1: POST_SECTION_ITEMS + 1;
     }
 
     class MenuGroupTitleViewHolder extends RecyclerView.ViewHolder {

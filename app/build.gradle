@@ -1,27 +1,50 @@
+import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.artifact.ArtifactTransformationRequest
+import com.android.build.api.variant.BuiltArtifact
+import com.android.build.api.variant.FilterConfiguration
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
+import org.gradle.workers.WorkerExecutor
+import javax.inject.Inject
+import java.io.Serializable
+
 plugins {
     id 'com.android.application'
     id 'com.gladed.androidgitversion' version '0.4.14'
     id 'com.github.ben-manes.versions' version '0.42.0'
     id 'com.github.breadmoirai.github-release' version '2.5.2'
     id 'com.diffplug.spotless' version '7.0.2'
-    id 'org.jetbrains.kotlin.android'
-    id("io.qameta.allure") version "2.12.0"
-    id 'org.jetbrains.kotlin.kapt'
+    id("io.qameta.allure") version "4.1.0"
+    id 'com.android.legacy-kapt'
     id 'kotlin-parcelize'
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
+    id("org.jetbrains.kotlin.plugin.compose") version '2.2.10'
 }
 
-def allureVersion = "2.16.0"
-def aspectJVersion = '1.9.21'
+def allureVersion = "2.35.2"
+def aspectJVersion = '1.9.25.1'
 
 configurations {
-    agent {
-        canBeResolved = true
-        canBeConsumed = true
-    }
-
     all {
         exclude module: 'httpclient'
+    }
+}
+
+// Append "-dirty" to the version name when building from a working tree that has uncommitted
+// changes to tracked files, mirroring Slide's androidGitVersion behaviour. This marks builds
+// that don't correspond to a clean commit. Untracked files are ignored (matching the plugin
+// default) so stray local files don't flag an otherwise-clean build.
+def gitVersionSuffix = {
+    try {
+        def status = providers.exec {
+            commandLine 'git', 'status', '--porcelain', '--untracked-files=no'
+        }.standardOutput.asText.get().trim()
+        return status.isEmpty() ? "" : "-dirty"
+    } catch (Exception ignored) {
+        return ""
     }
 }
 
@@ -53,27 +76,10 @@ android {
         println("Warning: test.properties file not found. Using default test values.")
     }
 
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            def appName = "continuum"
-            def baseAbiVersion = output.getFilter(com.android.build.OutputFile.ABI)
-            def buildType = variant.buildType
-            def versionCode = variant.versionCode
-            def versionName = variant.versionName
-            def artifactName = "${appName}-${versionName}(${versionCode})"
+    // Custom APK names are applied via the new Variant API below (see the androidComponents block at
+    // the end of this file). AGP 9's new DSL removed applicationVariants.outputs.outputFileName.
 
-            if (buildType == "debug") {
-                artifactName = "${appName}-${buildType}-${baseAbiVersion}-${versionName}"
-            } else {
-                artifactName = "${appName}-${baseAbiVersion}-${versionName}"
-            }
-
-            // Assign the apk filename
-            output.outputFileName = "${artifactName}.apk"
-        }
-    }
-
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId "org.cygnusx1.continuum"
@@ -83,10 +89,10 @@ android {
             }
         }
 
-        minSdk 21
+        minSdk 24
         targetSdk 35
-        versionCode 211
-        versionName "8.1.2.4"
+        versionCode 223
+        versionName "8.2.5.9.9.2" + gitVersionSuffix()
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }
@@ -98,15 +104,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.release
             } else {
                 println("Warning: keystore.properties file not found. Skipping signing configuration for release.")
             }
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "app_name", "Continuum"
         }
         minifiedRelease {
@@ -138,6 +142,8 @@ android {
         animationsDisabled = true
         //execution 'ANDROIDX_TEST_ORCHESTRATOR'
         unitTests.returnDefaultValues = true
+        // Robolectric needs real merged resources to resolve string IDs in unit tests.
+        unitTests.includeAndroidResources = true
         unitTests.all {
             useJUnitPlatform()
         }
@@ -147,6 +153,9 @@ android {
         buildConfig = true
         viewBinding = true
         compose = true
+        // Required because build types use resValue (release/debug app_name); the global
+        // android.defaults.buildfeatures.resvalues default is off in AGP 9.
+        resValues = true
     }
 
     lint {
@@ -169,9 +178,6 @@ android {
         kotlinCompilerExtensionVersion = "1.5.14"
     }
 
-    kotlinOptions {
-        jvmTarget = '21'
-    }
 }
 
 def githubPropertiesFile = rootProject.file("github.properties")
@@ -205,41 +211,51 @@ if (githubPropertiesFile.exists()) {
 } else {
     println("Warning: github.properties file not found. Skipping GitHub release configuration.")
 }
+
+allure {
+    adapter {
+        // Allure attaches aspectjweaver as the test -javaagent. Pin it to a JDK 25-capable release;
+        // the plugin's default bundles an ASM that can't read class file major version 69 (Java 25).
+        aspectjVersion = aspectJVersion
+    }
+}
+
 dependencies {
 /** AndroidX **/
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.biometric:biometric:1.2.0-alpha05'
-    implementation 'androidx.browser:browser:1.9.0'
+    implementation 'androidx.browser:browser:1.10.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.activity:activity:1.10.1'
-    implementation 'androidx.fragment:fragment:1.8.8'
-    implementation 'androidx.core:core-ktx:1.17.0'
-    def lifecycleVersion = "2.9.4"
+    implementation 'androidx.activity:activity:1.13.0'
+    implementation 'androidx.fragment:fragment:1.8.9'
+    implementation 'androidx.core:core-ktx:1.19.0'
+    def lifecycleVersion = "2.11.0"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-process:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-runtime:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycleVersion"
 
-    def pagingVersion = '3.3.6'
+    def pagingVersion = '3.5.0'
     implementation "androidx.paging:paging-runtime:$pagingVersion"
     implementation "androidx.paging:paging-guava:$pagingVersion"
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    def roomVersion = "2.7.2"
+    implementation 'androidx.webkit:webkit:1.16.0'
+    def roomVersion = "2.8.4"
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-guava:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
-    implementation 'androidx.work:work-runtime:2.9.0'
-    implementation 'com.google.android.material:material:1.14.0-alpha01'
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-beta01"
+    implementation 'androidx.work:work-runtime:2.11.2'
+    implementation 'com.google.android.material:material:1.14.0'
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0"
 
 /** ExoPlayer **/
-    def media3_version = "1.8.0"
+    def media3_version = "1.10.1"
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
@@ -259,10 +275,10 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
     implementation "com.squareup.retrofit2:adapter-guava:$retrofitVersion"
-    implementation 'com.squareup.okhttp3:okhttp:5.3.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.4.0'
 
     // Dependency injection
-    def daggerVersion = '2.59'
+    def daggerVersion = '2.60'
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
@@ -285,13 +301,13 @@ dependencies {
 
     // Object to JSON
     // NOTE: Replace with Squareup's Moshi?
-    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'com.google.code.gson:gson:2.14.0'
 
     // Java library for zip files and streams
-    implementation 'net.lingala.zip4j:zip4j:2.11.5'
+    implementation 'net.lingala.zip4j:zip4j:2.11.6'
 
     // IO functionality
-    implementation 'commons-io:commons-io:2.16.1'
+    implementation 'commons-io:commons-io:2.22.0'
 
     // Crash reporting
     implementation 'com.github.FunkyMuse:Crashy:1.2.0'
@@ -300,13 +316,13 @@ dependencies {
 /**** User Interface (frontend) ****/
 
     //Image loading
-    def glideVersion = "5.0.5"
+    def glideVersion = "5.0.7"
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     kapt "com.github.bumptech.glide:compiler:$glideVersion"
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
-    implementation "com.github.bumptech.glide:compose:1.0.0-beta08"
+    implementation "com.github.bumptech.glide:compose:1.0.0-beta09"
     implementation 'com.github.santalu:aspect-ratio-imageview:1.0.9'
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.29'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.32'
     // APNG animation support for profile avatars
     implementation 'com.github.penfeizhou.android.animation:glide-plugin:3.0.5'
     def bivVersion = "1.8.1"
@@ -326,13 +342,7 @@ dependencies {
     implementation 'me.saket:better-link-movement-method:2.2.0'
 
     // Animations
-    implementation 'com.airbnb.android:lottie:6.4.1'
-
-    // Loading ProgressBar
-    implementation 'com.lsjwzh:materialloadingprogressbar:0.5.8-RELEASE'
-
-    // Customizable TextView
-    implementation files("Modules/customtextview-2.1.aar")
+    implementation 'com.airbnb.android:lottie:6.7.1'
 
     // Dismiss gesturing
     implementation 'app.futured.hauler:hauler:5.0.0'
@@ -367,7 +377,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4'
     implementation 'androidx.compose.runtime:runtime-livedata'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
 /**** Builds and flavors ****/
     // debugImplementation because LeakCanary should only run in debug builds.
@@ -375,7 +385,17 @@ dependencies {
 
     testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
     testImplementation "io.qameta.allure:allure-junit5"
-    agent "org.aspectj:aspectjweaver:$aspectJVersion"
+
+    // OAuthLoginHelper unit tests. The pure classification tests run on JUnit 5 (Jupiter); the
+    // message-formatting tests use Robolectric (a JUnit 4 runner) for real string resources, so the
+    // JUnit Vintage engine is needed to discover them on the JUnit Platform.
+    // allure-junit5 only exposes the Jupiter API at runtime, so declare it explicitly for compilation.
+    testImplementation platform("org.junit:junit-bom:5.10.3")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "junit:junit:4.13.2"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
+    testImplementation "org.robolectric:robolectric:4.16.1"
 
     androidTestImplementation "androidx.test.ext:junit:1.0.0"
     androidTestImplementation "androidx.test:rules:1.5.0"
@@ -390,6 +410,7 @@ dependencies {
 spotless {
     java {
         target '**/*.java'
+        importOrder()
         removeUnusedImports()
         trimTrailingWhitespace()
         leadingTabsToSpaces(4)
@@ -403,5 +424,81 @@ spotless {
         target '**/*.xml'
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
+    }
+}
+
+// Replaces the legacy applicationVariants APK-renaming (removed by AGP 9's new DSL). For each
+// variant, transforms the APK artifact so each per-ABI output becomes
+// "continuum-<abi>-<versionName>.apk" (versionName already carries the git/build-type suffixes).
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def renameProvider = tasks.register("rename${variant.name.capitalize()}Apks", RenameApksTask)
+        def request = variant.artifacts.use(renameProvider)
+            .wiredWithDirectories(
+                { it.getApkFolder() } as kotlin.jvm.functions.Function1,
+                { it.getOutFolder() } as kotlin.jvm.functions.Function1)
+            .toTransformMany(SingleArtifact.APK.INSTANCE)
+        renameProvider.configure { it.transformationRequest.set(request) }
+    }
+}
+
+interface CopyApkParameters extends WorkParameters, Serializable {
+    RegularFileProperty getInputApkFile()
+    RegularFileProperty getOutputApkFile()
+}
+
+abstract class CopyApkWorkAction implements WorkAction<CopyApkParameters> {
+    @Override
+    void execute() {
+        def output = parameters.outputApkFile.get().asFile
+        output.delete()
+        java.nio.file.Files.copy(parameters.inputApkFile.get().asFile.toPath(), output.toPath())
+    }
+}
+
+abstract class RenameApksTask extends DefaultTask {
+    @InputFiles
+    abstract DirectoryProperty getApkFolder()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutFolder()
+
+    @Internal
+    abstract Property<ArtifactTransformationRequest<RenameApksTask>> getTransformationRequest()
+
+    private final WorkerExecutor workerExecutor
+
+    @Inject
+    RenameApksTask(WorkerExecutor workerExecutor) {
+        this.workerExecutor = workerExecutor
+    }
+
+    @TaskAction
+    void taskAction() {
+        // Remove APKs left by previous builds before producing this build's outputs.
+        // Filenames embed the versionName, so a new build creates new files instead of
+        // overwriting old ones; without this, stale older-version APKs accumulate in the
+        // output folder (and would otherwise be picked up by the GitHub release upload).
+        outFolder.get().asFile.listFiles()?.each { File f ->
+            if (f.name.endsWith(".apk")) {
+                f.delete()
+            }
+        }
+
+        transformationRequest.get().submit(
+            this,
+            workerExecutor.noIsolation(),
+            CopyApkWorkAction.class,
+            { BuiltArtifact builtArtifact, Directory outputLocation, CopyApkParameters params ->
+                def abi = builtArtifact.filters.find {
+                    it.filterType == FilterConfiguration.FilterType.ABI
+                }?.identifier
+                def abiPart = abi ? "-${abi}" : ""
+                def newName = "continuum${abiPart}-${builtArtifact.versionName}.apk"
+                params.inputApkFile.set(new File(builtArtifact.outputFile))
+                params.outputApkFile.set(new File(outputLocation.asFile, newName as String))
+                return params.outputApkFile.get().asFile
+            } as kotlin.jvm.functions.Function3
+        )
     }
 }

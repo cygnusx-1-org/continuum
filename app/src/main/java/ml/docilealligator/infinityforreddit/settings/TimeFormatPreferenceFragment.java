@@ -1,17 +1,14 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.os.Bundle;
-
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
-
-import org.greenrobot.eventbus.EventBus;
-
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeShowElapsedTimeEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeTimeFormatEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import org.greenrobot.eventbus.EventBus;
 
 public class TimeFormatPreferenceFragment extends CustomFontPreferenceFragmentCompat {
     @Override

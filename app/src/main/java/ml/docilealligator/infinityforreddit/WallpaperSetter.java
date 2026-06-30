@@ -7,16 +7,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.WindowManager;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-
 import java.util.concurrent.Executor;
-
 import ml.docilealligator.infinityforreddit.asynctasks.SetAsWallpaper;
 
 public class WallpaperSetter {

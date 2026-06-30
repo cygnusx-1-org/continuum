@@ -5,6 +5,7 @@ import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.Gravity;
@@ -15,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
@@ -23,17 +23,11 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -48,6 +42,8 @@ import ml.docilealligator.infinityforreddit.services.EditProfileService;
 import ml.docilealligator.infinityforreddit.user.UserViewModel;
 import ml.docilealligator.infinityforreddit.utils.EditProfileUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Retrofit;
 
 public class EditProfileActivity extends BaseActivity {
@@ -250,9 +246,14 @@ public class EditProfileActivity extends BaseActivity {
                 break;
         }*/
 
+        Uri mediaUri = data.getData();
+        if (mediaUri == null) {
+            return;
+        }
+
         int contentEstimatedBytes = 0;
         PersistableBundle extras = new PersistableBundle();
-        extras.putString(EditProfileService.EXTRA_MEDIA_URI, data.getData().toString());
+        extras.putString(EditProfileService.EXTRA_MEDIA_URI, mediaUri.toString());
         extras.putString(EditProfileService.EXTRA_ACCOUNT_NAME, accountName);
         extras.putString(EditProfileService.EXTRA_ACCESS_TOKEN, accessToken);
         switch (requestCode) {

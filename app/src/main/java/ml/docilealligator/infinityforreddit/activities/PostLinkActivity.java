@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,20 +22,13 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
 import java.util.concurrent.Executor;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
@@ -44,6 +36,7 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.apis.TitleSuggestion;
+import ml.docilealligator.infinityforreddit.asynctasks.FlairRequirementController;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
@@ -57,6 +50,8 @@ import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -127,6 +122,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private ActivityPostLinkBinding binding;
+    private FlairRequirementController flairController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,6 +138,10 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
         EventBus.getDefault().register(this);
 
         applyCustomTheme();
+
+        flairController = new FlairRequirementController(mOauthRetrofit,
+                R.id.action_send_post_link_activity,
+                this::applyFlairLabelStyle);
 
         if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             if (isChangeStatusBarIconColor()) {
@@ -212,6 +212,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
                 if (!loadSubredditIconSuccessful) {
                     loadSubredditIcon();
                 }
+                notifyControllerOfSubreddit();
             }
             displaySubredditIcon();
 
@@ -248,6 +249,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
                 binding.subredditNameTextViewPostLinkActivity.setText(subredditName);
                 binding.flairCustomTextViewPostLinkActivity.setVisibility(View.VISIBLE);
                 loadSubredditIcon();
+                notifyControllerOfSubreddit();
             } else {
                 mGlide.load(R.drawable.subreddit_default_icon)
                         .transform(new RoundedCornersTransformation(72, 0))
@@ -296,10 +298,10 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
                 flairSelectionBottomSheetFragment.setArguments(bundle);
                 flairSelectionBottomSheetFragment.show(getSupportFragmentManager(), flairSelectionBottomSheetFragment.getTag());
             } else {
-                binding.flairCustomTextViewPostLinkActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
-                binding.flairCustomTextViewPostLinkActivity.setTextColor(primaryTextColor);
-                binding.flairCustomTextViewPostLinkActivity.setText(getString(R.string.flair));
                 flair = null;
+                flairController.setHasFlair(false);
+                binding.flairCustomTextViewPostLinkActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
+                applyFlairLabelStyle();
             }
         });
 
@@ -503,6 +505,19 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
         }
     }
 
+    private void applyFlairLabelStyle() {
+        if (flair != null) return;
+        boolean required = flairController != null && flairController.isFlairRequired();
+        binding.flairCustomTextViewPostLinkActivity.setText(getString(required ? R.string.flair_required : R.string.flair));
+        binding.flairCustomTextViewPostLinkActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
+    }
+
+    private void notifyControllerOfSubreddit() {
+        String token = selectedAccount != null && selectedAccount.getAccessToken() != null
+                ? selectedAccount.getAccessToken() : accessToken;
+        flairController.onSubredditChanged(subredditName, subredditIsUser, token);
+    }
+
     private void loadSubredditIcon() {
         LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
@@ -526,10 +541,8 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
         getMenuInflater().inflate(R.menu.post_link_activity, menu);
         applyMenuItemTheme(menu);
         mMemu = menu;
-        if (isPosting) {
-            mMemu.findItem(R.id.action_send_post_link_activity).setEnabled(false);
-            mMemu.findItem(R.id.action_send_post_link_activity).getIcon().setAlpha(130);
-        }
+        flairController.setPosting(isPosting);
+        flairController.setMenu(menu);
         return true;
     }
 
@@ -556,9 +569,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
             }
 
             isPosting = true;
-
-            item.setEnabled(false);
-            item.getIcon().setAlpha(130);
+            flairController.setPosting(true);
 
             mPostingSnackbar.show();
 
@@ -647,11 +658,12 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
                 binding.subredditNameTextViewPostLinkActivity.setText(subredditName);
                 displaySubredditIcon();
 
+                flair = null;
+                flairController.setHasFlair(false);
                 binding.flairCustomTextViewPostLinkActivity.setVisibility(View.VISIBLE);
                 binding.flairCustomTextViewPostLinkActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
-                binding.flairCustomTextViewPostLinkActivity.setTextColor(primaryTextColor);
-                binding.flairCustomTextViewPostLinkActivity.setText(getString(R.string.flair));
-                flair = null;
+                applyFlairLabelStyle();
+                notifyControllerOfSubreddit();
             }/* else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 submitPost(mMenu.findItem(R.id.action_send_post_text_activity));
             }*/
@@ -671,6 +683,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
         binding.flairCustomTextViewPostLinkActivity.setBackgroundColor(flairBackgroundColor);
         binding.flairCustomTextViewPostLinkActivity.setBorderColor(flairBackgroundColor);
         binding.flairCustomTextViewPostLinkActivity.setTextColor(flairTextColor);
+        flairController.setHasFlair(true);
     }
 
     @Override
@@ -696,6 +709,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
     @Subscribe
     public void onSubmitLinkPostEvent(SubmitTextOrLinkPostEvent submitTextOrLinkPostEvent) {
         isPosting = false;
+        flairController.setPosting(false);
         mPostingSnackbar.dismiss();
         if (submitTextOrLinkPostEvent.postSuccess) {
             Intent intent = new Intent(PostLinkActivity.this, ViewPostDetailActivity.class);
@@ -703,8 +717,6 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
             startActivity(intent);
             finish();
         } else {
-            mMemu.findItem(R.id.action_send_post_link_activity).setEnabled(true);
-            mMemu.findItem(R.id.action_send_post_link_activity).getIcon().setAlpha(255);
             if (submitTextOrLinkPostEvent.errorMessage == null || submitTextOrLinkPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostLinkActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
