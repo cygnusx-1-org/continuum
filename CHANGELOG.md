@@ -2,6 +2,12 @@
 
 ---
 
+8.2.5.9.9.2 / 2026-6-30
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Added text to the override toggle to make it crystal clear that the default client ID, user agent, and redirect URI are RedReader
+
 8.2.5.9.9.1 / 2026-6-29
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
