@@ -20,6 +20,10 @@ public class TextToSpeechHelper {
     private void initIfNeeded() {
         if (tts == null) {
             tts = new TextToSpeech(context, status -> {
+                if (tts == null) {
+                    // shut down before init completed
+                    return;
+                }
                 if (status == TextToSpeech.SUCCESS) {
                     int result = tts.setLanguage(Locale.getDefault());
                     if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
@@ -31,6 +35,7 @@ public class TextToSpeechHelper {
                         pendingText = null;
                     }
                 } else {
+                    pendingText = null;
                     Toast.makeText(context, R.string.tts_not_available, Toast.LENGTH_SHORT).show();
                 }
             });
@@ -50,16 +55,18 @@ public class TextToSpeechHelper {
     }
 
     public void stop() {
+        pendingText = null;
         if (tts != null) {
             tts.stop();
         }
     }
 
     public boolean isSpeaking() {
-        return tts != null && tts.isSpeaking();
+        return pendingText != null || (tts != null && tts.isSpeaking());
     }
 
     public void shutdown() {
+        pendingText = null;
         if (tts != null) {
             tts.stop();
             tts.shutdown();
