@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,6 +11,7 @@ import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.TypedValue;
@@ -141,10 +143,32 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
         setPreferencesFromResource(R.xml.api_keys_preferences, rootKey);
         ((Infinity) requireActivity().getApplication()).getAppComponent().inject(this);
 
+        setupEnableOverridesPreference();
         setupClientIdPreference();
         setupGiphyApiKeyPreference();
         setupUserAgentPreference();
         setupRedirectUriPreference();
+    }
+
+    // The summary explains the built-in defaults are RedReader's keys; color that word red so it
+    // stands out. Done in code (and app:summary is intentionally not set in XML) because
+    // Preference.setSummary compares with TextUtils.equals, which ignores spans — so a spanned
+    // summary with the same text as an existing XML summary would be dropped as "unchanged".
+    private void setupEnableOverridesPreference() {
+        Preference enableOverridesPref = findPreference(SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY);
+        if (enableOverridesPref == null) {
+            Log.e(TAG, "Could not find Enable Overrides preference: " + SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY);
+            return;
+        }
+        String summary = getString(R.string.settings_enable_api_key_overrides_summary);
+        String highlight = "RedReader";
+        int start = summary.lastIndexOf(highlight);
+        if (start >= 0) {
+            SpannableString styled = new SpannableString(summary);
+            styled.setSpan(new ForegroundColorSpan(Color.RED), start, start + highlight.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            enableOverridesPref.setSummary(styled);
+        }
     }
 
     private void setupClientIdPreference() {
