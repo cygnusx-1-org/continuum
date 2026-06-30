@@ -1,7 +1,8 @@
 <h1 align="center">Continuum</h1>
 
 
-<h2><a href="https://colab.research.google.com/drive/13AE8RvjnCfuBJGaACEqxeBIMo33_l-Sc?usp=sharing&pli=1#scrollTo=BNM9Hdc_iHNX" target="_blank">link to build</a><br/><br/><br/</h2>
+<p>this fork implement (roughly) the use of a regex in the subreddit filter.
+Regex must appear at the beginning of the list and be followed by the character ‘#’ ie "(?i).*(one|two).*#"</p>
 
 
 <p align="center">
