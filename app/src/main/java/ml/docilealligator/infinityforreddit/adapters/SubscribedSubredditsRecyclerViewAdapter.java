@@ -186,6 +186,10 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
                 }
 
                 ((SubredditViewHolder) viewHolder).binding.favoriteImageViewItemSubscribedThing.setOnClickListener(view -> {
+                    int clickPosition = viewHolder.getBindingAdapterPosition() - offset;
+                    if (clickPosition < 0 || clickPosition >= mSubscribedSubredditData.size()) {
+                        return;
+                    }
                     if(mSubscribedSubredditData.get(viewHolder.getBindingAdapterPosition() - offset).isFavorite()) {
                         ((SubredditViewHolder) viewHolder).binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
                         mSubscribedSubredditData.get(viewHolder.getBindingAdapterPosition() - offset).setFavorite(false);

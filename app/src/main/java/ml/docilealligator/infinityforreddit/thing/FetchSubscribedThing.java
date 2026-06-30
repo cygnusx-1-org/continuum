@@ -31,7 +31,7 @@ public class FetchSubscribedThing {
         executor.execute(() -> {
             try {
                 Response<String> response = oauthRetrofit.create(RedditAPI.class).getSubscribedThing(lastItem, APIUtils.getOAuthHeader(accessToken)).execute();
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     JSONObject jsonResponse = new JSONObject(response.body());
                     JSONArray children = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
 

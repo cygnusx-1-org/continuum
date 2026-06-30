@@ -29,6 +29,9 @@ import org.json.JSONObject;
 public class ParsePost {
     @WorkerThread
     public static LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+        if (response == null) {
+            return null;
+        }
         LinkedHashSet<Post> newPosts = new LinkedHashSet<>();
         try {
             JSONObject jsonResponse = new JSONObject(response);
@@ -72,6 +75,9 @@ public class ParsePost {
     }
 
     public static String getLastItem(String response) {
+        if (response == null) {
+            return null;
+        }
         try {
             JSONObject object = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
             return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
@@ -383,6 +389,9 @@ public class ParsePost {
         String url = Html.fromHtml(data.getString(JSONUtils.URL_KEY)).toString();
         Uri uri = Uri.parse(url);
         String path = uri.getPath();
+        if (path == null) {
+            path = "";
+        }
 
         if (!data.has(JSONUtils.PREVIEW_KEY) && previews.isEmpty()) {
             if (url.contains(permalink)) {
@@ -545,7 +554,7 @@ public class ParsePost {
                     String authority = uri.getAuthority();
 
                     // The hls stream inside REDDIT_VIDEO_PREVIEW_KEY can sometimes lack an audio track
-                    if (authority.contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
+                    if (authority != null && authority.contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
                         if (path.endsWith(".gifv")) {
                             url = url.substring(0, url.length() - 5) + ".mp4";
                         }
@@ -623,7 +632,7 @@ public class ParsePost {
                                 post.setMp4Variant(mp4Variant);
                             }
                         } catch (Exception ignore) {}
-                    } else if (uri.getAuthority().contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
+                    } else if (uri.getAuthority() != null && uri.getAuthority().contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
                         // Imgur gifv/mp4
                         int postType = Post.VIDEO_TYPE;
 

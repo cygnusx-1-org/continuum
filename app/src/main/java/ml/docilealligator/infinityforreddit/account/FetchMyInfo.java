@@ -23,7 +23,7 @@ public class FetchMyInfo {
         oauthRetrofit.create(RedditAPI.class).getMyInfo(APIUtils.getOAuthHeader(accessToken)).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     executor.execute(() -> {
                         try {
                             JSONObject jsonResponse = new JSONObject(response.body());

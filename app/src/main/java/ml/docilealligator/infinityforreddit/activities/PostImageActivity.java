@@ -696,9 +696,10 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                subredditName = data.getExtras().getString(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME);
-                iconUrl = data.getExtras().getString(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_ICON);
+            if (resultCode == RESULT_OK && data != null && data.getExtras() != null) {
+                Bundle extras = data.getExtras();
+                subredditName = extras.getString(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME);
+                iconUrl = extras.getString(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_ICON);
                 subredditSelected = true;
                 subredditIsUser = data.getIntExtra(SelectThingReturnKey.RETURN_EXTRA_THING_TYPE, SelectThingReturnKey.THING_TYPE.SUBREDDIT) == SelectThingReturnKey.THING_TYPE.USER;
 

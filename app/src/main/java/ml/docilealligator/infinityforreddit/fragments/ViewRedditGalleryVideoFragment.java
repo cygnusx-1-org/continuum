@@ -333,16 +333,18 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
 
         // Get the parent Post object from the activity
         Post parentPost = activity.getPost(); // Assuming getPost() exists in ViewRedditGalleryActivity
-        int galleryIndex = getArguments().getInt(EXTRA_INDEX, 0);
+        Bundle arguments = getArguments();
 
-        if (parentPost == null) {
+        if (parentPost == null || arguments == null) {
             Toast.makeText(activity, R.string.downloading_media_failed_cannot_download_media, Toast.LENGTH_SHORT).show();
             return; // Cannot proceed without the parent post object
         }
 
+        int galleryIndex = arguments.getInt(EXTRA_INDEX, 0);
+
         // Check if download location is set
         String downloadLocation;
-        boolean isNsfw = getArguments().getBoolean(EXTRA_IS_NSFW, false);
+        boolean isNsfw = arguments.getBoolean(EXTRA_IS_NSFW, false);
 
         // Gallery videos should be saved to video location
         if (isNsfw && mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
@@ -419,7 +421,11 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
                 ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
                 if (!trackGroups.isEmpty()) {
                     for (int i = 0; i < trackGroups.size(); i++) {
-                        String mimeType = trackGroups.get(i).getTrackFormat(0).sampleMimeType;
+                        Tracks.Group group = trackGroups.get(i);
+                        if (group.length == 0) {
+                            continue;
+                        }
+                        String mimeType = group.getTrackFormat(0).sampleMimeType;
                         if (mimeType != null && mimeType.contains("audio")) {
                             binding.getMuteButton().setVisibility(View.VISIBLE);
                             binding.getMuteButton().setOnClickListener(view -> {

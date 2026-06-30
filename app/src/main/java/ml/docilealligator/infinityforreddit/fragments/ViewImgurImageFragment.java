@@ -289,9 +289,13 @@ public class ViewImgurImageFragment extends Fragment {
     private void download() {
         isDownloading = false;
 
-        String subredditName = getArguments().getString(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME);
-        boolean isNsfw = getArguments().getBoolean(ViewImgurMediaActivity.EXTRA_IS_NSFW);
-        String title = getArguments().getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY);
+        Bundle arguments = getArguments();
+        if (arguments == null) {
+            return;
+        }
+        String subredditName = arguments.getString(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME);
+        boolean isNsfw = arguments.getBoolean(ViewImgurMediaActivity.EXTRA_IS_NSFW);
+        String title = arguments.getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY);
 
         Log.d("ImgurDownload", "ViewImgurImageFragment - Starting download of image, isNsfw=" + isNsfw);
 
@@ -361,6 +365,8 @@ public class ViewImgurImageFragment extends Fragment {
     }
 
     private void shareImage() {
+        Bundle arguments = getArguments();
+        String postTitle = arguments != null ? arguments.getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY) : null;
         glide.asBitmap().load(imgurMedia.getLink()).into(new CustomTarget<Bitmap>() {
 
             @Override
@@ -369,8 +375,7 @@ public class ViewImgurImageFragment extends Fragment {
                 if (cacheDir != null) {
                     Toast.makeText(activity, R.string.save_image_first, Toast.LENGTH_SHORT).show();
                     SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, new Handler(), resource, cacheDir.getPath(),
-                            MediaFileNameUtils.getDownloadFileName(imgurMedia,
-                                    getArguments().getString(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY)),
+                            MediaFileNameUtils.getDownloadFileName(imgurMedia, postTitle),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override
                                 public void saveSuccess(File imageFile) {

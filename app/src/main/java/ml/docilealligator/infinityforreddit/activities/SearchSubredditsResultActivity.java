@@ -103,7 +103,7 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSearchSubredditsResultActivity);
 
-        String query = getIntent().getExtras().getString(EXTRA_QUERY);
+        String query = getIntent().getStringExtra(EXTRA_QUERY);
 
         if (savedInstanceState == null) {
             mFragment = new SubredditListingFragment();

@@ -268,7 +268,11 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             binding.recyclerViewCommentsListingFragment.setLayoutManager(mLinearLayoutManager);
 
-            String username = getArguments().getString(EXTRA_USERNAME);
+            Bundle arguments = getArguments();
+            if (arguments == null) {
+                return;
+            }
+            String username = arguments.getString(EXTRA_USERNAME);
             String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name());
             if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
                 String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name());
@@ -302,11 +306,11 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
             if (mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 factory = new CommentViewModel.Factory(mExecutor, mActivity.mHandler, mRetrofit,
                         null, mActivity.accountName, username, sortType,
-                        getArguments().getBoolean(EXTRA_ARE_SAVED_COMMENTS));
+                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS));
             } else {
                 factory = new CommentViewModel.Factory(mExecutor, mActivity.mHandler, mOauthRetrofit,
                         mActivity.accessToken, mActivity.accountName, username, sortType,
-                        getArguments().getBoolean(EXTRA_ARE_SAVED_COMMENTS));
+                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS));
             }
 
             mCommentViewModel = new ViewModelProvider(this, factory).get(CommentViewModel.class);

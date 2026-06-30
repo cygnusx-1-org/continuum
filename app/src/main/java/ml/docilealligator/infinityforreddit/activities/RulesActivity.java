@@ -121,7 +121,7 @@ public class RulesActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarRulesActivity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mSubredditName = getIntent().getExtras().getString(EXTRA_SUBREDDIT_NAME);
+        mSubredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
 
         mAdapter = new RulesRecyclerViewAdapter(this, mCustomThemeWrapper, mSliderPanel, mSubredditName);
         binding.recyclerViewRulesActivity.setAdapter(mAdapter);

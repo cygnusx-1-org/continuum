@@ -25,6 +25,10 @@ public class ParseComment {
                                     boolean expandChildren, CommentFilter commentFilter,
                                     ParseCommentListener parseCommentListener) {
         executor.execute(() -> {
+            if (response == null) {
+                handler.post(parseCommentListener::onParseCommentFailed);
+                return;
+            }
             try {
                 JSONArray childrenArray = new JSONArray(response);
                 String parentId = childrenArray.getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY)
@@ -55,6 +59,10 @@ public class ParseComment {
 
     static void parseMoreComment(Executor executor, Handler handler, String response, boolean expandChildren, ParseCommentListener parseCommentListener) {
         executor.execute(() -> {
+            if (response == null) {
+                handler.post(parseCommentListener::onParseCommentFailed);
+                return;
+            }
             try {
                 JSONArray childrenArray = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY)
                         .getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.THINGS_KEY);

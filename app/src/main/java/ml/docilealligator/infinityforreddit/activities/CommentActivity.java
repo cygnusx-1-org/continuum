@@ -163,7 +163,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
         EventBus.getDefault().register(this);
 
         Intent intent = getIntent();
-        isReplying = intent.getExtras().getBoolean(EXTRA_IS_REPLYING_KEY);
+        isReplying = intent.getBooleanExtra(EXTRA_IS_REPLYING_KEY, false);
         applyCustomTheme();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -299,8 +299,8 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             markwonAdapter.notifyDataSetChanged();
         }
         parentFullname = intent.getStringExtra(EXTRA_PARENT_FULLNAME_KEY);
-        parentDepth = intent.getExtras().getInt(EXTRA_PARENT_DEPTH_KEY);
-        parentPosition = intent.getExtras().getInt(EXTRA_PARENT_POSITION_KEY);
+        parentDepth = intent.getIntExtra(EXTRA_PARENT_DEPTH_KEY, 0);
+        parentPosition = intent.getIntExtra(EXTRA_PARENT_POSITION_KEY, 0);
 
         if (isReplying) {
             binding.commentToolbar.setTitle(getString(R.string.comment_activity_label_is_replying));

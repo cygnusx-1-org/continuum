@@ -43,7 +43,7 @@ class SharedPreferenceStringLiveData(
 ) :
     SharedPreferenceLiveData<String>(sharedPrefs, key, defValue) {
     override fun getValueFromPreferences(key: String, defValue: String): String =
-        sharedPrefs.getString(key, defValue)!!
+        sharedPrefs.getString(key, defValue) ?: defValue
 }
 
 class SharedPreferenceBooleanLiveData(

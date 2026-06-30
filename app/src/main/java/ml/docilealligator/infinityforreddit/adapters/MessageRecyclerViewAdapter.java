@@ -175,7 +175,9 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 }
 
                 ((DataViewHolder) holder).binding.authorTextViewItemMessage.setText(recipientUsername);
-                String subject = displayedMessage.getSubject().substring(0, 1).toUpperCase() + displayedMessage.getSubject().substring(1);
+                String subjectRaw = displayedMessage.getSubject();
+                String subject = (subjectRaw == null || subjectRaw.isEmpty()) ? "" :
+                        subjectRaw.substring(0, 1).toUpperCase() + subjectRaw.substring(1);
                 ((DataViewHolder) holder).binding.subjectTextViewItemMessage.setText(subject);
                 mMarkwon.setMarkdown(((DataViewHolder) holder).binding.contentCustomMarkwonViewItemMessage, displayedMessage.getBody());
             }
