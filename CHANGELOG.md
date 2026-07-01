@@ -2,6 +2,13 @@
 
 ---
 
+8.2.5.9.9.3 / 2026-6-30
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Added Translate feature in the overflow menu for posts and comments via Google Translate
+* Added Read Aloud feature in the overflow menu for posts and comments
+
 8.2.5.9.9.2 / 2026-6-30
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
