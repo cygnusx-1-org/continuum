@@ -87,7 +87,6 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     public static final String EXTRA_POST_FRAGMENT_ID = "EPFI";
     public static final String EXTRA_IS_NSFW_SUBREDDIT = "EINS";
     public static final int EDIT_COMMENT_REQUEST_CODE = 3;
-    private TextToSpeechHelper textToSpeechHelper;
     @State
     String mNewAccountName;
     @Inject
@@ -761,25 +760,26 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     }
 
     public TextToSpeechHelper getTextToSpeechHelper() {
-        if (textToSpeechHelper == null) {
-            textToSpeechHelper = new TextToSpeechHelper(this);
-        }
-        return textToSpeechHelper;
+        // Owned by the ViewModel so playback survives configuration changes (e.g. rotation).
+        return viewPostDetailActivityViewModel.getTextToSpeechHelper(this);
+    }
+
+    public void stopTextToSpeech() {
+        viewPostDetailActivityViewModel.stopTextToSpeech();
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (textToSpeechHelper != null) {
-            textToSpeechHelper.stop();
+    protected void onStop() {
+        super.onStop();
+        // Release the TTS engine when the activity is no longer visible (backgrounded or
+        // left), but keep it alive across a configuration change such as rotation.
+        if (viewPostDetailActivityViewModel != null && !isChangingConfigurations()) {
+            viewPostDetailActivityViewModel.shutdownTextToSpeech();
         }
     }
 
     @Override
     protected void onDestroy() {
-        if (textToSpeechHelper != null) {
-            textToSpeechHelper.shutdown();
-        }
         EventBus.getDefault().unregister(this);
         super.onDestroy();
         Bridge.clear(this);

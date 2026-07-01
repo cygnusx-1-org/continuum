@@ -226,6 +226,22 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 });
             }
 
+            binding.translateTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                StringBuilder textToTranslate = new StringBuilder();
+                if (mPost.getTitle() != null) {
+                    textToTranslate.append(mPost.getTitle());
+                }
+                String selfText = mPost.getSelfTextPlain();
+                if (selfText != null && !selfText.isEmpty()) {
+                    if (textToTranslate.length() > 0) {
+                        textToTranslate.append("\n\n");
+                    }
+                    textToTranslate.append(selfText);
+                }
+                Utils.translateText(mBaseActivity, textToTranslate.toString());
+                dismiss();
+            });
+
             binding.copyTitleTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                 CopyTextBottomSheetFragment.showCopyDialog(mBaseActivity, mPost.getTitle());
                 dismiss();

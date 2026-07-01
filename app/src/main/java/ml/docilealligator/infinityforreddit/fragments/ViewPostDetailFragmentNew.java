@@ -791,6 +791,10 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             } else {
                 Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, readAloudItem, mActivity.getString(R.string.read_aloud));
             }
+
+            MenuItem translateItem = mMenu.findItem(R.id.action_translate_view_post_detail_fragment);
+            translateItem.setVisible(true);
+            Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, translateItem, mActivity.getString(R.string.translate));
         }
     }
 
@@ -1048,6 +1052,22 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 }
             }
             return true;
+        } else if (itemId == R.id.action_translate_view_post_detail_fragment) {
+            if (mPost != null) {
+                StringBuilder textToTranslate = new StringBuilder();
+                if (mPost.getTitle() != null) {
+                    textToTranslate.append(mPost.getTitle());
+                }
+                String selfText = mPost.getSelfTextPlain();
+                if (selfText != null && !selfText.isEmpty()) {
+                    if (textToTranslate.length() > 0) {
+                        textToTranslate.append("\n\n");
+                    }
+                    textToTranslate.append(selfText);
+                }
+                Utils.translateText(mActivity, textToTranslate.toString());
+            }
+            return true;
         }
         return false;
     }
@@ -1099,6 +1119,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     public void onPause() {
         super.onPause();
         binding.postDetailRecyclerViewViewPostDetailFragment.onWindowVisibilityChanged(View.GONE);
+        // Stop Read Aloud (post or comment) when this post leaves the foreground,
+        // including swiping to another post within the same activity. Skip on a
+        // configuration change (e.g. rotation) so playback continues across it.
+        if (mActivity != null && !mActivity.isChangingConfigurations()) {
+            mActivity.stopTextToSpeech();
+        }
     }
 
     @Override

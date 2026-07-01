@@ -1,8 +1,10 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -683,6 +685,38 @@ public final class Utils {
             }
         }
         return transparentCount >= 3;
+    }
+
+    public static void translateText(Context context, String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return;
+        }
+        // Preferred: hand the text to Google Translate via PROCESS_TEXT (read-only), which shows
+        // its floating translation panel over the current screen instead of switching to the app.
+        Intent intent = new Intent(Intent.ACTION_PROCESS_TEXT);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_PROCESS_TEXT, text);
+        intent.putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true);
+        intent.setPackage("com.google.android.apps.translate");
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Google Translate's web UI caps input at ~5000 characters; trim to avoid
+            // building an oversized URL that the browser may reject. Back off one char
+            // if the cut lands between a surrogate pair so we don't split it.
+            int webLimit = Math.min(5000, text.length());
+            if (webLimit > 0 && Character.isHighSurrogate(text.charAt(webLimit - 1))) {
+                webLimit--;
+            }
+            String webText = text.substring(0, webLimit);
+            Uri uri = Uri.parse("https://translate.google.com/?sl=auto&tl="
+                    + Locale.getDefault().getLanguage() + "&op=translate&text=" + Uri.encode(webText));
+            try {
+                context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            } catch (ActivityNotFoundException e2) {
+                Toast.makeText(context, R.string.no_app, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     public static Insets getInsets(WindowInsetsCompat insets, boolean includeIME, boolean forcedImmersiveMode) {

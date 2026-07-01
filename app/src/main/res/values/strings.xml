@@ -1837,6 +1837,7 @@
 
     <string name="read_aloud">Read Aloud</string>
     <string name="stop_reading">Stop Reading</string>
+    <string name="translate">Translate</string>
     <string name="tts_not_available">Text-to-speech is not available</string>
 
     <string name="settings_search_settings">Search Settings</string>

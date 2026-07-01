@@ -222,6 +222,11 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
             });
         }
 
+        binding.translateTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+            Utils.translateText(activity, comment.getCommentRawText());
+            dismiss();
+        });
+
         binding.reportViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
             Intent intent = new Intent(activity, ReportActivity.class);
             intent.putExtra(ReportActivity.EXTRA_SUBREDDIT_NAME, comment.getSubredditName());

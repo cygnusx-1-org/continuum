@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
@@ -26,6 +27,7 @@ import ml.docilealligator.infinityforreddit.thing.SortType
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader
 import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.JSONUtils
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper
 import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Response
@@ -41,6 +43,27 @@ class ViewPostDetailActivityViewModel(
     var post: Post? = null
 
     var posts: ArrayList<Post>? = null
+
+    // Held here (not on the activity) so Read Aloud survives configuration changes such as rotation.
+    private var textToSpeechHelper: TextToSpeechHelper? = null
+
+    fun getTextToSpeechHelper(context: Context): TextToSpeechHelper {
+        return textToSpeechHelper ?: TextToSpeechHelper(context).also { textToSpeechHelper = it }
+    }
+
+    fun stopTextToSpeech() {
+        textToSpeechHelper?.stop()
+    }
+
+    fun shutdownTextToSpeech() {
+        textToSpeechHelper?.shutdown()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        textToSpeechHelper?.shutdown()
+        textToSpeechHelper = null
+    }
 
     private var _loadMorePostsState = MutableStateFlow(LoadMorePostsState(LoadingMorePostsStatus.NOT_LOADING, 0))
     val loadMorePostsState = _loadMorePostsState.asLiveData()

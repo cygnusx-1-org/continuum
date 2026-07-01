@@ -110,4 +110,11 @@
         android:title="@string/read_aloud"
         app:showAsAction="never"
         android:visible="false" />
+
+    <item
+        android:id="@+id/action_translate_view_post_detail_fragment"
+        android:orderInCategory="17"
+        android:title="@string/translate"
+        app:showAsAction="never"
+        android:visible="false" />
 </menu>
