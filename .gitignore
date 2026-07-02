@@ -126,3 +126,7 @@ backup/
 github.properties
 
 # End of https://www.gitignore.io/api/androidstudio
+
+changelog_override.txt
+
+.claude

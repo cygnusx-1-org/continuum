@@ -22,6 +22,7 @@ plugins {
     id 'com.android.legacy-kapt'
     id 'kotlin-parcelize'
     id("org.jetbrains.kotlin.plugin.compose") version '2.2.10'
+    id 'io.github.takahirom.roborazzi'
 }
 
 def allureVersion = "2.35.2"
@@ -396,6 +397,12 @@ dependencies {
     testImplementation "junit:junit:4.13.2"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
     testImplementation "org.robolectric:robolectric:4.16.1"
+
+    // Roborazzi: render View layouts at arbitrary smallest-width-dp configs (no emulator) and
+    // diff them against committed golden PNGs. Driven by the recordRoborazziDebug /
+    // verifyRoborazziDebug / compareRoborazziDebug Gradle tasks. See RoborazziLayoutTest.
+    testImplementation "io.github.takahirom.roborazzi:roborazzi:1.64.0"
+    testImplementation "io.github.takahirom.roborazzi:roborazzi-junit-rule:1.64.0"
 
     androidTestImplementation "androidx.test.ext:junit:1.0.0"
     androidTestImplementation "androidx.test:rules:1.5.0"
