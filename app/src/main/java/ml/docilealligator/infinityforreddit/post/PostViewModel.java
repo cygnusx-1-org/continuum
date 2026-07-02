@@ -291,7 +291,14 @@ public class PostViewModel extends ViewModel {
     }
 
     public void hideReadPosts() {
-        hideReadPostsValue.setValue(true);
+        // Guard against re-firing when read posts are already hidden. Re-setting the same value makes
+        // the switchMap tear down and rebuild the filter pipeline while the previous collection is still
+        // cancelling; the two collectors then race over the cached post stream and crash paging with a
+        // ConcurrentModificationException (issue #321). Only the initial false->true transition rebuilds,
+        // which is the safe single-rebuild case.
+        if (!Boolean.TRUE.equals(hideReadPostsValue.getValue())) {
+            hideReadPostsValue.setValue(true);
+        }
     }
 
     public PostPagingSource returnPagingSoruce() {
