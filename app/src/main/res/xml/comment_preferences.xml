@@ -12,6 +12,12 @@
         app:key="show_comment_divider"
         app:title="@string/settings_show_comment_divider_title" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="show_comment_top_padding"
+        app:summary="@string/settings_show_comment_top_padding_summary"
+        app:title="@string/settings_show_comment_top_padding_title" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"
         app:key="comment_divider_type"

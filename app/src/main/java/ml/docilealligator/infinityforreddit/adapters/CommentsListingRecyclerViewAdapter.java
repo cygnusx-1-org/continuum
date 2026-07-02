@@ -112,6 +112,8 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private final boolean mShowElapsedTime;
     private final String mTimeFormatPattern;
     private final boolean mShowCommentDivider;
+    private final boolean mShowCommentTopPadding;
+    private final int mCommentTopPaddingPx;
     private final boolean mShowAbsoluteNumberOfVotes;
     private boolean canStartActivity = true;
     private NetworkState networkState;
@@ -134,6 +136,8 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         mAccountName = accountName;
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
         mShowCommentDivider = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, false);
+        mShowCommentTopPadding = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_TOP_PADDING, false);
+        mCommentTopPaddingPx = (int) Utils.convertDpToPixel(8, activity);
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
         mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
@@ -496,6 +500,14 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
             this.saveButton = saveButton;
             this.replyButton = replyButton;
             this.commentDivider = commentDivider;
+
+            int commentTopMargin = mShowCommentTopPadding ? mCommentTopPaddingPx : 0;
+            ViewGroup.MarginLayoutParams linearLayoutParams = (ViewGroup.MarginLayoutParams) linearLayout.getLayoutParams();
+            linearLayoutParams.topMargin = commentTopMargin;
+            linearLayout.setLayoutParams(linearLayoutParams);
+            ViewGroup.MarginLayoutParams markdownLayoutParams = (ViewGroup.MarginLayoutParams) commentMarkdownView.getLayoutParams();
+            markdownLayoutParams.topMargin = commentTopMargin;
+            commentMarkdownView.setLayoutParams(markdownLayoutParams);
 
             replyButton.setVisibility(View.GONE);
 

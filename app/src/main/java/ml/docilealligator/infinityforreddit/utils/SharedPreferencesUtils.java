@@ -134,6 +134,7 @@ public class SharedPreferencesUtils {
     public static final String COMMENT_TOOLBAR_HIDE_ON_CLICK = "comment_toolbar_hide_on_click";
     public static final String FULLY_COLLAPSE_COMMENT = "fully_collapse_comment";
     public static final String SHOW_COMMENT_DIVIDER = "show_comment_divider";
+    public static final String SHOW_COMMENT_TOP_PADDING = "show_comment_top_padding";
     public static final String SHOW_ABSOLUTE_NUMBER_OF_VOTES = "show_absolute_number_of_votes";
     public static final String CUSTOMIZE_LIGHT_THEME = "customize_light_theme";
     public static final String CUSTOMIZE_DARK_THEME = "customize_dark_theme";
