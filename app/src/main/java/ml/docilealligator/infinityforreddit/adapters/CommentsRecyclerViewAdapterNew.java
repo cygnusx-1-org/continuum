@@ -901,9 +901,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             this.commentDivider = commentDivider;
 
             int commentTopMargin = mShowCommentTopPadding ? mCommentTopPaddingPx : 0;
-            ViewGroup.MarginLayoutParams linearLayoutParams = (ViewGroup.MarginLayoutParams) linearLayout.getLayoutParams();
-            linearLayoutParams.topMargin = commentTopMargin;
-            linearLayout.setLayoutParams(linearLayoutParams);
+            applyCommentTopMargin(linearLayout);
             ViewGroup.MarginLayoutParams markdownLayoutParams = (ViewGroup.MarginLayoutParams) commentMarkdownView.getLayoutParams();
             markdownLayoutParams.topMargin = commentTopMargin;
             commentMarkdownView.setLayoutParams(markdownLayoutParams);
@@ -1457,6 +1455,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     // verticalPaddingDp is per-caller: the normal row uses 2dp for breathing room, but the
     // fully-collapsed row passes 0 so the badge never grows taller than the 24dp avatar and
     // re-inflates the row (which would reintroduce the username jump on collapse).
+    private void applyCommentTopMargin(View view) {
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        layoutParams.topMargin = mShowCommentTopPadding ? mCommentTopPaddingPx : 0;
+        view.setLayoutParams(layoutParams);
+    }
+
     private void styleChildCountBadge(TextView childCountBadge, int verticalPaddingDp) {
         int badgeHorizontalPadding = (int) Utils.convertDpToPixel(4, mActivity);
         int badgeVerticalPadding = (int) Utils.convertDpToPixel(verticalPaddingDp, mActivity);
@@ -1479,6 +1483,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         public CommentFullyCollapsedViewHolder(@NonNull ItemCommentFullyCollapsedBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+
+            applyCommentTopMargin(binding.headerLinearLayoutItemCommentFullyCollapsed);
 
             if (mActivity.typeface != null) {
                 binding.userNameTextViewItemCommentFullyCollapsed.setTypeface(mActivity.typeface);
