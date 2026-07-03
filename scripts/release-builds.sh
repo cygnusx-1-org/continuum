@@ -65,6 +65,15 @@ ${RELEVANT_COMMIT_MESSAGES}"
   # Make a new commit for a new release
   git commit -m "${COMMIT_MESSAGE}"
 
+  # Refuse to tag from a dirty working tree — anything still uncommitted here
+  # was not captured by the release commit, so the tag would point at a tree
+  # that does not match what actually gets built and released.
+  if [ -n "$(git status --porcelain)" ]; then
+    echo "Error: working tree is dirty after the release commit. Commit or stash your changes before releasing."
+    git status --short
+    exit 1
+  fi
+
   # Creating new tag for the new release
   git tag -a "${VERSION_NAME}" -m "Version ${VERSION_NAME}"
 
