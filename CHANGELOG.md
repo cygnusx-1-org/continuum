@@ -2,6 +2,13 @@
 
 ---
 
+8.2.5.9.9.4 / 2026-7-2
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed option to add comment top padding back #113 Thanks @KaKi87
+* Fixed Crash on hiding posts twice in a session #321
+
 8.2.5.9.9.3 / 2026-6-30
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
@@ -51,7 +58,7 @@ Note v8a is the 64-bit build, and should be considered the default choice.
 was `5.0`.
 
 This was done to allow the modernization of various libraries. The biggest
-being an upgrade of the main video library from 1.8.0 to 1.10.1(latest). 
+being an upgrade of the main video library from 1.8.0 to 1.10.1(latest).
 
 The other big thing in this release is no need to restart the app a lot less.
 Most settings now just work. The big exception is `Post Filters`, which would
@@ -87,11 +94,11 @@ work, but it would work like the old way for most people. The catch is that
 the max length of a subreddit is 21 and the max length of a username is 20.
 So after doing the math based on those, the font sizes, upper case vs lower
 case, the UI scaling, other text, etc it wouldn't work even on my phone in
-the worst case scenario. 
+the worst case scenario.
 
 Examples:
 subreddit AAAAAAAAAAAAAAAAAAAAA 21
-username  PaleRulerGoingAlone7  20 
+username  PaleRulerGoingAlone7  20
 
 8.2.5.9.5 / 2026-6-22
 ============
@@ -423,7 +430,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Added feature to allow the user to "Halve the post limit" on failure 
+* Added feature to allow the user to "Halve the post limit" on failure
 * Upgraded to 8.1.2
 
 8.1.1.1 / 2026-2-12
@@ -437,7 +444,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Fixed crash on start with 8.1.0.1 
+* Fixed crash on start with 8.1.0.1
 
 8.1.0.1 / 2026-1-23
 ============
@@ -472,7 +479,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Fixed Confirm to exit doesn't really exit #154 
+* Fixed Confirm to exit doesn't really exit #154
 * Upgraded to 8.0.7
 
 8.0.5.1 / 2025-10-17
@@ -498,7 +505,7 @@ the comments not loading
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Keep pinned posts pinned even when filtering or hiding read posts 
+* Keep pinned posts pinned even when filtering or hiding read posts
 * Make double tapping tabs cause a scroll to the top #148
 * Fix the + button in apply post filter not working correctly
 * Upgraded to 8.0.2
@@ -567,7 +574,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 * Fixed Make the comments more compact #18
 * Enabled "Swap Tap and Long Press Comments" by default
 * Fixed Incorrect FAB icon and action in bottom bar customization #39
-* Fixed Sensible download names #13  
+* Fixed Sensible download names #13
 * Fixed Simplify download path #38
 
 7.4.4.3 / 2025-4-16
