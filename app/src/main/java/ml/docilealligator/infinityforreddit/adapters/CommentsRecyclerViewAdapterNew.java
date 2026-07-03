@@ -111,6 +111,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final boolean mCommentToolbarHideOnClick;
     private final boolean mSwapTapAndLong;
     private final boolean mShowCommentDivider;
+    private final boolean mShowCommentTopPadding;
+    private final int mCommentTopPaddingPx;
     private final int mDividerType;
     private final boolean mShowAbsoluteNumberOfVotes;
     private final boolean mFullyCollapseComment;
@@ -306,6 +308,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mCommentToolbarHideOnClick = sharedPreferences.getBoolean(SharedPreferencesUtils.COMMENT_TOOLBAR_HIDE_ON_CLICK, true);
         mSwapTapAndLong = sharedPreferences.getBoolean(SharedPreferencesUtils.SWAP_TAP_AND_LONG_COMMENTS, true);
         mShowCommentDivider = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, false);
+        mShowCommentTopPadding = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_TOP_PADDING, false);
+        mCommentTopPaddingPx = (int) Utils.convertDpToPixel(8, activity);
         mDividerType = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.COMMENT_DIVIDER_TYPE, "0"));
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
         mFullyCollapseComment = sharedPreferences.getBoolean(SharedPreferencesUtils.FULLY_COLLAPSE_COMMENT, false);
@@ -896,6 +900,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             this.commentIndentationView = commentIndentationView;
             this.commentDivider = commentDivider;
 
+            int commentTopMargin = mShowCommentTopPadding ? mCommentTopPaddingPx : 0;
+            applyCommentTopMargin(linearLayout);
+            ViewGroup.MarginLayoutParams markdownLayoutParams = (ViewGroup.MarginLayoutParams) commentMarkdownView.getLayoutParams();
+            markdownLayoutParams.topMargin = commentTopMargin;
+            commentMarkdownView.setLayoutParams(markdownLayoutParams);
+
             if (mVoteButtonsOnTheRight) {
                 ConstraintSet constraintSet = new ConstraintSet();
                 constraintSet.clone(bottomConstraintLayout);
@@ -1445,6 +1455,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     // verticalPaddingDp is per-caller: the normal row uses 2dp for breathing room, but the
     // fully-collapsed row passes 0 so the badge never grows taller than the 24dp avatar and
     // re-inflates the row (which would reintroduce the username jump on collapse).
+    private void applyCommentTopMargin(View view) {
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        layoutParams.topMargin = mShowCommentTopPadding ? mCommentTopPaddingPx : 0;
+        view.setLayoutParams(layoutParams);
+    }
+
     private void styleChildCountBadge(TextView childCountBadge, int verticalPaddingDp) {
         int badgeHorizontalPadding = (int) Utils.convertDpToPixel(4, mActivity);
         int badgeVerticalPadding = (int) Utils.convertDpToPixel(verticalPaddingDp, mActivity);
@@ -1467,6 +1483,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         public CommentFullyCollapsedViewHolder(@NonNull ItemCommentFullyCollapsedBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+
+            applyCommentTopMargin(binding.headerLinearLayoutItemCommentFullyCollapsed);
 
             if (mActivity.typeface != null) {
                 binding.userNameTextViewItemCommentFullyCollapsed.setTypeface(mActivity.typeface);
