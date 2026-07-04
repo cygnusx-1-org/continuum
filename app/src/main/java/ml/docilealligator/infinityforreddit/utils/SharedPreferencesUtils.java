@@ -343,6 +343,19 @@ public class SharedPreferencesUtils {
     public static final String MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS = "_main_page_show_favorite_users_multireddits";
     public static final String MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS = "_main_page_show_subscribed_subreddits";
     public static final String MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS = "_main_page_show_favorite_subscribed_subreddits";
+    // Ordered, variable-length replacement for the fixed MAIN_PAGE_TAB_N_* slots. Stores a
+    // JSON List<MainPageTabInput> (account-prefixed). The legacy keys above are kept only so a
+    // first launch can migrate the old configuration into this list (see MainPageTabsUtils).
+    public static final String MAIN_PAGE_TABS_ORDER = "_main_page_tabs_order";
+    // MainPageTabInput.source: where a list entry came from. USER = a single tab the user added;
+    // the GROUP_* values are placeholders that expand into a "Show ..." toggle's dynamic list.
+    public static final int MAIN_PAGE_TAB_SOURCE_USER = 0;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS = 1;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_MULTIREDDITS = 2;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_SUBSCRIBED_SUBREDDITS = 3;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_SUBSCRIBED_SUBREDDITS = 4;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_USERS_MULTIREDDITS = 5;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_USERS_MULTIREDDITS = 6;
 
     public static final String BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.bottom_app_bar";
     public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT = "main_activity_bottom_app_bar_option_count";

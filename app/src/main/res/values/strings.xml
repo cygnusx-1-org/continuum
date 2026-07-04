@@ -161,6 +161,8 @@
     <string name="profile">Profile</string>
     <string name="subscriptions">Subscriptions</string>
     <string name="multi_reddit">Multireddit</string>
+    <string name="user_multi_reddit">User Multireddit</string>
+    <string name="subscribed_subreddits">Subscribed Subreddits</string>
     <string name="history">History</string>
     <string name="inbox">Inbox</string>
     <string name="inbox_with_count">Inbox (%1$,d)</string>
@@ -586,6 +588,15 @@
     <string name="app_will_restart">Going back after changing a value will cause the app to restart.</string>
     <string name="settings_tab_count">Tab Count</string>
     <string name="settings_show_tab_names">Show Tab Names</string>
+    <string name="settings_enable_tabs">Enable Tabs</string>
+    <string name="settings_edit_tabs_title">Tabs</string>
+    <string name="settings_edit_tabs_summary">Add, remove, and reorder tabs</string>
+    <string name="settings_add_tab">Add tab</string>
+    <string name="tab_already_added">This tab has already been added</string>
+    <string name="move_to_top">Move to top</string>
+    <string name="move_to_bottom">Move to bottom</string>
+    <string name="content_description_drag_to_reorder">Drag to reorder</string>
+    <string name="content_description_delete">Delete</string>
     <string name="settings_tab_1_summary">Tab 1</string>
     <string name="settings_tab_2_summary">Tab 2</string>
     <string name="settings_tab_3_summary">Tab 3</string>
@@ -593,7 +604,7 @@
     <string name="settings_tab_5_summary">Tab 5</string>
     <string name="settings_tab_6_summary">Tab 6</string>
     <string name="settings_more_tabs_summary">More Tabs</string>
-    <string name="settings_more_tabs_info_summary">Enabling the following options will cause an unintended behaviour:\nTabs may lose all the content after switching to others. This is the same as refreshing the page.</string>
+    <string name="settings_more_tabs_info_summary">Changing these effects the list above</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">Show Favorite MultiReddits</string>
     <string name="settings_more_tabs_show_multireddits_title">Show MultiReddits</string>
     <string name="settings_more_tabs_show_favorite_users_multireddits_title">Show Favorite Users MultiReddits</string>

@@ -16,6 +16,7 @@ import ml.docilealligator.infinityforreddit.activities.CustomThemeListingActivit
 import ml.docilealligator.infinityforreddit.activities.CustomThemePreviewActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomizeCommentFilterActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomizePostFilterActivity;
+import ml.docilealligator.infinityforreddit.activities.CustomizeTabsOrderActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomizeThemeActivity;
 import ml.docilealligator.infinityforreddit.activities.EditCommentActivity;
 import ml.docilealligator.infinityforreddit.activities.EditMultiRedditActivity;
@@ -339,6 +340,8 @@ public interface AppComponent {
     void inject(PostDetailsPreferenceFragment postDetailsPreferenceFragment);
 
     void inject(ViewPostDetailFragmentNew viewPostDetailFragmentNew);
+
+    void inject(CustomizeTabsOrderActivity customizeTabsOrderActivity);
 
     @Component.Factory
     interface Factory {
