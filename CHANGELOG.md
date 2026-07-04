@@ -2,6 +2,13 @@
 
 ---
 
+8.2.5.9.9.5 / 2026-7-4
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented rearrangeable tabs
+* Prefixed multireddit tabs with /m/
+
 8.2.5.9.9.4 / 2026-7-2
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
