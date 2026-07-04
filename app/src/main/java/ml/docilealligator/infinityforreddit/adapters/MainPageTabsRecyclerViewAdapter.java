@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.Collections;
@@ -69,6 +70,11 @@ public class MainPageTabsRecyclerViewAdapter extends RecyclerView.Adapter<Recycl
         tabHolder.binding.deleteImageViewItemMainPageTab.setOnClickListener(view -> {
             int pos = tabHolder.getBindingAdapterPosition();
             if (pos == RecyclerView.NO_POSITION) {
+                return;
+            }
+            if (tabs.size() <= 1) {
+                // Keep at least one tab so the main page never resolves to a blank ViewPager.
+                Toast.makeText(view.getContext(), R.string.cannot_delete_last_tab, Toast.LENGTH_SHORT).show();
                 return;
             }
             tabs.remove(pos);

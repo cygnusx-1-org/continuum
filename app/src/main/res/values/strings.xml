@@ -593,6 +593,7 @@
     <string name="settings_edit_tabs_summary">Add, remove, and reorder tabs</string>
     <string name="settings_add_tab">Add tab</string>
     <string name="tab_already_added">This tab has already been added</string>
+    <string name="cannot_delete_last_tab">At least one tab is required</string>
     <string name="move_to_top">Move to top</string>
     <string name="move_to_bottom">Move to bottom</string>
     <string name="content_description_drag_to_reorder">Drag to reorder</string>

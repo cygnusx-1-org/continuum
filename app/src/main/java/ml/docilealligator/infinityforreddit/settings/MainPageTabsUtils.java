@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -159,6 +160,17 @@ public class MainPageTabsUtils {
     public static List<MainPageTabInput> merge(List<MainPageTabInput> order,
                                                Map<Integer, List<MainPageTabInput>> liveBySource,
                                                Set<Integer> enabled) {
+        // Precompute each loaded source's keys once so membership checks below are O(1) rather than
+        // a linear scan of the live list per saved entry.
+        Map<Integer, Set<String>> liveKeys = new HashMap<>();
+        for (Map.Entry<Integer, List<MainPageTabInput>> entry : liveBySource.entrySet()) {
+            Set<String> keys = new HashSet<>();
+            for (MainPageTabInput item : entry.getValue()) {
+                keys.add(userKey(item.postType, item.name));
+            }
+            liveKeys.put(entry.getKey(), keys);
+        }
+
         List<MainPageTabInput> out = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         for (MainPageTabInput e : order) {
@@ -168,13 +180,13 @@ public class MainPageTabsUtils {
                     out.add(e);
                 }
             } else if (enabled.contains(e.source)) {
-                List<MainPageTabInput> live = liveBySource.get(e.source);
-                if (live == null) {
+                Set<String> keys = liveKeys.get(e.source);
+                if (keys == null) {
                     // Enabled but not loaded yet — keep the saved entry (its name/label are stored).
                     if (seen.add(key)) {
                         out.add(e);
                     }
-                } else if (containsKey(live, key) && seen.add(key)) {
+                } else if (keys.contains(key) && seen.add(key)) {
                     out.add(e);
                 }
             }
@@ -191,16 +203,10 @@ public class MainPageTabsUtils {
                 }
             }
         }
-        return out;
-    }
-
-    private static boolean containsKey(List<MainPageTabInput> list, String key) {
-        for (MainPageTabInput item : list) {
-            if (userKey(item.postType, item.name).equals(key)) {
-                return true;
-            }
-        }
-        return false;
+        // Never resolve to zero pages — an empty list leaves MainActivity with a blank ViewPager
+        // and no way to recover. Fall back to the default tabs (can happen if the saved order held
+        // only group items and every toggle was later turned off).
+        return out.isEmpty() ? defaultTabs() : out;
     }
 
     public static List<MainPageTabInput> fromMultiReddits(List<MultiReddit> multiReddits, int source) {
@@ -302,11 +308,16 @@ public class MainPageTabsUtils {
         return path;
     }
 
-    /** True if a user tab with the same type (and, for name-based types, the same name) already exists. */
+    /**
+     * True if a tab with the same type (and, for name-based types, the same name) already exists —
+     * whether user-added or pulled in by a "Show ..." toggle. Toggle-sourced entries must count:
+     * adding e.g. a subscribed subreddit that the "Show Subscribed Subreddits" toggle already
+     * surfaced would otherwise create a duplicate that merge() silently collapses on save.
+     */
     public static boolean isDuplicate(List<MainPageTabInput> tabs, int postType, String name) {
         String key = userKey(postType, name);
         for (MainPageTabInput tab : tabs) {
-            if (!tab.isGroup() && userKey(tab.postType, tab.name).equals(key)) {
+            if (userKey(tab.postType, tab.name).equals(key)) {
                 return true;
             }
         }
@@ -315,6 +326,18 @@ public class MainPageTabsUtils {
 
     /** Human-readable label for a list row (also the main page tab title). */
     public static String getTabLabel(Context context, MainPageTabInput tab) {
+        if (tab.postType == SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT) {
+            // Multireddit tabs are prefixed with "/m/" to distinguish them from subreddits.
+            String label;
+            if (tab.displayName != null && !tab.displayName.isEmpty()) {
+                label = tab.displayName;
+            } else if (tab.name != null && !tab.name.isEmpty()) {
+                label = tab.name;
+            } else {
+                return context.getString(R.string.multi_reddit);
+            }
+            return label.startsWith("/m/") ? label : "/m/" + label;
+        }
         if (tab.displayName != null && !tab.displayName.isEmpty()) {
             return tab.displayName;
         }
@@ -337,8 +360,6 @@ public class MainPageTabsUtils {
                 return context.getString(R.string.saved_comments);
             case SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT:
                 return tab.name != null && !tab.name.isEmpty() ? tab.name : context.getString(R.string.subreddit);
-            case SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT:
-                return tab.name != null && !tab.name.isEmpty() ? tab.name : context.getString(R.string.multi_reddit);
             case SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_USER:
                 return tab.name != null && !tab.name.isEmpty() ? tab.name : context.getString(R.string.user);
             default:

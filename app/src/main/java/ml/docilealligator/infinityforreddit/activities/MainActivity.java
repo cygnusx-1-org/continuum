@@ -2348,12 +2348,20 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return false;
         }
 
+        // Fragments are stored in the FragmentManager under "f" + getItemId(position). Our item ids
+        // are content-based (not the position), so lookups must go through getItemId — never "f" +
+        // position, which is only correct while the id/position mapping is the identity.
         @Nullable
-        private PostFragment getCurrentFragment() {
-            if (fragmentManager == null) {
+        private Fragment rawFragmentAtPosition(int position) {
+            if (fragmentManager == null || position < 0 || position >= getItemCount()) {
                 return null;
             }
-            Fragment fragment = fragmentManager.findFragmentByTag("f" + binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
+            return fragmentManager.findFragmentByTag("f" + getItemId(position));
+        }
+
+        @Nullable
+        private PostFragment getCurrentFragment() {
+            Fragment fragment = rawFragmentAtPosition(binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
             if (fragment instanceof PostFragment) {
                 return (PostFragment) fragment;
             }
@@ -2362,18 +2370,12 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         @Nullable
         private Fragment getCurrentRawFragment() {
-            if (fragmentManager == null) {
-                return null;
-            }
-            return fragmentManager.findFragmentByTag("f" + binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
+            return rawFragmentAtPosition(binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
         }
 
         @Nullable
         private PostFragment getFragmentAtPosition(int position) {
-            if (fragmentManager == null) {
-                return null;
-            }
-            Fragment fragment = fragmentManager.findFragmentByTag("f" + position);
+            Fragment fragment = rawFragmentAtPosition(position);
             if (fragment instanceof PostFragment) {
                 return (PostFragment) fragment;
             }
@@ -2382,10 +2384,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         @Nullable
         private Fragment getRawFragmentAtPosition(int position) {
-            if (fragmentManager == null) {
-                return null;
-            }
-            return fragmentManager.findFragmentByTag("f" + position);
+            return rawFragmentAtPosition(position);
         }
 
         boolean handleKeyDown(int keyCode) {
@@ -2427,7 +2426,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         void changeNSFW(boolean nsfw) {
             for (int i = 0; i < getItemCount(); i++) {
-                Fragment fragment = fragmentManager.findFragmentByTag("f" + i);
+                Fragment fragment = rawFragmentAtPosition(i);
                 if (fragment instanceof PostFragment) {
                     ((PostFragment) fragment).changeNSFW(nsfw);
                 }
