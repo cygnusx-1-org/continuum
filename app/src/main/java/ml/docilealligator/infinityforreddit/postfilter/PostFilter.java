@@ -8,7 +8,10 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -96,6 +99,16 @@ public class PostFilter implements Parcelable {
      */
     public static volatile boolean subredditFilterSuffixMatching = false;
     public static final int SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH = 5;
+
+    /**
+     * Lower-cased subreddit names that prefix/suffix matching must never hide: the current
+     * account's subscribed subreddits plus the {@code u_username} profile subreddits of the users
+     * it follows. Refreshed from the database whenever a feed loads its post filter (so an
+     * "Exclude subreddits" entry like "story" cannot accidentally hide r/history when you are
+     * subscribed to it). Exact-name entries are still honoured. Reassigned wholesale, never mutated
+     * in place, so readers on the paging thread always see a complete set.
+     */
+    public static volatile Set<String> neverHideSubredditsLowerCase = Collections.emptySet();
 
     public PostFilter() {
 
@@ -273,11 +286,19 @@ public class PostFilter implements Parcelable {
                     continue;
                 }
                 boolean matched = false;
+                boolean fuzzyMatch = false;
                 if (subredditFilterPrefixMatching && filter.length() >= SUBREDDIT_FILTER_PREFIX_MIN_LENGTH) {
                     matched = subredditName.regionMatches(true, 0, filter, 0, filter.length());
+                    fuzzyMatch = matched;
                 }
                 if (!matched && subredditFilterSuffixMatching && filter.length() >= SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH) {
                     matched = subredditName.regionMatches(true, subredditName.length() - filter.length(), filter, 0, filter.length());
+                    fuzzyMatch = matched;
+                }
+                // Never let prefix/suffix matching hide a subreddit the user is subscribed to;
+                // an exact-name entry below is still honoured as a deliberate block.
+                if (fuzzyMatch && neverHideSubredditsLowerCase.contains(subredditName.toLowerCase(Locale.ENGLISH))) {
+                    matched = false;
                 }
                 if (!matched) {
                     matched = subredditName.equalsIgnoreCase(filter);
