@@ -29,6 +29,7 @@ public class APIUtils {
     public static final String IMGUR_API_BASE_URI = "https://api.imgur.com/3/";
     public static final String STREAMABLE_API_BASE_URI = "https://api.streamable.com";
     public static final String SERVER_API_BASE_URI = "http://127.0.0.1";
+    public static final String ARCTIC_SHIFT_API_BASE_URI = "https://arctic-shift.photon-reddit.com/";
 
     public static final String CLIENT_ID_KEY = "client_id";
     public static final String CLIENT_SECRET_KEY = "client_secret";

@@ -57,6 +57,7 @@ import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDeta
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.MorePostsInfoFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
@@ -568,6 +569,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             SaveThing.unsaveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
                 @Override
                 public void success() {
+                    LocalSaved.onUnsaved(ViewPostDetailActivity.this, accountName, comment.getFullName());
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         fragment.saveComment(position, false);
@@ -589,6 +591,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             SaveThing.saveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
                 @Override
                 public void success() {
+                    LocalSaved.onSaved(ViewPostDetailActivity.this, mOauthRetrofit, accessToken,
+                            accountName, comment.getFullName());
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         fragment.saveComment(position, true);

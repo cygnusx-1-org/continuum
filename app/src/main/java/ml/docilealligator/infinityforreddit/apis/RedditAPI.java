@@ -81,6 +81,14 @@ public interface RedditAPI {
     @GET("/api/info.json?raw_json=1")
     Call<String> getInfoOauth(@Query("id") String id, @HeaderMap Map<String, String> headers);
 
+    // Mixed post+comment listing (no type filter) used by Local Saved reconcile to collect the
+    // fullnames currently present in the user's /saved listing.
+    @GET("user/{username}/{where}.json?raw_json=1&limit=100")
+    Call<String> getSavedThingsForReconcileOauth(@HeaderMap Map<String, String> headers,
+                                                 @Path("username") String username,
+                                                 @Path("where") String where,
+                                                 @Query("after") String after);
+
     @GET("subreddits/search.json?raw_json=1&limit=100")
     Call<String> searchSubreddits(@Query("q") String subredditName, @Query("after") String after,
                                   @Query("sort") SortType.Type sort, @Query("include_over_18") int nsfw,

@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData
 import ml.docilealligator.infinityforreddit.thing.SortType
 import ml.docilealligator.infinityforreddit.thing.deleteThing
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved
 import ml.docilealligator.infinityforreddit.thing.saveThing
 import ml.docilealligator.infinityforreddit.thing.unsaveThing
 import ml.docilealligator.infinityforreddit.utils.APIUtils
@@ -1322,6 +1323,9 @@ class ViewPostDetailFragmentViewModelNew(
                             if (unsaveThing(
                                 oauthRetrofit, accessToken, post.fullName
                             )) {
+                                LocalSaved.onUnsaved(
+                                    redditDataRoomDatabase, accountName, post.fullName
+                                )
                                 _dataState.value = _dataState.value.copy(
                                     post = Post(post).apply {
                                         isSaved = !isSaved
@@ -1346,6 +1350,10 @@ class ViewPostDetailFragmentViewModelNew(
                             if (saveThing(
                                     oauthRetrofit, accessToken, post.fullName
                             )) {
+                                LocalSaved.onSaved(
+                                    redditDataRoomDatabase, oauthRetrofit, accessToken,
+                                    accountName, post.fullName
+                                )
                                 _dataState.value = _dataState.value.copy(
                                     post = Post(post).apply {
                                         isSaved = !isSaved

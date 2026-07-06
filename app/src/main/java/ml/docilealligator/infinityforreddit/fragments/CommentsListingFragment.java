@@ -63,6 +63,7 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
     public static final String EXTRA_USERNAME = "EN";
     public static final String EXTRA_ARE_SAVED_COMMENTS = "EISC";
+    public static final String EXTRA_ARE_LOCAL_SAVED_COMMENTS = "EIALSC";
 
     CommentViewModel mCommentViewModel;
     @Inject
@@ -303,14 +304,17 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
             CommentViewModel.Factory factory;
 
+            boolean areLocalSavedComments = arguments.getBoolean(EXTRA_ARE_LOCAL_SAVED_COMMENTS);
             if (mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 factory = new CommentViewModel.Factory(mExecutor, mActivity.mHandler, mRetrofit,
                         null, mActivity.accountName, username, sortType,
-                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS));
+                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS), areLocalSavedComments,
+                        mRedditDataRoomDatabase);
             } else {
                 factory = new CommentViewModel.Factory(mExecutor, mActivity.mHandler, mOauthRetrofit,
                         mActivity.accessToken, mActivity.accountName, username, sortType,
-                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS));
+                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS), areLocalSavedComments,
+                        mRedditDataRoomDatabase);
             }
 
             mCommentViewModel = new ViewModelProvider(this, factory).get(CommentViewModel.class);

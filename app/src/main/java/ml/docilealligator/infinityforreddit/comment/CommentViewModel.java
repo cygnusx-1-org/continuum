@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.NetworkState;
+import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SingleLiveEvent;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.moderation.CommentModerationEvent;
@@ -38,12 +39,13 @@ public class CommentViewModel extends ViewModel {
     public final SingleLiveEvent<CommentModerationEvent> commentModerationEventLiveData = new SingleLiveEvent<>();
 
     public CommentViewModel(Executor executor, Handler handler, Retrofit retrofit, @Nullable String accessToken,
-                            @NonNull String accountName, String username, SortType sortType, boolean areSavedComments) {
+                            @NonNull String accountName, String username, SortType sortType, boolean areSavedComments,
+                            boolean areLocalSavedComments, RedditDataRoomDatabase redditDataRoomDatabase) {
         this.retrofit = retrofit;
         this.accessToken = accessToken;
         this.accountName = accountName;
         commentDataSourceFactory = new CommentDataSourceFactory(executor, handler, retrofit, accessToken,
-                accountName, username, sortType, areSavedComments);
+                accountName, username, sortType, areSavedComments, areLocalSavedComments, redditDataRoomDatabase);
 
         initialLoadingState = Transformations.switchMap(commentDataSourceFactory.getCommentDataSourceLiveData(),
                 CommentDataSource::getInitialLoadStateLiveData);
@@ -247,9 +249,12 @@ public class CommentViewModel extends ViewModel {
         private final String username;
         private final SortType sortType;
         private final boolean areSavedComments;
+        private final boolean areLocalSavedComments;
+        private final RedditDataRoomDatabase redditDataRoomDatabase;
 
         public Factory(Executor executor, Handler handler, Retrofit retrofit, @Nullable String accessToken,
-                       @NonNull String accountName, String username, SortType sortType, boolean areSavedComments) {
+                       @NonNull String accountName, String username, SortType sortType, boolean areSavedComments,
+                       boolean areLocalSavedComments, RedditDataRoomDatabase redditDataRoomDatabase) {
             this.executor = executor;
             this.handler = handler;
             this.retrofit = retrofit;
@@ -258,13 +263,15 @@ public class CommentViewModel extends ViewModel {
             this.username = username;
             this.sortType = sortType;
             this.areSavedComments = areSavedComments;
+            this.areLocalSavedComments = areLocalSavedComments;
+            this.redditDataRoomDatabase = redditDataRoomDatabase;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             return (T) new CommentViewModel(executor, handler, retrofit, accessToken, accountName, username,
-                    sortType, areSavedComments);
+                    sortType, areSavedComments, areLocalSavedComments, redditDataRoomDatabase);
         }
     }
 }

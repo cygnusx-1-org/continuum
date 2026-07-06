@@ -602,6 +602,9 @@ public abstract class PostFragmentBase extends Fragment {
             Post post = posts.get(event.positionInList);
             if (post != null && post.getFullName().equals(event.post.getFullName())) {
                 post.setTitle(event.post.getTitle());
+                post.setSelfText(event.post.getSelfText());
+                post.setSelfTextPlain(event.post.getSelfTextPlain());
+                post.setSelfTextPlainTrimmed(event.post.getSelfTextPlainTrimmed());
                 post.setVoteType(event.post.getVoteType());
                 post.setScore(event.post.getScore());
                 post.setNComments(event.post.getNComments());

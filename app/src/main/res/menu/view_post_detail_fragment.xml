@@ -117,4 +117,11 @@
         android:title="@string/translate"
         app:showAsAction="never"
         android:visible="false" />
+
+    <item
+        android:id="@+id/action_recover_post_view_post_detail_fragment"
+        android:orderInCategory="18"
+        android:title="@string/recover_post"
+        app:showAsAction="never"
+        android:visible="false" />
 </menu>

@@ -36,6 +36,7 @@ import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRounded
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostOptionsBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
+import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.HidePost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
@@ -71,6 +72,9 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
+    @Inject
+    @Named("arctic_shift")
+    Retrofit mArcticShiftRetrofit;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -387,6 +391,28 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                     }
                 }
             });
+
+            boolean canRecoverPost = mPost.isRemoved() || mPost.isAuthorDeleted()
+                    || "[removed]".equals(mPost.getSelfText()) || "[deleted]".equals(mPost.getSelfText());
+            if (canRecoverPost) {
+                binding.recoverPostTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                binding.recoverPostTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    Toast.makeText(mBaseActivity, R.string.fetching_removed_post, Toast.LENGTH_SHORT).show();
+                    FetchRemovedPost.fetchRemovedPost(mArcticShiftRetrofit, mPost, new FetchRemovedPost.FetchRemovedPostListener() {
+                        @Override
+                        public void fetchSuccess(Post post) {
+                            EventBus.getDefault().post(new PostUpdateEventToPostList(post, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
+                            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                        }
+
+                        @Override
+                        public void fetchFailed() {
+                            Toast.makeText(mBaseActivity, R.string.show_removed_post_failed, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    dismiss();
+                });
+            }
 
             if (mPost.isApproved()) {
                 binding.statusTextViewPostOptionsBottomSheetFragment.setText(getString(R.string.approved_status, mPost.getApprovedBy()));

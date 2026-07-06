@@ -292,6 +292,13 @@ abstract class NetworkModule {
     }
 
     @Provides
+    @Named("arctic_shift")
+    @Singleton
+    static Retrofit provideArcticShiftRetrofit(@Named("base") Retrofit retrofit) {
+        return retrofit.newBuilder().baseUrl(APIUtils.ARCTIC_SHIFT_API_BASE_URI).build();
+    }
+
+    @Provides
     @Named("online_custom_themes")
     @Singleton
     static Retrofit provideOnlineCustomThemesRetrofit(@Named("base") Retrofit retrofit, @Named("server") OkHttpClient httpClient) {

@@ -7,10 +7,13 @@ import androidx.annotation.WorkerThread;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.PageKeyedDataSource;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.NetworkState;
+import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -35,6 +38,8 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     private final String username;
     private final SortType sortType;
     private final boolean areSavedComments;
+    private final boolean areLocalSavedComments;
+    private final RedditDataRoomDatabase redditDataRoomDatabase;
 
     private final MutableLiveData<NetworkState> paginationNetworkStateLiveData;
     private final MutableLiveData<NetworkState> initialLoadStateLiveData;
@@ -45,7 +50,8 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
 
     CommentDataSource(Executor executor, Handler handler, Retrofit retrofit, @Nullable String accessToken,
                       @NonNull String accountName, String username, SortType sortType,
-                      boolean areSavedComments) {
+                      boolean areSavedComments, boolean areLocalSavedComments,
+                      RedditDataRoomDatabase redditDataRoomDatabase) {
         this.executor = executor;
         this.handler = handler;
         this.retrofit = retrofit;
@@ -54,6 +60,8 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
         this.username = username;
         this.sortType = sortType;
         this.areSavedComments = areSavedComments;
+        this.areLocalSavedComments = areLocalSavedComments;
+        this.redditDataRoomDatabase = redditDataRoomDatabase;
         paginationNetworkStateLiveData = new MutableLiveData<>();
         initialLoadStateLiveData = new MutableLiveData<>();
         hasPostLiveData = new MutableLiveData<>();
@@ -78,6 +86,23 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     @Override
     public void loadInitial(@NonNull LoadInitialParams<String> params, @NonNull LoadInitialCallback<String, Comment> callback) {
         initialLoadStateLiveData.postValue(NetworkState.LOADING);
+
+        if (areLocalSavedComments) {
+            executor.execute(() -> {
+                try {
+                    LocalSavedResult result = fetchLocalSavedComments(null);
+                    handler.post(() -> {
+                        hasPostLiveData.postValue(!result.comments.isEmpty());
+                        callback.onResult(result.comments, null, result.nextKey);
+                        initialLoadStateLiveData.postValue(NetworkState.LOADED);
+                    });
+                } catch (Exception e) {
+                    handler.post(() -> initialLoadStateLiveData.postValue(
+                            new NetworkState(NetworkState.Status.FAILED, "Error parsing data")));
+                }
+            });
+            return;
+        }
 
         RedditAPI api = retrofit.create(RedditAPI.class);
         Call<String> commentsCall;
@@ -150,6 +175,22 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
 
         paginationNetworkStateLiveData.postValue(NetworkState.LOADING);
 
+        if (areLocalSavedComments) {
+            executor.execute(() -> {
+                try {
+                    LocalSavedResult result = fetchLocalSavedComments(params.key);
+                    handler.post(() -> {
+                        callback.onResult(result.comments, result.nextKey);
+                        paginationNetworkStateLiveData.postValue(NetworkState.LOADED);
+                    });
+                } catch (Exception e) {
+                    handler.post(() -> paginationNetworkStateLiveData.postValue(
+                            new NetworkState(NetworkState.Status.FAILED, "Error fetching data")));
+                }
+            });
+            return;
+        }
+
         RedditAPI api = retrofit.create(RedditAPI.class);
         Call<String> commentsCall;
         if (areSavedComments) {
@@ -198,6 +239,62 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                 paginationNetworkStateLiveData.postValue(new NetworkState(NetworkState.Status.FAILED, "Error fetching data"));
             }
         });
+    }
+
+    /**
+     * Loads a page of promoted local-saved comments (t1_) from Room and hydrates them via
+     * /api/info. Runs on {@code executor}. Throws on any failure so the caller can post a
+     * FAILED state without mutating anything.
+     */
+    @WorkerThread
+    private LocalSavedResult fetchLocalSavedComments(String beforeKey) throws Exception {
+        Long before = beforeKey != null ? Long.parseLong(beforeKey) : null;
+        List<LocalSavedThing> promoted =
+                redditDataRoomDatabase.localSavedThingDao().getPromotedCommentsSync(accountName, before);
+        ArrayList<Comment> comments = new ArrayList<>();
+        if (promoted.isEmpty()) {
+            return new LocalSavedResult(comments, null);
+        }
+
+        StringBuilder ids = new StringBuilder();
+        long lastItem = 0;
+        for (LocalSavedThing t : promoted) {
+            ids.append(t.getFullName()).append(",");
+            lastItem = t.getTime();
+        }
+        ids.deleteCharAt(ids.length() - 1);
+
+        Response<String> response = retrofit.create(RedditAPI.class)
+                .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken)).execute();
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new java.io.IOException("Response failed");
+        }
+
+        JSONObject data = new JSONObject(response.body()).getJSONObject(JSONUtils.DATA_KEY);
+        JSONArray children = data.getJSONArray(JSONUtils.CHILDREN_KEY);
+        for (int i = 0; i < children.length(); i++) {
+            try {
+                JSONObject commentJSON = children.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
+                Comment comment = ParseComment.parseSingleComment(commentJSON, 0);
+                comment.setSaved(true);
+                comments.add(comment);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        // Page by DB rows so removed/un-hydratable items don't stop pagination early.
+        String nextKey = promoted.size() < 25 ? null : Long.toString(lastItem);
+        return new LocalSavedResult(comments, nextKey);
+    }
+
+    private static class LocalSavedResult {
+        final ArrayList<Comment> comments;
+        final String nextKey;
+
+        LocalSavedResult(ArrayList<Comment> comments, String nextKey) {
+            this.comments = comments;
+            this.nextKey = nextKey;
+        }
     }
 
     @WorkerThread

@@ -93,6 +93,7 @@ import ml.docilealligator.infinityforreddit.extensions.ConcatAdapterKt;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent;
+import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -127,6 +128,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     @Inject
     @Named("redgifs")
     Retrofit mRedgifsRetrofit;
+    @Inject
+    @Named("arctic_shift")
+    Retrofit mArcticShiftRetrofit;
     @Inject
     Provider<StreamableAPI> mStreamableApiProvider;
     @Inject
@@ -795,6 +799,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             MenuItem translateItem = mMenu.findItem(R.id.action_translate_view_post_detail_fragment);
             translateItem.setVisible(true);
             Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, translateItem, mActivity.getString(R.string.translate));
+
+            boolean canRecoverPost = mPost.isRemoved() || mPost.isAuthorDeleted()
+                    || "[removed]".equals(mPost.getSelfText()) || "[deleted]".equals(mPost.getSelfText());
+            MenuItem recoverPostItem = mMenu.findItem(R.id.action_recover_post_view_post_detail_fragment);
+            recoverPostItem.setVisible(canRecoverPost);
+            Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, recoverPostItem, mActivity.getString(R.string.recover_post));
         }
     }
 
@@ -1067,6 +1077,23 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 }
                 Utils.translateText(mActivity, textToTranslate.toString());
             }
+            return true;
+        } else if (itemId == R.id.action_recover_post_view_post_detail_fragment) {
+            Toast.makeText(mActivity, R.string.fetching_removed_post, Toast.LENGTH_SHORT).show();
+            FetchRemovedPost.fetchRemovedPost(mArcticShiftRetrofit, mPost, new FetchRemovedPost.FetchRemovedPostListener() {
+                @Override
+                public void fetchSuccess(Post post) {
+                    mPost = post;
+                    mPostAdapter.updatePost(post);
+                    setupMenu();
+                    EventBus.getDefault().post(new PostUpdateEventToPostList(post, postListPosition));
+                }
+
+                @Override
+                public void fetchFailed() {
+                    Toast.makeText(mActivity, R.string.show_removed_post_failed, Toast.LENGTH_SHORT).show();
+                }
+            });
             return true;
         }
         return false;

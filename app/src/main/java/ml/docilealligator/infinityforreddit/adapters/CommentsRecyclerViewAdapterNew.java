@@ -59,6 +59,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemCommentBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemCommentFullyCollapsedBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemLoadMoreCommentsPlaceholderBinding;
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
@@ -1280,6 +1281,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                             @Override
                             public void success() {
                                 comment.setSaved(false);
+                                LocalSaved.onUnsaved(mActivity, mAccountName, comment.getFullName());
                                 if (getBindingAdapterPosition() == position) {
                                     saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                 }
@@ -1301,6 +1303,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                             @Override
                             public void success() {
                                 comment.setSaved(true);
+                                LocalSaved.onSaved(mActivity, mOauthRetrofit, mAccessToken,
+                                        mAccountName, comment.getFullName());
                                 if (getBindingAdapterPosition() == position) {
                                     saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                 }

@@ -34,7 +34,9 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityAccountSavedThin
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
+import ml.docilealligator.infinityforreddit.fragments.HistoryPostFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
@@ -138,6 +140,9 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
         fragmentManager = getSupportFragmentManager();
 
         initializeViewPager();
+
+        // Surface any saves Reddit has since dropped from /saved into the Local Saved tabs.
+        LocalSaved.reconcile(mRedditDataRoomDatabase, mOauthRetrofit, accessToken, accountName);
     }
 
     @Override
@@ -186,6 +191,12 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
                     break;
                 case 1:
                     Utils.setTitleWithCustomFontToTab(typeface, tab, getString(R.string.comments));
+                    break;
+                case 2:
+                    Utils.setTitleWithCustomFontToTab(typeface, tab, getString(R.string.local_posts));
+                    break;
+                case 3:
+                    Utils.setTitleWithCustomFontToTab(typeface, tab, getString(R.string.local_comments));
                     break;
             }
         }).attach();
@@ -296,6 +307,19 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
                 bundle.putBoolean(PostFragment.EXTRA_DISABLE_READ_POSTS, true);
                 fragment.setArguments(bundle);
                 return fragment;
+            } else if (position == 2) {
+                HistoryPostFragment fragment = new HistoryPostFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt(HistoryPostFragment.EXTRA_READ_POST_TYPE, ReadPostType.LOCAL_SAVED_POSTS);
+                fragment.setArguments(bundle);
+                return fragment;
+            } else if (position == 3) {
+                CommentsListingFragment fragment = new CommentsListingFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString(CommentsListingFragment.EXTRA_USERNAME, accountName);
+                bundle.putBoolean(CommentsListingFragment.EXTRA_ARE_LOCAL_SAVED_COMMENTS, true);
+                fragment.setArguments(bundle);
+                return fragment;
             }
             CommentsListingFragment fragment = new CommentsListingFragment();
             Bundle bundle = new Bundle();
@@ -358,7 +382,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
 
         @Override
         public int getItemCount() {
-            return 2;
+            return 4;
         }
     }
 }

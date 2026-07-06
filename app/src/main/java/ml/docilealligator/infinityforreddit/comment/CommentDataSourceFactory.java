@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import java.util.concurrent.Executor;
+import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import retrofit2.Retrofit;
 
@@ -18,13 +19,16 @@ class CommentDataSourceFactory extends DataSource.Factory {
     private final String username;
     private SortType sortType;
     private final boolean areSavedComments;
+    private final boolean areLocalSavedComments;
+    private final RedditDataRoomDatabase redditDataRoomDatabase;
 
     private CommentDataSource commentDataSource;
     private final MutableLiveData<CommentDataSource> commentDataSourceLiveData;
 
     CommentDataSourceFactory(Executor executor, Handler handler, Retrofit retrofit, @Nullable String accessToken, @NonNull String accountName,
                              String username, SortType sortType,
-                             boolean areSavedComments) {
+                             boolean areSavedComments, boolean areLocalSavedComments,
+                             RedditDataRoomDatabase redditDataRoomDatabase) {
         this.executor = executor;
         this.handler = handler;
         this.retrofit = retrofit;
@@ -33,6 +37,8 @@ class CommentDataSourceFactory extends DataSource.Factory {
         this.username = username;
         this.sortType = sortType;
         this.areSavedComments = areSavedComments;
+        this.areLocalSavedComments = areLocalSavedComments;
+        this.redditDataRoomDatabase = redditDataRoomDatabase;
         commentDataSourceLiveData = new MutableLiveData<>();
     }
 
@@ -40,7 +46,7 @@ class CommentDataSourceFactory extends DataSource.Factory {
     @Override
     public DataSource create() {
         commentDataSource = new CommentDataSource(executor, handler, retrofit, accessToken, accountName, username,
-                sortType, areSavedComments);
+                sortType, areSavedComments, areLocalSavedComments, redditDataRoomDatabase);
         commentDataSourceLiveData.postValue(commentDataSource);
         return commentDataSource;
     }

@@ -13,9 +13,11 @@ import androidx.paging.Pager;
 import androidx.paging.PagingConfig;
 import androidx.paging.PagingData;
 import androidx.paging.PagingLiveData;
+import androidx.paging.PagingSource;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
+import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import retrofit2.Retrofit;
 
 public class HistoryPostViewModel extends ViewModel {
@@ -55,7 +57,11 @@ public class HistoryPostViewModel extends ViewModel {
         return posts;
     }
 
-    public HistoryPostPagingSource returnPagingSource() {
+    public PagingSource<String, Post> returnPagingSource() {
+        if (readPostType == ReadPostType.LOCAL_SAVED_POSTS) {
+            return new LocalSavedPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken,
+                    accountName, postFilter);
+        }
         return new HistoryPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken, accountName,
                 sharedPreferences, accountName, readPostType, postFilter);
     }

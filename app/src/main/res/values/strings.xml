@@ -271,6 +271,8 @@
     <string name="users_multireddits">Users MultiReddits</string>
     <string name="posts">Posts</string>
     <string name="comments">Comments</string>
+    <string name="local_posts">Local Posts</string>
+    <string name="local_comments">Local Comments</string>
     <string name="about">About</string>
 
     <string name="bottom_sheet_post_text">Text</string>
@@ -1845,6 +1847,9 @@
     <string name="post_removed_status">This post is removed</string>
     <string name="post_spam_status">This post is removed as spam</string>
     <string name="comment_removed_status">This comment is removed</string>
+    <string name="recover_post">Recover post</string>
+    <string name="fetching_removed_post">Fetching removed post</string>
+    <string name="show_removed_post_failed">Could not find the removed post</string>
     <string name="comment_spam_status">This comment is removed as spam</string>
 
     <string name="copying_multi_reddit">Copying</string>

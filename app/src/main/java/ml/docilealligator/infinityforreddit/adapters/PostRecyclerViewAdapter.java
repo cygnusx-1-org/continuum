@@ -114,6 +114,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostVideoTypeAutopla
 import ml.docilealligator.infinityforreddit.databinding.ItemPostWithPreviewBinding;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -2728,6 +2729,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                             @Override
                                             public void success() {
                                                 post.setSaved(false);
+                                                LocalSaved.onUnsaved(mRedditDataRoomDatabase, mExecutor,
+                                                        mAccountName, post.getFullName());
                                                 if (getBindingAdapterPosition() == position) {
                                                     saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                                 }
@@ -2761,6 +2764,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                             @Override
                                             public void success() {
                                                 post.setSaved(true);
+                                                LocalSaved.onSaved(mRedditDataRoomDatabase, mExecutor,
+                                                        mOauthRetrofit, mAccessToken, mAccountName, post.getFullName());
                                                 if (getBindingAdapterPosition() == position) {
                                                     saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                                 }

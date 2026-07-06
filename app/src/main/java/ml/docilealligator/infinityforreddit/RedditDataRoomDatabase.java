@@ -25,6 +25,8 @@ import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsageDao;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeDao;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeDaoKt;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThingDao;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubredditDao;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubredditDaoKt;
@@ -52,7 +54,8 @@ import ml.docilealligator.infinityforreddit.user.UserData;
 @Database(entities = {Account.class, SubredditData.class, SubscribedSubredditData.class, UserData.class,
         SubscribedUserData.class, MultiReddit.class, CustomTheme.class, RecentSearchQuery.class,
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
-        CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class}, version = 35, exportSchema = false)
+        CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
+        LocalSavedThing.class}, version = 36, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -67,7 +70,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25,
                         MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29,
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
-                        MIGRATION_33_34, MIGRATION_34_35)
+                        MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36)
                 .build();
     }
 
@@ -114,6 +117,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     public abstract CommentDraftDao commentDraftDao();
 
     public abstract ApiCallRecordDao apiCallRecordDao();
+
+    public abstract LocalSavedThingDao localSavedThingDao();
 
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -545,6 +550,20 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE custom_themes ADD COLUMN video_type_background_color INTEGER NOT NULL DEFAULT -3202514");
             database.execSQL("ALTER TABLE custom_themes ADD COLUMN gif_type_background_color INTEGER NOT NULL DEFAULT -4245111");
             database.execSQL("ALTER TABLE custom_themes ADD COLUMN gallery_type_background_color INTEGER NOT NULL DEFAULT -8236833");
+        }
+    };
+
+    private static final Migration MIGRATION_35_36 = new Migration(35, 36) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `local_saved` "
+                    + "(`username` TEXT NOT NULL, `full_name` TEXT NOT NULL, "
+                    + "`state` INTEGER NOT NULL, `time` INTEGER NOT NULL, "
+                    + "PRIMARY KEY(`username`, `full_name`), "
+                    + "FOREIGN KEY(`username`) REFERENCES `accounts`(`username`) "
+                    + "ON UPDATE NO ACTION ON DELETE CASCADE)");
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_local_saved_username` "
+                    + "ON `local_saved` (`username`)");
         }
     };
 }

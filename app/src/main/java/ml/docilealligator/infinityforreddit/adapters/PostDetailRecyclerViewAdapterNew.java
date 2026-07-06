@@ -106,6 +106,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostDetailVideoAndGi
 import ml.docilealligator.infinityforreddit.databinding.ItemPostDetailVideoAutoplayBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostDetailVideoAutoplayLegacyControllerBinding;
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
@@ -1828,6 +1829,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                     @Override
                                     public void success() {
                                         mPost.setSaved(false);
+                                        LocalSaved.onUnsaved(mRedditDataRoomDatabase, mExecutor,
+                                                mAccountName, mPost.getFullName());
                                         PostDetailBaseViewHolder.this.saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                         Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
                                         mPostDetailRecyclerViewAdapterCallback.updatePost(mPost);
@@ -1857,6 +1860,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                     @Override
                                     public void success() {
                                         mPost.setSaved(true);
+                                        LocalSaved.onSaved(mRedditDataRoomDatabase, mExecutor,
+                                                mOauthRetrofit, mAccessToken, mAccountName, mPost.getFullName());
                                         PostDetailBaseViewHolder.this.saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                         Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
                                         mPostDetailRecyclerViewAdapterCallback.updatePost(mPost);

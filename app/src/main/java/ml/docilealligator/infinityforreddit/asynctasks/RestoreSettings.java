@@ -27,6 +27,7 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
@@ -154,6 +155,7 @@ public class RestoreSettings {
                                 File commentFilterUsageFile = new File(f.getAbsolutePath() + "/comment_filter_usage.json");
                                 File accountsFile = new File(f.getAbsolutePath() + "/accounts.json");
                                 File readPostsFile = new File(f.getAbsolutePath() + "/read_posts.json");
+                                File localSavedFile = new File(f.getAbsolutePath() + "/local_saved.json");
 
                                 if (anonymousSubscribedSubredditsFile.exists()) {
                                     List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
@@ -231,6 +233,14 @@ public class RestoreSettings {
                                     List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
                                     if (readPosts != null) {
                                         redditDataRoomDatabase.readPostDao().insertAll(readPosts);
+                                    }
+                                }
+
+                                // Restore local_saved after accounts so the FK on username is satisfied.
+                                if (localSavedFile.exists()) {
+                                    List<LocalSavedThing> localSaved = getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType());
+                                    if (localSaved != null) {
+                                        redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
                                     }
                                 }
                             }
