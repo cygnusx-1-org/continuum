@@ -791,7 +791,7 @@
     <string name="settings_subreddit_filter_prefix_matching">Enable subreddit filter prefix matching</string>
     <string name="settings_subreddit_filter_prefix_matching_summary">When on, an \"Exclude subreddits\" entry of at least six characters also hides every subreddit whose name starts with it. For example, excluding \"android\" also hides r/androiddev, and \"pokemongo\" also hides r/pokemongoraids.</string>
     <string name="settings_subreddit_filter_suffix_matching">Enable subreddit filter suffix matching</string>
-    <string name="settings_subreddit_filter_suffix_matching_summary">When on, an \"Exclude subreddits\" entry of at least five characters also hides every subreddit whose name ends with it. For example, excluding \"memes\" also hides r/couplememes and r/dankmemes.</string>
+    <string name="settings_subreddit_filter_suffix_matching_summary">When on, an \"Exclude subreddits\" entry of at least five characters also hides every subreddit whose name ends with it. For example, excluding \"memes\" hides r/memes plus every subreddit ending in \"memes\", such as r/dankmemes and r/couplememes. Watch out for unintended matches: excluding \"story\" also hides r/history.</string>
     <string name="settings_sort_type_summary">Default sort type and time range for subreddits, users, and comments</string>
     <string name="settings_download_location_summary">Choose folders for downloaded images, GIFs, videos, and NSFW media</string>
     <string name="settings_miscellaneous_summary">Link handling, browser, search history, language, and fold support</string>
