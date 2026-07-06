@@ -30,6 +30,7 @@ import ml.docilealligator.infinityforreddit.postfilter.DeletePostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterWithUsage;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterWithUsageViewModel;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class PostFilterPreferenceActivity extends BaseActivity {
@@ -84,10 +85,17 @@ public class PostFilterPreferenceActivity extends BaseActivity {
                             allInsets.right,
                             BaseActivity.IGNORE_MARGIN);
 
-                    binding.recyclerViewPostFilterPreferenceActivity.setPadding(
+                    binding.contentLinearLayoutPostFilterPreferenceActivity.setPadding(
                             allInsets.left,
                             0,
                             allInsets.right,
+                            0
+                    );
+
+                    binding.recyclerViewPostFilterPreferenceActivity.setPadding(
+                            0,
+                            0,
+                            0,
                             allInsets.bottom
                     );
 
@@ -140,6 +148,24 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         });
 
         binding.recyclerViewPostFilterPreferenceActivity.setAdapter(adapter);
+
+        binding.subredditFilterPrefixMatchingSwitchPostFilterPreferenceActivity.setChecked(
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_PREFIX_MATCHING, false));
+        binding.subredditFilterPrefixMatchingSwitchPostFilterPreferenceActivity.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_PREFIX_MATCHING, isChecked).apply();
+            PostFilter.subredditFilterPrefixMatching = isChecked;
+        });
+        binding.subredditFilterPrefixMatchingLinearLayoutPostFilterPreferenceActivity.setOnClickListener(view ->
+                binding.subredditFilterPrefixMatchingSwitchPostFilterPreferenceActivity.performClick());
+
+        binding.subredditFilterSuffixMatchingSwitchPostFilterPreferenceActivity.setChecked(
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_SUFFIX_MATCHING, false));
+        binding.subredditFilterSuffixMatchingSwitchPostFilterPreferenceActivity.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_SUFFIX_MATCHING, isChecked).apply();
+            PostFilter.subredditFilterSuffixMatching = isChecked;
+        });
+        binding.subredditFilterSuffixMatchingLinearLayoutPostFilterPreferenceActivity.setOnClickListener(view ->
+                binding.subredditFilterSuffixMatchingSwitchPostFilterPreferenceActivity.performClick());
 
         postFilterWithUsageViewModel = new ViewModelProvider(this,
                 new PostFilterWithUsageViewModel.Factory(redditDataRoomDatabase)).get(PostFilterWithUsageViewModel.class);
@@ -256,6 +282,10 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutPostFilterPreferenceActivity);
         applyFABTheme(binding.fabPostFilterPreferenceActivity);
         binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.subredditFilterPrefixMatchingTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getPrimaryTextColor());
+        binding.subredditFilterPrefixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getSecondaryTextColor());
+        binding.subredditFilterSuffixMatchingTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getPrimaryTextColor());
+        binding.subredditFilterSuffixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getSecondaryTextColor());
     }
 
     @Override

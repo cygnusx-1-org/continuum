@@ -79,6 +79,24 @@ public class PostFilter implements Parcelable {
     @Ignore
     public ArrayList<String> postTitleContainsRegexes = new ArrayList<>();
 
+    /**
+     * Global setting (mirrored from SharedPreferences, initialised in Infinity and updated live
+     * from the Post Filter screen). When enabled, an "Exclude subreddits" entry of at least
+     * {@link #SUBREDDIT_FILTER_PREFIX_MIN_LENGTH} characters matches any subreddit whose name
+     * starts with it (e.g. "android" hides r/androiddev). Shorter entries keep exact matching.
+     */
+    public static volatile boolean subredditFilterPrefixMatching = false;
+    public static final int SUBREDDIT_FILTER_PREFIX_MIN_LENGTH = 6;
+
+    /**
+     * Global setting (mirrored from SharedPreferences, initialised in Infinity and updated live
+     * from the Post Filter screen). When enabled, an "Exclude subreddits" entry of at least
+     * {@link #SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH} characters matches any subreddit whose name
+     * ends with it (e.g. "memes" hides r/dankmemes). Shorter entries keep exact matching.
+     */
+    public static volatile boolean subredditFilterSuffixMatching = false;
+    public static final int SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH = 5;
+
     public PostFilter() {
 
     }
@@ -248,8 +266,23 @@ public class PostFilter implements Parcelable {
         }
         if (postFilter.excludeSubreddits != null && !postFilter.excludeSubreddits.equals("")) {
             String[] subreddits = postFilter.excludeSubreddits.split(",", 0);
+            String subredditName = post.getSubredditName();
             for (String s : subreddits) {
-                if (!s.trim().equals("") && post.getSubredditName().equalsIgnoreCase(s.trim())) {
+                String filter = s.trim();
+                if (filter.isEmpty()) {
+                    continue;
+                }
+                boolean matched = false;
+                if (subredditFilterPrefixMatching && filter.length() >= SUBREDDIT_FILTER_PREFIX_MIN_LENGTH) {
+                    matched = subredditName.regionMatches(true, 0, filter, 0, filter.length());
+                }
+                if (!matched && subredditFilterSuffixMatching && filter.length() >= SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH) {
+                    matched = subredditName.regionMatches(true, subredditName.length() - filter.length(), filter, 0, filter.length());
+                }
+                if (!matched) {
+                    matched = subredditName.equalsIgnoreCase(filter);
+                }
+                if (matched) {
                     return false;
                 }
             }

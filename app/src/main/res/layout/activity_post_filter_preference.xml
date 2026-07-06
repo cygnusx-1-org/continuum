@@ -32,12 +32,105 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_post_filter_preference_activity"
+    <LinearLayout
+        android:id="@+id/content_linear_layout_post_filter_preference_activity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/subreddit_filter_prefix_matching_linear_layout_post_filter_preference_activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/subreddit_filter_prefix_matching_text_view_post_filter_preference_activity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:text="@string/settings_subreddit_filter_prefix_matching"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
+                android:id="@+id/subreddit_filter_prefix_matching_switch_post_filter_preference_activity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/subreddit_filter_prefix_matching_description_text_view_post_filter_preference_activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp"
+            android:text="@string/settings_subreddit_filter_prefix_matching_summary"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family" />
+
+        <LinearLayout
+            android:id="@+id/subreddit_filter_suffix_matching_linear_layout_post_filter_preference_activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/subreddit_filter_suffix_matching_text_view_post_filter_preference_activity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:text="@string/settings_subreddit_filter_suffix_matching"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
+                android:id="@+id/subreddit_filter_suffix_matching_switch_post_filter_preference_activity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/subreddit_filter_suffix_matching_description_text_view_post_filter_preference_activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp"
+            android:text="@string/settings_subreddit_filter_suffix_matching_summary"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_post_filter_preference_activity"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_post_filter_preference_activity"
