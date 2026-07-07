@@ -324,19 +324,70 @@ public class MainPageTabsUtils {
         return false;
     }
 
+    /**
+     * The multireddit name from a user-multireddit path {@code /user/<username>/m/<name>} (or
+     * {@code /u/...}), or {@code null} if {@code label} is not such a path. Drives the compact
+     * "u/m/&lt;name&gt;" tab label.
+     */
+    private static String userMultiRedditName(String label) {
+        if (label == null) {
+            return null;
+        }
+        String[] parts = label.split("/");
+        boolean hasUser = false;
+        String multiName = null;
+        for (int i = 0; i + 1 < parts.length; i++) {
+            if (parts[i].equals("user") || parts[i].equals("u")) {
+                hasUser = true;
+            } else if (parts[i].equals("m")) {
+                multiName = parts[i + 1];
+            }
+        }
+        return hasUser && multiName != null && !multiName.isEmpty() ? multiName : null;
+    }
+
+    /**
+     * The title actually shown for a tab: the user's rename override ({@link MainPageTabInput
+     * #customTitle}) when set, otherwise the computed default from {@link #getTabLabel}.
+     */
+    public static String getEffectiveTabLabel(Context context, MainPageTabInput tab) {
+        if (tab.customTitle != null && !tab.customTitle.isEmpty()) {
+            return tab.customTitle;
+        }
+        return getTabLabel(context, tab);
+    }
+
     /** Human-readable label for a list row (also the main page tab title). */
     public static String getTabLabel(Context context, MainPageTabInput tab) {
         if (tab.postType == SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT) {
-            // Multireddit tabs are prefixed with "/m/" to distinguish them from subreddits.
+            // Someone else's ("followed") multireddits are labelled "u/m/<name>"; your own are
+            // "m/<name>". Own and followed feeds share the same "/user/<name>/m/<name>" path shape,
+            // so the tab's source (which "Show ..." toggle surfaced it) is what tells them apart.
+            boolean userMultiReddit =
+                    tab.source == SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_USERS_MULTIREDDITS
+                            || tab.source == SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_USERS_MULTIREDDITS;
             String label;
             if (tab.displayName != null && !tab.displayName.isEmpty()) {
                 label = tab.displayName;
             } else if (tab.name != null && !tab.name.isEmpty()) {
-                label = tab.name;
+                // No display name: fall back to "<name>" from the raw path "/user/<username>/m/<name>".
+                String fromPath = userMultiRedditName(tab.name);
+                label = fromPath != null ? fromPath : tab.name;
             } else {
                 return context.getString(R.string.multi_reddit);
             }
-            return label.startsWith("/m/") ? label : "/m/" + label;
+            // Strip any "m/" or "/m/" a stored value already carries, then re-prefix. If the label was
+            // a leftover raw path starting with "/", the prefix join yields "m//"; collapse just that
+            // first occurrence so the tab reads cleanly without touching any other slashes.
+            if (label.startsWith("/m/")) {
+                label = label.substring(3);
+            } else if (label.startsWith("m/")) {
+                label = label.substring(2);
+            }
+            String result = (userMultiReddit ? "u/m/" : "m/") + label;
+            int doubleSlash = result.indexOf("m//");
+            return doubleSlash < 0 ? result
+                    : result.substring(0, doubleSlash + 2) + result.substring(doubleSlash + 3);
         }
         if (tab.displayName != null && !tab.displayName.isEmpty()) {
             return tab.displayName;

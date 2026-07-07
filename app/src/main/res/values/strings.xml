@@ -598,6 +598,8 @@
     <string name="cannot_delete_last_tab">At least one tab is required</string>
     <string name="move_to_top">Move to top</string>
     <string name="move_to_bottom">Move to bottom</string>
+    <string name="customize_tabs_hint">Long-press a tab for options.</string>
+    <string name="reset_name">Reset name</string>
     <string name="content_description_drag_to_reorder">Drag to reorder</string>
     <string name="content_description_delete">Delete</string>
     <string name="settings_tab_1_summary">Tab 1</string>

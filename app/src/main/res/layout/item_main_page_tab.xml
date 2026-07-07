@@ -16,6 +16,8 @@
         android:src="@drawable/ic_drag_handle_day_night_24dp"
         android:contentDescription="@string/content_description_drag_to_reorder" />
 
+    <!-- The custom title plus, when renamed, the dimmed computed default to its right — rendered as
+         one flowing text so it line-wraps to fit both instead of ellipsizing (see the adapter). -->
     <TextView
         android:id="@+id/name_text_view_item_main_page_tab"
         android:layout_width="0dp"
@@ -23,7 +25,7 @@
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="32dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="8dp"
         android:textSize="?attr/font_default"
         android:textColor="?attr/primaryTextColor"
         android:fontFamily="?attr/font_family" />

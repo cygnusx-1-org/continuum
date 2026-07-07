@@ -22,7 +22,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -242,7 +241,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private boolean mShowUsersMultiReddits;
     private boolean mShowFavoriteSubscribedSubreddits;
     private boolean mShowSubscribedSubreddits;
-    private int mLastTabLayoutItemCount = -1;
     private int fabOption;
     private int inboxCount;
     private ActivityMainBinding binding;
@@ -1148,8 +1146,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         binding.includedAppBar.viewPagerMainActivity.setAdapter(sectionsPagerAdapter);
         binding.includedAppBar.viewPagerMainActivity.setUserInputEnabled(!mDisableSwipingBetweenTabs);
         if (mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES, true)) {
-            // Start scrollable so tabs render at their natural width; adjustTabLayoutMode() then
-            // switches to fixed/fill when they fit the screen, or keeps scrollable when they overflow.
+            // Always scrollable so tabs render at their natural width and never wrap.
             binding.includedAppBar.tabLayoutMainActivity.setTabMode(TabLayout.MODE_SCROLLABLE);
             new TabLayoutMediator(binding.includedAppBar.tabLayoutMainActivity, binding.includedAppBar.viewPagerMainActivity, (tab, position) -> {
                 if (sectionsPagerAdapter != null) {
@@ -1192,21 +1189,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     }
                 }
             });
-
-            // Re-evaluate fixed-vs-scrollable only when the number of tabs actually changes
-            // (dynamic tabs load async, and each section emits separately).
-            sectionsPagerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                @Override
-                public void onChanged() {
-                    int itemCount = sectionsPagerAdapter.getItemCount();
-                    if (itemCount != mLastTabLayoutItemCount) {
-                        mLastTabLayoutItemCount = itemCount;
-                        adjustTabLayoutMode();
-                    }
-                }
-            });
-            mLastTabLayoutItemCount = sectionsPagerAdapter.getItemCount();
-            adjustTabLayoutMode();
         } else {
             binding.includedAppBar.tabLayoutMainActivity.setVisibility(View.GONE);
         }
@@ -1547,38 +1529,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             }
         }
         return result;
-    }
-
-    /**
-     * Use a fixed, width-filling tab bar when all tabs fit the screen, and only fall back to a
-     * scrollable bar when they would overflow. Measured at the tabs' natural (scrollable) width.
-     */
-    private void adjustTabLayoutMode() {
-        TabLayout tabLayout = binding.includedAppBar.tabLayoutMainActivity;
-        if (tabLayout.getVisibility() != View.VISIBLE) {
-            return;
-        }
-        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-        tabLayout.post(() -> {
-            if (tabLayout.getWidth() == 0 || !(tabLayout.getChildAt(0) instanceof ViewGroup)) {
-                return;
-            }
-            ViewGroup tabStrip = (ViewGroup) tabLayout.getChildAt(0);
-            // The strip's children should map 1:1 to the tabs. If they don't, the internal view
-            // structure isn't what we expect, so don't trust the measurement and stay scrollable.
-            if (tabStrip.getChildCount() == 0 || tabStrip.getChildCount() != tabLayout.getTabCount()) {
-                return;
-            }
-            int totalTabsWidth = 0;
-            for (int i = 0; i < tabStrip.getChildCount(); i++) {
-                totalTabsWidth += tabStrip.getChildAt(i).getWidth();
-            }
-            int available = tabLayout.getWidth() - tabLayout.getPaddingStart() - tabLayout.getPaddingEnd();
-            if (totalTabsWidth > 0 && totalTabsWidth <= available) {
-                tabLayout.setTabMode(TabLayout.MODE_FIXED);
-                tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-            }
-        });
     }
 
     @Override
@@ -2143,7 +2093,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
             List<ResolvedTab> out = new ArrayList<>();
             for (MainPageTabInput t : MainPageTabsUtils.merge(tabInputs, live, enabled)) {
-                out.add(new ResolvedTab(t.postType, t.name, MainPageTabsUtils.getTabLabel(MainActivity.this, t)));
+                out.add(new ResolvedTab(t.postType, t.name, MainPageTabsUtils.getEffectiveTabLabel(MainActivity.this, t)));
             }
             return out;
         }

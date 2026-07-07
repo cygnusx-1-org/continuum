@@ -18,6 +18,10 @@ public class MainPageTabInput {
     // For toggle-sourced items, the tab label (a multireddit's display name differs from its path,
     // stored in name). Null for user tabs, whose label is derived from type/name.
     public String displayName;
+    // A user-entered rename that overrides the displayed tab title (see MainPageTabsUtils
+    // .getEffectiveTabLabel). Null/empty means no override — the computed default is shown.
+    // Distinct from displayName, which must stay intact to render the default label.
+    public String customTitle;
     public int source;
 
     public MainPageTabInput() {

@@ -144,7 +144,8 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
 
         adapter = new MainPageTabsRecyclerViewAdapter(this, mCustomThemeWrapper, tabs,
                 viewHolder -> itemTouchHelper.startDrag(viewHolder),
-                this::persist);
+                this::persist,
+                this::promptRenameTab);
         linearLayoutManager = new LinearLayoutManagerBugFixed(this);
         binding.recyclerViewCustomizeTabsOrderActivity.setLayoutManager(linearLayoutManager);
         binding.recyclerViewCustomizeTabsOrderActivity.setAdapter(adapter);
@@ -405,6 +406,39 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
             });
         });
         dialog.show();
+    }
+
+    // Long-press a tab -> Rename: override its displayed title. Applies to any row, including
+    // group (toggle-sourced) tabs whose computed label is long (e.g. "u/m/Soft/SFW").
+    private void promptRenameTab(MainPageTabInput tab) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_text, null);
+        EditText editText = dialogView.findViewById(R.id.edit_text_edit_text_dialog);
+        editText.setText(MainPageTabsUtils.getEffectiveTabLabel(this, tab));
+        editText.setSelection(editText.getText().length());
+        editText.requestFocus();
+        Utils.showKeyboard(this, new Handler(), editText);
+        if (dialogView.getParent() != null) {
+            ((ViewGroup) dialogView.getParent()).removeView(dialogView);
+        }
+        new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                .setTitle(R.string.rename)
+                .setView(dialogView)
+                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+                    String text = editText.getText().toString().trim();
+                    Utils.hideKeyboard(this);
+                    // Empty, or matching the computed default, clears the override (reset to default).
+                    tab.customTitle = text.isEmpty() || text.equals(MainPageTabsUtils.getTabLabel(this, tab))
+                            ? null : text;
+                    // Resolve the row from the object; the list may have been rebuilt (reconcileWithLive)
+                    // while the dialog was open, so the captured position can be stale.
+                    int pos = tabs.indexOf(tab);
+                    if (pos >= 0) {
+                        adapter.notifyItemChanged(pos);
+                    }
+                    persist();
+                })
+                .setNegativeButton(R.string.cancel, (dialogInterface, i) -> Utils.hideKeyboard(this))
+                .show();
     }
 
     private void addTab(int postType, String name) {
