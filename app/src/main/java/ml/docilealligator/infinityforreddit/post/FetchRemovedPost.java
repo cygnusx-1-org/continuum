@@ -1,6 +1,9 @@
 package ml.docilealligator.infinityforreddit.post;
 
 import androidx.annotation.NonNull;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import ml.docilealligator.infinityforreddit.apis.ArcticShiftAPI;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,6 +14,12 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class FetchRemovedPost {
+
+    /** A body that is exactly a [text](url) autolink — Reddit's rendering of a lone bare URL. */
+    private static final Pattern SOLE_MARKDOWN_LINK =
+            Pattern.compile("\\[[^\\]]*]\\((https?://[^)\\s]+)\\)");
+    /** A body that is exactly one bare URL. */
+    private static final Pattern SOLE_URL = Pattern.compile("https?://\\S+");
 
     public static void fetchRemovedPost(Retrofit arcticShiftRetrofit, Post post, FetchRemovedPostListener listener) {
         arcticShiftRetrofit.create(ArcticShiftAPI.class).getRemovedPost(post.getId())
@@ -31,7 +40,15 @@ public class FetchRemovedPost {
                         if (result.title != null) {
                             post.setTitle(result.title);
                         }
-                        if (result.body != null) {
+                        if (result.link != null) {
+                            // The original post was a link post; rebuild it as one so the recovered
+                            // destination renders as a tappable link card rather than as body text.
+                            post.setUrl(result.link);
+                            post.setPostType(Post.NO_PREVIEW_LINK_TYPE);
+                            post.setSelfText("");
+                            post.setSelfTextPlain("");
+                            post.setSelfTextPlainTrimmed("");
+                        } else if (result.body != null) {
                             post.setSelfText(result.body);
                             post.setSelfTextPlain("");
                             post.setSelfTextPlainTrimmed("");
@@ -62,20 +79,86 @@ public class FetchRemovedPost {
                 return null;
             }
 
+            // Reject values that are themselves a removal placeholder: when the archive only ever
+            // ingested the post after Reddit scrubbed it, there is no original to recover, and
+            // handing back the placeholder would masquerade as a successful recovery.
             String title = readString(post, "title");
+            if (isRemovalPlaceholder(title)) {
+                title = null;
+            }
             String body = readString(post, "selftext");
-            if (body != null && (body.equals("[removed]") || body.equals("[deleted]"))) {
+            if (isRemovalPlaceholder(body)) {
+                body = null;
+            }
+            boolean isSelf = readBoolean(post, "is_self");
+
+            // When a link post's recovered body is nothing but a link (Reddit stores a bare URL the
+            // author wrote as a [url](url) autolink), surface it as a link post rather than burying
+            // the destination in the selftext. Only for non-self posts — a self-post whose body
+            // happens to be a single link is still a text post, so leave it in the body.
+            String link = isSelf ? null : extractSoleLink(body);
+            if (link != null) {
                 body = null;
             }
 
-            if (title == null && body == null) {
+            // A media post with no selftext still loses its destination on removal — Reddit rewrites
+            // the url to the self permalink — so recover the original url into the body. A bare URL
+            // is valid markdown and renders as a tappable link. Skip self-posts and any url that
+            // merely points back at the comments permalink.
+            if (body == null && link == null && !isSelf) {
+                String url = readString(post, "url");
+                if (url != null && !url.contains("/comments/")) {
+                    body = url;
+                }
+            }
+
+            if (title == null && body == null && link == null) {
                 return null;
             }
 
-            return new Result(title, body);
+            return new Result(title, body, link);
         } catch (JSONException e) {
             return null;
         }
+    }
+
+    /**
+     * Recognizes the placeholder text Reddit substitutes for removed content: the bare
+     * {@code [removed]} / {@code [deleted]} left by an ordinary moderator removal or author
+     * deletion, the "[ Removed by moderator ]" sentence a subreddit moderator leaves in the title
+     * when the removal carries a reason, and the "[ Removed by Reddit ... ]" sentence its admins
+     * leave (in both the title and the body) on a legal / content-policy takedown. Used both to
+     * decide a post is removed and to reject archive copies that are themselves post-takedown
+     * snapshots rather than the original.
+     */
+    public static boolean isRemovalPlaceholder(String text) {
+        if (text == null) {
+            return false;
+        }
+        String normalized = text.trim().toLowerCase(Locale.ENGLISH);
+        return normalized.equals("[removed]")
+                || normalized.equals("[deleted]")
+                || normalized.startsWith("[ removed by reddit")
+                || normalized.startsWith("[ removed by moderator");
+    }
+
+    /**
+     * If {@code body} consists solely of a single link — either a bare URL or the [url](url)
+     * autolink Reddit generates for one — returns that URL; otherwise null.
+     */
+    private static String extractSoleLink(String body) {
+        if (body == null) {
+            return null;
+        }
+        String trimmed = body.trim();
+        Matcher markdownLink = SOLE_MARKDOWN_LINK.matcher(trimmed);
+        if (markdownLink.matches()) {
+            return markdownLink.group(1);
+        }
+        if (SOLE_URL.matcher(trimmed).matches()) {
+            return trimmed;
+        }
+        return null;
     }
 
     private static String readString(JSONObject obj, String key) {
@@ -83,13 +166,19 @@ public class FetchRemovedPost {
         return value == null || value.trim().isEmpty() ? null : value;
     }
 
+    private static boolean readBoolean(JSONObject obj, String key) {
+        return obj.optBoolean(key, false);
+    }
+
     private static final class Result {
         final String title;
         final String body;
+        final String link;
 
-        Result(String title, String body) {
+        Result(String title, String body, String link) {
             this.title = title;
             this.body = body;
+            this.link = link;
         }
     }
 

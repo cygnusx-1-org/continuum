@@ -605,6 +605,10 @@ public abstract class PostFragmentBase extends Fragment {
                 post.setSelfText(event.post.getSelfText());
                 post.setSelfTextPlain(event.post.getSelfTextPlain());
                 post.setSelfTextPlainTrimmed(event.post.getSelfTextPlainTrimmed());
+                // Recovering a removed post can turn it into a link post, changing both the url and
+                // the post type; propagate them so the feed row matches the recovered detail view.
+                post.setUrl(event.post.getUrl());
+                post.setPostType(event.post.getPostType());
                 post.setVoteType(event.post.getVoteType());
                 post.setScore(event.post.getScore());
                 post.setNComments(event.post.getNComments());

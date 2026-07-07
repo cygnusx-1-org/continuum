@@ -800,8 +800,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             translateItem.setVisible(true);
             Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, translateItem, mActivity.getString(R.string.translate));
 
+            // Reddit rewrites both the title and the body to a "[ Removed by Reddit ... ]" sentence
+            // on a legal / content-policy takedown (removed_by_category is "content_takedown", not
+            // "moderator", so isRemoved() stays false), so gate on the placeholder text of either.
             boolean canRecoverPost = mPost.isRemoved() || mPost.isAuthorDeleted()
-                    || "[removed]".equals(mPost.getSelfText()) || "[deleted]".equals(mPost.getSelfText());
+                    || FetchRemovedPost.isRemovalPlaceholder(mPost.getSelfText())
+                    || FetchRemovedPost.isRemovalPlaceholder(mPost.getTitle());
             MenuItem recoverPostItem = mMenu.findItem(R.id.action_recover_post_view_post_detail_fragment);
             recoverPostItem.setVisible(canRecoverPost);
             Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, recoverPostItem, mActivity.getString(R.string.recover_post));
@@ -1083,6 +1087,11 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             FetchRemovedPost.fetchRemovedPost(mArcticShiftRetrofit, mPost, new FetchRemovedPost.FetchRemovedPostListener() {
                 @Override
                 public void fetchSuccess(Post post) {
+                    // The archive request outlives this fragment; ignore a late reply once it is torn
+                    // down so we don't touch a null adapter/activity.
+                    if (mActivity == null || !isAdded()) {
+                        return;
+                    }
                     mPost = post;
                     mPostAdapter.updatePost(post);
                     setupMenu();
@@ -1091,6 +1100,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
                 @Override
                 public void fetchFailed() {
+                    if (mActivity == null || !isAdded()) {
+                        return;
+                    }
                     Toast.makeText(mActivity, R.string.show_removed_post_failed, Toast.LENGTH_SHORT).show();
                 }
             });
