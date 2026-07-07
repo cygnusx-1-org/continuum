@@ -6,6 +6,9 @@
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
 
+* Implemented Enable subreddit filtering by keyword #326
+* Added Local Saved to mirror saves locally and surface ones Reddit drops
+* Added removed-post recovery via Arctic Shift API with a "Recover Post" action
 * Implemented Restore ability to customize tab names #328
 * Changed the "/m/" prefix for multireddit tabs to "m/" for increased consistently with the rest of the app
 * Fixed "m//" to "m/" for user multireddit tabs
