@@ -2,6 +2,18 @@
 
 ---
 
+8.2.5.9.9.6 / 2026-7-6
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Restore ability to customize tab names #328
+* Changed the "/m/" prefix for multireddit tabs to "m/" for increased consistently with the rest of the app
+* Fixed "m//" to "m/" for user multireddit tabs
+* Shortened "/m/user/username/m/multireddit-name" to "u/m/multireddit-name" for user multireddit tabs
+* Made the main page tab bar always scrollable
+
+"Made the main page tab bar always scrollable" makes the titles not try to span the full width. This change was made to make the behavior consistent. With the fixed(fills the width of the screen) shorter titles could get line wrapped.
+
 8.2.5.9.9.5 / 2026-7-4
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
