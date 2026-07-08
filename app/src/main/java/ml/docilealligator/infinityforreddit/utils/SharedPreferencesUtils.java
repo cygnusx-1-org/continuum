@@ -470,6 +470,9 @@ public class SharedPreferencesUtils {
     public static final String COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION = "collapse_subscribed_subreddits_section";
     public static final String HIDE_FAVORITE_SUBREDDITS_SECTION = "hide_favorite_subreddits_sections";
     public static final String HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS = "hide_subscribed_subreddits_sections";
+    public static final String SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER = "show_theme_toggle_in_navigation_drawer";
+    public static final String SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER = "show_nsfw_toggle_in_navigation_drawer";
+    public static final String SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER = "show_thumbnail_on_the_left_toggle_in_navigation_drawer";
 
     public static final String POST_DETAILS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_details";
     public static final String SEPARATE_POST_AND_COMMENTS_IN_PORTRAIT_MODE = "separate_post_and_comments_in_portrait_mode";

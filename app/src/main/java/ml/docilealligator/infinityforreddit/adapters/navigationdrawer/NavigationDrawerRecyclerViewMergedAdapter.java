@@ -52,7 +52,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         postSectionRecyclerViewAdapter = new PostSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
                 navigationDrawerSharedPreferences, itemClickListener);
         preferenceSectionRecyclerViewAdapter = new PreferenceSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
-                accountName, nsfwAndSpoilerSharedPreferences, navigationDrawerSharedPreferences, itemClickListener);
+                accountName, sharedPreferences, nsfwAndSpoilerSharedPreferences, navigationDrawerSharedPreferences, itemClickListener);
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter = new FavoriteSubscribedSubredditsSectionRecyclerViewAdapter(
                 baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences, itemClickListener);
         subscribedSubredditsRecyclerViewAdapter = new SubscribedSubredditsRecyclerViewAdapter(baseActivity, glide,
@@ -136,6 +136,10 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         preferenceSectionRecyclerViewAdapter.setNSFWEnabled(isNSFWEnabled);
     }
 
+    public void setShowThumbnailOnTheLeft(boolean showThumbnailOnTheLeft) {
+        preferenceSectionRecyclerViewAdapter.setShowThumbnailOnTheLeft(showThumbnailOnTheLeft);
+    }
+
     public void setFavoriteSubscribedSubreddits(List<SubscribedSubredditData> favoriteSubscribedSubreddits) {
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setFavoriteSubscribedSubreddits(favoriteSubscribedSubreddits);
     }
@@ -167,6 +171,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION, false));
         subscribedSubredditsRecyclerViewAdapter.setHideSubscribedSubredditsSection(
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS, false));
+        preferenceSectionRecyclerViewAdapter.refreshVisibleRows(navigationDrawerSharedPreferences);
     }
 
     public interface ItemClickListener {

@@ -1055,6 +1055,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             String nsfwKey = (accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE;
                             mNsfwAndSpoilerSharedPreferences.edit().putBoolean(nsfwKey, false).apply();
                             EventBus.getDefault().post(new ChangeNSFWEvent(false));
+                        } else if (stringId == R.string.settings_show_thumbnail_on_the_left_in_compact_layout) {
+                            boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+                            mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, newValue).apply();
+                            EventBus.getDefault().post(new ShowThumbnailOnTheLeftInCompactLayoutEvent(newValue));
                         } else if (stringId == R.string.settings) {
                             intent = new Intent(MainActivity.this, SettingsActivity.class);
                         } else if (stringId == R.string.add_account) {
@@ -1683,6 +1687,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         sectionsPagerAdapter.changeNSFW(changeNSFWEvent.nsfw);
         if (adapter != null) {
             adapter.setNSFWEnabled(changeNSFWEvent.nsfw);
+        }
+    }
+
+    @Subscribe
+    public void onShowThumbnailOnTheLeftInCompactLayoutEvent(ShowThumbnailOnTheLeftInCompactLayoutEvent event) {
+        if (adapter != null) {
+            adapter.setShowThumbnailOnTheLeft(event.showThumbnailOnTheLeftInCompactLayout);
         }
     }
 

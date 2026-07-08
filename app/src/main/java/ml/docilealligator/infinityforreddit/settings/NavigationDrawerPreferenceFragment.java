@@ -64,5 +64,8 @@ public class NavigationDrawerPreferenceFragment extends CustomFontPreferenceFrag
             SharedPreferencesUtils.COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION,
             SharedPreferencesUtils.HIDE_FAVORITE_SUBREDDITS_SECTION,
             SharedPreferencesUtils.HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS,
+            SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER,
+            SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER,
+            SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER,
     };
 }

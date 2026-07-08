@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+import java.util.List;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -20,7 +22,15 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
 
     private static final int VIEW_TYPE_MENU_GROUP_TITLE = 1;
     private static final int VIEW_TYPE_MENU_ITEM = 2;
-    private static final int PREFERENCES_SECTION_ITEMS = 3;
+
+    private static final int ROW_THEME = 0;
+    private static final int ROW_NSFW = 1;
+    private static final int ROW_THUMBNAIL = 2;
+    private static final int ROW_SETTINGS = 3;
+
+    // Canonical top-to-bottom order of the rows. visibleRows is always a subsequence of this,
+    // which lets refreshVisibleRows() dispatch minimal insert/remove notifications.
+    private static final int[] ROW_ORDER = {ROW_THEME, ROW_NSFW, ROW_THUMBNAIL, ROW_SETTINGS};
 
     private final BaseActivity baseActivity;
     private final Resources resources;
@@ -28,11 +38,17 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
     private final int secondaryTextColor;
     private final int primaryIconColor;
     private boolean isNSFWEnabled;
+    private boolean showThumbnailOnTheLeft;
+    private boolean showThemeToggle;
+    private boolean showNSFWToggle;
+    private boolean showThumbnailToggle;
     private boolean collapsePreferencesSection;
+    private final List<Integer> visibleRows = new ArrayList<>();
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
 
     public PreferenceSectionRecyclerViewAdapter(BaseActivity baseActivity, CustomThemeWrapper customThemeWrapper,
-                                                @NonNull String accountName, SharedPreferences nsfwAndSpoilerSharedPreferences,
+                                                @NonNull String accountName, SharedPreferences sharedPreferences,
+                                                SharedPreferences nsfwAndSpoilerSharedPreferences,
                                                 SharedPreferences navigationDrawerSharedPreferences,
                                                 NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener) {
         this.baseActivity = baseActivity;
@@ -41,11 +57,43 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         secondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         isNSFWEnabled = nsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false);
+        showThumbnailOnTheLeft = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+        showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
+        showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
+        showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);
         collapsePreferencesSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION, false);
         this.itemClickListener = itemClickListener;
+        buildVisibleRows();
+    }
+
+    private boolean isRowVisible(int rowType) {
+        switch (rowType) {
+            case ROW_THEME:
+                return showThemeToggle;
+            case ROW_NSFW:
+                return showNSFWToggle;
+            case ROW_THUMBNAIL:
+                return showThumbnailToggle;
+            case ROW_SETTINGS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void buildVisibleRows() {
+        visibleRows.clear();
+        for (int rowType : ROW_ORDER) {
+            if (isRowVisible(rowType)) {
+                visibleRows.add(rowType);
+            }
+        }
     }
 
     public void setCollapsePreferencesSection(boolean collapsePreferencesSection) {
+        if (this.collapsePreferencesSection == collapsePreferencesSection) {
+            return;
+        }
         this.collapsePreferencesSection = collapsePreferencesSection;
         notifyDataSetChanged();
     }
@@ -78,22 +126,27 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
             }
 
             holder.itemView.setOnClickListener(view -> {
-                if (collapsePreferencesSection) {
-                    collapsePreferencesSection = !collapsePreferencesSection;
-                    notifyItemRangeInserted(holder.getBindingAdapterPosition() + 1, PREFERENCES_SECTION_ITEMS);
-                } else {
-                    collapsePreferencesSection = !collapsePreferencesSection;
-                    notifyItemRangeRemoved(holder.getBindingAdapterPosition() + 1, PREFERENCES_SECTION_ITEMS);
+                int titlePosition = holder.getBindingAdapterPosition();
+                if (titlePosition == RecyclerView.NO_POSITION) {
+                    return;
                 }
-                notifyItemChanged(holder.getBindingAdapterPosition());
+                if (collapsePreferencesSection) {
+                    collapsePreferencesSection = false;
+                    notifyItemRangeInserted(titlePosition + 1, visibleRows.size());
+                } else {
+                    collapsePreferencesSection = true;
+                    notifyItemRangeRemoved(titlePosition + 1, visibleRows.size());
+                }
+                notifyItemChanged(titlePosition);
             });
         } else if (holder instanceof MenuItemViewHolder) {
+            MenuItemViewHolder itemHolder = (MenuItemViewHolder) holder;
+            int row = visibleRows.get(position - 1);
             int stringId = 0;
             int drawableId = 0;
-            boolean setOnClickListener = true;
 
-            switch (position) {
-                case 1:
+            switch (row) {
+                case ROW_THEME:
                     if ((resources.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
                         stringId = R.string.dark_theme;
                         drawableId = R.drawable.ic_dark_theme_24dp;
@@ -101,9 +154,10 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
                         stringId = R.string.light_theme;
                         drawableId = R.drawable.ic_light_theme_24dp;
                     }
+                    int themeStringId = stringId;
+                    itemHolder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(themeStringId));
                     break;
-                case 2:
-                    setOnClickListener = false;
+                case ROW_NSFW:
                     if (isNSFWEnabled) {
                         stringId = R.string.disable_nsfw;
                         drawableId = R.drawable.ic_nsfw_off_day_night_24dp;
@@ -111,45 +165,94 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
                         stringId = R.string.enable_nsfw;
                         drawableId = R.drawable.ic_nsfw_on_day_night_24dp;
                     }
-
-                    holder.itemView.setOnClickListener(view -> {
-                        if (isNSFWEnabled) {
-                            isNSFWEnabled = false;
-                            ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(R.string.enable_nsfw);
-                            ((MenuItemViewHolder) holder).binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, R.drawable.ic_nsfw_on_day_night_24dp));
-                            itemClickListener.onMenuClick(R.string.disable_nsfw);
-                        } else {
-                            isNSFWEnabled = true;
-                            ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(R.string.disable_nsfw);
-                            ((MenuItemViewHolder) holder).binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, R.drawable.ic_nsfw_off_day_night_24dp));
-                            itemClickListener.onMenuClick(R.string.enable_nsfw);
-                        }
-                    });
+                    // The label/icon are refreshed via setNSFWEnabled() when the resulting
+                    // ChangeNSFWEvent is delivered back, so there is no inline update here
+                    // (a single, authoritative update path, mirroring the thumbnail row).
+                    int nsfwStringId = stringId;
+                    itemHolder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(nsfwStringId));
                     break;
-                case 3:
+                case ROW_THUMBNAIL:
+                    drawableId = R.drawable.ic_thumbnail_left_day_night_24dp;
+                    stringId = showThumbnailOnTheLeft
+                            ? R.string.settings_show_thumbnail_on_the_right_in_compact_layout
+                            : R.string.settings_show_thumbnail_on_the_left_in_compact_layout;
+                    // The label is refreshed via setShowThumbnailOnTheLeft() when the resulting
+                    // ShowThumbnailOnTheLeftInCompactLayoutEvent is delivered back, so there is no
+                    // inline update here (a single, authoritative update path).
+                    itemHolder.itemView.setOnClickListener(view ->
+                            itemClickListener.onMenuClick(R.string.settings_show_thumbnail_on_the_left_in_compact_layout));
+                    break;
+                case ROW_SETTINGS:
                     stringId = R.string.settings;
                     drawableId = R.drawable.ic_settings_day_night_24dp;
+                    itemHolder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(R.string.settings));
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected preference row: " + row);
             }
 
             if (stringId != 0) {
-                ((MenuItemViewHolder) holder).binding.textViewItemNavDrawerMenuItem.setText(stringId);
-                ((MenuItemViewHolder) holder).binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, drawableId));
-                if (setOnClickListener) {
-                    int finalStringId = stringId;
-                    holder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(finalStringId));
-                }
+                itemHolder.binding.textViewItemNavDrawerMenuItem.setText(stringId);
+            }
+            if (drawableId != 0) {
+                itemHolder.binding.imageViewItemNavDrawerMenuItem.setImageDrawable(ContextCompat.getDrawable(baseActivity, drawableId));
             }
         }
     }
 
     @Override
     public int getItemCount() {
-        return collapsePreferencesSection ? 1 : PREFERENCES_SECTION_ITEMS + 1;
+        return collapsePreferencesSection ? 1 : visibleRows.size() + 1;
     }
 
     public void setNSFWEnabled(boolean isNSFWEnabled) {
         this.isNSFWEnabled = isNSFWEnabled;
-        notifyItemChanged(2);
+        int index = visibleRows.indexOf(ROW_NSFW);
+        if (index >= 0 && !collapsePreferencesSection) {
+            notifyItemChanged(index + 1);
+        }
+    }
+
+    public void setShowThumbnailOnTheLeft(boolean showThumbnailOnTheLeft) {
+        this.showThumbnailOnTheLeft = showThumbnailOnTheLeft;
+        int index = visibleRows.indexOf(ROW_THUMBNAIL);
+        if (index >= 0 && !collapsePreferencesSection) {
+            notifyItemChanged(index + 1);
+        }
+    }
+
+    public void refreshVisibleRows(SharedPreferences navigationDrawerSharedPreferences) {
+        showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
+        showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
+        showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);
+
+        if (collapsePreferencesSection) {
+            // Only the title is shown while collapsed (item count stays 1), so just rebuild the
+            // list; the correct rows appear when the section is next expanded.
+            buildVisibleRows();
+            return;
+        }
+
+        List<Integer> oldRows = new ArrayList<>(visibleRows);
+        buildVisibleRows();
+        // Both lists are subsequences of ROW_ORDER, so a single walk yields the minimal set of
+        // insert/remove notifications (offset by 1 for the always-present title at position 0).
+        int oldIndex = 0;
+        int newIndex = 0;
+        for (int rowType : ROW_ORDER) {
+            boolean inOld = oldIndex < oldRows.size() && oldRows.get(oldIndex) == rowType;
+            boolean inNew = newIndex < visibleRows.size() && visibleRows.get(newIndex) == rowType;
+            if (inOld && inNew) {
+                oldIndex++;
+                newIndex++;
+            } else if (inNew) {
+                notifyItemInserted(newIndex + 1);
+                newIndex++;
+            } else if (inOld) {
+                notifyItemRemoved(newIndex + 1);
+                oldIndex++;
+            }
+        }
     }
 
     class MenuGroupTitleViewHolder extends RecyclerView.ViewHolder {
