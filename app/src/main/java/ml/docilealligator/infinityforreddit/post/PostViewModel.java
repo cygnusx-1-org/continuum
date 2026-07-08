@@ -28,6 +28,8 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SavedPostCache;
+import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,6 +57,19 @@ public class PostViewModel extends ViewModel {
 
     private final LiveData<PagingData<Post>> posts;
     private final LiveData<PagingData<Post>> postsWithReadPostsHidden;
+    // Saved-screen search. Only the Saved tab sets this; when non-empty the paging source loads the
+    // whole saved listing, filters by the query, and returns every match at once (see
+    // PostPagingSource#loadAllUserPostsFiltered). Read on the paging executor when a source is built,
+    // written from the main thread, so it is volatile.
+    private volatile String searchQuery;
+    // Full unfiltered saved listing shared with the current PostPagingSource so refining the query
+    // filters in memory instead of re-walking the listing. Invalidated whenever the listing must be
+    // refetched (sort/filter change, refresh, search cleared).
+    private final SavedSearchCache<Post> savedSearchCache = new SavedSearchCache<>();
+    // The most recently created source, kept so a query change can refresh it in place via
+    // invalidate() instead of reposting a LiveData (which would tear down and rebuild the whole
+    // pipeline while a slow load-all is still collecting — the rebuild race behind the paging CMEs).
+    private volatile PostPagingSource pagingSource;
 
     private final MutableLiveData<SortType> sortTypeLiveData;
     private final MutableLiveData<PostFilter> postFilterLiveData;
@@ -290,6 +305,30 @@ public class PostViewModel extends ViewModel {
         return postsWithReadPostsHidden;
     }
 
+    public String getSearchQuery() {
+        return searchQuery;
+    }
+
+    // Refreshes the current PostPagingSource in place (invalidate() rebuilds it from the factory with
+    // the new query) rather than reposting a LiveData, so the LiveData/cachedIn/read-hidden-filter
+    // pipeline is not torn down and rebuilt while a slow load-all is still collecting. A non-empty
+    // query makes the source load the whole saved listing, filter it, and return every match at once;
+    // an empty query restores the normal paginated listing. Clearing the query drops the cached
+    // listing so reopening search refetches.
+    public void searchSaved(String query) {
+        String normalized = query == null ? "" : query;
+        if (!normalized.equals(searchQuery == null ? "" : searchQuery)) {
+            searchQuery = normalized;
+            if (normalized.isEmpty()) {
+                savedSearchCache.invalidate();
+            }
+            PostPagingSource currentSource = pagingSource;
+            if (currentSource != null) {
+                currentSource.invalidate();
+            }
+        }
+    }
+
     public void hideReadPosts() {
         // Guard against re-firing when read posts are already hidden. Re-setting the same value makes
         // the switchMap tear down and rebuild the filter pipeline while the previous collection is still
@@ -331,10 +370,40 @@ public class PostViewModel extends ViewModel {
                 //User
                 paging3PagingSource = new PostPagingSource(executor, retrofit, redditDataRoomDatabase,
                         accessToken, accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        name, postType, sortType, postFilter, userWhere, readPostsList);
+                        name, postType, sortType, postFilter, userWhere, searchQuery, savedSearchCache, readPostsList);
                 break;
         }
+        pagingSource = paging3PagingSource;
         return paging3PagingSource;
+    }
+
+    // Called by the Saved screen's pull-to-refresh so a refresh while a search is active refetches
+    // the listing instead of serving the cached copy. Also drops the persistent hard-TTL cache so a
+    // later tab reopen won't serve the pre-refresh list.
+    public void invalidateSavedSearchCache() {
+        savedSearchCache.invalidate();
+        if (PostPagingSource.USER_WHERE_SAVED.equals(userWhere)) {
+            SavedPostCache.invalidate();
+        }
+    }
+
+    // Drops only the in-memory Saved search cache. Used after an in-app save/unsave (the persistent
+    // SavedPostCache is already invalidated at the SaveThing funnel), so a search in progress on the
+    // Saved tab refetches instead of re-filtering a list that still holds the just-unsaved item.
+    public void invalidateInMemorySavedSearchCache() {
+        savedSearchCache.invalidate();
+    }
+
+    // The "Bypass cache (fetch fresh)" toggle. Drops the persistent and in-memory Saved caches and
+    // rebuilds the source, so the reload re-walks the network for the whole history and rewrites the
+    // cache, instead of serving the copy still within its TTL.
+    public void forceFreshSavedLoad() {
+        SavedPostCache.invalidate();
+        savedSearchCache.invalidate();
+        PostPagingSource currentSource = pagingSource;
+        if (currentSource != null) {
+            currentSource.invalidate();
+        }
     }
 
     private void changeSortTypeAndPostFilter(SortType sortType, PostFilter postFilter) {
@@ -343,10 +412,14 @@ public class PostViewModel extends ViewModel {
     }
 
     public void changeSortType(SortType sortType) {
+        // A different sort reorders the saved listing, so the cached search copy is stale.
+        savedSearchCache.invalidate();
         sortTypeLiveData.postValue(sortType);
     }
 
     public void changePostFilter(PostFilter postFilter) {
+        // A different filter changes which items pass, so the cached search copy is stale.
+        savedSearchCache.invalidate();
         postFilterLiveData.postValue(postFilter);
     }
 

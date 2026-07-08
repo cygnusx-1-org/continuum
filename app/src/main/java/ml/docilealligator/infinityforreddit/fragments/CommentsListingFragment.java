@@ -405,6 +405,21 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
         mAdapter.setNetworkState(null);
     }
 
+    // Client-side search used by the Saved screen's (Local) Comments tabs.
+    public void filterSaved(String query) {
+        if (mCommentViewModel != null) {
+            mCommentViewModel.search(query);
+        }
+    }
+
+    // A comment was saved/unsaved in-app: drop the in-memory Saved search cache so a search in
+    // progress refetches rather than re-surfacing the just-changed comment.
+    public void onSavedThingChanged() {
+        if (mCommentViewModel != null) {
+            mCommentViewModel.invalidateInMemorySavedSearchCache();
+        }
+    }
+
     @Override
     public void applyTheme() {
         binding.swipeRefreshLayoutViewCommentsListingFragment.setProgressBackgroundColorSchemeColor(customThemeWrapper.getCircularProgressBarBackground());

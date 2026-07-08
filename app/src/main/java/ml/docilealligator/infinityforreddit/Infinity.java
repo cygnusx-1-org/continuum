@@ -46,6 +46,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 public class Infinity extends Application implements LifecycleObserver {
+    // Application-context accessor for static helpers that have no Context of their own (e.g.
+    // SavedPostCache). Set as early as possible in onCreate().
+    private static Infinity instance;
+
+    public static android.content.Context getAppContext() {
+        return instance == null ? null : instance.getApplicationContext();
+    }
+
     public Typeface typeface;
     public Typeface titleTypeface;
     public Typeface contentTypeface;
@@ -85,6 +93,8 @@ public class Infinity extends Application implements LifecycleObserver {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        instance = this;
 
         mAppComponent = DaggerAppComponent.factory()
                 .create(this);

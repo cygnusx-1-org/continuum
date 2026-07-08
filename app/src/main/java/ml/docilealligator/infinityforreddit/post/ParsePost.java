@@ -32,9 +32,22 @@ public class ParsePost {
         if (response == null) {
             return null;
         }
+        try {
+            return parsePostsSync(new JSONObject(response), nPosts, postFilter, readPostsList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Overload taking an already-parsed listing so a caller that also needs the raw JSON (e.g. the
+    // Saved cache) doesn't have to parse the response body a second time.
+    public static LinkedHashSet<Post> parsePostsSync(JSONObject jsonResponse, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+        if (jsonResponse == null) {
+            return null;
+        }
         LinkedHashSet<Post> newPosts = new LinkedHashSet<>();
         try {
-            JSONObject jsonResponse = new JSONObject(response);
             JSONArray allPostsData = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
 
             //Posts listing
@@ -79,7 +92,19 @@ public class ParsePost {
             return null;
         }
         try {
-            JSONObject object = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
+            return getLastItem(new JSONObject(response));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getLastItem(JSONObject response) {
+        if (response == null) {
+            return null;
+        }
+        try {
+            JSONObject object = response.getJSONObject(JSONUtils.DATA_KEY);
             return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
         } catch (JSONException e) {
             e.printStackTrace();

@@ -40,6 +40,7 @@ import ml.docilealligator.infinityforreddit.subreddit.SubredditData
 import ml.docilealligator.infinityforreddit.thing.SortType
 import ml.docilealligator.infinityforreddit.thing.deleteThing
 import ml.docilealligator.infinityforreddit.localsaved.LocalSaved
+import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier
 import ml.docilealligator.infinityforreddit.thing.saveThing
 import ml.docilealligator.infinityforreddit.thing.unsaveThing
 import ml.docilealligator.infinityforreddit.utils.APIUtils
@@ -1326,6 +1327,7 @@ class ViewPostDetailFragmentViewModelNew(
                                 LocalSaved.onUnsaved(
                                     redditDataRoomDatabase, accountName, post.fullName
                                 )
+                                SavedPostCacheNotifier.onSavedPostChanged()
                                 _dataState.value = _dataState.value.copy(
                                     post = Post(post).apply {
                                         isSaved = !isSaved
@@ -1354,6 +1356,7 @@ class ViewPostDetailFragmentViewModelNew(
                                     redditDataRoomDatabase, oauthRetrofit, accessToken,
                                     accountName, post.fullName
                                 )
+                                SavedPostCacheNotifier.onSavedPostChanged()
                                 _dataState.value = _dataState.value.copy(
                                     post = Post(post).apply {
                                         isSaved = !isSaved

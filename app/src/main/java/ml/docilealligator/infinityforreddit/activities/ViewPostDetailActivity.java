@@ -68,6 +68,7 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
+import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -570,6 +571,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                 @Override
                 public void success() {
                     LocalSaved.onUnsaved(ViewPostDetailActivity.this, accountName, comment.getFullName());
+                    SavedCommentCacheNotifier.onSavedCommentChanged();
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         fragment.saveComment(position, false);
@@ -593,6 +595,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                 public void success() {
                     LocalSaved.onSaved(ViewPostDetailActivity.this, mOauthRetrofit, accessToken,
                             accountName, comment.getFullName());
+                    SavedCommentCacheNotifier.onSavedCommentChanged();
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         fragment.saveComment(position, true);

@@ -63,6 +63,7 @@ import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
@@ -821,6 +822,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                             public void success() {
                                 comment.setSaved(false);
                                 LocalSaved.onUnsaved(mActivity, mAccountName, comment.getFullName());
+                                SavedCommentCacheNotifier.onSavedCommentChanged();
                                 if (getBindingAdapterPosition() == position) {
                                     saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                 }
@@ -844,6 +846,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                                 comment.setSaved(true);
                                 LocalSaved.onSaved(mActivity, mOauthRetrofit, mAccessToken,
                                         mAccountName, comment.getFullName());
+                                SavedCommentCacheNotifier.onSavedCommentChanged();
                                 if (getBindingAdapterPosition() == position) {
                                     saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                 }

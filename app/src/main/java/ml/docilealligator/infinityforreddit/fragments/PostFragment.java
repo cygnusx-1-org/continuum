@@ -1362,6 +1362,30 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
     }
 
+    // Client-side search used by the Saved screen. Filters the loaded posts against the query and
+    // keeps loading further pages while the query is active (see PostViewModel#buildSearchLayer).
+    public void filterSaved(String query) {
+        if (mPostViewModel != null) {
+            mPostViewModel.searchSaved(query);
+        }
+    }
+
+    // "Bypass cache (fetch fresh)" toggle on the Saved screen: drop the hard-TTL cache and reload
+    // the whole history from the network.
+    public void forceFreshSaved() {
+        if (mPostViewModel != null) {
+            mPostViewModel.forceFreshSavedLoad();
+        }
+    }
+
+    // A thing was saved/unsaved in-app: drop the in-memory Saved search cache so a search in progress
+    // refetches rather than re-surfacing the just-changed item.
+    public void onSavedThingChanged() {
+        if (mPostViewModel != null) {
+            mPostViewModel.invalidateInMemorySavedSearchCache();
+        }
+    }
+
     @Override
     public void refresh() {
         binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
@@ -1378,6 +1402,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             return;
         }
         saveCache();
+        // Drop any cached Saved-search listing so a refresh while a search is active refetches.
+        if (mPostViewModel != null) {
+            mPostViewModel.invalidateSavedSearchCache();
+        }
         mAdapter.refresh();
         goBackToTop();
     }

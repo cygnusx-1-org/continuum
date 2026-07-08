@@ -1853,7 +1853,9 @@
     <string name="post_removed_status">This post is removed</string>
     <string name="post_spam_status">This post is removed as spam</string>
     <string name="comment_removed_status">This comment is removed</string>
-    <string name="recover_post">Recover post</string>
+    <string name="recover_post">Recover Post</string>
+    <string name="action_bypass_saved_cache">Bypass cache</string>
+    <string name="bypass_saved_cache_on">Fetching fresh saved posts…</string>
     <string name="fetching_removed_post">Fetching removed post</string>
     <string name="show_removed_post_failed">Could not find the removed post</string>
     <string name="comment_spam_status">This comment is removed as spam</string>

@@ -435,6 +435,10 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         if (isInLazyMode) {
             stopLazyMode();
         }
+        // Drop any cached Saved-search listing so a refresh while a search is active refetches.
+        if (mHistoryPostViewModel != null) {
+            mHistoryPostViewModel.invalidateSavedSearchCache();
+        }
         mAdapter.refresh();
         goBackToTop();
     }
@@ -540,6 +544,21 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         binding.recyclerViewHistoryPostFragment.setLayoutManager(layoutManager);
         if (previousPosition > 0) {
             binding.recyclerViewHistoryPostFragment.scrollToPosition(previousPosition);
+        }
+    }
+
+    // Client-side search used by the Saved screen's Local Posts tab.
+    public void filterSaved(String query) {
+        if (mHistoryPostViewModel != null) {
+            mHistoryPostViewModel.searchSaved(query);
+        }
+    }
+
+    // A post was saved/unsaved in-app: drop the in-memory Saved search cache so a search in progress
+    // on the Local Posts tab refetches rather than re-surfacing the just-changed post.
+    public void onSavedThingChanged() {
+        if (mHistoryPostViewModel != null) {
+            mHistoryPostViewModel.invalidateSavedSearchCache();
         }
     }
 

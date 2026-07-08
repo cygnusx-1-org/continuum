@@ -125,6 +125,7 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
@@ -1831,6 +1832,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                         mPost.setSaved(false);
                                         LocalSaved.onUnsaved(mRedditDataRoomDatabase, mExecutor,
                                                 mAccountName, mPost.getFullName());
+                                        SavedPostCacheNotifier.onSavedPostChanged();
                                         PostDetailBaseViewHolder.this.saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                         Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
                                         mPostDetailRecyclerViewAdapterCallback.updatePost(mPost);
@@ -1862,6 +1864,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                         mPost.setSaved(true);
                                         LocalSaved.onSaved(mRedditDataRoomDatabase, mExecutor,
                                                 mOauthRetrofit, mAccessToken, mAccountName, mPost.getFullName());
+                                        SavedPostCacheNotifier.onSavedPostChanged();
                                         PostDetailBaseViewHolder.this.saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                         Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
                                         mPostDetailRecyclerViewAdapterCallback.updatePost(mPost);

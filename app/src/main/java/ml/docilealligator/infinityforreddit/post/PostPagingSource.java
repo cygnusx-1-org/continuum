@@ -27,6 +27,10 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import ml.docilealligator.infinityforreddit.utils.SavedPostCache;
+import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
+import ml.docilealligator.infinityforreddit.utils.SavedThingSearchFilter;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,6 +55,9 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     public static final String USER_WHERE_SAVED = "saved";
 
     private static final int HTTP_INTERNAL_SERVER_ERROR = 500;
+    // Reddit caps a user's saved listing at ~1000 items (100/page), so this bounds the load-all
+    // saved search while comfortably covering the whole listing.
+    private static final int SAVED_SEARCH_MAX_PAGES = 15;
 
     private final Executor executor;
     private final Retrofit retrofit;
@@ -68,6 +75,16 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private final PostFilter postFilter;
     private final ReadPostsListInterface readPostsList;
     private String userWhere;
+    private String searchQuery;
+    // Full unfiltered saved listing, shared with the ViewModel so a refined query filters the
+    // already-loaded items in memory instead of re-walking the whole listing (null when not the
+    // saved-search path).
+    @Nullable
+    private SavedSearchCache<Post> savedSearchCache;
+    // Accumulated raw t3 listing children for the persistent SavedPostCache (saved feed only), built
+    // as pages are walked so a later Saved tab open can be served from disk with no network call.
+    private final JSONArray savedCacheChildren = new JSONArray();
+    private final Set<String> savedCacheSeenFullnames = new HashSet<>();
     private String multiRedditPath;
     private final List<Post> posts;
     private final Set<String> existingPostIds = new HashSet<>();
@@ -160,7 +177,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                      @Nullable String accessToken, @NonNull String accountName,
                      SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
                      String subredditOrUserName, @PostType int postType, SortType sortType, PostFilter postFilter,
-                     String where, ReadPostsListInterface readPostsList) {
+                     String where, String searchQuery, @Nullable SavedSearchCache<Post> savedSearchCache,
+                     ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -173,6 +191,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.sortType = sortType == null ? new SortType(SortType.Type.NEW) : sortType;
         this.postFilter = postFilter;
         userWhere = where;
+        this.searchQuery = searchQuery;
+        this.savedSearchCache = savedSearchCache;
         this.readPostsList = readPostsList;
         posts = new ArrayList<>();
     }
@@ -228,42 +248,57 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     public LoadResult<String, Post> transformData(Response<String> response) {
-        if (response.isSuccessful()) {
-            String responseString = response.body();
-            LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostsList);
-            String lastItem = ParsePost.getLastItem(responseString);
-            if (newPosts == null) {
-                return new LoadResult.Error<>(new Exception("Error parsing posts"));
-            } else {
-                int currentPostsSize = posts.size();
-                if (lastItem != null && lastItem.equals(previousLastItem)) {
-                    lastItem = null;
-                }
-                previousLastItem = lastItem;
-
-                if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
-                    setMetadataToAnonymousPosts(newPosts);
-                }
-
-                for (Post p : newPosts) {
-                    if (existingPostIds.contains(p.getId())) {
-                        continue;
-                    }
-
-                    existingPostIds.add(p.getId());
-                    posts.add(p);
-                }
-
-                if (currentPostsSize == posts.size()) {
-                    return new LoadResult.Page<>(new ArrayList<>(), null, lastItem);
-                } else {
-                    // Copy the slice: subList() is a live view of posts, which a later load()
-                    // structurally modifies via add(), invalidating the view (CME on iteration).
-                    return new LoadResult.Page<>(new ArrayList<>(posts.subList(currentPostsSize, posts.size())), null, lastItem);
-                }
-            }
-        } else {
+        if (!response.isSuccessful()) {
             return new LoadResult.Error<>(new Exception("Error getting response"));
+        }
+        return transformData(parseListing(response.body()));
+    }
+
+    // Parses the response body once and shares it (versus re-parsing for the posts and the `after`
+    // separately, plus again for the Saved cache). Returns null on a null/malformed body.
+    @Nullable
+    private static JSONObject parseListing(String body) {
+        if (body == null) {
+            return null;
+        }
+        try {
+            return new JSONObject(body);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    private LoadResult<String, Post> transformData(JSONObject json) {
+        LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(json, -1, postFilter, readPostsList);
+        if (newPosts == null) {
+            return new LoadResult.Error<>(new Exception("Error parsing posts"));
+        }
+        String lastItem = ParsePost.getLastItem(json);
+        int currentPostsSize = posts.size();
+        if (lastItem != null && lastItem.equals(previousLastItem)) {
+            lastItem = null;
+        }
+        previousLastItem = lastItem;
+
+        if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
+            setMetadataToAnonymousPosts(newPosts);
+        }
+
+        for (Post p : newPosts) {
+            if (existingPostIds.contains(p.getId())) {
+                continue;
+            }
+
+            existingPostIds.add(p.getId());
+            posts.add(p);
+        }
+
+        if (currentPostsSize == posts.size()) {
+            return new LoadResult.Page<>(new ArrayList<>(), null, lastItem);
+        } else {
+            // Copy the slice: subList() is a live view of posts, which a later load()
+            // structurally modifies via add(), invalidating the view (CME on iteration).
+            return new LoadResult.Page<>(new ArrayList<>(posts.subList(currentPostsSize, posts.size())), null, lastItem);
         }
     }
 
@@ -372,8 +407,142 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
     }
 
+    private boolean isSavedSearchActive() {
+        return searchQuery != null && !searchQuery.trim().isEmpty();
+    }
+
+    // The server-side Saved posts tab, the only user feed the hard-TTL SavedPostCache applies to.
+    private boolean isSavedFeed() {
+        return postType == PostType.USER && USER_WHERE_SAVED.equals(userWhere);
+    }
+
     private ListenableFuture<LoadResult<String, Post>> loadUserPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
+        boolean reset = loadParams.getKey() == null;
+
+        if (isSavedSearchActive()) {
+            // A refined query reuses the listing already walked for this search session (see
+            // SavedSearchCache), so only the first query of a session hits the network.
+            List<Post> cached = savedSearchCache != null ? savedSearchCache.snapshot() : null;
+            if (cached != null) {
+                return Futures.immediateFuture(filterToPage(cached));
+            }
+            // First search after a tab reopen: if the persistent cache holds the whole saved list and
+            // is still fresh, filter it instead of re-walking the network.
+            if (reset && isSavedFeed() && SavedPostCache.isFresh(accountName, userWhere)) {
+                SavedPostCache.Cached hit = SavedPostCache.load(accountName, userWhere, postFilter, readPostsList);
+                if (hit != null && hit.complete) {
+                    if (savedSearchCache != null) {
+                        savedSearchCache.set(hit.posts);
+                    }
+                    return Futures.immediateFuture(filterToPage(hit.posts));
+                }
+            }
+            // Load the entire saved listing up front, then filter, so every match is presented at
+            // once (with the normal loading indicator) rather than trickling in as pages arrive.
+            return catchErrors(loadAllUserPostsFiltered(api, loadParams.getKey(), 0));
+        }
+
+        // Tab open (no search): serve the whole saved list from the fresh persistent cache with no
+        // network call. nextKey null == "no more" (the cache holds the entire list).
+        if (reset && isSavedFeed() && SavedPostCache.isFresh(accountName, userWhere)) {
+            SavedPostCache.Cached hit = SavedPostCache.load(accountName, userWhere, postFilter, readPostsList);
+            if (hit != null && hit.complete) {
+                return Futures.immediateFuture(new LoadResult.Page<>(hit.posts, null, null));
+            }
+        }
         return catchErrors(loadUserPostsWithKey(api, loadParams.getKey()));
+    }
+
+    private LoadResult<String, Post> filterToPage(List<Post> unfiltered) {
+        List<Post> filtered = new ArrayList<>();
+        for (Post p : unfiltered) {
+            if (SavedThingSearchFilter.matches(p, searchQuery)) {
+                filtered.add(p);
+            }
+        }
+        return new LoadResult.Page<>(filtered, null, null);
+    }
+
+    // Collect this page's raw t3 children (deduped, in order) for the persistent SavedPostCache. The
+    // whole unfiltered t3 listing is stored -- the current postFilter is re-applied on load -- so a
+    // filter change needs no invalidation. Takes the already-parsed listing to avoid re-parsing.
+    private void accumulateSavedCacheChildren(JSONObject json) {
+        if (json == null) {
+            return;
+        }
+        try {
+            JSONArray children = json.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
+            for (int i = 0; i < children.length(); i++) {
+                JSONObject child = children.getJSONObject(i);
+                // Saved listings interleave t1 comments; the posts tab keeps only submissions.
+                if (!"t3".equals(child.optString(JSONUtils.KIND_KEY))) {
+                    continue;
+                }
+                String fullname = child.getJSONObject(JSONUtils.DATA_KEY).optString(JSONUtils.NAME_KEY);
+                if (fullname.isEmpty() || !savedCacheSeenFullnames.add(fullname)) {
+                    continue;
+                }
+                savedCacheChildren.put(child);
+            }
+        } catch (JSONException e) {
+            // A malformed page just means a smaller cache; never fail the load over it.
+        }
+    }
+
+    // Walks the saved/user listing from afterKey to the end (accumulating into `posts` with dedup),
+    // then returns every post that matches the search query as a single terminal page (next key
+    // null). Bounded by SAVED_SEARCH_MAX_PAGES; transformData's previousLastItem guard and the finite
+    // listing also terminate it.
+    private ListenableFuture<LoadResult<String, Post>> loadAllUserPostsFiltered(RedditAPI api, String afterKey, int pagesLoaded) {
+        ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
+        return Futures.transformAsync(userPosts, response -> {
+            if (!response.isSuccessful()) {
+                LoadResult<String, Post> error = new LoadResult.Error<>(new Exception("Error getting response"));
+                return Futures.immediateFuture(error);
+            }
+            JSONObject json = parseListing(response.body());
+            LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(json, -1, postFilter, readPostsList);
+            if (newPosts == null) {
+                LoadResult<String, Post> error = new LoadResult.Error<>(new Exception("Error parsing posts"));
+                return Futures.immediateFuture(error);
+            }
+            String lastItem = ParsePost.getLastItem(json);
+            boolean repeated = lastItem != null && lastItem.equals(previousLastItem);
+            previousLastItem = lastItem;
+
+            for (Post p : newPosts) {
+                if (!existingPostIds.contains(p.getId())) {
+                    existingPostIds.add(p.getId());
+                    posts.add(p);
+                }
+            }
+
+            // Keep the raw t3 children so a complete walk can be persisted for the Saved tab cache.
+            if (isSavedFeed()) {
+                accumulateSavedCacheChildren(json);
+            }
+
+            int nextPagesLoaded = pagesLoaded + 1;
+            // Genuine end = Reddit gave a null/empty `after`. A repeated cursor also stops the walk
+            // (defensive), but it may mean we stopped short, so it does NOT count the list as complete.
+            boolean genuineEnd = lastItem == null || lastItem.isEmpty();
+            boolean atEnd = genuineEnd || repeated || nextPagesLoaded >= SAVED_SEARCH_MAX_PAGES;
+            if (!atEnd) {
+                return loadAllUserPostsFiltered(api, lastItem, nextPagesLoaded);
+            }
+
+            // Cache the full unfiltered walk so refining the query filters it in memory instead of
+            // re-walking the listing over the network.
+            if (savedSearchCache != null) {
+                savedSearchCache.set(posts);
+            }
+            // Persist to disk so a later tab open is instant -- only when we truly reached the end
+            // (a capped or repeated-cursor walk is not known to be the complete list).
+            if (isSavedFeed() && genuineEnd) {
+                SavedPostCache.store(accountName, userWhere, savedCacheChildren, true);
+            }
+            return Futures.immediateFuture(filterToPage(posts));
+        }, executor);
     }
 
     // Saved/upvoted/downvoted/hidden listings interleave posts (t3) and comments (t1). A page that
@@ -386,11 +555,30 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private ListenableFuture<LoadResult<String, Post>> loadUserPostsWithKey(RedditAPI api, String afterKey) {
         ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
         return Futures.transformAsync(userPosts, response -> {
-            LoadResult<String, Post> result = transformData(response);
+            if (!response.isSuccessful()) {
+                return Futures.immediateFuture(new LoadResult.Error<>(new Exception("Error getting response")));
+            }
+            // Parse once and share the listing between transformData and the Saved-cache accumulation.
+            JSONObject json = parseListing(response.body());
+            LoadResult<String, Post> result = transformData(json);
+            // Accumulate raw children as the user pages so that reaching the end via normal browsing
+            // (not just search) warms the persistent Saved cache too.
+            if (isSavedFeed()) {
+                accumulateSavedCacheChildren(json);
+            }
             if (result instanceof LoadResult.Page) {
                 LoadResult.Page<String, Post> page = (LoadResult.Page<String, Post>) result;
                 if (page.getData().isEmpty() && page.getNextKey() != null) {
                     return loadUserPostsWithKey(api, page.getNextKey());
+                }
+                // Persist as complete only when Reddit genuinely ended the listing (null/empty
+                // `after`). A null next key can also come from the repeated-cursor guard, which may
+                // mean we stopped short -- getLastItem gives the raw `after` to tell them apart.
+                if (isSavedFeed() && page.getNextKey() == null) {
+                    String after = ParsePost.getLastItem(json);
+                    if (after == null || after.isEmpty()) {
+                        SavedPostCache.store(accountName, userWhere, savedCacheChildren, true);
+                    }
                 }
             }
             return Futures.immediateFuture(result);

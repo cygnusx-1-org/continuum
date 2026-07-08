@@ -126,6 +126,7 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
@@ -2731,6 +2732,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                                 post.setSaved(false);
                                                 LocalSaved.onUnsaved(mRedditDataRoomDatabase, mExecutor,
                                                         mAccountName, post.getFullName());
+                                                SavedPostCacheNotifier.onSavedPostChanged();
                                                 if (getBindingAdapterPosition() == position) {
                                                     saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                                 }
@@ -2766,6 +2768,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                                 post.setSaved(true);
                                                 LocalSaved.onSaved(mRedditDataRoomDatabase, mExecutor,
                                                         mOauthRetrofit, mAccessToken, mAccountName, post.getFullName());
+                                                SavedPostCacheNotifier.onSavedPostChanged();
                                                 if (getBindingAdapterPosition() == position) {
                                                     saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                                 }

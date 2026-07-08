@@ -21,6 +21,7 @@ import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.moderation.CommentModerationEvent;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,6 +37,11 @@ public class CommentViewModel extends ViewModel {
     private final LiveData<Boolean> hasCommentLiveData;
     private final LiveData<PagedList<Comment>> comments;
     private final MutableLiveData<SortType> sortTypeLiveData;
+    private String currentSearchQuery = "";
+    // Full unfiltered saved-comments listing shared with the data source so a refined query filters
+    // it in memory instead of re-walking the listing. Invalidated on sort change, refresh, search
+    // cleared.
+    private final SavedSearchCache<Comment> savedSearchCache = new SavedSearchCache<>();
     public final SingleLiveEvent<CommentModerationEvent> commentModerationEventLiveData = new SingleLiveEvent<>();
 
     public CommentViewModel(Executor executor, Handler handler, Retrofit retrofit, @Nullable String accessToken,
@@ -45,7 +51,8 @@ public class CommentViewModel extends ViewModel {
         this.accessToken = accessToken;
         this.accountName = accountName;
         commentDataSourceFactory = new CommentDataSourceFactory(executor, handler, retrofit, accessToken,
-                accountName, username, sortType, areSavedComments, areLocalSavedComments, redditDataRoomDatabase);
+                accountName, username, sortType, areSavedComments, areLocalSavedComments, savedSearchCache,
+                redditDataRoomDatabase);
 
         initialLoadingState = Transformations.switchMap(commentDataSourceFactory.getCommentDataSourceLiveData(),
                 CommentDataSource::getInitialLoadStateLiveData);
@@ -87,7 +94,16 @@ public class CommentViewModel extends ViewModel {
     }
 
     public void refresh() {
+        // Drop any cached Saved-search listing so a refresh while a search is active refetches.
+        savedSearchCache.invalidate();
         commentDataSourceFactory.getCommentDataSource().invalidate();
+    }
+
+    // Drops only the in-memory Saved search cache. Used after an in-app comment save/unsave so a
+    // search in progress on a Saved comments tab refetches instead of re-filtering a stale list that
+    // still holds the just-changed comment.
+    public void invalidateInMemorySavedSearchCache() {
+        savedSearchCache.invalidate();
     }
 
     public void retryLoadingMore() {
@@ -95,7 +111,22 @@ public class CommentViewModel extends ViewModel {
     }
 
     public void changeSortType(SortType sortType) {
+        // A different sort reorders the saved listing, so the cached search copy is stale.
+        savedSearchCache.invalidate();
         sortTypeLiveData.postValue(sortType);
+    }
+
+    // Client-side search used by the Saved screen's (Local) Comments tabs. Only a distinct query
+    // reaches the factory, so a debounced live query does not repeatedly invalidate the data source.
+    public void search(String query) {
+        String normalized = query == null ? "" : query;
+        if (!normalized.equals(currentSearchQuery)) {
+            currentSearchQuery = normalized;
+            if (normalized.isEmpty()) {
+                savedSearchCache.invalidate();
+            }
+            commentDataSourceFactory.changeQuery(normalized);
+        }
     }
 
     public void approveComment(Comment comment, int position) {
