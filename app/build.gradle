@@ -121,6 +121,11 @@ android {
             shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        beta {
+            initWith buildTypes.release
+            applicationIdSuffix '.beta'
+            resValue "string", "app_name", "Continuum Beta"
+        }
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
