@@ -124,7 +124,9 @@ android {
         beta {
             initWith buildTypes.release
             applicationIdSuffix '.beta'
-            resValue "string", "app_name", "Continuum Beta"
+            // On-screen app name is overridden via the src/beta/res/values/strings.xml
+            // application_name string (mirroring src/debug), which is what the launcher label
+            // and toolbar actually use.
         }
         debug {
             applicationIdSuffix '.debug'
