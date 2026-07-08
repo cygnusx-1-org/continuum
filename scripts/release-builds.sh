@@ -8,6 +8,16 @@ if [ -z "$VERSION_NAME" ]; then
   exit 1
 fi
 
+# Release variant: "release" (default; publishes to the continuum repo) or "beta" (builds the
+# beta variant and publishes to the continuum-beta repo). Set from the optional leading CLI
+# argument in the dispatch section at the bottom.
+VARIANT="release"
+
+# The beta GitHub release is published in the separate continuum-beta repo, which requires the
+# release's git tag to exist there. continuum-beta is a placeholder (not a fork), so pushing the
+# tag also uploads the commit it points at. Tags still go to origin (continuum) as well.
+BETA_GIT_REMOTE="git@github.com:cygnusx-1-org/continuum-beta.git"
+
 # build.gradle
 BUILD_GRADLE_FILENAME="app/build.gradle"
 
@@ -77,14 +87,24 @@ ${RELEVANT_COMMIT_MESSAGES}"
   # Creating new tag for the new release
   git tag -a "${VERSION_NAME}" -m "Version ${VERSION_NAME}"
 
-  # Push tags to the git repository
+  # Push tags to the git repository (origin = the non-beta continuum repo)
   git push --tags
+
+  # A beta release is published as a GitHub release in the separate continuum-beta repo, which
+  # needs this tag to exist there too. Push it (and the commit it points at) to continuum-beta.
+  if [ "${VARIANT}" = "beta" ]; then
+    git push "${BETA_GIT_REMOTE}" "refs/tags/${VERSION_NAME}"
+  fi
 }
 
-# Section 2: "./gradlew assembleRelease"
+# Section 2: "./gradlew assembleRelease" (or assembleBeta for the beta variant)
 2() {
-  # Creating apk in app/build/outputs/apk/Release
-  ./gradlew assembleRelease
+  # Creating apk in app/build/outputs/apk/<variant>
+  if [ "${VARIANT}" = "beta" ]; then
+    ./gradlew assembleBeta
+  else
+    ./gradlew assembleRelease
+  fi
 
   RC="${?}"
 
@@ -96,14 +116,25 @@ ${RELEVANT_COMMIT_MESSAGES}"
 
 # Section 3: everything after "./gradlew assembleRelease"
 3() {
-  # Creating .apk in app/build/outputs/apk/Release, and uploading it to git repository in GitHub as a new release.
-  scripts/release-github.sh "${RELEVANT_COMMIT_MESSAGES}"
+  # Build the APKs and upload them to GitHub as a new release (continuum for release,
+  # continuum-beta for beta).
+  scripts/release-github.sh "${VARIANT}" "${RELEVANT_COMMIT_MESSAGES}"
 
+  # Push the release commit (e.g. the CHANGELOG update) to origin, the non-beta continuum repo.
   git push
 }
 
+# Optional leading variant argument (release|beta). Defaults to release; "beta" builds the beta
+# variant and publishes to the continuum-beta repo.
+case "${1}" in
+  release|beta)
+    VARIANT="${1}"
+    shift
+    ;;
+esac
+
 # Dispatch: run all sections in order by default, or an individual section
-# when its name is passed as the first argument.
+# when its name is passed as the (next) argument.
 case "${1}" in
   1) 1 ;;
   2) 2 ;;
@@ -114,7 +145,7 @@ case "${1}" in
     3
     ;;
   *)
-    echo "Usage: ${0} [1|2|3|all]"
+    echo "Usage: ${0} [release|beta] [1|2|3|all]"
     exit 1
     ;;
 esac

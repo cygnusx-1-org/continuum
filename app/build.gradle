@@ -197,9 +197,15 @@ if (githubPropertiesFile.exists()) {
     githubRelease {
         def releaseNotes = System.getenv("RELEASE_NOTES") ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
 
+        // RELEASE_VARIANT (set by scripts/release-github.sh) selects where the release is
+        // published: "beta" targets the separate continuum-beta repo with the beta APKs;
+        // anything else is a normal release to the continuum repo.
+        def isBeta = (System.getenv("RELEASE_VARIANT") ?: "release") == "beta"
+        def apkDirName = isBeta ? "beta" : "release"
+
         token = githubProperties["githubToken"]
         owner = "cygnusx-1-org"
-        repo = "continuum"
+        repo = isBeta ? "continuum-beta" : "continuum"
         tagName = android.defaultConfig.versionName ?: "default-version"
         targetCommitish = "master"
         releaseName = "Release ${android.defaultConfig.versionName ?: "default-version"}"
@@ -208,10 +214,10 @@ if (githubPropertiesFile.exists()) {
         prerelease = false
         overwrite = false
 
-        // Dynamically set releaseAssets by searching the APK path
-        def apkFiles = fileTree(dir: "build/outputs/apk/release/", include: "*.apk").files.toList()
+        // Dynamically set releaseAssets by searching the APK path for the selected variant
+        def apkFiles = fileTree(dir: "build/outputs/apk/${apkDirName}/", include: "*.apk").files.toList()
         if (apkFiles.isEmpty()) {
-            println("Warning: No APK files found in the directory 'build/outputs/apk/release/'.")
+            println("Warning: No APK files found in the directory 'build/outputs/apk/${apkDirName}/'.")
         } else {
             releaseAssets = apkFiles
         }

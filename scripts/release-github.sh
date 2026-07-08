@@ -1,10 +1,28 @@
 #!/bin/bash
 
-# Guard the release APK output before uploading anything to GitHub. Stale APKs
-# from previous builds accumulate here, and a dirty tree taints the version
-# suffix — either would ship the wrong artifact to a release.
-APK_DIR="app/build/outputs/apk/release"
+# Optional leading variant argument (release|beta); defaults to release. "beta" builds the beta
+# variant and publishes the GitHub release to the continuum-beta repo (selected in
+# app/build.gradle via the RELEASE_VARIANT env var). Backward compatible with the previous
+# single-argument (release notes) invocation.
+VARIANT="release"
+case "${1}" in
+  release|beta)
+    VARIANT="${1}"
+    shift
+    ;;
+esac
 
+if [ "${VARIANT}" = "beta" ]; then
+  APK_DIR="app/build/outputs/apk/beta"
+  ASSEMBLE_TASK="assembleBeta"
+else
+  APK_DIR="app/build/outputs/apk/release"
+  ASSEMBLE_TASK="assembleRelease"
+fi
+
+# Guard the APK output before uploading anything to GitHub. Stale APKs from previous builds
+# accumulate here, and a dirty tree taints the version suffix — either would ship the wrong
+# artifact to a release.
 shopt -s nullglob
 ARM64_APKS=("${APK_DIR}"/*arm64-v8a*.apk)
 ARMEABI_APKS=("${APK_DIR}"/*armeabi-v7a*.apk)
@@ -31,8 +49,10 @@ fi
 
 RELEASE_NOTES="${1}"
 export RELEASE_NOTES
+export RELEASE_VARIANT="${VARIANT}"
 
+echo "Release variant: ${VARIANT}"
 echo "Release notes set to: $RELEASE_NOTES"
 
-./gradlew assembleRelease
+./gradlew "${ASSEMBLE_TASK}"
 ./gradlew githubRelease
