@@ -2,6 +2,13 @@
 
 ---
 
+8.3.0.1-beta3 / 2026-7-9
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed YouTube title suggestion via oEmbed and hardened the scraper<F12>
+* Updated to upstream's 8.3.0-beta3 with video markdown and reminders
+
 8.2.5.9.9.6 / 2026-7-6
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
