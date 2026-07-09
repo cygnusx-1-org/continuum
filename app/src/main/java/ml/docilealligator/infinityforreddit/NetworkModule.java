@@ -23,6 +23,7 @@ import ml.docilealligator.infinityforreddit.network.SortTypeConverterFactory;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import okhttp3.ConnectionPool;
+import okhttp3.EventListener;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -208,6 +209,24 @@ abstract class NetworkModule {
     @Singleton
     static Retrofit provideOauthWithoutAuthenticatorRetrofit(@Named("base") Retrofit retrofit) {
         return retrofit.newBuilder().baseUrl(APIUtils.OAUTH_API_BASE_URI).build();
+    }
+
+    @Provides
+    @Named("title_suggestion")
+    @Singleton
+    static Retrofit provideTitleSuggestionRetrofit(@Named("base") Retrofit retrofit,
+        @Named("base") OkHttpClient httpClient) {
+        // Title suggestion fetches whatever URL the user typed into the link field. The bare base
+        // client keeps Reddit credentials off those third-party hosts, and detaching the event
+        // listener keeps them out of the API monitor's stats. The localhost base URL is never
+        // resolved against — every @Url is absolute — but it stops a hypothetical relative one
+        // from silently resolving against a Reddit host.
+        return retrofit.newBuilder()
+                .baseUrl("http://localhost/")
+                .client(httpClient.newBuilder()
+                        .eventListenerFactory(call -> EventListener.NONE)
+                        .build())
+                .build();
     }
 
     @Provides
