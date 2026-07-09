@@ -1,53 +1,137 @@
 package ml.docilealligator.infinityforreddit.customviews.compose
 
+import android.R.attr.fontWeight
+import android.R.attr.lineHeight
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 
 @Composable
-fun PrimaryText(stringResourceId: Int, textAlign: TextAlign? = null) {
+fun PrimaryText(
+    stringResourceId: Int,
+    modifier: Modifier = Modifier,
+    fontFamily: FontFamily? = LocalTypography.current.fontFamily,
+    fontSize: TextUnit = LocalTypography.current.fontSize.default,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified
+) {
     Text(
         stringResource(stringResourceId),
+        modifier = modifier,
         color = Color(LocalAppTheme.current.primaryTextColor),
-        textAlign = textAlign
+        fontFamily = fontFamily,
+        fontSize = fontSize,
+        textAlign = textAlign,
+        fontWeight = fontWeight,
+        lineHeight = lineHeight
     )
 }
 
 @Composable
-fun PrimaryText(text: String, textAlign: TextAlign? = null) {
+fun PrimaryText(
+    text: String,
+    modifier: Modifier = Modifier,
+    fontFamily: FontFamily? = LocalTypography.current.fontFamily,
+    fontSize: TextUnit = LocalTypography.current.fontSize.default,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified
+) {
     Text(
-        text,
+        text = text,
+        modifier = modifier,
         color = Color(LocalAppTheme.current.primaryTextColor),
-        textAlign = textAlign
+        fontFamily = fontFamily,
+        fontSize = fontSize,
+        textAlign = textAlign,
+        fontWeight = fontWeight,
+        lineHeight = lineHeight
     )
 }
 
 @Composable
-fun SecondaryText(stringResourceId: Int, textAlign: TextAlign? = null) {
+fun SecondaryText(
+    stringResourceId: Int,
+    modifier: Modifier = Modifier,
+    fontFamily: FontFamily? = LocalTypography.current.fontFamily,
+    fontSize: TextUnit = LocalTypography.current.fontSize.default,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified
+) {
     Text(
         stringResource(stringResourceId),
+        modifier = modifier,
         color = Color(LocalAppTheme.current.secondaryTextColor),
-        textAlign = textAlign
+        fontFamily = fontFamily,
+        fontSize = fontSize,
+        textAlign = textAlign,
+        fontWeight = fontWeight,
+        lineHeight = lineHeight
     )
 }
 
 @Composable
-fun SecondaryText(text: String, textAlign: TextAlign? = null) {
+fun SecondaryText(
+    text: String,
+    modifier: Modifier = Modifier,
+    fontFamily: FontFamily? = LocalTypography.current.fontFamily,
+    fontSize: TextUnit = LocalTypography.current.fontSize.default,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified
+) {
     Text(
         text,
+        modifier = modifier,
         color = Color(LocalAppTheme.current.secondaryTextColor),
-        textAlign = textAlign
+        fontFamily = fontFamily,
+        fontSize = fontSize,
+        textAlign = textAlign,
+        fontWeight = fontWeight,
+        lineHeight = lineHeight
     )
 }
 
 @Composable
-fun SecondaryText(text: AnnotatedString, textAlign: TextAlign? = null) {
+fun SecondaryText(
+    text: AnnotatedString,
+    modifier: Modifier = Modifier,
+    fontFamily: FontFamily? = LocalTypography.current.fontFamily,
+    fontSize: TextUnit = LocalTypography.current.fontSize.default,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified
+) {
     Text(
         text,
+        modifier = modifier,
         color = Color(LocalAppTheme.current.secondaryTextColor),
-        textAlign = textAlign
+        fontFamily = fontFamily,
+        fontSize = fontSize,
+        textAlign = textAlign,
+        fontWeight = fontWeight,
+        lineHeight = lineHeight,
+        style = if (textAlign == TextAlign.Justify) LocalTextStyle.current.copy(
+            hyphens = Hyphens.Auto,
+            lineBreak = LineBreak.Paragraph.copy(
+                strategy = LineBreak.Strategy.HighQuality,
+                strictness = LineBreak.Strictness.Strict,
+                wordBreak = LineBreak.WordBreak.Phrase,
+            ),
+            letterSpacing = TextUnit.Unspecified
+        ) else LocalTextStyle.current
     )
 }

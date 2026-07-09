@@ -79,7 +79,6 @@ class ViewPostDetailFragmentViewModelNew(
         val isInitialLoading: Boolean,
         val isInitialLoadingFailed: Boolean,
         val fetchPostFailed: Boolean,
-        val isFetchingComments: Boolean,
         val isRefreshing: Boolean,
         val isLoadingMoreChildren: Boolean,
         val loadMoreChildrenSuccess: Boolean,
@@ -115,7 +114,6 @@ class ViewPostDetailFragmentViewModelNew(
             isInitialLoading = false,
             isInitialLoadingFailed = false,
             fetchPostFailed = false,
-            isFetchingComments = false,
             isRefreshing = false,
             isLoadingMoreChildren = false,
             loadMoreChildrenSuccess = true,
@@ -144,6 +142,17 @@ class ViewPostDetailFragmentViewModelNew(
         _dataState.value = _dataState.value.copy(
             post = post
         )
+    }
+
+    fun updatePostFromEvent(post: Post): Boolean {
+        if (_dataState.value.post?.id == post.id) {
+            _dataState.value = _dataState.value.copy(
+                post = post
+            )
+            return true
+        }
+
+        return false
     }
 
     fun getPost(): Post? {
@@ -285,7 +294,7 @@ class ViewPostDetailFragmentViewModelNew(
         _uiState.value = _uiState.value.copy(
             isInitialLoading = true,
             isInitialLoadingFailed = false,
-            isFetchingComments = true,
+            fetchPostFailed = false,
             shouldShowErrorView = false
         )
 
@@ -294,7 +303,6 @@ class ViewPostDetailFragmentViewModelNew(
             _uiState.value = _uiState.value.copy(
                 isInitialLoading = false,
                 isInitialLoadingFailed = true,
-                isFetchingComments = false,
                 isRefreshing = if (changeRefreshState) false else _uiState.value.isRefreshing
             )
             return
@@ -334,7 +342,6 @@ class ViewPostDetailFragmentViewModelNew(
                         _uiState.value = _uiState.value.copy(
                             isInitialLoading = false,
                             isInitialLoadingFailed = false,
-                            isFetchingComments = false,
                             isRefreshing = if (changeRefreshState) false else _uiState.value.isRefreshing
                         )
                         _dataState.value = _dataState.value.copy(
@@ -346,7 +353,6 @@ class ViewPostDetailFragmentViewModelNew(
                         _uiState.value = _uiState.value.copy(
                             isInitialLoading = false,
                             isInitialLoadingFailed = true,
-                            isFetchingComments = false,
                             isRefreshing = if (changeRefreshState) false else _uiState.value.isRefreshing
                         )
                     }
@@ -355,7 +361,6 @@ class ViewPostDetailFragmentViewModelNew(
                 _uiState.value = _uiState.value.copy(
                     isInitialLoading = false,
                     isInitialLoadingFailed = true,
-                    isFetchingComments = false,
                     isRefreshing = if (changeRefreshState) false else _uiState.value.isRefreshing
                 )
             }
@@ -364,7 +369,6 @@ class ViewPostDetailFragmentViewModelNew(
             _uiState.value = _uiState.value.copy(
                 isInitialLoading = false,
                 isInitialLoadingFailed = true,
-                isFetchingComments = false,
                 isRefreshing = if (changeRefreshState) false else _uiState.value.isRefreshing
             )
         }
@@ -379,7 +383,7 @@ class ViewPostDetailFragmentViewModelNew(
                     _uiState.value = _uiState.value.copy(
                         isInitialLoading = true,
                         isInitialLoadingFailed = false,
-                        isFetchingComments = true,
+                        fetchPostFailed = false,
                         shouldShowErrorView = false
                     )
 
@@ -431,9 +435,7 @@ class ViewPostDetailFragmentViewModelNew(
                     if (response.isSuccessful) {
                         val post = parsePost(response.body())
                         post?.let { post ->
-                            _dataState.value = _dataState.value.copy(
-                                post = post
-                            )
+                            setPost(post)
 
                             commentFilter = fetchCommentFilter(post.subredditName)
 
@@ -449,8 +451,7 @@ class ViewPostDetailFragmentViewModelNew(
                                         )
                                         _uiState.value = _uiState.value.copy(
                                             isInitialLoading = false,
-                                            isInitialLoadingFailed = false,
-                                            isFetchingComments = false
+                                            isInitialLoadingFailed = false
                                         )
                                     }
                                     is AppResult.Error<*> -> {
@@ -463,22 +464,30 @@ class ViewPostDetailFragmentViewModelNew(
                             }
                         } ?: run {
                             _uiState.value = _uiState.value.copy(
+                                isInitialLoading = false,
+                                isInitialLoadingFailed = true,
                                 shouldShowErrorView = true
                             )
                         }
                     } else {
                         _uiState.value = _uiState.value.copy(
+                            isInitialLoading = false,
+                            isInitialLoadingFailed = true,
                             shouldShowErrorView = true
                         )
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _uiState.value = _uiState.value.copy(
+                        isInitialLoading = false,
+                        isInitialLoadingFailed = true,
                         shouldShowErrorView = true
                     )
                 }
             } ?: run {
                 _uiState.value = _uiState.value.copy(
+                    isInitialLoading = false,
+                    isInitialLoadingFailed = true,
                     shouldShowErrorView = true
                 )
             }
@@ -487,7 +496,7 @@ class ViewPostDetailFragmentViewModelNew(
 
     fun fetchMoreComments() {
         viewModelScope.launch {
-            if (_uiState.value.isFetchingComments || _uiState.value.isLoadingMoreChildren || !_uiState.value.loadMoreChildrenSuccess) {
+            if (_uiState.value.isInitialLoading || _uiState.value.isLoadingMoreChildren || !_uiState.value.loadMoreChildrenSuccess) {
                 return@launch
             }
 
@@ -813,6 +822,7 @@ class ViewPostDetailFragmentViewModelNew(
             if (!_uiState.value.isRefreshing) {
                 _uiState.value = _uiState.value.copy(
                     isRefreshing = true,
+                    fetchPostFailed = false,
                     shouldShowErrorView = false
                 )
 
@@ -849,9 +859,7 @@ class ViewPostDetailFragmentViewModelNew(
 
                                         fetchCommentsRespectRecommendedSortSync(true)
                                     } else {
-                                        _dataState.value = _dataState.value.copy(
-                                            post = post
-                                        )
+                                        setPost(post)
 
                                         _uiState.value = _uiState.value.copy(
                                             isRefreshing = false
@@ -1266,9 +1274,7 @@ class ViewPostDetailFragmentViewModelNew(
                             readPostsLimit
                         )
 
-                        _dataState.value = _dataState.value.copy(
-                            post = updatedPost
-                        )
+                        setPost(updatedPost)
                     }
                 }
             }
@@ -1313,11 +1319,9 @@ class ViewPostDetailFragmentViewModelNew(
                         )
                     }
 
-                    _dataState.value = _dataState.value.copy(
-                        post = Post(post).apply {
-                            isSaved = !isSaved
-                        }
-                    )
+                    setPost(Post(post).apply {
+                        isSaved = !isSaved
+                    })
                 } else {
                     accessToken?.let { accessToken ->
                         if (post.isSaved) {
@@ -1422,22 +1426,18 @@ class ViewPostDetailFragmentViewModelNew(
                         )
                     }
 
-                    _dataState.value = _dataState.value.copy(
-                        post = Post(post).apply {
-                            isSaved = !isSaved
-                        }
-                    )
+                    setPost(Post(post).apply {
+                        isSaved = !isSaved
+                    })
                 } else {
                     accessToken?.let { accessToken ->
                         if (post.isHidden) {
                             if (unhidePost(
                                     oauthRetrofit, accessToken, post.fullName
                             )) {
-                                _dataState.value = _dataState.value.copy(
-                                    post = Post(post).apply {
-                                        isHidden = !isHidden
-                                    }
-                                )
+                                setPost(Post(post).apply {
+                                    isHidden = !isHidden
+                                })
 
                                 postModerationEventLiveData.postValue(
                                     PostModerationEvent.Unhid(
@@ -1457,11 +1457,9 @@ class ViewPostDetailFragmentViewModelNew(
                             if (hidePost(
                                     oauthRetrofit, accessToken, post.fullName
                             )) {
-                                _dataState.value = _dataState.value.copy(
-                                    post = Post(post).apply {
-                                        isHidden = !isHidden
-                                    }
-                                )
+                                setPost(Post(post).apply {
+                                    isHidden = !isHidden
+                                })
 
                                 postModerationEventLiveData.postValue(
                                     PostModerationEvent.Hid(

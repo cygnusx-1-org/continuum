@@ -23,6 +23,7 @@ import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.activities.EditCommentActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
+import ml.docilealligator.infinityforreddit.activities.SetReminderActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.comment.Comment;
@@ -123,6 +124,11 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                     }
                 });
             }
+
+            binding.setReminderCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+                SetReminderActivity.Companion.startReminderActivity(activity, comment.getLinkId(), comment);
+                dismiss();
+            });
         }
 
         if (showReplyAndSaveOption) {

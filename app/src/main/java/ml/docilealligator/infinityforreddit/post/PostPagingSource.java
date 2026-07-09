@@ -156,10 +156,10 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.accountName = accountName;
         this.sharedPreferences = sharedPreferences;
         this.postFeedScrolledPositionSharedPreferences = postFeedScrolledPositionSharedPreferences;
-        if (path.endsWith("/")) {
+        if (path != null && path.endsWith("/")) {
             multiRedditPath = path.substring(0, path.length() - 1);
         } else {
-            multiRedditPath = path;
+            multiRedditPath = path == null ? "" : path;
         }
         this.query = query;
         this.postType = postType;
@@ -219,6 +219,17 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         posts = new ArrayList<>();
     }
 
+    public static class PostPagingSourceError extends Exception {
+        public final int code;
+        public final String message;
+
+        PostPagingSourceError(int code, String message) {
+            super(message);
+            this.code = code;
+            this.message = message;
+        }
+    }
+
     @Nullable
     @Override
     public String getRefreshKey(@NonNull PagingState<String, Post> pagingState) {
@@ -249,7 +260,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     public LoadResult<String, Post> transformData(Response<String> response) {
         if (!response.isSuccessful()) {
-            return new LoadResult.Error<>(new Exception("Error getting response"));
+            return new LoadResult.Error<>(new PostPagingSourceError(response.code(), "Error getting response"));
         }
         return transformData(parseListing(response.body()));
     }
@@ -497,7 +508,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
         return Futures.transformAsync(userPosts, response -> {
             if (!response.isSuccessful()) {
-                LoadResult<String, Post> error = new LoadResult.Error<>(new Exception("Error getting response"));
+                LoadResult<String, Post> error = new LoadResult.Error<>(new PostPagingSourceError(response.code(), "Error getting response"));
                 return Futures.immediateFuture(error);
             }
             JSONObject json = parseListing(response.body());
@@ -556,7 +567,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
         return Futures.transformAsync(userPosts, response -> {
             if (!response.isSuccessful()) {
-                return Futures.immediateFuture(new LoadResult.Error<>(new Exception("Error getting response")));
+                return Futures.immediateFuture(new LoadResult.Error<>(new PostPagingSourceError(response.code(), "Error getting response")));
             }
             // Parse once and share the listing between transformData and the Saved-cache accumulation.
             JSONObject json = parseListing(response.body());
@@ -674,7 +685,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 }
             }
         } else {
-            return new LoadResult.Error<>(new Exception("Error getting response"));
+            return new LoadResult.Error<>(new PostPagingSourceError(response.code(), "Error getting response"));
         }
     }
 

@@ -67,13 +67,14 @@ public class DownloadRedditVideoService extends JobService {
     public static final String EXTRA_IS_SHARE = "EIS";
 
     private static final int NO_ERROR = -1;
-    private static final int ERROR_CANNOT_GET_CACHE_DIRECTORY = 0;
-    private static final int ERROR_VIDEO_FILE_CANNOT_DOWNLOAD = 1;
-    private static final int ERROR_VIDEO_FILE_CANNOT_SAVE = 2;
-    private static final int ERROR_AUDIO_FILE_CANNOT_SAVE = 3;
-    private static final int ERROR_MUX_FAILED = 4;
-    private static final int ERROR_MUXED_VIDEO_FILE_CANNOT_SAVE = 5;
-    private static final int ERROR_CANNOT_GET_DESTINATION_DIRECTORY = 6;
+    private static final int ERROR_INVALID_VIDEO_URL = 0;
+    private static final int ERROR_CANNOT_GET_CACHE_DIRECTORY = 1;
+    private static final int ERROR_VIDEO_FILE_CANNOT_DOWNLOAD = 2;
+    private static final int ERROR_VIDEO_FILE_CANNOT_SAVE = 3;
+    private static final int ERROR_AUDIO_FILE_CANNOT_SAVE = 4;
+    private static final int ERROR_MUX_FAILED = 5;
+    private static final int ERROR_MUXED_VIDEO_FILE_CANNOT_SAVE = 6;
+    private static final int ERROR_CANNOT_GET_DESTINATION_DIRECTORY = 7;
 
     private static int JOB_ID = 30000;
 
@@ -88,6 +89,7 @@ public class DownloadRedditVideoService extends JobService {
     @Inject
     Executor executor;
     private NotificationManagerCompat notificationManager;
+    private final String[] possibleVideoUrlSuffices = new String[]{"/CMAF_720.mp4", "/CMAF_480.mp4", "/CMAF_360.mp4"};
     private final String[] possibleAudioUrlSuffices = new String[]{"/CMAF_AUDIO_128.mp4", "/CMAF_AUDIO_64.mp4", "/DASH_AUDIO_128.mp4", "/DASH_audio.mp4", "/DASH_audio", "/audio.mp4", "/audio"};
 
     public DownloadRedditVideoService() {
@@ -161,7 +163,8 @@ public class DownloadRedditVideoService extends JobService {
                     createNotification(builder, notificationTitle)); // Use notificationTitle
         }
 
-        String audioUrlPrefix = Build.VERSION.SDK_INT > Build.VERSION_CODES.N ? videoUrl.substring(0, videoUrl.lastIndexOf('/')) : null;
+        int audioLastSlashIndex = videoUrl.lastIndexOf('/');
+        String audioUrlPrefix = Build.VERSION.SDK_INT > Build.VERSION_CODES.N && audioLastSlashIndex >= 0 ? videoUrl.substring(0, audioLastSlashIndex) : null;
 
         boolean isNsfw = intent.getInt(EXTRA_IS_NSFW, 0) == 1;
 
@@ -453,6 +456,31 @@ public class DownloadRedditVideoService extends JobService {
     }
 
     @Nullable
+    private ResponseBody getVideoResponse(DownloadFile downloadFileRetrofit, @NonNull String videoUrl, int videoSuffixIndex) throws IOException {
+        if (videoSuffixIndex >= possibleVideoUrlSuffices.length) {
+            return null;
+        }
+
+        if (videoSuffixIndex >= 0) {
+            int videoLastSlashIndex = videoUrl.lastIndexOf('/');
+            String videoUrlPrefix = videoLastSlashIndex >= 0 ? videoUrl.substring(0, videoLastSlashIndex) : null;
+            if (videoUrlPrefix == null) {
+                return null;
+            }
+
+            videoUrl = videoUrlPrefix + possibleVideoUrlSuffices[videoSuffixIndex];
+        }
+
+        Response<ResponseBody> videoResponse = downloadFileRetrofit.downloadFile(videoUrl).execute();
+        ResponseBody responseBody = videoResponse.body();
+        if (videoResponse.isSuccessful() && responseBody != null) {
+            return responseBody;
+        }
+
+        return getVideoResponse(downloadFileRetrofit, videoUrl, videoSuffixIndex < 0 ? 0 : videoSuffixIndex + 1);
+    }
+
+    @Nullable
     private ResponseBody getAudioResponse(DownloadFile downloadFileRetrofit, @NonNull String audioUrlPrefix, int audioSuffixIndex) throws IOException {
         if (audioSuffixIndex >= possibleAudioUrlSuffices.length) {
             return null;
@@ -684,6 +712,10 @@ public class DownloadRedditVideoService extends JobService {
     private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, Uri destinationFileUri, int errorCode, int randomNotificationIdOffset) {
         if (errorCode != NO_ERROR) {
             switch (errorCode) {
+                case ERROR_INVALID_VIDEO_URL:
+                    updateNotification(builder, R.string.downloading_reddit_video_failed_invalid_video_url, -1,
+                            randomNotificationIdOffset, null);
+                    break;
                 case ERROR_CANNOT_GET_CACHE_DIRECTORY:
                     updateNotification(builder, R.string.downloading_reddit_video_failed_cannot_get_cache_directory, -1,
                             randomNotificationIdOffset, null);
@@ -713,15 +745,16 @@ public class DownloadRedditVideoService extends JobService {
                             randomNotificationIdOffset, null);
                     break;
             }
+            jobFinished(parameters, false);
         } else {
             MediaScannerConnection.scanFile(
                     this, new String[]{destinationFileUri.toString()}, null,
                     (path, uri) -> {
                         updateNotification(builder, R.string.downloading_reddit_video_finished, -1, randomNotificationIdOffset, destinationFileUri);
+                        jobFinished(parameters, false);
                     }
             );
         }
-        jobFinished(parameters, false);
     }
 
     private Notification createNotification(NotificationCompat.Builder builder, String fileName) {

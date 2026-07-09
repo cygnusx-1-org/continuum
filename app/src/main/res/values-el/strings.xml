@@ -1182,7 +1182,5 @@
     <string name="continue_to_app">"Συνέχεια στην εφαρμογή"</string>
     <string name="restore_subscription_purchase_details">"Πληρώσατε ήδη για τη συνδρομή;"</string>
     <string name="restore_subscription_purchase">"Επαναφορά αγοράς συνδρομής"</string>
-    <string name="important_info_title"></string>
-    <string name="important_info"></string>
     <string name="i_understand"></string>
 </resources>

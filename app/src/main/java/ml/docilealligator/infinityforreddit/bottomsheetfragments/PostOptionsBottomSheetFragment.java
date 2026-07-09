@@ -30,6 +30,7 @@ import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
+import ml.docilealligator.infinityforreddit.activities.SetReminderActivity;
 import ml.docilealligator.infinityforreddit.activities.SubmitCrosspostActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
@@ -300,6 +301,11 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                         dismiss();
                     });
                 }
+
+                binding.setReminderTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    SetReminderActivity.Companion.startReminderActivity(mBaseActivity, mPost, null);
+                    dismiss();
+                });
 
                 binding.reportTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                     Intent intent = new Intent(mBaseActivity, ReportActivity.class);

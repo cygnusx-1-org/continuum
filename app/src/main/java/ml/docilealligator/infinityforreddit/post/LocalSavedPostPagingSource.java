@@ -122,7 +122,7 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
             Response<String> response = oauthRetrofit.create(RedditAPI.class)
                     .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken)).execute();
             if (!response.isSuccessful()) {
-                return new LoadResult.Error<>(new Exception("Response failed"));
+                return new LoadResult.Error<>(new PostPagingSource.PostPagingSourceError(response.code(), "Response failed"));
             }
             LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(response.body(), -1, postFilter,
                     NullReadPostsList.getInstance());
@@ -187,7 +187,7 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
                 }
                 return new LoadResult.Page<>(new ArrayList<>(newPosts), null, Long.toString(lastItem));
             } else {
-                return new LoadResult.Error<>(new Exception("Response failed"));
+                return new LoadResult.Error<>(new PostPagingSource.PostPagingSourceError(response.code(), "Response failed"));
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -92,6 +92,7 @@ import ml.docilealligator.infinityforreddit.events.ShowDividerInCompactLayoutPre
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -176,7 +177,7 @@ public abstract class PostFragmentBase extends Fragment {
                             setCurrentPosition(mLinearLayoutManager.findFirstVisibleItemPosition());
                         } else {
                             int[] into = new int[mStaggeredGridLayoutManager.getSpanCount()];
-                            setCurrentPosition(mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0]);
+                            setCurrentPosition(mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[into.length - 1]);
                         }
                     }
 
@@ -527,7 +528,7 @@ public abstract class PostFragmentBase extends Fragment {
         return false;
     }
 
-    public final void loadIcon(String subredditOrUserName, boolean isSubreddit, LoadIconListener loadIconListener) {
+    public final void loadIcon(String subredditOrUserName, boolean isSubreddit, UserProfileImagesBatchLoader.LoadIconListener loadIconListener) {
         if (subredditOrUserIcons.containsKey(subredditOrUserName)) {
             loadIconListener.loadIconSuccess(subredditOrUserName, subredditOrUserIcons.get(subredditOrUserName));
         } else {
@@ -609,6 +610,7 @@ public abstract class PostFragmentBase extends Fragment {
                 // the post type; propagate them so the feed row matches the recovered detail view.
                 post.setUrl(event.post.getUrl());
                 post.setPostType(event.post.getPostType());
+                post.setMediaMetadataMap(event.post.getMediaMetadataMap());
                 post.setVoteType(event.post.getVoteType());
                 post.setScore(event.post.getScore());
                 post.setNComments(event.post.getNComments());

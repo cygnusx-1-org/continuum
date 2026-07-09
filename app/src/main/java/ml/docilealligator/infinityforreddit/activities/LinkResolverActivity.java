@@ -51,9 +51,6 @@ public class LinkResolverActivity extends AppCompatActivity {
     private static final String MULTIREDDIT_PATTERN_2 = "/[rR]/(\\w+\\+?)+/?";
     private static final String REDD_IT_POST_PATTERN = "/\\w+/?";
     private static final String REDGIFS_PATTERN = "/watch/[\\w-]+$";
-    private static final String IMGUR_GALLERY_PATTERN = "/gallery/\\w+/?";
-    private static final String IMGUR_ALBUM_PATTERN = "/(album|a)/\\w+/?";
-    private static final String IMGUR_IMAGE_PATTERN = "/\\w+/?";
     private static final String REDDIT_IMAGE_PATTERN =  "^/media$";
     private static final String WIKI_PATTERN = "/[rR]/[\\w.-]+/(wiki|w)(?:/[\\w-]+)*";
     private static final String GOOGLE_AMP_PATTERN = "/amp/s/amp.reddit.com/.*";
@@ -130,7 +127,7 @@ public class LinkResolverActivity extends AppCompatActivity {
                 if (path.endsWith(".jpg") || path.endsWith(".png") || path.endsWith(".jpeg")) {
                     Intent intent = new Intent(this, ViewImageOrGifActivity.class);
                     String url = uri.toString();
-                    String fileName = FilenameUtils.getName(path);
+                    String fileName = uri.getLastPathSegment();
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IMAGE_URL_KEY, url);
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, fileName);
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, fileName);
@@ -138,7 +135,7 @@ public class LinkResolverActivity extends AppCompatActivity {
                 } else if (path.endsWith(".gif")) {
                     Intent intent = new Intent(this, ViewImageOrGifActivity.class);
                     String url = uri.toString();
-                    String fileName = FilenameUtils.getName(path);
+                    String fileName = uri.getLastPathSegment();
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, url);
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, fileName);
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, fileName);
@@ -326,31 +323,45 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 deepLinkError(uri);
                             }
                         } else if (authority.contains("imgur.com")) {
-                            if (path.matches(IMGUR_GALLERY_PATTERN)) {
-                                Intent intent = new Intent(this, ViewImgurMediaActivity.class);
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_TYPE, ViewImgurMediaActivity.IMGUR_TYPE_GALLERY);
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_ID, segments.get(1));
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME, getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IS_NSFW, getIntent().getBooleanExtra(EXTRA_IS_NSFW, false));
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY, getIntent().getStringExtra(EXTRA_POST_TITLE_KEY));
-                                startActivity(intent);
-                            } else if (path.matches(IMGUR_ALBUM_PATTERN)) {
-                                Intent intent = new Intent(this, ViewImgurMediaActivity.class);
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_TYPE, ViewImgurMediaActivity.IMGUR_TYPE_ALBUM);
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_ID, segments.get(1));
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME, getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IS_NSFW, getIntent().getBooleanExtra(EXTRA_IS_NSFW, false));
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY, getIntent().getStringExtra(EXTRA_POST_TITLE_KEY));
-                                startActivity(intent);
-                            } else if (path.matches(IMGUR_IMAGE_PATTERN)) {
+                            if (segments.size() == 1) {
                                 Intent intent = new Intent(this, ViewImgurMediaActivity.class);
                                 intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_TYPE, ViewImgurMediaActivity.IMGUR_TYPE_IMAGE);
-                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_ID, path.substring(1));
+                                intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_ID, getImgurId(segments.get(0)));
                                 intent.putExtra(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME, getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
                                 intent.putExtra(ViewImgurMediaActivity.EXTRA_IS_NSFW, getIntent().getBooleanExtra(EXTRA_IS_NSFW, false));
                                 intent.putExtra(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY, getIntent().getStringExtra(EXTRA_POST_TITLE_KEY));
                                 startActivity(intent);
-                            } else if (path.endsWith("gifv") || path.endsWith("mp4")) {
+
+                                finish();
+                                return;
+                            } else if (segments.size() == 2) {
+                                if (segments.get(0).equalsIgnoreCase("gallery")) {
+                                    Intent intent = new Intent(this, ViewImgurMediaActivity.class);
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_TYPE, ViewImgurMediaActivity.IMGUR_TYPE_GALLERY);
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_ID, getImgurId(segments.get(1)));
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME, getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_IS_NSFW, getIntent().getBooleanExtra(EXTRA_IS_NSFW, false));
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY, getIntent().getStringExtra(EXTRA_POST_TITLE_KEY));
+                                    startActivity(intent);
+
+                                    finish();
+                                    return;
+                                } else if (segments.get(0).equalsIgnoreCase("album")
+                                        || segments.get(0).equalsIgnoreCase("a")) {
+                                    Intent intent = new Intent(this, ViewImgurMediaActivity.class);
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_TYPE, ViewImgurMediaActivity.IMGUR_TYPE_ALBUM);
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_IMGUR_ID, getImgurId(segments.get(1)));
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_SUBREDDIT_NAME, getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_IS_NSFW, getIntent().getBooleanExtra(EXTRA_IS_NSFW, false));
+                                    intent.putExtra(ViewImgurMediaActivity.EXTRA_POST_TITLE_KEY, getIntent().getStringExtra(EXTRA_POST_TITLE_KEY));
+                                    startActivity(intent);
+
+                                    finish();
+                                    return;
+                                }
+                            }
+
+                            if (path.endsWith("gifv") || path.endsWith("mp4")) {
                                 String url = uri.toString();
                                 if (path.endsWith("gifv")) {
                                     url = url.substring(0, url.length() - 5) + ".mp4";
@@ -391,6 +402,15 @@ public class LinkResolverActivity extends AppCompatActivity {
 
         }
         finish();
+    }
+
+    private String getImgurId(String pathSegment) {
+        int dashIndex = pathSegment.lastIndexOf('-');
+        if (dashIndex < 0 || dashIndex >= pathSegment.length() - 1) {
+            return pathSegment;
+        }
+
+        return pathSegment.substring(dashIndex + 1);
     }
 
     private void deepLinkError(Uri uri) {

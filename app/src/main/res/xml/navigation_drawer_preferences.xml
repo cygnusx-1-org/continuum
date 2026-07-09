@@ -56,6 +56,11 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
+        app:key="show_reminders_toggle_in_navigation_drawer"
+        app:title="@string/settings_show_reminders_toggle_in_navigation_drawer_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
         app:key="show_theme_toggle_in_navigation_drawer"
         app:title="@string/settings_show_theme_toggle_in_navigation_drawer_title" />
 

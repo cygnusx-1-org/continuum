@@ -96,6 +96,7 @@ import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent;
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -528,24 +529,25 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         viewPostDetailFragmentViewModel.getUiState().observe(getViewLifecycleOwner(), uiState -> {
             RecyclerView recyclerView = mCommentsRecyclerView != null ? mCommentsRecyclerView : binding.postDetailRecyclerViewViewPostDetailFragment;
             mCommentsStatusAdapter.setSingleCommentThreadMode(uiState.getSingleCommentId() != null && !uiState.getSingleCommentId().isEmpty());
-            mCommentsStatusAdapter.setInitiallyLoading(uiState.isInitialLoading());
-            mCommentsStatusAdapter.setInitiallyLoadingFailed(uiState.isInitialLoadingFailed());
+            mCommentsStatusAdapter.setInitialLoading(uiState.isInitialLoading());
+            mCommentsStatusAdapter.setInitialLoadingFailed(uiState.isInitialLoadingFailed());
             recyclerView.post(() -> mCommentsStatusAdapter.notifyDataSetChanged());
 
             mCommentsFooterAdapter.setLoadingMoreChildren(uiState.isLoadingMoreChildren());
             mCommentsFooterAdapter.setLoadMoreChildrenSuccess(uiState.getLoadMoreChildrenSuccess());
             recyclerView.post(() -> mCommentsFooterAdapter.notifyDataSetChanged());
 
+            binding.swipeRefreshLayoutViewPostDetailFragment.setRefreshing((mPost == null && uiState.isInitialLoading()) || uiState.isRefreshing());
+
             if (uiState.isInitialLoading()) {
                 binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.GONE);
-                binding.swipeRefreshLayoutViewPostDetailFragment.setRefreshing(true);
                 mGlide.clear(binding.fetchPostInfoImageViewViewPostDetailFragment);
-            } else {
-                binding.swipeRefreshLayoutViewPostDetailFragment.setRefreshing(false);
 
+                mCommentsAdapter.initiallyLoading();
+            } else {
                 if (uiState.getShouldShowErrorView()) {
                     showErrorView(viewPostDetailFragmentViewModel.getDerivedPostId());
-                } else {
+                } else if (!uiState.isInitialLoadingFailed()) {
                     if (!renderContent()) {
                         return;
                     }
@@ -556,12 +558,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
             if (uiState.getFetchPostFailed()) {
                 showMessage(R.string.refresh_post_failed);
-            }
-
-            if (uiState.isFetchingComments()) {
-                if (mCommentsAdapter != null) {
-                    mCommentsAdapter.initiallyLoading();
-                }
             }
 
             if (uiState.getSortType() != null) {
@@ -588,7 +584,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 }
                 EventBus.getDefault().post(new PostUpdateEventToPostList(dataState.getPost(), postListPosition));
                 setupMenu();
-                binding.swipeRefreshLayoutViewPostDetailFragment.setRefreshing(false);
             }
 
             comments = dataState.getComments();
@@ -660,6 +655,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             VolumeInfo volumeInfo = new VolumeInfo(true, 0f);
             return new PlaybackInfo(INDEX_UNSET, TIME_UNSET, volumeInfo);
         });
+
+        binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setOnClickListener(view -> viewPostDetailFragmentViewModel.fetchPostAndCommentsById(postId));
 
         viewPostDetailFragmentViewModel.getPostModerationEventLiveData().observe(getViewLifecycleOwner(), moderationEvent -> {
             showMessage(moderationEvent.getToastMessageResId());
@@ -733,7 +730,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     }
 
     private void setupMenu() {
-        if (mMenu != null) {
+        if (mMenu != null && mPost != null) {
             MenuItem saveItem = mMenu.findItem(R.id.action_save_view_post_detail_fragment);
             MenuItem hideItem = mMenu.findItem(R.id.action_hide_view_post_detail_fragment);
 
@@ -917,7 +914,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         }
     }
 
-    public void loadIcon(List<Comment> comments, ViewPostDetailActivityViewModel.LoadIconListener loadIconListener) {
+    public void loadIcon(List<Comment> comments, UserProfileImagesBatchLoader.LoadIconListener loadIconListener) {
         mActivity.loadAuthorIcons(comments, loadIconListener);
     }
 
@@ -1239,9 +1236,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     }
 
     private void showErrorView(String postId) {
-        binding.swipeRefreshLayoutViewPostDetailFragment.setRefreshing(false);
         binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.VISIBLE);
-        binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setOnClickListener(view -> viewPostDetailFragmentViewModel.fetchPostAndCommentsById(postId));
         binding.fetchPostInfoTextViewViewPostDetailFragment.setText(R.string.load_post_error);
         mGlide.load(R.drawable.error_image).into(binding.fetchPostInfoImageViewViewPostDetailFragment);
     }
@@ -1496,6 +1491,13 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     public void onFlairSelectedEvent(FlairSelectedEvent event) {
         if (event.viewPostDetailFragmentId == viewPostDetailFragmentId) {
             viewPostDetailFragmentViewModel.changeFlair(event.flair, postListPosition);
+        }
+    }
+
+    @Subscribe
+    public void onPostUpdateEvent(PostUpdateEventToPostList event) {
+        if (viewPostDetailFragmentViewModel.updatePostFromEvent(event.post)) {
+            mActivity.updatePostFromEvent(event.post, postListPosition);
         }
     }
 

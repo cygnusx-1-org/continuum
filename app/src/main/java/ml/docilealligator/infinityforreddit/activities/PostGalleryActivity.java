@@ -132,7 +132,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMemu;
+    private Menu mMenu;
     private RequestManager mGlide;
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
@@ -584,7 +584,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_gallery_activity, menu);
         applyMenuItemTheme(menu);
-        mMemu = menu;
+        mMenu = menu;
         flairController.setPosting(isPosting);
         flairController.setMenu(menu);
         return true;

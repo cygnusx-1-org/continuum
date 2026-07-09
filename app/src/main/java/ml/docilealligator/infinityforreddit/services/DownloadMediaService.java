@@ -51,6 +51,7 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.DownloadedMediaDeleteActionBroadcastReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
+import ml.docilealligator.infinityforreddit.extensions.StringKt;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -167,6 +168,7 @@ public class DownloadMediaService extends JobService {
             } else if (post.isImgur()) {
                 url = post.getVideoUrl();
                 extras.putString(EXTRA_URL, url);
+                extras.putString(EXTRA_FILE_NAME, "Imgur-" + StringKt.getFileNameFromUrlString(post.getVideoUrl()));
             } else { // Standard Reddit video
                 url = post.getVideoUrl();
                 extras.putString(EXTRA_URL, url);
@@ -1123,6 +1125,8 @@ public class DownloadMediaService extends JobService {
                                 -1, randomNotificationIdOffset, null, null);
                         break;
                 }
+
+                jobFinished(parameters, false);
             }
         } else {
             MediaScannerConnection.scanFile(
@@ -1131,13 +1135,11 @@ public class DownloadMediaService extends JobService {
                         if (!multipleDownloads) {
                             updateNotification(builder, mediaType, R.string.downloading_media_finished, -1,
                                     randomNotificationIdOffset, destinationFileUri, mimeType);
+
+                            jobFinished(parameters, false);
                         }
                     }
             );
-        }
-
-        if (!multipleDownloads) {
-            jobFinished(parameters, false);
         }
     }
 }

@@ -13,12 +13,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -80,7 +82,8 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     private String postTitle;
     private boolean isNsfw;
     private String title;
-
+    private boolean useBottomAppBar;
+    private boolean isActionBarHidden = false;
     @Inject
     @Named("imgur")
     Retrofit imgurRetrofit;
@@ -130,7 +133,10 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
         handler = new Handler(Looper.getMainLooper());
 
-        getSupportActionBar().hide();
+        // Continuum removed USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER and always uses the bottom bar
+        // (rotation buttons live in the fragments), so the top toolbar is always hidden.
+        useBottomAppBar = true;
+        binding.toolbarViewImgurMediaActivity.setVisibility(View.GONE);
 
         viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
 
@@ -138,7 +144,12 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
             @NonNull
             @Override
             public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                viewGalleryViewModel.setInsets(Utils.getInsets(insets, false, false));
+                Insets allInsets = Utils.getInsets(insets, false, false);
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.toolbarViewImgurMediaActivity.getLayoutParams();
+                params.topMargin = allInsets.top;
+                binding.toolbarViewImgurMediaActivity.setLayoutParams(params);
+
+                viewGalleryViewModel.setInsets(allInsets);
                 return WindowInsetsCompat.CONSUMED;
             }
         });
@@ -159,13 +170,13 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
         }
 
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
-            binding.getRoot().setOnDragDismissedListener(dragDirection -> {
+            binding.haulerViewViewImgurMediaActivity.setOnDragDismissedListener(dragDirection -> {
                 int slide = dragDirection == DragDirection.UP ? R.anim.slide_out_up : R.anim.slide_out_down;
                 finish();
                 overridePendingTransition(0, slide);
             });
         } else {
-            binding.getRoot().setDragEnabled(false);
+            binding.haulerViewViewImgurMediaActivity.setDragEnabled(false);
         }
 
         if (mImages == null) {
@@ -493,6 +504,21 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     @Override
     public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
         this.typeface = typeface;
+    }
+
+    public boolean isActionBarHidden() {
+        return isActionBarHidden;
+    }
+
+    public boolean isUseBottomAppBar() {
+        return useBottomAppBar;
+    }
+
+    public void setActionBarHidden(boolean isActionBarHidden) {
+        this.isActionBarHidden = isActionBarHidden;
+        if (!useBottomAppBar) {
+            binding.toolbarViewImgurMediaActivity.setVisibility(isActionBarHidden ? View.GONE : View.VISIBLE);
+        }
     }
 
     private class SectionsPagerAdapter extends FragmentStatePagerAdapter {

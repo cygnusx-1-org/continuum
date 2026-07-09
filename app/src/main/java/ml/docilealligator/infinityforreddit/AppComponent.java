@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.activities.PostLinkActivity;
 import ml.docilealligator.infinityforreddit.activities.PostPollActivity;
 import ml.docilealligator.infinityforreddit.activities.PostTextActivity;
 import ml.docilealligator.infinityforreddit.activities.PostVideoActivity;
+import ml.docilealligator.infinityforreddit.activities.ReminderListingActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
 import ml.docilealligator.infinityforreddit.activities.RulesActivity;
 import ml.docilealligator.infinityforreddit.activities.SearchActivity;
@@ -49,6 +50,7 @@ import ml.docilealligator.infinityforreddit.activities.SearchUsersResultActivity
 import ml.docilealligator.infinityforreddit.activities.SelectUserFlairActivity;
 import ml.docilealligator.infinityforreddit.activities.SelectedSubredditsAndUsersActivity;
 import ml.docilealligator.infinityforreddit.activities.SendPrivateMessageActivity;
+import ml.docilealligator.infinityforreddit.activities.SetReminderActivity;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.activities.SubmitCrosspostActivity;
 import ml.docilealligator.infinityforreddit.activities.SubredditMultiselectionActivity;
@@ -71,6 +73,8 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserB
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostOptionsBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.broadcastreceivers.BootCompletedBroadcastReceiver;
+import ml.docilealligator.infinityforreddit.broadcastreceivers.ReminderAlarmReceiver;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.CustomThemeListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.FollowedUsersListingFragment;
@@ -342,6 +346,14 @@ public interface AppComponent {
     void inject(ViewPostDetailFragmentNew viewPostDetailFragmentNew);
 
     void inject(CustomizeTabsOrderActivity customizeTabsOrderActivity);
+
+    void inject(ReminderListingActivity reminderListingActivity);
+
+    void inject(SetReminderActivity setReminderActivity);
+
+    void inject(ReminderAlarmReceiver reminderAlarmReceiver);
+
+    void inject(BootCompletedBroadcastReceiver bootCompletedBroadcastReceiver);
 
     @Component.Factory
     interface Factory {

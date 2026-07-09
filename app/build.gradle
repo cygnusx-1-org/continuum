@@ -92,8 +92,8 @@ android {
 
         minSdk 24
         targetSdk 35
-        versionCode 223
-        versionName "8.2.5.9.9.7-beta2" + gitVersionSuffix()
+        versionCode 224
+        versionName "8.3.0.1-beta3" + gitVersionSuffix()
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }
@@ -387,7 +387,13 @@ dependencies {
     implementation 'androidx.compose.material3:material3:1.5.0-alpha01'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
-    //implementation 'androidx.compose.material3.adaptive:adaptive'
+    implementation'androidx.compose.material3.adaptive:adaptive:1.1.0'
+    configurations.configureEach {
+        resolutionStrategy.force(
+                "androidx.compose.material3.adaptive:adaptive:1.1.0",
+                "androidx.compose.material3.adaptive:adaptive-android:1.1.0"
+        )
+    }
     implementation 'androidx.activity:activity-compose:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4'
     implementation 'androidx.compose.runtime:runtime-livedata'

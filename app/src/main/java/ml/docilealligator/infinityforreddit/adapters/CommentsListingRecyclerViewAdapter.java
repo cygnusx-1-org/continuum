@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.paging.PagedListAdapter;
@@ -60,6 +61,7 @@ import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntr
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
+import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -246,7 +248,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                         Intent intent = new Intent(activity, ViewVideoActivity.class);
                         intent.setData(Uri.parse(mediaMetadata.original.url));
                         intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
-                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, mediaMetadata.original.url);
+                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
                         activity.startActivity(intent);
                     }
                 });
@@ -268,7 +270,9 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof CommentBaseViewHolder) {
-            Comment comment = getItem(holder.getBindingAdapterPosition());
+            // Use the bind position, not getBindingAdapterPosition(): the latter can be NO_POSITION
+            // while the holder is being (re)bound, which would make getItem() throw.
+            Comment comment = getItemAtPosition(position);
             if (comment != null) {
                 String name = "r/" + comment.getSubredditName();
                 ((CommentBaseViewHolder) holder).authorTextView.setText(name);
@@ -364,6 +368,22 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         return super.getItemCount();
     }
 
+    /**
+     * Bounds-safe accessor. Positions reach this adapter from two unsafe places: a ViewHolder that
+     * was detached between a tap and its listener running (NO_POSITION), and a stale position
+     * captured for the comment bottom sheet that survives an EditCommentActivity round-trip, during
+     * which the PagedList may have refreshed. PagedListAdapter.getItem() throws
+     * IndexOutOfBoundsException in both cases, before the call sites' {@code != null} checks run.
+     * Bounds against super.getItemCount() because getItemCount() is overridden to add a footer row.
+     */
+    @Nullable
+    private Comment getItemAtPosition(int position) {
+        if (position < 0 || position >= super.getItemCount()) {
+            return null;
+        }
+        return getItem(position);
+    }
+
     private boolean hasExtraRow() {
         return networkState != null && networkState.getStatus() != NetworkState.Status.SUCCESS;
     }
@@ -403,7 +423,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     }
 
     public void editComment(Comment comment, int position) {
-        Comment oldComment = getItem(position);
+        Comment oldComment = getItemAtPosition(position);
         if (oldComment != null) {
             oldComment.setCommentMarkdown(comment.getCommentMarkdown());
             oldComment.setMediaMetadataMap(comment.getMediaMetadataMap());
@@ -412,7 +432,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     }
 
     public void editComment(String commentContentMarkdown, int position) {
-        Comment comment = getItem(position);
+        Comment comment = getItemAtPosition(position);
         if (comment != null) {
             comment.setCommentMarkdown(commentContentMarkdown);
             notifyItemChanged(position);
@@ -420,7 +440,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     }
 
     public void toggleReplyNotifications(int position) {
-        Comment comment = getItem(position);
+        Comment comment = getItemAtPosition(position);
         if (comment != null) {
             comment.toggleSendReplies();
             notifyItemChanged(position);
@@ -428,7 +448,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     }
 
     public void updateModdedStatus(int position) {
-        Comment originalComment = getItem(position);
+        Comment originalComment = getItemAtPosition(position);
         if (originalComment != null) {
             notifyItemChanged(position);
         }
@@ -583,7 +603,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 if (position < 0) {
                     return;
                 }
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(position);
                 if (comment != null) {
                     Intent intent = new Intent(mActivity, ViewSubredditDetailActivity.class);
                     intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, comment.getSubredditName());
@@ -596,7 +616,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 if (position < 0) {
                     return;
                 }
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(position);
                 if (comment != null) {
                     Bundle bundle = new Bundle();
                     if (comment.getAuthor().equals(mAccountName)) {
@@ -615,7 +635,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 if (position < 0) {
                     return;
                 }
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(position);
                 if (comment != null) {
                     Intent intent = new Intent(mActivity, ViewPostDetailActivity.class);
                     intent.putExtra(ViewPostDetailActivity.EXTRA_POST_ID, comment.getLinkId());
@@ -662,7 +682,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 if (position < 0) {
                     return;
                 }
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(position);
                 if (comment != null) {
                     int previousVoteType = comment.getVoteType();
                     String newVoteType;
@@ -742,7 +762,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 if (position < 0) {
                     return;
                 }
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(position);
                 if (comment != null) {
                     int previousVoteType = comment.getVoteType();
                     String newVoteType;
@@ -813,7 +833,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 if (position < 0) {
                     return;
                 }
-                Comment comment = getItem(position);
+                Comment comment = getItemAtPosition(position);
                 if (comment != null) {
                     if (comment.isSaved()) {
                         comment.setSaved(false);

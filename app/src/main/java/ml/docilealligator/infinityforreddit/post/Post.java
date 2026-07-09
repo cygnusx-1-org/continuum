@@ -30,6 +30,7 @@ public class Post implements Parcelable {
     private final String subredditNamePrefixed;
     private String subredditIconUrl;
     private String author;
+    private String authorFullname;
     private String authorNamePrefixed;
     private String authorIconUrl;
     private final String authorFlair;
@@ -86,7 +87,7 @@ public class Post implements Parcelable {
 
     //Text and video posts
     public Post(String id, String fullName, String subredditName, String subredditNamePrefixed,
-                String author, String authorFlair, String authorFlairHTML, long postTimeMillis,
+                String author, String authorFullname, String authorFlair, String authorFlairHTML, long postTimeMillis,
                 String title, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
                 boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
@@ -97,6 +98,7 @@ public class Post implements Parcelable {
         this.subredditName = subredditName;
         this.subredditNamePrefixed = subredditNamePrefixed;
         this.author = author;
+        this.authorFullname = authorFullname;
         this.authorNamePrefixed = "u/" + author;
         this.authorFlair = authorFlair;
         this.authorFlairHTML = authorFlairHTML;
@@ -130,7 +132,7 @@ public class Post implements Parcelable {
     }
 
     public Post(String id, String fullName, String subredditName, String subredditNamePrefixed,
-                String author, String authorFlair, String authorFlairHTML, long postTimeMillis, String title,
+                String author, String authorFullname, String authorFlair, String authorFlairHTML, long postTimeMillis, String title,
                 String url, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
                 boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
@@ -141,6 +143,7 @@ public class Post implements Parcelable {
         this.subredditName = subredditName;
         this.subredditNamePrefixed = subredditNamePrefixed;
         this.author = author;
+        this.authorFullname = authorFullname;
         this.authorNamePrefixed = "u/" + author;
         this.authorFlair = authorFlair;
         this.authorFlairHTML = authorFlairHTML;
@@ -181,6 +184,7 @@ public class Post implements Parcelable {
         this.subredditNamePrefixed = postToBeCopied.subredditNamePrefixed;
         this.subredditIconUrl = postToBeCopied.subredditIconUrl;
         this.author = postToBeCopied.author;
+        this.authorFullname = postToBeCopied.authorFullname;
         this.authorNamePrefixed = postToBeCopied.authorNamePrefixed;
         this.authorIconUrl = postToBeCopied.authorIconUrl;
         this.authorFlair = postToBeCopied.authorFlair;
@@ -239,6 +243,7 @@ public class Post implements Parcelable {
         subredditNamePrefixed = in.readString();
         subredditIconUrl = in.readString();
         author = in.readString();
+        authorFullname = in.readString();
         authorNamePrefixed = in.readString();
         authorIconUrl = in.readString();
         authorFlair = in.readString();
@@ -333,6 +338,11 @@ public class Post implements Parcelable {
 
     public String getAuthor() {
         return author;
+    }
+
+    // Will be empty if the post is deleted
+    public String getAuthorFullname() {
+        return authorFullname;
     }
 
     public boolean isAuthorDeleted() {
@@ -606,6 +616,7 @@ public class Post implements Parcelable {
         dest.writeString(subredditNamePrefixed);
         dest.writeString(subredditIconUrl);
         dest.writeString(author);
+        dest.writeString(authorFullname);
         dest.writeString(authorNamePrefixed);
         dest.writeString(authorIconUrl);
         dest.writeString(authorFlair);
@@ -818,7 +829,8 @@ public class Post implements Parcelable {
                 && removed == ((Post) obj).removed
                 && spam == ((Post) obj).spam
                 && locked == ((Post) obj).locked
-                && Objects.equals(distinguished, ((Post) obj).distinguished);
+                && Objects.equals(distinguished, ((Post) obj).distinguished)
+                && Objects.equals(selfText, ((Post) obj).selfText);
     }
 
     @Override

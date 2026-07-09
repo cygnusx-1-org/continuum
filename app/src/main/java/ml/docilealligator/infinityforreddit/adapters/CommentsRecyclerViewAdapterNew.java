@@ -46,6 +46,7 @@ import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
+import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.CommentMoreBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.comment.Comment;
@@ -295,7 +296,22 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mVideoEntry = new VideoEntry(activity, Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")), new VideoEntry.OnItemClickListener() {
             @Override
             public void onItemClick(@org.jetbrains.annotations.Nullable MediaMetadata mediaMetadata) {
+                if (canStartActivity) {
+                    canStartActivity = false;
+                    if (mediaMetadata == null) {
+                        return;
+                    }
 
+                    Intent intent = new Intent(activity, ViewVideoActivity.class);
+                    intent.setData(Uri.parse(mediaMetadata.original.url));
+                    intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
+                    intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
+                    if (post != null) {
+                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, post.getSubredditName());
+                    }
+                    intent.putExtra(ViewVideoActivity.EXTRA_ID, mediaMetadata.id);
+                    activity.startActivity(intent);
+                }
             }
         });
         recycledViewPool = new RecyclerView.RecycledViewPool();
@@ -372,6 +388,20 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     }
 
     @NonNull
+    /**
+     * Bounds-safe accessor for use inside click listeners. A ViewHolder can be detached or rebound
+     * between the tap and the listener running, at which point getBindingAdapterPosition() returns
+     * NO_POSITION (-1) and ListAdapter.getItem() would throw IndexOutOfBoundsException before the
+     * call site's {@code comment != null} check could run. Returning null lets those guards work.
+     */
+    @Nullable
+    private Comment getItemAtPosition(int position) {
+        if (position < 0 || position >= getCurrentList().size()) {
+            return null;
+        }
+        return getItem(position);
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
@@ -429,7 +459,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 }
 
                 if (mShowAuthorAvatar) {
-                    if (comment.getAuthorIconUrl() == null) {
+                    if (comment.getAuthorIconUrl() == null && comment.getAuthorFullName() != null && !comment.getAuthorFullName().isEmpty()) {
                         if (position >= 0) {
                             List<Comment> commentBatch = getCurrentList().subList(position, Math.min(getCurrentList().size(), UserProfileImagesBatchLoader.BATCH_SIZE + position));
                             mFragment.loadIcon(commentBatch, (authorFullName, iconUrl) -> {
@@ -614,7 +644,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 ((CommentFullyCollapsedViewHolder) holder).binding.userNameTextViewItemCommentFullyCollapsed.setText(authorText);
 
                 if (mShowAuthorAvatar) {
-                    if (comment.getAuthorIconUrl() == null) {
+                    if (comment.getAuthorIconUrl() == null && comment.getAuthorFullName() != null && !comment.getAuthorFullName().isEmpty()) {
                         if (position >= 0) {
                             List<Comment> commentBatch = getCurrentList().subList(position, Math.min(getCurrentList().size(), UserProfileImagesBatchLoader.BATCH_SIZE + position));
                             mFragment.loadIcon(commentBatch, (authorFullName, iconUrl) -> {
@@ -711,7 +741,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                 if (placeholder.getPlaceholderType() == Comment.PLACEHOLDER_LOAD_MORE_COMMENTS) {
                     ((LoadMoreChildCommentsViewHolder) holder).binding.placeholderTextViewItemLoadMoreComments.setOnClickListener(view -> {
-                        mCommentRecyclerViewAdapterCallback.fetchMoreChildComments(holder.getBindingAdapterPosition());
+                        int currentPosition = holder.getBindingAdapterPosition();
+                        if (currentPosition == RecyclerView.NO_POSITION) {
+                            return;
+                        }
+                        mCommentRecyclerViewAdapterCallback.fetchMoreChildComments(currentPosition);
                         ((LoadMoreChildCommentsViewHolder) holder).binding.placeholderTextViewItemLoadMoreComments.setText(R.string.loading);
                     });
                 } else {
@@ -1017,7 +1051,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             authorFlairTextView.setOnClickListener(view -> authorTextView.performClick());
 
             editedTextView.setOnClickListener(view -> {
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(getBindingAdapterPosition());
                 if (comment != null) {
                     Toast.makeText(view.getContext(), view.getContext().getString(R.string.edited_time, mShowElapsedTime ?
                             Utils.getElapsedTime(mActivity, comment.getEditedTimeMillis()) :
@@ -1027,7 +1061,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             moreButton.setOnClickListener(view -> {
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(getBindingAdapterPosition());
                 if (comment != null) {
                     Bundle bundle = new Bundle();
                     if (!mPost.isArchived() && !mPost.isLocked() && comment.getAuthor().equals(mAccountName)) {
@@ -1073,7 +1107,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     return;
                 }
 
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(getBindingAdapterPosition());
                 if (comment != null) {
                     if (comment.isLocked()) {
                         Toast.makeText(mActivity, R.string.locked_comment_reply_unavailable, Toast.LENGTH_SHORT).show();
@@ -1104,7 +1138,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     return;
                 }
 
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(getBindingAdapterPosition());
                 if (comment != null) {
                     int previousVoteType = comment.getVoteType();
                     String newVoteType;
@@ -1195,7 +1229,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     return;
                 }
 
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(getBindingAdapterPosition());
                 if (comment != null) {
                     int previousVoteType = comment.getVoteType();
                     String newVoteType;
@@ -1273,7 +1307,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             saveButton.setOnClickListener(view -> {
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(getBindingAdapterPosition());
                 if (comment != null) {
                     int position = getBindingAdapterPosition();
                     if (comment.isSaved()) {
@@ -1328,7 +1362,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             authorTextView.setOnClickListener(view -> {
-                Comment comment = getItem(getBindingAdapterPosition());
+                Comment comment = getItemAtPosition(getBindingAdapterPosition());
                 if (comment == null || comment.isAuthorDeleted()) {
                     return;
                 }
@@ -1342,10 +1376,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             expandButton.setOnClickListener(view -> {
+                int currentPosition = getBindingAdapterPosition();
+                if (currentPosition == RecyclerView.NO_POSITION) {
+                    return;
+                }
                 if (expandButton.getVisibility() == View.VISIBLE) {
-                    mCommentRecyclerViewAdapterCallback.expandComment(getBindingAdapterPosition());
+                    mCommentRecyclerViewAdapterCallback.expandComment(currentPosition);
                 } else if (mFullyCollapseComment) {
-                    mCommentRecyclerViewAdapterCallback.collapseComment(getBindingAdapterPosition());
+                    mCommentRecyclerViewAdapterCallback.collapseComment(currentPosition);
                 }
             });
 
@@ -1518,7 +1556,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             }
 
             itemView.setOnClickListener(view -> {
-                mCommentRecyclerViewAdapterCallback.expandComment(getBindingAdapterPosition());
+                int currentPosition = getBindingAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    mCommentRecyclerViewAdapterCallback.expandComment(currentPosition);
+                }
             });
 
             itemView.setOnLongClickListener(view -> {

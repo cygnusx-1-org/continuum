@@ -339,7 +339,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         Resources resources = getResources();
 
-        getSupportActionBar().hide();
+        // AppTheme.Draggable is a NoActionBar theme (windowActionBar=false), so there is no support
+        // action bar to hide here — this activity uses its own bottom app bar. Guard against the null
+        // getSupportActionBar() to avoid an NPE on launch.
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         binding.getBottomAppBar().setVisibility(View.VISIBLE);
         binding.getBackButton().setOnClickListener(view -> {
             finish();

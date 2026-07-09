@@ -23,14 +23,15 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
     private static final int VIEW_TYPE_MENU_GROUP_TITLE = 1;
     private static final int VIEW_TYPE_MENU_ITEM = 2;
 
-    private static final int ROW_THEME = 0;
-    private static final int ROW_NSFW = 1;
-    private static final int ROW_THUMBNAIL = 2;
-    private static final int ROW_SETTINGS = 3;
+    private static final int ROW_REMINDERS = 0;
+    private static final int ROW_THEME = 1;
+    private static final int ROW_NSFW = 2;
+    private static final int ROW_THUMBNAIL = 3;
+    private static final int ROW_SETTINGS = 4;
 
     // Canonical top-to-bottom order of the rows. visibleRows is always a subsequence of this,
     // which lets refreshVisibleRows() dispatch minimal insert/remove notifications.
-    private static final int[] ROW_ORDER = {ROW_THEME, ROW_NSFW, ROW_THUMBNAIL, ROW_SETTINGS};
+    private static final int[] ROW_ORDER = {ROW_REMINDERS, ROW_THEME, ROW_NSFW, ROW_THUMBNAIL, ROW_SETTINGS};
 
     private final BaseActivity baseActivity;
     private final Resources resources;
@@ -39,6 +40,7 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
     private final int primaryIconColor;
     private boolean isNSFWEnabled;
     private boolean showThumbnailOnTheLeft;
+    private boolean showRemindersToggle;
     private boolean showThemeToggle;
     private boolean showNSFWToggle;
     private boolean showThumbnailToggle;
@@ -58,6 +60,7 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         isNSFWEnabled = nsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false);
         showThumbnailOnTheLeft = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+        showRemindersToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_REMINDERS_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);
@@ -68,6 +71,8 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
 
     private boolean isRowVisible(int rowType) {
         switch (rowType) {
+            case ROW_REMINDERS:
+                return showRemindersToggle;
             case ROW_THEME:
                 return showThemeToggle;
             case ROW_NSFW:
@@ -146,6 +151,11 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
             int drawableId = 0;
 
             switch (row) {
+                case ROW_REMINDERS:
+                    stringId = R.string.reminders;
+                    drawableId = R.drawable.ic_reminder_day_night_24dp;
+                    itemHolder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(R.string.reminders));
+                    break;
                 case ROW_THEME:
                     if ((resources.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
                         stringId = R.string.dark_theme;
@@ -222,6 +232,7 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
     }
 
     public void refreshVisibleRows(SharedPreferences navigationDrawerSharedPreferences) {
+        showRemindersToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_REMINDERS_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);

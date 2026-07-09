@@ -641,6 +641,10 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         );
     }
 
+    public void updatePostFromEvent(Post post, int postListPosition) {
+
+    }
+
     @Subscribe
     public void onAccountSwitchEvent(SwitchAccountEvent event) {
         if (!getClass().getName().equals(event.excludeActivityClassName)) {
@@ -839,7 +843,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
-    public void loadAuthorIcons(List<Comment> comments, ViewPostDetailActivityViewModel.LoadIconListener loadIconListener) {
+    public void loadAuthorIcons(List<Comment> comments, UserProfileImagesBatchLoader.LoadIconListener loadIconListener) {
         viewPostDetailActivityViewModel.loadAuthorImages(comments, loadIconListener);
     }
 

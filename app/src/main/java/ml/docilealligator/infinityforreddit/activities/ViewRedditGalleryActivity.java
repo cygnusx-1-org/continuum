@@ -17,11 +17,13 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -74,6 +76,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
     private String subredditName;
     private boolean isNsfw;
     private boolean isActionBarHidden = false;
+    private boolean useBottomAppBar;
     private ActivityViewRedditGalleryBinding binding;
     ViewGalleryViewModel viewGalleryViewModel;
 
@@ -144,7 +147,10 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
 
         EventBus.getDefault().register(this);
 
-        getSupportActionBar().hide();
+        // Continuum removed USE_BOTTOM_TOOLBAR_IN_MEDIA_VIEWER and always uses the bottom bar
+        // (rotation buttons live in the fragments), so the top toolbar is always hidden.
+        useBottomAppBar = true;
+        binding.toolbarViewRedditGalleryActivity.setVisibility(View.GONE);
 
         viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
 
@@ -152,7 +158,13 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
             @NonNull
             @Override
             public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                viewGalleryViewModel.setInsets(Utils.getInsets(insets, false, false));
+                Insets allInsets = Utils.getInsets(insets, false, false);
+
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.toolbarViewRedditGalleryActivity.getLayoutParams();
+                params.topMargin = allInsets.top;
+                binding.toolbarViewRedditGalleryActivity.setLayoutParams(params);
+
+                viewGalleryViewModel.setInsets(allInsets);
                 return WindowInsetsCompat.CONSUMED;
             }
         });
@@ -171,13 +183,13 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         isNsfw = post.isNSFW();
 
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
-            binding.getRoot().setOnDragDismissedListener(dragDirection -> {
+            binding.haulerViewViewRedditGalleryActivity.setOnDragDismissedListener(dragDirection -> {
                 int slide = dragDirection == DragDirection.UP ? R.anim.slide_out_up : R.anim.slide_out_down;
                 finish();
                 overridePendingTransition(0, slide);
             });
         } else {
-            binding.getRoot().setDragEnabled(false);
+            binding.haulerViewViewRedditGalleryActivity.setDragEnabled(false);
         }
 
         setupViewPager(savedInstanceState);
@@ -329,8 +341,15 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         return isActionBarHidden;
     }
 
+    public boolean isUseBottomAppBar() {
+        return useBottomAppBar;
+    }
+
     public void setActionBarHidden(boolean isActionBarHidden) {
         this.isActionBarHidden = isActionBarHidden;
+        if (!useBottomAppBar) {
+            binding.toolbarViewRedditGalleryActivity.setVisibility(isActionBarHidden ? View.GONE : View.VISIBLE);
+        }
     }
 
     // Add getter for the Post object

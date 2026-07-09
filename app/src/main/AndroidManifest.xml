@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RUN_USER_INITIATED_JOBS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".Infinity"
@@ -39,15 +40,25 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:label">
         <activity
+            android:name=".activities.SetReminderActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.ComposeActivity" />
+        <activity
+            android:name=".activities.ReminderListingActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.ComposeActivity" />
+        <activity
             android:name=".activities.AppAuthLoginActivity"
             android:exported="false"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.ComposeActivity" />
         <activity
             android:name=".activities.CopyMultiRedditActivity"
             android:exported="false"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.ComposeActivity" />
         <activity
             android:name=".activities.UserMultiRedditsActivity"
             android:exported="false"
@@ -607,6 +618,16 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <receiver android:name=".broadcastreceivers.DownloadedMediaDeleteActionBroadcastReceiver" />
+        <receiver android:name=".broadcastreceivers.ReminderAlarmReceiver" />
+        <receiver
+            android:name=".broadcastreceivers.BootCompletedBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -368,8 +368,7 @@ public class SubmitPostService extends JobService {
             // SD cards. Sanitize it so the cache file can actually be created.
             String lastPathSegment = mediaUri.getLastPathSegment();
             String fileName = lastPathSegment == null
-                ? "video" : lastPathSegment.replaceAll("[^a-zA-Z0-9._-]", "_");
-
+                    ? "video" : lastPathSegment.replaceAll("[^a-zA-Z0-9._-]", "_");
             if (type != null && type.contains("gif")) {
                 cacheFilePath = cacheDir + "/" + fileName + ".gif";
             } else {

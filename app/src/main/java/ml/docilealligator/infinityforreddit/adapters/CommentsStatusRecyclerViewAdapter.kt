@@ -29,8 +29,8 @@ class CommentsStatusRecyclerViewAdapter(
     }
 
     var isSingleCommentThreadMode: Boolean = false
-    var isInitiallyLoading: Boolean = false
-    var isInitiallyLoadingFailed: Boolean = false
+    var isInitialLoading: Boolean = false
+    var isInitialLoadingFailed: Boolean = false
     var emptyComments: Boolean = false
 
     private val colorAccent = activity.customThemeWrapper.colorAccent
@@ -38,9 +38,9 @@ class CommentsStatusRecyclerViewAdapter(
     private val commentBackgroundColor = activity.customThemeWrapper.commentBackgroundColor
 
     override fun getItemViewType(position: Int): Int {
-        if (isInitiallyLoading) {
+        if (isInitialLoading) {
             return VIEW_TYPE_FIRST_LOADING
-        } else if (isInitiallyLoadingFailed) {
+        } else if (isInitialLoadingFailed) {
             if (isSingleCommentThreadMode && position == 0) {
                 return Constants.VIEW_TYPE_VIEW_ALL_COMMENTS
             }
@@ -108,11 +108,11 @@ class CommentsStatusRecyclerViewAdapter(
     }
 
     override fun getItemCount(): Int {
-        if (isInitiallyLoading) {
+        if (isInitialLoading) {
             return 1
         }
 
-        if (isInitiallyLoadingFailed || emptyComments) {
+        if (isInitialLoadingFailed || emptyComments) {
             return if (isSingleCommentThreadMode) 2 else 1
         }
 
