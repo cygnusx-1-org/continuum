@@ -2,6 +2,15 @@
 
 ---
 
+8.2.5.9.9.7 / 2026-7-11
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed YouTube title suggestion
+* Added Quick Toggles settings to hide the theme, NSFW, and thumbnail quick toggles in the navigation drawer
+* Added Saved search
+* Improved "Recovery Post"
+
 8.2.5.9.9.6 / 2026-7-6
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
