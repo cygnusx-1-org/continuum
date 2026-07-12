@@ -9,12 +9,13 @@ import org.gradle.api.provider.Property
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
+import org.gradle.process.ExecOperations
 import javax.inject.Inject
+import java.io.ByteArrayOutputStream
 import java.io.Serializable
 
 plugins {
     id 'com.android.application'
-    id 'com.gladed.androidgitversion' version '0.4.14'
     id 'com.github.ben-manes.versions' version '0.42.0'
     id 'com.github.breadmoirai.github-release' version '2.5.2'
     id 'com.diffplug.spotless' version '7.0.2'
@@ -31,21 +32,6 @@ def aspectJVersion = '1.9.25.1'
 configurations {
     all {
         exclude module: 'httpclient'
-    }
-}
-
-// Append "-dirty" to the version name when building from a working tree that has uncommitted
-// changes to tracked files, mirroring Slide's androidGitVersion behaviour. This marks builds
-// that don't correspond to a clean commit. Untracked files are ignored (matching the plugin
-// default) so stray local files don't flag an otherwise-clean build.
-def gitVersionSuffix = {
-    try {
-        def status = providers.exec {
-            commandLine 'git', 'status', '--porcelain', '--untracked-files=no'
-        }.standardOutput.asText.get().trim()
-        return status.isEmpty() ? "" : "-dirty"
-    } catch (Exception ignored) {
-        return ""
     }
 }
 
@@ -93,7 +79,11 @@ android {
         minSdk 24
         targetSdk 35
         versionCode 223
-        versionName "8.2.5.9.9.7" + gitVersionSuffix()
+        // Base version only. The "-dirty" marker for builds from a tree with uncommitted changes is
+        // applied to the APK *filename* at execution time (see RenameApksTask), so it can't go stale
+        // under the configuration cache and stays out of the user-visible manifest version. Release
+        // scripts (release-github.sh / release-builds.sh) guard against publishing a "-dirty" artifact.
+        versionName "8.2.5.9.9.7"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }
@@ -449,10 +439,18 @@ spotless {
 
 // Replaces the legacy applicationVariants APK-renaming (removed by AGP 9's new DSL). For each
 // variant, transforms the APK artifact so each per-ABI output becomes
-// "continuum-<abi>-<versionName>.apk" (versionName already carries the git/build-type suffixes).
+// "continuum-<abi>-<versionName><-dirty?>.apk". versionName carries only the build-type suffix
+// (e.g. "-debug"); the "-dirty" marker is appended at execution time in RenameApksTask.taskAction.
 androidComponents {
     onVariants(selector().all()) { variant ->
-        def renameProvider = tasks.register("rename${variant.name.capitalize()}Apks", RenameApksTask)
+        def renameProvider = tasks.register("rename${variant.name.capitalize()}Apks", RenameApksTask) {
+            // Pin the git dirty check to the repo root so it's independent of the process CWD.
+            it.repoRoot.set(rootProject.layout.projectDirectory)
+            // Always re-run so the git dirty check reflects the current tree. The task's other
+            // inputs (base name, packaged APK) don't change when only the commit state does, so
+            // without this a "-dirty" name could linger after committing (or vice versa).
+            it.outputs.upToDateWhen { false }
+        }
         def request = variant.artifacts.use(renameProvider)
             .wiredWithDirectories(
                 { it.getApkFolder() } as kotlin.jvm.functions.Function1,
@@ -486,11 +484,39 @@ abstract class RenameApksTask extends DefaultTask {
     @Internal
     abstract Property<ArtifactTransformationRequest<RenameApksTask>> getTransformationRequest()
 
+    // Git repo root, captured at configuration time and used as the git command's working directory
+    // so the dirty check runs inside the repo regardless of the Gradle process CWD (a CWD outside the
+    // repo would make git exit non-zero and silently report a dirty build as clean). @Internal — not
+    // @Input — so Gradle doesn't snapshot the whole tree; upToDateWhen { false } already forces re-run.
+    @Internal
+    abstract DirectoryProperty getRepoRoot()
+
     private final WorkerExecutor workerExecutor
+    private final ExecOperations execOps
 
     @Inject
-    RenameApksTask(WorkerExecutor workerExecutor) {
+    RenameApksTask(WorkerExecutor workerExecutor, ExecOperations execOps) {
         this.workerExecutor = workerExecutor
+        this.execOps = execOps
+    }
+
+    // "-dirty" when tracked files have uncommitted changes, else "". Untracked files are
+    // ignored so stray local files don't flag an otherwise-clean build. A missing git binary
+    // or non-repo checkout yields "" quietly instead of failing the build.
+    private String gitDirtySuffix() {
+        try {
+            def stdout = new ByteArrayOutputStream()
+            def result = execOps.exec { spec ->
+                spec.workingDir = repoRoot.get().asFile
+                spec.commandLine 'git', 'status', '--porcelain', '--untracked-files=no'
+                spec.standardOutput = stdout
+                spec.errorOutput = new ByteArrayOutputStream() // keep git stderr out of the build log
+                spec.ignoreExitValue = true
+            }
+            return (result.exitValue == 0 && stdout.toString().trim()) ? "-dirty" : ""
+        } catch (Exception ignored) {
+            return ""
+        }
     }
 
     @TaskAction
@@ -505,6 +531,10 @@ abstract class RenameApksTask extends DefaultTask {
             }
         }
 
+        // Computed here (execution time) so it reflects the working tree on every build and is
+        // correct under the configuration cache. Captured by the work-action closure below.
+        def dirty = gitDirtySuffix()
+
         transformationRequest.get().submit(
             this,
             workerExecutor.noIsolation(),
@@ -514,7 +544,7 @@ abstract class RenameApksTask extends DefaultTask {
                     it.filterType == FilterConfiguration.FilterType.ABI
                 }?.identifier
                 def abiPart = abi ? "-${abi}" : ""
-                def newName = "continuum${abiPart}-${builtArtifact.versionName}.apk"
+                def newName = "continuum${abiPart}-${builtArtifact.versionName}${dirty}.apk"
                 params.inputApkFile.set(new File(builtArtifact.outputFile))
                 params.outputApkFile.set(new File(outputLocation.asFile, newName as String))
                 return params.outputApkFile.get().asFile
