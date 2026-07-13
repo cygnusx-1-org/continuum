@@ -1,5 +1,8 @@
 # This workflow overrides the upstream build.yml for this fork.
-# It runs a no-op job so GitHub doesn't report "no jobs were run".
+# Keeping the file (rather than deleting it) means a later `git merge upstream`
+# conflicts on this path and we resolve in our favor, so upstream's real Android
+# build never comes back. The `if: ${{ false }}` guard makes the job skip
+# instantly instead of queuing a runner, so no run ever waits for a runner.
 name: Build
 
 on:
@@ -9,6 +12,7 @@ on:
 
 jobs:
   build:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - run: echo "Build workflow disabled for this fork"
