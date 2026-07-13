@@ -13,6 +13,7 @@ import org.gradle.process.ExecOperations
 import javax.inject.Inject
 import java.io.ByteArrayOutputStream
 import java.io.Serializable
+import net.ltgt.gradle.errorprone.CheckSeverity
 
 plugins {
     id 'com.android.application'
@@ -24,6 +25,7 @@ plugins {
     id 'kotlin-parcelize'
     id("org.jetbrains.kotlin.plugin.compose") version '2.2.10'
     id 'io.github.takahirom.roborazzi'
+    id 'net.ltgt.errorprone' version '5.1.0'
 }
 
 def allureVersion = "2.35.2"
@@ -178,6 +180,44 @@ android {
 
 }
 
+// NullAway compile-time null checking, run via Error Prone. Scope is intentionally
+// tight: every other Error Prone check is disabled, and NullAway only analyzes code
+// under an @NullMarked scope (OnlyNullMarked), so the build stays green until a
+// package opts in with a @NullMarked package-info.java. Roll out one package at a
+// time. Dagger @Inject fields are treated as initialized without a constructor
+// assignment: NullAway's default ExcludedFieldAnnotations set already includes
+// javax.inject.Inject and jakarta.inject.Inject, so injected fields won't trip the
+// initialization check. Room/view-binding/Retrofit generated code lives outside any
+// @NullMarked package and is ignored.
+//
+// The net.ltgt.errorprone plugin does NOT auto-wire Error Prone into Android Gradle
+// Plugin builds (it only supplies the `errorprone` extension and leaves the checker
+// disabled). So we enable it by hand here; the Error Prone/NullAway jars reach javac's
+// plugin path via the debugAnnotationProcessor dependencies above, and the JDK-internal
+// exports the checker needs are in gradle.properties.
+//
+// Enforcement is scoped to exactly one task: the main debug variant compile. All
+// production Java lives in src/main (there are no variant-specific Java source sets), so
+// every variant compiles identical sources — checking one is enough, and NullAway is a
+// pure compile-time check that never alters output, so release/beta/minifiedRelease
+// artifacts are byte-for-byte identical whether or not it also runs there. Matching a
+// single explicit task name (rather than "every non-test compile") is also a safe
+// allowlist: any other JavaCompile task — the release/beta/minifiedRelease main compiles,
+// the unit/android test compiles (whose *AnnotationProcessor configs don't carry Error
+// Prone), or anything AGP/a plugin adds later — stays OFF and can never hard-fail with
+// "plug-in not found". To also enforce on another variant, add its compile task to this
+// check AND add the error_prone_core + nullaway deps to that variant's *AnnotationProcessor
+// config (they are on debugAnnotationProcessor here).
+tasks.withType(JavaCompile).configureEach { compileTask ->
+    options.errorprone {
+        enabled = compileTask.name == 'compileDebugJavaWithJavac'
+        disableAllChecks = true
+        check('NullAway', CheckSeverity.ERROR)
+        option('NullAway:OnlyNullMarked', 'true')
+        option('NullAway:JSpecifyMode', 'true')
+    }
+}
+
 def githubPropertiesFile = rootProject.file("github.properties")
 
 if (githubPropertiesFile.exists()) {
@@ -273,6 +313,20 @@ dependencies {
 
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    // Compile-time null checking (Error Prone + NullAway). See the JavaCompile
+    // options block below; enforcement is opt-in per package via @NullMarked.
+    // Under AGP, javac's -Xplugin/processor path is built from the annotationProcessor
+    // configuration. Scoped to debugAnnotationProcessor because the checker only runs on
+    // the debug compile (see the options block) — the unprefixed annotationProcessor would
+    // attach these jars to every variant's compile for no benefit. (The net.ltgt plugin's
+    // own `errorprone` config is never wired into AGP compile tasks.)
+    debugAnnotationProcessor 'com.google.errorprone:error_prone_core:2.50.0'
+    debugAnnotationProcessor 'com.uber.nullaway:nullaway:0.13.7'
+    // jspecify stays compileOnly on ALL variants: package-info.java's @NullMarked lives in
+    // src/main and is compiled by every variant, so each needs the annotation on its
+    // classpath (debug-scoping this would break release/beta/minifiedRelease compilation).
+    compileOnly 'org.jspecify:jspecify:1.0.0'
 
     // HTTP clients
     def retrofitVersion = '3.0.0'
