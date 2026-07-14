@@ -2,6 +2,13 @@
 
 ---
 
+8.2.5.9.9.8 / 2026-7-14
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Replaced all icons with a cleaner versions. Thanks to @98xe!
+* Started a new process to make null checks crashes a non-issue within the Continuum code
+
 8.2.5.9.9.7 / 2026-7-11
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
