@@ -81,11 +81,7 @@ android {
         minSdk 24
         targetSdk 35
         versionCode 223
-        // Base version only. The "-dirty" marker for builds from a tree with uncommitted changes is
-        // applied to the APK *filename* at execution time (see RenameApksTask), so it can't go stale
-        // under the configuration cache and stays out of the user-visible manifest version. Release
-        // scripts (release-github.sh / release-builds.sh) guard against publishing a "-dirty" artifact.
-        versionName "8.2.5.9.9.7"
+        versionName "8.2.5.9.9.8"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }
