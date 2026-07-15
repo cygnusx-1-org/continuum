@@ -104,6 +104,7 @@ import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompa
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
+import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.multireddit.FetchMyMultiReddits;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
@@ -1439,11 +1440,27 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         @ExperimentalBadgeUtils
                         @Override
                         public void onFetchUserDataSuccess(UserData userData, int inboxCount) {
-                            MainActivity.this.inboxCount = inboxCount;
-                            mCurrentAccountSharedPreferences.edit().putInt(SharedPreferencesUtils.INBOX_COUNT, inboxCount).apply();
                             accountName = userData.getName();
                             mFetchUserInfoSuccess = true;
-                            EventBus.getDefault().post(new ChangeInboxCountEvent(inboxCount));
+                            if (inboxCount > 0) {
+                                // Reddit's inbox_count can stay stuck on items that can't be cleared
+                                // in-app (archived PMs, chat, ...). Reconcile against the real unread
+                                // listing so a genuinely-empty inbox drops to no badge. See issue #334.
+                                FetchMessage.fetchUnreadMessagesCount(mExecutor, mHandler, mOauthRetrofit, accessToken,
+                                        new FetchMessage.FetchUnreadMessagesCountListener() {
+                                            @Override
+                                            public void fetchSuccess(int unreadCount, boolean hasMore) {
+                                                applyInboxCount(hasMore ? inboxCount : unreadCount);
+                                            }
+
+                                            @Override
+                                            public void fetchFailed() {
+                                                applyInboxCount(inboxCount);
+                                            }
+                                        });
+                            } else {
+                                applyInboxCount(Math.max(0, inboxCount));
+                            }
                         }
 
                         @Override
@@ -1465,6 +1482,12 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         }
                     });*/
         }
+    }
+
+    private void applyInboxCount(int count) {
+        inboxCount = count;
+        mCurrentAccountSharedPreferences.edit().putInt(SharedPreferencesUtils.INBOX_COUNT, count).apply();
+        EventBus.getDefault().post(new ChangeInboxCountEvent(count));
     }
 
     @ExperimentalBadgeUtils
@@ -1744,7 +1767,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @ExperimentalBadgeUtils
     @Subscribe
     public void onChangeInboxCountEvent(ChangeInboxCountEvent event) {
-        this.inboxCount = event.inboxCount;
+        // A negative value is a delta (e.g. -1 when a single message is read), a non-negative
+        // value is an absolute count. Mirror the semantics NavigationWrapper#setInboxCount uses.
+        if (event.inboxCount < 0) {
+            this.inboxCount = Math.max(0, this.inboxCount + event.inboxCount);
+        } else {
+            this.inboxCount = event.inboxCount;
+        }
         setInboxCount();
     }
 

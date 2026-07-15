@@ -59,8 +59,51 @@ public class FetchMessage {
         });
     }
 
+    /**
+     * Fetches the actual unread inbox listing and reports how many items it contains. Reddit's
+     * {@code inbox_count} field can get stuck on items that cannot be cleared from within the app
+     * (archived private messages, chat, ...), so this is used to reconcile the badge against what
+     * the user can really act on. See issue #334.
+     */
+    public static void fetchUnreadMessagesCount(Executor executor, Handler handler, Retrofit oauthRetrofit,
+                                                String accessToken, FetchUnreadMessagesCountListener listener) {
+        oauthRetrofit.create(RedditAPI.class).getMessages(APIUtils.getOAuthHeader(accessToken), WHERE_UNREAD, null).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    executor.execute(() -> {
+                        try {
+                            JSONObject data = new JSONObject(response.body()).getJSONObject(JSONUtils.DATA_KEY);
+                            int count = data.getJSONArray(JSONUtils.CHILDREN_KEY).length();
+                            // A non-empty "after" means there are more than one page of unread items.
+                            boolean hasMore = !data.isNull(JSONUtils.AFTER_KEY)
+                                    && !data.getString(JSONUtils.AFTER_KEY).isEmpty();
+                            handler.post(() -> listener.fetchSuccess(count, hasMore));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            handler.post(listener::fetchFailed);
+                        }
+                    });
+                } else {
+                    listener.fetchFailed();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable throwable) {
+                listener.fetchFailed();
+            }
+        });
+    }
+
     interface FetchMessagesListener {
         void fetchSuccess(List<Message> messages, @Nullable String after);
+
+        void fetchFailed();
+    }
+
+    public interface FetchUnreadMessagesCountListener {
+        void fetchSuccess(int unreadCount, boolean hasMore);
 
         void fetchFailed();
     }

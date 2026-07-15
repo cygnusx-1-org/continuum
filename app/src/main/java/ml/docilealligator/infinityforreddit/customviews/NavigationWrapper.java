@@ -245,7 +245,7 @@ public class NavigationWrapper {
                     BadgeUtils.detachBadgeDrawable(badgeDrawable, option1BottomAppBar);
                     badgeDrawable = null;
                 } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, inboxCount, option1BottomAppBar), option1BottomAppBar);
+                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option1BottomAppBar), option1BottomAppBar);
                 }
             }
         } else if (option2 == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX || option2 == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX) {
@@ -254,7 +254,7 @@ public class NavigationWrapper {
                     BadgeUtils.detachBadgeDrawable(badgeDrawable, option2BottomAppBar);
                     badgeDrawable = null;
                 } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, inboxCount, option2BottomAppBar), option2BottomAppBar);
+                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option2BottomAppBar), option2BottomAppBar);
                 }
             }
         } else if (option3 == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX || option3 == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX) {
@@ -263,7 +263,7 @@ public class NavigationWrapper {
                     BadgeUtils.detachBadgeDrawable(badgeDrawable, option3BottomAppBar);
                     badgeDrawable = null;
                 } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, inboxCount, option3BottomAppBar), option3BottomAppBar);
+                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option3BottomAppBar), option3BottomAppBar);
                 }
             }
         } else if (option4 == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX || option4 == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX) {
@@ -272,7 +272,7 @@ public class NavigationWrapper {
                     BadgeUtils.detachBadgeDrawable(badgeDrawable, option4BottomAppBar);
                     badgeDrawable = null;
                 } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, inboxCount, option4BottomAppBar), option4BottomAppBar);
+                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option4BottomAppBar), option4BottomAppBar);
                 }
             }
         }

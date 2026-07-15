@@ -159,13 +159,18 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
 
                 ((DataViewHolder) holder).binding.authorTextViewItemMessage.setTextColor(message.isRecipientASubreddit() ? mSubredditColor : mUsernameColor);
 
-                if (message.isNew()) {
+                // Highlight if any message in the thread is unread (the root or any reply), so a
+                // thread is highlighted whether it is the latest reply or an earlier message that
+                // is unread. See issue #334.
+                if (!markAllMessagesAsRead && hasUnreadMessage(message)) {
+                    holder.itemView.setBackgroundColor(mUnreadMessageBackgroundColor);
+                } else {
+                    // Reset read rows (a recycled holder may still carry a previous unread
+                    // highlight); on "mark all as read" clear the whole thread's unread flags.
                     if (markAllMessagesAsRead) {
-                        message.setNew(false);
-                    } else {
-                        holder.itemView.setBackgroundColor(
-                                mUnreadMessageBackgroundColor);
+                        markThreadAsRead(message);
                     }
+                    holder.itemView.setBackgroundColor(mMessageBackgroundColor);
                 }
 
                 if (message.wasComment()) {
@@ -217,6 +222,31 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
 
     private boolean hasExtraRow() {
         return networkState != null && networkState.getStatus() != NetworkState.Status.SUCCESS;
+    }
+
+    private static boolean hasUnreadMessage(Message message) {
+        if (message.isNew()) {
+            return true;
+        }
+        if (message.getReplies() != null) {
+            for (Message reply : message.getReplies()) {
+                if (reply != null && hasUnreadMessage(reply)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void markThreadAsRead(Message message) {
+        message.setNew(false);
+        if (message.getReplies() != null) {
+            for (Message reply : message.getReplies()) {
+                if (reply != null) {
+                    markThreadAsRead(reply);
+                }
+            }
+        }
     }
 
     public void setNetworkState(NetworkState newNetworkState) {
@@ -290,11 +320,12 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                     mActivity.startActivity(intent);
                 }
 
-                if (message.getDisplayedMessage().isNew()) {
+                Message displayedMessage = message.getDisplayedMessage();
+                if (displayedMessage.isNew()) {
                     itemView.setBackgroundColor(mMessageBackgroundColor);
-                    message.setNew(false);
+                    displayedMessage.setNew(false);
 
-                    ReadMessage.readMessage(mOauthRetrofit, mAccessToken, message.getFullname(),
+                    ReadMessage.readMessage(mOauthRetrofit, mAccessToken, displayedMessage.getFullname(),
                             new ReadMessage.ReadMessageListener() {
                                 @Override
                                 public void readSuccess() {
@@ -303,8 +334,14 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
 
                                 @Override
                                 public void readFailed() {
-                                    message.setNew(true);
-                                    itemView.setBackgroundColor(mUnreadMessageBackgroundColor);
+                                    displayedMessage.setNew(true);
+                                    // The holder may have been recycled onto another row while the
+                                    // request was in flight; only restore the highlight if it still
+                                    // shows this message.
+                                    int position = getBindingAdapterPosition();
+                                    if (position != RecyclerView.NO_POSITION && getItem(position) == message) {
+                                        itemView.setBackgroundColor(mUnreadMessageBackgroundColor);
+                                    }
                                 }
                             });
                 }
