@@ -59,7 +59,7 @@ public class FetchRules {
         });
     }
 
-    private static void parseRules(Executor executor, Handler handler, String response,
+    private static void parseRules(Executor executor, Handler handler, @Nullable String response,
                                    FetchRulesListener fetchRulesListener) {
         executor.execute(() -> {
             try {

@@ -149,7 +149,7 @@ class ViewVideoViewModel(
                                     }
                                 }
                             } ?: run {
-                                _videoUri.value = data.post.videoUrl.toUri()
+                                _videoUri.value = data.post.videoUrl?.toUri()
                             }
                         }
                     }

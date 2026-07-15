@@ -5,12 +5,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import java.util.Objects;
 
 public class MediaMetadata implements Parcelable {
     public String id;
     //E.g. Image
     public String e;
     public String fileName;
+    @Nullable
     public String caption;
     public boolean isGIF;
     public MediaItem original;
@@ -27,13 +29,13 @@ public class MediaMetadata implements Parcelable {
     }
 
     protected MediaMetadata(Parcel in) {
-        id = in.readString();
-        e = in.readString();
-        fileName = in.readString();
+        id = Objects.requireNonNull(in.readString());
+        e = Objects.requireNonNull(in.readString());
+        fileName = Objects.requireNonNull(in.readString());
         caption = in.readString();
         isGIF = in.readByte() != 0;
-        original = in.readParcelable(MediaItem.class.getClassLoader());
-        downscaled = in.readParcelable(MediaItem.class.getClassLoader());
+        original = Objects.requireNonNull(in.readParcelable(MediaItem.class.getClassLoader()));
+        downscaled = Objects.requireNonNull(in.readParcelable(MediaItem.class.getClassLoader()));
     }
 
     public static final Creator<MediaMetadata> CREATOR = new Creator<MediaMetadata>() {
@@ -89,7 +91,7 @@ public class MediaMetadata implements Parcelable {
         protected MediaItem(Parcel in) {
             x = in.readInt();
             y = in.readInt();
-            url = in.readString();
+            url = Objects.requireNonNull(in.readString());
             mp4Url = in.readString();
         }
 

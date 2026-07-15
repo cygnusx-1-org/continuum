@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
@@ -198,7 +199,7 @@ public class SubmitPost {
         }
     }
 
-    private static void getSubmittedPost(Executor executor, Handler handler, String response, String kind,
+    private static void getSubmittedPost(Executor executor, Handler handler, @Nullable String response, String kind,
                                          Retrofit oauthRetrofit, String accessToken,
                                          SubmitPostListener submitPostListener) throws JSONException, IOException {
         JSONObject responseObject = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY);
@@ -228,7 +229,7 @@ public class SubmitPost {
             Call<String> getPostCall = api.getPostOauth(postId, APIUtils.getOAuthHeader(accessToken));
             Response<String> getPostCallResponse = getPostCall.execute();
             if (getPostCallResponse.isSuccessful()) {
-                ParsePost.parsePost(executor, handler, getPostCallResponse.body(), new ParsePost.ParsePostListener() {
+                ParsePost.parsePost(executor, handler, Objects.requireNonNull(getPostCallResponse.body()), new ParsePost.ParsePostListener() {
                     @Override
                     public void onParsePostSuccess(Post post) {
                         submitPostListener.submitSuccessful(post);
@@ -248,7 +249,7 @@ public class SubmitPost {
     }
 
     public interface SubmitPostListener {
-        void submitSuccessful(Post post);
+        void submitSuccessful(@Nullable Post post);
 
         void submitFailed(@Nullable String errorMessage);
     }

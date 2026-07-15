@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 
 public class UserWithSelection implements Parcelable {
@@ -19,8 +20,8 @@ public class UserWithSelection implements Parcelable {
     }
 
     protected UserWithSelection(Parcel in) {
-        name = in.readString();
-        iconUrl = in.readString();
+        name = Objects.requireNonNull(in.readString());
+        iconUrl = Objects.requireNonNull(in.readString());
         selected = in.readByte() != 0;
     }
 

@@ -17,7 +17,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class FetchSubredditData {
-    public static void fetchSubredditData(Executor executor, Handler handler, Retrofit oauthRetrofit, Retrofit retrofit,
+    public static void fetchSubredditData(Executor executor, Handler handler, @Nullable Retrofit oauthRetrofit, Retrofit retrofit,
                                           String subredditName, String accessToken,
                                           final FetchSubredditDataListener fetchSubredditDataListener) {
         executor.execute(() -> {
@@ -45,7 +45,7 @@ public class FetchSubredditData {
 
     static void fetchSubredditListingData(Executor executor, Handler handler, Retrofit retrofit,
                                           Retrofit oauthRetrofit, String query,
-                                          String after, SortType.Type sortType, @Nullable String accessToken,
+                                          @Nullable String after, SortType.Type sortType, @Nullable String accessToken,
                                           @NonNull String accountName, boolean nsfw,
                                           final FetchSubredditListingDataListener fetchSubredditListingDataListener) {
         executor.execute(() -> {

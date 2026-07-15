@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.post;
 
+import androidx.annotation.Nullable;
 import com.google.gson.annotations.SerializedName;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 
@@ -29,6 +30,7 @@ public class PollPayload {
     public String subredditName;
     @SerializedName("submit_type")
     public String submitType;
+    @Nullable
     public String text;
     public String title;
     @SerializedName("validate_on_submit")

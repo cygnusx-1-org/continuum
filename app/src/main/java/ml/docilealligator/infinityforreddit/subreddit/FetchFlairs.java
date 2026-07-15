@@ -51,7 +51,7 @@ public class FetchFlairs {
 
     @WorkerThread
     @Nullable
-    private static List<Flair> parseFlairs(String response) {
+    private static List<Flair> parseFlairs(@Nullable String response) {
         try {
             JSONArray jsonArray = new JSONArray(response);
             List<Flair> flairs = new ArrayList<>();
@@ -74,7 +74,7 @@ public class FetchFlairs {
     }
 
     public interface FetchFlairsInSubredditListener {
-        void fetchSuccessful(List<Flair> flairs);
+        void fetchSuccessful(@Nullable List<Flair> flairs);
 
         void fetchFailed();
     }

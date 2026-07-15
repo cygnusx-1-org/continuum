@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -28,7 +29,7 @@ public class FetchPost {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful()) {
-                    ParsePost.parsePost(executor, handler, response.body(), new ParsePost.ParsePostListener() {
+                    ParsePost.parsePost(executor, handler, Objects.requireNonNull(response.body()), new ParsePost.ParsePostListener() {
                         @Override
                         public void onParsePostSuccess(Post post) {
                             fetchPostListener.fetchPostSuccess(post);
@@ -64,7 +65,7 @@ public class FetchPost {
         try {
             Response<String> response = postCall.execute();
             if (response.isSuccessful()) {
-                return ParsePost.parsePostSync(response.body());
+                return ParsePost.parsePostSync(Objects.requireNonNull(response.body()));
             } else {
                 return null;
             }
@@ -87,7 +88,7 @@ public class FetchPost {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful()) {
-                    ParsePost.parseRandomPost(executor, handler, response.body(), isNSFW,
+                    ParsePost.parseRandomPost(executor, handler, Objects.requireNonNull(response.body()), isNSFW,
                             new ParsePost.ParseRandomPostListener() {
                                 @Override
                                 public void onParseRandomPostSuccess(String postId, String subredditName) {

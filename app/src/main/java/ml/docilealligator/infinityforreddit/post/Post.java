@@ -28,23 +28,34 @@ public class Post implements Parcelable {
     private final String fullName;
     private final String subredditName;
     private final String subredditNamePrefixed;
+    @Nullable
     private String subredditIconUrl;
     private String author;
     private String authorNamePrefixed;
+    @Nullable
     private String authorIconUrl;
     private final String authorFlair;
     private final String authorFlairHTML;
     private String title;
+    @Nullable
     private String selfText;
+    @Nullable
     private String selfTextPlain;
+    @Nullable
     private String selfTextPlainTrimmed;
+    @Nullable
     private String url;
+    @Nullable
     private String videoUrl;
+    @Nullable
     private String videoDownloadUrl;
     @Nullable
     private String videoFallBackDirectUrl;
+    @Nullable
     private String thumbnailUrl;
+    @Nullable
     private String redgifsId;
+    @Nullable
     private String streamableShortCode;
     private boolean isImgur;
     private boolean isRedgifs;
@@ -69,9 +80,13 @@ public class Post implements Parcelable {
     private boolean sendReplies;
     private final boolean isCrosspost;
     private boolean isRead;
+    @Nullable
     private String crosspostParentId;
+    @Nullable
     private String distinguished;
+    @Nullable
     private final String suggestedSort;
+    @Nullable
     private String mp4Variant;
     private ArrayList<Preview> previews = new ArrayList<>();
     @Nullable
@@ -80,6 +95,7 @@ public class Post implements Parcelable {
     private boolean canModPost;
     private boolean approved;
     private long approvedAtUTC;
+    @Nullable
     private String approvedBy;
     private boolean removed;
     private boolean spam;
@@ -90,8 +106,8 @@ public class Post implements Parcelable {
                 String title, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
                 boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
-                boolean isCrosspost, boolean canModPost, boolean approved, long approvedAtUTC, String approvedBy,
-                boolean removed, boolean spam, String distinguished, String suggestedSort) {
+                boolean isCrosspost, boolean canModPost, boolean approved, long approvedAtUTC, @Nullable String approvedBy,
+                boolean removed, boolean spam, String distinguished, @Nullable String suggestedSort) {
         this.id = id;
         this.fullName = fullName;
         this.subredditName = subredditName;
@@ -134,8 +150,8 @@ public class Post implements Parcelable {
                 String url, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
                 boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
-                boolean isCrosspost, boolean canModPost, boolean approved, long approvedAtUTC, String approvedBy,
-                boolean removed, boolean spam, String distinguished, String suggestedSort) {
+                boolean isCrosspost, boolean canModPost, boolean approved, long approvedAtUTC, @Nullable String approvedBy,
+                boolean removed, boolean spam, String distinguished, @Nullable String suggestedSort) {
         this.id = id;
         this.fullName = fullName;
         this.subredditName = subredditName;
@@ -233,17 +249,17 @@ public class Post implements Parcelable {
     }
 
     protected Post(Parcel in) {
-        id = in.readString();
-        fullName = in.readString();
-        subredditName = in.readString();
-        subredditNamePrefixed = in.readString();
+        id = Objects.requireNonNull(in.readString());
+        fullName = Objects.requireNonNull(in.readString());
+        subredditName = Objects.requireNonNull(in.readString());
+        subredditNamePrefixed = Objects.requireNonNull(in.readString());
         subredditIconUrl = in.readString();
-        author = in.readString();
-        authorNamePrefixed = in.readString();
+        author = Objects.requireNonNull(in.readString());
+        authorNamePrefixed = Objects.requireNonNull(in.readString());
         authorIconUrl = in.readString();
-        authorFlair = in.readString();
-        authorFlairHTML = in.readString();
-        title = in.readString();
+        authorFlair = Objects.requireNonNull(in.readString());
+        authorFlairHTML = Objects.requireNonNull(in.readString());
+        title = Objects.requireNonNull(in.readString());
         selfText = in.readString();
         selfTextPlain = in.readString();
         selfTextPlainTrimmed = in.readString();
@@ -259,8 +275,8 @@ public class Post implements Parcelable {
         isStreamable = in.readByte() != 0;
         isTumblr = in.readByte() != 0;
         loadedStreamableVideoAlready = in.readByte() != 0;
-        permalink = in.readString();
-        flair = in.readString();
+        permalink = Objects.requireNonNull(in.readString());
+        flair = Objects.requireNonNull(in.readString());
         postTimeMillis = in.readLong();
         score = in.readInt();
         postType = in.readInt();
@@ -287,12 +303,10 @@ public class Post implements Parcelable {
         distinguished = in.readString();
         suggestedSort = in.readString();
         mp4Variant = in.readString();
-        previews = in.createTypedArrayList(Preview.CREATOR);
+        previews = Objects.requireNonNull(in.createTypedArrayList(Preview.CREATOR));
         mediaMetadataMap = (Map<String, MediaMetadata>) in.readValue(getClass().getClassLoader());
-        gallery = in.createTypedArrayList(Gallery.CREATOR);
-        if (gallery == null) {
-            gallery = new ArrayList<>();
-        }
+        ArrayList<Gallery> parsedGallery = in.createTypedArrayList(Gallery.CREATOR);
+        gallery = parsedGallery != null ? parsedGallery : new ArrayList<>();
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
@@ -323,11 +337,12 @@ public class Post implements Parcelable {
         return subredditNamePrefixed;
     }
 
+    @Nullable
     public String getSubredditIconUrl() {
         return subredditIconUrl;
     }
 
-    public void setSubredditIconUrl(String subredditIconUrl) {
+    public void setSubredditIconUrl(@Nullable String subredditIconUrl) {
         this.subredditIconUrl = subredditIconUrl;
     }
 
@@ -356,11 +371,12 @@ public class Post implements Parcelable {
         return authorFlairHTML;
     }
 
+    @Nullable
     public String getAuthorIconUrl() {
         return authorIconUrl;
     }
 
-    public void setAuthorIconUrl(String authorIconUrl) {
+    public void setAuthorIconUrl(@Nullable String authorIconUrl) {
         this.authorIconUrl = authorIconUrl;
     }
 
@@ -376,51 +392,57 @@ public class Post implements Parcelable {
         this.title = title;
     }
 
+    @Nullable
     public String getSelfText() {
         return selfText;
     }
 
-    public void setSelfText(String selfText) {
+    public void setSelfText(@Nullable String selfText) {
         this.selfText = selfText;
     }
 
+    @Nullable
     public String getSelfTextPlain() {
         return selfTextPlain;
     }
 
-    public void setSelfTextPlain(String selfTextPlain) {
+    public void setSelfTextPlain(@Nullable String selfTextPlain) {
         this.selfTextPlain = selfTextPlain;
     }
 
+    @Nullable
     public String getSelfTextPlainTrimmed() {
         return selfTextPlainTrimmed;
     }
 
-    public void setSelfTextPlainTrimmed(String selfTextPlainTrimmed) {
+    public void setSelfTextPlainTrimmed(@Nullable String selfTextPlainTrimmed) {
         this.selfTextPlainTrimmed = selfTextPlainTrimmed;
     }
 
+    @Nullable
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(@Nullable String url) {
         this.url = url;
     }
 
+    @Nullable
     public String getVideoUrl() {
         return videoUrl;
     }
 
-    public void setVideoUrl(String videoUrl) {
+    public void setVideoUrl(@Nullable String videoUrl) {
         this.videoUrl = videoUrl;
     }
 
+    @Nullable
     public String getVideoDownloadUrl() {
         return videoDownloadUrl;
     }
 
-    public void setVideoDownloadUrl(String videoDownloadUrl) {
+    public void setVideoDownloadUrl(@Nullable String videoDownloadUrl) {
         this.videoDownloadUrl = videoDownloadUrl;
     }
 
@@ -433,27 +455,30 @@ public class Post implements Parcelable {
         this.videoFallBackDirectUrl = videoFallBackDirectUrl;
     }
 
+    @Nullable
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
 
-    public void setThumbnailUrl(String thumbnailUrl) {
+    public void setThumbnailUrl(@Nullable String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
     }
 
+    @Nullable
     public String getRedgifsId() {
         return redgifsId;
     }
 
-    public void setRedgifsId(String redgifsId) {
+    public void setRedgifsId(@Nullable String redgifsId) {
         this.redgifsId = redgifsId;
     }
 
+    @Nullable
     public String getStreamableShortCode() {
         return streamableShortCode;
     }
 
-    public void setStreamableShortCode(String shortCode) {
+    public void setStreamableShortCode(@Nullable String shortCode) {
         this.streamableShortCode = shortCode;
     }
 
@@ -525,6 +550,7 @@ public class Post implements Parcelable {
         return distinguished != null && distinguished.equals("admin");
     }
 
+    @Nullable
     public String getSuggestedSort() {
         return suggestedSort;
     }
@@ -719,11 +745,12 @@ public class Post implements Parcelable {
         this.approvedAtUTC = approvedAtUTC;
     }
 
+    @Nullable
     public String getApprovedBy() {
         return approvedBy;
     }
 
-    public void setApprovedBy(String approvedBy) {
+    public void setApprovedBy(@Nullable String approvedBy) {
         this.approvedBy = approvedBy;
     }
 
@@ -748,11 +775,12 @@ public class Post implements Parcelable {
         return isRead;
     }
 
+    @Nullable
     public String getCrosspostParentId() {
         return crosspostParentId;
     }
 
-    public void setCrosspostParentId(String crosspostParentId) {
+    public void setCrosspostParentId(@Nullable String crosspostParentId) {
         this.crosspostParentId = crosspostParentId;
     }
 
@@ -791,11 +819,12 @@ public class Post implements Parcelable {
         this.gallery = gallery != null ? gallery : new ArrayList<>();
     }
 
+    @Nullable
     public String getMp4Variant() {
         return mp4Variant;
     }
 
-    public void setMp4Variant(String mp4Variant) {
+    public void setMp4Variant(@Nullable String mp4Variant) {
         this.mp4Variant = mp4Variant;
     }
 
@@ -842,6 +871,7 @@ public class Post implements Parcelable {
         // A smaller, resolution-bounded preview used only when rendering the gallery inline in the
         // feed/post-detail card. The full-screen media view keeps using `url` (the source). Null for
         // GIFs/videos and for images that have no usable preview.
+        @Nullable
         public String feedPreviewUrl;
         public String fileName;
         public int mediaType;
@@ -865,15 +895,15 @@ public class Post implements Parcelable {
         }
 
         protected Gallery(Parcel in) {
-            mimeType = in.readString();
-            url = in.readString();
-            fallbackUrl = in.readString();
+            mimeType = Objects.requireNonNull(in.readString());
+            url = Objects.requireNonNull(in.readString());
+            fallbackUrl = Objects.requireNonNull(in.readString());
             hasFallback = in.readByte() != 0;
             feedPreviewUrl = in.readString();
-            fileName = in.readString();
+            fileName = Objects.requireNonNull(in.readString());
             mediaType = in.readInt();
-            caption = in.readString();
-            captionUrl = in.readString();
+            caption = Objects.requireNonNull(in.readString());
+            captionUrl = Objects.requireNonNull(in.readString());
         }
 
         public static final Creator<Gallery> CREATOR = new Creator<Gallery>() {
@@ -929,11 +959,11 @@ public class Post implements Parcelable {
         }
 
         protected Preview(Parcel in) {
-            previewUrl = in.readString();
+            previewUrl = Objects.requireNonNull(in.readString());
             previewWidth = in.readInt();
             previewHeight = in.readInt();
-            previewCaption = in.readString();
-            previewCaptionUrl = in.readString();
+            previewCaption = Objects.requireNonNull(in.readString());
+            previewCaptionUrl = Objects.requireNonNull(in.readString());
         }
 
         public static final Creator<Preview> CREATOR = new Creator<Preview>() {

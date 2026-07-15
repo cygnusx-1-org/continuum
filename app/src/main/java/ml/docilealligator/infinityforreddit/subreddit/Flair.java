@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import java.util.Objects;
 
 public class Flair implements Parcelable {
     public static final Creator<Flair> CREATOR = new Creator<Flair>() {
@@ -28,8 +29,8 @@ public class Flair implements Parcelable {
     }
 
     protected Flair(Parcel in) {
-        id = in.readString();
-        text = in.readString();
+        id = Objects.requireNonNull(in.readString());
+        text = Objects.requireNonNull(in.readString());
         editable = in.readByte() != 0;
     }
 

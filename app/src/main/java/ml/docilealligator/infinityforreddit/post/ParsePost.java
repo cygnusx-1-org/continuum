@@ -28,7 +28,8 @@ import org.json.JSONObject;
 
 public class ParsePost {
     @WorkerThread
-    public static LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+    @Nullable
+    public static LinkedHashSet<Post> parsePostsSync(@Nullable String response, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
         if (response == null) {
             return null;
         }
@@ -42,7 +43,8 @@ public class ParsePost {
 
     // Overload taking an already-parsed listing so a caller that also needs the raw JSON (e.g. the
     // Saved cache) doesn't have to parse the response body a second time.
-    public static LinkedHashSet<Post> parsePostsSync(JSONObject jsonResponse, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+    @Nullable
+    public static LinkedHashSet<Post> parsePostsSync(@Nullable JSONObject jsonResponse, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
         if (jsonResponse == null) {
             return null;
         }
@@ -87,7 +89,8 @@ public class ParsePost {
         }
     }
 
-    public static String getLastItem(String response) {
+    @Nullable
+    public static String getLastItem(@Nullable String response) {
         if (response == null) {
             return null;
         }
@@ -99,7 +102,8 @@ public class ParsePost {
         }
     }
 
-    public static String getLastItem(JSONObject response) {
+    @Nullable
+    public static String getLastItem(@Nullable JSONObject response) {
         if (response == null) {
             return null;
         }
@@ -115,7 +119,8 @@ public class ParsePost {
     // The /duplicates/{id} endpoint returns a two-element array: index 0 is the original post and
     // index 1 is the listing of other submissions of the same URL. Pull element 1 and parse it as a
     // normal posts listing.
-    public static LinkedHashSet<Post> parseDuplicatePostsSync(String response, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+    @Nullable
+    public static LinkedHashSet<Post> parseDuplicatePostsSync(@Nullable String response, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
         try {
             String duplicatesListing = new JSONArray(response).getJSONObject(1).toString();
             return parsePostsSync(duplicatesListing, -1, postFilter, readPostsList);
@@ -125,7 +130,8 @@ public class ParsePost {
         }
     }
 
-    public static String getDuplicatesLastItem(String response) {
+    @Nullable
+    public static String getDuplicatesLastItem(@Nullable String response) {
         try {
             JSONObject object = new JSONArray(response).getJSONObject(1).getJSONObject(JSONUtils.DATA_KEY);
             return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
@@ -398,16 +404,16 @@ public class ParsePost {
     }
 
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,
-                                  String subredditName, String subredditNamePrefixed, String subredditIconUrl,
+                                  String subredditName, String subredditNamePrefixed, @Nullable String subredditIconUrl,
                                   String author, String authorFlair, String authorFlairHTML,
                                   long postTimeMillis, String title, ArrayList<Post.Preview> previews,
-                                  Map<String, MediaMetadata> mediaMetadataMap, int score, int voteType,
+                                  @Nullable Map<String, MediaMetadata> mediaMetadataMap, int score, int voteType,
                                   int nComments, int upvoteRatio, String flair, boolean hidden,
                                   boolean spoiler, boolean nsfw, boolean stickied, boolean archived,
                                   boolean locked, boolean saved, boolean sendReplies, boolean deleted,
                                   boolean removed, boolean isCrosspost, boolean canModPost, boolean approved,
-                                  long approvedAtUTC, String approvedBy, boolean spam,
-                                  String distinguished, String suggestedSort, String thumbnailUrl) throws JSONException {
+                                  long approvedAtUTC, @Nullable String approvedBy, boolean spam,
+                                  String distinguished, @Nullable String suggestedSort, String thumbnailUrl) throws JSONException {
         Post post;
 
         boolean isVideo = data.getBoolean(JSONUtils.IS_VIDEO_KEY);

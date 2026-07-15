@@ -86,7 +86,7 @@ public class UserProfileImagesBatchLoader {
         }
     }
 
-    private void loadNextBatch(String accessToken) {
+    private void loadNextBatch(@Nullable String accessToken) {
         synchronized (mCommentQueueLock) {
             if (mCommentQueue.isEmpty()) {
                 return;
@@ -207,7 +207,7 @@ public class UserProfileImagesBatchLoader {
     }
 
     @WorkerThread
-    private void parseUserProfileImages(String response) {
+    private void parseUserProfileImages(@Nullable String response) {
         try {
             JSONObject jsonResponse = new JSONObject(response);
             synchronized (mLoadingSetLock) {
@@ -227,7 +227,7 @@ public class UserProfileImagesBatchLoader {
         }
     }
 
-    private void callListenerAndLoadNextBatch(String accessToken, boolean loadSuccessful) {
+    private void callListenerAndLoadNextBatch(@Nullable String accessToken, boolean loadSuccessful) {
         synchronized (mLoadingSetLock) {
             for (String s : mLoadingAuthorFullNames) {
                 ViewPostDetailActivityViewModel.LoadIconListener loadIconListener;

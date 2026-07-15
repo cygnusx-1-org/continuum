@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.localsaved;
 
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -26,7 +27,7 @@ public interface LocalSavedThingDao {
     @Query("SELECT * FROM local_saved WHERE username = :username AND state = 1 " +
             "AND full_name LIKE 't3\\_%' ESCAPE '\\' " +
             "AND (:before IS NULL OR time < :before) ORDER BY time DESC LIMIT 25")
-    ListenableFuture<List<LocalSavedThing>> getPromotedPosts(String username, Long before);
+    ListenableFuture<List<LocalSavedThing>> getPromotedPosts(String username, @Nullable Long before);
 
     // All promoted posts (t3_) newest-first, no limit. Used by the Local Saved posts tab's search,
     // which loads the whole list up front so it can filter and present every match at once. Runs on
@@ -40,7 +41,7 @@ public interface LocalSavedThingDao {
     @Query("SELECT * FROM local_saved WHERE username = :username AND state = 1 " +
             "AND full_name LIKE 't1\\_%' ESCAPE '\\' " +
             "AND (:before IS NULL OR time < :before) ORDER BY time DESC LIMIT 25")
-    List<LocalSavedThing> getPromotedCommentsSync(String username, Long before);
+    List<LocalSavedThing> getPromotedCommentsSync(String username, @Nullable Long before);
 
     @Query("UPDATE local_saved SET state = :state WHERE username = :username AND full_name = :fullName")
     void setState(String username, String fullName, @LocalSavedState int state);

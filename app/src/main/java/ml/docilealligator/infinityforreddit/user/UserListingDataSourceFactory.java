@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import java.util.concurrent.Executor;
@@ -16,6 +17,7 @@ public class UserListingDataSourceFactory extends DataSource.Factory {
     private SortType sortType;
     private final boolean nsfw;
 
+    @Nullable
     private UserListingDataSource userListingDataSource;
     private final MutableLiveData<UserListingDataSource> userListingDataSourceMutableLiveData;
 
@@ -42,6 +44,7 @@ public class UserListingDataSourceFactory extends DataSource.Factory {
         return userListingDataSourceMutableLiveData;
     }
 
+    @Nullable
     UserListingDataSource getUserListingDataSource() {
         return userListingDataSource;
     }

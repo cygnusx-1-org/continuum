@@ -25,6 +25,7 @@ public class HistoryPostViewModel extends ViewModel {
     private final Executor executor;
     private final Retrofit retrofit;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final SharedPreferences sharedPreferences;
@@ -37,12 +38,14 @@ public class HistoryPostViewModel extends ViewModel {
     // Saved-screen search for the Local Saved posts tab. When non-empty the paging source loads the
     // whole local_saved list, filters, and returns every match at once. Read on the paging executor
     // when a source is built, written from the main thread, so it is volatile.
+    @Nullable
     private volatile String searchQuery;
     // Full unfiltered local_saved posts listing shared with the current source so refining the query
     // filters in memory instead of re-hydrating. Invalidated on filter change, refresh, search cleared.
     private final SavedSearchCache<Post> savedSearchCache = new SavedSearchCache<>();
     // Most recently created source, refreshed in place via invalidate() on a query change instead of
     // reposting a LiveData (which would tear down and rebuild the pager mid-load).
+    @Nullable
     private volatile PagingSource<String, Post> pagingSource;
 
     public HistoryPostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
@@ -115,7 +118,8 @@ public class HistoryPostViewModel extends ViewModel {
         private final Executor executor;
         private final Retrofit retrofit;
         private final RedditDataRoomDatabase redditDataRoomDatabase;
-        private final String accessToken;
+        @Nullable
+    private final String accessToken;
         private final String accountName;
         private final SharedPreferences sharedPreferences;
         private final int readPostType;

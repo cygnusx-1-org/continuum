@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.post;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.Objects;
 
 public class ImgurMedia implements Parcelable {
     public static final int TYPE_IMAGE = 0;
@@ -25,9 +26,10 @@ public class ImgurMedia implements Parcelable {
     }
 
     protected ImgurMedia(Parcel in) {
-        title = in.readString();
-        description = in.readString();
-        link = in.readString();
+        id = Objects.requireNonNull(in.readString());
+        title = Objects.requireNonNull(in.readString());
+        description = Objects.requireNonNull(in.readString());
+        link = Objects.requireNonNull(in.readString());
     }
 
     public static final Creator<ImgurMedia> CREATOR = new Creator<ImgurMedia>() {
@@ -77,6 +79,7 @@ public class ImgurMedia implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
         parcel.writeString(title);
         parcel.writeString(description);
         parcel.writeString(link);

@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.commentfilter;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -27,6 +28,7 @@ public interface CommentFilterDao {
     void deleteCommentFilter(String name);
 
     @Query("SELECT * FROM comment_filter WHERE name = :name LIMIT 1")
+    @Nullable
     CommentFilter getCommentFilter(String name);
 
     @Query("SELECT * FROM comment_filter ORDER BY name")

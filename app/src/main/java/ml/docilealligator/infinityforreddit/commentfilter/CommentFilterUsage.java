@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import java.util.Objects;
 
 @Entity(tableName = "comment_filter_usage", primaryKeys = {"name", "usage", "name_of_usage"},
         foreignKeys = @ForeignKey(entity = CommentFilter.class, parentColumns = "name",
@@ -29,9 +30,9 @@ public class CommentFilterUsage implements Parcelable {
     }
 
     protected CommentFilterUsage(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         usage = in.readInt();
-        nameOfUsage = in.readString();
+        nameOfUsage = Objects.requireNonNull(in.readString());
     }
 
     public static final Creator<CommentFilterUsage> CREATOR = new Creator<CommentFilterUsage>() {

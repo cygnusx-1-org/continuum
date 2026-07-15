@@ -62,18 +62,18 @@ object MediaFileNameUtils {
 
         when (post.postType) {
             Post.IMAGE_TYPE -> {
-                url = post.url
+                url = post.url ?: ""
                 mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE
             }
             Post.GIF_TYPE -> {
-                url = post.videoUrl // GIFs are often served as videos (mp4)
+                url = post.videoUrl ?: "" // GIFs are often served as videos (mp4)
                 mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_GIF
             }
             Post.VIDEO_TYPE -> {
                 mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO
                 // Streamable/Redgifs URLs are fetched later, so fall back to the media-type extension.
                 if (!post.isStreamable) {
-                    url = post.videoUrl
+                    url = post.videoUrl ?: ""
                 }
             }
             Post.GALLERY_TYPE -> {

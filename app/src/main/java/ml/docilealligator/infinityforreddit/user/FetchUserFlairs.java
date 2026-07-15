@@ -49,7 +49,8 @@ public class FetchUserFlairs {
     }
 
     @WorkerThread
-    private static ArrayList<UserFlair> parseUserFlairs(String response) {
+    @Nullable
+    private static ArrayList<UserFlair> parseUserFlairs(@Nullable String response) {
         try {
             JSONArray jsonArray = new JSONArray(response);
             ArrayList<UserFlair> userFlairs = new ArrayList<>();

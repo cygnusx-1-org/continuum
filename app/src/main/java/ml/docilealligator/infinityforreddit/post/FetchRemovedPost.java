@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.post;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,6 +68,7 @@ public class FetchRemovedPost {
      * Returns null (rather than an empty {@link Result}) for any unexpected payload shape so a
      * schema drift or error envelope from the archive can't be mistaken for "found but empty".
      */
+    @Nullable
     private static Result parseResponse(String responseBody) {
         try {
             JSONObject obj = new JSONObject(responseBody);
@@ -131,7 +133,7 @@ public class FetchRemovedPost {
      * decide a post is removed and to reject archive copies that are themselves post-takedown
      * snapshots rather than the original.
      */
-    public static boolean isRemovalPlaceholder(String text) {
+    public static boolean isRemovalPlaceholder(@Nullable String text) {
         if (text == null) {
             return false;
         }
@@ -146,7 +148,8 @@ public class FetchRemovedPost {
      * If {@code body} consists solely of a single link — either a bare URL or the [url](url)
      * autolink Reddit generates for one — returns that URL; otherwise null.
      */
-    private static String extractSoleLink(String body) {
+    @Nullable
+    private static String extractSoleLink(@Nullable String body) {
         if (body == null) {
             return null;
         }
@@ -161,6 +164,7 @@ public class FetchRemovedPost {
         return null;
     }
 
+    @Nullable
     private static String readString(JSONObject obj, String key) {
         String value = obj.optString(key, null);
         return value == null || value.trim().isEmpty() ? null : value;
@@ -171,11 +175,14 @@ public class FetchRemovedPost {
     }
 
     private static final class Result {
+        @Nullable
         final String title;
+        @Nullable
         final String body;
+        @Nullable
         final String link;
 
-        Result(String title, String body, String link) {
+        Result(@Nullable String title, @Nullable String body, @Nullable String link) {
             this.title = title;
             this.body = body;
             this.link = link;

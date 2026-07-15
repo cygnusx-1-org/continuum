@@ -7,6 +7,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import java.util.Objects;
 
 @Entity(tableName = "subreddits")
 public class SubredditData implements Parcelable {
@@ -52,15 +53,15 @@ public class SubredditData implements Parcelable {
     }
 
     protected SubredditData(Parcel in) {
-        id = in.readString();
-        name = in.readString();
-        iconUrl = in.readString();
-        bannerUrl = in.readString();
-        description = in.readString();
-        sidebarDescription = in.readString();
+        id = Objects.requireNonNull(in.readString());
+        name = Objects.requireNonNull(in.readString());
+        iconUrl = Objects.requireNonNull(in.readString());
+        bannerUrl = Objects.requireNonNull(in.readString());
+        description = Objects.requireNonNull(in.readString());
+        sidebarDescription = Objects.requireNonNull(in.readString());
         nSubscribers = in.readInt();
         createdUTC = in.readLong();
-        suggestedCommentSort = in.readString();
+        suggestedCommentSort = Objects.requireNonNull(in.readString());
         isNSFW = in.readByte() != 0;
         isSelected = in.readByte() != 0;
     }

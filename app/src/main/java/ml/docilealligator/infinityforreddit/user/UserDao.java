@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.user;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -21,5 +22,6 @@ public interface UserDao {
     LiveData<UserData> getUserLiveData(String userName);
 
     @Query("SELECT * FROM users WHERE name = :userName COLLATE NOCASE LIMIT 1")
+    @Nullable
     UserData getUserData(String userName);
 }

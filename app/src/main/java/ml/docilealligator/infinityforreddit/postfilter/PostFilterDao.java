@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.postfilter;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -27,6 +28,7 @@ public interface PostFilterDao {
     void deletePostFilter(String name);
 
     @Query("SELECT * FROM post_filter WHERE name = :name LIMIT 1")
+    @Nullable
     PostFilter getPostFilter(String name);
 
     @Query("SELECT * FROM post_filter ORDER BY name")

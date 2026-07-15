@@ -160,8 +160,9 @@ fun sharePostAsScreenshot(
         }
 
         else -> {
-            if (post.selfTextPlainTrimmed != null && post.selfTextPlainTrimmed.isNotEmpty()) {
-                binding.contentTextViewSharedPost.text = post.selfTextPlainTrimmed
+            val selfTextTrimmed = post.selfTextPlainTrimmed
+            if (!selfTextTrimmed.isNullOrEmpty()) {
+                binding.contentTextViewSharedPost.text = selfTextTrimmed
             }
             binding.imageViewSharedPost.visibility = View.GONE
         }
@@ -284,8 +285,9 @@ fun sharePostWithCommentsAsScreenshot(
         }
 
         else -> {
-            if (post.selfTextPlainTrimmed != null && post.selfTextPlainTrimmed.isNotEmpty()) {
-                binding.contentTextViewSharedPostWithComments.text = post.selfTextPlainTrimmed
+            val selfTextTrimmed = post.selfTextPlainTrimmed
+            if (!selfTextTrimmed.isNullOrEmpty()) {
+                binding.contentTextViewSharedPostWithComments.text = selfTextTrimmed
             }
             binding.imageViewSharedPostWithComments.visibility = View.GONE
         }

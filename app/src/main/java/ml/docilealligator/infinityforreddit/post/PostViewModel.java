@@ -18,6 +18,7 @@ import androidx.paging.PagingDataTransforms;
 import androidx.paging.PagingLiveData;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SingleLiveEvent;
@@ -40,17 +41,23 @@ public class PostViewModel extends ViewModel {
     private final Executor executor;
     private final Retrofit retrofit;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final SharedPreferences sharedPreferences;
+    @Nullable
     private final SharedPreferences postFeedScrolledPositionSharedPreferences;
+    @Nullable
     private String name;
+    @Nullable
     private String query;
+    @Nullable
     private String trendingSource;
     @PostType
     private final int postType;
     private SortType sortType;
     private PostFilter postFilter;
+    @Nullable
     private String userWhere;
     private ReadPostsListInterface readPostsList;
     private final MutableLiveData<Boolean> hideReadPostsValue = new MutableLiveData<>();
@@ -61,6 +68,7 @@ public class PostViewModel extends ViewModel {
     // whole saved listing, filters by the query, and returns every match at once (see
     // PostPagingSource#loadAllUserPostsFiltered). Read on the paging executor when a source is built,
     // written from the main thread, so it is volatile.
+    @Nullable
     private volatile String searchQuery;
     // Full unfiltered saved listing shared with the current PostPagingSource so refining the query
     // filters in memory instead of re-walking the listing. Invalidated whenever the listing must be
@@ -69,6 +77,7 @@ public class PostViewModel extends ViewModel {
     // The most recently created source, kept so a query change can refresh it in place via
     // invalidate() instead of reposting a LiveData (which would tear down and rebuild the whole
     // pipeline while a slow load-all is still collecting — the rebuild race behind the paging CMEs).
+    @Nullable
     private volatile PostPagingSource pagingSource;
 
     private final MutableLiveData<SortType> sortTypeLiveData;
@@ -80,7 +89,7 @@ public class PostViewModel extends ViewModel {
     // PostType.FRONT_PAGE
     public PostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                          @Nullable String accessToken, @NonNull String accountName,
-                         SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
+                         SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                          @Nullable SharedPreferences postHistorySharedPreferences, @PostType int postType,
                          SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
         this.executor = executor;
@@ -104,7 +113,7 @@ public class PostViewModel extends ViewModel {
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
-                    sortTypeLiveData.getValue(), postFilterLiveData.getValue());
+                    Objects.requireNonNull(sortTypeLiveData.getValue()), Objects.requireNonNull(postFilterLiveData.getValue()));
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
@@ -113,7 +122,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -122,8 +131,8 @@ public class PostViewModel extends ViewModel {
     // PostType.SUBREDDIT || PostType.ANONYMOUS_FRONT_PAGE || PostType.ANONYMOUS_MULTIREDDIT
     public PostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                          @Nullable String accessToken, @NonNull String accountName,
-                         SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                         @Nullable SharedPreferences postHistorySharedPreferences, String subredditName, @PostType int postType,
+                         SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                         @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String subredditName, @PostType int postType,
                          SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -147,7 +156,7 @@ public class PostViewModel extends ViewModel {
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
-                    sortTypeLiveData.getValue(), postFilterLiveData.getValue());
+                    Objects.requireNonNull(sortTypeLiveData.getValue()), Objects.requireNonNull(postFilterLiveData.getValue()));
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
@@ -156,18 +165,18 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && ((postType != PostType.SUBREDDIT || subredditName.equals("all") || subredditName.equals("popular")) || postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE, false)));
+                && ((postType != PostType.SUBREDDIT || "all".equals(subredditName) || "popular".equals(subredditName)) || postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE, false)));
     }
 
     // PostType.MULTIREDDIT
     public PostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                          @Nullable String accessToken, @NonNull String accountName,
-                         SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                         @Nullable SharedPreferences postHistorySharedPreferences, String multiredditPath, String query,
+                         SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                         @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String multiredditPath, @Nullable String query,
                          @PostType int postType, SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -192,7 +201,7 @@ public class PostViewModel extends ViewModel {
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
-                    sortTypeLiveData.getValue(), postFilterLiveData.getValue());
+                    Objects.requireNonNull(sortTypeLiveData.getValue()), Objects.requireNonNull(postFilterLiveData.getValue()));
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
@@ -201,7 +210,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -211,9 +220,9 @@ public class PostViewModel extends ViewModel {
     public PostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                          @Nullable String accessToken, @NonNull String accountName,
                          SharedPreferences sharedPreferences,
-                         SharedPreferences postFeedScrolledPositionSharedPreferences,
-                         @Nullable SharedPreferences postHistorySharedPreferences, String username,
-                         @PostType int postType, SortType sortType, PostFilter postFilter, String userWhere,
+                         @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                         @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String username,
+                         @PostType int postType, SortType sortType, PostFilter postFilter, @Nullable String userWhere,
                          ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -238,7 +247,7 @@ public class PostViewModel extends ViewModel {
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
-                    sortTypeLiveData.getValue(), postFilterLiveData.getValue());
+                    Objects.requireNonNull(sortTypeLiveData.getValue()), Objects.requireNonNull(postFilterLiveData.getValue()));
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
@@ -247,7 +256,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
@@ -257,9 +266,9 @@ public class PostViewModel extends ViewModel {
     // postType == PostType.SEARCH
     public PostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                          @Nullable String accessToken, @NonNull String accountName,
-                         SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                         @Nullable SharedPreferences postHistorySharedPreferences, String subredditName, String query,
-                         String trendingSource, @PostType int postType, SortType sortType, PostFilter postFilter,
+                         SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                         @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String subredditName, @Nullable String query,
+                         @Nullable String trendingSource, @PostType int postType, SortType sortType, PostFilter postFilter,
                          ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -285,7 +294,7 @@ public class PostViewModel extends ViewModel {
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
-                    sortTypeLiveData.getValue(), postFilterLiveData.getValue());
+                    Objects.requireNonNull(sortTypeLiveData.getValue()), Objects.requireNonNull(postFilterLiveData.getValue()));
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
@@ -294,7 +303,7 @@ public class PostViewModel extends ViewModel {
                         posts,
                         postPagingData -> PagingDataTransforms.filter(
                                 postPagingData, executor,
-                                post -> !post.isRead() || !hideReadPostsValue.getValue()))), ViewModelKt.getViewModelScope(this));
+                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
@@ -305,6 +314,7 @@ public class PostViewModel extends ViewModel {
         return postsWithReadPostsHidden;
     }
 
+    @Nullable
     public String getSearchQuery() {
         return searchQuery;
     }
@@ -437,25 +447,32 @@ public class PostViewModel extends ViewModel {
         private final Executor executor;
         private final Retrofit retrofit;
         private final RedditDataRoomDatabase redditDataRoomDatabase;
+        @Nullable
         private String accessToken;
         private String accountName;
         private final SharedPreferences sharedPreferences;
+        @Nullable
         private SharedPreferences postFeedScrolledPositionSharedPreferences;
+        @Nullable
         private SharedPreferences postHistorySharedPreferences;
+        @Nullable
         private String name;
+        @Nullable
         private String query;
+        @Nullable
         private String trendingSource;
         @PostType
         private final int postType;
         private final SortType sortType;
         private final PostFilter postFilter;
+        @Nullable
         private String userWhere;
         private final ReadPostsListInterface readPostsList;
 
         // Front page
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
-                       SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
+                       SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        SharedPreferences postHistorySharedPreferences, @PostType int postType, SortType sortType,
                        PostFilter postFilter, ReadPostsListInterface readPostsList) {
             this.executor = executor;
@@ -475,8 +492,8 @@ public class PostViewModel extends ViewModel {
         // PostType.SUBREDDIT
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
-                       SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                       SharedPreferences postHistorySharedPreferences, String name, @PostType int postType, SortType sortType,
+                       SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                       SharedPreferences postHistorySharedPreferences, @Nullable String name, @PostType int postType, SortType sortType,
                        PostFilter postFilter, ReadPostsListInterface readPostsList) {
             this.executor = executor;
             this.retrofit = retrofit;
@@ -496,8 +513,8 @@ public class PostViewModel extends ViewModel {
         // PostType.MULTIREDDIT
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
-                       SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                       SharedPreferences postHistorySharedPreferences, String name, String query, @PostType int postType, SortType sortType,
+                       SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                       SharedPreferences postHistorySharedPreferences, @Nullable String name, @Nullable String query, @PostType int postType, SortType sortType,
                        PostFilter postFilter, ReadPostsListInterface readPostsList) {
             this.executor = executor;
             this.retrofit = retrofit;
@@ -518,7 +535,7 @@ public class PostViewModel extends ViewModel {
         //User posts
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
-                       SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
+                       SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        SharedPreferences postHistorySharedPreferences, String username, @PostType int postType,
                        SortType sortType, PostFilter postFilter, String where, ReadPostsListInterface readPostsList) {
             this.executor = executor;
@@ -540,8 +557,8 @@ public class PostViewModel extends ViewModel {
         // PostType.SEARCH
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
-                       SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                       SharedPreferences postHistorySharedPreferences, String name, String query, String trendingSource,
+                       SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                       SharedPreferences postHistorySharedPreferences, @Nullable String name, @Nullable String query, @Nullable String trendingSource,
                        @PostType int postType, SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
             this.executor = executor;
             this.retrofit = retrofit;
@@ -568,6 +585,13 @@ public class PostViewModel extends ViewModel {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
+            // Anonymous browsing has no account, so this factory previously left accountName null and
+            // create() forwarded that null to the view model / paging source. PostPagingSource then
+            // both dereferences accountName (e.g. accountName.equals(ANONYMOUS_ACCOUNT) when merging
+            // followed-user posts in an anonymous multireddit -> NPE) and, via the null-safe reversed
+            // check ANONYMOUS_ACCOUNT.equals(accountName), silently skipped applying the local
+            // anonymous vote/hide/save metadata. Using the real anonymous sentinel fixes both.
+            this.accountName = Account.ANONYMOUS_ACCOUNT;
             this.sharedPreferences = sharedPreferences;
             this.name = concatenatedSubredditNames;
             this.postType = postType;
@@ -596,9 +620,9 @@ public class PostViewModel extends ViewModel {
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
                         postHistorySharedPreferences, name, query, postType, sortType, postFilter, readPostsList);
             } else if (postType == PostType.ANONYMOUS_FRONT_PAGE || postType == PostType.ANONYMOUS_MULTIREDDIT) {
-                return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, null,
-                        null, sharedPreferences, null,
-                        null, name, postType, sortType, postFilter, readPostsList);
+                return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
+                        accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
+                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList);
             } else {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,

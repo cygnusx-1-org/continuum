@@ -213,9 +213,10 @@ class ViewPostDetailFragmentViewModelNew(
     ) {
         if (respectSubredditRecommendedSortType) {
             _dataState.value.post?.let {
-                if (it.suggestedSort != null && it.suggestedSort.equals("null")) {
+                val suggestedSort = it.suggestedSort
+                if (suggestedSort != null && suggestedSort.equals("null")) {
                     try {
-                        val sortType = SortType.Type.valueOf(it.suggestedSort.uppercase())
+                        val sortType = SortType.Type.valueOf(suggestedSort.uppercase())
                         updateSortType(sortType)
                         fetchComments(sortType, changeRefreshState)
                         return

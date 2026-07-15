@@ -45,7 +45,7 @@ public class SubredditListingViewModel extends ViewModel {
                         .build();
 
         subreddits = Transformations.switchMap(sortTypeLiveData, sort -> {
-            subredditListingDataSourceFactory.changeSortType(sortTypeLiveData.getValue());
+            subredditListingDataSourceFactory.changeSortType(sort);
             return new LivePagedListBuilder(subredditListingDataSourceFactory, pagedListConfig).build();
         });
     }
@@ -67,11 +67,17 @@ public class SubredditListingViewModel extends ViewModel {
     }
 
     public void refresh() {
-        subredditListingDataSourceFactory.getSubredditListingDataSource().invalidate();
+        SubredditListingDataSource dataSource = subredditListingDataSourceFactory.getSubredditListingDataSource();
+        if (dataSource != null) {
+            dataSource.invalidate();
+        }
     }
 
     public void retryLoadingMore() {
-        subredditListingDataSourceFactory.getSubredditListingDataSource().retryLoadingMore();
+        SubredditListingDataSource dataSource = subredditListingDataSourceFactory.getSubredditListingDataSource();
+        if (dataSource != null) {
+            dataSource.retryLoadingMore();
+        }
     }
 
     public void changeSortType(SortType sortType) {

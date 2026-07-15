@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 
 public class RedditGalleryPayload {
@@ -66,9 +67,9 @@ public class RedditGalleryPayload {
         }
 
         protected Item(Parcel in) {
-            caption = in.readString();
-            outboundUrl = in.readString();
-            mediaId = in.readString();
+            caption = Objects.requireNonNull(in.readString());
+            outboundUrl = Objects.requireNonNull(in.readString());
+            mediaId = Objects.requireNonNull(in.readString());
         }
 
         public static final Creator<Item> CREATOR = new Creator<Item>() {

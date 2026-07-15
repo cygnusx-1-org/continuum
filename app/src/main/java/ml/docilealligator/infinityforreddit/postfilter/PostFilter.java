@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.postfilter;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,28 +43,40 @@ public class PostFilter implements Parcelable {
     public boolean onlyNSFW;
     @ColumnInfo(name = "only_spoiler")
     public boolean onlySpoiler;
+    @Nullable
     @ColumnInfo(name = "post_title_excludes_regex")
     public String postTitleExcludesRegex;
+    @Nullable
     @ColumnInfo(name = "post_title_contains_regex")
     public String postTitleContainsRegex;
+    @Nullable
     @ColumnInfo(name = "post_title_excludes_strings")
     public String postTitleExcludesStrings;
+    @Nullable
     @ColumnInfo(name = "post_title_contains_strings")
     public String postTitleContainsStrings;
+    @Nullable
     @ColumnInfo(name = "exclude_subreddits")
     public String excludeSubreddits;
+    @Nullable
     @ColumnInfo(name = "contain_subreddits")
     public String containSubreddits;
+    @Nullable
     @ColumnInfo(name = "exclude_users")
     public String excludeUsers;
+    @Nullable
     @ColumnInfo(name = "contain_users")
     public String containUsers;
+    @Nullable
     @ColumnInfo(name = "contain_flairs")
     public String containFlairs;
+    @Nullable
     @ColumnInfo(name = "exclude_flairs")
     public String excludeFlairs;
+    @Nullable
     @ColumnInfo(name =  "exclude_domains")
     public String excludeDomains;
+    @Nullable
     @ColumnInfo(name =  "contain_domains")
     public String containDomains;
     @ColumnInfo(name = "contain_text_type")
@@ -115,7 +129,7 @@ public class PostFilter implements Parcelable {
     }
 
     protected PostFilter(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         maxVote = in.readInt();
         minVote = in.readInt();
         maxComments = in.readInt();
@@ -161,7 +175,7 @@ public class PostFilter implements Parcelable {
         }
     };
 
-    public static boolean isPostAllowed(Post post, PostFilter postFilter) {
+    public static boolean isPostAllowed(@Nullable Post post, @Nullable PostFilter postFilter) {
         if (postFilter == null || post == null) {
             return true;
         }

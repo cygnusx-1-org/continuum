@@ -62,19 +62,26 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private final Executor executor;
     private final Retrofit retrofit;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final SharedPreferences sharedPreferences;
+    @Nullable
     private final SharedPreferences postFeedScrolledPositionSharedPreferences;
+    @Nullable
     private String subredditOrUserName;
+    @Nullable
     private String query;
+    @Nullable
     private String trendingSource;
     @PostType
     private final int postType;
     private final SortType sortType;
     private final PostFilter postFilter;
     private final ReadPostsListInterface readPostsList;
+    @Nullable
     private String userWhere;
+    @Nullable
     private String searchQuery;
     // Full unfiltered saved listing, shared with the ViewModel so a refined query filters the
     // already-loaded items in memory instead of re-walking the whole listing (null when not the
@@ -85,17 +92,21 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // as pages are walked so a later Saved tab open can be served from disk with no network call.
     private final JSONArray savedCacheChildren = new JSONArray();
     private final Set<String> savedCacheSeenFullnames = new HashSet<>();
+    @Nullable
     private String multiRedditPath;
     private final List<Post> posts;
     private final Set<String> existingPostIds = new HashSet<>();
+    @Nullable
     private String previousLastItem;
+    @Nullable
     private List<String> multiRedditUsernames;
     private boolean multiRedditUsernamesFetched = false;
+    @Nullable
     private String subredditOnlyName;
 
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                      @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
-                     SharedPreferences postFeedScrolledPositionSharedPreferences, @PostType int postType,
+                     @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences, @PostType int postType,
                      SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -114,8 +125,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // PostPagingSource.TYPE_SUBREDDIT || PostPagingSource.TYPE_ANONYMOUS_FRONT_PAGE || PostPagingSource.TYPE_ANONYMOUS_MULTIREDDIT:
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                      @Nullable String accessToken, @NonNull String accountName,
-                     SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                     String name, @PostType int postType, SortType sortType, PostFilter postFilter,
+                     SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                     @Nullable String name, @PostType int postType, SortType sortType, PostFilter postFilter,
                      ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -146,8 +157,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // PostPagingSource.TYPE_MULTI_REDDIT
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                      @Nullable String accessToken, @NonNull String accountName,
-                     SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                     String path, String query, @PostType int postType, SortType sortType, PostFilter postFilter,
+                     SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                     @Nullable String path, @Nullable String query, @PostType int postType, SortType sortType, PostFilter postFilter,
                      ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -156,7 +167,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.accountName = accountName;
         this.sharedPreferences = sharedPreferences;
         this.postFeedScrolledPositionSharedPreferences = postFeedScrolledPositionSharedPreferences;
-        if (path.endsWith("/")) {
+        if (path != null && path.endsWith("/")) {
             multiRedditPath = path.substring(0, path.length() - 1);
         } else {
             multiRedditPath = path;
@@ -175,9 +186,9 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                      @Nullable String accessToken, @NonNull String accountName,
-                     SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                     String subredditOrUserName, @PostType int postType, SortType sortType, PostFilter postFilter,
-                     String where, String searchQuery, @Nullable SavedSearchCache<Post> savedSearchCache,
+                     SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                     @Nullable String subredditOrUserName, @PostType int postType, SortType sortType, PostFilter postFilter,
+                     @Nullable String where, @Nullable String searchQuery, @Nullable SavedSearchCache<Post> savedSearchCache,
                      ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -199,8 +210,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                      @Nullable String accessToken, @NonNull String accountName,
-                     SharedPreferences sharedPreferences, SharedPreferences postFeedScrolledPositionSharedPreferences,
-                     String subredditOrUserName, String query, String trendingSource, @PostType int postType,
+                     SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
+                     @Nullable String subredditOrUserName, @Nullable String query, @Nullable String trendingSource, @PostType int postType,
                      SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -257,7 +268,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // Parses the response body once and shares it (versus re-parsing for the posts and the `after`
     // separately, plus again for the Saved cache). Returns null on a null/malformed body.
     @Nullable
-    private static JSONObject parseListing(String body) {
+    private static JSONObject parseListing(@Nullable String body) {
         if (body == null) {
             return null;
         }
@@ -268,7 +279,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
     }
 
-    private LoadResult<String, Post> transformData(JSONObject json) {
+    private LoadResult<String, Post> transformData(@Nullable JSONObject json) {
         LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(json, -1, postFilter, readPostsList);
         if (newPosts == null) {
             return new LoadResult.Error<>(new Exception("Error parsing posts"));
@@ -332,7 +343,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         String afterKey;
         if (loadParams.getKey() == null) {
             boolean savePostFeedScrolledPosition = sortType != null && sortType.getType() == SortType.Type.BEST && sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION, false);
-            if (savePostFeedScrolledPosition) {
+            if (savePostFeedScrolledPosition && postFeedScrolledPositionSharedPreferences != null) {
                 String accountNameForCache = accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_ANONYMOUS : accountName;
                 afterKey = postFeedScrolledPositionSharedPreferences.getString(accountNameForCache + SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE, null);
             } else {
@@ -397,7 +408,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 IOException.class, LoadResult.Error::new, executor);
     }
 
-    private ListenableFuture<Response<String>> fetchUserPosts(RedditAPI api, String afterKey) {
+    private ListenableFuture<Response<String>> fetchUserPosts(RedditAPI api, @Nullable String afterKey) {
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             return api.getUserPostsListenableFuture(subredditOrUserName, afterKey, sortType.getType(),
                     sortType.getTime(), 100);
@@ -466,7 +477,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // Collect this page's raw t3 children (deduped, in order) for the persistent SavedPostCache. The
     // whole unfiltered t3 listing is stored -- the current postFilter is re-applied on load -- so a
     // filter change needs no invalidation. Takes the already-parsed listing to avoid re-parsing.
-    private void accumulateSavedCacheChildren(JSONObject json) {
+    private void accumulateSavedCacheChildren(@Nullable JSONObject json) {
         if (json == null) {
             return;
         }
@@ -493,7 +504,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // then returns every post that matches the search query as a single terminal page (next key
     // null). Bounded by SAVED_SEARCH_MAX_PAGES; transformData's previousLastItem guard and the finite
     // listing also terminate it.
-    private ListenableFuture<LoadResult<String, Post>> loadAllUserPostsFiltered(RedditAPI api, String afterKey, int pagesLoaded) {
+    private ListenableFuture<LoadResult<String, Post>> loadAllUserPostsFiltered(RedditAPI api, @Nullable String afterKey, int pagesLoaded) {
         ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
         return Futures.transformAsync(userPosts, response -> {
             if (!response.isSuccessful()) {
@@ -552,7 +563,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // key until a page yields at least one post or the listing ends (next key becomes null). The
     // listing is finite and transformData's previousLastItem guard nulls a repeated key, so this
     // terminates.
-    private ListenableFuture<LoadResult<String, Post>> loadUserPostsWithKey(RedditAPI api, String afterKey) {
+    private ListenableFuture<LoadResult<String, Post>> loadUserPostsWithKey(RedditAPI api, @Nullable String afterKey) {
         ListenableFuture<Response<String>> userPosts = fetchUserPosts(api, afterKey);
         return Futures.transformAsync(userPosts, response -> {
             if (!response.isSuccessful()) {
@@ -763,7 +774,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         return catchErrors(pageFuture);
     }
 
-    private List<String> getUsersToFetch(Map<String, String> currentUserAfterKeys, boolean isInitialLoad) {
+    private List<String> getUsersToFetch(@Nullable Map<String, String> currentUserAfterKeys, boolean isInitialLoad) {
         List<String> users = new ArrayList<>();
         if (multiRedditUsernames == null) return users;
         for (String username : multiRedditUsernames) {
@@ -776,8 +787,11 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private List<ListenableFuture<Response<String>>> launchUserPostFetches(
-            RedditAPI api, Map<String, String> currentUserAfterKeys, boolean isInitialLoad) {
+            RedditAPI api, @Nullable Map<String, String> currentUserAfterKeys, boolean isInitialLoad) {
         List<ListenableFuture<Response<String>>> futures = new ArrayList<>();
+        if (multiRedditUsernames == null) {
+            return futures;
+        }
         for (String username : multiRedditUsernames) {
             if (!isInitialLoad && currentUserAfterKeys != null && !currentUserAfterKeys.containsKey(username)) {
                 continue;
@@ -793,7 +807,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         return futures;
     }
 
-    private String getMainAfterKey(String compositeKey) {
+    @Nullable
+    private String getMainAfterKey(@Nullable String compositeKey) {
         if (compositeKey == null || !compositeKey.startsWith("{")) return compositeKey;
         try {
             String m = new JSONObject(compositeKey).optString("m", null);
@@ -803,7 +818,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
     }
 
-    private Map<String, String> parseUserAfterKeys(String compositeKey) {
+    @Nullable
+    private Map<String, String> parseUserAfterKeys(@Nullable String compositeKey) {
         if (compositeKey == null || !compositeKey.startsWith("{")) return null;
         try {
             JSONObject users = new JSONObject(compositeKey).optJSONObject("u");
@@ -839,7 +855,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private LoadResult<String, Post> mergeResponses(
-            Response<String> mainResponse, List<Response<String>> userResponses,
+            @Nullable Response<String> mainResponse, List<Response<String>> userResponses,
             List<String> usersToFetch) {
         int currentPostsSize = posts.size();
 
@@ -906,7 +922,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
     }
 
-    private LoadResult<String, Post> buildSortedPage(int currentPostsSize, String nextKey) {
+    private LoadResult<String, Post> buildSortedPage(int currentPostsSize, @Nullable String nextKey) {
         int newSize = posts.size();
         if (newSize == currentPostsSize) {
             return new LoadResult.Page<>(new ArrayList<>(), null, nextKey);
@@ -926,6 +942,13 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
     }
 
+    // A future that yields a null "no main response" sentinel; mergeResponses handles the null.
+    // Isolated here because Futures.immediateFuture's value parameter is modeled @NonNull.
+    @SuppressWarnings("NullAway")
+    private static ListenableFuture<Response<String>> immediateNullResponse() {
+        return Futures.immediateFuture(null);
+    }
+
     private ListenableFuture<LoadResult<String, Post>> catchErrors(ListenableFuture<LoadResult<String, Post>> future) {
         ListenableFuture<LoadResult<String, Post>> partial =
                 Futures.catching(future, HttpException.class, LoadResult.Error::new, executor);
@@ -936,7 +959,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         // For anonymous multireddit, extract user entries from concatenated name on first call
         if (postType == PostType.ANONYMOUS_MULTIREDDIT && !multiRedditUsernamesFetched) {
             multiRedditUsernamesFetched = true;
-            String[] parts = subredditOrUserName.split("\\+");
+            String[] parts = (subredditOrUserName == null ? "" : subredditOrUserName).split("\\+");
             List<String> subreddits = new ArrayList<>();
             multiRedditUsernames = new ArrayList<>();
             for (String part : parts) {
@@ -987,7 +1010,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                     subredditOnlyName, sortType.getType(), sortType.getTime(), mainAfterKey,
                     75, APIUtils.ANONYMOUS_USER_AGENT);
         } else {
-            mainFuture = Futures.immediateFuture(null);
+            mainFuture = immediateNullResponse();
         }
 
         // Launch user post fetches in parallel

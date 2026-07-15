@@ -31,6 +31,7 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
     private final Retrofit retrofit;
     private final Executor executor;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final SharedPreferences sharedPreferences;

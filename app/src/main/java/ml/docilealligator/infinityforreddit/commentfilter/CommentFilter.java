@@ -4,12 +4,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 
 @Entity(tableName = "comment_filter")
@@ -24,8 +26,10 @@ public class CommentFilter implements Parcelable {
     public int maxVote = -1;
     @ColumnInfo(name = "min_vote")
     public int minVote = -1;
+    @Nullable
     @ColumnInfo(name = "exclude_strings")
     public String excludeStrings;
+    @Nullable
     @ColumnInfo(name = "exclude_users")
     public String excludeUsers;
 
@@ -34,7 +38,7 @@ public class CommentFilter implements Parcelable {
     }
 
     protected CommentFilter(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         displayMode = in.readInt();
         maxVote = in.readInt();
         minVote = in.readInt();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.ArrayList;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.subreddit.Rule;
 
@@ -26,8 +27,8 @@ public class ReportReason implements Parcelable {
     }
 
     protected ReportReason(Parcel in) {
-        reportReason = in.readString();
-        reasonType = in.readString();
+        reportReason = Objects.requireNonNull(in.readString());
+        reasonType = Objects.requireNonNull(in.readString());
         isSelected = in.readByte() != 0;
     }
 

@@ -183,8 +183,20 @@ android {
 // time. Dagger @Inject fields are treated as initialized without a constructor
 // assignment: NullAway's default ExcludedFieldAnnotations set already includes
 // javax.inject.Inject and jakarta.inject.Inject, so injected fields won't trip the
-// initialization check. Room/view-binding/Retrofit generated code lives outside any
-// @NullMarked package and is ignored.
+// initialization check. We extend that set (additively — NullAway seeds it from its
+// DEFAULT_EXCLUDED_FIELD_ANNOT, so @Inject stays covered) with androidx.room.Embedded
+// and androidx.room.Relation (Room fills those relation POJO fields via generated code)
+// plus com.google.gson.annotations.SerializedName (Gson fills @SerializedName fields via
+// reflection) — all initialized-by-framework the same way @Inject fields are. Genuinely
+// nullable framework fields are still marked @Nullable individually (e.g. a Gson field the
+// API may omit), exactly as before; the exclusion only suppresses the initialization check.
+//
+// Room's generated DAO _Impl classes are emitted into the SAME package as the @Dao
+// interface, so a @NullMarked package-info.java also covers them, and NullAway would
+// then flag their cursor-reading code (nullable column reads assigned to @NonNull entity
+// fields). TreatGeneratedAsUnannotated makes NullAway skip any class annotated @Generated
+// (Room, Dagger, etc. all carry it), which is exactly what we want: generated code is not
+// ours to null-annotate. Hand-written code is unaffected.
 //
 // The net.ltgt.errorprone plugin does NOT auto-wire Error Prone into Android Gradle
 // Plugin builds (it only supplies the `errorprone` extension and leaves the checker
@@ -211,6 +223,8 @@ tasks.withType(JavaCompile).configureEach { compileTask ->
         check('NullAway', CheckSeverity.ERROR)
         option('NullAway:OnlyNullMarked', 'true')
         option('NullAway:JSpecifyMode', 'true')
+        option('NullAway:ExcludedFieldAnnotations', 'androidx.room.Embedded,androidx.room.Relation,com.google.gson.annotations.SerializedName')
+        option('NullAway:TreatGeneratedAsUnannotated', 'true')
     }
 }
 

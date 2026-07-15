@@ -127,7 +127,7 @@ public class FetchRedgifsVideoLinks {
         });
     }
 
-    private static void parseRedgifsVideoLinks(Handler handler, String response,
+    private static void parseRedgifsVideoLinks(Handler handler, @Nullable String response,
                                               FetchVideoLinkListener fetchVideoLinkListener) {
         /*try {
             *//*String mp4 = new JSONObject(response).getJSONObject(JSONUtils.GIF_KEY).getJSONObject(JSONUtils.URLS_KEY)
@@ -173,7 +173,7 @@ public class FetchRedgifsVideoLinks {
     }
 
     @Nullable
-    private static String parseRedgifsVideoLinks(String response) {
+    private static String parseRedgifsVideoLinks(@Nullable String response) {
         try {
             JSONObject jsonResponse = new JSONObject(response);
             JSONObject gif = jsonResponse.getJSONObject(JSONUtils.GIF_KEY);

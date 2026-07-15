@@ -29,7 +29,9 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     private final MutableLiveData<NetworkState> initialLoadStateLiveData;
     private final MutableLiveData<Boolean> hasSubredditLiveData;
 
+    @Nullable
     private LoadParams<String> params;
+    @Nullable
     private LoadCallback<String, SubredditData> callback;
 
     SubredditListingDataSource(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
@@ -113,6 +115,8 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     }
 
     void retryLoadingMore() {
-        loadAfter(params, callback);
+        if (params != null && callback != null) {
+            loadAfter(params, callback);
+        }
     }
 }

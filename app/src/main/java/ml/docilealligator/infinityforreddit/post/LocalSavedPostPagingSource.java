@@ -33,6 +33,7 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
     private final Retrofit oauthRetrofit;
     private final Executor executor;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final PostFilter postFilter;

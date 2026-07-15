@@ -22,6 +22,7 @@ public class SubredditListingDataSourceFactory extends DataSource.Factory {
     private final String accountName;
     private final boolean nsfw;
 
+    @Nullable
     private SubredditListingDataSource subredditListingDataSource;
     private final MutableLiveData<SubredditListingDataSource> subredditListingDataSourceMutableLiveData;
 
@@ -53,6 +54,7 @@ public class SubredditListingDataSourceFactory extends DataSource.Factory {
         return subredditListingDataSourceMutableLiveData;
     }
 
+    @Nullable
     SubredditListingDataSource getSubredditListingDataSource() {
         return subredditListingDataSource;
     }

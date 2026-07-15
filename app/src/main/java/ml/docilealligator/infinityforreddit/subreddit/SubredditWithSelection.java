@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 
 public class SubredditWithSelection implements Parcelable {
@@ -19,8 +20,8 @@ public class SubredditWithSelection implements Parcelable {
     }
 
     protected SubredditWithSelection(Parcel in) {
-        name = in.readString();
-        iconUrl = in.readString();
+        name = Objects.requireNonNull(in.readString());
+        iconUrl = Objects.requireNonNull(in.readString());
         selected = in.readByte() != 0;
     }
 
