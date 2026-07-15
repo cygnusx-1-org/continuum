@@ -217,8 +217,8 @@
 
         <RelativeLayout
             android:id="@+id/image_view_wrapper_item_post_compact_right_thumbnail"
-            android:layout_width="112dp"
-            android:layout_height="112dp"
+            android:layout_width="@dimen/post_compact_thumbnail_size"
+            android:layout_height="@dimen/post_compact_thumbnail_size"
             android:layout_marginEnd="16dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -278,8 +278,8 @@
 
             <ImageView
                 android:id="@+id/image_view_no_preview_link_item_post_compact_right_thumbnail"
-                android:layout_width="112dp"
-                android:layout_height="112dp"
+                android:layout_width="@dimen/post_compact_thumbnail_size"
+                android:layout_height="@dimen/post_compact_thumbnail_size"
                 android:scaleType="center"
                 android:src="@drawable/ic_link_day_night_24dp"
                 app:tint="@android:color/tab_indicator_text" />

@@ -243,6 +243,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private int mPostIconAndInfoColor;
     private int mDividerColor;
     private float mScale;
+    private int mCompactThumbnailBoxSizePx;
     private boolean mDisplaySubredditName;
     private boolean mVoteButtonsOnTheRight;
     private boolean mNeedBlurNsfw;
@@ -428,6 +429,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mDividerColor = customThemeWrapper.getDividerColor();
 
             mScale = resources.getDisplayMetrics().density;
+            mCompactThumbnailBoxSizePx = resources.getDimensionPixelSize(R.dimen.post_compact_thumbnail_size);
             mGlide = Glide.with(mActivity);
             mMaxResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
             mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
@@ -1656,16 +1658,22 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
             }
         } else if (holder instanceof PostCompactBaseViewHolder) {
-            Post post = ((PostCompactBaseViewHolder) holder).post;
-            ((PostCompactBaseViewHolder) holder).imageView.setBackground(null);
+            PostCompactBaseViewHolder compactHolder = (PostCompactBaseViewHolder) holder;
+            Post post = compactHolder.post;
+            // Reset to the rounded-edge shape (not null): it feeds clipToOutline the 8dp rounded
+            // outline so opaque thumbnails keep rounded corners (Infinity parity), and it also
+            // clears any transparent-image backdrop left on a recycled holder. The requestListener
+            // swaps in the (also-rounded) transparent backdrop when the loaded image needs it.
+            // Cache the drawable once per holder so scrolling doesn't re-inflate it every bind.
+            if (compactHolder.thumbnailRoundedEdgeBackground == null) {
+                compactHolder.thumbnailRoundedEdgeBackground =
+                        ContextCompat.getDrawable(mActivity, R.drawable.thumbnail_compact_layout_rounded_edge);
+            }
+            compactHolder.imageView.setBackground(compactHolder.thumbnailRoundedEdgeBackground);
             String postCompactThumbnailPreviewUrl = null;
             ArrayList<Post.Preview> previews = post.getPreviews();
             if (previews != null && !previews.isEmpty()) {
-                if (previews.size() >= 2) {
-                    postCompactThumbnailPreviewUrl = previews.get(1).getPreviewUrl();
-                } else {
-                    postCompactThumbnailPreviewUrl = previews.get(0).getPreviewUrl();
-                }
+                postCompactThumbnailPreviewUrl = getBestPreviewForCompactThumbnail(previews).getPreviewUrl();
             } else {
                 // Use thumbnail as fallback for compact view
                 String thumbnailUrl = post.getThumbnailUrl();
@@ -1676,12 +1684,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
             if (postCompactThumbnailPreviewUrl != null) {
                 RequestBuilder<Drawable> imageRequestBuilder = mGlide.load(postCompactThumbnailPreviewUrl)
-                        .error(R.drawable.ic_error_outline_black_day_night_24dp).listener(((PostCompactBaseViewHolder) holder).requestListener);
+                        .error(R.drawable.ic_error_outline_black_day_night_24dp).listener(compactHolder.requestListener);
                 if ((post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler)) {
                     imageRequestBuilder
-                            .transform(new BlurTransformation(50, 2)).into(((PostCompactBaseViewHolder) holder).imageView);
+                            .transform(new BlurTransformation(50, 2)).into(compactHolder.imageView);
                 } else {
-                    imageRequestBuilder.into(((PostCompactBaseViewHolder) holder).imageView);
+                    imageRequestBuilder.into(compactHolder.imageView);
                 }
             }
         } else if (holder instanceof PostGalleryViewHolder) {
@@ -1707,6 +1715,31 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
             }
         }
+    }
+
+    /**
+     * Picks the Reddit preview to show in the square compact/card-2 thumbnail box. {@code previews}
+     * is ordered [source, resolutions ascending] (see ParsePost); Reddit's resolution rungs
+     * are a prefix of 108/216/320/640/960/1080 px wide. We choose the smallest rung whose shorter
+     * side still covers the box, so Glide down-scales it (crisp) instead of up-scaling a tiny rung
+     * (the blur in issue #339). When no rung is large enough (e.g. wide/short banners) we fall back
+     * to the largest available rung rather than the source, keeping the download bounded (Reddit
+     * rungs cap at 1080px wide) instead of pulling the uncapped original. The box size comes from a
+     * layout dimen, so it tracks the device density (and any screen-size override) without a
+     * hardcoded pixel value.
+     */
+    private Post.Preview getBestPreviewForCompactThumbnail(ArrayList<Post.Preview> previews) {
+        // Largest available rung (or the source itself when it's the only entry, e.g. galleries).
+        Post.Preview best = previews.get(previews.size() - 1);
+        for (int i = previews.size() - 1; i >= 1; i--) {
+            Post.Preview preview = previews.get(i);
+            if (Math.min(preview.getPreviewWidth(), preview.getPreviewHeight()) >= mCompactThumbnailBoxSizePx) {
+                best = preview;
+            } else {
+                break;
+            }
+        }
+        return best;
     }
 
     private void shareLink(Post post) {
@@ -4266,6 +4299,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         View divider;
         RequestListener<Drawable> requestListener;
         GradientDrawable itemViewBackground;
+        Drawable thumbnailRoundedEdgeBackground;
 
         PostCompactBaseViewHolder(View itemView) {
             super(itemView);

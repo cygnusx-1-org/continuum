@@ -13,8 +13,8 @@
 
         <RelativeLayout
             android:id="@+id/image_view_wrapper_item_post_card_2_compact_link"
-            android:layout_width="112dp"
-            android:layout_height="112dp"
+            android:layout_width="@dimen/post_compact_thumbnail_size"
+            android:layout_height="@dimen/post_compact_thumbnail_size"
             android:layout_marginStart="16dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -30,7 +30,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@drawable/thumbnail_compact_layout_rounded_edge"
-                    android:scaleType="center" />
+                    android:scaleType="centerCrop" />
 
                 <ImageView
                     android:id="@+id/play_button_image_view_item_post_card_2_compact_link"
@@ -71,8 +71,8 @@
 
             <ImageView
                 android:id="@+id/image_view_no_preview_link_item_post_card_2_compact_link"
-                android:layout_width="112dp"
-                android:layout_height="112dp"
+                android:layout_width="@dimen/post_compact_thumbnail_size"
+                android:layout_height="@dimen/post_compact_thumbnail_size"
                 android:scaleType="center"
                 android:src="@drawable/ic_link_day_night_24dp"
                 app:tint="@android:color/tab_indicator_text" />
