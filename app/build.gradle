@@ -666,9 +666,10 @@ abstract class RenameApksTask extends DefaultTask {
 // connected device's ABI (splits are per-ABI; universalApk=false) and installs it with
 // the local SDK's adb.
 //
-// Success is judged from the remote "BUILD SUCCESSFUL" line, NOT the wrapper exit code:
-// the local Mirakle wrapper exits 1 even when the remote build succeeds (config-cache
-// discard — see MIRAKLE.md). Written config-cache-clean (injected ExecOperations,
+// Success is judged from the remote "BUILD SUCCESSFUL" line, not solely the wrapper exit
+// code. Mirakle 1.6.1 fixed the local wrapper exiting 1 on a successful remote build (the
+// config-cache discard — see MIRAKLE.md), but this check is kept regardless: it also
+// catches a genuine remote failure. Written config-cache-clean (injected ExecOperations,
 // config-time inputs) because org.gradle.configuration-cache=true.
 abstract class RemoteInstallTask extends DefaultTask {
     @Input abstract Property<String> getAssembleTaskName()
@@ -688,8 +689,9 @@ abstract class RemoteInstallTask extends DefaultTask {
 
         // 1. Compile remotely. This nested invocation's "assemble…" name isn't force-local,
         //    so Mirakle runs it on boson and rsyncs the APKs back. Tee the log so it stays
-        //    visible AND checkable; ignore the exit code (the wrapper exits 1 even on a
-        //    successful remote build — see MIRAKLE.md) and judge success by BUILD SUCCESSFUL.
+        //    visible AND checkable; ignore the exit code and judge success by BUILD SUCCESSFUL.
+        //    (Mirakle 1.6.1 fixed the wrapper exiting 1 on a successful remote build — see
+        //    MIRAKLE.md — but the BUILD SUCCESSFUL check still catches a genuine failure.)
         def captured = new ByteArrayOutputStream()
         def tee = new OutputStream() {
             @Override void write(int b) { System.out.write(b); captured.write(b) }
