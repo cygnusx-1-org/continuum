@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
@@ -33,7 +34,9 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     private final Resources resources;
     private final RequestManager glide;
     private final String accountName;
+    @Nullable
     private String profileImageUrl;
+    @Nullable
     private String bannerImageUrl;
     private int karma;
     private boolean requireAuthToAccountSection;
@@ -183,7 +186,7 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         }
     }
 
-    public void updateAccountInfo(String profileImageUrl, String bannerImageUrl, int karma) {
+    public void updateAccountInfo(@Nullable String profileImageUrl, @Nullable String bannerImageUrl, int karma) {
         this.profileImageUrl = profileImageUrl;
         this.bannerImageUrl = bannerImageUrl;
         this.karma = karma;

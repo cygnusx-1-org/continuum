@@ -90,11 +90,11 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     private int systemVisibilityToolbarCollapsed = 0;
     private boolean shouldTrackFullscreenMediaPeekTouchEvent;
     public CustomThemeWrapper customThemeWrapper;
-    @SuppressWarnings("NullAway.Init")
+    @Nullable
     public Typeface typeface;
-    @SuppressWarnings("NullAway.Init")
+    @Nullable
     public Typeface titleTypeface;
-    @SuppressWarnings("NullAway.Init")
+    @Nullable
     public Typeface contentTypeface;
     @Nullable
     public SliderPanel mSliderPanel;
@@ -659,7 +659,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
         this.titleTypeface = titleTypeface;
         this.contentTypeface = contentTypeface;

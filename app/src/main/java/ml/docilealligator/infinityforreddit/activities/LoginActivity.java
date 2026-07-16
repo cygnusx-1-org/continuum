@@ -75,6 +75,7 @@ public class LoginActivity extends BaseActivity {
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @SuppressWarnings("NullAway.Init")
     private String authCode;
     private ActivityLoginBinding binding;
 
@@ -223,7 +224,7 @@ public class LoginActivity extends BaseActivity {
                         uri.getQueryParameter("code"), uri.getQueryParameter("state"), uri.getQueryParameter("error"));
                 switch (redirect.action) {
                     case EXCHANGE_CODE: {
-                        authCode = redirect.authCode;
+                        authCode = Objects.requireNonNull(redirect.authCode);
 
                         Map<String, String> params = new HashMap<>();
                         params.put(APIUtils.GRANT_TYPE_KEY, "authorization_code");
@@ -242,14 +243,14 @@ public class LoginActivity extends BaseActivity {
                                             finish();
                                             return;
                                         }
-                                        String accessToken = result.accessToken;
-                                        String refreshToken = result.refreshToken;
+                                        String accessToken = Objects.requireNonNull(result.accessToken);
+                                        String refreshToken = Objects.requireNonNull(result.refreshToken);
 
                                         FetchMyInfo.fetchAccountInfo(mExecutor, mHandler, mOauthRetrofit,
                                                 mRedditDataRoomDatabase, accessToken,
                                                 new FetchMyInfo.FetchMyInfoListener() {
                                                     @Override
-                                                    public void onFetchMyInfoSuccess(String name, String profileImageUrl, String bannerImageUrl, int karma, boolean isMod) {
+                                                    public void onFetchMyInfoSuccess(String name, String profileImageUrl, @Nullable String bannerImageUrl, int karma, boolean isMod) {
                                                         mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, accessToken)
                                                             .putString(SharedPreferencesUtils.ACCOUNT_NAME, name)
                                                             .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, profileImageUrl).apply();

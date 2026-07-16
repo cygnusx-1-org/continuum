@@ -282,8 +282,8 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 Intent intent = new Intent(this, ViewPostDetailActivity.class);
                                 intent.putExtra(ViewPostDetailActivity.EXTRA_POST_ID, path.substring(1));
                                 startActivity(intent);
-                            } else if (uri.getPath().matches(SHARELINK_SUBREDDIT_PATTERN)
-                                    || uri.getPath().matches(SHARELINK_USER_PATTERN)) {
+                            } else if (path.matches(SHARELINK_SUBREDDIT_PATTERN)
+                                    || path.matches(SHARELINK_USER_PATTERN)) {
                                 mRetrofit.callFactory().newCall(new Request.Builder().url(uri.toString()).build()).enqueue(new Callback() {
                                     @Override
                                     public void onResponse(@NonNull Call call, @NonNull Response response) {

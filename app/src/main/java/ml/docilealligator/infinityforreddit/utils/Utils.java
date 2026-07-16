@@ -572,7 +572,7 @@ public final class Utils {
         return null;
     }
 
-    public static void setTitleWithCustomFontToMenuItem(Typeface typeface, MenuItem item, @Nullable String desiredTitle) {
+    public static void setTitleWithCustomFontToMenuItem(@Nullable Typeface typeface, MenuItem item, @Nullable String desiredTitle) {
         if (typeface != null) {
             CharSequence title = desiredTitle == null ? item.getTitle() : desiredTitle;
             if (title != null) {
@@ -585,7 +585,7 @@ public final class Utils {
         }
     }
 
-    public static void setTitleWithCustomFontToTab(Typeface typeface, TabLayout.Tab tab, String title) {
+    public static void setTitleWithCustomFontToTab(@Nullable Typeface typeface, TabLayout.Tab tab, String title) {
         if (typeface != null) {
             if (title != null) {
                 SpannableStringBuilder spannableTitle = new SpannableStringBuilder(title);
@@ -597,7 +597,7 @@ public final class Utils {
         }
     }
 
-    public static CharSequence getTabTextWithCustomFont(Typeface typeface, CharSequence title) {
+    public static CharSequence getTabTextWithCustomFont(@Nullable Typeface typeface, CharSequence title) {
         if (typeface != null && title != null) {
             SpannableStringBuilder spannableTitle = new SpannableStringBuilder(title);
             spannableTitle.setSpan(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? new TypefaceSpan(typeface) : new CustomTypefaceSpan(typeface), 0, spannableTitle.length(), 0);

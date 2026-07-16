@@ -163,7 +163,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
                 uri.getQueryParameter("code"), uri.getQueryParameter("state"), uri.getQueryParameter("error"));
         switch (redirect.action) {
             case EXCHANGE_CODE:
-                exchangeCodeForToken(redirect.authCode);
+                exchangeCodeForToken(Objects.requireNonNull(redirect.authCode));
                 break;
             case ACCESS_DENIED:
                 Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
@@ -200,14 +200,14 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
                     finish();
                     return;
                 }
-                String accessToken = result.accessToken;
-                String refreshToken = result.refreshToken;
+                String accessToken = Objects.requireNonNull(result.accessToken);
+                String refreshToken = Objects.requireNonNull(result.refreshToken);
 
                 FetchMyInfo.fetchAccountInfo(mExecutor, mHandler, mOauthRetrofit,
                         mRedditDataRoomDatabase, accessToken,
                         new FetchMyInfo.FetchMyInfoListener() {
                             @Override
-                            public void onFetchMyInfoSuccess(String name, String profileImageUrl, String bannerImageUrl, int karma, boolean isMod) {
+                            public void onFetchMyInfoSuccess(String name, String profileImageUrl, @Nullable String bannerImageUrl, int karma, boolean isMod) {
                                 mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, accessToken)
                                     .putString(SharedPreferencesUtils.ACCOUNT_NAME, name)
                                     .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, profileImageUrl).apply();

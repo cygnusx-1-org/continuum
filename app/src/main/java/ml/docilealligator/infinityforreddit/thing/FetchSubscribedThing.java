@@ -23,7 +23,7 @@ import retrofit2.Retrofit;
 public class FetchSubscribedThing {
     public static void fetchSubscribedThing(Executor executor, Handler handler, final Retrofit oauthRetrofit,
                                             @Nullable String accessToken, @NonNull String accountName,
-                                            final String lastItem,
+                                            @Nullable final String lastItem,
                                             final ArrayList<SubscribedSubredditData> subscribedSubredditData,
                                             final ArrayList<SubscribedUserData> subscribedUserData,
                                             final ArrayList<SubredditData> subredditData,

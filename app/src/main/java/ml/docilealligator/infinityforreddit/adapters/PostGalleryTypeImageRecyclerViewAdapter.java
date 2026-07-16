@@ -29,6 +29,7 @@ import ml.docilealligator.infinityforreddit.post.Post;
 @SuppressWarnings("NullAway.Init")
 public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapter<PostGalleryTypeImageRecyclerViewAdapter.ImageViewHolder> {
     private final RequestManager glide;
+    @Nullable
     private final Typeface typeface;
     private Markwon mPostDetailMarkwon;
     private final SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy;
@@ -42,7 +43,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     private float ratio;
     private final boolean showCaption;
 
-    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, Typeface typeface,
+    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
                                                    int mColorAccent, int mPrimaryTextColor, float scale) {
         this.glide = glide;
@@ -54,7 +55,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         showCaption = false;
     }
 
-    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, Typeface typeface, Markwon postDetailMarkwon,
+    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface, Markwon postDetailMarkwon,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
                                                    int mColorAccent, int mPrimaryTextColor, int mCardViewColor,
                                                    int mCommentColor, float scale) {

@@ -63,6 +63,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -161,9 +162,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
     private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
 
+    @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel multiRedditViewModel;
+    @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel followedMultiRedditViewModel;
+    @SuppressWarnings("NullAway.Init")
     SubscribedSubredditViewModel subscribedSubredditViewModel;
+    @SuppressWarnings("NullAway.Init")
     AccountViewModel accountViewModel;
     @Inject
     @Named("oauth")
@@ -208,7 +213,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @Inject
     Executor mExecutor;
     private FragmentManager fragmentManager;
+    @SuppressWarnings("NullAway.Init")
     private SectionsPagerAdapter sectionsPagerAdapter;
+    @SuppressWarnings("NullAway.Init")
     private NavigationDrawerRecyclerViewMergedAdapter adapter;
     private NavigationWrapper navigationWrapper;
     // Tracks the AppBar collapsed/expanded state so it can be persisted across rotation;
@@ -223,13 +230,17 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     // rail (no bottom app bar), so we can't read translationY there; this field carries the
     // portrait hidden-state across the landscape intermediate so a P→L→P round trip keeps it.
     private boolean mBottomBarHidden = false;
+    @SuppressWarnings("NullAway.Init")
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private boolean mFetchUserInfoSuccess = false;
     private boolean mFetchSubscriptionsSuccess = false;
     private boolean mFetchMultiredditsSuccess = false;
     private boolean mDrawerOnAccountSwitch = false;
+    @Nullable
     private String mMessageFullname;
+    @Nullable
     private String mNewAccountName;
     private boolean hideFab;
     private boolean showBottomAppBar;
@@ -1069,7 +1080,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             String currentClientId = defaultPrefs.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, getString(R.string.default_client_id));
                             // Only block login when overrides are on but no custom Client ID has been set.
                             // With overrides off, the valid built-in default Client ID is used.
-                            if (overridesEnabled && currentClientId.equals(getString(R.string.default_client_id))) {
+                            if (overridesEnabled && getString(R.string.default_client_id).equals(currentClientId)) {
                                 new MaterialAlertDialogBuilder(MainActivity.this, R.style.MaterialAlertDialogTheme)
                                         .setMessage(R.string.set_client_id_dialog_message)
                                         .setPositiveButton(R.string.ok, null)
@@ -1283,7 +1294,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         if (!accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             if (mMessageFullname != null) {
-                ReadMessage.readMessage(mOauthRetrofit, accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
+                ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
                     @Override
                     public void readSuccess() {
                         mMessageFullname = null;
@@ -1413,7 +1424,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     private void loadMultiReddits() {
         if (!accountName.equals(Account.ANONYMOUS_ACCOUNT) && !mFetchMultiredditsSuccess) {
-            FetchMyMultiReddits.fetchMyMultiReddits(mExecutor, mHandler, mOauthRetrofit, accessToken,
+            FetchMyMultiReddits.fetchMyMultiReddits(mExecutor, mHandler, mOauthRetrofit, Objects.requireNonNull(accessToken),
                     new FetchMyMultiReddits.FetchMyMultiRedditsListener() {
                         @Override
                         public void success(ArrayList<MultiReddit> multiReddits) {
@@ -1446,7 +1457,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                 // Reddit's inbox_count can stay stuck on items that can't be cleared
                                 // in-app (archived PMs, chat, ...). Reconcile against the real unread
                                 // listing so a genuinely-empty inbox drops to no badge. See issue #334.
-                                FetchMessage.fetchUnreadMessagesCount(mExecutor, mHandler, mOauthRetrofit, accessToken,
+                                FetchMessage.fetchUnreadMessagesCount(mExecutor, mHandler, mOauthRetrofit, Objects.requireNonNull(accessToken),
                                         new FetchMessage.FetchUnreadMessagesCountListener() {
                                             @Override
                                             public void fetchSuccess(int unreadCount, boolean hasMore) {
@@ -1911,7 +1922,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -1985,7 +1996,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -2006,7 +2017,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -2019,7 +2030,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -2071,6 +2082,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         // each group placeholder expands into its dynamic list, with duplicates removed (a tab that
         // is both explicitly added and pulled in by a "Show ..." toggle appears only once — the
         // earliest occurrence wins). Cached and rebuilt whenever the inputs or dynamic lists change.
+        @Nullable
         private List<ResolvedTab> resolvedTabsCache;
 
         private List<ResolvedTab> resolvedTabs() {

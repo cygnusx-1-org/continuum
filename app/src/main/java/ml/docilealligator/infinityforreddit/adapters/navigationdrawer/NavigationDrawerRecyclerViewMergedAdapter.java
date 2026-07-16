@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.adapters.navigationdrawer;
 
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.ConcatAdapter;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -112,7 +113,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         }
     }
 
-    public void updateAccountInfo(String profileImageUrl, String bannerImageUrl, int karma) {
+    public void updateAccountInfo(@Nullable String profileImageUrl, @Nullable String bannerImageUrl, int karma) {
         headerSectionRecyclerViewAdapter.updateAccountInfo(profileImageUrl, bannerImageUrl, karma);
     }
 
