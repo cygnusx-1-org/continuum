@@ -51,6 +51,7 @@ import com.livefront.bridge.Bridge;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -164,17 +165,22 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     @Inject
     VideoMuteManager mVideoMuteManager;
     @State
+    @Nullable
     ArrayList<Comment> comments;
     @State
+    @Nullable
     ArrayList<String> children;
     @State
+    @Nullable
     String mMessageFullname;
     @State
+    @SuppressWarnings("NullAway.Init")
     SortType.Type sortType;
     @State
     long viewPostDetailFragmentId;
     private ViewPostDetailActivity mActivity;
     private RequestManager mGlide;
+    @SuppressWarnings("NullAway.Init")
     private Menu mMenu;
     private Post mPost;
     @Nullable
@@ -191,7 +197,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private CommentsFooterRecyclerViewAdapter mCommentsFooterAdapter;
     private ColorDrawable backgroundSwipeRight;
     private ColorDrawable backgroundSwipeLeft;
+    @SuppressWarnings("NullAway.Init")
     private Drawable drawableSwipeRight;
+    @SuppressWarnings("NullAway.Init")
     private Drawable drawableSwipeLeft;
     private int swipeLeftAction;
     private int swipeRightAction;
@@ -199,6 +207,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private boolean shouldSwipeBack;
     private int commentScrollPosition = -1;
     private FragmentViewPostDetailBinding binding;
+    @Nullable
     private RecyclerView mCommentsRecyclerView;
     public ViewPostDetailFragmentViewModelNew viewPostDetailFragmentViewModel;
     public ViewPostDetailActivityViewModel viewPostDetailActivityViewModel;
@@ -306,9 +315,11 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 ViewPostDetailFragmentViewModelNew.DataState dataState = viewPostDetailFragmentViewModel.getDataState().getValue();
                 if (dataState != null && dataState.getComments() != null && !dataState.getComments().isEmpty()
                         && uiState != null && !uiState.isLoadingMoreChildren() && uiState.getLoadMoreChildrenSuccess()) {
-                    int visibleItemCount = (mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView).getLayoutManager().getChildCount();
-                    int totalItemCount = (mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView).getLayoutManager().getItemCount();
-                    int firstVisibleItemPosition = ((LinearLayoutManagerBugFixed) (mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView).getLayoutManager()).findFirstVisibleItemPosition();
+                    RecyclerView.LayoutManager layoutManager = Objects.requireNonNull(
+                            (mCommentsRecyclerView == null ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView).getLayoutManager());
+                    int visibleItemCount = layoutManager.getChildCount();
+                    int totalItemCount = layoutManager.getItemCount();
+                    int firstVisibleItemPosition = ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition();
 
                     if ((visibleItemCount + firstVisibleItemPosition >= totalItemCount) && firstVisibleItemPosition >= 0) {
                         viewPostDetailFragmentViewModel.fetchMoreComments();
@@ -449,9 +460,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 .get(ViewPostDetailActivityViewModel.class);
 
         if (mPost == null) {
-            mPost = viewPostDetailActivityViewModel.getPost(postListPosition);
-            if (mPost == null) {
-                mPost = viewPostDetailActivityViewModel.getPost();
+            Post post = viewPostDetailActivityViewModel.getPost(postListPosition);
+            if (post == null) {
+                post = viewPostDetailActivityViewModel.getPost();
+            }
+            if (post != null) {
+                mPost = post;
             }
         }
 
@@ -606,7 +620,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         return binding.getRoot();
     }
 
-    private void bindView(Bundle savedInstanceState) {
+    private void bindView(@Nullable Bundle savedInstanceState) {
         if (!mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) && mMessageFullname != null) {
             ReadMessage.readMessage(mOauthRetrofit, mActivity.accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
@@ -828,18 +842,18 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private void initializeSwipeActionDrawable() {
         if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
             backgroundSwipeRight = new ColorDrawable(mCustomThemeWrapper.getDownvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         } else {
             backgroundSwipeRight = new ColorDrawable(mCustomThemeWrapper.getUpvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         }
 
         if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
             backgroundSwipeLeft = new ColorDrawable(mCustomThemeWrapper.getUpvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         } else {
             backgroundSwipeLeft = new ColorDrawable(mCustomThemeWrapper.getDownvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         }
     }
 
@@ -864,9 +878,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     }
 
     public void goToTop() {
-        ((LinearLayoutManagerBugFixed) binding.postDetailRecyclerViewViewPostDetailFragment.getLayoutManager()).scrollToPositionWithOffset(0, 0);
+        ((LinearLayoutManagerBugFixed) Objects.requireNonNull(binding.postDetailRecyclerViewViewPostDetailFragment.getLayoutManager())).scrollToPositionWithOffset(0, 0);
         if (mCommentsRecyclerView != null) {
-            ((LinearLayoutManagerBugFixed) mCommentsRecyclerView.getLayoutManager()).scrollToPositionWithOffset(0, 0);
+            ((LinearLayoutManagerBugFixed) Objects.requireNonNull(mCommentsRecyclerView.getLayoutManager())).scrollToPositionWithOffset(0, 0);
         }
     }
 
@@ -1122,7 +1136,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                     } else {
                         String parentFullname = data.getStringExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY);
                         int parentPosition = data.getIntExtra(CommentActivity.EXTRA_PARENT_POSITION_KEY, -1);
-                        if (parentFullname != null && parentPosition >= 0) {
+                        if (comment != null && parentFullname != null && parentPosition >= 0) {
                             addChildComment(comment, parentFullname, parentPosition);
                         }
                     }
@@ -1238,7 +1252,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         return true;
     }
 
-    private void showErrorView(String postId) {
+    private void showErrorView(@Nullable String postId) {
         binding.swipeRefreshLayoutViewPostDetailFragment.setRefreshing(false);
         binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.VISIBLE);
         binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setOnClickListener(view -> viewPostDetailFragmentViewModel.fetchPostAndCommentsById(postId));
@@ -1461,8 +1475,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
-        String autoplay = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
-        String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String autoplay = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER));
+        String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         boolean stateChanged = false;
         if (autoplay.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI)) {
             if (mPostAdapter != null) {

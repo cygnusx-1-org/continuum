@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.paging.PagedListAdapter;
@@ -28,6 +29,7 @@ import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
 import java.util.Locale;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -119,6 +121,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private final int mCommentTopPaddingPx;
     private final boolean mShowAbsoluteNumberOfVotes;
     private boolean canStartActivity = true;
+    @Nullable
     private NetworkState networkState;
     private final RetryLoadingMoreCallback mRetryLoadingMoreCallback;
 
@@ -143,7 +146,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         mCommentTopPaddingPx = (int) Utils.convertDpToPixel(8, activity);
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
-        mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
+        mTimeFormatPattern = Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mRetryLoadingMoreCallback = retryLoadingMoreCallback;
         mColorPrimaryLightTheme = customThemeWrapper.getColorPrimaryLightTheme();
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
@@ -334,7 +337,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     public int getItemViewType(int position) {
         // Reached at the end
         if (hasExtraRow() && position == getItemCount() - 1) {
-            if (networkState.getStatus() == NetworkState.Status.LOADING) {
+            if (Objects.requireNonNull(networkState).getStatus() == NetworkState.Status.LOADING) {
                 return VIEW_TYPE_LOADING;
             } else {
                 return VIEW_TYPE_ERROR;
@@ -369,7 +372,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         return networkState != null && networkState.getStatus() != NetworkState.Status.SUCCESS;
     }
 
-    public void setNetworkState(NetworkState newNetworkState) {
+    public void setNetworkState(@Nullable NetworkState newNetworkState) {
         NetworkState previousState = this.networkState;
         boolean previousExtraRow = hasExtraRow();
         this.networkState = newNetworkState;
@@ -380,7 +383,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
             } else {
                 notifyItemInserted(super.getItemCount());
             }
-        } else if (newExtraRow && !previousState.equals(newNetworkState)) {
+        } else if (newExtraRow && !Objects.equals(previousState, newNetworkState)) {
             notifyItemChanged(getItemCount() - 1);
         }
     }

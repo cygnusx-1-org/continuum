@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -66,6 +67,7 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     public static final String EXTRA_ARE_SAVED_COMMENTS = "EISC";
     public static final String EXTRA_ARE_LOCAL_SAVED_COMMENTS = "EIALSC";
 
+    @SuppressWarnings("NullAway.Init")
     CommentViewModel mCommentViewModel;
     @Inject
     @Named("no_oauth")
@@ -93,12 +95,17 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     Executor mExecutor;
     private RequestManager mGlide;
     private BaseActivity mActivity;
+    @Nullable
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
+    @SuppressWarnings("NullAway.Init")
     private CommentsListingRecyclerViewAdapter mAdapter;
+    @SuppressWarnings("NullAway.Init")
     private SortType sortType;
     private ColorDrawable backgroundSwipeRight;
     private ColorDrawable backgroundSwipeLeft;
+    @SuppressWarnings("NullAway.Init")
     private Drawable drawableSwipeRight;
+    @SuppressWarnings("NullAway.Init")
     private Drawable drawableSwipeLeft;
     private int swipeLeftAction;
     private int swipeRightAction;
@@ -274,10 +281,10 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
             if (arguments == null) {
                 return;
             }
-            String username = arguments.getString(EXTRA_USERNAME);
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name());
+            String username = Objects.requireNonNull(arguments.getString(EXTRA_USERNAME));
+            String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name()));
             if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
-                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name());
+                String sortTime = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name()));
                 sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()), SortType.Time.valueOf(sortTime.toUpperCase()));
             } else {
                 sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
@@ -378,18 +385,18 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     private void initializeSwipeActionDrawable() {
         if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
             backgroundSwipeRight = new ColorDrawable(customThemeWrapper.getDownvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         } else {
             backgroundSwipeRight = new ColorDrawable(customThemeWrapper.getUpvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         }
 
         if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
             backgroundSwipeLeft = new ColorDrawable(customThemeWrapper.getUpvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         } else {
             backgroundSwipeLeft = new ColorDrawable(customThemeWrapper.getDownvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         }
     }
 
@@ -482,7 +489,7 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
         if (mAdapter != null) {
-            String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+            String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
             if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
                 mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
                 refreshAdapter(binding.recyclerViewCommentsListingFragment, mAdapter);

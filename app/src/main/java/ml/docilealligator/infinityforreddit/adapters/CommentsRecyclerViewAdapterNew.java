@@ -107,6 +107,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final Locale mLocale;
     private final RequestManager mGlide;
     private final RecyclerView.RecycledViewPool recycledViewPool;
+    @Nullable
     private final String mSingleCommentId;
     private final boolean mVoteButtonsOnTheRight;
     private final boolean mShowElapsedTime;
@@ -189,7 +190,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                                           CustomThemeWrapper customThemeWrapper,
                                           Retrofit oauthRetrofit,
                                           @Nullable String accessToken, @NonNull String accountName,
-                                          @Nullable Post post, Locale locale, String singleCommentId,
+                                          @Nullable Post post, Locale locale, @Nullable String singleCommentId,
                                           SharedPreferences sharedPreferences,
                                           SharedPreferences nsfwAndSpoilerSharedPreferences,
                                           CommentRecyclerViewAdapterCallback commentRecyclerViewAdapterCallback) {
