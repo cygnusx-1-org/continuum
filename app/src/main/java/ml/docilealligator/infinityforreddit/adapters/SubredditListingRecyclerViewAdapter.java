@@ -31,6 +31,7 @@ import ml.docilealligator.infinityforreddit.subreddit.SubredditSubscription;
 import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<SubredditData, RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_DATA = 0;
     private static final int VIEW_TYPE_ERROR = 1;
@@ -51,6 +52,7 @@ public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<Subred
     private final Executor executor;
     private final Retrofit retrofit;
     private final Retrofit oauthRetrofit;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final RedditDataRoomDatabase redditDataRoomDatabase;

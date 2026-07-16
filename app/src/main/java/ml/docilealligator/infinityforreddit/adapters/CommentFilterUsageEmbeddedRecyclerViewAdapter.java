@@ -12,6 +12,7 @@ import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.databinding.ItemCommentFilterUsageEmbeddedBinding;
 
+@SuppressWarnings("NullAway.Init")
 public class CommentFilterUsageEmbeddedRecyclerViewAdapter extends RecyclerView.Adapter<CommentFilterUsageEmbeddedRecyclerViewAdapter.EntryViewHolder> {
     private final BaseActivity baseActivity;
     private List<CommentFilterUsage> commentFilterUsageList;

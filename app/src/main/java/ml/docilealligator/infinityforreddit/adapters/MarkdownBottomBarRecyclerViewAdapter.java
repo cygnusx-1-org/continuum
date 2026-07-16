@@ -168,8 +168,8 @@ public class MarkdownBottomBarRecyclerViewAdapter extends RecyclerView.Adapter<R
                         .setView(dialogView)
                         .setPositiveButton(R.string.ok, (editTextDialogInterface, i1)
                                 -> {
-                            String text = textEditText.getText().toString();
-                            String link = linkEditText.getText().toString();
+                            String text = java.util.Objects.requireNonNull(textEditText.getText()).toString();
+                            String link = java.util.Objects.requireNonNull(linkEditText.getText()).toString();
                             if (text.equals("")) {
                                 text = link;
                             }

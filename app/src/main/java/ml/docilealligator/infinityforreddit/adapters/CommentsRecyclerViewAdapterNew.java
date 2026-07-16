@@ -80,6 +80,7 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, RecyclerView.ViewHolder> {
     public static final int DIVIDER_NORMAL = 0;
     public static final int DIVIDER_PARENT = 1;
@@ -98,6 +99,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final Markwon mCommentMarkwon;
     private final ImageAndGifEntry mImageAndGifEntry;
     private final VideoEntry mVideoEntry;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     @Nullable
@@ -305,7 +307,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
-        mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
+        mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mCommentToolbarHidden = sharedPreferences.getBoolean(SharedPreferencesUtils.COMMENT_TOOLBAR_HIDDEN, true);
         mCommentToolbarHideOnClick = sharedPreferences.getBoolean(SharedPreferencesUtils.COMMENT_TOOLBAR_HIDE_ON_CLICK, true);
         mSwapTapAndLong = sharedPreferences.getBoolean(SharedPreferencesUtils.SWAP_TAP_AND_LONG_COMMENTS, true);
@@ -324,8 +326,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
         mCommentRecyclerViewAdapterCallback = commentRecyclerViewAdapterCallback;
 
-        expandDrawable = Utils.getTintedDrawable(activity, R.drawable.ic_expand_more_grey_24dp, customThemeWrapper.getCommentIconAndInfoColor());
-        collapseDrawable = Utils.getTintedDrawable(activity, R.drawable.ic_expand_less_grey_24dp, customThemeWrapper.getCommentIconAndInfoColor());
+        expandDrawable = java.util.Objects.requireNonNull(Utils.getTintedDrawable(activity, R.drawable.ic_expand_more_grey_24dp, customThemeWrapper.getCommentIconAndInfoColor()));
+        collapseDrawable = java.util.Objects.requireNonNull(Utils.getTintedDrawable(activity, R.drawable.ic_expand_less_grey_24dp, customThemeWrapper.getCommentIconAndInfoColor()));
 
         mPrimaryTextColor = customThemeWrapper.getPrimaryTextColor();
         mDividerColor = customThemeWrapper.getDividerColor();
@@ -393,7 +395,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         if (holder instanceof CommentBaseViewHolder) {
             Comment comment = getItem(position);
             if (comment != null) {
-                if (comment.getId().equals(mSingleCommentId)) {
+                if (java.util.Objects.equals(comment.getId(), mSingleCommentId)) {
                     holder.itemView.setBackgroundColor(mSingleCommentThreadBackgroundColor);
                 }
 
@@ -421,7 +423,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     Drawable moderatorDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_verified_user_14dp, mModeratorColor);
                     ((CommentBaseViewHolder) holder).authorTextView.setCompoundDrawablesWithIntrinsicBounds(
                             moderatorDrawable, null, null, null);
-                } else if (comment.getAuthor().equals(mAccountName)) {
+                } else if (java.util.Objects.equals(comment.getAuthor(), mAccountName)) {
                     ((CommentBaseViewHolder) holder).authorTextView.setTextColor(mCurrentUserColor);
                     Drawable currentUserDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_current_user_14dp, mCurrentUserColor);
                     ((CommentBaseViewHolder) holder).authorTextView.setCompoundDrawablesWithIntrinsicBounds(
@@ -438,12 +440,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                                     return;
                                 }
 
-                                if (authorFullName.equals(comment.getAuthorFullName())) {
+                                if (java.util.Objects.equals(authorFullName, comment.getAuthorFullName())) {
                                     comment.setAuthorIconUrl(iconUrl);
                                 }
 
                                 Comment currentComment = getItem(currentPosition);
-                                if (currentComment != null && authorFullName.equals(currentComment.getAuthorFullName())) {
+                                if (currentComment != null && java.util.Objects.equals(authorFullName, currentComment.getAuthorFullName())) {
                                     if (mDisableProfileAvatarAnimation) {
                                         mGlide.asBitmap().load(iconUrl)
                                                 .transform(new RoundedCornersTransformation(72, 0))
@@ -499,7 +501,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 mImageAndGifEntry.setCurrentCommentId(comment.getId());
                 mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
                 mVideoPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
-                ((CommentBaseViewHolder) holder).mMarkwonAdapter.setMarkdown(mCommentMarkwon, comment.getCommentMarkdown());
+                ((CommentBaseViewHolder) holder).mMarkwonAdapter.setMarkdown(mCommentMarkwon, java.util.Objects.requireNonNullElse(comment.getCommentMarkdown(), ""));
                 // noinspection NotifyDataSetChanged
                 ((CommentBaseViewHolder) holder).mMarkwonAdapter.notifyDataSetChanged();
 
@@ -576,14 +578,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                         break;
                 }
 
-                if (mPost.isArchived()) {
+                if (mPost != null && mPost.isArchived()) {
                     ((CommentBaseViewHolder) holder).replyButton.setIconTint(ColorStateList.valueOf(mVoteAndReplyUnavailableVoteButtonColor));
                     ((CommentBaseViewHolder) holder).upvoteButton.setIconTint(ColorStateList.valueOf(mVoteAndReplyUnavailableVoteButtonColor));
                     ((CommentBaseViewHolder) holder).scoreTextView.setTextColor(mVoteAndReplyUnavailableVoteButtonColor);
                     ((CommentBaseViewHolder) holder).downvoteButton.setIconTint(ColorStateList.valueOf(mVoteAndReplyUnavailableVoteButtonColor));
                 }
 
-                if (mPost.isLocked() || comment.isLocked()) {
+                if ((mPost != null && mPost.isLocked()) || comment.isLocked()) {
                     ((CommentBaseViewHolder) holder).replyButton.setIconTint(ColorStateList.valueOf(mVoteAndReplyUnavailableVoteButtonColor));
                 }
 
@@ -623,12 +625,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                                     return;
                                 }
 
-                                if (authorFullName.equals(comment.getAuthorFullName())) {
+                                if (java.util.Objects.equals(authorFullName, comment.getAuthorFullName())) {
                                     comment.setAuthorIconUrl(iconUrl);
                                 }
 
                                 Comment currentComment = getItem(currentPosition);
-                                if (currentComment != null && authorFullName.equals(currentComment.getAuthorFullName())) {
+                                if (currentComment != null && java.util.Objects.equals(authorFullName, currentComment.getAuthorFullName())) {
                                     if (mDisableProfileAvatarAnimation) {
                                         mGlide.asBitmap().load(iconUrl)
                                                 .transform(new RoundedCornersTransformation(72, 0))
@@ -1030,12 +1032,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 Comment comment = getItem(getBindingAdapterPosition());
                 if (comment != null) {
                     Bundle bundle = new Bundle();
-                    if (!mPost.isArchived() && !mPost.isLocked() && comment.getAuthor().equals(mAccountName)) {
+                    if (mPost != null && !mPost.isArchived() && !mPost.isLocked() && java.util.Objects.equals(comment.getAuthor(), mAccountName)) {
                         bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_EDIT_AND_DELETE_AVAILABLE, true);
                     }
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_COMMENT, comment);
                     bundle.putInt(CommentMoreBottomSheetFragment.EXTRA_POSITION, getBindingAdapterPosition());
-                    bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_IS_NSFW, mPost.isNSFW());
+                    bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_IS_NSFW, mPost != null && mPost.isNSFW());
                     if (comment.getDepth() >= mDepthThreshold) {
                         bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_AND_SAVE_OPTION, true);
                     }
@@ -1058,10 +1060,13 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             replyButton.setOnClickListener(view -> {
+
                 if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                     Toast.makeText(mActivity, R.string.login_first, Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+                if (mPost == null) return;
 
                 if (mPost.isArchived()) {
                     Toast.makeText(mActivity, R.string.archived_post_reply_unavailable, Toast.LENGTH_SHORT).show();
@@ -1094,6 +1099,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             upvoteButton.setOnClickListener(view -> {
+
+                if (mPost == null) return;
                 if (mPost.isArchived()) {
                     Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
                     return;
@@ -1185,6 +1192,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             downvoteButton.setOnClickListener(view -> {
+
+                if (mPost == null) return;
                 if (mPost.isArchived()) {
                     Toast.makeText(mActivity, R.string.archived_post_vote_unavailable, Toast.LENGTH_SHORT).show();
                     return;

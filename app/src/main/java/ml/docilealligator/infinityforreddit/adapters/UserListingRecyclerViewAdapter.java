@@ -27,6 +27,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.user.UserFollowing;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class UserListingRecyclerViewAdapter extends PagedListAdapter<UserData, RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_DATA = 0;
     private static final int VIEW_TYPE_ERROR = 1;
@@ -47,6 +48,7 @@ public class UserListingRecyclerViewAdapter extends PagedListAdapter<UserData, R
     private final Executor executor;
     private final Retrofit oauthRetrofit;
     private final Retrofit retrofit;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final RedditDataRoomDatabase redditDataRoomDatabase;

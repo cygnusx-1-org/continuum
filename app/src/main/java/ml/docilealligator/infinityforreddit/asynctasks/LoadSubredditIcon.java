@@ -15,7 +15,7 @@ import retrofit2.Retrofit;
 public class LoadSubredditIcon {
 
     public static void loadSubredditIcon(Executor executor, Handler handler, RedditDataRoomDatabase redditDataRoomDatabase,
-                                         String subredditName, String accessToken, @NonNull String accountName,
+                                         String subredditName, @Nullable String accessToken, @NonNull String accountName,
                                          Retrofit oauthRetrofit, Retrofit retrofit,
                                          LoadSubredditIconListener loadSubredditIconListener) {
         executor.execute(() -> {

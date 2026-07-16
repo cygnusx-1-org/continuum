@@ -48,7 +48,7 @@ public class LocalSaved {
     }
 
     /** Convenience overload for call sites (e.g. comment adapters) that lack an injected DB/Executor. */
-    public static void onSaved(Context context, Retrofit oauthRetrofit, String accessToken,
+    public static void onSaved(Context context, Retrofit oauthRetrofit, @Nullable String accessToken,
                                String accountName, String fullName) {
         onSaved(getDatabase(context), LOCAL_EXECUTOR, oauthRetrofit, accessToken, accountName, fullName);
     }
@@ -59,13 +59,13 @@ public class LocalSaved {
     }
 
     /** Convenience overload for call sites that lack an injected DB. */
-    public static void reconcile(Context context, Retrofit oauthRetrofit, String accessToken,
+    public static void reconcile(Context context, Retrofit oauthRetrofit, @Nullable String accessToken,
                                  String accountName) {
         reconcile(getDatabase(context), oauthRetrofit, accessToken, accountName);
     }
 
     /** Convenience overload for call sites that have a DB but no Executor (e.g. a ViewModel). */
-    public static void onSaved(RedditDataRoomDatabase db, Retrofit oauthRetrofit, String accessToken,
+    public static void onSaved(RedditDataRoomDatabase db, Retrofit oauthRetrofit, @Nullable String accessToken,
                                String accountName, String fullName) {
         onSaved(db, LOCAL_EXECUTOR, oauthRetrofit, accessToken, accountName, fullName);
     }
@@ -80,7 +80,7 @@ public class LocalSaved {
      * save succeeds. No-op for anonymous accounts.
      */
     public static void onSaved(RedditDataRoomDatabase db, Executor executor, Retrofit oauthRetrofit,
-                               String accessToken, String accountName, String fullName) {
+                               @Nullable String accessToken, String accountName, String fullName) {
         if (!isEnabledForAccount(accountName) || fullName == null || fullName.isEmpty()) {
             return;
         }
@@ -110,7 +110,7 @@ public class LocalSaved {
      * failed fetch can never false-promote a save.
      */
     public static void reconcile(RedditDataRoomDatabase db, Retrofit oauthRetrofit,
-                                 String accessToken, String accountName) {
+                                 @Nullable String accessToken, String accountName) {
         if (!isEnabledForAccount(accountName)) {
             return;
         }
@@ -129,7 +129,7 @@ public class LocalSaved {
     }
 
     private static void reconcileInternal(RedditDataRoomDatabase db, Retrofit oauthRetrofit,
-                                          String accessToken, String accountName) throws Exception {
+                                          @Nullable String accessToken, String accountName) throws Exception {
         LocalSavedThingDao dao = db.localSavedThingDao();
         List<LocalSavedThing> pending = dao.getByState(accountName, LocalSavedState.PENDING);
         List<LocalSavedThing> promoted = dao.getByState(accountName, LocalSavedState.PROMOTED);

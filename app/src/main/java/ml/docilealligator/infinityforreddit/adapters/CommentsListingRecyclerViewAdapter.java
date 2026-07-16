@@ -68,6 +68,7 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment, RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_DATA = 0;
     private static final int VIEW_TYPE_ERROR = 1;
@@ -75,12 +76,12 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private static final DiffUtil.ItemCallback<Comment> DIFF_CALLBACK = new DiffUtil.ItemCallback<Comment>() {
         @Override
         public boolean areItemsTheSame(@NonNull Comment comment, @NonNull Comment t1) {
-            return comment.getId().equals(t1.getId());
+            return java.util.Objects.equals(comment.getId(), t1.getId());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull Comment comment, @NonNull Comment t1) {
-            return comment.getCommentMarkdown().equals(t1.getCommentMarkdown());
+            return java.util.Objects.equals(comment.getCommentMarkdown(), t1.getCommentMarkdown());
         }
     };
     private final BaseActivity mActivity;
@@ -142,7 +143,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         mCommentTopPaddingPx = (int) Utils.convertDpToPixel(8, activity);
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
-        mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
+        mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mRetryLoadingMoreCallback = retryLoadingMoreCallback;
         mColorPrimaryLightTheme = customThemeWrapper.getColorPrimaryLightTheme();
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
@@ -294,7 +295,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 mImageAndGifEntry.setCurrentCommentId(comment.getId());
                 mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
                 mVideoPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
-                ((CommentBaseViewHolder) holder).markwonAdapter.setMarkdown(mMarkwon, comment.getCommentMarkdown());
+                ((CommentBaseViewHolder) holder).markwonAdapter.setMarkdown(mMarkwon, java.util.Objects.requireNonNullElse(comment.getCommentMarkdown(), ""));
                 // noinspection NotifyDataSetChanged
                 ((CommentBaseViewHolder) holder).markwonAdapter.notifyDataSetChanged();
 
@@ -599,7 +600,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 Comment comment = getItem(getBindingAdapterPosition());
                 if (comment != null) {
                     Bundle bundle = new Bundle();
-                    if (comment.getAuthor().equals(mAccountName)) {
+                    if (java.util.Objects.equals(comment.getAuthor(), mAccountName)) {
                         bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_EDIT_AND_DELETE_AVAILABLE, true);
                     }
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_COMMENT, comment);

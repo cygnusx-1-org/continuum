@@ -26,6 +26,7 @@ import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubred
 import ml.docilealligator.infinityforreddit.thing.FavoriteThing;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements PopupTextProvider {
     private static final int VIEW_TYPE_FAVORITE_SUBREDDIT_DIVIDER = 0;
     private static final int VIEW_TYPE_FAVORITE_SUBREDDIT = 1;
@@ -41,9 +42,11 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
     private final RequestManager glide;
     private ItemClickListener itemClickListener;
 
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private String username;
+    @Nullable
     private String userIconUrl;
     private boolean hasClearSelectionRow;
 
@@ -468,7 +471,7 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
     }
 
     public interface ItemClickListener {
-        void onClick(String name, String iconUrl, boolean subredditIsUser);
+        void onClick(@Nullable String name, @Nullable String iconUrl, boolean subredditIsUser);
     }
 
     class SubredditViewHolder extends RecyclerView.ViewHolder {

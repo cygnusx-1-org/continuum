@@ -26,6 +26,7 @@ import ml.docilealligator.infinityforreddit.multireddit.FavoriteMultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class MultiRedditListingRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  implements PopupTextProvider {
 
     private static final int VIEW_TYPE_FAVORITE_MULTI_REDDIT_DIVIDER = 0;
@@ -39,6 +40,7 @@ public class MultiRedditListingRecyclerViewAdapter extends RecyclerView.Adapter<
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
     private final RequestManager mGlide;
 
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     private List<MultiReddit> mMultiReddits;

@@ -24,6 +24,7 @@ import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.thing.FavoriteThing;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements PopupTextProvider {
     private static final int VIEW_TYPE_FAVORITE_USER_DIVIDER = 0;
     private static final int VIEW_TYPE_FAVORITE_USER = 1;
@@ -36,6 +37,7 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     private final Executor mExecutor;
     private final Retrofit mOauthRetrofit;
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     private final RequestManager glide;

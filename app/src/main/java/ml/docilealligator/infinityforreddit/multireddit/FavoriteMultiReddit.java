@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -22,7 +23,7 @@ public class FavoriteMultiReddit {
 
     public static void favoriteMultiReddit(Executor executor, Handler handler, Retrofit oauthRetrofit,
                                            RedditDataRoomDatabase redditDataRoomDatabase,
-                                           String accessToken, boolean makeFavorite,
+                                           @Nullable String accessToken, boolean makeFavorite,
                                            MultiReddit multiReddit, FavoriteMultiRedditListener favoriteMultiRedditListener) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.MULTIPATH_KEY, multiReddit.getPath());

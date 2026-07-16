@@ -139,8 +139,11 @@ public class RedditGallerySubmissionRecyclerViewAdapter extends RecyclerView.Ada
 
     public void setCaptionAndUrl(int position, String caption, String url) {
         if (redditGalleryImageInfoList.size() > position && position >= 0) {
-            redditGalleryImageInfoList.get(position).payload.setCaption(caption);
-            redditGalleryImageInfoList.get(position).payload.setOutboundUrl(url);
+            var payload = redditGalleryImageInfoList.get(position).payload;
+            if (payload != null) {
+                payload.setCaption(caption);
+                payload.setOutboundUrl(url);
+            }
         }
     }
 

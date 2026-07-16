@@ -36,6 +36,7 @@ import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlug
 import ml.docilealligator.infinityforreddit.subreddit.Rule;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
+@SuppressWarnings("NullAway.Init")
 public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecyclerViewAdapter.RuleViewHolder> {
     private final BaseActivity activity;
     private final EmoteCloseBracketInlineProcessor emoteCloseBracketInlineProcessor;

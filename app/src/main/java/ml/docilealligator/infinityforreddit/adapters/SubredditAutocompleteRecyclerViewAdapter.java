@@ -18,6 +18,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import pl.droidsonroids.gif.GifImageView;
 
+@SuppressWarnings("NullAway.Init")
 public class SubredditAutocompleteRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final BaseActivity activity;
     private List<SubredditData> subreddits;

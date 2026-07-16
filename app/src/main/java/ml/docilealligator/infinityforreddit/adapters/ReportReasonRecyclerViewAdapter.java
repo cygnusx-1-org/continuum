@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -11,6 +12,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemReportReasonBinding;
 import ml.docilealligator.infinityforreddit.thing.ReportReason;
 
+@SuppressWarnings("NullAway.Init")
 public class ReportReasonRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final BaseActivity activity;
@@ -56,6 +58,7 @@ public class ReportReasonRecyclerViewAdapter extends RecyclerView.Adapter<Recycl
         notifyDataSetChanged();
     }
 
+    @Nullable
     public ReportReason getSelectedReason() {
         if (rules != null) {
             for (ReportReason reportReason : rules) {

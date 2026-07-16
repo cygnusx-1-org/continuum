@@ -140,6 +140,7 @@ import pl.droidsonroids.gif.GifImageView;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements CacheManager {
     private static final int VIEW_TYPE_POST_DETAIL_VIDEO_AUTOPLAY = 1;
     private static final int VIEW_TYPE_POST_DETAIL_VIDEO_AND_GIF_PREVIEW = 2;
@@ -168,6 +169,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final Markwon mPostDetailMarkwon;
     private final ImageAndGifEntry mImageAndGifEntry;
     private final CustomMarkwonAdapter mMarkwonAdapter;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     @Nullable
@@ -294,10 +296,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mNeedBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, false);
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
-        mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
+        mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
 
-        String autoplayString = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
+        String autoplayString = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER));
         int networkType = Utils.getConnectedNetwork(activity);
         if (autoplayString.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON)) {
             mAutoplay = true;
@@ -314,7 +316,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
         mMuteNSFWVideo = sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_NSFW_VIDEO, false);
 
-        String dataSavingModeString = sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingModeString = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
             mDataSavingMode = true;
         } else if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
@@ -619,7 +621,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                                 .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                     }
 
-                                    if (holder.getBindingAdapterPosition() >= 0) {
+                                    if (mPost != null && holder.getBindingAdapterPosition() >= 0) {
                                         mPost.setAuthorIconUrl(iconImageUrl);
                                     }
                                 }
@@ -667,7 +669,11 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                             .into(((PostDetailBaseViewHolder) holder).iconGifImageView);
                                 }
 
-                                mPost.setSubredditIconUrl(iconImageUrl);
+                                if (mPost != null) {
+
+                                    mPost.setSubredditIconUrl(iconImageUrl);
+
+                                }
                             });
                 } else if (!mPost.getSubredditIconUrl().isEmpty()) {
                     if (mDisableProfileAvatarAnimation) {
@@ -841,25 +847,32 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 }
                             });
                 } else */if(mPost.isStreamable() && !mPost.isLoadedStreamableVideoAlready()) {
-                    ((PostDetailBaseVideoAutoplayViewHolder) holder).fetchRedgifsOrStreamableVideoCall =
-                            mStreamableApiProvider.get().getStreamableData(mPost.getStreamableShortCode());
-                    FetchStreamableVideo.fetchStreamableVideoInRecyclerViewAdapter(mExecutor, new Handler(),
-                            ((PostDetailBaseVideoAutoplayViewHolder) holder).fetchRedgifsOrStreamableVideoCall,
-                            new FetchVideoLinkListener() {
-                                @Override
-                                public void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {
-                                    StreamableVideo.Media media = streamableVideo.mp4 == null ? streamableVideo.mp4Mobile : streamableVideo.mp4;
-                                    mPost.setVideoDownloadUrl(media.url);
-                                    mPost.setVideoUrl(media.url);
-                                    mPost.setLoadedStreamableVideoAlready(true);
-                                    ((PostDetailBaseVideoAutoplayViewHolder) holder).bindVideoUri(Uri.parse(mPost.getVideoUrl()));
-                                }
+                    String streamableShortCode = mPost.getStreamableShortCode();
+                    if (streamableShortCode != null) {
+                        ((PostDetailBaseVideoAutoplayViewHolder) holder).fetchRedgifsOrStreamableVideoCall =
+                                mStreamableApiProvider.get().getStreamableData(streamableShortCode);
+                        FetchStreamableVideo.fetchStreamableVideoInRecyclerViewAdapter(mExecutor, new Handler(),
+                                ((PostDetailBaseVideoAutoplayViewHolder) holder).fetchRedgifsOrStreamableVideoCall,
+                                new FetchVideoLinkListener() {
+                                    @Override
+                                    public void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {
+                                        if (mPost == null) return;
+                                        StreamableVideo.Media media = streamableVideo.mp4 == null ? streamableVideo.mp4Mobile : streamableVideo.mp4;
+                                        if (media == null) {
+                                            return;
+                                        }
+                                        mPost.setVideoDownloadUrl(media.url);
+                                        mPost.setVideoUrl(media.url);
+                                        mPost.setLoadedStreamableVideoAlready(true);
+                                        ((PostDetailBaseVideoAutoplayViewHolder) holder).bindVideoUri(Uri.parse(mPost.getVideoUrl()));
+                                    }
 
-                                @Override
-                                public void failed(@Nullable Integer messageRes) {
-                                    ((PostDetailBaseVideoAutoplayViewHolder) holder).loadFallbackDirectVideo();
-                                }
-                            });
+                                    @Override
+                                    public void failed(@Nullable Integer messageRes) {
+                                        ((PostDetailBaseVideoAutoplayViewHolder) holder).loadFallbackDirectVideo();
+                                    }
+                                });
+                    }
                 } else {
                     ((PostDetailBaseVideoAutoplayViewHolder) holder).bindVideoUri(Uri.parse(mPost.getVideoUrl()));
                 }
@@ -1014,7 +1027,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
 
         // Thumbnail fallback for post detail view (e.g. crossposts without previews)
-        String thumbnailUrl = mPost.getThumbnailUrl();
+        String thumbnailUrl = mPost != null ? mPost.getThumbnailUrl() : null;
         if (thumbnailUrl != null && !thumbnailUrl.isEmpty() && !thumbnailUrl.equals("self")
                 && !thumbnailUrl.equals("default") && !thumbnailUrl.equals("nsfw")
                 && !thumbnailUrl.equals("spoiler") && !thumbnailUrl.equals("image")
@@ -1228,19 +1241,22 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         typeTextView.setBorderColor(color);
     }
 
-    private void openMedia(Post post) {
+    private void openMedia(@Nullable Post post) {
         openMedia(post, 0);
     }
 
-    private void openMedia(Post post, int galleryItemIndex) {
+    private void openMedia(@Nullable Post post, int galleryItemIndex) {
         openMedia(post, galleryItemIndex, -1);
     }
 
-    private void openMedia(Post post, long videoProgress) {
+    private void openMedia(@Nullable Post post, long videoProgress) {
         openMedia(post, 0, videoProgress);
     }
 
-    private void openMedia(Post post, int galleryItemIndex, long videoProgress) {
+    private void openMedia(@Nullable Post post, int galleryItemIndex, long videoProgress) {
+        if (post == null) {
+            return;
+        }
         if (canStartActivity) {
             canStartActivity = false;
             if (post.getPostType() == Post.VIDEO_TYPE) {
@@ -1473,7 +1489,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 if (mPost.getPostType() == Post.GALLERY_TYPE && this instanceof PostDetailGalleryViewHolder) {
                     postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost,
                             mFragment.getPostListPosition(),
-                            ((LinearLayoutManagerBugFixed) ((PostDetailGalleryViewHolder) this).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager()).findFirstVisibleItemPosition());
+                            ((LinearLayoutManagerBugFixed) java.util.Objects.requireNonNull(((PostDetailGalleryViewHolder) this).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager())).findFirstVisibleItemPosition());
                 } else {
                     postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost, mFragment.getPostListPosition());
                 }
@@ -1634,6 +1650,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 VoteThing.voteThing(mActivity, mOauthRetrofit, mAccessToken, new VoteThing.VoteThingWithoutPositionListener() {
                     @Override
                     public void onVoteThingSuccess() {
+                        if (mPost == null) return;
                         if (newVoteType.equals(APIUtils.DIR_UPVOTE)) {
                             mPost.setVoteType(1);
                             upvoteButton.setIconResource(R.drawable.ic_upvote_filled_24dp);
@@ -1658,6 +1675,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
                     @Override
                     public void onVoteThingFail() {
+                        if (mPost == null) return;
                         Toast.makeText(mActivity, R.string.vote_failed, Toast.LENGTH_SHORT).show();
                         mPost.setVoteType(previousVoteType);
                         if (!mHideTheNumberOfVotes) {
@@ -1735,6 +1753,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 VoteThing.voteThing(mActivity, mOauthRetrofit, mAccessToken, new VoteThing.VoteThingWithoutPositionListener() {
                     @Override
                     public void onVoteThingSuccess() {
+                        if (mPost == null) return;
                         if (newVoteType.equals(APIUtils.DIR_DOWNVOTE)) {
                             mPost.setVoteType(-1);
                             downvoteButton.setIconResource(R.drawable.ic_downvote_filled_24dp);
@@ -1759,6 +1778,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
                     @Override
                     public void onVoteThingFail() {
+                        if (mPost == null) return;
                         Toast.makeText(mActivity, R.string.vote_failed, Toast.LENGTH_SHORT).show();
                         mPost.setVoteType(previousVoteType);
                         if (!mHideTheNumberOfVotes) {
@@ -1829,6 +1849,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 new SaveThing.SaveThingListener() {
                                     @Override
                                     public void success() {
+                                        if (mPost == null) return;
                                         mPost.setSaved(false);
                                         LocalSaved.onUnsaved(mRedditDataRoomDatabase, mExecutor,
                                                 mAccountName, mPost.getFullName());
@@ -1840,6 +1861,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
                                     @Override
                                     public void failed() {
+                                        if (mPost == null) return;
                                         mPost.setSaved(true);
                                         PostDetailBaseViewHolder.this.saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                         Toast.makeText(mActivity, R.string.post_unsaved_failed, Toast.LENGTH_SHORT).show();
@@ -1861,6 +1883,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 new SaveThing.SaveThingListener() {
                                     @Override
                                     public void success() {
+                                        if (mPost == null) return;
                                         mPost.setSaved(true);
                                         LocalSaved.onSaved(mRedditDataRoomDatabase, mExecutor,
                                                 mOauthRetrofit, mAccessToken, mAccountName, mPost.getFullName());
@@ -1872,6 +1895,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
                                     @Override
                                     public void failed() {
+                                        if (mPost == null) return;
                                         mPost.setSaved(false);
                                         PostDetailBaseViewHolder.this.saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                         Toast.makeText(mActivity, R.string.post_saved_failed, Toast.LENGTH_SHORT).show();
@@ -1995,6 +2019,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
     @UnstableApi
     class PostDetailBaseVideoAutoplayViewHolder extends PostDetailBaseViewHolder implements ToroPlayer {
+        @Nullable
         public Call<String> fetchRedgifsOrStreamableVideoCall;
         AspectRatioFrameLayout aspectRatioFrameLayout;
         PlayerView playerView;
@@ -2165,6 +2190,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
 
         void loadFallbackDirectVideo() {
+
+            if (mPost == null) return;
             if (mPost.getVideoFallBackDirectUrl() != null) {
                 mediaUri = Uri.parse(mPost.getVideoFallBackDirectUrl());
                 mPost.setVideoDownloadUrl(mPost.getVideoFallBackDirectUrl());
@@ -2214,12 +2241,18 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         if (mPost == null) {
                             return;
                         }
+                        if (helper == null) {
+                            return;
+                        }
 
                         ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
                         if (!trackGroups.isEmpty()) {
                             if (mPost.isNormalVideo()) {
                                 videoQualityButton.setVisibility(View.VISIBLE);
                                 videoQualityButton.setOnClickListener(view -> {
+                                    if (helper == null) {
+                                        return;
+                                    }
                                     TrackSelectionDialogBuilder builder = new TrackSelectionDialogBuilder(mActivity, mActivity.getString(R.string.select_video_quality), helper.getPlayer(), C.TRACK_TYPE_VIDEO);
                                     builder.setShowDisableOption(true);
                                     builder.setAllowAdaptiveSelections(false);

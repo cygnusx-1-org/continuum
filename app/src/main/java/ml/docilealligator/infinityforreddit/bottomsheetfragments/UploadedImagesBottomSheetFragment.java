@@ -45,7 +45,7 @@ public class UploadedImagesBottomSheetFragment extends LandscapeExpandedRoundedB
         });
 
         adapter = new UploadedImagesRecyclerViewAdapter(getActivity(),
-                getArguments().getParcelableArrayList(EXTRA_UPLOADED_IMAGES), uploadedImage -> {
+                java.util.Objects.requireNonNull(getArguments().getParcelableArrayList(EXTRA_UPLOADED_IMAGES)), uploadedImage -> {
             activity.insertImageUrl(uploadedImage);
             dismiss();
         });

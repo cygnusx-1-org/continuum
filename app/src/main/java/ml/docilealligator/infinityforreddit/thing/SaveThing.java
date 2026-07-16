@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.thing;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -11,7 +12,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class SaveThing {
-    public static void saveThing(Retrofit oauthRetrofit, String accessToken, String fullname,
+    public static void saveThing(Retrofit oauthRetrofit, @Nullable String accessToken, String fullname,
                                  SaveThingListener saveThingListener) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.ID_KEY, fullname);
@@ -32,7 +33,7 @@ public class SaveThing {
         });
     }
 
-    public static void unsaveThing(Retrofit oauthRetrofit, String accessToken, String fullname,
+    public static void unsaveThing(Retrofit oauthRetrofit, @Nullable String accessToken, String fullname,
                                    SaveThingListener saveThingListener) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.ID_KEY, fullname);

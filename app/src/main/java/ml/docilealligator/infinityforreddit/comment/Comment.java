@@ -305,7 +305,7 @@ public class Comment implements Parcelable {
         return commentMarkdown;
     }
 
-    public void setCommentMarkdown(String commentMarkdown) {
+    public void setCommentMarkdown(@Nullable String commentMarkdown) {
         this.commentMarkdown = commentMarkdown;
     }
 
@@ -585,7 +585,7 @@ public class Comment implements Parcelable {
         return mediaMetadataMap;
     }
 
-    public void setMediaMetadataMap(Map<String, MediaMetadata> mediaMetadataMap) {
+    public void setMediaMetadataMap(@Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         this.mediaMetadataMap = mediaMetadataMap;
     }
 

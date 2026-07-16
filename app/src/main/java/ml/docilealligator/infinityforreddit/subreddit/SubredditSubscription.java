@@ -18,7 +18,7 @@ import retrofit2.Retrofit;
 
 public class SubredditSubscription {
     public static void subscribeToSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                            Retrofit retrofit, String accessToken, String subredditName,
+                                            Retrofit retrofit, @Nullable String accessToken, String subredditName,
                                             String accountName, RedditDataRoomDatabase redditDataRoomDatabase,
                                             SubredditSubscriptionListener subredditSubscriptionListener) {
         subredditSubscription(executor, handler, oauthRetrofit, retrofit, accessToken, subredditName,
@@ -67,7 +67,7 @@ public class SubredditSubscription {
     }
 
     private static void subredditSubscription(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                              @Nullable Retrofit retrofit, String accessToken, String subredditName,
+                                              @Nullable Retrofit retrofit, @Nullable String accessToken, String subredditName,
                                               String accountName, String action,
                                               RedditDataRoomDatabase redditDataRoomDatabase,
                                               SubredditSubscriptionListener subredditSubscriptionListener) {

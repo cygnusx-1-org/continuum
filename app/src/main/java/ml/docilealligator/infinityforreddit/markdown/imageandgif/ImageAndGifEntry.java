@@ -264,11 +264,11 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     @Nullable
     private String currentPostId;
 
-    public void setCurrentCommentId(String commentId) {
+    public void setCurrentCommentId(@Nullable String commentId) {
         this.currentCommentId = commentId;
     }
 
-    public void setCurrentPostId(String postId) {
+    public void setCurrentPostId(@Nullable String postId) {
         this.currentPostId = postId;
     }
 

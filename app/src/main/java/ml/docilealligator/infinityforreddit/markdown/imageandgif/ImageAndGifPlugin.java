@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.markdown.imageandgif;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.noties.markwon.AbstractMarkwonPlugin;
 import java.util.Map;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
@@ -25,7 +26,7 @@ public class ImageAndGifPlugin extends AbstractMarkwonPlugin {
         builder.customBlockParserFactory(factory);
     }
 
-    public void setMediaMetadataMap(Map<String, MediaMetadata> mediaMetadataMap) {
+    public void setMediaMetadataMap(@Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         factory.setMediaMetadataMap(mediaMetadataMap);
     }
 }

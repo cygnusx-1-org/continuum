@@ -26,6 +26,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.NavHeaderMainBinding;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
+@SuppressWarnings("NullAway.Init")
 public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final BaseActivity baseActivity;
     private final CustomThemeWrapper customThemeWrapper;

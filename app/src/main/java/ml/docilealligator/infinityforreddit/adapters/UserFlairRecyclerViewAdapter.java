@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import ml.docilealligator.infinityforreddit.R;
@@ -29,7 +30,7 @@ public class UserFlairRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
     }
 
     public interface ItemClickListener {
-        void onClick(UserFlair userFlair, boolean editUserFlair);
+        void onClick(@Nullable UserFlair userFlair, boolean editUserFlair);
     }
 
     @NonNull

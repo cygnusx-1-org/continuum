@@ -19,6 +19,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemSubscribedUserMultiS
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.user.UserWithSelection;
 
+@SuppressWarnings("NullAway.Init")
 public class UserMultiselectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final BaseActivity activity;

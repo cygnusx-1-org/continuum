@@ -91,7 +91,7 @@ public class MainPageTabsRecyclerViewAdapter extends RecyclerView.Adapter<Recycl
         // Only append the dimmed default when the override actually differs from it (a title that
         // happens to equal the default would otherwise show it twice).
         if (renamed && !title.equals(defaultLabel)) {
-            SpannableStringBuilder text = new SpannableStringBuilder(title).append("  ").append(nonBreaking(defaultLabel));
+            SpannableStringBuilder text = new SpannableStringBuilder(title).append("  ").append(nonBreaking(java.util.Objects.requireNonNull(defaultLabel)));
             text.setSpan(secondaryColorSpan, title.length() + 2, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             tabHolder.binding.nameTextViewItemMainPageTab.setText(text);
         } else {

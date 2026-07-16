@@ -18,7 +18,7 @@ import retrofit2.Retrofit;
 
 public class FetchSubredditData {
     public static void fetchSubredditData(Executor executor, Handler handler, @Nullable Retrofit oauthRetrofit, Retrofit retrofit,
-                                          String subredditName, String accessToken,
+                                          String subredditName, @Nullable String accessToken,
                                           final FetchSubredditDataListener fetchSubredditDataListener) {
         executor.execute(() -> {
             RedditAPI api = retrofit.create(RedditAPI.class);

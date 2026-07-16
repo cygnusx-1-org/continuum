@@ -147,6 +147,7 @@ import retrofit2.Retrofit;
  * Created by alex on 2/25/18.
  */
 
+@SuppressWarnings("NullAway.Init")
 public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerView.ViewHolder> implements CacheManager {
     private static final int VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE = 1;
     private static final int VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE = 2;
@@ -189,6 +190,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private Retrofit mOauthRetrofit;
     private Retrofit mRedgifsRetrofit;
     private Provider<StreamableAPI> mStreamableApiProvider;
+    @Nullable
     private String mAccessToken;
     private String mAccountName;
     private RequestManager mGlide;
@@ -324,10 +326,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mNeedBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, false);
             mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
             mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
-            mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
+            mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
             mShowDividerInCompactLayout = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_DIVIDER_IN_COMPACT_LAYOUT, true);
             mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
-            String autoplayString = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
+            String autoplayString = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER));
             int networkType = Utils.getConnectedNetwork(activity);
             if (autoplayString.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON)) {
                 mAutoplay = true;
@@ -351,7 +353,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mLongPressToHideToolbarInCompactLayout = sharedPreferences.getBoolean(SharedPreferencesUtils.LONG_PRESS_TO_HIDE_TOOLBAR_IN_COMPACT_LAYOUT, false);
             mCompactLayoutToolbarHiddenByDefault = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_COMPACT_LAYOUT_TOOLBAR_HIDDEN_BY_DEFAULT, false);
 
-            String dataSavingModeString = sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+            String dataSavingModeString = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
             if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
                 mDataSavingMode = true;
             } else if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
@@ -1544,6 +1546,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     @Nullable
     private Post.Preview getSuitablePreview(ArrayList<Post.Preview> previews) {
+        @Nullable
         Post.Preview preview;
         if (!previews.isEmpty()) {
             int previewIndex;
@@ -1567,7 +1570,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return null;
     }
 
-    private Post.Preview getSuitablePreviewWithThumbnailFallback(ArrayList<Post.Preview> previews, String thumbnailUrl) {
+    @Nullable
+    private Post.Preview getSuitablePreviewWithThumbnailFallback(ArrayList<Post.Preview> previews, @Nullable String thumbnailUrl) {
         Post.Preview preview = getSuitablePreview(previews);
         if (preview == null && thumbnailUrl != null && !thumbnailUrl.isEmpty() && !thumbnailUrl.equals("self") && !thumbnailUrl.equals("default") && !thumbnailUrl.equals("nsfw") && !thumbnailUrl.equals("spoiler") && !thumbnailUrl.equals("image") && thumbnailUrl.startsWith("http")) {
             return new Post.Preview(thumbnailUrl, 0, 0, "", "");
@@ -1575,7 +1579,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return preview;
     }
 
-    private boolean hasValidThumbnailFallback(String thumbnailUrl) {
+    private boolean hasValidThumbnailFallback(@Nullable String thumbnailUrl) {
         return thumbnailUrl != null && !thumbnailUrl.isEmpty() && !thumbnailUrl.equals("self") && !thumbnailUrl.equals("default") && !thumbnailUrl.equals("nsfw") && !thumbnailUrl.equals("spoiler") && !thumbnailUrl.equals("image") && thumbnailUrl.startsWith("http");
     }
 
@@ -1610,7 +1614,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return background;
     }
 
-    private void applyTypeColor(CustomTextView typeTextView, int postType) {
+    private void applyTypeColor(@Nullable CustomTextView typeTextView, int postType) {
         if (typeTextView == null) return;
         int color = getTypeColor(postType);
         typeTextView.setBackgroundColor(color);
@@ -1942,7 +1946,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 int position = ((PostViewHolder) holder).currentPosition;
                 if (position < getItemCount() && position >= 0) {
                     Post post = getItem(position);
-                    ((PostViewHolder) holder).markPostRead(post, false);
+                    if (post != null) { ((PostViewHolder) holder).markPostRead(post, false); }
                 }
             }
 
@@ -2042,7 +2046,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 int position = ((PostGalleryViewHolder) holder).currentPosition;
                 if (position < super.getItemCount() && position >= 0) {
                     Post post = getItem(position);
-                    ((PostGalleryViewHolder) holder).markPostRead(post, false);
+                    if (post != null) { ((PostGalleryViewHolder) holder).markPostRead(post, false); }
                 }
             }
             holder.itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
@@ -2060,7 +2064,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 int position = ((PostGalleryBaseGalleryTypeViewHolder) holder).currentPosition;
                 if (position < super.getItemCount() && position >= 0) {
                     Post post = getItem(position);
-                    ((PostGalleryBaseGalleryTypeViewHolder) holder).markPostRead(post, false);
+                    if (post != null) { ((PostGalleryBaseGalleryTypeViewHolder) holder).markPostRead(post, false); }
                 }
             }
             holder.itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
@@ -2929,8 +2933,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         Container container;
         @Nullable
         ExoPlayerViewHelper helper;
+        @Nullable
         private Uri mediaUri;
         private float volume;
+        @Nullable
         public Call<String> fetchRedgifsOrStreamableVideoCall;
         private boolean isManuallyPaused;
         private Drawable playDrawable;
@@ -3069,29 +3075,35 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             }
                         });
             } else */if(post.isStreamable() && !post.isLoadedStreamableVideoAlready()) {
-                fetchRedgifsOrStreamableVideoCall =
-                        mStreamableApiProvider.get().getStreamableData(post.getStreamableShortCode());
-                FetchStreamableVideo.fetchStreamableVideoInRecyclerViewAdapter(mExecutor, new Handler(),
-                        fetchRedgifsOrStreamableVideoCall,
-                        new FetchVideoLinkListener() {
-                            @Override
-                            public void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {
-                                StreamableVideo.Media media = streamableVideo.mp4 == null ? streamableVideo.mp4Mobile : streamableVideo.mp4;
-                                post.setVideoDownloadUrl(media.url);
-                                post.setVideoUrl(media.url);
-                                post.setLoadedStreamableVideoAlready(true);
-                                if (position == getAdapterPosition()) {
-                                    bindVideoUri(Uri.parse(post.getVideoUrl()));
+                String streamableShortCode = post.getStreamableShortCode();
+                if (streamableShortCode != null) {
+                    fetchRedgifsOrStreamableVideoCall =
+                            mStreamableApiProvider.get().getStreamableData(streamableShortCode);
+                    FetchStreamableVideo.fetchStreamableVideoInRecyclerViewAdapter(mExecutor, new Handler(),
+                            fetchRedgifsOrStreamableVideoCall,
+                            new FetchVideoLinkListener() {
+                                @Override
+                                public void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {
+                                    StreamableVideo.Media media = streamableVideo.mp4 == null ? streamableVideo.mp4Mobile : streamableVideo.mp4;
+                                    if (media == null) {
+                                        return;
+                                    }
+                                    post.setVideoDownloadUrl(media.url);
+                                    post.setVideoUrl(media.url);
+                                    post.setLoadedStreamableVideoAlready(true);
+                                    if (position == getAdapterPosition()) {
+                                        bindVideoUri(Uri.parse(post.getVideoUrl()));
+                                    }
                                 }
-                            }
 
-                            @Override
-                            public void failed(@Nullable Integer messageRes) {
-                                if (position == getAdapterPosition()) {
-                                    loadFallbackDirectVideo();
+                                @Override
+                                public void failed(@Nullable Integer messageRes) {
+                                    if (position == getAdapterPosition()) {
+                                        loadFallbackDirectVideo();
+                                    }
                                 }
-                            }
-                        });
+                            });
+                }
             } else {
                 bindVideoUri(Uri.parse(post.getVideoUrl()));
             }
@@ -3147,11 +3159,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                     @Override
                     public void onTracksChanged(@NonNull Tracks tracks) {
+                        if (helper == null) {
+                            return;
+                        }
                         ImmutableList<Tracks.Group> trackGroups = tracks.getGroups();
                         if (!trackGroups.isEmpty()) {
                             if (getPost().isNormalVideo()) {
                                 videoQualityButton.setVisibility(View.VISIBLE);
                                 videoQualityButton.setOnClickListener(view -> {
+                                    if (helper == null) {
+                                        return;
+                                    }
                                     TrackSelectionDialogBuilder builder = new TrackSelectionDialogBuilder(mActivity, mActivity.getString(R.string.select_video_quality), helper.getPlayer(), C.TRACK_TYPE_VIDEO);
                                     builder.setShowDisableOption(true);
                                     builder.setAllowAdaptiveSelections(false);
@@ -3255,7 +3273,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     @Override
                     public void onPlayerError(@NonNull PlaybackException error) {
                         Post post = getPost();
-                        if (post.getVideoFallBackDirectUrl() == null || post.getVideoFallBackDirectUrl().equals(mediaUri.toString())) {
+                        if (post.getVideoFallBackDirectUrl() == null || post.getVideoFallBackDirectUrl().equals(java.util.Objects.requireNonNull(mediaUri).toString())) {
                             errorLoadingRedgifsImageView.setVisibility(View.VISIBLE);
                         } else {
                             loadFallbackDirectVideo();
@@ -3318,6 +3336,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public abstract class PostBaseViewHolder extends PostViewHolder {
         TextView subredditTextView;
         TextView userTextView;
+        @Nullable
         Post.Preview preview;
 
         PostBaseViewHolder(@NonNull View itemView) {
@@ -3368,7 +3387,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             this.subredditTextView = subredditTextView;
             this.userTextView = userTextView;
 
-            if (mVoteButtonsOnTheRight) {
+            if (mVoteButtonsOnTheRight && saveButton != null && shareButton != null && commentsCountButton != null) {
                 ConstraintSet constraintSet = new ConstraintSet();
                 constraintSet.clone(bottomConstraintLayout);
                 constraintSet.clear(upvoteButton.getId(), ConstraintSet.START);
@@ -3481,7 +3500,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (post.getPostType() == Post.GALLERY_TYPE && this instanceof PostBaseGalleryTypeViewHolder) {
                 postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(post,
                         getBindingAdapterPosition(),
-                        ((LinearLayoutManagerBugFixed) ((PostBaseGalleryTypeViewHolder) this).galleryRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+                        ((LinearLayoutManagerBugFixed) java.util.Objects.requireNonNull(((PostBaseGalleryTypeViewHolder) this).galleryRecyclerView.getLayoutManager())).findFirstVisibleItemPosition());
             } else {
                 postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(post, getBindingAdapterPosition());
             }
@@ -4388,7 +4407,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             this.bottomConstraintLayout = bottomConstraintLayout;
             this.divider = divider;
 
-            if (mVoteButtonsOnTheRight) {
+            if (mVoteButtonsOnTheRight && saveButton != null && shareButton != null && commentsCountButton != null) {
                 if (bottomConstraintLayout != null) {
                     ConstraintSet constraintSet = new ConstraintSet();
                     constraintSet.clone(bottomConstraintLayout);
@@ -4890,6 +4909,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         ItemPostGalleryBinding binding;
         RequestListener<Drawable> requestListener;
         Post post;
+        @Nullable
         Post.Preview preview;
 
         int currentPosition;
@@ -5000,6 +5020,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         private final LinearLayoutManagerBugFixed layoutManager;
 
         Post post;
+        @Nullable
         Post.Preview preview;
 
         int currentPosition;

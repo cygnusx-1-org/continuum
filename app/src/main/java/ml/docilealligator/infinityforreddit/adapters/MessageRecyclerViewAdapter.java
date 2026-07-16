@@ -44,6 +44,7 @@ import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_DATA = 0;
     private static final int VIEW_TYPE_ERROR = 1;
