@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -124,7 +125,7 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
         String query = getArguments().getString(EXTRA_QUERY);
         boolean isGettingSubredditInfo = getArguments().getBoolean(EXTRA_IS_GETTING_SUBREDDIT_INFO);
 
-        String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_SUBREDDIT, SortType.Type.RELEVANCE.value);
+        String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_SUBREDDIT, SortType.Type.RELEVANCE.value));
         sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
         boolean nsfw = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE, false);
 
@@ -251,6 +252,7 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
         return sortType;
     }
 
+    @Nullable
     public ArrayList<SubredditData> getSelectedSubredditNames() {
         if (mSubredditListingViewModel != null) {
             List<SubredditData> allSubreddits = mSubredditListingViewModel.getSubreddits().getValue();

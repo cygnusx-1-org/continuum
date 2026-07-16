@@ -41,6 +41,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -121,8 +122,11 @@ public abstract class PostFragmentBase extends Fragment {
     protected BaseActivity mActivity;
     protected RequestManager mGlide;
     protected Window window;
+    @SuppressWarnings("NullAway.Init")
     protected MenuItem lazyModeItem;
+    @Nullable
     protected LinearLayoutManagerBugFixed mLinearLayoutManager;
+    @Nullable
     protected StaggeredGridLayoutManager mStaggeredGridLayoutManager;
     protected boolean hasPost;
     protected long postFragmentId;
@@ -137,7 +141,9 @@ public abstract class PostFragmentBase extends Fragment {
     protected boolean swipeActionEnabled;
     protected ColorDrawable backgroundSwipeRight;
     protected ColorDrawable backgroundSwipeLeft;
+    @SuppressWarnings("NullAway.Init")
     protected Drawable drawableSwipeRight;
+    @SuppressWarnings("NullAway.Init")
     protected Drawable drawableSwipeLeft;
     protected boolean vibrateWhenActionTriggered;
     protected float swipeActionThreshold;
@@ -151,7 +157,6 @@ public abstract class PostFragmentBase extends Fragment {
         // Required empty public constructor
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         EventBus.getDefault().register(this);
@@ -175,8 +180,9 @@ public abstract class PostFragmentBase extends Fragment {
                         if (mLinearLayoutManager != null) {
                             setCurrentPosition(mLinearLayoutManager.findFirstVisibleItemPosition());
                         } else {
-                            int[] into = new int[mStaggeredGridLayoutManager.getSpanCount()];
-                            setCurrentPosition(mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0]);
+                            StaggeredGridLayoutManager staggered = Objects.requireNonNull(mStaggeredGridLayoutManager);
+                            int[] into = new int[staggered.getSpanCount()];
+                            setCurrentPosition(staggered.findFirstVisibleItemPositions(into)[0]);
                         }
                     }
 
@@ -186,7 +192,7 @@ public abstract class PostFragmentBase extends Fragment {
                         if (mLinearLayoutManager != null) {
                             mLinearLayoutManager.startSmoothScroll(smoothScroller);
                         } else {
-                            mStaggeredGridLayoutManager.startSmoothScroll(smoothScroller);
+                            Objects.requireNonNull(mStaggeredGridLayoutManager).startSmoothScroll(smoothScroller);
                         }
                     }
                 }
@@ -404,7 +410,7 @@ public abstract class PostFragmentBase extends Fragment {
     public void stopLazyMode() {
         Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, lazyModeItem, getString(R.string.action_start_lazy_mode));
         if (getPostAdapter() != null) {
-            String autoplayString = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
+            String autoplayString = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER));
             if (autoplayString.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON) ||
                     (autoplayString.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI) && Utils.isConnectedToWifi(mActivity))) {
                 getPostAdapter().setAutoplay(true);
@@ -553,18 +559,18 @@ public abstract class PostFragmentBase extends Fragment {
     protected final void initializeSwipeActionDrawable() {
         if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
             backgroundSwipeRight = new ColorDrawable(mCustomThemeWrapper.getDownvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         } else {
             backgroundSwipeRight = new ColorDrawable(mCustomThemeWrapper.getUpvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         }
 
         if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
             backgroundSwipeLeft = new ColorDrawable(mCustomThemeWrapper.getUpvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         } else {
             backgroundSwipeLeft = new ColorDrawable(mCustomThemeWrapper.getDownvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         }
     }
 
@@ -757,8 +763,8 @@ public abstract class PostFragmentBase extends Fragment {
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
         if (getPostAdapter() != null) {
-            String autoplay = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
-            String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+            String autoplay = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER));
+            String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
             boolean stateChanged = false;
             if (autoplay.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI)) {
                 getPostAdapter().setAutoplay(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_WIFI);
@@ -1004,6 +1010,6 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     public interface LoadIconListener {
-        void loadIconSuccess(String subredditOrUserName, String iconUrl);
+        void loadIconSuccess(String subredditOrUserName, @Nullable String iconUrl);
     }
 }

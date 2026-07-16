@@ -45,6 +45,7 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
 
     public static final String EXTRA_MESSAGE_WHERE = "EMT";
 
+    @SuppressWarnings("NullAway.Init")
     MessageViewModel mMessageViewModel;
     @Inject
     @Named("oauth")
@@ -58,9 +59,13 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @SuppressWarnings("NullAway.Init")
     private String mWhere;
+    @SuppressWarnings("NullAway.Init")
     private MessageRecyclerViewAdapter mAdapter;
+    @SuppressWarnings("NullAway.Init")
     private RequestManager mGlide;
+    @SuppressWarnings("NullAway.Init")
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
     private BaseActivity mActivity;
     private FragmentInboxBinding binding;
@@ -211,6 +216,7 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
         mAdapter.setNetworkState(null);
     }
 
+    @Nullable
     public Message getMessageByIndex(int index) {
         if (mMessageViewModel == null || index < 0) {
             return null;

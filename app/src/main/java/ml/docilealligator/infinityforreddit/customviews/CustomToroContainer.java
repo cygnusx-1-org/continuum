@@ -34,7 +34,7 @@ public class CustomToroContainer extends Container {
         }
     }
 
-    public void addOnWindowFocusChangedListener(OnWindowFocusChangedListener onWindowFocusChangedListener) {
+    public void addOnWindowFocusChangedListener(@Nullable OnWindowFocusChangedListener onWindowFocusChangedListener) {
         this.listener = onWindowFocusChangedListener;
     }
 

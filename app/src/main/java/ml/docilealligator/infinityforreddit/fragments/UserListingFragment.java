@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -121,9 +122,9 @@ public class UserListingFragment extends Fragment implements FragmentCommunicato
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
         binding.recyclerViewUserListingFragment.setLayoutManager(mLinearLayoutManager);
 
-        mQuery = getArguments().getString(EXTRA_QUERY);
+        mQuery = Objects.requireNonNull(getArguments().getString(EXTRA_QUERY));
         boolean isGettingUserInfo = getArguments().getBoolean(EXTRA_IS_GETTING_USER_INFO);
-        String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_USER, SortType.Type.RELEVANCE.value);
+        String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_USER, SortType.Type.RELEVANCE.value));
         sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
         boolean nsfw = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE, false);
 
@@ -252,6 +253,7 @@ public class UserListingFragment extends Fragment implements FragmentCommunicato
         return sortType;
     }
 
+    @Nullable
     public ArrayList<String> getSelectedUsernames() {
         if (mUserListingViewModel != null) {
             List<UserData> allUsers = mUserListingViewModel.getUsers().getValue();

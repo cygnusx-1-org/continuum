@@ -26,6 +26,7 @@ import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,6 +63,7 @@ import retrofit2.Retrofit;
 public class SidebarFragment extends Fragment {
 
     public static final String EXTRA_SUBREDDIT_NAME = "ESN";
+    @SuppressWarnings("NullAway.Init")
     public SubredditViewModel mSubredditViewModel;
 
     @Inject
@@ -77,11 +79,16 @@ public class SidebarFragment extends Fragment {
     @Inject
     Executor mExecutor;
     private ViewSubredditDetailActivity mActivity;
+    @SuppressWarnings("NullAway.Init")
     private String subredditName;
+    @SuppressWarnings("NullAway.Init")
     private LinearLayoutManagerBugFixed linearLayoutManager;
     private int markdownColor;
+    @Nullable
     private String sidebarDescription;
+    @SuppressWarnings("NullAway.Init")
     private EmotePlugin emotePlugin;
+    @SuppressWarnings("NullAway.Init")
     private ImageAndGifEntry imageAndGifEntry;
     private FragmentSidebarBinding binding;
 
@@ -113,11 +120,12 @@ public class SidebarFragment extends Fragment {
             });
         }
 
-        subredditName = getArguments().getString(EXTRA_SUBREDDIT_NAME);
-        if (subredditName == null) {
+        String subredditNameArg = getArguments().getString(EXTRA_SUBREDDIT_NAME);
+        if (subredditNameArg == null) {
             Toast.makeText(mActivity, R.string.error_getting_subreddit_name, Toast.LENGTH_SHORT).show();
             return binding.getRoot();
         }
+        subredditName = subredditNameArg;
 
         binding.swipeRefreshLayoutSidebarFragment.setProgressBackgroundColorSchemeColor(mCustomThemeWrapper.getCircularProgressBarBackground());
         binding.swipeRefreshLayoutSidebarFragment.setColorSchemeColors(mCustomThemeWrapper.getColorAccent());
@@ -284,7 +292,7 @@ public class SidebarFragment extends Fragment {
 
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
-        String dataSavingMode = mActivity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingMode = Objects.requireNonNull(mActivity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
             if (emotePlugin != null) {
                 emotePlugin.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);

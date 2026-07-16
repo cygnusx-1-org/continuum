@@ -14,6 +14,7 @@ public class SubredditListingDataSourceFactory extends DataSource.Factory {
     private final Handler handler;
     private final Retrofit retrofit;
     private final Retrofit oauthRetrofit;
+    @Nullable
     private final String query;
     private SortType sortType;
     @Nullable
@@ -27,7 +28,7 @@ public class SubredditListingDataSourceFactory extends DataSource.Factory {
     private final MutableLiveData<SubredditListingDataSource> subredditListingDataSourceMutableLiveData;
 
     SubredditListingDataSourceFactory(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
-                                      String query, SortType sortType,
+                                      @Nullable String query, SortType sortType,
                                       @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
         this.executor = executor;
         this.handler = handler;

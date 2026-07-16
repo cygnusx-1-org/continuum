@@ -28,6 +28,7 @@ import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -74,6 +75,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     private static final String POST_FILTER_STATE = "PFS";
     private static final String POST_FRAGMENT_ID_STATE = "PFIS";
 
+    @SuppressWarnings("NullAway.Init")
     HistoryPostViewModel mHistoryPostViewModel;
     @Inject
     @Named("no_oauth")
@@ -109,6 +111,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     Executor mExecutor;
     private PostRecyclerViewAdapter mAdapter;
     private int maxPosition = -1;
+    @Nullable
     private PostFilter postFilter;
     @ReadPostType
     private int readPostType;
@@ -340,7 +343,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     private void initializeAndBindPostViewModel() {
         mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                 mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
-                mActivity.accountName, mSharedPreferences, readPostType, postFilter)).get(HistoryPostViewModel.class);
+                mActivity.accountName, mSharedPreferences, readPostType, Objects.requireNonNull(postFilter))).get(HistoryPostViewModel.class);
 
         bindPostViewModel();
     }

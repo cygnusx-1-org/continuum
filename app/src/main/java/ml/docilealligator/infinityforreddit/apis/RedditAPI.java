@@ -91,7 +91,7 @@ public interface RedditAPI {
                                                  @Query("after") @Nullable String after);
 
     @GET("subreddits/search.json?raw_json=1&limit=100")
-    Call<String> searchSubreddits(@Query("q") String subredditName, @Query("after") @Nullable String after,
+    Call<String> searchSubreddits(@Query("q") @Nullable String subredditName, @Query("after") @Nullable String after,
                                   @Query("sort") SortType.Type sort, @Query("include_over_18") int nsfw,
                                   @HeaderMap Map<String, String> headers);
 

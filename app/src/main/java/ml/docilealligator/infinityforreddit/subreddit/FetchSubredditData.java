@@ -44,7 +44,7 @@ public class FetchSubredditData {
     }
 
     static void fetchSubredditListingData(Executor executor, Handler handler, Retrofit retrofit,
-                                          Retrofit oauthRetrofit, String query,
+                                          Retrofit oauthRetrofit, @Nullable String query,
                                           @Nullable String after, SortType.Type sortType, @Nullable String accessToken,
                                           @NonNull String accountName, boolean nsfw,
                                           final FetchSubredditListingDataListener fetchSubredditListingDataListener) {

@@ -1,5 +1,7 @@
 package ml.docilealligator.infinityforreddit.events;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
@@ -13,25 +15,35 @@ public class ProvidePostListToViewPostDetailActivityEvent {
     public ArrayList<Post> posts;
     @PostType
     public int postType;
+    @Nullable
     public String subredditName;
+    @Nullable
     public String concatenatedSubredditNames;
+    @Nullable
     public String username;
+    @Nullable
     public String userWhere;
+    @Nullable
     public String multiPath;
+    @Nullable
     public String query;
+    @Nullable
     public String trendingSource;
     @ReadPostType
     public int readPostType;
+    @Nullable
     public PostFilter postFilter;
+    @Nullable
     public SortType sortType;
+    @Nullable
     public ReadPostsListInterface readPostsList;
 
     public ProvidePostListToViewPostDetailActivityEvent(long postFragmentId, ArrayList<Post> posts, @PostType int postType,
-                                                        String subredditName, String concatenatedSubredditNames,
-                                                        String username, String userWhere,
-                                                        String multiPath, String query, String trendingSource,
-                                                        @ReadPostType int readPostType, PostFilter postFilter,
-                                                        SortType sortType, ReadPostsListInterface readPostsList) {
+                                                        @Nullable String subredditName, @Nullable String concatenatedSubredditNames,
+                                                        @Nullable String username, @Nullable String userWhere,
+                                                        @Nullable String multiPath, @Nullable String query, @Nullable String trendingSource,
+                                                        @ReadPostType int readPostType, @Nullable PostFilter postFilter,
+                                                        @Nullable SortType sortType, @Nullable ReadPostsListInterface readPostsList) {
         this.postFragmentId = postFragmentId;
         this.posts = posts;
         this.postType = postType;

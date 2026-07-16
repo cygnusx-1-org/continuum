@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,7 @@ import io.noties.markwon.inlineparser.HtmlInlineProcessor;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
 import io.noties.markwon.movement.MovementMethodPlugin;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -66,6 +68,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     private final String mAccessToken;
     private final String mAccountName;
     private final int mMessageType;
+    @Nullable
     private NetworkState networkState;
     private final RetryLoadingMoreCallback mRetryLoadingMoreCallback;
     private final int mColorAccent;
@@ -194,7 +197,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     public int getItemViewType(int position) {
         // Reached at the end
         if (hasExtraRow() && position == getItemCount() - 1) {
-            if (networkState.getStatus() == NetworkState.Status.LOADING) {
+            if (Objects.requireNonNull(networkState).getStatus() == NetworkState.Status.LOADING) {
                 return VIEW_TYPE_LOADING;
             } else {
                 return VIEW_TYPE_ERROR;
@@ -250,7 +253,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
         }
     }
 
-    public void setNetworkState(NetworkState newNetworkState) {
+    public void setNetworkState(@Nullable NetworkState newNetworkState) {
         NetworkState previousState = this.networkState;
         boolean previousExtraRow = hasExtraRow();
         this.networkState = newNetworkState;
@@ -261,7 +264,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
             } else {
                 notifyItemInserted(super.getItemCount());
             }
-        } else if (newExtraRow && !previousState.equals(newNetworkState)) {
+        } else if (newExtraRow && !Objects.equals(previousState, newNetworkState)) {
             notifyItemChanged(getItemCount() - 1);
         }
     }

@@ -19,6 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -123,12 +124,12 @@ public class CustomThemeListingFragment extends Fragment {
 
             customizeThemeActivityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), activityResult -> {
                 if (activityResult.getResultCode() == Activity.RESULT_OK) {
-                    Intent data = activityResult.getData();
+                    Intent data = Objects.requireNonNull(activityResult.getData());
                     int index = data.getIntExtra(CustomizeThemeActivity.RETURN_EXTRA_INDEX_IN_THEME_LIST, -1);
                     String themeName = data.getStringExtra(CustomizeThemeActivity.RETURN_EXTRA_THEME_NAME);
                     String primaryColorHex = data.getStringExtra(CustomizeThemeActivity.RETURN_EXTRA_PRIMARY_COLOR);
 
-                    adapter.updateMetadata(index, themeName, primaryColorHex);
+                    adapter.updateMetadata(index, Objects.requireNonNull(themeName), Objects.requireNonNull(primaryColorHex));
                 }
             });
         } else {
@@ -139,7 +140,7 @@ public class CustomThemeListingFragment extends Fragment {
             customThemeViewModel = new ViewModelProvider(this,
                     new CustomThemeViewModel.Factory(redditDataRoomDatabase))
                     .get(CustomThemeViewModel.class);
-            customThemeViewModel.getAllCustomThemes().observe(getViewLifecycleOwner(), adapter::setUserThemes);
+            Objects.requireNonNull(customThemeViewModel.getAllCustomThemes()).observe(getViewLifecycleOwner(), adapter::setUserThemes);
         }
 
         return binding.getRoot();

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.NetworkState;
@@ -64,6 +65,7 @@ public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<Subred
     private final int buttonTextColor;
     private final int unsubscribed;
 
+    @Nullable
     private NetworkState networkState;
     private final Callback callback;
 
@@ -200,7 +202,7 @@ public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<Subred
     public int getItemViewType(int position) {
         // Reached at the end
         if (hasExtraRow() && position == getItemCount() - 1) {
-            if (networkState.getStatus() == NetworkState.Status.LOADING) {
+            if (Objects.requireNonNull(networkState).getStatus() == NetworkState.Status.LOADING) {
                 return VIEW_TYPE_LOADING;
             } else {
                 return VIEW_TYPE_ERROR;
@@ -222,7 +224,7 @@ public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<Subred
         return networkState != null && networkState.getStatus() != NetworkState.Status.SUCCESS;
     }
 
-    public void setNetworkState(NetworkState newNetworkState) {
+    public void setNetworkState(@Nullable NetworkState newNetworkState) {
         NetworkState previousState = this.networkState;
         boolean previousExtraRow = hasExtraRow();
         this.networkState = newNetworkState;
@@ -233,7 +235,7 @@ public class SubredditListingRecyclerViewAdapter extends PagedListAdapter<Subred
             } else {
                 notifyItemInserted(super.getItemCount());
             }
-        } else if (newExtraRow && !previousState.equals(newNetworkState)) {
+        } else if (newExtraRow && !Objects.equals(previousState, newNetworkState)) {
             notifyItemChanged(getItemCount() - 1);
         }
     }

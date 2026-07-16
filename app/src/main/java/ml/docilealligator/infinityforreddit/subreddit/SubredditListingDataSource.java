@@ -16,6 +16,7 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     private final Executor executor;
     private final Retrofit retrofit;
     private final Retrofit oauthRetrofit;
+    @Nullable
     private final String query;
     private final SortType sortType;
     @Nullable
@@ -35,7 +36,7 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     private LoadCallback<String, SubredditData> callback;
 
     SubredditListingDataSource(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
-                               String query, SortType sortType,
+                               @Nullable String query, SortType sortType,
                                @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
         this.executor = executor;
         this.retrofit = retrofit;
