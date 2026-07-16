@@ -38,6 +38,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -85,14 +86,14 @@ public class ViewImgurImageFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentViewImgurImageBinding.inflate(inflater, container, false);
 
         ((Infinity) activity.getApplication()).getAppComponent().inject(this);
 
         setHasOptionsMenu(true);
 
-        imgurMedia = getArguments().getParcelable(EXTRA_IMGUR_IMAGES);
+        imgurMedia = Objects.requireNonNull(getArguments().getParcelable(EXTRA_IMGUR_IMAGES));
         glide = Glide.with(activity);
 
         if (savedInstanceState != null) {
@@ -313,11 +314,11 @@ public class ViewImgurImageFragment extends Fragment {
         String defaultSharedPrefsFile = "ml.docilealligator.infinityforreddit_preferences";
 
         // Check for the location in both SharedPreferences - this will help identify the issue
-        String imageLoc1 = mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-        String imageLoc2 = activity.getSharedPreferences(SharedPreferencesUtils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-        String imageLoc3 = activity.getSharedPreferences(defaultSharedPrefsFile, Context.MODE_PRIVATE)
-                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+        String imageLoc1 = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
+        String imageLoc2 = Objects.requireNonNull(activity.getSharedPreferences(SharedPreferencesUtils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
+        String imageLoc3 = Objects.requireNonNull(activity.getSharedPreferences(defaultSharedPrefsFile, Context.MODE_PRIVATE)
+                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
 
         Log.d("ImgurDownload", "Image location from injected prefs: " +
                 (imageLoc1.isEmpty() ? "EMPTY" : imageLoc1));
@@ -327,16 +328,16 @@ public class ViewImgurImageFragment extends Fragment {
                 (imageLoc3.isEmpty() ? "EMPTY" : imageLoc3));
 
         if (isNsfw && mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
-            downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
+            downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, ""));
             Log.d("ImgurDownload", "Using NSFW download location: " +
                   (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
         } else {
             if (mediaType == DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO) {
-                downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+                downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, ""));
                 Log.d("ImgurDownload", "Using VIDEO download location: " +
                       (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
             } else {
-                downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+                downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
                 Log.d("ImgurDownload", "Using IMAGE download location: " +
                       (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
 

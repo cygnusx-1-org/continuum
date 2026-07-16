@@ -46,6 +46,7 @@ import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.ImageLoader;
 import com.github.piasy.biv.loader.glide.GlideImageLoader;
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -89,10 +90,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
     private ViewRedditGalleryActivity activity;
     private RequestManager glide;
     private Post.Gallery media;
-    private String subredditName;
-    private boolean isNsfw;
     private boolean isDownloading = false;
-    private boolean isUseBottomCaption = false;
     private boolean isFallback = false;
     private Handler handler;
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
@@ -104,7 +102,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         BigImageViewer.initialize(GlideImageLoader.with(activity.getApplicationContext()));
 
         binding = FragmentViewRedditGalleryImageOrGifBinding.inflate(inflater, container, false);
@@ -113,9 +111,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        media = getArguments().getParcelable(EXTRA_REDDIT_GALLERY_MEDIA);
-        subredditName = getArguments().getString(EXTRA_SUBREDDIT_NAME);
-        isNsfw = getArguments().getBoolean(EXTRA_IS_NSFW, false);
+        media = Objects.requireNonNull(getArguments().getParcelable(EXTRA_REDDIT_GALLERY_MEDIA));
         glide = Glide.with(activity);
         handler = new Handler(Looper.getMainLooper());
 
@@ -261,8 +257,6 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         binding.overflowImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(this::showOverflowMenu);
 
         if (captionTextOrUrlIsNotEmpty) {
-            isUseBottomCaption = true;
-
             binding.captionLayoutViewRedditGalleryImageOrGifFragment.setVisibility(View.VISIBLE);
 
             if (!captionIsEmpty) {
@@ -478,11 +472,11 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         String defaultSharedPrefsFile = "ml.docilealligator.infinityforreddit_preferences";
 
         // Check for the location in both SharedPreferences - this will help identify the issue
-        String imageLoc1 = mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-        String imageLoc2 = activity.getSharedPreferences(SharedPreferencesUtils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-        String imageLoc3 = activity.getSharedPreferences(defaultSharedPrefsFile, Context.MODE_PRIVATE)
-                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+        String imageLoc1 = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
+        String imageLoc2 = Objects.requireNonNull(activity.getSharedPreferences(SharedPreferencesUtils.SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
+                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
+        String imageLoc3 = Objects.requireNonNull(activity.getSharedPreferences(defaultSharedPrefsFile, Context.MODE_PRIVATE)
+                .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
 
         android.util.Log.d("ImgurDownload", "Image location from injected prefs: " +
                 (imageLoc1.isEmpty() ? "EMPTY" : imageLoc1));
@@ -492,14 +486,14 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                 (imageLoc3.isEmpty() ? "EMPTY" : imageLoc3));
 
         if (isNsfw && mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
-            downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
+            downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, ""));
             Log.d("GalleryDownload", "Using NSFW download location: " + (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
         } else {
             if (mediaType == DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO) {
-                downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+                downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, ""));
                 Log.d("GalleryDownload", "Using VIDEO download location: " + (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
             } else {
-                downloadLocation = mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+                downloadLocation = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
                 Log.d("GalleryDownload", "Using IMAGE download location: " + (downloadLocation.isEmpty() ? "EMPTY" : "SET"));
 
                 // If the location is empty, try the other SharedPreferences

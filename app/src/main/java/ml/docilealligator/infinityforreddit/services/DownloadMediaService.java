@@ -281,7 +281,7 @@ public class DownloadMediaService extends JobService {
         }
     }
 
-    public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, ImgurMedia imgurMedia, String subredditName, boolean isNsfw, String title) {
+    public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, ImgurMedia imgurMedia, @Nullable String subredditName, boolean isNsfw, @Nullable String title) {
         PersistableBundle extras = new PersistableBundle();
         extras.putString(EXTRA_URL, imgurMedia.getLink());
 
