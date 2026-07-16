@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.annotation.Nullable;
 import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceViewHolder;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
@@ -17,6 +18,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiv
 @SuppressWarnings("NullAway.Init")
 public class CustomFontEditTextPreference extends EditTextPreference implements CustomFontReceiver, CustomThemeWrapperReceiver {
     private CustomThemeWrapper customThemeWrapper;
+    @Nullable
     private Typeface typeface;
     private Typeface summaryTypeface;
 
@@ -91,7 +93,7 @@ public class CustomFontEditTextPreference extends EditTextPreference implements 
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 

@@ -1,7 +1,8 @@
 package ml.docilealligator.infinityforreddit;
 
 import android.graphics.Typeface;
+import androidx.annotation.Nullable;
 
 public interface CustomFontReceiver {
-    void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface);
+    void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface);
 }

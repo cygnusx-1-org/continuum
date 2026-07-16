@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.ListPreference;
 import androidx.preference.PreferenceViewHolder;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
@@ -18,6 +19,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiv
 @SuppressWarnings("NullAway.Init")
 public class CustomFontListPreference extends ListPreference implements CustomFontReceiver, CustomThemeWrapperReceiver {
     private CustomThemeWrapper customThemeWrapper;
+    @Nullable
     private Typeface typeface;
 
     public CustomFontListPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -70,7 +72,7 @@ public class CustomFontListPreference extends ListPreference implements CustomFo
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 

@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit;
 
 import android.os.Handler;
+import androidx.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -73,7 +74,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
 
     public static void fetchPostFilter(RedditDataRoomDatabase redditDataRoomDatabase, Executor executor,
                                                    Handler handler, int postFilterUsage,
-                                                   String nameOfUsage, FetchPostFilterListerner fetchPostFilterListerner) {
+                                                   @Nullable String nameOfUsage, FetchPostFilterListerner fetchPostFilterListerner) {
         executor.execute(() -> {
             refreshNeverHideSubreddits(redditDataRoomDatabase);
             List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
@@ -83,7 +84,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
     }
 
     public static void fetchPostFilterAndConcatenatedSubredditNames(RedditDataRoomDatabase redditDataRoomDatabase, Executor executor,
-                                                   Handler handler, int postFilterUsage, String nameOfUsage,
+                                                   Handler handler, int postFilterUsage, @Nullable String nameOfUsage,
                                                    FetchPostFilterAndConcatenatecSubredditNamesListener fetchPostFilterAndConcatenatecSubredditNamesListener) {
         executor.execute(() -> {
             List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
@@ -106,7 +107,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
     }
 
     public static void fetchPostFilterAndConcatenatedSubredditNames(RedditDataRoomDatabase redditDataRoomDatabase, Executor executor,
-                                                                    Handler handler, String multipath, int postFilterUsage, String nameOfUsage,
+                                                                    Handler handler, @Nullable String multipath, int postFilterUsage, @Nullable String nameOfUsage,
                                                                     FetchPostFilterAndConcatenatecSubredditNamesListener fetchPostFilterAndConcatenatecSubredditNamesListener) {
         executor.execute(() -> {
             refreshNeverHideSubreddits(redditDataRoomDatabase);
@@ -133,6 +134,6 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
     }
 
     public interface FetchPostFilterAndConcatenatecSubredditNamesListener {
-        void success(PostFilter postFilter, String concatenatedSubredditNames);
+        void success(PostFilter postFilter, @Nullable String concatenatedSubredditNames);
     }
 }

@@ -228,6 +228,20 @@ tasks.withType(JavaCompile).configureEach { compileTask ->
         option('NullAway:JSpecifyMode', 'true')
         option('NullAway:ExcludedFieldAnnotations', 'androidx.room.Embedded,androidx.room.Relation,com.google.gson.annotations.SerializedName')
         option('NullAway:TreatGeneratedAsUnannotated', 'true')
+        // A handful of annotation processors emit their generated classes into the root
+        // ml.docilealligator.infinityforreddit package WITHOUT a @Generated annotation, so
+        // TreatGeneratedAsUnannotated cannot see they are generated. Once that package is
+        // @NullMarked, NullAway would check these machine-written files (e.g. EventBusIndex's
+        // getSubscriberInfo returns null; the Glide-generated request builders). List them here so
+        // they are treated as unannotated, exactly like the @Generated Dagger/Room output — they are
+        // not ours to null-annotate. EventBusIndex is from greenrobot EventBus's annotation
+        // processor; GlideApp/GlideOptions/GlideRequest/GlideRequests are from Glide's.
+        option('NullAway:UnannotatedClasses',
+                'ml.docilealligator.infinityforreddit.EventBusIndex,' +
+                'ml.docilealligator.infinityforreddit.GlideApp,' +
+                'ml.docilealligator.infinityforreddit.GlideOptions,' +
+                'ml.docilealligator.infinityforreddit.GlideRequest,' +
+                'ml.docilealligator.infinityforreddit.GlideRequests')
         // Android UI classes initialize their @NonNull fields in lifecycle callbacks (onCreate/
         // onCreateView/onViewCreated), not the constructor. Tell NullAway to treat those as
         // initializer methods so such fields don't trip the "not initialized" check.

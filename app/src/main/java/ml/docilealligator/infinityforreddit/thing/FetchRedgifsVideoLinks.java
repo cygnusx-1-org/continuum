@@ -20,7 +20,7 @@ import retrofit2.Retrofit;
 public class FetchRedgifsVideoLinks {
     public static void fetchRedgifsVideoLinks(Executor executor, Handler handler, Retrofit redgifsRetrofit,
                                               SharedPreferences currentAccountSharedPreferences,
-                                              String redgifsId,
+                                              @Nullable String redgifsId,
                                               FetchVideoLinkListener fetchVideoLinkListener) {
         executor.execute(() -> {
             try {
@@ -70,7 +70,7 @@ public class FetchRedgifsVideoLinks {
     @Nullable
     public static String fetchRedgifsVideoLinkSync(Retrofit redgifsRetrofit,
                                               SharedPreferences currentAccountSharedPreferences,
-                                              String redgifsId) {
+                                              @Nullable String redgifsId) {
         try {
             // Get valid token
             String accessToken = getValidAccessToken(redgifsRetrofit, currentAccountSharedPreferences);

@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -15,7 +16,7 @@ public interface AnonymousMultiredditSubredditDao {
     void insertAll(List<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits);
 
     @Query("SELECT * FROM anonymous_multireddit_subreddits WHERE path = :path ORDER BY subreddit_name COLLATE NOCASE ASC")
-    List<AnonymousMultiredditSubreddit> getAllAnonymousMultiRedditSubreddits(String path);
+    List<AnonymousMultiredditSubreddit> getAllAnonymousMultiRedditSubreddits(@Nullable String path);
 
     @Query("SELECT * FROM anonymous_multireddit_subreddits")
     List<AnonymousMultiredditSubreddit> getAllSubreddits();
