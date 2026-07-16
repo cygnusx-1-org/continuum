@@ -438,7 +438,7 @@ public class PostViewModel extends ViewModel {
     // read by returnPagingSoruce() and re-triggers the paging pipeline so a fresh PostPagingSource is
     // built with them. Re-posting the current sort type rebuilds the feed exactly as changeSortType
     // does; without it the cached PagingData (and its stale names) would stick around.
-    public void changeSubredditName(String name) {
+    public void changeSubredditName(@Nullable String name) {
         this.name = name;
         sortTypeLiveData.postValue(sortTypeLiveData.getValue());
     }
@@ -473,7 +473,7 @@ public class PostViewModel extends ViewModel {
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
-                       SharedPreferences postHistorySharedPreferences, @PostType int postType, SortType sortType,
+                       @Nullable SharedPreferences postHistorySharedPreferences, @PostType int postType, SortType sortType,
                        PostFilter postFilter, ReadPostsListInterface readPostsList) {
             this.executor = executor;
             this.retrofit = retrofit;
@@ -493,7 +493,7 @@ public class PostViewModel extends ViewModel {
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
-                       SharedPreferences postHistorySharedPreferences, @Nullable String name, @PostType int postType, SortType sortType,
+                       @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String name, @PostType int postType, SortType sortType,
                        PostFilter postFilter, ReadPostsListInterface readPostsList) {
             this.executor = executor;
             this.retrofit = retrofit;
@@ -536,8 +536,8 @@ public class PostViewModel extends ViewModel {
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
-                       SharedPreferences postHistorySharedPreferences, String username, @PostType int postType,
-                       SortType sortType, PostFilter postFilter, String where, ReadPostsListInterface readPostsList) {
+                       @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String username, @PostType int postType,
+                       SortType sortType, PostFilter postFilter, @Nullable String where, ReadPostsListInterface readPostsList) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -558,7 +558,7 @@ public class PostViewModel extends ViewModel {
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
-                       SharedPreferences postHistorySharedPreferences, @Nullable String name, @Nullable String query, @Nullable String trendingSource,
+                       @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String name, @Nullable String query, @Nullable String trendingSource,
                        @PostType int postType, SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
             this.executor = executor;
             this.retrofit = retrofit;
@@ -579,7 +579,7 @@ public class PostViewModel extends ViewModel {
 
         //Anonymous Front Page
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
-                       SharedPreferences sharedPreferences, String concatenatedSubredditNames,
+                       SharedPreferences sharedPreferences, @Nullable String concatenatedSubredditNames,
                        @PostType int postType, SortType sortType, PostFilter postFilter,
                        ReadPostsListInterface readPostsList) {
             this.executor = executor;
