@@ -1,6 +1,5 @@
 package ml.docilealligator.infinityforreddit.settings;
 
-
 import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG;
 import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
@@ -9,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.biometric.BiometricManager;
 import androidx.preference.Preference;
 import javax.inject.Inject;
@@ -30,7 +30,7 @@ public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
     SharedPreferences sharedPreferences;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.main_preferences, rootKey);
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 

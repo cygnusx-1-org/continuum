@@ -1,8 +1,8 @@
 package ml.docilealligator.infinityforreddit.settings;
 
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.SwitchPreference;
@@ -26,7 +26,7 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
     SharedPreferences sharedPreferences;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.gestures_and_buttons_preferences, rootKey);
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 

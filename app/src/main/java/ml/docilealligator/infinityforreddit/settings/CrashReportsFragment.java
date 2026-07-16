@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.crazylegend.crashyreporter.CrashyReporter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import ml.docilealligator.infinityforreddit.BuildConfig;
@@ -70,7 +71,9 @@ public class CrashReportsFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        recyclerView.setAdapter(new CrashReportsRecyclerViewAdapter(mActivity, CrashyReporter.INSTANCE.getLogsAsStrings()));
+        List<String> crashReports = CrashyReporter.INSTANCE.getLogsAsStrings();
+        recyclerView.setAdapter(new CrashReportsRecyclerViewAdapter(mActivity,
+                crashReports != null ? crashReports : new ArrayList<>()));
 
         recyclerView.setBackgroundColor(mActivity.customThemeWrapper.getBackgroundColor());
 

@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.preference.EditTextPreference;
@@ -44,7 +45,7 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
     }
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.miscellaneous_preferences, rootKey);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);

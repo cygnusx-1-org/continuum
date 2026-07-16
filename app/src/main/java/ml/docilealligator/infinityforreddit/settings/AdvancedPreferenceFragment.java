@@ -95,13 +95,16 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
     SharedPreferences navigationDrawerSharedPreferences;
     @Inject
     Executor executor;
-    private Handler handler;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    @Nullable
     private String backupPassword;
+    @Nullable
     private String restorePassword;
+    @Nullable
     private Uri restoreFileUri;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.advanced_preferences, rootKey);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
@@ -117,8 +120,6 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
         Preference resetAllSettingsPreference = findPreference(SharedPreferencesUtils.RESET_ALL_SETTINGS);
         Preference backupSettingsPreference = findPreference(SharedPreferencesUtils.BACKUP_SETTINGS);
         Preference restoreSettingsPreference = findPreference(SharedPreferencesUtils.RESTORE_SETTINGS);
-
-        handler = new Handler(Looper.getMainLooper());
 
         if (deleteSubredditsPreference != null) {
             deleteSubredditsPreference.setOnPreferenceClickListener(preference -> {
@@ -328,30 +329,33 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK && data != null) {
             if (requestCode == SELECT_BACKUP_SETTINGS_DIRECTORY_REQUEST_CODE) {
                 Uri uri = data.getData();
-                BackupSettings.backupSettings(mActivity, executor, handler, mActivity.getContentResolver(), uri,
-                        backupPassword, mRedditDataRoomDatabase, mSharedPreferences, lightThemeSharedPreferences, darkThemeSharedPreferences,
-                        amoledThemeSharedPreferences, mSortTypeSharedPreferences, mPostLayoutSharedPreferences,
-                        mPostDetailsSharedPreferences, postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
-                        proxySharedPreferences, nsfwAndBlurringSharedPreferences, bottomAppBarSharedPreferences,
-                        postHistorySharedPreferences, navigationDrawerSharedPreferences,
-                        new BackupSettings.BackupSettingsListener() {
-                            @Override
-                            public void success() {
-                                Toast.makeText(mActivity, R.string.backup_settings_success, Toast.LENGTH_LONG).show();
-                                // Clear the password from memory after use
-                                backupPassword = null;
-                            }
+                String password = backupPassword;
+                if (uri != null && password != null) {
+                    BackupSettings.backupSettings(mActivity, executor, handler, mActivity.getContentResolver(), uri,
+                            password, mRedditDataRoomDatabase, mSharedPreferences, lightThemeSharedPreferences, darkThemeSharedPreferences,
+                            amoledThemeSharedPreferences, mSortTypeSharedPreferences, mPostLayoutSharedPreferences,
+                            mPostDetailsSharedPreferences, postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
+                            proxySharedPreferences, nsfwAndBlurringSharedPreferences, bottomAppBarSharedPreferences,
+                            postHistorySharedPreferences, navigationDrawerSharedPreferences,
+                            new BackupSettings.BackupSettingsListener() {
+                                @Override
+                                public void success() {
+                                    Toast.makeText(mActivity, R.string.backup_settings_success, Toast.LENGTH_LONG).show();
+                                    // Clear the password from memory after use
+                                    backupPassword = null;
+                                }
 
-                            @Override
-                            public void failed(String errorMessage) {
-                                Toast.makeText(mActivity, errorMessage, Toast.LENGTH_LONG).show();
-                                // Clear the password from memory after use
-                                backupPassword = null;
-                            }
-                        });
+                                @Override
+                                public void failed(String errorMessage) {
+                                    Toast.makeText(mActivity, errorMessage, Toast.LENGTH_LONG).show();
+                                    // Clear the password from memory after use
+                                    backupPassword = null;
+                                }
+                            });
+                }
             } else if (requestCode == SELECT_RESTORE_SETTINGS_DIRECTORY_REQUEST_CODE) {
                 restoreFileUri = data.getData();
                 showRestorePasswordDialog();
@@ -495,8 +499,13 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
     }
 
     private void performRestore() {
-        RestoreSettings.restoreSettings(mActivity, executor, handler, mActivity.getContentResolver(), restoreFileUri,
-                restorePassword, mRedditDataRoomDatabase, mSharedPreferences, mCurrentAccountSharedPreferences, lightThemeSharedPreferences,
+        Uri fileUri = restoreFileUri;
+        String password = restorePassword;
+        if (fileUri == null || password == null) {
+            return;
+        }
+        RestoreSettings.restoreSettings(mActivity, executor, handler, mActivity.getContentResolver(), fileUri,
+                password, mRedditDataRoomDatabase, mSharedPreferences, mCurrentAccountSharedPreferences, lightThemeSharedPreferences,
                 darkThemeSharedPreferences, amoledThemeSharedPreferences, mSortTypeSharedPreferences, mPostLayoutSharedPreferences,
                 mPostDetailsSharedPreferences, postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
                 proxySharedPreferences, nsfwAndBlurringSharedPreferences, bottomAppBarSharedPreferences,

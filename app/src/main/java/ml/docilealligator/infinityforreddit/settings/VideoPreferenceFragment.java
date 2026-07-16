@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import javax.inject.Inject;
@@ -30,7 +31,7 @@ public class VideoPreferenceFragment extends CustomFontPreferenceFragmentCompat 
     SharedPreferences sharedPreferences;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.video_preferences, rootKey);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);

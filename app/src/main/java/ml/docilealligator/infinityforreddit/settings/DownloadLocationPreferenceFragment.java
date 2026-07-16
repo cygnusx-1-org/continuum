@@ -28,9 +28,13 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
     private static final int VIDEO_DOWNLOAD_LOCATION_REQUEST_CODE = 12;
     private static final int NSFW_DOWNLOAD_LOCATION_REQUEST_CODE = 13;
 
+    @Nullable
     Preference imageDownloadLocationPreference;
+    @Nullable
     Preference gifDownloadLocationPreference;
+    @Nullable
     Preference videoDownloadLocationPreference;
+    @Nullable
     Preference nsfwDownloadLocationPreference;
     @Inject
     @Named("default")
@@ -40,7 +44,7 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
     private boolean isLongPressing = false;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
         setPreferencesFromResource(R.xml.download_location_preferences, rootKey);
 
@@ -51,7 +55,7 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
 
         if (nsfwDownloadLocationPreference != null) {
             String downloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
-            if (!downloadLocation.equals("")) {
+            if (!"".equals(downloadLocation)) {
                 nsfwDownloadLocationPreference.setSummary(formatDownloadPath(downloadLocation));
             } else {
                 nsfwDownloadLocationPreference.setSummary(R.string.settings_download_location_not_set);
@@ -66,7 +70,7 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
         }
         if (imageDownloadLocationPreference != null) {
             String downloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-            if (!downloadLocation.equals("")) {
+            if (!"".equals(downloadLocation)) {
                 imageDownloadLocationPreference.setSummary(formatDownloadPath(downloadLocation));
             } else {
                 imageDownloadLocationPreference.setSummary(R.string.settings_download_location_not_set);
@@ -81,7 +85,7 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
 
         if (gifDownloadLocationPreference != null) {
             String downloadLocation = sharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, "");
-            if (!downloadLocation.equals("")) {
+            if (!"".equals(downloadLocation)) {
                 gifDownloadLocationPreference.setSummary(formatDownloadPath(downloadLocation));
             } else {
                 gifDownloadLocationPreference.setSummary(R.string.settings_download_location_not_set);
@@ -96,7 +100,7 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
 
         if (videoDownloadLocationPreference != null) {
             String downloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
-            if (!downloadLocation.equals("")) {
+            if (!"".equals(downloadLocation)) {
                 videoDownloadLocationPreference.setSummary(formatDownloadPath(downloadLocation));
             } else {
                 videoDownloadLocationPreference.setSummary(R.string.settings_download_location_not_set);
@@ -146,7 +150,7 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
         }
     }
 
-    private String formatDownloadPath(String uriString) {
+    private String formatDownloadPath(@Nullable String uriString) {
         if (uriString == null || uriString.isEmpty()) {
             return "";
         }

@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.settings;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
@@ -17,7 +18,7 @@ import org.greenrobot.eventbus.EventBus;
 public class NavigationDrawerPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         PreferenceManager preferenceManager = getPreferenceManager();
         preferenceManager.setSharedPreferencesName(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
         setPreferencesFromResource(R.xml.navigation_drawer_preferences, rootKey);

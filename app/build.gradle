@@ -245,11 +245,12 @@ tasks.withType(JavaCompile).configureEach { compileTask ->
         // Android UI classes initialize their @NonNull fields in lifecycle callbacks (onCreate/
         // onCreateView/onViewCreated), not the constructor. Tell NullAway to treat those as
         // initializer methods so such fields don't trip the "not initialized" check.
-        // NOTE: This is inert until the NullAway rollout is finished. The packages that hold the
-        // Activities and Fragments (activities, fragments, bottomsheetfragments, settings, adapters,
-        // customviews, videoautoplay, asynctasks, and the root infinityforreddit package) are not yet
-        // @NullMarked, so NullAway ignores them entirely and this option does nothing for now. It is
-        // wired up ahead of time so those packages check cleanly once they are re-marked.
+        // NOTE: This is now active for the marked Fragment-holding packages (fragments,
+        // bottomsheetfragments, settings, etc.). Only `activities` remains un-@NullMarked, so this
+        // option does nothing for that package yet; it is wired up ahead of time so it checks cleanly
+        // once it is re-marked. (PreferenceFragmentCompat.onCreatePreferences is deliberately NOT a
+        // known initializer — the settings rollout kept @NonNull fields set there either constructor-
+        // initialized or scoped to locals, and made genuinely-optional fields @Nullable instead.)
         option('NullAway:KnownInitializers',
                 'android.app.Activity.onCreate,' +
                 'androidx.fragment.app.Fragment.onCreateView,' +

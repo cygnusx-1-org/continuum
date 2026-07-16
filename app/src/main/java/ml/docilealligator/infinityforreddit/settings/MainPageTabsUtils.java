@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -49,6 +50,7 @@ public class MainPageTabsUtils {
         return accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName;
     }
 
+    @Nullable
     public static String toggleKeyForGroupSource(int source) {
         switch (source) {
             case SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS:
@@ -329,7 +331,8 @@ public class MainPageTabsUtils {
      * {@code /u/...}), or {@code null} if {@code label} is not such a path. Drives the compact
      * "u/m/&lt;name&gt;" tab label.
      */
-    private static String userMultiRedditName(String label) {
+    @Nullable
+    private static String userMultiRedditName(@Nullable String label) {
         if (label == null) {
             return null;
         }

@@ -113,17 +113,21 @@ public class PostHistoryFragment extends Fragment {
         });
         binding.readPostsLimitTextInputEditTextPostHistoryFragment.setOnFocusChangeListener((view, b) -> {
             if (!b) {
-                String readPostsLimitString = binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText().toString();
+                CharSequence readPostsLimitText = binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText();
+                String readPostsLimitString = readPostsLimitText == null ? "" : readPostsLimitText.toString();
+                int readPostsLimit;
                 if (readPostsLimitString.isEmpty()) {
+                    readPostsLimit = 500;
                     binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText("500");
                 } else {
-                    int readPostsLimit = Integer.parseInt(readPostsLimitString);
+                    readPostsLimit = Integer.parseInt(readPostsLimitString);
                     if (readPostsLimit < 100) {
+                        readPostsLimit = 100;
                         binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText("100");
                     }
                 }
                 postHistorySharedPreferences.edit().putInt(mActivity.accountName + SharedPreferencesUtils.READ_POSTS_LIMIT,
-                        Integer.parseInt(binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText().toString())).apply();
+                        readPostsLimit).apply();
             }
         });
 

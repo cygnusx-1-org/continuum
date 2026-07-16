@@ -18,6 +18,7 @@ import ml.docilealligator.infinityforreddit.databinding.FragmentSettingsSearchBi
 
 public class SettingsSearchFragment extends Fragment {
 
+    @Nullable
     private FragmentSettingsSearchBinding binding;
     private SettingsActivity mActivity;
     private SettingsSearchAdapter mAdapter;
@@ -28,7 +29,6 @@ public class SettingsSearchFragment extends Fragment {
         mActivity = (SettingsActivity) context;
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -40,6 +40,18 @@ public class SettingsSearchFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mAdapter = new SettingsSearchAdapter(item -> {
+            Fragment fragment = mActivity.getSupportFragmentManager()
+                    .getFragmentFactory()
+                    .instantiate(requireActivity().getClassLoader(), item.fragmentClass.getName());
+            mActivity.navigateToSettingsFragment(fragment, item.fragmentTitleResId);
+        });
+
+        final FragmentSettingsSearchBinding binding = this.binding;
+        if (binding == null) {
+            return;
+        }
+
         binding.rootFragmentSettingsSearch.setBackgroundColor(
                 mActivity.customThemeWrapper.getBackgroundColor());
         binding.searchEditTextSettingsSearchFragment.setTextColor(
@@ -50,13 +62,6 @@ public class SettingsSearchFragment extends Fragment {
                 mActivity.customThemeWrapper.getPrimaryIconColor());
         binding.emptyTextSettingsSearchFragment.setTextColor(
                 mActivity.customThemeWrapper.getSecondaryTextColor());
-
-        mAdapter = new SettingsSearchAdapter(item -> {
-            Fragment fragment = mActivity.getSupportFragmentManager()
-                    .getFragmentFactory()
-                    .instantiate(requireActivity().getClassLoader(), item.fragmentClass.getName());
-            mActivity.navigateToSettingsFragment(fragment, item.fragmentTitleResId);
-        });
 
         binding.recyclerViewSettingsSearchFragment.setLayoutManager(
                 new LinearLayoutManager(mActivity));
@@ -93,6 +98,10 @@ public class SettingsSearchFragment extends Fragment {
     }
 
     private void updateEmptyState() {
+        final FragmentSettingsSearchBinding binding = this.binding;
+        if (binding == null) {
+            return;
+        }
         boolean hasText = !binding.searchEditTextSettingsSearchFragment.getText().toString().isEmpty();
         boolean isEmpty = mAdapter.isEmpty();
         if (hasText && isEmpty) {

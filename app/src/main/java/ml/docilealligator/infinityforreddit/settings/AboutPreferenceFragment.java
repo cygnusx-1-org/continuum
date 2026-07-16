@@ -1,11 +1,11 @@
 package ml.docilealligator.infinityforreddit.settings;
 
-
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.BuildConfig;
@@ -20,7 +20,7 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.about_preferences, rootKey);
 
         Preference openSourcePreference = findPreference(SharedPreferencesUtils.OPEN_SOURCE_KEY);

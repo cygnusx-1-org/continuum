@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.Context;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +13,9 @@ import ml.docilealligator.infinityforreddit.R;
  */
 public class SettingsSearchRegistry {
 
+    @Nullable
     private static SettingsSearchRegistry sInstance;
+    @Nullable
     private List<SettingsSearchItem> mItems;
 
     private SettingsSearchRegistry() {}
@@ -63,7 +66,7 @@ public class SettingsSearchRegistry {
     // Helper
     // -------------------------------------------------------------------------
 
-    private static void add(List<SettingsSearchItem> items, String title, String summary,
+    private static void add(List<SettingsSearchItem> items, String title, @Nullable String summary,
                              String breadcrumb,
                              Class<? extends androidx.fragment.app.Fragment> fragmentClass,
                              int fragmentTitleResId) {

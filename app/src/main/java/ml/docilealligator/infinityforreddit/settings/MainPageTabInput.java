@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.settings;
 
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 /**
@@ -14,13 +15,15 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
  */
 public class MainPageTabInput {
     public int postType;
-    public String name;
+    public String name = "";
     // For toggle-sourced items, the tab label (a multireddit's display name differs from its path,
     // stored in name). Null for user tabs, whose label is derived from type/name.
+    @Nullable
     public String displayName;
     // A user-entered rename that overrides the displayed tab title (see MainPageTabsUtils
     // .getEffectiveTabLabel). Null/empty means no override — the computed default is shown.
     // Distinct from displayName, which must stay intact to render the default label.
+    @Nullable
     public String customTitle;
     public int source;
 
@@ -28,7 +31,7 @@ public class MainPageTabInput {
         // Required for Gson deserialization.
     }
 
-    public MainPageTabInput(int postType, String name, int source) {
+    public MainPageTabInput(int postType, @Nullable String name, int source) {
         this.postType = postType;
         this.name = name == null ? "" : name;
         this.source = source;

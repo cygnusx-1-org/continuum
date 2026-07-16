@@ -55,7 +55,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     SharedPreferences mSharedPreferences;
 
     private ActivityResultLauncher<Intent> qrCodeScannerLauncher;
-    private CustomFontEditTextPreference clientIdPref;
+    @Nullable
     private EditText currentClientIdEditText;
 
     // Restart is deferred until the user leaves this screen, so a single restart covers
@@ -99,7 +99,6 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
                 });
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -172,7 +171,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     }
 
     private void setupClientIdPreference() {
-        clientIdPref = findPreference(SharedPreferencesUtils.CLIENT_ID_PREF_KEY);
+        CustomFontEditTextPreference clientIdPref = findPreference(SharedPreferencesUtils.CLIENT_ID_PREF_KEY);
         if (clientIdPref != null) {
             android.graphics.Typeface robotoMonoMedium = ResourcesCompat.getFont(requireContext(), R.font.roboto_mono_medium);
             if (robotoMonoMedium != null) {
@@ -496,7 +495,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     }
 
     // Strips all whitespace from the string (leading, trailing, and internal).
-    private static String stripWhitespace(String value) {
+    @Nullable
+    private static String stripWhitespace(@Nullable String value) {
         if (value == null) {
             return null;
         }
@@ -511,7 +511,8 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     }
 
     // Strips only leading and trailing whitespace; preserves internal spaces (e.g. in user agents).
-    private static String stripLeadingTrailingWhitespace(String value) {
+    @Nullable
+    private static String stripLeadingTrailingWhitespace(@Nullable String value) {
         if (value == null) {
             return null;
         }
@@ -537,7 +538,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
      * @param disallowedValue if non-null, the OK button stays disabled while the (whitespace-stripped)
      *                        entered value equals this value. Used to prevent saving the default Client ID.
      */
-    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck, final String disallowedValue) {
+    private void setupLengthValidation(android.widget.EditText editText, final int requiredLength, final boolean stripWhitespaceBeforeCheck, @Nullable final String disallowedValue) {
         // Add TextWatcher to enable/disable OK button based on length
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -557,7 +558,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     }
 
     private void updatePositiveButtonState(android.widget.EditText editText, final int requiredLength,
-                                           final boolean stripWhitespaceBeforeCheck, final String disallowedValue,
+                                           final boolean stripWhitespaceBeforeCheck, @Nullable final String disallowedValue,
                                            final String caller) {
         View rootView = editText.getRootView();
         if (rootView == null) {
@@ -570,6 +571,9 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
             return;
         }
         String effectiveValue = stripWhitespaceBeforeCheck ? stripWhitespace(editText.getText().toString()) : editText.getText().toString();
+        if (effectiveValue == null) {
+            effectiveValue = "";
+        }
         boolean lengthOk = effectiveValue.length() == requiredLength || (requiredLength == GIPHY_API_KEY_LENGTH && effectiveValue.isEmpty()); // Allow empty for Giphy
         boolean isDisallowed = disallowedValue != null && disallowedValue.equals(effectiveValue);
         boolean isEnabled = lengthOk && !isDisallowed;

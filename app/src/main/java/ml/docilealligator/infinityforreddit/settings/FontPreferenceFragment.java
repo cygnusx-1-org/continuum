@@ -41,12 +41,15 @@ public class FontPreferenceFragment extends CustomFontPreferenceFragmentCompat {
     SharedPreferences sharedPreferences;
     @Inject
     Executor executor;
+    @Nullable
     private Preference customFontFamilyPreference;
+    @Nullable
     private Preference customTitleFontFamilyPreference;
+    @Nullable
     private Preference customContentFontFamilyPreference;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.font_preferences, rootKey);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
@@ -62,7 +65,7 @@ public class FontPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         ListPreference contentFontSizePreference = findPreference(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY);
 
         if (customFontFamilyPreference != null) {
-            if (sharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()).equals(FontFamily.Custom.name())) {
+            if (FontFamily.Custom.name().equals(sharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))) {
                 customFontFamilyPreference.setVisible(true);
             }
 
@@ -84,7 +87,7 @@ public class FontPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         }
 
         if (customTitleFontFamilyPreference != null) {
-            if (sharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()).equals(TitleFontFamily.Custom.name())) {
+            if (TitleFontFamily.Custom.name().equals(sharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))) {
                 customTitleFontFamilyPreference.setVisible(true);
             }
 
@@ -105,7 +108,7 @@ public class FontPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         }
 
         if (customContentFontFamilyPreference != null) {
-            if (sharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()).equals(ContentFontFamily.Custom.name())) {
+            if (ContentFontFamily.Custom.name().equals(sharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))) {
                 customContentFontFamilyPreference.setVisible(true);
             }
 
