@@ -182,9 +182,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private NavigationWrapper navigationWrapper;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private String subredditName;
+    @Nullable
     private String description;
     private boolean mFetchSubredditInfoSuccess = false;
     private boolean isNsfwSubreddit = false;
@@ -193,7 +196,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private boolean hideFab;
     private boolean showBottomAppBar;
     private boolean lockBottomAppBar;
+    @Nullable
     private String mMessageFullname;
+    @Nullable
     private String mNewAccountName;
     private RequestManager glide;
     private int expandedTabTextColor;
@@ -206,7 +211,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private int subscribedColor;
     private int fabOption;
     private int topSystemBarHeight;
+    @Nullable
     private MaterialAlertDialogBuilder nsfwWarningBuilder;
+    @Nullable
     private Bitmap subredditIconBitmap;
     private ActivityViewSubredditDetailBinding binding;
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
@@ -395,7 +402,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         lockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
         boolean hideSubredditDescription = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_DESCRIPTION, false);
 
-        subredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY);
+        subredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY));
 
         fragmentManager = getSupportFragmentManager();
 
@@ -569,7 +576,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 MultiReddit multiReddit = data.getParcelableExtra(SelectThingReturnKey.RETRUN_EXTRA_MULTIREDDIT);
                 if (multiReddit != null) {
                     AddSubredditOrUserToMultiReddit.addSubredditOrUserToMultiReddit(mOauthRetrofit,
-                            accessToken, multiReddit.getPath(), subredditName,
+                            Objects.requireNonNull(accessToken), multiReddit.getPath(), subredditName,
                             new AddSubredditOrUserToMultiReddit.AddSubredditOrUserToMultiRedditListener() {
                                 @Override
                                 public void success() {
@@ -859,7 +866,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @ExperimentalBadgeUtils
     private void bindView() {
         if (mMessageFullname != null) {
-            ReadMessage.readMessage(mOauthRetrofit, accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
+            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
                 public void readSuccess() {
                     mMessageFullname = null;
@@ -1141,7 +1148,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                                 });
                     } else {
                         SubredditSubscription.unsubscribeToSubreddit(mExecutor, new Handler(), mOauthRetrofit,
-                                accessToken, subredditName, accountName, mRedditDataRoomDatabase,
+                                Objects.requireNonNull(accessToken), subredditName, accountName, mRedditDataRoomDatabase,
                                 new SubredditSubscription.SubredditSubscriptionListener() {
                                     @Override
                                     public void onSubredditSubscriptionSuccess() {
@@ -1592,7 +1599,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -1666,7 +1673,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -1687,7 +1694,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -1700,7 +1707,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {

@@ -127,14 +127,19 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private MultiReddit multiReddit;
+    @SuppressWarnings("NullAway.Init")
     private String multiPath;
+    @SuppressWarnings("NullAway.Init")
     private Fragment mFragment;
     private int fabOption;
     private boolean hideFab;
     private boolean showBottomAppBar;
     private boolean lockBottomAppBar;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private NavigationWrapper navigationWrapper;
     private ActivityViewMultiRedditDetailBinding binding;
@@ -262,14 +267,14 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
         multiReddit = getIntent().getParcelableExtra(EXTRA_MULTIREDDIT_DATA);
         if (multiReddit == null) {
-            multiPath = getIntent().getStringExtra(EXTRA_MULTIREDDIT_PATH);
-            if (multiPath != null) {
-                binding.toolbarViewMultiRedditDetailActivity.setTitle(multiPath.substring(multiPath.lastIndexOf("/", multiPath.length() - 2) + 1));
-            } else {
+            String multiRedditPath = getIntent().getStringExtra(EXTRA_MULTIREDDIT_PATH);
+            if (multiRedditPath == null) {
                 Toast.makeText(this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
+            multiPath = multiRedditPath;
+            binding.toolbarViewMultiRedditDetailActivity.setTitle(multiRedditPath.substring(multiRedditPath.lastIndexOf("/", multiRedditPath.length() - 2) + 1));
         } else {
             multiPath = multiReddit.getPath();
             binding.toolbarViewMultiRedditDetailActivity.setTitle(multiReddit.getDisplayName());
@@ -282,8 +287,13 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         lockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
 
         if (savedInstanceState != null) {
-            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE_KEY);
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
+            Fragment restoredFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE_KEY);
+            if (restoredFragment != null) {
+                mFragment = restoredFragment;
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
+            } else {
+                initializeFragment();
+            }
         } else {
             initializeFragment();
         }
@@ -687,7 +697,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -761,7 +771,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -782,7 +792,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -795,7 +805,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -891,7 +901,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                         FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
                     }
                 } else {
-                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
+                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, Objects.requireNonNull(accessToken), multiPath, listener);
                 }
             }
             return true;
@@ -955,7 +965,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                     FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
                 } else {
-                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
+                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, Objects.requireNonNull(accessToken), multiPath, listener);
                 }
             }
             return true;

@@ -172,9 +172,12 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private SectionsPagerAdapter sectionsPagerAdapter;
     private RequestManager glide;
     private NavigationWrapper navigationWrapper;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private String username;
+    @Nullable
     private String description;
     private boolean subscriptionReady = false;
     private boolean mFetchUserInfoSuccess = false;
@@ -192,7 +195,9 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private boolean hideFab;
     private boolean showBottomAppBar;
     private boolean lockBottomAppBar;
+    @Nullable
     private String mMessageFullname;
+    @Nullable
     private String mNewAccountName;
     //private MaterialAlertDialogBuilder nsfwWarningBuilder;
     private ActivityViewUserDetailBinding binding;
@@ -225,7 +230,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
         mViewPager2 = binding.viewPagerViewUserDetailActivity;
 
-        username = getIntent().getStringExtra(EXTRA_USER_NAME_KEY);
+        username = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_USER_NAME_KEY));
 
         fragmentManager = getSupportFragmentManager();
 
@@ -642,7 +647,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 MultiReddit multiReddit = data.getParcelableExtra(SelectThingReturnKey.RETRUN_EXTRA_MULTIREDDIT);
                 if (multiReddit != null) {
                     AddSubredditOrUserToMultiReddit.addSubredditOrUserToMultiReddit(mOauthRetrofit,
-                            accessToken, multiReddit.getPath(), "u_" + username,
+                            Objects.requireNonNull(accessToken), multiReddit.getPath(), "u_" + username,
                             new AddSubredditOrUserToMultiReddit.AddSubredditOrUserToMultiRedditListener() {
                                 @Override
                                 public void success() {
@@ -789,7 +794,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         fixViewPager2Sensitivity(binding.viewPagerViewUserDetailActivity);
 
         if (mMessageFullname != null) {
-            ReadMessage.readMessage(mOauthRetrofit, accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
+            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
                 public void readSuccess() {
                     mMessageFullname = null;
@@ -1204,7 +1209,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 .setTitle(R.string.delete_this_comment)
                 .setMessage(R.string.are_you_sure)
                 .setPositiveButton(R.string.delete, (dialogInterface, i)
-                        -> DeleteThing.delete(mOauthRetrofit, fullName, accessToken, new DeleteThing.DeleteThingListener() {
+                        -> DeleteThing.delete(mOauthRetrofit, fullName, Objects.requireNonNull(accessToken), new DeleteThing.DeleteThingListener() {
                     @Override
                     public void deleteSuccess() {
                         Toast.makeText(ViewUserDetailActivity.this, R.string.delete_post_success, Toast.LENGTH_SHORT).show();
@@ -1316,7 +1321,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     .setTitle(R.string.block_user)
                     .setMessage(R.string.are_you_sure)
                     .setPositiveButton(R.string.yes, (dialogInterface, i)
-                            -> BlockUser.blockUser(mOauthRetrofit, accessToken, username, new BlockUser.BlockUserListener() {
+                            -> BlockUser.blockUser(mOauthRetrofit, Objects.requireNonNull(accessToken), username, new BlockUser.BlockUserListener() {
                         @Override
                         public void success() {
                             Toast.makeText(ViewUserDetailActivity.this, R.string.block_user_success, Toast.LENGTH_SHORT).show();
@@ -1346,11 +1351,11 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     if (sectionsPagerAdapter != null) {
                         if (data.hasExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)) {
                             sectionsPagerAdapter.editComment(
-                                    (Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT),
+                                    Objects.requireNonNull((Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)),
                                     data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                         } else {
                             sectionsPagerAdapter.editComment(
-                                    data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT),
+                                    Objects.requireNonNull(data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT)),
                                     data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                         }
                     }
@@ -1477,7 +1482,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -1551,7 +1556,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -1572,7 +1577,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -1585,7 +1590,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
