@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -61,7 +62,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
     private ActivityAccountPostsBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -120,7 +121,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
         }
 
         setSupportActionBar(binding.accountPostsToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.accountPostsToolbar);
 
         postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();

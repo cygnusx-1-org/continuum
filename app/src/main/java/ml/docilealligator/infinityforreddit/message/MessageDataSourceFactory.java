@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.paging.DataSource;
 import java.util.Locale;
@@ -16,6 +17,7 @@ class MessageDataSourceFactory extends DataSource.Factory {
     private final String accessToken;
     private String where;
 
+    @Nullable
     private MessageDataSource messageDataSource;
     private final MutableLiveData<MessageDataSource> messageDataSourceLiveData;
 
@@ -32,15 +34,17 @@ class MessageDataSourceFactory extends DataSource.Factory {
     @NonNull
     @Override
     public DataSource create() {
-        messageDataSource = new MessageDataSource(executor, handler, oauthRetrofit, locale, accessToken, where);
-        messageDataSourceLiveData.postValue(messageDataSource);
-        return messageDataSource;
+        MessageDataSource dataSource = new MessageDataSource(executor, handler, oauthRetrofit, locale, accessToken, where);
+        messageDataSource = dataSource;
+        messageDataSourceLiveData.postValue(dataSource);
+        return dataSource;
     }
 
     public MutableLiveData<MessageDataSource> getMessageDataSourceLiveData() {
         return messageDataSourceLiveData;
     }
 
+    @Nullable
     MessageDataSource getMessageDataSource() {
         return messageDataSource;
     }

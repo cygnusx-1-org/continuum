@@ -51,8 +51,10 @@ public class EditMultiReddit {
             ArrayList<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits = new ArrayList<>();
             ArrayList<ExpandedSubredditInMultiReddit> subreddits = multiReddit.getSubreddits();
             redditDataRoomDatabase.multiRedditDao().insert(multiReddit);
-            for (ExpandedSubredditInMultiReddit s : subreddits) {
-                anonymousMultiredditSubreddits.add(new AnonymousMultiredditSubreddit(multiReddit.getPath(), s.getName(), s.getIconUrl()));
+            if (subreddits != null) {
+                for (ExpandedSubredditInMultiReddit s : subreddits) {
+                    anonymousMultiredditSubreddits.add(new AnonymousMultiredditSubreddit(multiReddit.getPath(), s.getName(), s.getIconUrl()));
+                }
             }
             redditDataRoomDatabase.anonymousMultiredditSubredditDao().insertAll(anonymousMultiredditSubreddits);
             handler.post(editMultiRedditListener::success);

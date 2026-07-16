@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -26,6 +27,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.regex.PatternSyntaxException;
 import javax.inject.Inject;
@@ -69,7 +71,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
     private ActivityCustomizeCommentFilterBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -117,7 +119,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarCustomizeCommentFilterActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarCustomizeCommentFilterActivity);
 
         ActivityResultLauncher<Intent> requestAddUsersLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {

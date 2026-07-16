@@ -17,6 +17,7 @@ public class SpoilerAwareMovementMethod extends EvenBetterLinkMovementMethod {
     private final RectF touchedLineBounds = new RectF();
 
     @Override
+    @Nullable
     protected ClickableSpan findClickableSpanUnderTouch(TextView textView, Spannable text, MotionEvent event) {
         // A copy of super method. Logic for selecting correct clickable span was moved to selectClickableSpan
 
@@ -34,6 +35,9 @@ public class SpoilerAwareMovementMethod extends EvenBetterLinkMovementMethod {
         touchY += textView.getScrollY();
 
         final Layout layout = textView.getLayout();
+        if (layout == null) {
+            return null;
+        }
         final int touchedLine = layout.getLineForVertical(touchY);
         final int touchOffset = layout.getOffsetForHorizontal(touchedLine, touchX);
 

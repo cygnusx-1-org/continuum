@@ -38,7 +38,7 @@ public class AnyAccountAccessTokenAuthenticator implements Authenticator {
 
     @Nullable
     @Override
-    public Request authenticate(Route route, @NonNull Response response) {
+    public Request authenticate(@Nullable Route route, @NonNull Response response) {
         if (response.code() == 401) {
             String accessTokenHeader = response.request().header(APIUtils.AUTHORIZATION_KEY);
             if (accessTokenHeader == null) {
@@ -101,7 +101,7 @@ public class AnyAccountAccessTokenAuthenticator implements Authenticator {
                 Account currentAccount = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
 
                 if (currentAccount != null && mAccount.getAccountName().equals(currentAccount.getAccountName())
-                    && mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT).equals(account.getAccountName())) {
+                    && account.getAccountName().equals(mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT))) {
 
                     mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, newAccessToken).apply();
                 }

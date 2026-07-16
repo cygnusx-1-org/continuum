@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.markdown.redditheading;
 
+import androidx.annotation.Nullable;
 import org.commonmark.internal.util.Parsing;
 import org.commonmark.node.Block;
 import org.commonmark.node.Heading;
@@ -76,6 +77,7 @@ public class RedditHeadingParser extends AbstractBlockParser {
     // The optional closing sequence of #s must be preceded by a space and may be followed by spaces only.
     //
     // Unlike CommonMark, the opening sequence of # characters does not have to be followed by a space or by the end of line.
+    @Nullable
     private static RedditHeadingParser getAtxHeading(CharSequence line, int index) {
         int level = Parsing.skip('#', line, index, line.length()) - index;
 

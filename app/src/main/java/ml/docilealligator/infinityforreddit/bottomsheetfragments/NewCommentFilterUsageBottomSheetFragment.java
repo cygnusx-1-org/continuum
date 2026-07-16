@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterUsageListingActivity;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
@@ -20,8 +21,8 @@ public class NewCommentFilterUsageBottomSheetFragment extends LandscapeExpandedR
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         FragmentNewCommentFilterUsageBottomSheetBinding binding = FragmentNewCommentFilterUsageBottomSheetBinding.inflate(inflater, container, false);
 

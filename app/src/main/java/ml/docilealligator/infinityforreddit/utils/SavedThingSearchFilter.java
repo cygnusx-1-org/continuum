@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
+import androidx.annotation.Nullable;
 import java.util.Locale;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -20,7 +21,7 @@ public final class SavedThingSearchFilter {
     private SavedThingSearchFilter() {
     }
 
-    public static boolean matches(Post post, String query) {
+    public static boolean matches(Post post, @Nullable String query) {
         if (isBlank(query)) {
             return true;
         }
@@ -30,7 +31,7 @@ public final class SavedThingSearchFilter {
         return matchesTerms(buildPostText(post), post.getSubredditName(), splitTerms(query));
     }
 
-    public static boolean matches(Comment comment, String query) {
+    public static boolean matches(Comment comment, @Nullable String query) {
         if (isBlank(query)) {
             return true;
         }
@@ -40,15 +41,18 @@ public final class SavedThingSearchFilter {
         return matchesTerms(buildCommentText(comment), comment.getSubredditName(), splitTerms(query));
     }
 
-    private static boolean isBlank(String s) {
+    private static boolean isBlank(@Nullable String s) {
         return s == null || s.trim().isEmpty();
     }
 
-    private static String[] splitTerms(String query) {
+    private static String[] splitTerms(@Nullable String query) {
+        if (query == null) {
+            return new String[0];
+        }
         return query.trim().toLowerCase(Locale.getDefault()).split("\\s+");
     }
 
-    private static boolean matchesTerms(String searchableText, String subredditName, String[] terms) {
+    private static boolean matchesTerms(String searchableText, @Nullable String subredditName, String[] terms) {
         String text = searchableText == null ? "" : searchableText.toLowerCase(Locale.getDefault());
         String subreddit = subredditName == null ? "" : subredditName.toLowerCase(Locale.getDefault());
         for (String term : terms) {
@@ -89,7 +93,7 @@ public final class SavedThingSearchFilter {
         return builder.toString();
     }
 
-    private static void append(StringBuilder builder, String value) {
+    private static void append(StringBuilder builder, @Nullable String value) {
         if (value != null) {
             builder.append(value).append(' ');
         }

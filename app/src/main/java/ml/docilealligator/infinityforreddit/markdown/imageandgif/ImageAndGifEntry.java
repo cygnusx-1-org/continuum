@@ -28,6 +28,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.recycler.MarkwonAdapter;
+import java.util.Objects;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
@@ -72,7 +73,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         canShowGif = SharedPreferencesUtils.canShowGif(embeddedMediaType);
         autoplayCommentGif = sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_COMMENT_GIF, true);
 
-        String dataSavingModeString = sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingModeString = Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
             dataSavingMode = true;
         } else if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
@@ -258,7 +259,9 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         holder.binding.captionTextViewMarkdownImageAndGifBlock.setGravity(Gravity.CENTER_HORIZONTAL);
     }
 
+    @Nullable
     private String currentCommentId;
+    @Nullable
     private String currentPostId;
 
     public void setCurrentCommentId(String commentId) {
@@ -285,8 +288,11 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         public MarkdownImageAndGifBlockBinding binding;
         RequestListener<Drawable> requestListener;
         RequestListener<Bitmap> bitmapRequestListener;
+        @Nullable
         ImageAndGifBlock imageAndGifBlock;
+        @Nullable
         String commentId;
+        @Nullable
         String postId;
 
         public Holder(@NonNull MarkdownImageAndGifBlockBinding binding) {
@@ -382,6 +388,6 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     }
 
     public interface OnItemClickListener {
-        void onItemClick(MediaMetadata mediaMetadata, String commentId, String postId);
+        void onItemClick(MediaMetadata mediaMetadata, @Nullable String commentId, @Nullable String postId);
     }
 }

@@ -24,7 +24,9 @@ class MessageDataSource extends PageKeyedDataSource<String, Message> {
     private final MutableLiveData<NetworkState> initialLoadStateLiveData;
     private final MutableLiveData<Boolean> hasPostLiveData;
 
+    @Nullable
     private LoadParams<String> params;
+    @Nullable
     private LoadCallback<String, Message> callback;
 
     MessageDataSource(Executor executor, Handler handler, Retrofit oauthRetrofit, Locale locale, String accessToken, String where) {
@@ -57,7 +59,9 @@ class MessageDataSource extends PageKeyedDataSource<String, Message> {
     }
 
     void retryLoadingMore() {
-        loadAfter(params, callback);
+        if (params != null && callback != null) {
+            loadAfter(params, callback);
+        }
     }
 
     @Override

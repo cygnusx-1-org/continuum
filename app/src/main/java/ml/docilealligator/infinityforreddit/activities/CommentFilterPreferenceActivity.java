@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -51,7 +52,7 @@ public class CommentFilterPreferenceActivity extends BaseActivity {
     private CommentFilterWithUsageRecyclerViewAdapter adapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -99,7 +100,7 @@ public class CommentFilterPreferenceActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarCommentFilterPreferenceActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         Comment comment = getIntent().getParcelableExtra(EXTRA_COMMENT);
 

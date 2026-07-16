@@ -317,7 +317,7 @@ fun shareCommentAsScreenshot(
     binding.userTextViewSharedComment.setTypeface(baseActivity.typeface)
     binding.contentTextViewSharedComment.setTypeface(baseActivity.contentTypeface)
 
-    binding.qrCodeImageViewSharedComment.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, comment.permalink))
+    binding.qrCodeImageViewSharedComment.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, comment.permalink ?: ""))
 
     measureView(binding.getRoot())
     shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), screenshotFileName(comment))

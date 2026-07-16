@@ -24,6 +24,7 @@ import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -36,6 +37,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -496,6 +498,11 @@ public class DownloadMediaService extends JobService {
                 String concatMediaTypes = extras.getString(EXTRA_ALL_GALLERY_IMAGE_MEDIA_TYPES);
                 String concatFileNames = extras.getString(EXTRA_ALL_GALLERY_IMAGE_FILE_NAMES);
 
+                if (concatUrls == null || concatMediaTypes == null || concatFileNames == null) {
+                    jobFinished(params, false);
+                    return;
+                }
+
                 Log.d("ImgurDownload", "Processing album/gallery with media types: " + concatMediaTypes);
 
                 String[] urls = concatUrls.split(" ");
@@ -547,7 +554,7 @@ public class DownloadMediaService extends JobService {
                 jobFinished(params, false);
             } else {
                 String fileUrl = extras.getString(EXTRA_URL);
-                String fileName = extras.getString(EXTRA_FILE_NAME);
+                String fileName = Objects.requireNonNull(extras.getString(EXTRA_FILE_NAME));
                 String mimeType = mediaType == EXTRA_MEDIA_TYPE_VIDEO ? "video/*" : "image/*";
 
                 Log.d("ImgurDownload", "Processing single download: mediaType=" + mediaType +
@@ -598,9 +605,9 @@ public class DownloadMediaService extends JobService {
      * @param progressListener
      * @return true if download succeeded or false otherwise.
      */
-    private boolean downloadMedia(JobParameters params, String fileUrl, PersistableBundle intent,
+    private boolean downloadMedia(JobParameters params, @Nullable String fileUrl, PersistableBundle intent,
                             NotificationCompat.Builder builder, int mediaType, int randomNotificationIdOffset,
-                            String fileName, String mimeType, String subredditName, boolean isNsfw,
+                            String fileName, String mimeType, @Nullable String subredditName, boolean isNsfw,
                             boolean multipleDownloads, DownloadProgressResponseBody.ProgressListener progressListener) {
     Log.d("GalleryDownload", "DownloadMediaService.downloadMedia(): Starting download. " +
         "mediaType=" + mediaType +
@@ -753,7 +760,7 @@ public class DownloadMediaService extends JobService {
         }
 
         try {
-            Uri destinationFileUri = writeResponseBodyToDisk(response.body(), isDefaultDestination, destinationFileUriString, fileName, mediaType);
+            Uri destinationFileUri = writeResponseBodyToDisk(Objects.requireNonNull(response.body()), isDefaultDestination, destinationFileUriString, fileName, mediaType);
             Log.d("ImgurDownload", "File written successfully");
             downloadFinished(params, builder, mediaType, randomNotificationIdOffset,
                     mimeType, destinationFileUri, NO_ERROR, multipleDownloads);
@@ -768,14 +775,14 @@ public class DownloadMediaService extends JobService {
         }
     }
 
-    private Notification createNotification(NotificationCompat.Builder builder, String fileName) {
+    private Notification createNotification(NotificationCompat.Builder builder, @Nullable String fileName) {
         builder.setContentTitle(fileName).setContentText(getString(R.string.downloading)).setProgress(100, 0, false);
         return builder.setSmallIcon(R.drawable.ic_notification)
                 .setColor(mCustomThemeWrapper.getColorPrimaryLightTheme())
                 .build();
     }
 
-    private void updateNotification(NotificationCompat.Builder builder, int mediaType, int contentStringResId, int progress, int randomNotificationIdOffset, Uri mediaUri, String mimeType) {
+    private void updateNotification(NotificationCompat.Builder builder, int mediaType, int contentStringResId, int progress, int randomNotificationIdOffset, @Nullable Uri mediaUri, @Nullable String mimeType) {
         if (notificationManager != null) {
             if (progress < 0) {
                 builder.setProgress(0, 0, false);
@@ -852,13 +859,14 @@ public class DownloadMediaService extends JobService {
         }
     }
 
+    @Nullable
     private String getDownloadLocation(int mediaType, boolean isNsfw) {
         String defaultSharedPrefsFile = "ml.docilealligator.infinityforreddit_preferences";
         // Additional diagnostics
-        String nsfwLoc = mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
-        String imgLoc = mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-        String gifLoc = mSharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, "");
-        String vidLoc = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+        String nsfwLoc = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, ""));
+        String imgLoc = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
+        String gifLoc = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.GIF_DOWNLOAD_LOCATION, ""));
+        String vidLoc = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, ""));
 
         Log.d("GalleryDownload", "DownloadMediaService.getDownloadLocation(): Checking locations for mediaType=" + mediaType + ", isNsfw=" + isNsfw);
         Log.d("ImgurDownload", "DownloadMediaService getDownloadLocation - mediaType=" + mediaType +
@@ -870,8 +878,8 @@ public class DownloadMediaService extends JobService {
 
         // Try alternate SharedPreferences file if image location is empty
         if (imgLoc.isEmpty()) {
-            imgLoc = getApplicationContext().getSharedPreferences(defaultSharedPrefsFile, MODE_PRIVATE)
-                    .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
+            imgLoc = Objects.requireNonNull(getApplicationContext().getSharedPreferences(defaultSharedPrefsFile, MODE_PRIVATE)
+                    .getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
             Log.d("ImgurDownload", "Tried alternate SharedPreferences, IMAGE: " +
                 (imgLoc.isEmpty() ? "EMPTY" : "SET"));
         }
@@ -1064,7 +1072,7 @@ public class DownloadMediaService extends JobService {
      * unavailable. On Android Q+ this is a MediaStore {@code RELATIVE_PATH}; on older versions it is
      * an absolute file path (with parent directories created and name collisions resolved).
      */
-    private String getDefaultDownloadPath(int mediaType, String subredditName, String fileName) {
+    private String getDefaultDownloadPath(int mediaType, @Nullable String subredditName, String fileName) {
         String topDir = mediaType == EXTRA_MEDIA_TYPE_VIDEO
                 ? Environment.DIRECTORY_MOVIES : Environment.DIRECTORY_PICTURES;
         String subFolder = (subredditName != null && !subredditName.isEmpty()) ? subredditName : null;
@@ -1094,7 +1102,7 @@ public class DownloadMediaService extends JobService {
         return outFile.getAbsolutePath();
     }
 
-    private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, int mediaType, int randomNotificationIdOffset, String mimeType, Uri destinationFileUri, int errorCode, boolean multipleDownloads) {
+    private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, int mediaType, int randomNotificationIdOffset, @Nullable String mimeType, @Nullable Uri destinationFileUri, int errorCode, boolean multipleDownloads) {
         if (errorCode != NO_ERROR) {
             if (!multipleDownloads) {
                 switch (errorCode) {
@@ -1125,12 +1133,13 @@ public class DownloadMediaService extends JobService {
                 }
             }
         } else {
+            Uri finishedUri = Objects.requireNonNull(destinationFileUri);
             MediaScannerConnection.scanFile(
-                    DownloadMediaService.this, new String[]{destinationFileUri.toString()}, null,
+                    DownloadMediaService.this, new String[]{finishedUri.toString()}, null,
                     (path, uri) -> {
                         if (!multipleDownloads) {
                             updateNotification(builder, mediaType, R.string.downloading_media_finished, -1,
-                                    randomNotificationIdOffset, destinationFileUri, mimeType);
+                                    randomNotificationIdOffset, finishedUri, mimeType);
                         }
                     }
             );

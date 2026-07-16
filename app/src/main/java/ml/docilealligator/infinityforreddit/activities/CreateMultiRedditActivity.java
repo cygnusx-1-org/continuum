@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,7 +57,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
     private ArrayList<ExpandedSubredditInMultiReddit> mSubreddits;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -97,7 +98,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarCreateMultiRedditActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             binding.visibilityChipCreateMultiRedditActivity.setVisibility(View.GONE);

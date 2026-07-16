@@ -27,11 +27,12 @@ public final class EditProfileUtils {
      * @return the error String. Null indicates no error.
      */
     @WorkerThread
+    @Nullable
     public static String updateProfileSync(Retrofit oauthRetrofit,
                                            @Nullable String accessToken,
                                            @NonNull String accountName,
-                                           String displayName,
-                                           String publicDesc) {
+                                           @Nullable String displayName,
+                                           @Nullable String publicDesc) {
         final Map<String, String> oauthHeader = APIUtils.getOAuthHeader(accessToken);
         final RedditAPI api = oauthRetrofit.create(RedditAPI.class);
         final String name = "u_" + accountName;
@@ -143,6 +144,7 @@ public final class EditProfileUtils {
      * @return the error String. Null indicates no error.
      */
     @WorkerThread
+    @Nullable
     public static String uploadAvatarSync(Retrofit oauthRetrofit,
                                           @Nullable String accessToken,
                                           @NonNull String accountName,
@@ -171,6 +173,7 @@ public final class EditProfileUtils {
         @return the error String. Null indicates no error.
      */
     @WorkerThread
+    @Nullable
     public static String uploadBannerSync(Retrofit oauthRetrofit,
                                         @Nullable String accessToken,
                                         @NonNull String accountName,
@@ -258,6 +261,6 @@ public final class EditProfileUtils {
     public interface EditProfileUtilsListener {
         void success();
 
-        void failed(String message);
+        void failed(@Nullable String message);
     }
 }

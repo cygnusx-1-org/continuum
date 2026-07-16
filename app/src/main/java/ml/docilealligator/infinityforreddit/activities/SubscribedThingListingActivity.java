@@ -39,6 +39,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
@@ -135,7 +136,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     private ActivitySubscribedThingListingBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -201,7 +202,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         }
 
         setSupportActionBar(binding.toolbarSubscribedThingListingActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSubscribedThingListingActivity);
 
         if (getIntent().hasExtra(EXTRA_SPECIFIED_ACCOUNT)) {
@@ -238,9 +239,9 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
 
         if (isThingSelectionMode) {
             if (thingSelectionType == EXTRA_THING_SELECTION_TYPE_SUBREDDIT) {
-                getSupportActionBar().setTitle(R.string.subreddit_selection_activity_label);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.subreddit_selection_activity_label);
             } else if (thingSelectionType == EXTRA_THING_SELECTION_TYPE_MULTIREDDIT) {
-                getSupportActionBar().setTitle(R.string.multireddit_selection_activity_label);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.multireddit_selection_activity_label);
             }
         }
 

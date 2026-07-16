@@ -279,7 +279,7 @@ class CopyMultiRedditActivity : BaseActivity() {
                                     }
                                 }
 
-                                items((multiRedditState as DataLoadState.Success).data.subreddits) { subreddit ->
+                                items((multiRedditState as DataLoadState.Success).data.subreddits ?: emptyList()) { subreddit ->
                                     SubredditRow(subreddit)
                                 }
                             }

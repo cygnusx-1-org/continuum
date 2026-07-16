@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
@@ -42,8 +43,8 @@ public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSh
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentUrlMenuBottomSheetBinding binding = FragmentUrlMenuBottomSheetBinding.inflate(inflater, container, false);
 
         url = getArguments().getString(EXTRA_URL);

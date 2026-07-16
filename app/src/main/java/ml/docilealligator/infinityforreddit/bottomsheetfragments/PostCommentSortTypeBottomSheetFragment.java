@@ -43,8 +43,8 @@ public class PostCommentSortTypeBottomSheetFragment extends LandscapeExpandedRou
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         FragmentPostCommentSortTypeBottomSheetBinding binding = FragmentPostCommentSortTypeBottomSheetBinding.inflate(inflater, container, false);
 

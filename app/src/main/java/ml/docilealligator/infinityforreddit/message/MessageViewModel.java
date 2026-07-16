@@ -41,7 +41,7 @@ public class MessageViewModel extends ViewModel {
                         .build();
 
         messages = Transformations.switchMap(whereLiveData, newWhere -> {
-            messageDataSourceFactory.changeWhere(whereLiveData.getValue());
+            messageDataSourceFactory.changeWhere(newWhere);
             return (new LivePagedListBuilder(messageDataSourceFactory, pagedListConfig)).build();
         });
     }
@@ -63,11 +63,17 @@ public class MessageViewModel extends ViewModel {
     }
 
     public void refresh() {
-        messageDataSourceFactory.getMessageDataSource().invalidate();
+        MessageDataSource dataSource = messageDataSourceFactory.getMessageDataSource();
+        if (dataSource != null) {
+            dataSource.invalidate();
+        }
     }
 
     public void retryLoadingMore() {
-        messageDataSourceFactory.getMessageDataSource().retryLoadingMore();
+        MessageDataSource dataSource = messageDataSourceFactory.getMessageDataSource();
+        if (dataSource != null) {
+            dataSource.retryLoadingMore();
+        }
     }
 
     void changeWhere(String where) {

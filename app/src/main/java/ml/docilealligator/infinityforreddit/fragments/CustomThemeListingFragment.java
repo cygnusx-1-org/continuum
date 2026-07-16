@@ -75,8 +75,8 @@ public class CustomThemeListingFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 
         // Inflate the layout for this fragment

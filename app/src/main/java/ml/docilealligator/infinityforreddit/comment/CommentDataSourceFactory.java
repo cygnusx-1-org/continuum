@@ -15,16 +15,19 @@ class CommentDataSourceFactory extends DataSource.Factory {
     private final Executor executor;
     private final Handler handler;
     private final Retrofit retrofit;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final String username;
     private SortType sortType;
     private final boolean areSavedComments;
     private final boolean areLocalSavedComments;
+    @Nullable
     private String query;
     private final SavedSearchCache<Comment> savedSearchCache;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
 
+    @Nullable
     private CommentDataSource commentDataSource;
     private final MutableLiveData<CommentDataSource> commentDataSourceLiveData;
 
@@ -50,16 +53,18 @@ class CommentDataSourceFactory extends DataSource.Factory {
     @NonNull
     @Override
     public DataSource create() {
-        commentDataSource = new CommentDataSource(executor, handler, retrofit, accessToken, accountName, username,
+        CommentDataSource dataSource = new CommentDataSource(executor, handler, retrofit, accessToken, accountName, username,
                 sortType, areSavedComments, areLocalSavedComments, query, savedSearchCache, redditDataRoomDatabase);
-        commentDataSourceLiveData.postValue(commentDataSource);
-        return commentDataSource;
+        commentDataSource = dataSource;
+        commentDataSourceLiveData.postValue(dataSource);
+        return dataSource;
     }
 
     public MutableLiveData<CommentDataSource> getCommentDataSourceLiveData() {
         return commentDataSourceLiveData;
     }
 
+    @Nullable
     CommentDataSource getCommentDataSource() {
         return commentDataSource;
     }

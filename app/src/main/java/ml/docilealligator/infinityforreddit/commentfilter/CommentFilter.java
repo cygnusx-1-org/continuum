@@ -68,7 +68,7 @@ public class CommentFilter implements Parcelable {
         if (commentFilter.excludeStrings != null && !commentFilter.excludeStrings.equals("")) {
             String[] titles = commentFilter.excludeStrings.split(",", 0);
             for (String t : titles) {
-                if (!t.trim().equals("") && comment.getCommentRawText().toLowerCase().contains(t.toLowerCase().trim())) {
+                if (!t.trim().equals("") && comment.getCommentRawText() != null && comment.getCommentRawText().toLowerCase().contains(t.toLowerCase().trim())) {
                     return false;
                 }
             }
@@ -76,7 +76,7 @@ public class CommentFilter implements Parcelable {
         if (commentFilter.excludeUsers != null && !commentFilter.excludeUsers.equals("")) {
             String[] users = commentFilter.excludeUsers.split(",", 0);
             for (String u : users) {
-                if (!u.trim().equals("") && comment.getAuthor().equalsIgnoreCase(u.trim())) {
+                if (!u.trim().equals("") && u.trim().equalsIgnoreCase(comment.getAuthor())) {
                     return false;
                 }
             }

@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -105,7 +106,7 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         binding = new ViewRedditGalleryVideoFragmentBindingAdapter(ml.docilealligator.infinityforreddit.databinding.FragmentViewRedditGalleryVideoBinding.inflate(inflater, container, false));
 
         ((Infinity) activity.getApplication()).getAppComponent().inject(this);

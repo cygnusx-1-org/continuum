@@ -217,6 +217,9 @@ android {
 // check AND add the error_prone_core + nullaway deps to that variant's *AnnotationProcessor
 // config (they are on debugAnnotationProcessor here).
 tasks.withType(JavaCompile).configureEach { compileTask ->
+    if (compileTask.name == 'compileDebugJavaWithJavac') {
+        options.compilerArgs += ['-Xmaxerrs', '100000', '-Xmaxwarns', '100000']
+    }
     options.errorprone {
         enabled = compileTask.name == 'compileDebugJavaWithJavac'
         disableAllChecks = true
@@ -225,6 +228,20 @@ tasks.withType(JavaCompile).configureEach { compileTask ->
         option('NullAway:JSpecifyMode', 'true')
         option('NullAway:ExcludedFieldAnnotations', 'androidx.room.Embedded,androidx.room.Relation,com.google.gson.annotations.SerializedName')
         option('NullAway:TreatGeneratedAsUnannotated', 'true')
+        // Android UI classes initialize their @NonNull fields in lifecycle callbacks (onCreate/
+        // onCreateView/onViewCreated), not the constructor. Tell NullAway to treat those as
+        // initializer methods so such fields don't trip the "not initialized" check.
+        // NOTE: This is inert until the NullAway rollout is finished. The packages that hold the
+        // Activities and Fragments (activities, fragments, bottomsheetfragments, settings, adapters,
+        // customviews, videoautoplay, asynctasks, and the root infinityforreddit package) are not yet
+        // @NullMarked, so NullAway ignores them entirely and this option does nothing for now. It is
+        // wired up ahead of time so those packages check cleanly once they are re-marked.
+        option('NullAway:KnownInitializers',
+                'android.app.Activity.onCreate,' +
+                'androidx.fragment.app.Fragment.onCreateView,' +
+                'androidx.fragment.app.Fragment.onViewCreated,' +
+                'androidx.fragment.app.Fragment.onCreate,' +
+                'androidx.fragment.app.Fragment.onActivityCreated')
     }
 }
 

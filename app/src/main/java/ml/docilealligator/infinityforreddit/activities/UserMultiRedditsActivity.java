@@ -10,12 +10,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -63,7 +65,7 @@ public class UserMultiRedditsActivity extends BaseActivity {
     private Set<String> mOriginalSavedPaths;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -110,7 +112,7 @@ public class UserMultiRedditsActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarUserMultiRedditsActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarUserMultiRedditsActivity);
 
         username = getIntent().getStringExtra(EXTRA_USERNAME);
@@ -119,7 +121,7 @@ public class UserMultiRedditsActivity extends BaseActivity {
             finish();
             return;
         }
-        getSupportActionBar().setTitle(getString(R.string.user_multireddits_activity_label, username));
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.user_multireddits_activity_label, username));
 
         binding.recyclerViewUserMultiRedditsActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
 

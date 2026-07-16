@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
+import androidx.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
@@ -44,6 +45,6 @@ public class ComposeMessage {
 
     public interface ComposeMessageListener {
         void composeMessageSuccess();
-        void composeMessageFailed(String errorMessage);
+        void composeMessageFailed(@Nullable String errorMessage);
     }
 }

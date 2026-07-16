@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.account;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -50,7 +51,7 @@ public interface AccountDao {
 
     @Query("UPDATE accounts SET profile_image_url = :profileImageUrl, banner_image_url = :bannerImageUrl, " +
             "karma = :karma, is_mod = :isMod WHERE username = :username")
-    void updateAccountInfo(String username, String profileImageUrl, String bannerImageUrl, int karma, boolean isMod);
+    void updateAccountInfo(String username, String profileImageUrl, @Nullable String bannerImageUrl, int karma, boolean isMod);
 
     @Query("SELECT * FROM accounts WHERE is_current_user = 0 AND username != '-' ORDER BY username COLLATE NOCASE ASC")
     LiveData<List<Account>> getAccountsExceptCurrentAccountLiveData();

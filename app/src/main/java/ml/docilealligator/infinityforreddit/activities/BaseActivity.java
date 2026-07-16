@@ -54,6 +54,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import java.lang.reflect.Field;
 import java.util.Locale;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -83,13 +84,17 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     private boolean transparentStatusBarAfterToolbarCollapsed;
     private boolean hasDrawerLayout = false;
     private boolean isImmersiveInterfaceApplicable = true;
+    @SuppressWarnings("NullAway.Init")
     private View navBarScrim;
     private int systemVisibilityToolbarExpanded = 0;
     private int systemVisibilityToolbarCollapsed = 0;
     private boolean shouldTrackFullscreenMediaPeekTouchEvent;
     public CustomThemeWrapper customThemeWrapper;
+    @SuppressWarnings("NullAway.Init")
     public Typeface typeface;
+    @SuppressWarnings("NullAway.Init")
     public Typeface titleTypeface;
+    @SuppressWarnings("NullAway.Init")
     public Typeface contentTypeface;
     @Nullable
     public SliderPanel mSliderPanel;
@@ -108,7 +113,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
 
         SharedPreferences mSharedPreferences = getDefaultSharedPreferences();
 
-        String language = mSharedPreferences.getString(SharedPreferencesUtils.LANGUAGE, SharedPreferencesUtils.LANGUAGE_DEFAULT_VALUE);
+        String language = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.LANGUAGE, SharedPreferencesUtils.LANGUAGE_DEFAULT_VALUE));
         Locale systemLocale = Resources.getSystem().getConfiguration().locale;
         Locale locale;
         if (language.equals(SharedPreferencesUtils.LANGUAGE_DEFAULT_VALUE)) {
@@ -178,23 +183,23 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
             changeStatusBarIconColor = false;
         }
 
-        getTheme().applyStyle(FontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(FontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         Window window = getWindow();
         View decorView = window.getDecorView();
@@ -270,7 +275,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         applyPreferredRefreshRate(window, mSharedPreferences);
 
         accessToken = getCurrentAccountSharedPreferences().getString(SharedPreferencesUtils.ACCESS_TOKEN, null);
-        accountName = getCurrentAccountSharedPreferences().getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT);
+        accountName = Objects.requireNonNull(getCurrentAccountSharedPreferences().getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT));
 
         mHandler = new Handler(Looper.getMainLooper());
     }

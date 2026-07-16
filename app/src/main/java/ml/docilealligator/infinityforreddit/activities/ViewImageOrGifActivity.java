@@ -43,6 +43,7 @@ import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.ImageLoader;
 import com.github.piasy.biv.loader.glide.GlideImageLoader;
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -107,7 +108,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -184,7 +185,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             binding.titleTextViewViewImageOrGifActivity.setText(title);
         }
 
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
         binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
         binding.downloadImageViewViewImageOrGifActivity.setOnClickListener(view -> {
             if (isDownloading) {

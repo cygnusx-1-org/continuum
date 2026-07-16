@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.account;
 import android.os.Handler;
 import android.text.Html;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -53,7 +54,7 @@ public class FetchMyInfo {
     }
 
     public interface FetchMyInfoListener {
-        void onFetchMyInfoSuccess(String name, String profileImageUrl, String bannerImageUrl, int karma, boolean isMod);
+        void onFetchMyInfoSuccess(String name, String profileImageUrl, @Nullable String bannerImageUrl, int karma, boolean isMod);
 
         void onFetchMyInfoFailed(boolean parseFailed);
     }

@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -26,6 +27,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -87,7 +89,7 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
     private List<SubscribedSubredditData> subscribedSubreddits;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -136,8 +138,8 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
         }
 
         setSupportActionBar(binding.toolbarCustomizeTabsOrderActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(R.string.settings_edit_tabs_title);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.settings_edit_tabs_title);
         setToolbarGoToTop(binding.toolbarCustomizeTabsOrderActivity);
 
         tabs = MainPageTabsUtils.load(mMainActivityTabsSharedPreferences, accountName);

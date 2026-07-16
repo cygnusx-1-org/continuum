@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import ml.docilealligator.infinityforreddit.R;
@@ -41,8 +42,8 @@ public class SearchPostSortTypeBottomSheetFragment extends LandscapeExpandedRoun
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentSearchPostSortTypeBottomSheetBinding binding = FragmentSearchPostSortTypeBottomSheetBinding.inflate(inflater, container, false);
 
         String currentSortType = getArguments().getString(EXTRA_CURRENT_SORT_TYPE);

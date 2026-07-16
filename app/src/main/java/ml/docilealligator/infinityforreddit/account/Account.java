@@ -3,12 +3,14 @@ package ml.docilealligator.infinityforreddit.account;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import java.util.Objects;
 
 @Entity(tableName = "accounts")
 public class Account implements Parcelable {
@@ -18,16 +20,21 @@ public class Account implements Parcelable {
     @ColumnInfo(name = "username")
     private final String accountName;
     @ColumnInfo(name = "profile_image_url")
+    @Nullable
     private final String profileImageUrl;
     @ColumnInfo(name = "banner_image_url")
+    @Nullable
     private final String bannerImageUrl;
     @ColumnInfo(name = "karma")
     private final int karma;
     @ColumnInfo(name = "access_token")
+    @Nullable
     private String accessToken;
     @ColumnInfo(name = "refresh_token")
+    @Nullable
     private final String refreshToken;
     @ColumnInfo(name = "code")
+    @Nullable
     private final String code;
     @ColumnInfo(name = "is_current_user")
     private final boolean isCurrentUser;
@@ -36,7 +43,7 @@ public class Account implements Parcelable {
 
     @Ignore
     protected Account(Parcel in) {
-        accountName = in.readString();
+        accountName = Objects.requireNonNull(in.readString());
         profileImageUrl = in.readString();
         bannerImageUrl = in.readString();
         karma = in.readInt();
@@ -64,8 +71,8 @@ public class Account implements Parcelable {
         return new Account(Account.ANONYMOUS_ACCOUNT, null, null, null, null, null, 0, false, false);
     }
 
-    public Account(@NonNull String accountName, String accessToken, String refreshToken, String code,
-                   String profileImageUrl, String bannerImageUrl, int karma, boolean isCurrentUser, boolean isMod) {
+    public Account(@NonNull String accountName, @Nullable String accessToken, @Nullable String refreshToken, @Nullable String code,
+                   @Nullable String profileImageUrl, @Nullable String bannerImageUrl, int karma, boolean isCurrentUser, boolean isMod) {
         this.accountName = accountName;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
@@ -82,10 +89,12 @@ public class Account implements Parcelable {
         return accountName;
     }
 
+    @Nullable
     public String getProfileImageUrl() {
         return profileImageUrl;
     }
 
+    @Nullable
     public String getBannerImageUrl() {
         return bannerImageUrl;
     }
@@ -94,18 +103,21 @@ public class Account implements Parcelable {
         return karma;
     }
 
+    @Nullable
     public String getAccessToken() {
         return accessToken;
     }
 
-    public void setAccessToken(String accessToken) {
+    public void setAccessToken(@Nullable String accessToken) {
         this.accessToken = accessToken;
     }
 
+    @Nullable
     public String getRefreshToken() {
         return refreshToken;
     }
 
+    @Nullable
     public String getCode() {
         return code;
     }
@@ -140,7 +152,7 @@ public class Account implements Parcelable {
         return new Gson().toJson(this);
     }
 
-    public static Account fromJson(String json) throws JsonParseException {
+    public static Account fromJson(@Nullable String json) throws JsonParseException {
         return new Gson().fromJson(json, Account.class);
     }
 }

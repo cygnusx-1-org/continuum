@@ -37,6 +37,7 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -113,9 +114,13 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Account selectedAccount;
+    @Nullable
     private ArrayList<RedditGallerySubmissionRecyclerViewAdapter.RedditGalleryImageInfo> redditGalleryImageInfoList;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
@@ -128,22 +133,26 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
+    @Nullable
     private Menu mMemu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private RedditGallerySubmissionRecyclerViewAdapter adapter;
+    @Nullable
     private Uri imageUri;
     private boolean isUploading;
     private ActivityPostGalleryBinding binding;
     private FlairRequirementController flairController;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -190,7 +199,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         }
 
         setSupportActionBar(binding.toolbarPostGalleryActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mGlide = Glide.with(this);
 
@@ -209,7 +218,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         binding.imagesRecyclerViewPostGalleryActivity.setAdapter(adapter);
         Resources resources = getResources();
         int nColumns = resources.getBoolean(R.bool.isTablet) || resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
-        ((GridLayoutManager) binding.imagesRecyclerViewPostGalleryActivity.getLayoutManager()).setSpanCount(nColumns);
+        ((GridLayoutManager) Objects.requireNonNull(binding.imagesRecyclerViewPostGalleryActivity.getLayoutManager())).setSpanCount(nColumns);
         binding.imagesRecyclerViewPostGalleryActivity.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {

@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import com.bumptech.glide.Glide;
 import java.io.FileNotFoundException;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -104,8 +105,8 @@ public class EditProfileService extends JobService {
         int randomNotificationIdOffset = new Random().nextInt(10000);
 
         PersistableBundle bundle = params.getExtras();
-        String accessToken = bundle.getString(EXTRA_ACCESS_TOKEN);
-        String accountName = bundle.getString(EXTRA_ACCOUNT_NAME);
+        String accessToken = Objects.requireNonNull(bundle.getString(EXTRA_ACCESS_TOKEN));
+        String accountName = Objects.requireNonNull(bundle.getString(EXTRA_ACCOUNT_NAME));
         final int postType = bundle.getInt(EXTRA_POST_TYPE, EXTRA_POST_TYPE_UNKNOWN);
         switch (postType) {
             case EXTRA_POST_TYPE_CHANGE_BANNER:
@@ -227,8 +228,8 @@ public class EditProfileService extends JobService {
     @WorkerThread
     private void submitSaveEditProfileSync(JobParameters parameters, @Nullable String accessToken,
                                            @NonNull String accountName,
-                                           String displayName,
-                                           String publicDesc
+                                           @Nullable String displayName,
+                                           @Nullable String publicDesc
     ) {
         String potentialError = EditProfileUtils.updateProfileSync(mOauthRetrofit, accessToken, accountName,
                 displayName, publicDesc);

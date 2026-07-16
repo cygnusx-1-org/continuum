@@ -20,13 +20,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 @Entity(tableName = "custom_themes")
 public class CustomTheme implements Parcelable {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "name")
-    public String name;
+    public String name = "";
     @ColumnInfo(name = "is_light_theme")
     public boolean isLightTheme;
     @ColumnInfo(name = "is_dark_theme")
@@ -225,7 +226,7 @@ public class CustomTheme implements Parcelable {
     }
 
     protected CustomTheme(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         isLightTheme = in.readByte() != 0;
         isDarkTheme = in.readByte() != 0;
         isAmoledTheme = in.readByte() != 0;

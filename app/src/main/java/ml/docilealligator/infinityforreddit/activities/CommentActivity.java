@@ -151,7 +151,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
     private ImageAndGifEntry imageAndGifEntry;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();

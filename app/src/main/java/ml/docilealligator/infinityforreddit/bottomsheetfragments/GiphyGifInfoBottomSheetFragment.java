@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
@@ -20,8 +21,8 @@ public class GiphyGifInfoBottomSheetFragment extends LandscapeExpandedRoundedBot
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentGiphyGifInfoBottomSheetBinding binding = FragmentGiphyGifInfoBottomSheetBinding.inflate(inflater, container, false);
 
         binding.selectGiphyGifButtonUploadedImagesBottomSheetFragment.setOnClickListener(view -> {

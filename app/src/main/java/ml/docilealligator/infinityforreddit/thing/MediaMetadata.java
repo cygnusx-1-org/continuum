@@ -81,7 +81,7 @@ public class MediaMetadata implements Parcelable {
             this.url = url;
         }
 
-        public MediaItem(int x, int y, String url, String mp4Url) {
+        public MediaItem(int x, int y, String url, @Nullable String mp4Url) {
             this.x = x;
             this.y = y;
             this.url = url;

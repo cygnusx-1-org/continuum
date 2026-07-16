@@ -998,8 +998,9 @@ class ViewPostDetailFragmentViewModelNew(
                             val comment = ParseComment.parseSingleComment(childData, 0)
                             val parentFullName = comment.getParentId()
 
-                            val parentComment =
-                                ParseComment.findCommentByFullName(newComments, parentFullName)
+                            val parentComment = parentFullName?.let {
+                                ParseComment.findCommentByFullName(newComments, it)
+                            }
                             if (parentComment != null) {
                                 parentComment.setHasReply(true)
                                 parentComment.addChild(comment, parentComment.getChildCount())

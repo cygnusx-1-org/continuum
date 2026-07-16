@@ -81,7 +81,7 @@ public class ParseMessage {
 
     @WorkerThread
     @Nullable
-    public static String parseRepliedMessageErrorMessage(String response) {
+    public static String parseRepliedMessageErrorMessage(@Nullable String response) {
         try {
             JSONObject responseObject = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY);
 

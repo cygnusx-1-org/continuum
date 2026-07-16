@@ -59,7 +59,9 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     private final MutableLiveData<NetworkState> initialLoadStateLiveData;
     private final MutableLiveData<Boolean> hasPostLiveData;
 
+    @Nullable
     private LoadParams<String> params;
+    @Nullable
     private LoadCallback<String, Comment> callback;
 
     CommentDataSource(Executor executor, Handler handler, Retrofit retrofit, @Nullable String accessToken,
@@ -101,7 +103,9 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     }
 
     void retryLoadingMore() {
-        loadAfter(params, callback);
+        if (params != null && callback != null) {
+            loadAfter(params, callback);
+        }
     }
 
     @Override
@@ -307,7 +311,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
      * first pages hold no match. Without a query it loads exactly one page, as before.
      */
     @WorkerThread
-    private LocalSavedResult fetchLocalSavedComments(String beforeKey) throws Exception {
+    private LocalSavedResult fetchLocalSavedComments(@Nullable String beforeKey) throws Exception {
         if (isSearchActive()) {
             // A refined query reuses the listing already hydrated for this search session.
             List<Comment> cached = savedSearchCache != null ? savedSearchCache.snapshot() : null;
@@ -392,7 +396,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
      * covers.
      */
     @WorkerThread
-    private LocalSavedResult fetchFilteredSavedComments(String startAfter) throws Exception {
+    private LocalSavedResult fetchFilteredSavedComments(@Nullable String startAfter) throws Exception {
         // A refined query reuses the listing already walked for this search session.
         if (savedSearchCache != null && startAfter == null) {
             List<Comment> cached = savedSearchCache.snapshot();
@@ -430,7 +434,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
         return filterComments(all, cursor);
     }
 
-    private LocalSavedResult filterComments(List<Comment> unfiltered, String nextKey) {
+    private LocalSavedResult filterComments(List<Comment> unfiltered, @Nullable String nextKey) {
         ArrayList<Comment> matches = new ArrayList<>();
         for (Comment comment : unfiltered) {
             if (SavedThingSearchFilter.matches(comment, searchQuery)) {
@@ -440,7 +444,8 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
         return new LocalSavedResult(matches, nextKey);
     }
 
-    private static String normalizeAfter(String after) {
+    @Nullable
+    private static String normalizeAfter(@Nullable String after) {
         if (after == null || after.isEmpty() || after.equals("null")) {
             return null;
         }
@@ -449,9 +454,10 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
 
     private static class LocalSavedResult {
         final ArrayList<Comment> comments;
+        @Nullable
         final String nextKey;
 
-        LocalSavedResult(ArrayList<Comment> comments, String nextKey) {
+        LocalSavedResult(ArrayList<Comment> comments, @Nullable String nextKey) {
             this.comments = comments;
             this.nextKey = nextKey;
         }
@@ -485,7 +491,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     }
 
     @WorkerThread
-    private static void parseComments(String response, ParseCommentsAsyncTaskListener parseCommentsAsyncTaskListener) {
+    private static void parseComments(@Nullable String response, ParseCommentsAsyncTaskListener parseCommentsAsyncTaskListener) {
         try {
             JSONObject data = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
             JSONArray commentsJSONArray = data.getJSONArray(JSONUtils.CHILDREN_KEY);

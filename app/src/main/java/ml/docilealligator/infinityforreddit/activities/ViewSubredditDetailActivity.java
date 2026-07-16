@@ -60,6 +60,7 @@ import io.noties.markwon.core.MarkwonTheme;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -211,7 +212,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -530,7 +531,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
                 String subredditFullName = "r/" + subredditData.getName();
                 if (!title.equals(subredditFullName)) {
-                    getSupportActionBar().setTitle(subredditFullName);
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(subredditFullName);
                 }
                 binding.subredditNameTextViewViewSubredditDetailActivity.setText(subredditFullName);
                 String nSubscribers = getString(R.string.subscribers_number_detail, subredditData.getNSubscribers());

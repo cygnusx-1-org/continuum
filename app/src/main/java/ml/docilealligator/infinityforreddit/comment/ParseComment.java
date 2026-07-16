@@ -21,7 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ParseComment {
-    public static void parseComment(Executor executor, Handler handler, String response,
+    public static void parseComment(Executor executor, Handler handler, @Nullable String response,
                                     boolean expandChildren, CommentFilter commentFilter,
                                     ParseCommentListener parseCommentListener) {
         executor.execute(() -> {
@@ -57,7 +57,7 @@ public class ParseComment {
         });
     }
 
-    static void parseMoreComment(Executor executor, Handler handler, String response, boolean expandChildren, ParseCommentListener parseCommentListener) {
+    static void parseMoreComment(Executor executor, Handler handler, @Nullable String response, boolean expandChildren, ParseCommentListener parseCommentListener) {
         executor.execute(() -> {
             if (response == null) {
                 handler.post(parseCommentListener::onParseCommentFailed);
@@ -117,7 +117,7 @@ public class ParseComment {
                             Comment comment = parseSingleComment(childData, 0);
                             String parentFullName = comment.getParentId();
 
-                            Comment parentComment = findCommentByFullName(newComments, parentFullName);
+                            Comment parentComment = parentFullName != null ? findCommentByFullName(newComments, parentFullName) : null;
                             if (parentComment != null) {
                                 parentComment.setHasReply(true);
                                 parentComment.addChild(comment, parentComment.getChildCount());
@@ -151,7 +151,7 @@ public class ParseComment {
         });
     }
 
-    static void parseSentComment(Executor executor, Handler handler, String response, int depth, ParseSentCommentListener parseSentCommentListener) {
+    static void parseSentComment(Executor executor, Handler handler, @Nullable String response, int depth, ParseSentCommentListener parseSentCommentListener) {
         executor.execute(() -> {
             try {
                 JSONObject sentCommentData = new JSONObject(response);
@@ -256,7 +256,7 @@ public class ParseComment {
                     c.setExpanded(true);
                 }
             }
-            if (c.hasMoreChildrenIds() && !c.getMoreChildrenIds().isEmpty()) {
+            if (c.getMoreChildrenIds() != null && !c.getMoreChildrenIds().isEmpty()) {
                 //Add a load more placeholder
                 Comment placeholder = new Comment(c.getFullName(), c.getDepth() + 1, Comment.PLACEHOLDER_LOAD_MORE_COMMENTS);
                 if (!c.isFilteredOut()) {
@@ -348,7 +348,7 @@ public class ParseComment {
     }
 
     @Nullable
-    private static String parseSentCommentErrorMessage(String response) {
+    private static String parseSentCommentErrorMessage(@Nullable String response) {
         try {
             JSONObject responseObject = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY);
 
@@ -403,7 +403,7 @@ public class ParseComment {
     }
 
     public interface ParseCommentListener {
-        void onParseCommentSuccess(ArrayList<Comment> topLevelComments, ArrayList<Comment> expandedComments, String parentId, ArrayList<String> moreChildrenIds);
+        void onParseCommentSuccess(ArrayList<Comment> topLevelComments, ArrayList<Comment> expandedComments, @Nullable String parentId, ArrayList<String> moreChildrenIds);
 
         void onParseCommentFailed();
     }

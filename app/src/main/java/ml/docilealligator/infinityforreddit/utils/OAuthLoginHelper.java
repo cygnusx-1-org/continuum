@@ -9,6 +9,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.IOException;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,16 +61,20 @@ public final class OAuthLoginHelper {
      * {@link #failureType} is populated; check {@link #isSuccess()}.
      */
     public static final class TokenResult {
+        @Nullable
         public final String accessToken;
+        @Nullable
         public final String refreshToken;
+        @Nullable
         public final FailureType failureType;
         /** HTTP status for the HTTP_* failures, otherwise -1. */
         public final int httpCode;
         /** The raw Reddit {@code error} value for {@link FailureType#REDDIT_ERROR}, otherwise null. */
+        @Nullable
         public final String redditError;
 
-        private TokenResult(String accessToken, String refreshToken, FailureType failureType,
-                            int httpCode, String redditError) {
+        private TokenResult(@Nullable String accessToken, @Nullable String refreshToken, @Nullable FailureType failureType,
+                            int httpCode, @Nullable String redditError) {
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
             this.failureType = failureType;
@@ -173,7 +178,7 @@ public final class OAuthLoginHelper {
      */
     @NonNull
     public static String describeFailure(@NonNull Context context, @NonNull TokenResult result) {
-        switch (result.failureType) {
+        switch (Objects.requireNonNull(result.failureType)) {
             case UNAUTHORIZED:
                 return context.getString(R.string.oauth_error_invalid_credentials, result.httpCode);
             case RATE_LIMITED:
@@ -216,11 +221,13 @@ public final class OAuthLoginHelper {
     public static final class RedirectResult {
         public final RedirectAction action;
         /** The auth code for {@link RedirectAction#EXCHANGE_CODE}, otherwise null. */
+        @Nullable
         public final String authCode;
         /** The raw error value for {@link RedirectAction#OAUTH_ERROR}, otherwise null. */
+        @Nullable
         public final String errorValue;
 
-        private RedirectResult(RedirectAction action, String authCode, String errorValue) {
+        private RedirectResult(RedirectAction action, @Nullable String authCode, @Nullable String errorValue) {
             this.action = action;
             this.authCode = authCode;
             this.errorValue = errorValue;

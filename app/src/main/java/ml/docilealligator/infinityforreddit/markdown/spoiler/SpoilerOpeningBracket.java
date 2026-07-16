@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.markdown.spoiler;
 
+import androidx.annotation.Nullable;
 import org.commonmark.internal.Delimiter;
 import org.commonmark.node.Node;
 
@@ -12,6 +13,7 @@ public class SpoilerOpeningBracket {
     /**
      * Previous bracket.
      */
+    @Nullable
     public final SpoilerOpeningBracket previous;
 
     /**
@@ -19,7 +21,7 @@ public class SpoilerOpeningBracket {
      */
     public final Delimiter previousDelimiter;
 
-    public SpoilerOpeningBracket(Node node, SpoilerOpeningBracket previous, Delimiter previousDelimiter) {
+    public SpoilerOpeningBracket(Node node, @Nullable SpoilerOpeningBracket previous, Delimiter previousDelimiter) {
         this.node = node;
         this.previous = previous;
         this.previousDelimiter = previousDelimiter;

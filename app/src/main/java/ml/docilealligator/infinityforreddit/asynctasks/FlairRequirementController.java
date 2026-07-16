@@ -23,10 +23,12 @@ public class FlairRequirementController {
     private final int sendItemId;
     private final StateChangeListener listener;
 
+    @androidx.annotation.Nullable
     private Menu menu;
     private boolean isFlairRequired = false;
     private boolean hasFlair = false;
     private boolean isPosting = false;
+    @androidx.annotation.Nullable
     private String currentSubreddit;
 
     public FlairRequirementController(Retrofit oauthRetrofit, int sendItemId, StateChangeListener listener) {

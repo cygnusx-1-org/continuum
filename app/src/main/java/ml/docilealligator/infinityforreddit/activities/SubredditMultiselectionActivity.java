@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -63,7 +64,7 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
     private ActivitySubscribedSubredditsMultiselectionBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
         super.onCreate(savedInstanceState);
 
@@ -113,7 +114,7 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
         }
 
         setSupportActionBar(binding.toolbarSubscribedSubredditsMultiselectionActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mGlide = Glide.with(this);
 

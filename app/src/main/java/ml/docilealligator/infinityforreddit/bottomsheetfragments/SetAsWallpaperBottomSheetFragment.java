@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.SetAsWallpaperCallback;
 import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity;
@@ -27,8 +28,8 @@ public class SetAsWallpaperBottomSheetFragment extends LandscapeExpandedRoundedB
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentSetAsWallpaperBottomSheetBinding binding = FragmentSetAsWallpaperBottomSheetBinding.inflate(inflater, container, false);
 
         Bundle bundle = getArguments();

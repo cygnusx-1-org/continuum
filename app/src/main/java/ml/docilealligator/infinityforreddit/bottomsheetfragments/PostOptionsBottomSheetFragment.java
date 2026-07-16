@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
@@ -118,7 +119,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mPost = getArguments().getParcelable(EXTRA_POST);
@@ -128,7 +129,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         ((Infinity) mBaseActivity.getApplication()).getAppComponent().inject(this);
         // Inflate the layout for this fragment
         FragmentPostOptionsBottomSheetBinding binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);

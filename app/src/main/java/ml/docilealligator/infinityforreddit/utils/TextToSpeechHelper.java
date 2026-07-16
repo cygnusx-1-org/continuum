@@ -3,14 +3,17 @@ package ml.docilealligator.infinityforreddit.utils;
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import java.util.Locale;
 import ml.docilealligator.infinityforreddit.R;
 
 public class TextToSpeechHelper {
 
     private final Context context;
+    @Nullable
     private TextToSpeech tts;
     private boolean initialized;
+    @Nullable
     private String pendingText;
 
     public TextToSpeechHelper(Context context) {
@@ -51,7 +54,9 @@ public class TextToSpeechHelper {
             pendingText = text;
             return;
         }
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "readAloud");
+        if (tts != null) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "readAloud");
+        }
     }
 
     public void stop() {

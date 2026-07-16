@@ -28,6 +28,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayoutMediator;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -93,7 +94,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
     private Runnable searchDebounceRunnable;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -145,7 +146,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
         }
 
         setSupportActionBar(binding.accountSavedThingToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.accountSavedThingToolbar);
 
         postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();

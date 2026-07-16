@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -235,15 +236,15 @@ public class DownloadRedditVideoService extends JobService {
 
                             try {
                                 if (separateDownloadFolder) {
-                                    dir = DocumentFile.fromTreeUri(DownloadRedditVideoService.this, Uri.parse(destinationFileDirectory));
-                                    if (dir == null) {
+                                    DocumentFile treeDir = DocumentFile.fromTreeUri(DownloadRedditVideoService.this, Uri.parse(destinationFileDirectory));
+                                    if (treeDir == null || subredditName == null) {
                                         downloadFinished(params, builder, null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, randomNotificationIdOffset);
 
                                         return;
                                     }
-                                    dir = dir.findFile(subredditName);
+                                    dir = treeDir.findFile(subredditName);
                                     if (dir == null) {
-                                        dir = DocumentFile.fromTreeUri(DownloadRedditVideoService.this, Uri.parse(destinationFileDirectory)).createDirectory(subredditName);
+                                        dir = treeDir.createDirectory(subredditName);
                                         if (dir == null) {
                                             downloadFinished(params, builder, null, ERROR_CANNOT_GET_DESTINATION_DIRECTORY, randomNotificationIdOffset);
 
@@ -331,7 +332,7 @@ public class DownloadRedditVideoService extends JobService {
                                         new File(audioFilePath).delete();
                                         shareCachedVideo(params, builder, randomNotificationIdOffset, outputFilePath, destinationFileName);
                                     } else {
-                                        Uri destinationFileUri = copyToDestination(outputFilePath, destinationFileUriString, destinationFileName, isDefaultDestination);
+                                        Uri destinationFileUri = copyToDestination(outputFilePath, Objects.requireNonNull(destinationFileUriString), destinationFileName, isDefaultDestination);
 
                                         new File(videoFilePath).delete();
                                         new File(audioFilePath).delete();
@@ -359,7 +360,7 @@ public class DownloadRedditVideoService extends JobService {
                                         new File(videoFilePath).delete();
                                         shareCachedVideo(params, builder, randomNotificationIdOffset, outputFilePath, destinationFileName);
                                     } else {
-                                        Uri destinationFileUri = copyToDestination(outputFilePath, destinationFileUriString, destinationFileName, isDefaultDestination);
+                                        Uri destinationFileUri = copyToDestination(outputFilePath, Objects.requireNonNull(destinationFileUriString), destinationFileName, isDefaultDestination);
 
                                         new File(videoFilePath).delete();
                                         new File(outputFilePath).delete();
@@ -379,7 +380,7 @@ public class DownloadRedditVideoService extends JobService {
                                 if (isShare) {
                                     shareCachedVideo(params, builder, randomNotificationIdOffset, videoFilePath, destinationFileName);
                                 } else {
-                                    Uri destinationFileUri = copyToDestination(videoFilePath, destinationFileUriString, destinationFileName, isDefaultDestination);
+                                    Uri destinationFileUri = copyToDestination(videoFilePath, Objects.requireNonNull(destinationFileUriString), destinationFileName, isDefaultDestination);
                                     new File(videoFilePath).delete();
                                     downloadFinished(params, builder, destinationFileUri, NO_ERROR, randomNotificationIdOffset);
                                 }
@@ -469,6 +470,7 @@ public class DownloadRedditVideoService extends JobService {
         return getAudioResponse(downloadFileRetrofit, audioUrlPrefix, audioSuffixIndex + 1);
     }
 
+    @Nullable
     private String writeResponseBodyToDisk(ResponseBody body, String filePath) {
         try {
             File file = new File(filePath);
@@ -516,7 +518,7 @@ public class DownloadRedditVideoService extends JobService {
         }
     }
 
-    private boolean muxVideoAndAudio(String videoFilePath, String audioFilePath, String outputFilePath) {
+    private boolean muxVideoAndAudio(String videoFilePath, @Nullable String audioFilePath, String outputFilePath) {
         try {
             File file = new File(outputFilePath);
             file.createNewFile();
@@ -681,7 +683,7 @@ public class DownloadRedditVideoService extends JobService {
         return Uri.parse(destinationFileUriString);
     }
 
-    private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, Uri destinationFileUri, int errorCode, int randomNotificationIdOffset) {
+    private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, @Nullable Uri destinationFileUri, int errorCode, int randomNotificationIdOffset) {
         if (errorCode != NO_ERROR) {
             switch (errorCode) {
                 case ERROR_CANNOT_GET_CACHE_DIRECTORY:
@@ -714,10 +716,11 @@ public class DownloadRedditVideoService extends JobService {
                     break;
             }
         } else {
+            Uri finishedUri = Objects.requireNonNull(destinationFileUri);
             MediaScannerConnection.scanFile(
-                    this, new String[]{destinationFileUri.toString()}, null,
+                    this, new String[]{finishedUri.toString()}, null,
                     (path, uri) -> {
-                        updateNotification(builder, R.string.downloading_reddit_video_finished, -1, randomNotificationIdOffset, destinationFileUri);
+                        updateNotification(builder, R.string.downloading_reddit_video_finished, -1, randomNotificationIdOffset, finishedUri);
                     }
             );
         }
@@ -729,7 +732,7 @@ public class DownloadRedditVideoService extends JobService {
         return builder.setSmallIcon(R.drawable.ic_notification).setColor(customThemeWrapper.getColorPrimaryLightTheme()).build();
     }
 
-    private void updateNotification(NotificationCompat.Builder builder, int contentStringResId, int progress, int randomNotificationIdOffset, Uri mediaUri) {
+    private void updateNotification(NotificationCompat.Builder builder, int contentStringResId, int progress, int randomNotificationIdOffset, @Nullable Uri mediaUri) {
         if (notificationManager != null) {
             if (progress < 0) {
                 builder.setProgress(0, 0, false);

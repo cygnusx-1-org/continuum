@@ -248,7 +248,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     @ExperimentalBadgeUtils
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         SplashScreen.installSplashScreen(this);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);

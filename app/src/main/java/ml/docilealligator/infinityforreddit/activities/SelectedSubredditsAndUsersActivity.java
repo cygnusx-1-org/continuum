@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,7 +55,7 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
     private ActivitySelectedSubredditsBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -103,13 +104,13 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
         }
 
         setSupportActionBar(binding.toolbarSelectedSubredditsAndUsersActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSelectedSubredditsAndUsersActivity);
 
         if (savedInstanceState != null) {
-            subreddits = savedInstanceState.getParcelableArrayList(SELECTED_SUBREDDITS_STATE);
+            subreddits = Objects.requireNonNull(savedInstanceState.getParcelableArrayList(SELECTED_SUBREDDITS_STATE));
         } else {
-            subreddits = getIntent().getParcelableArrayListExtra(EXTRA_SELECTED_SUBREDDITS);
+            subreddits = Objects.requireNonNull(getIntent().getParcelableArrayListExtra(EXTRA_SELECTED_SUBREDDITS));
         }
 
         Collections.sort(subreddits, Comparator.comparing(ExpandedSubredditInMultiReddit::getName));
@@ -178,7 +179,7 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
         if (resultCode == RESULT_OK) {
             if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE) {
                 if (data != null) {
-                    ArrayList<SubredditWithSelection> subredditWithSelections = data.getParcelableArrayListExtra(SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
+                    ArrayList<SubredditWithSelection> subredditWithSelections = Objects.requireNonNull(data.getParcelableArrayListExtra(SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS));
                     subreddits = new ArrayList<>(subredditWithSelections.stream().map(
                             (subredditWithSelection) -> new ExpandedSubredditInMultiReddit(subredditWithSelection.getName(), subredditWithSelection.getIconUrl())
                     ).collect(Collectors.toList()));

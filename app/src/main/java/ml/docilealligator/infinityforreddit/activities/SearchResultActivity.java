@@ -32,6 +32,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -141,7 +142,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     private ActivitySearchResultBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -211,7 +212,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         }
 
         setSupportActionBar(binding.toolbarSearchResultActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSearchResultActivity);
 
         // Get the intent, verify the action and get the query

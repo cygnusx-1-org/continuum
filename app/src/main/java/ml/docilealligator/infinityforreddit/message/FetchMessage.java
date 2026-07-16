@@ -30,7 +30,7 @@ public class FetchMessage {
     public static final int MESSAGE_TYPE_NOTIFICATION = 2;
 
     static void fetchInbox(Executor executor, Handler handler,  Retrofit oauthRetrofit, Locale locale, String accessToken, String where,
-                           String after, int messageType, FetchMessagesListener fetchMessagesListener) {
+                           @Nullable String after, int messageType, FetchMessagesListener fetchMessagesListener) {
         oauthRetrofit.create(RedditAPI.class).getMessages(APIUtils.getOAuthHeader(accessToken), where, after).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {

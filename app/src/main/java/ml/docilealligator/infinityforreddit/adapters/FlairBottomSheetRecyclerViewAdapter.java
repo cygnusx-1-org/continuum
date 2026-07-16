@@ -18,7 +18,7 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class FlairBottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<FlairBottomSheetRecyclerViewAdapter.FlairViewHolder> {
     private final BaseActivity activity;
-    private List<Flair> flairs;
+    private List<Flair> flairs = List.of();
     private final int flairTextColor;
     private final ItemClickListener itemClickListener;
 

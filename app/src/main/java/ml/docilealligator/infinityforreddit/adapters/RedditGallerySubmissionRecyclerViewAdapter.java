@@ -36,7 +36,7 @@ public class RedditGallerySubmissionRecyclerViewAdapter extends RecyclerView.Ada
     private static final int VIEW_TYPE_ADD_IMAGE = 2;
 
     private final PostGalleryActivity activity;
-    private ArrayList<RedditGalleryImageInfo> redditGalleryImageInfoList;
+    private ArrayList<RedditGalleryImageInfo> redditGalleryImageInfoList = new ArrayList<>();
     private final CustomThemeWrapper customThemeWrapper;
     private final ItemClickListener itemClickListener;
     private final RequestManager glide;
@@ -201,6 +201,7 @@ public class RedditGallerySubmissionRecyclerViewAdapter extends RecyclerView.Ada
 
     public static class RedditGalleryImageInfo implements Parcelable {
         public String imageUrlString;
+        @androidx.annotation.Nullable
         public RedditGalleryPayload.Item payload;
 
         public RedditGalleryImageInfo(String imageUrlString) {
@@ -208,7 +209,7 @@ public class RedditGallerySubmissionRecyclerViewAdapter extends RecyclerView.Ada
         }
 
         protected RedditGalleryImageInfo(Parcel in) {
-            imageUrlString = in.readString();
+            imageUrlString = java.util.Objects.requireNonNull(in.readString());
             payload = in.readParcelable(RedditGalleryPayload.Item.class.getClassLoader());
         }
 

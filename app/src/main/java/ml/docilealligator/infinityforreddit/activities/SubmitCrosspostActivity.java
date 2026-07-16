@@ -32,6 +32,7 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -131,7 +132,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     private FlairRequirementController flairController;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -174,7 +175,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         }
 
         setSupportActionBar(binding.toolbarSubmitCrosspostActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mGlide = Glide.with(this);
 

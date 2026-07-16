@@ -17,6 +17,7 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -101,7 +102,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     private ActivityFilteredThingBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -170,7 +171,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         }
 
         setSupportActionBar(binding.toolbarFilteredPostsActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarFilteredPostsActivity);
 
         name = getIntent().getStringExtra(EXTRA_NAME);
@@ -295,17 +296,17 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         switch (postType) {
             case PostType.FRONT_PAGE:
             case PostType.ANONYMOUS_FRONT_PAGE:
-                getSupportActionBar().setTitle(R.string.home);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.home);
                 break;
             case PostType.SEARCH:
-                getSupportActionBar().setTitle(R.string.search);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.search);
                 break;
             case PostType.SUBREDDIT:
                 if (name.equals("popular") || name.equals("all")) {
-                    getSupportActionBar().setTitle(name.substring(0, 1).toUpperCase() + name.substring(1));
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(name.substring(0, 1).toUpperCase() + name.substring(1));
                 } else {
                     String subredditNamePrefixed = "r/" + name;
-                    getSupportActionBar().setTitle(subredditNamePrefixed);
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(subredditNamePrefixed);
 
                     mSubredditViewModel = new ViewModelProvider(this,
                             new SubredditViewModel.Factory(mRedditDataRoomDatabase, name))
@@ -326,14 +327,14 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 } else {
                     multiRedditName = name.substring(name.lastIndexOf("/") + 1);
                 }
-                getSupportActionBar().setTitle(multiRedditName);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(multiRedditName);
                 break;
             case PostType.USER:
                 String usernamePrefixed = "u/" + name;
-                getSupportActionBar().setTitle(usernamePrefixed);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(usernamePrefixed);
                 break;
             case PostType.DUPLICATES:
-                getSupportActionBar().setTitle(R.string.other_discussions);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.other_discussions);
                 break;
         }
 

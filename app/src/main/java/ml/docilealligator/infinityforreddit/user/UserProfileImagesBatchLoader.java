@@ -116,7 +116,8 @@ public class UserProfileImagesBatchLoader {
                             }
                         }
 
-                        UserData userData = mRedditDataRoomDatabase.userDao().getUserData(c.getAuthor());
+                        String author = c.getAuthor();
+                        UserData userData = author != null ? mRedditDataRoomDatabase.userDao().getUserData(author) : null;
                         if (userData != null) {
                             String iconImageUrl = userData.getIconUrl();
                             synchronized (mImageMapLock) {

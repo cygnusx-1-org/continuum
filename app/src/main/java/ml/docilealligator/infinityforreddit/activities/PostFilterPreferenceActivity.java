@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,7 +57,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
     private ActivityPostFilterPreferenceBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -111,7 +112,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarPostFilterPreferenceActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         Post post = getIntent().getParcelableExtra(EXTRA_POST);
         String subredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);

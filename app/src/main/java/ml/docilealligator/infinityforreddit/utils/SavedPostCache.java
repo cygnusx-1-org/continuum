@@ -54,7 +54,7 @@ public final class SavedPostCache {
         return c == null ? null : c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
-    private static String key(String username, String category) {
+    private static String key(String username, @Nullable String category) {
         return (username == null ? "" : username) + "|" + (category == null ? "" : category);
     }
 
@@ -82,7 +82,7 @@ public final class SavedPostCache {
     }
 
     /** True if a cache entry for this key exists and is still within the TTL. */
-    public static boolean isFresh(String username, String category) {
+    public static boolean isFresh(String username, @Nullable String category) {
         SharedPreferences prefs = prefs();
         if (prefs == null) {
             return false;
@@ -99,7 +99,7 @@ public final class SavedPostCache {
      */
     @WorkerThread
     @Nullable
-    public static Cached load(String username, String category, PostFilter postFilter,
+    public static Cached load(String username, @Nullable String category, PostFilter postFilter,
                               @Nullable ReadPostsListInterface readPostsList) {
         Context context = Infinity.getAppContext();
         SharedPreferences prefs = prefs();
@@ -140,7 +140,7 @@ public final class SavedPostCache {
      * {@code complete} records whether the entire saved list was captured (required before search /
      * instant-open trust the cache).
      */
-    public static void store(String username, String category, JSONArray children, boolean complete) {
+    public static void store(String username, @Nullable String category, JSONArray children, boolean complete) {
         if (children == null) {
             return;
         }

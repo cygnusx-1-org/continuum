@@ -29,6 +29,7 @@ import retrofit2.Retrofit;
 
 public class CommentViewModel extends ViewModel {
     private final Retrofit retrofit;
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private final CommentDataSourceFactory commentDataSourceFactory;
@@ -72,7 +73,7 @@ public class CommentViewModel extends ViewModel {
                         .build();
 
         comments = Transformations.switchMap(sortTypeLiveData, sort -> {
-            commentDataSourceFactory.changeSortType(sortTypeLiveData.getValue());
+            commentDataSourceFactory.changeSortType(sort);
             return (new LivePagedListBuilder(commentDataSourceFactory, pagedListConfig)).build();
         });
     }
@@ -96,7 +97,10 @@ public class CommentViewModel extends ViewModel {
     public void refresh() {
         // Drop any cached Saved-search listing so a refresh while a search is active refetches.
         savedSearchCache.invalidate();
-        commentDataSourceFactory.getCommentDataSource().invalidate();
+        CommentDataSource dataSource = commentDataSourceFactory.getCommentDataSource();
+        if (dataSource != null) {
+            dataSource.invalidate();
+        }
     }
 
     // Drops only the in-memory Saved search cache. Used after an in-app comment save/unsave so a
@@ -107,7 +111,10 @@ public class CommentViewModel extends ViewModel {
     }
 
     public void retryLoadingMore() {
-        commentDataSourceFactory.getCommentDataSource().retryLoadingMore();
+        CommentDataSource dataSource = commentDataSourceFactory.getCommentDataSource();
+        if (dataSource != null) {
+            dataSource.retryLoadingMore();
+        }
     }
 
     public void changeSortType(SortType sortType) {
@@ -275,7 +282,8 @@ public class CommentViewModel extends ViewModel {
         private final Executor executor;
         private final Handler handler;
         private final Retrofit retrofit;
-        private final String accessToken;
+        @Nullable
+    private final String accessToken;
         private final String accountName;
         private final String username;
         private final SortType sortType;

@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -31,6 +32,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
 import app.futured.hauler.DragDirection;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -78,7 +80,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
     ViewGalleryViewModel viewGalleryViewModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -144,7 +146,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
 
         EventBus.getDefault().register(this);
 
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
 

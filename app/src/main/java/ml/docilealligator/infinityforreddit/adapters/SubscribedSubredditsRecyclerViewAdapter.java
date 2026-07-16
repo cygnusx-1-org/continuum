@@ -417,7 +417,7 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
         notifyDataSetChanged();
     }
 
-    public void addUser(String username, String userIconUrl) {
+    public void addUser(String username, @androidx.annotation.Nullable String userIconUrl) {
         this.username = username;
         this.userIconUrl = userIconUrl;
     }

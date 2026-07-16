@@ -13,7 +13,7 @@ import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 
 public class CommentFilterUsageRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<CommentFilterUsage> commentFilterUsages;
+    private List<CommentFilterUsage> commentFilterUsages = List.of();
     private final BaseActivity activity;
     private final CustomThemeWrapper customThemeWrapper;
     private final CommentFilterUsageRecyclerViewAdapter.OnItemClickListener onItemClickListener;

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.UploadImageEnabledActivity;
 import ml.docilealligator.infinityforreddit.adapters.UploadedImagesRecyclerViewAdapter;
@@ -26,8 +27,8 @@ public class UploadedImagesBottomSheetFragment extends LandscapeExpandedRoundedB
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         FragmentUploadedImagesBottomSheetBinding binding = FragmentUploadedImagesBottomSheetBinding.inflate(inflater, container, false);
 

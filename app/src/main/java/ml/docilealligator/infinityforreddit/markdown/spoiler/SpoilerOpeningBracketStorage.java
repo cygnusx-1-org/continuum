@@ -7,6 +7,7 @@ import org.commonmark.node.Node;
 public class SpoilerOpeningBracketStorage {
     @Nullable
     private SpoilerOpeningBracket lastBracket;
+    @Nullable
     private Node currentBlock;
 
     public void clear() {

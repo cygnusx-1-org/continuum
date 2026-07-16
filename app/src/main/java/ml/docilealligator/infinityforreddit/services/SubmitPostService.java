@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -223,22 +224,22 @@ public class SubmitPostService extends JobService {
                     receivePostReplyNotifications, isRichTextJSON, kind);
             } else if (postType == EXTRA_POST_TYPE_CROSSPOST) {
                 submitCrosspost(params, manager, randomNotificationIdOffset, mExecutor, handler,
-                    newAuthenticatorOauthRetrofit, account, subredditName, title, bundle.getString(EXTRA_CONTENT),
+                    newAuthenticatorOauthRetrofit, account, subredditName, title, bundle.getString(EXTRA_CONTENT, ""),
                     flair, isSpoiler, isNSFW, receivePostReplyNotifications);
             } else if (postType == EXTRA_POST_TYPE_IMAGE) {
-                Uri mediaUri = Uri.parse(bundle.getString(EXTRA_MEDIA_URI));
+                Uri mediaUri = Uri.parse(Objects.requireNonNull(bundle.getString(EXTRA_MEDIA_URI)));
                 submitImagePost(params, manager, randomNotificationIdOffset, newAuthenticatorOauthRetrofit,
                         getContentResolver(), account, mediaUri, subredditName, title,
-                        bundle.getString(EXTRA_CONTENT), flair, isSpoiler, isNSFW, receivePostReplyNotifications);
+                        bundle.getString(EXTRA_CONTENT, ""), flair, isSpoiler, isNSFW, receivePostReplyNotifications);
             } else if (postType == EXTRA_POST_TYPE_VIDEO) {
-                Uri mediaUri = Uri.parse(bundle.getString(EXTRA_MEDIA_URI));
+                Uri mediaUri = Uri.parse(Objects.requireNonNull(bundle.getString(EXTRA_MEDIA_URI)));
                 submitVideoPost(params, manager, randomNotificationIdOffset, newAuthenticatorOauthRetrofit, account,
-                    mediaUri, subredditName, title, bundle.getString(EXTRA_CONTENT), flair, isSpoiler, isNSFW,
+                    mediaUri, subredditName, title, bundle.getString(EXTRA_CONTENT, ""), flair, isSpoiler, isNSFW,
                     receivePostReplyNotifications);
             } else if (postType == EXTRA_POST_TYPE_GALLERY) {
-                submitGalleryPost(params, manager, randomNotificationIdOffset, newAuthenticatorOauthRetrofit, account, bundle.getString(EXTRA_REDDIT_GALLERY_PAYLOAD));
+                submitGalleryPost(params, manager, randomNotificationIdOffset, newAuthenticatorOauthRetrofit, account, Objects.requireNonNull(bundle.getString(EXTRA_REDDIT_GALLERY_PAYLOAD)));
             } else {
-                submitPollPost(params, manager, randomNotificationIdOffset, newAuthenticatorOauthRetrofit, account, bundle.getString(EXTRA_POLL_PAYLOAD));
+                submitPollPost(params, manager, randomNotificationIdOffset, newAuthenticatorOauthRetrofit, account, Objects.requireNonNull(bundle.getString(EXTRA_POLL_PAYLOAD)));
             }
         });
 
@@ -268,16 +269,16 @@ public class SubmitPostService extends JobService {
     @WorkerThread
     private void submitTextOrLinkPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
         Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount,
-        String subredditName, String title, String content, @Nullable String url,
+        @Nullable String subredditName, @Nullable String title, String content, @Nullable String url,
         Flair flair, boolean isSpoiler, boolean isNSFW,
         boolean receivePostReplyNotifications, boolean isRichtextJSON,
-        String kind) {
+        @Nullable String kind) {
 
         SubmitPost.submitTextOrLinkPost(mExecutor, handler, newAuthenticatorOauthRetrofit, selectedAccount.getAccessToken(),
             subredditName, title, content, url, flair, isSpoiler,
             isNSFW, receivePostReplyNotifications, isRichtextJSON, kind, new SubmitPost.SubmitPostListener() {
                 @Override
-                public void submitSuccessful(Post post) {
+                public void submitSuccessful(@Nullable Post post) {
                     handler.post(() -> EventBus.getDefault().post(new SubmitTextOrLinkPostEvent(true, post, null)));
 
                     stopJob(parameters, manager, randomNotificationIdOffset);
@@ -295,15 +296,15 @@ public class SubmitPostService extends JobService {
     @WorkerThread
     private void submitCrosspost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
         Executor executor, Handler handler, Retrofit newAuthenticatorOauthRetrofit,
-        Account selectedAccount, String subredditName,
-        String title, String content, Flair flair, boolean isSpoiler, boolean isNSFW,
+        Account selectedAccount, @Nullable String subredditName,
+        @Nullable String title, String content, Flair flair, boolean isSpoiler, boolean isNSFW,
         boolean receivePostReplyNotifications) {
 
         SubmitPost.submitCrosspost(executor, handler, newAuthenticatorOauthRetrofit, selectedAccount.getAccessToken(), subredditName, title,
             content, flair, isSpoiler, isNSFW, receivePostReplyNotifications, APIUtils.KIND_CROSSPOST,
             new SubmitPost.SubmitPostListener() {
                 @Override
-                public void submitSuccessful(Post post) {
+                public void submitSuccessful(@Nullable Post post) {
                     handler.post(() -> EventBus.getDefault().post(new SubmitCrosspostEvent(true, post, null)));
 
                     stopJob(parameters, manager, randomNotificationIdOffset);
@@ -321,7 +322,7 @@ public class SubmitPostService extends JobService {
     @WorkerThread
     private void submitImagePost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
                                  Retrofit newAuthenticatorOauthRetrofit, ContentResolver contentResolver,
-                                 Account selectedAccount, Uri mediaUri, String subredditName, String title,
+                                 Account selectedAccount, Uri mediaUri, @Nullable String subredditName, @Nullable String title,
                                  String content, Flair flair, boolean isSpoiler, boolean isNSFW,
                                  boolean receivePostReplyNotifications) {
         SubmitPost.submitImagePost(mExecutor, handler, newAuthenticatorOauthRetrofit, mUploadMediaRetrofit,
@@ -329,7 +330,7 @@ public class SubmitPostService extends JobService {
                 flair, isSpoiler, isNSFW, receivePostReplyNotifications,
                 new SubmitPost.SubmitPostListener() {
                     @Override
-                    public void submitSuccessful(Post post) {
+                    public void submitSuccessful(@Nullable Post post) {
                         handler.post(() -> {
                             EventBus.getDefault().post(new SubmitImagePostEvent(true, null));
                             Toast.makeText(SubmitPostService.this, R.string.image_is_processing, Toast.LENGTH_SHORT).show();
@@ -350,11 +351,15 @@ public class SubmitPostService extends JobService {
     @WorkerThread
     private void submitVideoPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset,
         Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, Uri mediaUri,
-        String subredditName, String title, String content, Flair flair,
+        @Nullable String subredditName, @Nullable String title, String content, Flair flair,
         boolean isSpoiler, boolean isNSFW, boolean receivePostReplyNotifications) {
 
         try {
             InputStream in = getContentResolver().openInputStream(mediaUri);
+            if (in == null) {
+                handler.post(() -> EventBus.getDefault().post(new SubmitVideoOrGifPostEvent(false, true, null)));
+                return;
+            }
             String type = getContentResolver().getType(mediaUri);
             File cacheDir = Utils.getCacheDir(this);
             if (cacheDir == null) {
@@ -381,16 +386,17 @@ public class SubmitPostService extends JobService {
             Bitmap resource = Glide.with(this).asBitmap().load(mediaUri).submit().get();
 
             if (type != null) {
+                final String videoMimeType = type;
                 SubmitPost.submitVideoPost(mExecutor, handler, newAuthenticatorOauthRetrofit, mUploadMediaRetrofit,
                     mUploadVideoRetrofit, selectedAccount.getAccessToken(), subredditName, title, content,
-                    new File(cacheFilePath), type, resource, flair, isSpoiler, isNSFW, receivePostReplyNotifications,
+                    new File(cacheFilePath), videoMimeType, resource, flair, isSpoiler, isNSFW, receivePostReplyNotifications,
                     new SubmitPost.SubmitPostListener() {
                         @Override
-                        public void submitSuccessful(Post post) {
+                        public void submitSuccessful(@Nullable Post post) {
                             handler.post(() -> {
                                 EventBus.getDefault().post(new SubmitVideoOrGifPostEvent(true, false, null));
 
-                                if (type.contains("gif")) {
+                                if (videoMimeType.contains("gif")) {
                                     Toast.makeText(SubmitPostService.this, R.string.gif_is_processing, Toast.LENGTH_SHORT).show();
                                 } else {
                                     Toast.makeText(SubmitPostService.this, R.string.video_is_processing, Toast.LENGTH_SHORT).show();

@@ -40,8 +40,8 @@ public class CustomThemeOptionsBottomSheetFragment extends LandscapeExpandedRoun
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentCustomThemeOptionsBottomSheetBinding binding = FragmentCustomThemeOptionsBottomSheetBinding.inflate(inflater, container, false);
 
         themeName = getArguments().getString(EXTRA_THEME_NAME);

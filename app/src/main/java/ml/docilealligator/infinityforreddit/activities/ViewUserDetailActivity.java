@@ -54,6 +54,7 @@ import io.noties.markwon.core.MarkwonTheme;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -198,7 +199,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
         setTransparentStatusBarAfterToolbarCollapsed();
 
@@ -593,7 +594,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 String userFullName = "u/" + userData.getName();
                 binding.userNameTextViewViewUserDetailActivity.setText(userFullName);
                 if (!title.equals(userFullName)) {
-                    getSupportActionBar().setTitle(userFullName);
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(userFullName);
                 }
                 String karma = getString(R.string.karma_info_user_detail, userData.getTotalKarma(), userData.getLinkKarma(), userData.getCommentKarma());
                 binding.karmaTextViewViewUserDetailActivity.setText(karma);

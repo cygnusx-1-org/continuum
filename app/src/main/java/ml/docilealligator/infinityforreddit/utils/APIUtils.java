@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -155,7 +156,7 @@ public class APIUtils {
         if (!areOverridesEnabled(sharedPreferences)) {
             return defaultClientId;
         }
-        return sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, defaultClientId);
+        return Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, defaultClientId));
     }
 
     // Method to retrieve User Agent from SharedPreferences
@@ -225,7 +226,7 @@ public class APIUtils {
         return params;
     }
 
-    public static Map<String, String> getOAuthHeader(String accessToken) {
+    public static Map<String, String> getOAuthHeader(@Nullable String accessToken) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.AUTHORIZATION_KEY, APIUtils.AUTHORIZATION_BASE + accessToken);
         params.put(APIUtils.USER_AGENT_KEY, APIUtils.USER_AGENT);
@@ -245,7 +246,7 @@ public class APIUtils {
         return params;
     }
 
-    public static Map<String, String> getRedgifsOAuthHeader(String redgifsAccessToken) {
+    public static Map<String, String> getRedgifsOAuthHeader(@Nullable String redgifsAccessToken) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.AUTHORIZATION_KEY, APIUtils.AUTHORIZATION_BASE + redgifsAccessToken);
 

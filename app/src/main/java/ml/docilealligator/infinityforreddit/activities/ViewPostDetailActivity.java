@@ -160,7 +160,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     private ReadPostsListInterface readPostsList;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);

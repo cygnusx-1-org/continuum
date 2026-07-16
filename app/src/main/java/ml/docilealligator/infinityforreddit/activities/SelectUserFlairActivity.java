@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,7 +57,7 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
     private ActivitySelectUserFlairBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -100,7 +101,7 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
         attachSliderPanelIfApplicable();
 
         setSupportActionBar(binding.toolbarSelectUserFlairActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSelectUserFlairActivity);
 
         mSubredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);

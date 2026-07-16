@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.EditMultiRedditActivity;
@@ -33,8 +34,8 @@ public class MultiRedditOptionsBottomSheetFragment extends LandscapeExpandedRoun
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentMultiRedditOptionsBottomSheetBinding binding = FragmentMultiRedditOptionsBottomSheetBinding.inflate(inflater, container, false);
 
         MultiReddit multiReddit = getArguments().getParcelable(EXTRA_MULTI_REDDIT);

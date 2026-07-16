@@ -18,6 +18,7 @@ import io.noties.markwon.recycler.MarkwonAdapter;
 import io.noties.markwon.recycler.SimpleEntry;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
@@ -31,10 +32,12 @@ public class CustomMarkwonAdapter extends MarkwonAdapter {
     private final Entry<Node, Holder> defaultEntry;
     private final MarkwonReducer reducer;
 
+    @Nullable
     private LayoutInflater layoutInflater;
 
+    @Nullable
     private Markwon markwon;
-    private List<Node> nodes;
+    private List<Node> nodes = Collections.emptyList();
 
     @Nullable
     private View.OnClickListener onClickListener;
@@ -123,7 +126,7 @@ public class CustomMarkwonAdapter extends MarkwonAdapter {
 
         final Entry<Node, Holder> entry = getEntry(viewType);
 
-        entry.bindHolder(markwon, holder, node);
+        entry.bindHolder(Objects.requireNonNull(markwon), holder, node);
 
         if (holder.itemView instanceof SpoilerOnClickTextView) {
             SpoilerOnClickTextView textView = (SpoilerOnClickTextView) holder.itemView;
@@ -255,6 +258,7 @@ public class CustomMarkwonAdapter extends MarkwonAdapter {
 
         private final Entry<Node, Holder> defaultEntry;
 
+        @Nullable
         private MarkwonReducer reducer;
 
         CustomBuilderImpl(@NonNull BaseActivity activity, @NonNull Entry<Node, Holder> defaultEntry) {
@@ -283,11 +287,12 @@ public class CustomMarkwonAdapter extends MarkwonAdapter {
         @Override
         public CustomMarkwonAdapter build() {
 
-            if (reducer == null) {
-                reducer = MarkwonReducer.directChildren();
+            MarkwonReducer effectiveReducer = reducer;
+            if (effectiveReducer == null) {
+                effectiveReducer = MarkwonReducer.directChildren();
             }
 
-            return new CustomMarkwonAdapter(activity, entries, defaultEntry, reducer);
+            return new CustomMarkwonAdapter(activity, entries, defaultEntry, effectiveReducer);
         }
     }
 }

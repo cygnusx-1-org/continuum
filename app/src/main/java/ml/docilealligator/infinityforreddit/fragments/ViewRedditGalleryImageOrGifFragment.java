@@ -104,7 +104,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         BigImageViewer.initialize(GlideImageLoader.with(activity.getApplicationContext()));
 
         binding = FragmentViewRedditGalleryImageOrGifBinding.inflate(inflater, container, false);

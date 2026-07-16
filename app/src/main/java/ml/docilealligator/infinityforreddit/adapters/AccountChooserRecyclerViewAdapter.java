@@ -17,7 +17,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerAccountBind
 public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final BaseActivity baseActivity;
-    private ArrayList<Account> accounts;
+    private ArrayList<Account> accounts = new ArrayList<>();
     private final RequestManager glide;
     private final int primaryTextColor;
     private final ItemClickListener itemClickListener;

@@ -28,6 +28,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
 import app.futured.hauler.DragDirection;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -94,7 +95,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     ViewGalleryViewModel viewGalleryViewModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -130,7 +131,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
         handler = new Handler(Looper.getMainLooper());
 
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
 

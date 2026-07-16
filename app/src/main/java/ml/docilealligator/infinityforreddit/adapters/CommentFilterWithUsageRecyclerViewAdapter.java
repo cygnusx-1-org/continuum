@@ -14,7 +14,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemCommentFilterWithUsa
 public class CommentFilterWithUsageRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final BaseActivity activity;
     private final OnItemClickListener onItemClickListener;
-    private List<CommentFilterWithUsage> commentFilterWithUsageList;
+    private List<CommentFilterWithUsage> commentFilterWithUsageList = List.of();
     private final RecyclerView.RecycledViewPool recycledViewPool;
 
     public interface OnItemClickListener {

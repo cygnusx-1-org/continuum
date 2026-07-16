@@ -20,6 +20,7 @@ public interface FragmentCommunicator {
     default void changePostFilter(PostFilter postFilter) {
     }
 
+    @androidx.annotation.Nullable
     default PostFilter getPostFilter() {
         return null;
     }

@@ -7,6 +7,7 @@ import org.commonmark.node.Node;
 public class SuperscriptOpeningStorage {
     @Nullable
     private SuperscriptOpeningBracket lastBracket;
+    @Nullable
     private Node currentBlock;
 
     public void clear() {

@@ -3,8 +3,10 @@ package ml.docilealligator.infinityforreddit.comment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -27,24 +29,38 @@ public class Comment implements Parcelable {
             return new Comment[size];
         }
     };
+    @Nullable
     private String id;
     private String fullName;
+    @Nullable
     private String author;
+    @Nullable
     private String authorFullName;
+    @Nullable
     private String authorFlair;
+    @Nullable
     private String authorFlairHTML;
+    @Nullable
     private String authorIconUrl;
+    @Nullable
     private String linkAuthor;
     private long commentTimeMillis;
+    @Nullable
     private String commentMarkdown;
+    @Nullable
     private String commentRawText;
+    @Nullable
     private String linkId;
+    @Nullable
     private String subredditName;
+    @Nullable
     private String parentId;
     private int score;
     private int voteType;
     private boolean isSubmitter;
+    @Nullable
     private String distinguished;
+    @Nullable
     private String permalink;
     private int depth;
     private int childCount;
@@ -57,29 +73,32 @@ public class Comment implements Parcelable {
     private boolean canModComment;
     private boolean approved;
     private long approvedAtUTC;
+    @Nullable
     private String approvedBy;
     private boolean removed;
     private boolean spam;
     private boolean isExpanded;
     private boolean hasExpandedBefore;
     private boolean isFilteredOut;
-    private ArrayList<Comment> children;
+    private ArrayList<Comment> children = new ArrayList<>();
+    @Nullable
     private ArrayList<String> moreChildrenIds;
     private int placeholderType;
     private boolean isLoadingMoreChildren;
     private boolean loadMoreChildrenFailed;
     private long editedTimeMillis;
+    @Nullable
     private Map<String, MediaMetadata> mediaMetadataMap;
 
     public Comment(String id, String fullName, String author, String authorFullName, String authorFlair,
-                   String authorFlairHTML, String linkAuthor,
+                   String authorFlairHTML, @Nullable String linkAuthor,
                    long commentTimeMillis, String commentMarkdown, String commentRawText,
                    String linkId, String subredditName, String parentId, int score,
                    int voteType, boolean isSubmitter, String distinguished, String permalink,
                    int depth, boolean collapsed, boolean hasReply,
                    boolean scoreHidden, boolean saved, boolean sendReplies, boolean locked, boolean canModComment,
-                   boolean approved, long approvedAtUTC, String approvedBy, boolean removed, boolean spam,
-                   long edited, Map<String, MediaMetadata> mediaMetadataMap) {
+                   boolean approved, long approvedAtUTC, @Nullable String approvedBy, boolean removed, boolean spam,
+                   long edited, @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         this.id = id;
         this.fullName = fullName;
         this.author = author;
@@ -180,7 +199,7 @@ public class Comment implements Parcelable {
 
     protected Comment(Parcel in) {
         id = in.readString();
-        fullName = in.readString();
+        fullName = Objects.requireNonNull(in.readString());
         author = in.readString();
         authorFullName = in.readString();
         authorFlair = in.readString();
@@ -226,6 +245,7 @@ public class Comment implements Parcelable {
         mediaMetadataMap = (Map<String, MediaMetadata>) in.readValue(getClass().getClassLoader());
     }
 
+    @Nullable
     public String getId() {
         return id;
     }
@@ -234,6 +254,7 @@ public class Comment implements Parcelable {
         return fullName;
     }
 
+    @Nullable
     public String getAuthor() {
         return author;
     }
@@ -246,26 +267,31 @@ public class Comment implements Parcelable {
         this.author = author;
     }
 
+    @Nullable
     public String getAuthorFullName() {
         return authorFullName;
     }
 
+    @Nullable
     public String getAuthorFlair() {
         return authorFlair;
     }
 
+    @Nullable
     public String getAuthorFlairHTML() {
         return authorFlairHTML;
     }
 
+    @Nullable
     public String getAuthorIconUrl() {
         return authorIconUrl;
     }
 
-    public void setAuthorIconUrl(String authorIconUrl) {
+    public void setAuthorIconUrl(@Nullable String authorIconUrl) {
         this.authorIconUrl = authorIconUrl;
     }
 
+    @Nullable
     public String getLinkAuthor() {
         return linkAuthor;
     }
@@ -274,6 +300,7 @@ public class Comment implements Parcelable {
         return commentTimeMillis;
     }
 
+    @Nullable
     public String getCommentMarkdown() {
         return commentMarkdown;
     }
@@ -282,6 +309,7 @@ public class Comment implements Parcelable {
         this.commentMarkdown = commentMarkdown;
     }
 
+    @Nullable
     public String getCommentRawText() {
         return commentRawText;
     }
@@ -290,14 +318,17 @@ public class Comment implements Parcelable {
         this.commentRawText = commentRawText;
     }
 
+    @Nullable
     public String getLinkId() {
         return linkId;
     }
 
+    @Nullable
     public String getSubredditName() {
         return subredditName;
     }
 
+    @Nullable
     public String getParentId() {
         return parentId;
     }
@@ -330,6 +361,7 @@ public class Comment implements Parcelable {
         return distinguished != null && distinguished.equals("admin");
     }
 
+    @Nullable
     public String getPermalink() {
         return permalink;
     }
@@ -406,11 +438,12 @@ public class Comment implements Parcelable {
         this.approvedAtUTC = approvedAtUTC;
     }
 
+    @Nullable
     public String getApprovedBy() {
         return approvedBy;
     }
 
-    public void setApprovedBy(String approvedBy) {
+    public void setApprovedBy(@Nullable String approvedBy) {
         this.approvedBy = approvedBy;
     }
 
@@ -500,6 +533,7 @@ public class Comment implements Parcelable {
         }
     }
 
+    @Nullable
     public ArrayList<String> getMoreChildrenIds() {
         return moreChildrenIds;
     }
@@ -513,7 +547,9 @@ public class Comment implements Parcelable {
     }
 
     public void removeMoreChildrenIds() {
-        moreChildrenIds.clear();
+        if (moreChildrenIds != null) {
+            moreChildrenIds.clear();
+        }
     }
 
     public int getPlaceholderType() {
@@ -544,6 +580,7 @@ public class Comment implements Parcelable {
         return editedTimeMillis;
     }
 
+    @Nullable
     public Map<String, MediaMetadata> getMediaMetadataMap() {
         return mediaMetadataMap;
     }

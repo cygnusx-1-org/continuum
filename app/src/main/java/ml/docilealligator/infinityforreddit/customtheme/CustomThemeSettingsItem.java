@@ -4,11 +4,14 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 
 public class CustomThemeSettingsItem implements Parcelable {
     public String itemName;
+    @Nullable
     public String itemDetails;
     public int colorValue;
     public boolean isEnabled;
@@ -25,7 +28,7 @@ public class CustomThemeSettingsItem implements Parcelable {
     }
 
     protected CustomThemeSettingsItem(Parcel in) {
-        itemName = in.readString();
+        itemName = Objects.requireNonNull(in.readString());
         itemDetails = in.readString();
         colorValue = in.readInt();
         isEnabled = in.readByte() != 0;

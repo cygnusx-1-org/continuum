@@ -271,9 +271,10 @@ public final class Utils {
 
     public final static class ParseRedditMediaBlockResult {
         public String parsedMarkdown;
+        @Nullable
         public Map<String, MediaMetadata> mediaMetadataMap;
 
-        public ParseRedditMediaBlockResult(String parsedMarkdown, Map<String, MediaMetadata> mediaMetadataMap) {
+        public ParseRedditMediaBlockResult(String parsedMarkdown, @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
             this.parsedMarkdown = parsedMarkdown;
             this.mediaMetadataMap = mediaMetadataMap;
         }
@@ -571,7 +572,7 @@ public final class Utils {
         return null;
     }
 
-    public static void setTitleWithCustomFontToMenuItem(Typeface typeface, MenuItem item, String desiredTitle) {
+    public static void setTitleWithCustomFontToMenuItem(Typeface typeface, MenuItem item, @Nullable String desiredTitle) {
         if (typeface != null) {
             CharSequence title = desiredTitle == null ? item.getTitle() : desiredTitle;
             if (title != null) {

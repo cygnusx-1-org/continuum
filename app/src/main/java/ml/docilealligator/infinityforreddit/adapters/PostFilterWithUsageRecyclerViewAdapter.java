@@ -25,7 +25,7 @@ public class PostFilterWithUsageRecyclerViewAdapter extends RecyclerView.Adapter
     private final BaseActivity activity;
     private final CustomThemeWrapper customThemeWrapper;
     private final OnItemClickListener onItemClickListener;
-    private List<PostFilterWithUsage> postFilterWithUsageList;
+    private List<PostFilterWithUsage> postFilterWithUsageList = List.of();
     private final RecyclerView.RecycledViewPool recycledViewPool;
 
     public interface OnItemClickListener {

@@ -51,7 +51,7 @@ class CopyMultiRedditActivityViewModel(
             val multiReddit = copyMultiRedditActivityRepository.fetchMultiRedditInfo(multipath)
             _multiRedditState.value = multiReddit?.let {
                 _name.value = it.name
-                _description.value = it.description
+                _description.value = it.description.orEmpty()
 
                 DataLoadState.Success(it)
             } ?: DataLoadState.Error("Failed to load multiReddit")
@@ -66,7 +66,7 @@ class CopyMultiRedditActivityViewModel(
         _copyMultiRedditState.value = ActionState.Running
 
         viewModelScope.launch {
-            when (val result = copyMultiRedditActivityRepository.copyMultiReddit(multipath, _name.value, _description.value, (multiRedditState.value as DataLoadState.Success).data.subreddits)) {
+            when (val result = copyMultiRedditActivityRepository.copyMultiReddit(multipath, _name.value, _description.value, (multiRedditState.value as DataLoadState.Success).data.subreddits ?: emptyList())) {
                 is APIResult.Success -> {
                     _copyMultiRedditState.value = ActionState.Success(result.data)
                 }

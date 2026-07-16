@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -62,7 +63,7 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
     private ActivityHistoryBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -115,7 +116,7 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
         }
 
         setSupportActionBar(binding.toolbarHistoryActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarHistoryActivity);
 
         readPostType = getIntent().getIntExtra(EXTRA_READ_POST_TYPE, ReadPostType.READ_POSTS);

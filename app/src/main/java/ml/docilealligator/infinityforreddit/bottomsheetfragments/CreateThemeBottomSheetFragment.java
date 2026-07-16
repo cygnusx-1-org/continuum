@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -31,8 +32,8 @@ public class CreateThemeBottomSheetFragment extends LandscapeExpandedRoundedBott
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentCreateThemeBottomSheetBinding binding = FragmentCreateThemeBottomSheetBinding.inflate(inflater, container, false);
 
         binding.importThemeTextViewCreateThemeBottomSheetFragment.setOnClickListener(view -> {

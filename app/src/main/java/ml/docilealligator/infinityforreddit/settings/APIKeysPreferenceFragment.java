@@ -67,7 +67,7 @@ public class APIKeysPreferenceFragment extends CustomFontPreferenceFragmentCompa
     public APIKeysPreferenceFragment() {}
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mRestartOnBackCallback = new OnBackPressedCallback(false) {

@@ -37,7 +37,7 @@ public class AccessTokenAuthenticator implements Authenticator {
 
     @Nullable
     @Override
-    public Request authenticate(Route route, @NonNull Response response) {
+    public Request authenticate(@Nullable Route route, @NonNull Response response) {
         if (response.code() == 401) {
             String accessTokenHeader = response.request().header(APIUtils.AUTHORIZATION_KEY);
 
@@ -102,7 +102,7 @@ public class AccessTokenAuthenticator implements Authenticator {
                     mRedditDataRoomDatabase.accountDao().updateAccessTokenAndRefreshToken(account.getAccountName(), newAccessToken, newRefreshToken);
                 }
 
-                if (mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT).equals(account.getAccountName())) {
+                if (account.getAccountName().equals(mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT))) {
                     mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, newAccessToken).apply();
                 }
 

@@ -42,6 +42,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -82,6 +83,7 @@ import app.futured.hauler.DragDirection;
 import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -266,7 +268,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -339,7 +341,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         Resources resources = getResources();
 
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
         binding.getBottomAppBar().setVisibility(View.VISIBLE);
         binding.getBackButton().setOnClickListener(view -> {
             finish();

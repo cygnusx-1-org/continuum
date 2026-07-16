@@ -18,18 +18,25 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
+import androidx.annotation.Nullable;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 
 public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
+    @Nullable
     private static EvenBetterLinkMovementMethod singleInstance;
     private static final int LINKIFY_NONE = -2;
 
+    @Nullable
     private OnLinkClickListener onLinkClickListener;
+    @Nullable
     private OnLinkLongClickListener onLinkLongClickListener;
     private final RectF touchedLineBounds = new RectF();
     private boolean isUrlHighlighted;
+    @Nullable
     private ClickableSpan clickableSpanUnderTouchOnActionDown;
     private int activeTextViewHashcode;
+    @Nullable
     private LongPressTimer ongoingLongPressTimer;
     private boolean wasLongPressRegistered;
 
@@ -149,7 +156,7 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
     /**
      * Set a listener that will get called whenever any link is clicked on the TextView.
      */
-    public EvenBetterLinkMovementMethod setOnLinkClickListener(OnLinkClickListener clickListener) {
+    public EvenBetterLinkMovementMethod setOnLinkClickListener(@Nullable OnLinkClickListener clickListener) {
         if (this == singleInstance) {
             throw new UnsupportedOperationException("Setting a click listener on the instance returned by getInstance() is not supported to avoid memory " +
                     "leaks. Please use newInstance() or any of the linkify() methods instead.");
@@ -162,7 +169,7 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
     /**
      * Set a listener that will get called whenever any link is clicked on the TextView.
      */
-    public EvenBetterLinkMovementMethod setOnLinkLongClickListener(OnLinkLongClickListener longClickListener) {
+    public EvenBetterLinkMovementMethod setOnLinkLongClickListener(@Nullable OnLinkLongClickListener longClickListener) {
         if (this == singleInstance) {
             throw new UnsupportedOperationException("Setting a long-click listener on the instance returned by getInstance() is not supported to avoid " +
                     "memory leaks. Please use newInstance() or any of the linkify() methods instead.");
@@ -224,7 +231,7 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
                         public void onTimerReached() {
                             wasLongPressRegistered = true;
                             removeUrlHighlightColor(textView);
-                            if (dispatchUrlLongClick(textView, clickableSpanUnderTouch)) {
+                            if (dispatchUrlLongClick(textView, Objects.requireNonNull(clickableSpanUnderTouch))) {
                                 textView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                             }
                         }
@@ -236,7 +243,7 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
             case MotionEvent.ACTION_UP:
                 // Register a click only if the touch started and ended on the same URL.
                 if (!wasLongPressRegistered && touchStartedOverAClickableSpan && clickableSpanUnderTouch == clickableSpanUnderTouchOnActionDown) {
-                    dispatchUrlClick(textView, clickableSpanUnderTouch);
+                    dispatchUrlClick(textView, Objects.requireNonNull(clickableSpanUnderTouch));
                 }
                 cleanupOnTouchUp(textView);
 
@@ -283,6 +290,7 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
      *
      * @return The touched ClickableSpan or null.
      */
+    @Nullable
     protected ClickableSpan findClickableSpanUnderTouch(TextView textView, Spannable text, MotionEvent event) {
         // So we need to find the location in text where touch was made, regardless of whether the TextView
         // has scrollable text. That is, not the entire text is currently visible.
@@ -298,6 +306,9 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
         touchY += textView.getScrollY();
 
         final Layout layout = textView.getLayout();
+        if (layout == null) {
+            return null;
+        }
         final int touchedLine = layout.getLineForVertical(touchY);
         final int touchOffset = layout.getOffsetForHorizontal(touchedLine, touchX);
 
@@ -397,6 +408,7 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
     }
 
     protected static final class LongPressTimer implements Runnable {
+        @Nullable
         private LongPressTimer.OnTimerReachedListener onTimerReachedListener;
 
         protected interface OnTimerReachedListener {
@@ -405,7 +417,9 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
 
         @Override
         public void run() {
-            onTimerReachedListener.onTimerReached();
+            if (onTimerReachedListener != null) {
+                onTimerReachedListener.onTimerReached();
+            }
         }
 
         public void setOnTimerReachedListener(LongPressTimer.OnTimerReachedListener listener) {

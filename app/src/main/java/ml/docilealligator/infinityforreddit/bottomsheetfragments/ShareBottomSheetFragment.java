@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -62,8 +63,8 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         ((Infinity) activity.getApplication()).getAppComponent().inject(this);
 
         // Inflate the layout for this fragment
