@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.MenuItemImpl;
 import androidx.core.view.MenuItemCompat;
 import com.google.android.material.badge.BadgeDrawable;
@@ -16,6 +17,7 @@ import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigationrail.NavigationRailView;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -38,6 +40,7 @@ public class NavigationWrapper {
     private int option4 = -1;
 
     private int inboxCount;
+    @Nullable
     private BadgeDrawable badgeDrawable;
 
     public NavigationWrapper(BottomAppBar bottomAppBar, LinearLayout linearLayoutBottomAppBar,
@@ -56,7 +59,7 @@ public class NavigationWrapper {
         this.customThemeWrapper = customThemeWrapper;
         if (navigationRailView != null) {
             if (showBottomAppBar) {
-                this.floatingActionButton = (FloatingActionButton) navigationRailView.getHeaderView();
+                this.floatingActionButton = (FloatingActionButton) Objects.requireNonNull(navigationRailView.getHeaderView());
             } else {
                 navigationRailView.setVisibility(View.GONE);
                 this.floatingActionButton = floatingActionButton;

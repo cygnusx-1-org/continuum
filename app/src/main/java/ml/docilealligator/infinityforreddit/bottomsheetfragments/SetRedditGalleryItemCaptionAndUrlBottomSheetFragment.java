@@ -33,7 +33,6 @@ public class SetRedditGalleryItemCaptionAndUrlBottomSheetFragment extends Landsc
 
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FragmentSetRedditGalleryItemCaptionAndUrlBottomSheetBinding binding = FragmentSetRedditGalleryItemCaptionAndUrlBottomSheetBinding.inflate(inflater, container, false);
@@ -56,7 +55,7 @@ public class SetRedditGalleryItemCaptionAndUrlBottomSheetFragment extends Landsc
         binding.urlTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.setText(url);
 
         binding.okButtonSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.setOnClickListener(view -> {
-            mActivity.setCaptionAndUrl(position, binding.captionTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText().toString(), binding.urlTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText().toString());
+            mActivity.setCaptionAndUrl(position, java.util.Objects.requireNonNull(binding.captionTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText()).toString(), java.util.Objects.requireNonNull(binding.urlTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText()).toString());
             dismiss();
         });
 

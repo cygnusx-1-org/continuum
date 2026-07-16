@@ -132,7 +132,7 @@ public interface RedditAPI {
 
     @GET("/comments/{id}/placeholder/{singleCommentId}.json?raw_json=1")
     Call<String> getPostAndCommentsSingleThreadByIdOauth(@Path("id") @Nullable String id, @Path("singleCommentId") String singleCommentId,
-                                                         @Query("sort") SortType.Type sortType, @Query("context") String contextNumber,
+                                                         @Query("sort") SortType.Type sortType, @Query("context") @Nullable String contextNumber,
                                                          @HeaderMap Map<String, String> headers);
 
     @GET("/comments/{id}.json?raw_json=1")
@@ -141,7 +141,7 @@ public interface RedditAPI {
 
     @GET("/comments/{id}/placeholder/{singleCommentId}.json?raw_json=1")
     Call<String> getPostAndCommentsSingleThreadById(@Path("id") @Nullable String id, @Path("singleCommentId") String singleCommentId,
-                                                    @Query("sort") SortType.Type sortType, @Query("context") String contextNumber);
+                                                    @Query("sort") SortType.Type sortType, @Query("context") @Nullable String contextNumber);
 
     @GET("/comments/{id}.json?raw_json=1")
     Call<String> getPostAndCommentsById(@Path("id") @Nullable String id, @Query("sort") SortType.Type sortType);

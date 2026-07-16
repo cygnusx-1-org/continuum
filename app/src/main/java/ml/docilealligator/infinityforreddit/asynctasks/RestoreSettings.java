@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
-import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -198,7 +198,9 @@ public class RestoreSettings {
                                 }
                                 if (accountsFile.exists()) {
                                     List<Account> accounts = getListFromFile(accountsFile, new TypeToken<List<Account>>() {}.getType());
-                                    if (accounts != null) {
+                                    // Only replace local accounts when the backup actually has some; an empty
+                                    // or unreadable accounts.json (now an empty list, not null) must not wipe them.
+                                    if (!accounts.isEmpty()) {
                                         // Clear existing accounts before inserting restored ones
                                         redditDataRoomDatabase.accountDao().deleteAllAccounts();
                                         // Inserted rows keep the is_current_user flag from the backup, so more
@@ -231,7 +233,7 @@ public class RestoreSettings {
                                 // Restore read_posts after accounts so the FK on username is satisfied.
                                 if (readPostsFile.exists()) {
                                     List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
-                                    if (readPosts != null) {
+                                    if (!readPosts.isEmpty()) {
                                         redditDataRoomDatabase.readPostDao().insertAll(readPosts);
                                     }
                                 }
@@ -239,7 +241,7 @@ public class RestoreSettings {
                                 // Restore local_saved after accounts so the FK on username is satisfied.
                                 if (localSavedFile.exists()) {
                                     List<LocalSavedThing> localSaved = getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType());
-                                    if (localSaved != null) {
+                                    if (!localSaved.isEmpty()) {
                                         redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
                                     }
                                 }
@@ -326,16 +328,18 @@ public class RestoreSettings {
         return result;
     }
 
-    @Nullable
     private static <T> List<T> getListFromFile(File file, Type dataType) {
         try (JsonReader reader = new JsonReader(new FileReader(file))) {
             Gson gson = new Gson();
-            return gson.fromJson(reader, dataType);
+            List<T> result = gson.fromJson(reader, dataType);
+            if (result != null) {
+                return result;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return Collections.emptyList();
     }
 
     public interface RestoreSettingsListener {

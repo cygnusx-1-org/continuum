@@ -31,6 +31,7 @@ public class CopyTextBottomSheetFragment extends LandscapeExpandedRoundedBottomS
     public static final String EXTRA_MARKDOWN = "EM";
 
     private BaseActivity baseActivity;
+    @SuppressWarnings("NullAway.Init")
     private ViewRedditGalleryActivity viewRedditGalleryActivity;
     private String markdownText;
 

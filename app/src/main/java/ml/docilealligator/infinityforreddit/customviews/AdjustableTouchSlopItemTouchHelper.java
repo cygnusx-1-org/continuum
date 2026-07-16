@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import ml.docilealligator.infinityforreddit.R;
 
+// Vendored copy of androidx.recyclerview.widget.ItemTouchHelper (adjustable touch slop); framework
+// mirror, not hand-annotated for NullAway.
+@SuppressWarnings("NullAway")
 public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecoration
         implements RecyclerView.OnChildAttachStateChangeListener {
     /**

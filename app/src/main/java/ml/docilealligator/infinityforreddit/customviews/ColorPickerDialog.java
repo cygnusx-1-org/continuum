@@ -31,6 +31,7 @@ public class ColorPickerDialog extends AlertDialog {
 
     public ColorPickerDialog(Context context, int color, ColorPickerListener colorPickerListener) {
         super(context);
+        this.colorPickerListener = colorPickerListener;
 
         View rootView = getLayoutInflater().inflate(R.layout.color_picker, null);
         colorView = rootView.findViewById(R.id.color_view_color_picker);

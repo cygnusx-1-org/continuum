@@ -70,7 +70,7 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
         // Inflate the layout for this fragment
         FragmentShareLinkBottomSheetBinding binding = FragmentShareLinkBottomSheetBinding.inflate(inflater, container, false);
 
-        String postLink = getArguments().getString(EXTRA_POST_LINK);
+        String postLink = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_POST_LINK));
         String mediaLink = getArguments().containsKey(EXTRA_MEDIA_LINK) ? getArguments().getString(EXTRA_MEDIA_LINK) : null;
         Post post = getArguments().getParcelable(EXTRA_POST);
         ArrayList<Comment> comments = getArguments().getParcelableArrayList(EXTRA_COMMENTS);
@@ -139,8 +139,8 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
                         post,
                         activity.customThemeWrapper,
                         activity.getResources().getConfiguration().locale,
-                        activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
-                                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE),
+                        java.util.Objects.requireNonNull(activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
+                                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
                         new SaveMemoryCenterInisdeDownsampleStrategy(
                                 Integer.parseInt(activity.getDefaultSharedPreferences()
                                         .getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))
@@ -163,7 +163,7 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
                             new FetchComment.FetchCommentListener() {
                                 @Override
                                 public void onFetchCommentSuccess(ArrayList<Comment> expandedComments,
-                                                                  String parentId, ArrayList<String> children) {
+                                                                  @Nullable String parentId, ArrayList<String> children) {
                                     shareWithComments(post, expandedComments);
                                 }
 
@@ -189,8 +189,8 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
                 comments,
                 activity.customThemeWrapper,
                 activity.getResources().getConfiguration().locale,
-                activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
-                        SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE),
+                java.util.Objects.requireNonNull(activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
+                        SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
                 new SaveMemoryCenterInisdeDownsampleStrategy(
                         Integer.parseInt(activity.getDefaultSharedPreferences()
                                 .getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))

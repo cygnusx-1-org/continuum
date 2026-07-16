@@ -11,6 +11,9 @@ import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiver;
 
+// Fields are populated after construction via setCustomFont/setCustomThemeWrapper and null-checked
+// at use; suppress only the field-init check.
+@SuppressWarnings("NullAway.Init")
 public class CustomFontPreferenceCategory extends PreferenceCategory implements CustomFontReceiver, CustomThemeWrapperReceiver {
     private CustomThemeWrapper customThemeWrapper;
     private Typeface typeface;

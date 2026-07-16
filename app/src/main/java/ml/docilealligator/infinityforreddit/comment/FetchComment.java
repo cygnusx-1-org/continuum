@@ -18,7 +18,7 @@ import retrofit2.Retrofit;
 public class FetchComment {
     public static void fetchComments(Executor executor, Handler handler, Retrofit retrofit,
                                      @Nullable String accessToken, @NonNull String accountName, String article,
-                                     String commentId, SortType.Type sortType, String contextNumber,
+                                     @Nullable String commentId, SortType.Type sortType, @Nullable String contextNumber,
                                      boolean expandChildren, CommentFilter commentFilter,
                                      FetchCommentListener fetchCommentListener) {
         RedditAPI api = retrofit.create(RedditAPI.class);

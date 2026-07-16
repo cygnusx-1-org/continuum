@@ -47,7 +47,7 @@ public class UserThingSortTypeBottomSheetFragment extends LandscapeExpandedRound
                              @Nullable Bundle savedInstanceState) {
         FragmentUserThingSortTypeBottomSheetBinding binding = FragmentUserThingSortTypeBottomSheetBinding.inflate(inflater, container, false);
 
-        String currentSortType = getArguments().getString(EXTRA_CURRENT_SORT_TYPE);
+        String currentSortType = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_CURRENT_SORT_TYPE));
         if (currentSortType.equals(SortType.Type.NEW.fullName)) {
             binding.newTypeTextViewUserThingSortTypeBottomSheetFragment.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.newTypeTextViewUserThingSortTypeBottomSheetFragment.getCompoundDrawablesRelative()[0], null, AppCompatResources.getDrawable(activity, R.drawable.ic_check_circle_day_night_24dp), null);
         } else if (currentSortType.equals(SortType.Type.HOT.fullName)) {

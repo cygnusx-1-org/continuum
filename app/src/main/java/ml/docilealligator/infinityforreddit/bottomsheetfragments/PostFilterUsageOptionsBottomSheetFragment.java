@@ -29,7 +29,7 @@ public class PostFilterUsageOptionsBottomSheetFragment extends LandscapeExpanded
         // Inflate the layout for this fragment
         FragmentPostFilterUsageOptionsBottomSheetBinding binding = FragmentPostFilterUsageOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        PostFilterUsage postFilterUsage = getArguments().getParcelable(EXTRA_POST_FILTER_USAGE);
+        PostFilterUsage postFilterUsage = java.util.Objects.requireNonNull(getArguments().getParcelable(EXTRA_POST_FILTER_USAGE));
 
         if (postFilterUsage.usage == PostFilterUsage.HOME_TYPE || postFilterUsage.usage == PostFilterUsage.SEARCH_TYPE
                 || postFilterUsage.usage == PostFilterUsage.HISTORY_TYPE || postFilterUsage.usage == PostFilterUsage.UPVOTED_TYPE

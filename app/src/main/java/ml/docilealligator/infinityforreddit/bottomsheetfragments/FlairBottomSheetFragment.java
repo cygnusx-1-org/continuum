@@ -75,7 +75,7 @@ public class FlairBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
 
         binding.recyclerViewBottomSheetFragment.setAdapter(mAdapter);
 
-        mSubredditName = getArguments().getString(EXTRA_SUBREDDIT_NAME);
+        mSubredditName = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_SUBREDDIT_NAME));
 
         mHandler = new Handler(Looper.getMainLooper());
 
@@ -88,7 +88,7 @@ public class FlairBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
         FetchFlairs.fetchFlairsInSubreddit(mExecutor, mHandler, mOauthRetrofit, mActivity.accessToken,
                 mSubredditName, new FetchFlairs.FetchFlairsInSubredditListener() {
                     @Override
-                    public void fetchSuccessful(List<Flair> flairs) {
+                    public void fetchSuccessful(@Nullable List<Flair> flairs) {
                         binding.progressBarFlairBottomSheetFragment.setVisibility(View.GONE);
                         if (flairs == null || flairs.isEmpty()) {
                             binding.errorTextViewFlairBottomSheetFragment.setVisibility(View.VISIBLE);
@@ -124,6 +124,7 @@ public class FlairBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
     }
 
     @Override
+    @SuppressWarnings("NullAway") // binding is released here for GC; @NonNull elsewhere
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

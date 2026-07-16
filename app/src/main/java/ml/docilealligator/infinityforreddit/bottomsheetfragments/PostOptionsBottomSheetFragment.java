@@ -66,6 +66,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
     private BaseActivity mBaseActivity;
     private Post mPost;
+    @SuppressWarnings("NullAway.Init")
     private FragmentPostOptionsBottomSheetBinding binding;
     private boolean isDownloading = false;
     private boolean isDownloadingGallery = false;
@@ -122,14 +123,14 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mPost = getArguments().getParcelable(EXTRA_POST);
+            mPost = java.util.Objects.requireNonNull(getArguments().getParcelable(EXTRA_POST));
         } else {
             dismiss();
         }
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ((Infinity) mBaseActivity.getApplication()).getAppComponent().inject(this);
         // Inflate the layout for this fragment
         FragmentPostOptionsBottomSheetBinding binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);

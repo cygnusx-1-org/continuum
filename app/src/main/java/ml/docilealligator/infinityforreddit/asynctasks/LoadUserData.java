@@ -39,6 +39,6 @@ public class LoadUserData {
     }
 
     public interface LoadUserDataAsyncTaskListener {
-        void loadUserDataSuccess(String iconImageUrl);
+        void loadUserDataSuccess(@Nullable String iconImageUrl);
     }
 }

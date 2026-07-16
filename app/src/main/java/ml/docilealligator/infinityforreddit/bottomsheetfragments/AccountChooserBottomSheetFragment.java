@@ -45,6 +45,7 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
     Executor executor;
     BaseActivity activity;
     AccountChooserRecyclerViewAdapter adapter;
+    @SuppressWarnings("NullAway.Init")
     AccountViewModel accountViewModel;
 
     public AccountChooserBottomSheetFragment() {

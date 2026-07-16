@@ -62,7 +62,7 @@ public class SortTypeBottomSheetFragment extends LandscapeExpandedRoundedBottomS
             });
         }
 
-        String currentSortType = getArguments().getString(EXTRA_CURRENT_SORT_TYPE);
+        String currentSortType = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_CURRENT_SORT_TYPE));
         if (currentSortType.equals(SortType.Type.BEST.fullName)) {
             binding.bestTypeTextViewSortTypeBottomSheetFragment.setCompoundDrawablesRelativeWithIntrinsicBounds(binding.bestTypeTextViewSortTypeBottomSheetFragment.getCompoundDrawablesRelative()[0], null, AppCompatResources.getDrawable(activity, R.drawable.ic_check_circle_day_night_24dp), null);
         } else if (currentSortType.equals(SortType.Type.HOT.fullName)) {

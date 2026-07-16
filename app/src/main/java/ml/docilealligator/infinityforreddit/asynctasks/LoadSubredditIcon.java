@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -46,6 +47,6 @@ public class LoadSubredditIcon {
     }
 
     public interface LoadSubredditIconListener {
-        void loadIconSuccess(String iconImageUrl);
+        void loadIconSuccess(@Nullable String iconImageUrl);
     }
 }

@@ -15,6 +15,7 @@ public class CommentIndentationView extends LinearLayout {
 
     private final Paint paint;
     private int level;
+    @SuppressWarnings("NullAway.Init")
     private int[] colors;
     private ArrayList<Integer> startXs;
     private final int spacing;
@@ -64,10 +65,13 @@ public class CommentIndentationView extends LinearLayout {
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable parcelable = super.onSaveInstanceState();
+        if (parcelable == null) {
+            return null;
+        }
         SavedState myState = new SavedState(parcelable);
         myState.startXs = this.startXs;
         myState.colors = this.colors;
-        return parcelable;
+        return myState;
     }
 
     @Override
@@ -76,8 +80,12 @@ public class CommentIndentationView extends LinearLayout {
 
         super.onRestoreInstanceState(savedState.getSuperState());
 
-        this.startXs = savedState.startXs;
-        this.colors = savedState.colors;
+        if (savedState.startXs != null) {
+            this.startXs = savedState.startXs;
+        }
+        if (savedState.colors != null) {
+            this.colors = savedState.colors;
+        }
 
         invalidate();
     }
@@ -102,7 +110,9 @@ public class CommentIndentationView extends LinearLayout {
     }
 
     private static class SavedState extends BaseSavedState {
+        @Nullable
         ArrayList<Integer> startXs;
+        @Nullable
         int[] colors;
 
         SavedState(Parcelable superState) {

@@ -34,7 +34,7 @@ public class FABMoreOptionsBottomSheetFragment extends LandscapeExpandedRoundedB
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         FragmentFabMoreOptionsBottomSheetBinding binding = FragmentFabMoreOptionsBottomSheetBinding.inflate(inflater, container, false);
 

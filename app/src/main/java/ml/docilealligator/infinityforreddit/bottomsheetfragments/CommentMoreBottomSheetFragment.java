@@ -112,7 +112,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 });
             }
 
-            if (comment.getAuthor().equals(activity.accountName)) {
+            if (java.util.Objects.equals(comment.getAuthor(), activity.accountName)) {
                 binding.notificationViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
                 binding.notificationViewCommentMoreBottomSheetFragment.setText(comment.isSendReplies() ? R.string.disable_reply_notifications : R.string.enable_reply_notifications);
                 binding.notificationViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
@@ -192,8 +192,8 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 ShareScreenshotUtilsKt.sharePostWithCommentsAsScreenshot(
                         activity, post, threadComments, activity.customThemeWrapper,
                         activity.getResources().getConfiguration().locale,
-                        activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
-                                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE),
+                        java.util.Objects.requireNonNull(activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
+                                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
                         new SaveMemoryCenterInisdeDownsampleStrategy(
                                 Integer.parseInt(activity.getDefaultSharedPreferences()
                                         .getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))
@@ -217,14 +217,20 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 if (helper.isSpeaking()) {
                     helper.stop();
                 } else {
-                    helper.speak(comment.getCommentRawText());
+                    String rawText = comment.getCommentRawText();
+                    if (rawText != null) {
+                        helper.speak(rawText);
+                    }
                 }
                 dismiss();
             });
         }
 
         binding.translateTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
-            Utils.translateText(activity, comment.getCommentRawText());
+            String rawText = comment.getCommentRawText();
+            if (rawText != null) {
+                Utils.translateText(activity, rawText);
+            }
             dismiss();
         });
 
