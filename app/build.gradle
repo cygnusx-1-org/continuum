@@ -647,3 +647,129 @@ abstract class RenameApksTask extends DefaultTask {
         )
     }
 }
+
+// ---------------------------------------------------------------------------
+// install<Type>Remote — compile on the Mirakle remote host, install via LOCAL adb
+// ---------------------------------------------------------------------------
+// Mirakle offloads an ENTIRE gradlew invocation to the remote host (boson) or none of
+// it: the global init script (~/.gradle/init.d/mirakle.gradle) decides once from the
+// task names, and its force-local guard pins any task whose simple name starts with
+// "install" (also connected/spotless/lint/clean) to THIS machine so device/adb tasks
+// reach the locally-connected device. A single invocation that compiles remotely yet
+// installs locally is therefore impossible.
+//
+// These tasks bridge it. Each task's own name starts with "install", so the guard keeps
+// this OUTER invocation local. Its action shells out to a nested
+// `./gradlew :app:assemble<Type>` — a fresh invocation whose "assemble…" task name is
+// NOT force-local, so Mirakle offloads that compile to boson and rsyncs the built APKs
+// back into build/outputs/apk/<type>/. The task then selects the APK matching the
+// connected device's ABI (splits are per-ABI; universalApk=false) and installs it with
+// the local SDK's adb.
+//
+// Success is judged from the remote "BUILD SUCCESSFUL" line, NOT the wrapper exit code:
+// the local Mirakle wrapper exits 1 even when the remote build succeeds (config-cache
+// discard — see MIRAKLE.md). Written config-cache-clean (injected ExecOperations,
+// config-time inputs) because org.gradle.configuration-cache=true.
+abstract class RemoteInstallTask extends DefaultTask {
+    @Input abstract Property<String> getAssembleTaskName()
+    @Internal abstract Property<String> getAdbExecutable()
+    @Internal abstract DirectoryProperty getRepoRoot()   // holds gradlew; the nested build's CWD
+    @Internal abstract DirectoryProperty getApkDir()      // build/outputs/apk/<type>
+
+    private final ExecOperations execOps
+
+    @Inject
+    RemoteInstallTask(ExecOperations execOps) { this.execOps = execOps }
+
+    @TaskAction
+    void run() {
+        File rootDir = repoRoot.get().asFile
+        File gradlew = new File(rootDir, "gradlew")
+
+        // 1. Compile remotely. This nested invocation's "assemble…" name isn't force-local,
+        //    so Mirakle runs it on boson and rsyncs the APKs back. Tee the log so it stays
+        //    visible AND checkable; ignore the exit code (the wrapper exits 1 even on a
+        //    successful remote build — see MIRAKLE.md) and judge success by BUILD SUCCESSFUL.
+        def captured = new ByteArrayOutputStream()
+        def tee = new OutputStream() {
+            @Override void write(int b) { System.out.write(b); captured.write(b) }
+            @Override void write(byte[] b, int off, int len) { System.out.write(b, off, len); captured.write(b, off, len) }
+            @Override void flush() { System.out.flush() }
+        }
+        execOps.exec {
+            it.workingDir = rootDir
+            it.commandLine gradlew.absolutePath, assembleTaskName.get()
+            it.standardOutput = tee
+            it.errorOutput = tee
+            it.ignoreExitValue = true
+        }
+        if (!captured.toString().contains("BUILD SUCCESSFUL")) {
+            throw new GradleException("Remote assemble (${assembleTaskName.get()}) did not report BUILD SUCCESSFUL — see the log above. Nothing was installed.")
+        }
+
+        // 2. Device ABI preference order (fall back to the single primary ABI).
+        List<String> deviceAbis = adbProp("ro.product.cpu.abilist").split(",").collect { it.trim() }.findAll { it }
+        if (deviceAbis.isEmpty()) {
+            String primary = adbProp("ro.product.cpu.abi")
+            if (primary) deviceAbis = [primary]
+        }
+        if (deviceAbis.isEmpty()) {
+            throw new GradleException("Could not read the device ABI. Is exactly one device attached? (adb devices)")
+        }
+
+        // 3. Pick the built APK for the highest-priority ABI the device supports.
+        File dir = apkDir.get().asFile
+        List<File> apks = (dir.listFiles()?.findAll { it.name.endsWith(".apk") } ?: []).toList()
+        if (apks.isEmpty()) {
+            throw new GradleException("No APKs in ${dir}; the remote assemble reported success but produced no APK.")
+        }
+        File chosen = deviceAbis.findResult { abi -> apks.find { it.name.contains("-${abi}-") } }
+        if (chosen == null) {
+            throw new GradleException("No APK in ${dir} matches device ABIs ${deviceAbis}. Built: ${apks*.name}.")
+        }
+
+        // 4. Install with the local SDK's adb.
+        logger.lifecycle("Installing ${chosen.name} on the connected device…")
+        execOps.exec {
+            it.commandLine adbExecutable.get(), "install", "-r", chosen.absolutePath
+        }
+    }
+
+    private String adbProp(String prop) {
+        def out = new ByteArrayOutputStream()
+        execOps.exec {
+            it.commandLine adbExecutable.get(), "shell", "getprop", prop
+            it.standardOutput = out
+        }
+        return out.toString().trim()
+    }
+}
+
+def remoteInstallBuildTypes = [Debug: "debug", Release: "release", MinifiedRelease: "minifiedRelease", Beta: "beta"]
+// AGP 9's new DSL no longer exposes android.sdkDirectory, so resolve adb ourselves:
+// local.properties(sdk.dir) → ANDROID_HOME/ANDROID_SDK_ROOT → bare "adb" on PATH.
+def sdkAdbPath = {
+    def localProps = rootProject.file("local.properties")
+    def sdkDir = null
+    if (localProps.exists()) {
+        def p = new Properties()
+        localProps.withInputStream { p.load(it) }
+        sdkDir = p.getProperty("sdk.dir")
+    }
+    sdkDir = sdkDir ?: System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+    if (sdkDir) {
+        def adb = new File(sdkDir, "platform-tools/adb")
+        if (adb.exists()) return adb.absolutePath
+    }
+    return "adb" // fall back to PATH
+}()
+remoteInstallBuildTypes.each { suffix, typeDir ->
+    tasks.register("install${suffix}Remote", RemoteInstallTask) {
+        it.group = "install (remote build)"
+        it.description = "Compiles the ${typeDir} APK on the Mirakle remote host, then installs it on the connected device via local adb."
+        it.assembleTaskName.set(":app:assemble${suffix}".toString())
+        it.adbExecutable.set(sdkAdbPath)
+        it.repoRoot.set(rootProject.layout.projectDirectory)
+        it.apkDir.set(layout.buildDirectory.dir("outputs/apk/${typeDir}"))
+    }
+}
