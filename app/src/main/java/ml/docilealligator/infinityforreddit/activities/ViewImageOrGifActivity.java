@@ -96,12 +96,16 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     private boolean isActionBarHidden = false;
     private boolean isDownloading = false;
     private RequestManager glide;
+    @Nullable
     private String mImageUrl;
+    @Nullable
     private String mImageFileName;
+    @Nullable
     private String mSubredditName;
     private boolean isGif = true;
     private boolean isApng = false;
     private boolean isNsfw;
+    @Nullable
     private Typeface typeface;
     private Handler handler;
     private ActivityViewImageOrGifBinding binding;
@@ -115,23 +119,23 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         getTheme().applyStyle(R.style.Theme_Normal, true);
 
-        getTheme().applyStyle(FontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(FontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext()));
 
@@ -341,8 +345,11 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                     binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
                 }
             });
-        } else {
+        } else if (mImageUrl != null) {
             binding.imageViewViewImageOrGifActivity.showImage(Uri.parse(mImageUrl));
+        } else {
+            binding.progressBarViewImageOrGifActivity.setVisibility(View.GONE);
+            binding.loadImageErrorLinearLayoutViewImageOrGifActivity.setVisibility(View.VISIBLE);
         }
     }
 
@@ -690,7 +697,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 

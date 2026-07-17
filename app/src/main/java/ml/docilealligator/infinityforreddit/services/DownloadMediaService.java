@@ -318,7 +318,7 @@ public class DownloadMediaService extends JobService {
         }
     }
 
-    public static JobInfo constructImgurAlbumDownloadAllMediaJobInfo(Context context, long contentEstimatedBytes, List<ImgurMedia> imgurMedia, String subredditName, boolean isNsfw, String title) {
+    public static JobInfo constructImgurAlbumDownloadAllMediaJobInfo(Context context, long contentEstimatedBytes, List<ImgurMedia> imgurMedia, @Nullable String subredditName, boolean isNsfw, @Nullable String title) {
         PersistableBundle extras = new PersistableBundle();
 
         Log.d("ImgurDownload", "Creating job for Imgur album with " + imgurMedia.size() + " items, isNsfw=" + isNsfw);

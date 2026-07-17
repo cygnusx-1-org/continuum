@@ -158,6 +158,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private static final String PLAYBACK_SPEED_STATE = "PSS";
     private static final String SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE = "PSS";*/
 
+    @Nullable
     public Typeface typeface;
 
     //private Uri mVideoUri;
@@ -181,6 +182,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private int dataSavingModeDefaultResolution;
     private int nonDataSavingModeDefaultResolution;*/
     //private boolean setDefaultResolutionAlready = false;
+    @Nullable
     private Integer originalOrientation;
     /*private int playbackSpeed = 100;
     private boolean useBottomAppBar;*/
@@ -313,12 +315,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 }
         }
 
-        getTheme().applyStyle(FontStyle.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
-        getTheme().applyStyle(TitleFontStyle.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
-        getTheme().applyStyle(ContentFontStyle.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
-        getTheme().applyStyle(FontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())).getResId(), true);
-        getTheme().applyStyle(TitleFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
-        getTheme().applyStyle(ContentFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
+        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
+        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
+        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding.inflate(getLayoutInflater()));
         setContentView(binding.getRoot());
@@ -403,7 +405,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             /*videoFallbackDirectUrl = post.getVideoFallBackDirectUrl();*/
         }
 
-        String dataSavingModeString = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingModeString = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         int networkType = Utils.getConnectedNetwork(this);
         boolean isDataSavingMode = false;
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
@@ -908,7 +910,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         binding.getPlayPauseButton().setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getFABIconColor()));
     }
 
-    private void preparePlayer(Bundle savedInstanceState) {
+    private void preparePlayer(@Nullable Bundle savedInstanceState) {
         if (mSharedPreferences.getBoolean(SharedPreferencesUtils.LOOP_VIDEO, true)) {
             player.setRepeatMode(Player.REPEAT_MODE_ALL);
         } else {
@@ -1489,7 +1491,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     }*/
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 

@@ -74,12 +74,18 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     public static final int IMGUR_TYPE_IMAGE = 2;
     private static final String IMGUR_IMAGES_STATE = "IIS";
 
+    @Nullable
     public Typeface typeface;
+    @Nullable
     private SectionsPagerAdapter sectionsPagerAdapter;
+    @Nullable
     private ArrayList<ImgurMedia> mImages;
+    @Nullable
     private String subredditName;
+    @Nullable
     private String postTitle;
     private boolean isNsfw;
+    @Nullable
     private String title;
 
     @Inject
@@ -108,23 +114,23 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
         getTheme().applyStyle(R.style.Theme_Normal, true);
 
-        getTheme().applyStyle(FontStyle.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontStyle.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontStyle.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(FontFamily.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontFamily.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontFamily.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         binding = ActivityViewImgurMediaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -315,16 +321,17 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     }
 
     public void downloadAllImgurAlbumMedia() {
+        ArrayList<ImgurMedia> images = Objects.requireNonNull(mImages);
         // Check if download locations are set for all media types
         // Imgur album can contain images and videos
-        String imageDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, "");
-        String videoDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, "");
+        String imageDownloadLocation = Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION, ""));
+        String videoDownloadLocation = Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.VIDEO_DOWNLOAD_LOCATION, ""));
         String nsfwDownloadLocation = "";
 
         boolean needsNsfwLocation = isNsfw &&
                 sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false);
 
-        Log.d("ImgurDownload", "ViewImgurMediaActivity - Starting download of album with " + mImages.size() +
+        Log.d("ImgurDownload", "ViewImgurMediaActivity - Starting download of album with " + images.size() +
               " items, isNsfw=" + isNsfw + ", needsNsfwLocation=" + needsNsfwLocation);
 
         Log.d("ImgurDownload", "Download location prefs - IMAGE: " +
@@ -332,7 +339,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
               ", VIDEO: " + (videoDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
 
         if (needsNsfwLocation) {
-            nsfwDownloadLocation = sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, "");
+            nsfwDownloadLocation = Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.NSFW_DOWNLOAD_LOCATION, ""));
             Log.d("ImgurDownload", "NSFW location: " + (nsfwDownloadLocation.isEmpty() ? "EMPTY" : "SET"));
 
             if (nsfwDownloadLocation == null || nsfwDownloadLocation.isEmpty()) {
@@ -345,7 +352,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
             boolean hasImage = false;
             boolean hasVideo = false;
 
-            for (ImgurMedia media : mImages) {
+            for (ImgurMedia media : images) {
                 if (media.getType() == ImgurMedia.TYPE_VIDEO) {
                     hasVideo = true;
                 } else {
@@ -365,7 +372,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
             }
         }
 
-        JobInfo jobInfo = DownloadMediaService.constructImgurAlbumDownloadAllMediaJobInfo(this, 5000000L * mImages.size(), mImages, subredditName, isNsfw, title);
+        JobInfo jobInfo = DownloadMediaService.constructImgurAlbumDownloadAllMediaJobInfo(this, 5000000L * images.size(), images, subredditName, isNsfw, title);
         ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
 
         Log.d("ImgurDownload", "Download job scheduled successfully");
@@ -439,7 +446,10 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
     @WorkerThread
     @Nullable
-    private static ArrayList<ImgurMedia> parseImgurImages(String response) {
+    private static ArrayList<ImgurMedia> parseImgurImages(@Nullable String response) {
+        if (response == null) {
+            return null;
+        }
         try {
             JSONArray jsonArray = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.IMAGES_KEY);
             ArrayList<ImgurMedia> images = new ArrayList<>();
@@ -471,7 +481,10 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
     @WorkerThread
     @Nullable
-    private static ImgurMedia parseImgurImage(String response) {
+    private static ImgurMedia parseImgurImage(@Nullable String response) {
+        if (response == null) {
+            return null;
+        }
         try {
             JSONObject image = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
             String type = image.getString(JSONUtils.TYPE_KEY);
@@ -492,7 +505,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 
@@ -505,13 +518,14 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            ImgurMedia imgurMedia = mImages.get(position);
+            ArrayList<ImgurMedia> images = Objects.requireNonNull(mImages);
+            ImgurMedia imgurMedia = images.get(position);
             if (imgurMedia.getType() == ImgurMedia.TYPE_VIDEO) {
                 ViewImgurVideoFragment fragment = new ViewImgurVideoFragment();
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(ViewImgurVideoFragment.EXTRA_IMGUR_VIDEO, imgurMedia);
                 bundle.putInt(ViewImgurVideoFragment.EXTRA_INDEX, position);
-                bundle.putInt(ViewImgurVideoFragment.EXTRA_MEDIA_COUNT, mImages.size());
+                bundle.putInt(ViewImgurVideoFragment.EXTRA_MEDIA_COUNT, images.size());
                 bundle.putString(EXTRA_SUBREDDIT_NAME, subredditName);
                 bundle.putBoolean(EXTRA_IS_NSFW, isNsfw);
                 bundle.putString(EXTRA_POST_TITLE_KEY, postTitle);
@@ -522,7 +536,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(ViewImgurImageFragment.EXTRA_IMGUR_IMAGES, imgurMedia);
                 bundle.putInt(ViewImgurImageFragment.EXTRA_INDEX, position);
-                bundle.putInt(ViewImgurImageFragment.EXTRA_MEDIA_COUNT, mImages.size());
+                bundle.putInt(ViewImgurImageFragment.EXTRA_MEDIA_COUNT, images.size());
                 bundle.putString(EXTRA_SUBREDDIT_NAME, subredditName);
                 bundle.putBoolean(EXTRA_IS_NSFW, isNsfw);
                 bundle.putString(EXTRA_POST_TITLE_KEY, postTitle);
@@ -533,7 +547,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
         @Override
         public int getCount() {
-            return mImages.size();
+            return Objects.requireNonNull(mImages).size();
         }
     }
 }

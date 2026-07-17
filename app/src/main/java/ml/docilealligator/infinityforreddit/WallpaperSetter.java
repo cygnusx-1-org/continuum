@@ -20,7 +20,7 @@ public class WallpaperSetter {
     public static final int LOCK_SCREEN = 1;
     public static final int BOTH_SCREENS = 2;
 
-    public static void set(Executor executor, Handler handler, String url, int setTo, Context context, SetWallpaperListener setWallpaperListener) {
+    public static void set(Executor executor, Handler handler, @Nullable String url, int setTo, Context context, SetWallpaperListener setWallpaperListener) {
         Toast.makeText(context, R.string.save_image_first, Toast.LENGTH_SHORT).show();
         WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);

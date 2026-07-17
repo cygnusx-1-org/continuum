@@ -9,6 +9,7 @@ import app.futured.hauler.LockableNestedScrollView;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.loadingindicator.LoadingIndicator;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoBinding;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewVideoZoomableBinding;
@@ -68,15 +69,15 @@ public class ViewVideoActivityBindingAdapter {
     }
 
     public HaulerView getRoot() {
-        return binding == null ? zoomableBinding.getRoot() : binding.getRoot();
+        return binding == null ? Objects.requireNonNull(zoomableBinding).getRoot() : binding.getRoot();
     }
 
     public CoordinatorLayout getCoordinatorLayout() {
-        return binding == null ? zoomableBinding.coordinatorLayoutViewVideoActivity : binding.coordinatorLayoutViewVideoActivity;
+        return binding == null ? Objects.requireNonNull(zoomableBinding).coordinatorLayoutViewVideoActivity : binding.coordinatorLayoutViewVideoActivity;
     }
 
     public LoadingIndicator getLoadingIndicator() {
-        return binding == null ? zoomableBinding.progressBarViewVideoActivity : binding.progressBarViewVideoActivity;
+        return binding == null ? Objects.requireNonNull(zoomableBinding).progressBarViewVideoActivity : binding.progressBarViewVideoActivity;
     }
 
     public MaterialButton getPlayPauseButton() {
@@ -132,6 +133,6 @@ public class ViewVideoActivityBindingAdapter {
     }
 
     public LockableNestedScrollView getNestedScrollView() {
-        return binding == null ? zoomableBinding.lockableNestedScrollViewViewVideoActivity : binding.lockableNestedScrollViewViewVideoActivity;
+        return binding == null ? Objects.requireNonNull(zoomableBinding).lockableNestedScrollViewViewVideoActivity : binding.lockableNestedScrollViewViewVideoActivity;
     }
 }

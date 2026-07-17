@@ -69,10 +69,16 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
     SharedPreferences sharedPreferences;
     @Inject
     Executor executor;
+    @Nullable
     public Typeface typeface;
     private SectionsPagerAdapter sectionsPagerAdapter;
+    // Assigned from the required EXTRA_POST intent extra after a finish()+return guard, so its
+    // initialization along the early-return path can't be proven; live paths always set it.
+    @SuppressWarnings("NullAway.Init")
     private Post post;
+    @SuppressWarnings("NullAway.Init")
     private ArrayList<Post.Gallery> gallery;
+    @Nullable
     private String subredditName;
     private boolean isNsfw;
     private boolean isActionBarHidden = false;
@@ -123,23 +129,23 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
                 }
         }
 
-        getTheme().applyStyle(FontStyle.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontStyle.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontStyle.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(FontFamily.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontFamily.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontFamily.valueOf(sharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(sharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         binding = ActivityViewRedditGalleryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -159,11 +165,12 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
             }
         });
 
-        post = getIntent().getParcelableExtra(EXTRA_POST);
+        Post post = getIntent().getParcelableExtra(EXTRA_POST);
         if (post == null) {
             finish();
             return;
         }
+        this.post = post;
         gallery = post.getGallery();
         if (gallery == null || gallery.isEmpty()) {
             finish();
@@ -185,7 +192,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         setupViewPager(savedInstanceState);
     }
 
-    private void setupViewPager(Bundle savedInstanceState) {
+    private void setupViewPager(@Nullable Bundle savedInstanceState) {
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
@@ -323,7 +330,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 
