@@ -121,7 +121,9 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     @Inject
     @Named("nsfw_and_spoiler")
     SharedPreferences mNsfwAndSpoilerSharedPreferences;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private retrofit2.Call<String> subredditAutocompleteCall;
     private boolean mInsertSuccess;
     private boolean mInsertMultiredditSuccess;
@@ -129,8 +131,12 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     private boolean isThingSelectionMode;
     private boolean searchPrefixOnly;
     private int thingSelectionType;
+    @Nullable
     private String mAccountProfileImageUrl;
     private SectionsPagerAdapter sectionsPagerAdapter;
+    // Set in onCreateOptionsMenu; @Nullable + guarded at its reads so an early back-press before the
+    // menu is created can't NPE.
+    @Nullable
     private Menu mMenu;
     private ActivityResultLauncher<Intent> requestSearchThingLauncher;
     private ActivitySubscribedThingListingBinding binding;
@@ -285,7 +291,9 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                     Utils.hideKeyboard(SubscribedThingListingActivity.this);
                     binding.searchContainerSubscribedThingListingActivity.setVisibility(View.GONE);
                     binding.searchEditTextSubscribedThingListingActivity.setText("");
-                    mMenu.findItem(R.id.action_search_subscribed_thing_listing_activity).setVisible(true);
+                    if (mMenu != null) {
+                        mMenu.findItem(R.id.action_search_subscribed_thing_listing_activity).setVisible(true);
+                    }
                     applySearchQuery("");
                 } else {
                     setEnabled(false);
@@ -582,7 +590,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         thingEditText.setOnEditorActionListener((textView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
-                goToSubreddit(thingEditText.getText().toString());
+                goToSubreddit(Objects.requireNonNull(thingEditText.getText()).toString());
                 return true;
             }
             return false;
@@ -648,7 +656,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                 .setView(rootView)
                 .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
                     Utils.hideKeyboard(this);
-                    goToSubreddit(thingEditText.getText().toString());
+                    goToSubreddit(Objects.requireNonNull(thingEditText.getText()).toString());
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> Utils.hideKeyboard(this))
                 .setOnDismissListener(dialogInterface -> {
@@ -988,6 +996,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
             return 4;
         }
 
+        @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
             if (isThingSelectionMode) {

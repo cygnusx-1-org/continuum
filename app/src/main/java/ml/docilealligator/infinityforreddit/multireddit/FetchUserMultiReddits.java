@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -23,11 +24,12 @@ public class FetchUserMultiReddits {
      *
      * @param oauthRetrofit the OAuth retrofit for a signed-in account, or the no-OAuth retrofit
      *                      (which carries the anonymous app-only token) for the anonymous account.
-     * @param accessToken   the account access token, or empty for the anonymous account.
+     * @param accessToken   the account access token, or null for the anonymous account (which takes
+     *                      the public endpoint below and never reads the token).
      * @param accountName   the current account name, used to decide which endpoint variant to call.
      */
     public static void fetchUserMultiReddits(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                             String accessToken, String accountName, String username,
+                                             @Nullable String accessToken, String accountName, String username,
                                              FetchUserMultiRedditsListener listener) {
         Call<String> call;
         if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {

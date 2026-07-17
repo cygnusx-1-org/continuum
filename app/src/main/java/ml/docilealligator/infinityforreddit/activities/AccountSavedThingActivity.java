@@ -91,6 +91,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
     private static final long SEARCH_DEBOUNCE_MS = 500;
     private String currentSearchQuery = "";
     private final Handler searchDebounceHandler = new Handler(Looper.getMainLooper());
+    @Nullable
     private Runnable searchDebounceRunnable;
 
     @Override

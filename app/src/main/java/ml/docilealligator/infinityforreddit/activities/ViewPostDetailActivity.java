@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +42,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.livefront.bridge.Bridge;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -90,6 +92,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     public static final String EXTRA_IS_NSFW_SUBREDDIT = "EINS";
     public static final int EDIT_COMMENT_REQUEST_CODE = 3;
     @State
+    @Nullable
     String mNewAccountName;
     @Inject
     @Named("no_oauth")
@@ -115,34 +118,48 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     @Inject
     UserProfileImagesBatchLoader mLoader;
     @State
+    @Nullable
     ArrayList<Post> posts;
     @PostType
     @State
     int postType;
     @State
+    @Nullable
     String subredditName;
     @State
+    @Nullable
     String concatenatedSubredditNames;
     @State
+    @Nullable
     String username;
     @State
+    @Nullable
     String userWhere;
     @State
+    @Nullable
     String multiPath;
     @State
+    @Nullable
     String query;
     @State
+    @Nullable
     String trendingSource;
     @ReadPostType
     @State
     int readPostType;
     @State
+    @Nullable
     PostFilter postFilter;
+    // Passed to fetchMorePosts() as a @NonNull sort type; restored by Bridge / set from the post-list
+    // event, which NullAway can't see, so its init is asserted rather than proven.
+    @SuppressWarnings("NullAway.Init")
     @State
     SortType.Type sortType;
     @State
+    @Nullable
     SortType.Time sortTime;
     @State
+    @Nullable
     Post post;
     @State
     @LoadingMorePostsStatus
@@ -317,16 +334,19 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     fragment.setStatus(loadMorePostsState.getStatus());
                 }
                 if (loadMorePostsState.getStatus() == LoadingMorePostsStatus.LOADED) {
-                    if (loadMorePostsState.getChangePage()) {
-                        binding.viewPager2ViewPostDetailActivity.setCurrentItem(
-                                viewPostDetailActivityViewModel.getPosts().size() - 1,
-                                false
+                    ArrayList<Post> loadedPosts = viewPostDetailActivityViewModel.getPosts();
+                    if (loadedPosts != null) {
+                        if (loadMorePostsState.getChangePage()) {
+                            binding.viewPager2ViewPostDetailActivity.setCurrentItem(
+                                    loadedPosts.size() - 1,
+                                    false
+                            );
+                        }
+                        mSectionsPagerAdapter.notifyItemRangeInserted(
+                                loadedPosts.size(),
+                                loadMorePostsState.getNNewPosts()
                         );
                     }
-                    mSectionsPagerAdapter.notifyItemRangeInserted(
-                            viewPostDetailActivityViewModel.getPosts().size(),
-                            loadMorePostsState.getNNewPosts()
-                    );
                 }
             }
         });
@@ -447,7 +467,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
-    private void checkNewAccountAndBindView(Bundle savedInstanceState) {
+    private void checkNewAccountAndBindView(@Nullable Bundle savedInstanceState) {
         if (mNewAccountName != null) {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT) || !accountName.equals(mNewAccountName)) {
                 AccountManagement.switchAccount(mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
@@ -471,7 +491,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
-    private void bindView(Bundle savedInstanceState) {
+    private void bindView(@Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             binding.viewPager2ViewPostDetailActivity.setCurrentItem(getIntent().getIntExtra(EXTRA_POST_LIST_POSITION, 0), false);
         }
@@ -627,8 +647,9 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     }
 
     public void searchComment(ViewPostDetailFragmentNew fragment, boolean searchNextComment) {
-        if (!binding.searchTextInputEditTextViewPostDetailActivity.getText().toString().isEmpty()) {
-            fragment.searchComment(binding.searchTextInputEditTextViewPostDetailActivity.getText().toString(), searchNextComment);
+        Editable searchText = binding.searchTextInputEditTextViewPostDetailActivity.getText();
+        if (searchText != null && !searchText.toString().isEmpty()) {
+            fragment.searchComment(searchText.toString(), searchNextComment);
         }
     }
 
@@ -662,8 +683,11 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             this.trendingSource = event.trendingSource;
             this.readPostType = event.readPostType;
             this.postFilter = event.postFilter;
-            this.sortType = event.sortType.getType();
-            this.sortTime = event.sortType.getTime();
+            SortType eventSortType = event.sortType;
+            if (eventSortType != null) {
+                this.sortType = eventSortType.getType();
+                this.sortTime = eventSortType.getTime();
+            }
             this.readPostsList = event.readPostsList;
 
             if (mSectionsPagerAdapter != null) {
@@ -728,10 +752,10 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         if (requestCode == EDIT_COMMENT_REQUEST_CODE) {
             if (data != null && resultCode == Activity.RESULT_OK) {
                 if (data.hasExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)) {
-                    editComment((Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT),
+                    editComment(Objects.requireNonNull((Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)),
                             data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                 } else {
-                    editComment(data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT),
+                    editComment(Objects.requireNonNull(data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT)),
                             data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                 }
             }
@@ -741,13 +765,15 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         Comment comment = data.getParcelableExtra(RETURN_EXTRA_COMMENT_DATA_KEY);
-                        if (comment != null && comment.getDepth() == 0) {
-                            fragment.addComment(comment);
-                        } else {
-                            String parentFullname = data.getStringExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY);
-                            int parentPosition = data.getIntExtra(CommentActivity.EXTRA_PARENT_POSITION_KEY, -1);
-                            if (parentFullname != null && parentPosition >= 0) {
-                                fragment.addChildComment(comment, parentFullname, parentPosition);
+                        if (comment != null) {
+                            if (comment.getDepth() == 0) {
+                                fragment.addComment(comment);
+                            } else {
+                                String parentFullname = data.getStringExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY);
+                                int parentPosition = data.getIntExtra(CommentActivity.EXTRA_PARENT_POSITION_KEY, -1);
+                                if (parentFullname != null && parentPosition >= 0) {
+                                    fragment.addChildComment(comment, parentFullname, parentPosition);
+                                }
                             }
                         }
                     }

@@ -59,9 +59,15 @@ public class UserMultiRedditsActivity extends BaseActivity {
     Executor mExecutor;
 
     private ActivityUserMultiRedditsBinding binding;
+    // Guarded in onCreate (finish() on a missing/blank extra), so it is effectively @NonNull for the
+    // rest of the lifecycle even though the early-return path leaves it unset.
+    @SuppressWarnings("NullAway.Init")
     private String username;
+    @Nullable
     private UserMultiRedditsRecyclerViewAdapter mAdapter;
+    @Nullable
     private ArrayList<MultiReddit> mMultiReddits;
+    @Nullable
     private Set<String> mOriginalSavedPaths;
 
     @Override
@@ -115,12 +121,13 @@ public class UserMultiRedditsActivity extends BaseActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarUserMultiRedditsActivity);
 
-        username = getIntent().getStringExtra(EXTRA_USERNAME);
-        if (username == null || username.isEmpty()) {
+        String usernameExtra = getIntent().getStringExtra(EXTRA_USERNAME);
+        if (usernameExtra == null || usernameExtra.isEmpty()) {
             Toast.makeText(this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
+        username = usernameExtra;
         Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.user_multireddits_activity_label, username));
 
         binding.recyclerViewUserMultiRedditsActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));

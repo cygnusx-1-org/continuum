@@ -56,7 +56,11 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
     SharedPreferences mCurrentAccountSharedPreferences;
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
+    @Nullable
     private String mUserWhere;
+    // Assigned along every onCreate path (restored fragment or initializeFragment()), but NullAway
+    // can't see the assignment inside the initializeFragment() helper.
+    @SuppressWarnings("NullAway.Init")
     private Fragment mFragment;
     private PostLayoutBottomSheetFragment postLayoutBottomSheetFragment;
     private ActivityAccountPostsBinding binding;
@@ -127,10 +131,15 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
         postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
 
         if (savedInstanceState != null) {
-            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(binding.accountPostsFrameLayout.getId(), mFragment)
-                    .commit();
+            Fragment restoredFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+            if (restoredFragment != null) {
+                mFragment = restoredFragment;
+                getSupportFragmentManager().beginTransaction()
+                        .replace(binding.accountPostsFrameLayout.getId(), mFragment)
+                        .commit();
+            } else {
+                initializeFragment();
+            }
         } else {
             initializeFragment();
         }
