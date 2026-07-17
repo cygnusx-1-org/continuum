@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.activities.ActivityToolbarInterface;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.adapters.CommentsListingRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.comment.Comment;
@@ -66,6 +67,12 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     public static final String EXTRA_USERNAME = "EN";
     public static final String EXTRA_ARE_SAVED_COMMENTS = "EISC";
     public static final String EXTRA_ARE_LOCAL_SAVED_COMMENTS = "EIALSC";
+    // Sort carried by an opening deep link (e.g. /user/x/comments?sort=top), as SortType.Type/Time names.
+    // Applied once on fresh creation; overrides the saved/default comment sort for that launch only.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
+    private static final String SORT_TYPE_STATE = "STS";
+    private static final String SORT_TIME_STATE = "STMS";
 
     @SuppressWarnings("NullAway.Init")
     CommentViewModel mCommentViewModel;
@@ -101,6 +108,14 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     private CommentsListingRecyclerViewAdapter mAdapter;
     @SuppressWarnings("NullAway.Init")
     private SortType sortType;
+    // True on a fresh (non-recreation) launch; gates the one-time deep-link sort override in bindView.
+    private boolean freshCreation;
+    // Live sort restored across a config change (captured from savedInstanceState in onCreateView,
+    // consumed by bindView which has no savedInstanceState of its own since it is posted).
+    @Nullable
+    private String restoredSortTypeName;
+    @Nullable
+    private String restoredSortTimeName;
     private ColorDrawable backgroundSwipeRight;
     private ColorDrawable backgroundSwipeLeft;
     @SuppressWarnings("NullAway.Init")
@@ -123,6 +138,12 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentCommentsListingBinding.inflate(inflater, container, false);
+
+        freshCreation = savedInstanceState == null;
+        if (savedInstanceState != null) {
+            restoredSortTypeName = savedInstanceState.getString(SORT_TYPE_STATE);
+            restoredSortTimeName = savedInstanceState.getString(SORT_TIME_STATE);
+        }
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 
@@ -282,12 +303,23 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
                 return;
             }
             String username = Objects.requireNonNull(arguments.getString(EXTRA_USERNAME));
-            String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name()));
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
-                String sortTime = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name()));
-                sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()), SortType.Time.valueOf(sortTime.toUpperCase()));
+            SortType overrideSortType = getOverrideSortType(arguments);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
             } else {
-                sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
+                String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name()));
+                if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
+                    String sortTime = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name()));
+                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()), SortType.Time.valueOf(sortTime.toUpperCase()));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
+                }
+            }
+            // The list is sorted correctly regardless, but the host toolbar's sort subtitle is only
+            // set via its page-change callback, which can fire before this posted bindView assigns
+            // sortType. Notify now that it is ready (mirrors PostFragment).
+            if (mActivity instanceof ActivityToolbarInterface) {
+                ((ActivityToolbarInterface) mActivity).displaySortType();
             }
 
             mAdapter = new CommentsListingRecyclerViewAdapter(mActivity, this, mOauthRetrofit, customThemeWrapper,
@@ -380,6 +412,44 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     public void changeSortType(SortType sortType) {
         mCommentViewModel.changeSortType(sortType);
         this.sortType = sortType;
+    }
+
+    /**
+     * Resolves a sort that should take precedence over the saved/default comment sort: the live sort
+     * restored across a config change, or a sort carried by an opening deep link on fresh creation.
+     * Returns null to fall back to the saved/default sort. Malformed values are ignored.
+     */
+    @Nullable
+    private SortType getOverrideSortType(Bundle arguments) {
+        String typeName;
+        String timeName;
+        if (freshCreation) {
+            typeName = arguments.getString(EXTRA_INITIAL_SORT_TYPE);
+            timeName = arguments.getString(EXTRA_INITIAL_SORT_TIME);
+        } else {
+            typeName = restoredSortTypeName;
+            timeName = restoredSortTimeName;
+        }
+        if (typeName == null) {
+            return null;
+        }
+        try {
+            SortType.Type type = SortType.Type.valueOf(typeName);
+            return timeName == null ? new SortType(type) : new SortType(type, SortType.Time.valueOf(timeName));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (sortType != null) {
+            outState.putString(SORT_TYPE_STATE, sortType.getType().name());
+            if (sortType.getTime() != null) {
+                outState.putString(SORT_TIME_STATE, sortType.getTime().name());
+            }
+        }
     }
 
     private void initializeSwipeActionDrawable() {

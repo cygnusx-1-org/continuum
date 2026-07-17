@@ -133,6 +133,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     public static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     public static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
     public static final String EXTRA_VIEW_SIDEBAR = "EVSB";
+    // Initial sort carried by an opening deep link (e.g. reddit.com/r/x/top), as SortType.Type/Time names.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String FETCH_SUBREDDIT_INFO_STATE = "FSIS";
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
@@ -187,6 +190,10 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Nullable
     private Call<String> subredditAutocompleteCall;
     private String subredditName;
+    @Nullable
+    private String initialSortType;
+    @Nullable
+    private String initialSortTime;
     @Nullable
     private String description;
     private boolean mFetchSubredditInfoSuccess = false;
@@ -403,6 +410,8 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         boolean hideSubredditDescription = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_DESCRIPTION, false);
 
         subredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY));
+        initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
+        initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
 
         fragmentManager = getSupportFragmentManager();
 
@@ -1753,6 +1762,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 Bundle bundle = new Bundle();
                 bundle.putString(PostFragment.EXTRA_NAME, subredditName);
                 bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostType.SUBREDDIT);
+                if (initialSortType != null) {
+                    bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+                    if (initialSortTime != null) {
+                        bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+                    }
+                }
                 fragment.setArguments(bundle);
                 return fragment;
             }

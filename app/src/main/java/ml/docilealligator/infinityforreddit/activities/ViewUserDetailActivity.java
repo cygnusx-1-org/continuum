@@ -128,6 +128,12 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     public static final String EXTRA_USER_NAME_KEY = "EUNK";
     public static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     public static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
+    // Sort (?sort=/?t=) and initial tab carried by an opening deep link, for the submitted tab.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
+    public static final String EXTRA_INITIAL_TAB = "EIT";
+    public static final int TAB_POSTS = 0;
+    public static final int TAB_COMMENTS = 1;
     public static final int EDIT_COMMENT_REQUEST_CODE = 300;
 
     private static final String FETCH_USER_INFO_STATE = "FSIS";
@@ -177,6 +183,17 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Nullable
     private Call<String> subredditAutocompleteCall;
     private String username;
+    @Nullable
+    private String initialSortType;
+    @Nullable
+    private String initialSortTime;
+    private int initialTab = TAB_POSTS;
+    // The tab whose selection side effects were last applied. Guards applyUserTabSelected against
+    // running twice for the initial deep-link tab (explicit call + a possible page-change callback
+    // for that same pending page); genuine tab changes always report a different position.
+    private int lastAppliedTabPosition = -1;
+    // True when this instance is being recreated from saved state (config change / process death).
+    private boolean restoredFromInstanceState;
     @Nullable
     private String description;
     private boolean subscriptionReady = false;
@@ -240,9 +257,14 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             username = accountName;
         }
 
+        initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
+        initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
+        restoredFromInstanceState = savedInstanceState != null;
+
         if (savedInstanceState == null) {
             mMessageFullname = getIntent().getStringExtra(EXTRA_MESSAGE_FULLNAME);
             mNewAccountName = getIntent().getStringExtra(EXTRA_NEW_ACCOUNT_NAME);
+            initialTab = getIntent().getIntExtra(EXTRA_INITIAL_TAB, TAB_POSTS);
         } else {
             mFetchUserInfoSuccess = savedInstanceState.getBoolean(FETCH_USER_INFO_STATE);
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
@@ -756,6 +778,32 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
+    // Side effects of selecting a tab: swipe-back lock (Comments tab pages back to Posts instead of
+    // exiting), bottom bar / FAB visibility, and the toolbar sort subtitle. Invoked from
+    // onPageSelected and, for a deep-link initial tab, explicitly (that programmatic selection is done
+    // before the callback is registered).
+    private void applyUserTabSelected(int position) {
+        if (position == lastAppliedTabPosition) {
+            return;
+        }
+        lastAppliedTabPosition = position;
+
+        if (position == 0) {
+            unlockSwipeRightToGoBack();
+        } else {
+            lockSwipeRightToGoBack();
+        }
+
+        if (showBottomAppBar) {
+            navigationWrapper.showNavigation();
+        }
+        if (!hideFab) {
+            navigationWrapper.showFab();
+        }
+
+        sectionsPagerAdapter.displaySortTypeInToolbar();
+    }
+
     @ExperimentalBadgeUtils
     private void initializeViewPager() {
         binding.viewPagerViewUserDetailActivity.setAdapter(sectionsPagerAdapter);
@@ -771,25 +819,37 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             }
         }).attach();
 
+        // Land on the deep-link tab synchronously so the Posts tab is never briefly rendered first,
+        // and before registering the page-change callback so it doesn't fire for this programmatic
+        // selection. The initial tab's side effects are applied explicitly below. Guarded to fresh
+        // launches via initialTab (only set when savedInstanceState == null), so rotation keeps the tab.
+        if (initialTab != TAB_POSTS) {
+            binding.viewPagerViewUserDetailActivity.setCurrentItem(initialTab, false);
+        }
+
         binding.viewPagerViewUserDetailActivity.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                if (position == 0) {
-                    unlockSwipeRightToGoBack();
-                } else {
-                    lockSwipeRightToGoBack();
-                }
-
-                if (showBottomAppBar) {
-                    navigationWrapper.showNavigation();
-                }
-                if (!hideFab) {
-                    navigationWrapper.showFab();
-                }
-
-                sectionsPagerAdapter.displaySortTypeInToolbar();
+                applyUserTabSelected(position);
             }
         });
+
+        if (initialTab != TAB_POSTS) {
+            applyUserTabSelected(initialTab);
+        }
+
+        if (restoredFromInstanceState) {
+            // After a config-change/process restore, mSliderPanel is freshly unlocked and ViewPager2
+            // may restore a non-Posts tab without firing onPageSelected. Re-apply the current tab's
+            // lock once the restored position is available. getCurrentItem() reports ViewPager2's own
+            // restored position here — on a restore this code sets no initial tab (initialTab stays
+            // TAB_POSTS), so nothing overrides that restored value.
+            binding.viewPagerViewUserDetailActivity.post(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    applyUserTabSelected(binding.viewPagerViewUserDetailActivity.getCurrentItem());
+                }
+            });
+        }
 
         fixViewPager2Sensitivity(binding.viewPagerViewUserDetailActivity);
 
@@ -1710,6 +1770,12 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostType.USER);
                 bundle.putString(PostFragment.EXTRA_USER_NAME, username);
                 bundle.putString(PostFragment.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_SUBMITTED);
+                if (initialSortType != null && initialTab != TAB_COMMENTS) {
+                    bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+                    if (initialSortTime != null) {
+                        bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+                    }
+                }
                 fragment.setArguments(bundle);
                 return fragment;
             }
@@ -1717,6 +1783,12 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             Bundle bundle = new Bundle();
             bundle.putString(CommentsListingFragment.EXTRA_USERNAME, username);
             bundle.putBoolean(CommentsListingFragment.EXTRA_ARE_SAVED_COMMENTS, false);
+            if (initialSortType != null && initialTab == TAB_COMMENTS) {
+                bundle.putString(CommentsListingFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+                if (initialSortTime != null) {
+                    bundle.putString(CommentsListingFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+                }
+            }
             fragment.setArguments(bundle);
             return fragment;
         }

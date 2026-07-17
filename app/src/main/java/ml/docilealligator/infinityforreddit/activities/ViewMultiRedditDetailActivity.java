@@ -91,6 +91,9 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
     public static final String EXTRA_MULTIREDDIT_DATA = "EMD";
     public static final String EXTRA_MULTIREDDIT_PATH = "EMP";
+    // Initial sort carried by an opening deep link (e.g. reddit.com/user/x/m/y/top), as SortType.Type/Time names.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String FRAGMENT_OUT_STATE_KEY = "FOSK";
 
@@ -131,6 +134,10 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     private MultiReddit multiReddit;
     @SuppressWarnings("NullAway.Init")
     private String multiPath;
+    @Nullable
+    private String initialSortType;
+    @Nullable
+    private String initialSortTime;
     @SuppressWarnings("NullAway.Init")
     private Fragment mFragment;
     private int fabOption;
@@ -264,6 +271,9 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 }*/
             }
         }
+
+        initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
+        initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
 
         multiReddit = getIntent().getParcelableExtra(EXTRA_MULTIREDDIT_DATA);
         if (multiReddit == null) {
@@ -510,6 +520,12 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 && multiPath != null && multiPath.startsWith("/user/-/m/");
         bundle.putInt(PostFragment.EXTRA_POST_TYPE,
                 isAnonymousLocalMulti ? PostType.ANONYMOUS_MULTIREDDIT : PostType.MULTIREDDIT);
+        if (initialSortType != null) {
+            bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+            if (initialSortTime != null) {
+                bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+            }
+        }
         mFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
     }

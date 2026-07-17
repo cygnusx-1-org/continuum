@@ -104,8 +104,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public static final String EXTRA_POST_TYPE = "EPT";
     public static final String EXTRA_FILTER = "EF";
     public static final String EXTRA_DISABLE_READ_POSTS = "EDRP";
+    // Sort carried by an opening deep link (e.g. reddit.com/r/x/top), as SortType.Type/Time names.
+    // Applied once on fresh creation; overrides the saved/default sort for that launch only.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String IS_IN_LAZY_MODE_STATE = "IILMS";
+    private static final String SORT_TYPE_STATE = "STS";
+    private static final String SORT_TIME_STATE = "STMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
     private static final String RECYCLER_VIEW_POSITION_OFFSET_STATE = "RVPOS";
     private static final String RECYCLER_VIEW_USER_ANCHOR_STATE = "RVUA";
@@ -370,23 +376,25 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.SUBREDDIT_TYPE;
             nameOfUsage = subredditName;
 
-            String sort;
-            String sortTime = null;
-
-            sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + subredditName,
-                    mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TYPE, SortType.Type.HOT.name()));
-            if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
-                sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + subredditName,
-                        mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
+            } else {
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + subredditName,
+                        mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TYPE, SortType.Type.HOT.name()));
+                String sortTime = null;
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + subredditName,
+                            mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
+                }
+                if (sortTime != null) {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
             boolean displaySubredditName = subredditName != null && (subredditName.equals("popular") || subredditName.equals("all"));
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout);
-
-            if (sortTime != null) {
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
-            } else {
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
-            }
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mCustomThemeWrapper, locale,
@@ -442,23 +450,25 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.MULTIREDDIT_TYPE;
             nameOfUsage = multiRedditPath;
 
-            String sort;
-            String sortTime = null;
-
-            sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                    SortType.Type.HOT.name());
-            if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
-                sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                        SortType.Time.ALL.name());
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
+            } else {
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                        SortType.Type.HOT.name());
+                String sortTime = null;
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                            SortType.Time.ALL.name());
+                }
+                if (sortTime != null) {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
                     defaultPostLayout);
-
-            if (sortTime != null) {
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
-            } else {
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
-            }
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mCustomThemeWrapper, locale,
@@ -517,14 +527,19 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.USER_TYPE;
             nameOfUsage = username;
 
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_POST_BASE + username,
-                    mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TYPE, SortType.Type.NEW.name()));
-            if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
-                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_POST_BASE + username,
-                        mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
             } else {
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_POST_BASE + username,
+                        mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TYPE, SortType.Type.NEW.name()));
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_POST_BASE + username,
+                            mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout);
 
@@ -639,12 +654,17 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.MULTIREDDIT_TYPE;
             nameOfUsage = multiRedditPath;
 
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Type.HOT.name());
-            if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
-                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Time.ALL.name());
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
             } else {
-                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Type.HOT.name());
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Time.ALL.name());
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
 
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout);
@@ -1356,6 +1376,45 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         outState.putParcelable(POST_FILTER_STATE, postFilter);
         outState.putString(CONCATENATED_SUBREDDIT_NAMES_STATE, concatenatedSubredditNames);
         outState.putLong(POST_FRAGMENT_ID_STATE, postFragmentId);
+
+        // Only the subreddit/multireddit/user paths restore this (see getOverrideSortType).
+        if ((postType == PostType.SUBREDDIT || postType == PostType.MULTIREDDIT
+                || postType == PostType.ANONYMOUS_MULTIREDDIT || postType == PostType.USER)
+                && sortType != null) {
+            outState.putString(SORT_TYPE_STATE, sortType.getType().name());
+            if (sortType.getTime() != null) {
+                outState.putString(SORT_TIME_STATE, sortType.getTime().name());
+            }
+        }
+    }
+
+    /**
+     * Resolves a sort that should take precedence over the saved/default sort: the live sort
+     * restored across a config change, or a sort carried by an opening deep link on fresh
+     * creation. Returns null to fall back to the saved/default sort. Only consulted by the
+     * subreddit, multireddit (incl. anonymous), and user paths.
+     */
+    @Nullable
+    private SortType getOverrideSortType(@Nullable Bundle savedInstanceState) {
+        String typeName;
+        String timeName;
+        if (savedInstanceState != null) {
+            typeName = savedInstanceState.getString(SORT_TYPE_STATE);
+            timeName = savedInstanceState.getString(SORT_TIME_STATE);
+        } else {
+            Bundle args = getArguments();
+            typeName = args == null ? null : args.getString(EXTRA_INITIAL_SORT_TYPE);
+            timeName = args == null ? null : args.getString(EXTRA_INITIAL_SORT_TIME);
+        }
+        if (typeName == null) {
+            return null;
+        }
+        try {
+            SortType.Type type = SortType.Type.valueOf(typeName);
+            return timeName == null ? new SortType(type) : new SortType(type, SortType.Time.valueOf(timeName));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     @Override
