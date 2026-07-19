@@ -106,13 +106,17 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Account selectedAccount;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
     private boolean loadSubredditIconSuccessful = true;
     private boolean isPosting;
+    @Nullable
     private Uri imageUri;
     private int primaryTextColor;
     private ActivityResultLauncher<String> requestCameraPermissionLauncher;
@@ -122,12 +126,13 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMemu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private ActivityPostImageBinding binding;
@@ -421,8 +426,12 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         Handler handler = new Handler();
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
-            selectedAccount = account;
             handler.post(() -> {
+                if (selectedAccount != null) {
+                    // The user picked an account while this load was in flight; don't stomp it.
+                    return;
+                }
+                selectedAccount = account;
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -531,6 +540,13 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     }
 
     private void loadSubredditIcon() {
+        String subredditName = this.subredditName;
+        if (subredditName == null) {
+            // Nothing to fetch: fall back to the default icon, as the failed-fetch path used to.
+            displaySubredditIcon();
+            loadSubredditIconSuccessful = true;
+            return;
+        }
         LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
             iconUrl = iconImageUrl;
@@ -553,7 +569,6 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_image_activity, menu);
         applyMenuItemTheme(menu);
-        mMemu = menu;
         flairController.setPosting(isPosting);
         flairController.setMenu(menu);
         return true;
@@ -578,6 +593,12 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
 
             if (imageUri == null) {
                 Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.select_an_image, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+
+            Account selectedAccount = this.selectedAccount;
+            if (selectedAccount == null) {
+                Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.account_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
@@ -760,6 +781,9 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
                     .into(binding.accountIconGifImageViewPostImageActivity);
 
             binding.accountNameTextViewPostImageActivity.setText(selectedAccount.getAccountName());
+
+            // Flair requirements are per-account: re-fetch with the newly selected account's token.
+            notifyControllerOfSubreddit();
         }
     }
 
@@ -769,6 +793,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("temp_img", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (IOException ex) {
             Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.error_creating_temp_file, Snackbar.LENGTH_SHORT).show();

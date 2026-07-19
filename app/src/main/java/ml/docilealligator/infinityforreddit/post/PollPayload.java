@@ -13,10 +13,13 @@ public class PollPayload {
     public boolean isNsfw;
     public String[] options;
     @SerializedName("flair_id")
+    @Nullable
     public String flairId;
     @SerializedName("flair_text")
+    @Nullable
     public String flairText;
     @SerializedName("raw_rtjson")
+    @Nullable
     public String richTextJSON;
     @SerializedName("post_to_twitter")
     public boolean postToTwitter = false;
@@ -37,7 +40,7 @@ public class PollPayload {
     public boolean validateOnSubmit = true;
 
     public PollPayload(String subredditName, String title, String[] options, int duration, boolean isNsfw,
-                       boolean isSpoiler, Flair flair, boolean sendReplies,
+                       boolean isSpoiler, @Nullable Flair flair, boolean sendReplies,
                        String submitType) {
         this.subredditName = subredditName;
         this.title = title;
@@ -54,8 +57,8 @@ public class PollPayload {
     }
 
     public PollPayload(String subredditName, String title, String[] options, int duration, boolean isNsfw,
-                       boolean isSpoiler, Flair flair, String richTextJSON, String text, boolean sendReplies,
-                       String submitType) {
+                       boolean isSpoiler, @Nullable Flair flair, @Nullable String richTextJSON,
+                       @Nullable String text, boolean sendReplies, String submitType) {
         this.subredditName = subredditName;
         this.title = title;
         this.options = options;

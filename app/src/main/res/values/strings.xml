@@ -226,6 +226,7 @@
 
     <string name="select_a_subreddit">Please select a subreddit first</string>
     <string name="title_required">The post needs a good title</string>
+    <string name="account_not_loaded_yet">Account is still loading, please try again</string>
     <string name="crosspost_not_subscribed_title">Not subscribed</string>
     <string name="crosspost_not_subscribed_message">You\'re not subscribed to r/%1$s, so you can\'t crosspost there. Subscribe first, then try again.</string>
     <string name="crosspost_disallowed_title">Crossposts not allowed</string>

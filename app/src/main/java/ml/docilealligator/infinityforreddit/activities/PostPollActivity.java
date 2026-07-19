@@ -89,6 +89,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     private static final String IS_SPOILER_STATE = "ISS";
     private static final String IS_NSFW_STATE = "INS";
     private static final String UPLOADED_IMAGES_STATE = "UIS";
+    private static final String CAPTURED_IMAGE_URI_STATE = "CIUS";
 
     private static final int SUBREDDIT_SELECTION_REQUEST_CODE = 0;
     private static final int PICK_IMAGE_REQUEST_CODE = 100;
@@ -116,8 +117,11 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Account selectedAccount;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
@@ -130,14 +134,16 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMenu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
+    @Nullable
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
     private ActivityPostPollBinding binding;
@@ -212,7 +218,15 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             flair = savedInstanceState.getParcelable(FLAIR_STATE);
             isSpoiler = savedInstanceState.getBoolean(IS_SPOILER_STATE);
             isNSFW = savedInstanceState.getBoolean(IS_NSFW_STATE);
-            uploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            ArrayList<UploadedImage> savedUploadedImages =
+                    savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            if (savedUploadedImages != null) {
+                uploadedImages = savedUploadedImages;
+            }
+            String savedCapturedImageUri = savedInstanceState.getString(CAPTURED_IMAGE_URI_STATE);
+            if (savedCapturedImageUri != null) {
+                capturedImageUri = Uri.parse(savedCapturedImageUri);
+            }
 
             if (selectedAccount != null) {
                 mGlide.load(selectedAccount.getProfileImageUrl())
@@ -387,12 +401,12 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                 } else {
                     if (!binding.postTitleEditTextPostPollActivity.getText().toString().isEmpty()
                             || !binding.postContentEditTextPostPollActivity.getText().toString().isEmpty()
-                            || !binding.option1TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()
-                            || !binding.option2TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()
-                            || !binding.option3TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()
-                            || !binding.option4TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()
-                            || !binding.option5TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()
-                            || !binding.option6TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()) {
+                            || !Objects.requireNonNull(binding.option1TextInputLayoutEditTextPostPollActivity.getText()).toString().isEmpty()
+                            || !Objects.requireNonNull(binding.option2TextInputLayoutEditTextPostPollActivity.getText()).toString().isEmpty()
+                            || !Objects.requireNonNull(binding.option3TextInputLayoutEditTextPostPollActivity.getText()).toString().isEmpty()
+                            || !Objects.requireNonNull(binding.option4TextInputLayoutEditTextPostPollActivity.getText()).toString().isEmpty()
+                            || !Objects.requireNonNull(binding.option5TextInputLayoutEditTextPostPollActivity.getText()).toString().isEmpty()
+                            || !Objects.requireNonNull(binding.option6TextInputLayoutEditTextPostPollActivity.getText()).toString().isEmpty()) {
                         promptAlertDialog(R.string.discard, R.string.discard_detail);
                     } else {
                         setEnabled(false);
@@ -407,8 +421,12 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         Handler handler = new Handler();
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
-            selectedAccount = account;
             handler.post(() -> {
+                if (selectedAccount != null) {
+                    // The user picked an account while this load was in flight; don't stomp it.
+                    return;
+                }
+                selectedAccount = account;
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -574,6 +592,13 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     }
 
     private void loadSubredditIcon() {
+        String subredditName = this.subredditName;
+        if (subredditName == null) {
+            // Nothing to fetch: fall back to the default icon, as the failed-fetch path used to.
+            displaySubredditIcon();
+            loadSubredditIconSuccessful = true;
+            return;
+        }
         LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
             iconUrl = iconImageUrl;
@@ -596,7 +621,6 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_poll_activity, menu);
         applyMenuItemTheme(menu);
-        mMenu = menu;
         flairController.setPosting(isPosting);
         flairController.setMenu(menu);
         return true;
@@ -614,14 +638,14 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             intent.putExtra(FullMarkdownActivity.EXTRA_SUBMIT_POST, true);
             startActivityForResult(intent, MARKDOWN_PREVIEW_REQUEST_CODE);
         } else if (itemId == R.id.action_send_post_poll_activity) {
-            submitPost(item);
+            submitPost();
             return true;
         }
 
         return false;
     }
 
-    private void submitPost(MenuItem item) {
+    private void submitPost() {
         if (!subredditSelected) {
             Snackbar.make(binding.coordinatorLayoutPostPollActivity, R.string.select_a_subreddit, Snackbar.LENGTH_SHORT).show();
             return;
@@ -640,27 +664,39 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         }
 
         ArrayList<String> optionList = new ArrayList<>();
-        if (!binding.option1TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()) {
-            optionList.add(binding.option1TextInputLayoutEditTextPostPollActivity.getText().toString());
+        String option1 = Objects.requireNonNull(binding.option1TextInputLayoutEditTextPostPollActivity.getText()).toString();
+        if (!option1.isEmpty()) {
+            optionList.add(option1);
         }
-        if (!binding.option2TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()) {
-            optionList.add(binding.option2TextInputLayoutEditTextPostPollActivity.getText().toString());
+        String option2 = Objects.requireNonNull(binding.option2TextInputLayoutEditTextPostPollActivity.getText()).toString();
+        if (!option2.isEmpty()) {
+            optionList.add(option2);
         }
-        if (!binding.option3TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()) {
-            optionList.add(binding.option3TextInputLayoutEditTextPostPollActivity.getText().toString());
+        String option3 = Objects.requireNonNull(binding.option3TextInputLayoutEditTextPostPollActivity.getText()).toString();
+        if (!option3.isEmpty()) {
+            optionList.add(option3);
         }
-        if (!binding.option4TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()) {
-            optionList.add(binding.option4TextInputLayoutEditTextPostPollActivity.getText().toString());
+        String option4 = Objects.requireNonNull(binding.option4TextInputLayoutEditTextPostPollActivity.getText()).toString();
+        if (!option4.isEmpty()) {
+            optionList.add(option4);
         }
-        if (!binding.option5TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()) {
-            optionList.add(binding.option5TextInputLayoutEditTextPostPollActivity.getText().toString());
+        String option5 = Objects.requireNonNull(binding.option5TextInputLayoutEditTextPostPollActivity.getText()).toString();
+        if (!option5.isEmpty()) {
+            optionList.add(option5);
         }
-        if (!binding.option6TextInputLayoutEditTextPostPollActivity.getText().toString().isEmpty()) {
-            optionList.add(binding.option6TextInputLayoutEditTextPostPollActivity.getText().toString());
+        String option6 = Objects.requireNonNull(binding.option6TextInputLayoutEditTextPostPollActivity.getText()).toString();
+        if (!option6.isEmpty()) {
+            optionList.add(option6);
         }
 
         if (optionList.size() < 2) {
             Snackbar.make(binding.coordinatorLayoutPostPollActivity, R.string.two_options_required, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+
+        Account selectedAccount = this.selectedAccount;
+        if (selectedAccount == null) {
+            Snackbar.make(binding.coordinatorLayoutPostPollActivity, R.string.account_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
             return;
         }
 
@@ -722,6 +758,9 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         outState.putBoolean(IS_SPOILER_STATE, isSpoiler);
         outState.putBoolean(IS_NSFW_STATE, isNSFW);
         outState.putParcelableArrayList(UPLOADED_IMAGES_STATE, uploadedImages);
+        if (capturedImageUri != null) {
+            outState.putString(CAPTURED_IMAGE_URI_STATE, capturedImageUri.toString());
+        }
     }
 
     @Override
@@ -729,6 +768,9 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE) {
+                if (data == null) {
+                    return;
+                }
                 subredditName = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME);
                 iconUrl = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_ICON);
                 subredditSelected = true;
@@ -745,21 +787,33 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                 applyFlairLabelStyle();
                 notifyControllerOfSubreddit();
             } else if (requestCode == PICK_IMAGE_REQUEST_CODE) {
-                if (data == null) {
+                Uri pickedImageUri = data == null ? null : data.getData();
+                if (pickedImageUri == null) {
                     Toast.makeText(PostPollActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
                     return;
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.postContentEditTextPostPollActivity,
-                        binding.coordinatorLayoutPostPollActivity, data.getData(), uploadedImages);
+                        binding.coordinatorLayoutPostPollActivity, pickedImageUri, uploadedImages);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+                Uri capturedImageUri = this.capturedImageUri;
+                if (capturedImageUri == null) {
+                    Toast.makeText(PostPollActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.postContentEditTextPostPollActivity,
                         binding.coordinatorLayoutPostPollActivity, capturedImageUri, uploadedImages);
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
-                submitPost(mMenu.findItem(R.id.action_send_post_poll_activity));
+                submitPost();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 
     @Override
@@ -788,6 +842,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             capturedImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("captured_image", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (IOException ex) {
             Toast.makeText(this, R.string.error_creating_temp_file, Toast.LENGTH_SHORT).show();
@@ -824,6 +879,9 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                     .into(binding.accountIconGifImageViewPostPollActivity);
 
             binding.accountNameTextViewPostPollActivity.setText(selectedAccount.getAccountName());
+
+            // Flair requirements are per-account: re-fetch with the newly selected account's token.
+            notifyControllerOfSubreddit();
         }
     }
 
