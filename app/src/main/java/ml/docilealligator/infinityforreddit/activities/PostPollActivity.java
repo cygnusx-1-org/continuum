@@ -119,6 +119,9 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
     Executor mExecutor;
     @Nullable
     private Account selectedAccount;
+    /** Set once the current-account read lands, so a null {@link #selectedAccount} can tell
+     * "no account exists" apart from "still loading". */
+    private boolean accountLoadFinished;
     @Nullable
     private String iconUrl;
     @Nullable
@@ -422,6 +425,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
             handler.post(() -> {
+                accountLoadFinished = true;
                 if (selectedAccount != null) {
                     // The user picked an account while this load was in flight; don't stomp it.
                     return;
@@ -696,7 +700,10 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
 
         Account selectedAccount = this.selectedAccount;
         if (selectedAccount == null) {
-            Snackbar.make(binding.coordinatorLayoutPostPollActivity, R.string.account_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
+            // A finished read with no account means there is nothing left to wait for.
+            Snackbar.make(binding.coordinatorLayoutPostPollActivity,
+                    accountLoadFinished ? R.string.login_first : R.string.account_not_loaded_yet,
+                    Snackbar.LENGTH_SHORT).show();
             return;
         }
 

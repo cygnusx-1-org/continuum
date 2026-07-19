@@ -122,11 +122,18 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Account selectedAccount;
+    /** Set once the current-account read lands, so a null {@link #selectedAccount} can tell
+     * "no account exists" apart from "still loading". */
+    private boolean accountLoadFinished;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
+    @Nullable
     private Uri videoUri;
     private boolean loadSubredditIconSuccessful = true;
     private boolean isPosting;
@@ -139,12 +146,13 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMemu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment mFlairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private FlairRequirementController flairController;
@@ -230,7 +238,8 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
 
         Drawable playDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_play_arrow_24dp, null);
         Drawable pauseDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_24dp, null);
-        MaterialButton playPauseButton = binding.getRoot().findViewById(R.id.exo_play_pause_button_exo_playback_control_view);
+        MaterialButton playPauseButton = Objects.requireNonNull(
+                binding.getRoot().findViewById(R.id.exo_play_pause_button_exo_playback_control_view));
         playPauseButton.setOnClickListener((view) -> {
             Util.handlePlayPauseButtonAction(player);
         });
@@ -274,8 +283,9 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                 loadCurrentAccount();
             }
 
-            if (savedInstanceState.getString(VIDEO_URI_STATE) != null) {
-                videoUri = Uri.parse(savedInstanceState.getString(VIDEO_URI_STATE));
+            String savedVideoUri = savedInstanceState.getString(VIDEO_URI_STATE);
+            if (savedVideoUri != null) {
+                videoUri = Uri.parse(savedVideoUri);
                 loadVideo();
             }
 
@@ -474,8 +484,13 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         Handler handler = new Handler();
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
-            selectedAccount = account;
             handler.post(() -> {
+                accountLoadFinished = true;
+                if (selectedAccount != null) {
+                    // The user picked an account while this load was in flight; don't stomp it.
+                    return;
+                }
+                selectedAccount = account;
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -560,6 +575,10 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     }
 
     private void loadVideo() {
+        Uri videoUri = this.videoUri;
+        if (videoUri == null) {
+            return;
+        }
         binding.selectVideoConstraintLayoutPostVideoActivity.setVisibility(View.GONE);
         binding.selectAgainTextViewPostVideoActivity.setVisibility(View.VISIBLE);
         binding.playerViewPostVideoActivity.setVisibility(View.VISIBLE);
@@ -596,6 +615,13 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     }
 
     private void loadSubredditIcon() {
+        String subredditName = this.subredditName;
+        if (subredditName == null) {
+            // Nothing to fetch: fall back to the default icon, as the failed-fetch path used to.
+            displaySubredditIcon();
+            loadSubredditIconSuccessful = true;
+            return;
+        }
         LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
             iconUrl = iconImageUrl;
@@ -617,7 +643,6 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_video_activity, menu);
         applyMenuItemTheme(menu);
-        mMemu = menu;
         flairController.setPosting(isPosting);
         flairController.setMenu(menu);
         return true;
@@ -640,8 +665,18 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                 return true;
             }
 
+            Uri videoUri = this.videoUri;
             if (videoUri == null) {
                 Snackbar.make(binding.coordinatorLayoutPostVideoActivity, R.string.select_an_image, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+
+            Account selectedAccount = this.selectedAccount;
+            if (selectedAccount == null) {
+                // A finished read with no account means there is nothing left to wait for.
+                Snackbar.make(binding.coordinatorLayoutPostVideoActivity,
+                        accountLoadFinished ? R.string.login_first : R.string.account_not_loaded_yet,
+                        Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
@@ -762,12 +797,13 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
             }
         } else if (requestCode == PICK_VIDEO_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                if (data == null) {
+                Uri pickedVideoUri = data == null ? null : data.getData();
+                if (pickedVideoUri == null) {
                     Snackbar.make(binding.coordinatorLayoutPostVideoActivity, R.string.error_getting_video, Snackbar.LENGTH_SHORT).show();
                     return;
                 }
 
-                videoUri = data.getData();
+                videoUri = pickedVideoUri;
                 loadVideo();
             }
         } else if (requestCode == CAPTURE_VIDEO_REQUEST_CODE) {
