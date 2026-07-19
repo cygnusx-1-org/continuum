@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
 import ml.docilealligator.infinityforreddit.PostModerationActionHandler
 import ml.docilealligator.infinityforreddit.R
@@ -28,7 +29,7 @@ class PostModerationActionBottomSheetFragment : LandscapeExpandedRoundedBottomSh
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            post = it.getParcelable(EXTRA_POST)
+            post = BundleCompat.getParcelable(it, EXTRA_POST, Post::class.java)
             position = it.getInt(EXTRA_POSITION, -1)
         }
     }

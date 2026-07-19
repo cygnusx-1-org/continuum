@@ -11,5 +11,5 @@ sealed interface ActionState {
 
 sealed class ActionStateError {
     data class Message(val message: String) : ActionStateError()
-    data class MessageRes(@StringRes val resId: Int) : ActionStateError()
+    data class MessageRes(@param:StringRes @get:StringRes val resId: Int) : ActionStateError()
 }

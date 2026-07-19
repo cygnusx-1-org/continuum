@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -221,10 +222,15 @@ public class CustomTheme implements Parcelable {
 
     public CustomTheme() {}
 
+    // @Ignore keeps Room from considering the convenience and Parcelable constructors. Room already
+    // picks the no-arg one and populates fields directly; marking the others makes that explicit
+    // rather than leaving it to Room's "multiple good constructors" fallback.
+    @Ignore
     public CustomTheme(@NonNull String name) {
         this.name = name;
     }
 
+    @Ignore
     protected CustomTheme(Parcel in) {
         name = Objects.requireNonNull(in.readString());
         isLightTheme = in.readByte() != 0;

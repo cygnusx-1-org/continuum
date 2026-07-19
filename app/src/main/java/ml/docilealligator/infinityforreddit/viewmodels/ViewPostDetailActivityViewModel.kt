@@ -78,7 +78,7 @@ class ViewPostDetailActivityViewModel(
         return posts?.getOrNull(index)
     }
 
-    fun loadAuthorImages(comments: MutableList<Comment?>, loadIconListener: LoadIconListener) {
+    fun loadAuthorImages(comments: List<Comment>, loadIconListener: LoadIconListener) {
         loader.loadAuthorImages(accessToken, comments, loadIconListener)
     }
 

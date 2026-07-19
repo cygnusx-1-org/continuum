@@ -84,7 +84,7 @@ suspend fun loadVReddItVideo(
                         val postResponse = retrofit.create(RedditAPIKt::class.java).getPost(postId)
                         if (postResponse.isSuccessful) {
                             val post = withContext(Dispatchers.Default) {
-                                ParsePost.parsePostSync(response.body())
+                                postResponse.body()?.let { ParsePost.parsePostSync(it) }
                             }
                             return post?.let { post ->
                                 if (post.isRedgifs) {

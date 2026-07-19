@@ -60,7 +60,7 @@ class ViewPostDetailFragmentViewModelNew(
     private val oauthRetrofit: Retrofit,
     private val redditDataRoomDatabase: RedditDataRoomDatabase,
     private val accessToken: String?,
-    private val accountName: String?,
+    private val accountName: String,
     private var post: Post?,
     private var postId: String?,
     private var singleCommentId: String?,
@@ -838,7 +838,7 @@ class ViewPostDetailFragmentViewModelNew(
 
                             if (response.isSuccessful) {
                                 val post = withContext(Dispatchers.Default) {
-                                    ParsePost.parsePostSync(response.body())
+                                    response.body()?.let { ParsePost.parsePostSync(it) }
                                 }
                                 post?.let { post ->
                                     if (fetchComments) {
@@ -2273,7 +2273,7 @@ class ViewPostDetailFragmentViewModelNew(
     companion object {
         fun provideFactory(retrofit: Retrofit, oauthRetrofit: Retrofit,
                            redditDataRoomDatabase: RedditDataRoomDatabase,
-                           accessToken: String?, accountName: String?,
+                           accessToken: String?, accountName: String,
                            post: Post?, postId: String?, commentId: String?,
                            comments: ArrayList<Comment>?, children: ArrayList<String>?,
                            sortType: SortType.Type?, sortTypeSharedPreferences: SharedPreferences,

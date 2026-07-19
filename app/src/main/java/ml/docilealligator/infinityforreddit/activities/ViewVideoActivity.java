@@ -146,7 +146,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     public static final int VIDEO_TYPE_V_REDD_IT = 4;
     public static final int VIDEO_TYPE_DIRECT = 3;
     public static final int VIDEO_TYPE_REDGIFS = 2;
-    private static final int VIDEO_TYPE_NORMAL = 0;
+    public static final int VIDEO_TYPE_NORMAL = 0;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
     /*private static final String IS_MUTE_STATE = "IMS";
@@ -902,6 +902,17 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                     }
                 }
             }
+        });
+
+        viewVideoViewModel.getErrorResId().observe(this, messageRes -> {
+            if (messageRes == null) {
+                return;
+            }
+            // The fetch failed — removed post, dead link, or a provider outage — so no video URI
+            // will ever arrive. Without this the indeterminate spinner stays up forever and the
+            // error the ViewModel recorded is never shown to anyone.
+            binding.getLoadingIndicator().setVisibility(View.GONE);
+            Toast.makeText(this, messageRes, Toast.LENGTH_LONG).show();
         });
     }
 

@@ -3,8 +3,8 @@ package ml.docilealligator.infinityforreddit.viewmodels
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import android.text.Html
 import androidx.core.content.edit
+import androidx.core.text.HtmlCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -99,10 +99,14 @@ class AppAuthLoginViewModel(
             val jsonResponse = JSONObject(accountResponse)
             val name = jsonResponse.getString(JSONUtils.NAME_KEY)
             val profileImageUrl =
-                Html.fromHtml(jsonResponse.getString(JSONUtils.ICON_IMG_KEY)).toString()
-            val bannerImageUrl = if (!jsonResponse.isNull(JSONUtils.SUBREDDIT_KEY)) Html.fromHtml(
+                HtmlCompat.fromHtml(
+                    jsonResponse.getString(JSONUtils.ICON_IMG_KEY),
+                    HtmlCompat.FROM_HTML_MODE_LEGACY
+                ).toString()
+            val bannerImageUrl = if (!jsonResponse.isNull(JSONUtils.SUBREDDIT_KEY)) HtmlCompat.fromHtml(
                 jsonResponse.getJSONObject(JSONUtils.SUBREDDIT_KEY)
-                    .getString(JSONUtils.BANNER_IMG_KEY)
+                    .getString(JSONUtils.BANNER_IMG_KEY),
+                HtmlCompat.FROM_HTML_MODE_LEGACY
             ).toString() else null
             val karma = jsonResponse.getInt(JSONUtils.TOTAL_KARMA_KEY)
             val isMod = jsonResponse.getBoolean(JSONUtils.IS_MOD_KEY)

@@ -61,6 +61,12 @@ public class UserProfileImagesBatchLoader {
 
     public void loadAuthorImages(@Nullable String accessToken, List<Comment> comments,
                                  @NonNull ViewPostDetailActivityViewModel.LoadIconListener loadIconListener) {
+        if (comments.isEmpty()) {
+            // No comments means no author to resolve an icon for, so there is nothing to report:
+            // LoadIconListener only has a success callback keyed on an author full name, and we
+            // have none. Returning here keeps the comments.get(0) calls below in bounds.
+            return;
+        }
         String authorFullName = comments.get(0).getAuthorFullName();
         synchronized (mImageMapLock) {
             if (mAuthorFullNameToImageMap.containsKey(authorFullName)) {

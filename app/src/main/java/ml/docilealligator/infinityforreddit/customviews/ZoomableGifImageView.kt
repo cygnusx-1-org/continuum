@@ -29,14 +29,14 @@ class ZoomableGifImageView(context: Context) : ZoomImageView(context) {
     })
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        tapDetector.onTouchEvent(event)
+    override fun onTouchEvent(ev: MotionEvent): Boolean {
+        tapDetector.onTouchEvent(ev)
 
-        if (event.pointerCount >= 2 || zoom > 1.00001f) {
+        if (ev.pointerCount >= 2 || zoom > 1.00001f) {
             parent?.requestDisallowInterceptTouchEvent(true)
         }
 
-        return super.onTouchEvent(event)
+        return super.onTouchEvent(ev)
     }
 
     override fun performClick(): Boolean {

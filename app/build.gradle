@@ -23,7 +23,7 @@ plugins {
     id("io.qameta.allure") version "4.1.0"
     id 'com.android.legacy-kapt'
     id 'kotlin-parcelize'
-    id("org.jetbrains.kotlin.plugin.compose") version '2.2.10'
+    id("org.jetbrains.kotlin.plugin.compose") version '2.3.21'
     id 'io.github.takahirom.roborazzi'
     id 'net.ltgt.errorprone' version '5.1.0'
 }
@@ -168,10 +168,6 @@ android {
             include 'armeabi-v7a', 'arm64-v8a'
             universalApk = false  // Set to true if you also want a universal APK
         }
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
     }
 
 }
