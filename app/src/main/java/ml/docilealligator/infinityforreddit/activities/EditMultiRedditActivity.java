@@ -5,9 +5,11 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
@@ -16,6 +18,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import com.google.android.material.snackbar.Snackbar;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -27,6 +30,7 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityEditMultiRedditBinding;
 import ml.docilealligator.infinityforreddit.multireddit.EditMultiReddit;
+import ml.docilealligator.infinityforreddit.multireddit.ExpandedSubredditInMultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.FetchMultiRedditInfo;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiRedditJSONModel;
@@ -53,6 +57,8 @@ public class EditMultiRedditActivity extends BaseActivity {
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    /** Null until the multireddit is fetched, and stays null if that fetch fails. */
+    @Nullable
     private MultiReddit multiReddit;
     private String multipath;
     private ActivityEditMultiRedditBinding binding;
@@ -111,67 +117,103 @@ public class EditMultiRedditActivity extends BaseActivity {
 
         if (savedInstanceState != null) {
             multiReddit = savedInstanceState.getParcelable(MULTI_REDDIT_STATE);
-            multipath = savedInstanceState.getString(MULTI_PATH_STATE);
+            multipath = Objects.requireNonNull(savedInstanceState.getString(MULTI_PATH_STATE));
         } else {
-            multipath = getIntent().getStringExtra(EXTRA_MULTI_PATH);
+            multipath = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_MULTI_PATH));
         }
 
         bindView();
     }
 
     private void bindView() {
-        if (multiReddit == null) {
+        MultiReddit loadedMultiReddit = multiReddit;
+        if (loadedMultiReddit == null) {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 FetchMultiRedditInfo.anonymousFetchMultiRedditInfo(mExecutor, new Handler(),
                         mRedditDataRoomDatabase, multipath, new FetchMultiRedditInfo.FetchMultiRedditInfoListener() {
                             @Override
                             public void success(MultiReddit multiReddit) {
+                                if (isFinishing() || isDestroyed()) {
+                                    return;
+                                }
                                 EditMultiRedditActivity.this.multiReddit = multiReddit;
-                                binding.progressBarEditMultiRedditActivity.setVisibility(View.GONE);
-                                binding.linearLayoutEditMultiRedditActivity.setVisibility(View.VISIBLE);
-                                binding.multiRedditNameEditTextEditMultiRedditActivity.setText(multiReddit.getDisplayName());
-                                binding.descriptionEditTextEditMultiRedditActivity.setText(multiReddit.getDescription());
+                                displayMultiReddit(multiReddit, false);
                             }
 
                             @Override
                             public void failed() {
-                                Snackbar.make(binding.coordinatorLayoutEditMultiRedditActivity, R.string.cannot_fetch_multireddit, Snackbar.LENGTH_SHORT).show();
-                                finish();
+                                onFetchFailed();
                             }
                         });
             } else {
-                FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, mHandler, mRetrofit, accessToken,
+                String token = accessToken;
+                if (token == null) {
+                    // Nothing to authenticate with, so the fetch would only 401. Fail the same
+                    // way the request itself would rather than asserting on the way in.
+                    onFetchFailed();
+                    return;
+                }
+                FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, mHandler, mRetrofit, token,
                         multipath, new FetchMultiRedditInfo.FetchMultiRedditInfoListener() {
                             @Override
                             public void success(MultiReddit multiReddit) {
+                                if (isFinishing() || isDestroyed()) {
+                                    return;
+                                }
                                 EditMultiRedditActivity.this.multiReddit = multiReddit;
-                                binding.progressBarEditMultiRedditActivity.setVisibility(View.GONE);
-                                binding.linearLayoutEditMultiRedditActivity.setVisibility(View.VISIBLE);
-                                binding.multiRedditNameEditTextEditMultiRedditActivity.setText(multiReddit.getDisplayName());
-                                binding.descriptionEditTextEditMultiRedditActivity.setText(multiReddit.getDescription());
-                                binding.visibilitySwitchEditMultiRedditActivity.setChecked(!multiReddit.getVisibility().equals("public"));
+                                displayMultiReddit(multiReddit, true);
                             }
 
                             @Override
                             public void failed() {
-                                Snackbar.make(binding.coordinatorLayoutEditMultiRedditActivity, R.string.cannot_fetch_multireddit, Snackbar.LENGTH_SHORT).show();
+                                onFetchFailed();
                             }
                         });
             }
         } else {
-            binding.progressBarEditMultiRedditActivity.setVisibility(View.GONE);
-            binding.linearLayoutEditMultiRedditActivity.setVisibility(View.VISIBLE);
-            binding.multiRedditNameEditTextEditMultiRedditActivity.setText(multiReddit.getDisplayName());
-            binding.descriptionEditTextEditMultiRedditActivity.setText(multiReddit.getDescription());
-            binding.visibilitySwitchEditMultiRedditActivity.setChecked(!multiReddit.getVisibility().equals("public"));
+            displayMultiReddit(loadedMultiReddit, true);
         }
-            binding.selectSubredditTextViewEditMultiRedditActivity.setOnClickListener(view -> {
+        binding.selectSubredditTextViewEditMultiRedditActivity.setOnClickListener(view -> {
+            MultiReddit currentMultiReddit = multiReddit;
+            if (currentMultiReddit == null) {
+                // The fetch is still in flight, or it failed and left nothing to edit.
+                Snackbar.make(binding.coordinatorLayoutEditMultiRedditActivity, R.string.cannot_fetch_multireddit, Snackbar.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(EditMultiRedditActivity.this, SelectedSubredditsAndUsersActivity.class);
-            if (multiReddit.getSubreddits() != null) {
-                intent.putParcelableArrayListExtra(SelectedSubredditsAndUsersActivity.EXTRA_SELECTED_SUBREDDITS, multiReddit.getSubreddits());
+            ArrayList<ExpandedSubredditInMultiReddit> subreddits = currentMultiReddit.getSubreddits();
+            if (subreddits != null) {
+                intent.putParcelableArrayListExtra(SelectedSubredditsAndUsersActivity.EXTRA_SELECTED_SUBREDDITS, subreddits);
             }
             startActivityForResult(intent, SUBREDDIT_SELECTION_REQUEST_CODE);
         });
+    }
+
+    /**
+     * There is nothing to edit without the multireddit, and the content stays {@code gone} until
+     * {@link #displayMultiReddit} runs — so staying would leave a permanent spinner over a screen
+     * whose every control reports the same failure. Leave, as the anonymous path already did.
+     *
+     * <p>A Toast, not a Snackbar: a Snackbar is anchored to this activity's view hierarchy, which
+     * {@link #finish()} tears down before it can animate in. The no-token caller runs during
+     * {@code onCreate}, so a Snackbar there would never be seen at all.
+     */
+    private void onFetchFailed() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        Toast.makeText(this, R.string.cannot_fetch_multireddit, Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private void displayMultiReddit(MultiReddit multiReddit, boolean showVisibility) {
+        binding.progressBarEditMultiRedditActivity.setVisibility(View.GONE);
+        binding.linearLayoutEditMultiRedditActivity.setVisibility(View.VISIBLE);
+        binding.multiRedditNameEditTextEditMultiRedditActivity.setText(multiReddit.getDisplayName());
+        binding.descriptionEditTextEditMultiRedditActivity.setText(multiReddit.getDescription());
+        if (showVisibility) {
+            binding.visibilitySwitchEditMultiRedditActivity.setChecked(!"public".equals(multiReddit.getVisibility()));
+        }
     }
 
     @Override
@@ -188,18 +230,28 @@ public class EditMultiRedditActivity extends BaseActivity {
             finish();
             return true;
         } else if (itemId == R.id.action_save_edit_multi_reddit_activity) {
-            if (binding.multiRedditNameEditTextEditMultiRedditActivity.getText() == null || binding.multiRedditNameEditTextEditMultiRedditActivity.getText().toString().equals("")) {
+            Editable nameText = binding.multiRedditNameEditTextEditMultiRedditActivity.getText();
+            String name = nameText == null ? "" : nameText.toString();
+            if (name.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutEditMultiRedditActivity, R.string.no_multi_reddit_name, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+            Editable descriptionText = binding.descriptionEditTextEditMultiRedditActivity.getText();
+            String description = descriptionText == null ? "" : descriptionText.toString();
+
+            MultiReddit currentMultiReddit = multiReddit;
+            if (currentMultiReddit == null) {
+                // Nothing was loaded to edit, so there is nothing to save onto.
+                Snackbar.make(binding.coordinatorLayoutEditMultiRedditActivity, R.string.cannot_fetch_multireddit, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                String name = binding.multiRedditNameEditTextEditMultiRedditActivity.getText().toString();
-                multiReddit.setDisplayName(name);
-                multiReddit.setName(name);
-                multiReddit.setDescription(binding.descriptionEditTextEditMultiRedditActivity.getText().toString());
+                currentMultiReddit.setDisplayName(name);
+                currentMultiReddit.setName(name);
+                currentMultiReddit.setDescription(description);
                 EditMultiReddit.anonymousEditMultiReddit(mExecutor, new Handler(), mRedditDataRoomDatabase,
-                        multiReddit, new EditMultiReddit.EditMultiRedditListener() {
+                        currentMultiReddit, new EditMultiReddit.EditMultiRedditListener() {
                             @Override
                             public void success() {
                                 finish();
@@ -211,9 +263,15 @@ public class EditMultiRedditActivity extends BaseActivity {
                             }
                         });
             } else {
-                String jsonModel = new MultiRedditJSONModel(binding.multiRedditNameEditTextEditMultiRedditActivity.getText().toString(), binding.descriptionEditTextEditMultiRedditActivity.getText().toString(),
-                        binding.visibilitySwitchEditMultiRedditActivity.isChecked(), multiReddit.getSubreddits()).createJSONModel();
-                EditMultiReddit.editMultiReddit(mRetrofit, accessToken, multiReddit.getPath(),
+                String token = accessToken;
+                if (token == null) {
+                    // The request would only 401; report it the way a rejected edit reports.
+                    Snackbar.make(binding.coordinatorLayoutEditMultiRedditActivity, R.string.edit_multi_reddit_failed, Snackbar.LENGTH_SHORT).show();
+                    return true;
+                }
+                String jsonModel = new MultiRedditJSONModel(name, description,
+                        binding.visibilitySwitchEditMultiRedditActivity.isChecked(), currentMultiReddit.getSubreddits()).createJSONModel();
+                EditMultiReddit.editMultiReddit(mRetrofit, token, currentMultiReddit.getPath(),
                         jsonModel, new EditMultiReddit.EditMultiRedditListener() {
                             @Override
                             public void success() {
@@ -235,9 +293,13 @@ public class EditMultiRedditActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE && resultCode == RESULT_OK) {
-            if (data != null) {
-                multiReddit.setSubreddits(data.getParcelableArrayListExtra(
-                        SelectedSubredditsAndUsersActivity.EXTRA_RETURN_SELECTED_SUBREDDITS));
+            MultiReddit currentMultiReddit = multiReddit;
+            if (data != null && currentMultiReddit != null) {
+                ArrayList<ExpandedSubredditInMultiReddit> selectedSubreddits = data.getParcelableArrayListExtra(
+                        SelectedSubredditsAndUsersActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
+                if (selectedSubreddits != null) {
+                    currentMultiReddit.setSubreddits(selectedSubreddits);
+                }
             }
         }
     }

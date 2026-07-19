@@ -6,6 +6,7 @@ import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,7 +55,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
     @Inject
     Executor mExecutor;
     private ActivityCreateMultiRedditBinding binding;
-    private ArrayList<ExpandedSubredditInMultiReddit> mSubreddits;
+    private ArrayList<ExpandedSubredditInMultiReddit> mSubreddits = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,9 +110,11 @@ public class CreateMultiRedditActivity extends BaseActivity {
         }
 
         if (savedInstanceState != null) {
-            mSubreddits = savedInstanceState.getParcelableArrayList(SELECTED_SUBREDDITS_STATE);
-        } else {
-            mSubreddits = new ArrayList<>();
+            ArrayList<ExpandedSubredditInMultiReddit> restoredSubreddits =
+                    savedInstanceState.getParcelableArrayList(SELECTED_SUBREDDITS_STATE);
+            if (restoredSubreddits != null) {
+                mSubreddits = restoredSubreddits;
+            }
         }
         bindView();
     }
@@ -147,16 +150,26 @@ public class CreateMultiRedditActivity extends BaseActivity {
             finish();
             return true;
         } else if (itemId == R.id.action_save_create_multi_reddit_activity) {
-            if (binding.multiRedditNameEditTextCreateMultiRedditActivity.getText() == null || binding.multiRedditNameEditTextCreateMultiRedditActivity.getText().toString().equals("")) {
+            Editable nameText = binding.multiRedditNameEditTextCreateMultiRedditActivity.getText();
+            String name = nameText == null ? "" : nameText.toString();
+            if (name.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutCreateMultiRedditActivity, R.string.no_multi_reddit_name, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
+            Editable descriptionText = binding.descriptionEditTextCreateMultiRedditActivity.getText();
+            String description = descriptionText == null ? "" : descriptionText.toString();
 
             if (!accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                String jsonModel = new MultiRedditJSONModel(binding.multiRedditNameEditTextCreateMultiRedditActivity.getText().toString(), binding.descriptionEditTextCreateMultiRedditActivity.getText().toString(),
+                String token = accessToken;
+                if (token == null) {
+                    // The request would only 401; report it the way a rejected create reports.
+                    Snackbar.make(binding.coordinatorLayoutCreateMultiRedditActivity, R.string.create_multi_reddit_failed, Snackbar.LENGTH_SHORT).show();
+                    return true;
+                }
+                String jsonModel = new MultiRedditJSONModel(name, description,
                         binding.visibilityChipCreateMultiRedditActivity.isChecked(), mSubreddits).createJSONModel();
                 CreateMultiReddit.createMultiReddit(mExecutor, mHandler, mOauthRetrofit, mRedditDataRoomDatabase,
-                        accessToken, "/user/" + accountName + "/m/" + binding.multiRedditNameEditTextCreateMultiRedditActivity.getText().toString(),
+                        token, "/user/" + accountName + "/m/" + name,
                         jsonModel, new CreateMultiReddit.CreateMultiRedditListener() {
                             @Override
                             public void success() {
@@ -174,8 +187,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
                         });
             } else {
                 CreateMultiReddit.anonymousCreateMultiReddit(mExecutor, new Handler(), mRedditDataRoomDatabase,
-                        "/user/-/m/" + binding.multiRedditNameEditTextCreateMultiRedditActivity.getText().toString(),
-                        binding.multiRedditNameEditTextCreateMultiRedditActivity.getText().toString(), binding.descriptionEditTextCreateMultiRedditActivity.getText().toString(),
+                        "/user/-/m/" + name, name, description,
                         mSubreddits, new CreateMultiReddit.CreateMultiRedditListener() {
                             @Override
                             public void success() {
@@ -188,6 +200,7 @@ public class CreateMultiRedditActivity extends BaseActivity {
                             }
                         });
             }
+            return true;
         }
         return false;
     }
@@ -197,7 +210,11 @@ public class CreateMultiRedditActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data != null) {
-                mSubreddits = data.getParcelableArrayListExtra(SelectedSubredditsAndUsersActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
+                ArrayList<ExpandedSubredditInMultiReddit> selectedSubreddits =
+                        data.getParcelableArrayListExtra(SelectedSubredditsAndUsersActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
+                if (selectedSubreddits != null) {
+                    mSubreddits = selectedSubreddits;
+                }
             }
         }
     }

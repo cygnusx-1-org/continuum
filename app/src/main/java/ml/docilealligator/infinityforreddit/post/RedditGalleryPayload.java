@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.post;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.Nullable;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -32,13 +33,16 @@ public class RedditGalleryPayload {
     @SerializedName("validate_on_submit")
     public boolean validateOnSubmit = true;
     @SerializedName("flair_id")
+    @Nullable
     public String flairId;
     @SerializedName("flair_text")
+    @Nullable
     public String flairText;
     public ArrayList<Item> items;
 
     public RedditGalleryPayload(String subredditName, String submitType, String title, String text,
-                                boolean isSpoiler, boolean isNSFW, boolean sendReplies, Flair flair, ArrayList<Item> items) {
+                                boolean isSpoiler, boolean isNSFW, boolean sendReplies, @Nullable Flair flair,
+                                ArrayList<Item> items) {
         this.subredditName = subredditName;
         this.submitType = submitType;
         this.title = title;

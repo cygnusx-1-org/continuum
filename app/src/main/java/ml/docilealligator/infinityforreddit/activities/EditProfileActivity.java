@@ -163,7 +163,7 @@ public class EditProfileActivity extends BaseActivity {
                                         }
 
                                         @Override
-                                        public void failed(String message) {
+                                        public void failed(@Nullable String message) {
                                             Toast.makeText(EditProfileActivity.this,
                                                     getString(R.string.message_remove_banner_failed, message),
                                                     Toast.LENGTH_SHORT).show();
@@ -205,7 +205,7 @@ public class EditProfileActivity extends BaseActivity {
                                         }
 
                                         @Override
-                                        public void failed(String message) {
+                                        public void failed(@Nullable String message) {
                                             Toast.makeText(EditProfileActivity.this,
                                                     getString(R.string.message_remove_avatar_failed, message),
                                                     Toast.LENGTH_SHORT).show();
