@@ -704,6 +704,7 @@
     <string name="settings_hide_the_number_of_votes">Hide the Number of Votes</string>
     <string name="settings_hide_the_number_of_comments">Hide the Number of Comments</string>
     <string name="settings_show_avatar_on_the_right">Show Avatar on the Right</string>
+    <string name="settings_category_backup_and_restore_title">Backup and Restore</string>
     <string name="settings_backup_settings_title">Backup Settings</string>
     <string name="settings_backup_settings_summary">Includes accounts, Client ID, and Giphy API Key. You will be prompted to enter a password when creating the backup.</string>
     <string name="settings_restore_settings_title">Restore Settings</string>
@@ -1878,4 +1879,5 @@
     <string name="settings_search_settings">Search Settings</string>
     <string name="settings_search_hint">Search settings…</string>
     <string name="settings_search_no_results">No results found</string>
+    <string name="settings_search_loading">Loading settings…</string>
 </resources>

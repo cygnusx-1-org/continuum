@@ -41,11 +41,7 @@
 
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
-        app:title="Backup and Restore" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:key="reset_all_settings"
-        app:title="@string/settings_reset_all_settings_title" />
+        app:title="@string/settings_category_backup_and_restore_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         app:key="backup_settings"

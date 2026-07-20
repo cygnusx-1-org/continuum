@@ -18,6 +18,7 @@ import androidx.preference.PreferenceScreen;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiver;
+import ml.docilealligator.infinityforreddit.settings.SettingsScreenArgs;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public abstract class CustomFontPreferenceFragmentCompat extends PreferenceFragmentCompat implements PreferenceFragmentCompat.OnPreferenceDisplayDialogCallback {
@@ -33,6 +34,11 @@ public abstract class CustomFontPreferenceFragmentCompat extends PreferenceFragm
         this.view = view;
 
         applyStyle();
+
+        String scrollToKey = SettingsScreenArgs.takeScrollTarget(getArguments());
+        if (scrollToKey != null) {
+            scrollToPreference(scrollToKey);
+        }
     }
 
     protected void applyStyle() {

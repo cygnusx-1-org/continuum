@@ -44,13 +44,10 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
                 return true;
             });
 
-            if (sharedPreferences.getBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_KEY, false)) {
-                lockBottomAppBarSwitch.setVisible(true);
-                lockBottomAppBarSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
-                    EventBus.getDefault().post(new ChangeLockBottomAppBarEvent((Boolean) newValue));
-                    return true;
-                });
-            }
+            lockBottomAppBarSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
+                EventBus.getDefault().post(new ChangeLockBottomAppBarEvent((Boolean) newValue));
+                return true;
+            });
 
             if (!sharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON, false)) {
                 swipeUpToHideJumpToNextTopLevelCommentButtonSwitch.setVisible(true);

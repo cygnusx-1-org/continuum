@@ -1,29 +1,102 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.Context;
+import android.content.res.XmlResourceParser;
+import android.os.LocaleList;
+import android.util.Log;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.fragment.app.Fragment;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import ml.docilealligator.infinityforreddit.R;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Singleton that holds a flat list of all searchable settings items.
- * Call buildRegistry(context) once (e.g. in SettingsActivity.onCreate) to populate.
+ *
+ * <p>The list is derived by walking the preference XML tree, starting at
+ * {@link R.xml#main_preferences} and descending through every {@code app:fragment} link, so
+ * adding a preference to an XML file is all it takes to make it searchable.
+ *
+ * <p>The one thing the XML cannot tell us is which XML resource each preference fragment
+ * inflates -- that lives in Java, in each fragment's {@code setPreferencesFromResource} call --
+ * so {@link #SCREEN_RESOURCES} mirrors it. A fragment missing from that map is still indexed as
+ * a destination; the crawl just stops there rather than descending into its preferences.
+ *
+ * <p>Call {@link #buildRegistry(Context)} once per settings screen (e.g. in
+ * SettingsActivity.onCreate) to populate; it is cheap after the first successful build.
  */
 public class SettingsSearchRegistry {
 
+    private static final String TAG = "SettingsSearchRegistry";
+    private static final String BREADCRUMB_SEPARATOR = " › ";
+    /** Separates the parts of an item identity; cannot occur in a key or title. */
+    private static final String IDENTITY_SEPARATOR = "\u0000";
+
+    /**
+     * Preference fragment -> the XML resource it inflates. Must match each fragment's
+     * {@code setPreferencesFromResource} call; a stale entry only costs coverage, never a crash.
+     */
+    private static final Map<Class<? extends Fragment>, Integer> SCREEN_RESOURCES;
+
+    static {
+        Map<Class<? extends Fragment>, Integer> m = new HashMap<>();
+        m.put(MainPreferenceFragment.class, R.xml.main_preferences);
+        m.put(APIKeysPreferenceFragment.class, R.xml.api_keys_preferences);
+        m.put(NotificationPreferenceFragment.class, R.xml.notification_preferences);
+        m.put(InterfacePreferenceFragment.class, R.xml.interface_preferences);
+        m.put(FontPreferenceFragment.class, R.xml.font_preferences);
+        m.put(ImmersiveInterfacePreferenceFragment.class, R.xml.immersive_interface_preferences);
+        m.put(NavigationDrawerPreferenceFragment.class, R.xml.navigation_drawer_preferences);
+        m.put(TimeFormatPreferenceFragment.class, R.xml.time_format_preferences);
+        m.put(PostPreferenceFragment.class, R.xml.post_preferences);
+        m.put(NumberOfColumnsInPostFeedPreferenceFragment.class,
+                R.xml.number_of_columns_in_post_feed_preferences);
+        m.put(PostDetailsPreferenceFragment.class, R.xml.post_details_preferences);
+        m.put(CommentPreferenceFragment.class, R.xml.comment_preferences);
+        m.put(ThemePreferenceFragment.class, R.xml.theme_preferences);
+        m.put(VideoPreferenceFragment.class, R.xml.video_preferences);
+        m.put(GesturesAndButtonsPreferenceFragment.class, R.xml.gestures_and_buttons_preferences);
+        m.put(SwipeActionPreferenceFragment.class, R.xml.swipe_action_preferences);
+        m.put(SecurityPreferenceFragment.class, R.xml.security_preferences);
+        m.put(DataSavingModePreferenceFragment.class, R.xml.data_saving_mode_preferences);
+        m.put(ProxyPreferenceFragment.class, R.xml.proxy_preferences);
+        m.put(SortTypePreferenceFragment.class, R.xml.sort_type_preferences);
+        m.put(DownloadLocationPreferenceFragment.class, R.xml.download_location_preferences);
+        m.put(MiscellaneousPreferenceFragment.class, R.xml.miscellaneous_preferences);
+        m.put(AdvancedPreferenceFragment.class, R.xml.advanced_preferences);
+        m.put(AboutPreferenceFragment.class, R.xml.about_preferences);
+        m.put(CreditsPreferenceFragment.class, R.xml.credits_preferences);
+        m.put(DebugPreferenceFragment.class, R.xml.debug_preferences);
+        SCREEN_RESOURCES = Collections.unmodifiableMap(m);
+    }
+
+    // Eagerly created: the constructor does nothing, and lazy init here would need locking now
+    // that the index is built on a background thread while the UI reads it on the main one.
+    private static final SettingsSearchRegistry sInstance = new SettingsSearchRegistry();
+
+    /** Written on a background thread by {@link #buildRegistry}, read on the main thread. */
     @Nullable
-    private static SettingsSearchRegistry sInstance;
+    private volatile List<SettingsSearchItem> mItems;
+    /**
+     * Locale the cached items were resolved in, so a language change rebuilds them. Left null
+     * when a build did not finish, which forces the next call to try again.
+     */
     @Nullable
-    private List<SettingsSearchItem> mItems;
+    private volatile Locale mItemsLocale;
 
     private SettingsSearchRegistry() {}
 
     public static SettingsSearchRegistry getInstance() {
-        if (sInstance == null) {
-            sInstance = new SettingsSearchRegistry();
-        }
         return sInstance;
     }
 
@@ -31,688 +104,235 @@ public class SettingsSearchRegistry {
         return mItems != null ? mItems : Collections.emptyList();
     }
 
-    public void buildRegistry(Context ctx) {
-        if (mItems != null) return;
+    /**
+     * Whether a finished index for {@code ctx}'s language is already in hand, so callers can skip
+     * handing the build to a background thread that would have nothing to do.
+     *
+     * <p>Shares {@link #buildRegistry}'s lock: the items and the locale they were resolved in are
+     * written one after the other, and reading them unlocked can catch a new index paired with the
+     * previous language.
+     */
+    public synchronized boolean hasIndexFor(Context ctx) {
+        return mItems != null && localeOf(ctx).equals(mItemsLocale);
+    }
+
+    private static Locale localeOf(Context ctx) {
+        LocaleList locales = ctx.getResources().getConfiguration().getLocales();
+        return locales.isEmpty() ? Locale.getDefault() : locales.get(0);
+    }
+
+    /**
+     * Builds the index if it is not already current. Safe to call off the main thread, and
+     * synchronized so two callers racing to open search cannot both do the work.
+     *
+     * @param ctx an Activity context -- the app-wide language override is applied to the
+     *            activity's resources, so an application context can resolve stale strings.
+     */
+    public synchronized void buildRegistry(Context ctx) {
+        Locale locale = localeOf(ctx);
+        if (mItems != null && locale.equals(mItemsLocale)) {
+            return;
+        }
+
         List<SettingsSearchItem> items = new ArrayList<>();
-        addApiKeysPreferences(ctx, items);
-        addNotificationPreferences(ctx, items);
-        addInterfacePreferences(ctx, items);
-        addFontPreferences(ctx, items);
-        addImmersiveInterfacePreferences(ctx, items);
-        addNavigationDrawerPreferences(ctx, items);
-        addTimeFormatPreferences(ctx, items);
-        addPostPreferences(ctx, items);
-        addNumberOfColumnsPreferences(ctx, items);
-        addPostDetailsPreferences(ctx, items);
-        addCommentPreferences(ctx, items);
-        addThemePreferences(ctx, items);
-        addVideoPreferences(ctx, items);
-        addGesturesAndButtonsPreferences(ctx, items);
-        addSwipeActionPreferences(ctx, items);
-        addSecurityPreferences(ctx, items);
-        addDataSavingModePreferences(ctx, items);
-        addProxyPreferences(ctx, items);
-        addSortTypePreferences(ctx, items);
-        addDownloadLocationPreferences(ctx, items);
-        addMiscellaneousPreferences(ctx, items);
-        addAdvancedPreferences(ctx, items);
-        addAboutPreferences(ctx, items);
-        addCreditsPreferences(ctx, items);
-        addDebugPreferences(ctx, items);
+        boolean complete = crawl(ctx, R.xml.main_preferences, MainPreferenceFragment.class,
+                ctx.getString(R.string.settings_activity_label), "", items,
+                new HashSet<>(), new HashSet<>());
+
+        // A truncated index is still worth serving, but must not be cached as final.
         mItems = Collections.unmodifiableList(items);
+        mItemsLocale = complete ? locale : null;
+    }
+
+    @VisibleForTesting
+    static Map<Class<? extends Fragment>, Integer> getScreenResources() {
+        return SCREEN_RESOURCES;
     }
 
     // -------------------------------------------------------------------------
-    // Helper
+    // Crawl
     // -------------------------------------------------------------------------
 
-    private static void add(List<SettingsSearchItem> items, String title, @Nullable String summary,
-                             String breadcrumb,
-                             Class<? extends androidx.fragment.app.Fragment> fragmentClass,
-                             int fragmentTitleResId) {
-        items.add(new SettingsSearchItem(title, summary, breadcrumb, fragmentClass, fragmentTitleResId));
+    /**
+     * Indexes every preference in {@code xmlResId}, then recurses into the screens they link to.
+     *
+     * @param screenFragment fragment hosting this XML, where non-navigating preferences live
+     * @param screenTitle    toolbar title for {@code screenFragment}
+     * @param breadcrumb     " > "-joined ancestor screen titles, empty at the root
+     * @param visitedScreens XML resources already crawled, to stop cycles
+     * @param seenItems      identity of items already added, to drop duplicates
+     * @return whether the whole subtree was indexed without a parse error
+     */
+    private boolean crawl(Context c, int xmlResId, Class<? extends Fragment> screenFragment,
+                          String screenTitle, String breadcrumb, List<SettingsSearchItem> items,
+                          Set<Integer> visitedScreens, Set<String> seenItems) {
+        if (!visitedScreens.add(xmlResId)) {
+            return true;
+        }
+
+        String screenBreadcrumb = breadcrumb.isEmpty()
+                ? c.getString(R.string.settings_activity_label) : breadcrumb;
+        // Section heading the crawl is currently under, to tell same-titled rows apart -- the
+        // Number of Columns screen alone has four "Portrait" rows, one per post layout.
+        String currentCategory = null;
+        boolean complete = true;
+
+        XmlResourceParser parser = c.getResources().getXml(xmlResId);
+        try {
+            for (int event = parser.next(); event != XmlPullParser.END_DOCUMENT; event = parser.next()) {
+                if (event != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                // Screens are containers, never settings.
+                String tag = parser.getName();
+                if (tag == null || tag.endsWith("PreferenceScreen")) {
+                    continue;
+                }
+
+                PreferenceAttributes attrs = readAttributes(c, parser);
+                String title = attrs.title;
+                if (title == null || title.isEmpty()) {
+                    continue;
+                }
+
+                // A category is not a preference, but naming one is a fair way to look for the
+                // screen it heads, so index it and qualify the rows that follow it. A hidden
+                // heading still groups its rows, it just is not a result in its own right.
+                if (tag.endsWith("PreferenceCategory")) {
+                    if (attrs.visible) {
+                        add(items, seenItems, title, attrs, screenBreadcrumb, screenFragment,
+                                screenTitle, attrs.key);
+                    }
+                    currentCategory = title;
+                    continue;
+                }
+
+                String itemBreadcrumb = currentCategory == null
+                        ? screenBreadcrumb : screenBreadcrumb + BREADCRUMB_SEPARATOR + currentCategory;
+
+                Class<? extends Fragment> target = attrs.fragment == null
+                        ? null : resolveFragment(attrs.fragment);
+                if (target == null) {
+                    // Rows that start hidden are revealed at runtime only when some other setting
+                    // is on, so a result would land on a screen that does not show the row.
+                    if (attrs.visible) {
+                        add(items, seenItems, title, attrs, itemBreadcrumb, screenFragment,
+                                screenTitle, attrs.key);
+                    }
+                    continue;
+                }
+
+                // A preference that opens another screen: index it as a way to reach that screen,
+                // then index the screen's own preferences underneath it. Worth doing even when the
+                // row starts hidden, because search opens the fragment directly rather than
+                // tapping the row, so the destination is reachable either way.
+                //
+                // No scroll key: this row's key names it on *this* screen, and the item points at
+                // the screen it opens, where that key means nothing.
+                add(items, seenItems, title, attrs, itemBreadcrumb, target, title, null);
+
+                Integer targetXmlResId = SCREEN_RESOURCES.get(target);
+                if (targetXmlResId != null) {
+                    complete &= crawl(c, targetXmlResId, target, title,
+                            breadcrumb.isEmpty() ? title : breadcrumb + BREADCRUMB_SEPARATOR + title,
+                            items, visitedScreens, seenItems);
+                }
+            }
+        } catch (XmlPullParserException | IOException e) {
+            Log.e(TAG, "Failed to index preference screen " + xmlResId, e);
+            complete = false;
+        } finally {
+            parser.close();
+        }
+
+        return complete;
+    }
+
+    /**
+     * @param scrollKey key to scroll to on {@code fragmentClass}'s screen, or null when this row
+     *                  does not live there -- see the navigation case in {@link #crawl}.
+     */
+    private static void add(List<SettingsSearchItem> items, Set<String> seenItems, String title,
+                            PreferenceAttributes attrs, String breadcrumb,
+                            Class<? extends Fragment> fragmentClass, String fragmentTitle,
+                            @Nullable String scrollKey) {
+        // app:key is a preference's real identity, but only within the screen that declares it,
+        // hence pairing it with the breadcrumb. Keyless rows fall back to the title.
+        String identity = breadcrumb + IDENTITY_SEPARATOR + (attrs.key != null ? attrs.key : title);
+        if (!seenItems.add(identity)) {
+            return;
+        }
+        items.add(new SettingsSearchItem(title, attrs.summary, breadcrumb, scrollKey,
+                fragmentClass, fragmentTitle));
+    }
+
+    @Nullable
+    private static Class<? extends Fragment> resolveFragment(String className) {
+        try {
+            return Class.forName(className).asSubclass(Fragment.class);
+        } catch (ClassNotFoundException | ClassCastException e) {
+            Log.w(TAG, "Cannot index destination " + className, e);
+            return null;
+        }
     }
 
     // -------------------------------------------------------------------------
-    // API Keys
+    // Attributes
     // -------------------------------------------------------------------------
 
-    private void addApiKeysPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_api_keys_title);
-        add(items, c.getString(R.string.settings_client_id_title), null, bc,
-                APIKeysPreferenceFragment.class, R.string.settings_api_keys_title);
-        add(items, c.getString(R.string.settings_giphy_api_key_title), null, bc,
-                APIKeysPreferenceFragment.class, R.string.settings_api_keys_title);
+    /** The attributes of one preference element that the index cares about. */
+    private static final class PreferenceAttributes {
+        @Nullable
+        String title;
+        @Nullable
+        String summary;
+        @Nullable
+        String key;
+        @Nullable
+        String fragment;
+        boolean visible = true;
     }
 
-    // -------------------------------------------------------------------------
-    // Notifications
-    // -------------------------------------------------------------------------
-
-    private void addNotificationPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_notification_master_title);
-        add(items, c.getString(R.string.settings_notification_enable_notification_title), null, bc,
-                NotificationPreferenceFragment.class, R.string.settings_notification_master_title);
+    /**
+     * Reads a preference element in a single pass. These files mix the android: and app:
+     * namespaces for the same attribute, so match on the local name and take whichever
+     * namespace carries it.
+     */
+    private static PreferenceAttributes readAttributes(Context c, XmlResourceParser parser) {
+        PreferenceAttributes attrs = new PreferenceAttributes();
+        for (int i = 0; i < parser.getAttributeCount(); i++) {
+            String name = parser.getAttributeName(i);
+            if (name == null) {
+                continue;
+            }
+            switch (name) {
+                case "title":
+                    attrs.title = stringAttribute(c, parser, i);
+                    break;
+                case "summary":
+                    String summary = stringAttribute(c, parser, i);
+                    attrs.summary = summary == null || summary.isEmpty() ? null : summary;
+                    break;
+                case "key":
+                    attrs.key = parser.getAttributeValue(i);
+                    break;
+                case "fragment":
+                    attrs.fragment = parser.getAttributeValue(i);
+                    break;
+                case "isPreferenceVisible":
+                    attrs.visible = parser.getAttributeBooleanValue(i, true);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return attrs;
     }
 
-    // -------------------------------------------------------------------------
-    // Interface (top-level items + sub-screen navigation entries)
-    // -------------------------------------------------------------------------
-
-    private void addInterfacePreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_font_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-        add(items, c.getString(R.string.settings_navigation_drawer_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_customize_tabs_in_main_page_title), null, bc,
-                CustomizeMainPageTabsFragment.class, R.string.settings_customize_tabs_in_main_page_title);
-        add(items, c.getString(R.string.settings_customize_bottom_app_bar_title), null, bc,
-                CustomizeBottomAppBarFragment.class, R.string.settings_customize_bottom_app_bar_title);
-        add(items, c.getString(R.string.settings_hide_fab_in_post_feed), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_enable_bottom_app_bar_title), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_hide_subreddit_description_title), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_default_search_result_tab), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_time_format_title), null, bc,
-                TimeFormatPreferenceFragment.class, R.string.settings_time_format_title);
-        add(items, c.getString(R.string.settings_category_post_title), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_post_details_title), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_category_comment_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_lazy_mode_interval_title), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_vote_buttons_on_the_right_title), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
-        add(items, c.getString(R.string.settings_show_absolute_number_of_votes_title), null, bc,
-                InterfacePreferenceFragment.class, R.string.settings_interface_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Font
-    // -------------------------------------------------------------------------
-
-    private void addFontPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_interface_title);
-        String self = c.getString(R.string.settings_font_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_preview_font_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-        add(items, c.getString(R.string.settings_font_family_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-        add(items, c.getString(R.string.settings_font_size_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-        add(items, c.getString(R.string.settings_title_font_family_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-        add(items, c.getString(R.string.settings_title_font_size_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-        add(items, c.getString(R.string.settings_content_font_family_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-        add(items, c.getString(R.string.settings_content_font_size_title), null, bc,
-                FontPreferenceFragment.class, R.string.settings_font_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Immersive Interface
-    // -------------------------------------------------------------------------
-
-    private void addImmersiveInterfacePreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_interface_title);
-        String self = c.getString(R.string.settings_immersive_interface_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_immersive_interface_title),
-                c.getString(R.string.settings_immersive_interface_summary), bc,
-                ImmersiveInterfacePreferenceFragment.class, R.string.settings_immersive_interface_title);
-        add(items, c.getString(R.string.settings_disable_immersive_interface_in_landscape_mode), null, bc,
-                ImmersiveInterfacePreferenceFragment.class, R.string.settings_immersive_interface_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Navigation Drawer
-    // -------------------------------------------------------------------------
-
-    private void addNavigationDrawerPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_interface_title);
-        String self = c.getString(R.string.settings_navigation_drawer_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_show_avatar_on_the_right), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_collapse_account_section_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_collapse_reddit_section_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_collapse_post_section_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_collapse_preferences_section_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_collapse_favorite_subreddits_section_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_collapse_subscribed_subreddits_section_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_hide_favorite_subreddits_sections_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_hide_subscribed_subreddits_sections_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-        add(items, c.getString(R.string.settings_navigation_drawer_enable_hide_karma_title), null, bc,
-                NavigationDrawerPreferenceFragment.class, R.string.settings_navigation_drawer_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Time Format
-    // -------------------------------------------------------------------------
-
-    private void addTimeFormatPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_interface_title);
-        String self = c.getString(R.string.settings_time_format_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_show_elapsed_time), null, bc,
-                TimeFormatPreferenceFragment.class, R.string.settings_time_format_title);
-        add(items, c.getString(R.string.settings_time_format_title), null, bc,
-                TimeFormatPreferenceFragment.class, R.string.settings_time_format_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Post
-    // -------------------------------------------------------------------------
-
-    private void addPostPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_interface_title);
-        String self = c.getString(R.string.settings_category_post_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_default_post_layout), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_default_post_layout_unfolded), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_default_link_post_layout), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_number_of_columns_in_post_feed_title), null, bc,
-                NumberOfColumnsInPostFeedPreferenceFragment.class, R.string.settings_number_of_columns_in_post_feed_title);
-        add(items, c.getString(R.string.settings_hide_post_type), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_hide_post_flair), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_hide_subreddit_and_user_prefix), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_hide_the_number_of_votes), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_hide_the_number_of_comments), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_hide_text_post_content), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_fixed_height_preview_in_card_title), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_show_divider_in_compact_layout), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_show_thumbnail_on_the_left_in_compact_layout), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_long_press_to_hide_toolbar_in_compact_layout_title), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_post_compact_layout_toolbar_hidden_by_default_title), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_click_to_show_media_in_gallery_layout), null, bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_hide_post_type_indicator_title),
-                c.getString(R.string.settings_hide_post_type_indicator_summary), bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-        add(items, c.getString(R.string.settings_hide_image_count_in_gallery_title),
-                c.getString(R.string.settings_hide_image_count_in_gallery_summary), bc,
-                PostPreferenceFragment.class, R.string.settings_category_post_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Number of Columns
-    // -------------------------------------------------------------------------
-
-    private void addNumberOfColumnsPreferences(Context c, List<SettingsSearchItem> items) {
-        String grandparent = c.getString(R.string.settings_interface_title);
-        String parent = c.getString(R.string.settings_category_post_title);
-        String self = c.getString(R.string.settings_number_of_columns_in_post_feed_title);
-        String bc = grandparent + " \u203a " + parent + " \u203a " + self;
-        Class<?> frag = NumberOfColumnsInPostFeedPreferenceFragment.class;
-        int titleRes = R.string.settings_number_of_columns_in_post_feed_title;
-        add(items, c.getString(R.string.settings_number_of_columns_in_post_feed_portrait_title), null, bc,
-                NumberOfColumnsInPostFeedPreferenceFragment.class, titleRes);
-        add(items, c.getString(R.string.settings_number_of_columns_in_post_feed_landscape_title), null, bc,
-                NumberOfColumnsInPostFeedPreferenceFragment.class, titleRes);
-        add(items, c.getString(R.string.settings_number_of_columns_in_post_feed_unfolded_portrait_title), null, bc,
-                NumberOfColumnsInPostFeedPreferenceFragment.class, titleRes);
-        add(items, c.getString(R.string.settings_number_of_columns_in_post_feed_unfolded_landscape_title), null, bc,
-                NumberOfColumnsInPostFeedPreferenceFragment.class, titleRes);
-    }
-
-    // -------------------------------------------------------------------------
-    // Post Details
-    // -------------------------------------------------------------------------
-
-    private void addPostDetailsPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_interface_title);
-        String self = c.getString(R.string.settings_post_details_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_separate_post_and_comments_in_landscape_mode_title),
-                c.getString(R.string.settings_separate_post_and_comments_summary), bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_swap_post_and_comments_in_split_mode_title),
-                c.getString(R.string.settings_swap_post_and_comments_in_split_mode_summary), bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_hide_post_type), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_hide_post_flair), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_hide_upvote_ratio_title), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_hide_subreddit_and_user_prefix), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_hide_the_number_of_votes), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_hide_the_number_of_comments), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_hide_fab_in_post_details), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-        add(items, c.getString(R.string.settings_embedded_media_type_title), null, bc,
-                PostDetailsPreferenceFragment.class, R.string.settings_post_details_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Comment
-    // -------------------------------------------------------------------------
-
-    private void addCommentPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_interface_title);
-        String self = c.getString(R.string.settings_category_comment_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_show_top_level_comments_first_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_show_comment_divider_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_show_comment_top_padding_title),
-                c.getString(R.string.settings_show_comment_top_padding_summary), bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_show_only_one_comment_level_indicator), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_comment_toolbar_hidden), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_comment_toolbar_hide_on_click), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_fully_collapse_comment_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_show_author_avatar_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_show_user_prefix_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_show_fewer_toolbar_options_threshold_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-        add(items, c.getString(R.string.settings_embedded_media_type_title), null, bc,
-                CommentPreferenceFragment.class, R.string.settings_category_comment_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Theme
-    // -------------------------------------------------------------------------
-
-    private void addThemePreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_theme_title);
-        add(items, c.getString(R.string.settings_theme_title), null, bc,
-                ThemePreferenceFragment.class, R.string.settings_theme_title);
-        add(items, c.getString(R.string.settings_amoled_dark_title), null, bc,
-                ThemePreferenceFragment.class, R.string.settings_theme_title);
-        add(items, c.getString(R.string.settings_manage_themes_title), null, bc,
-                ThemePreferenceFragment.class, R.string.settings_theme_title);
-        add(items, c.getString(R.string.settings_enable_material_you_title),
-                c.getString(R.string.settings_enable_material_you_summary), bc,
-                ThemePreferenceFragment.class, R.string.settings_theme_title);
-        add(items, c.getString(R.string.settings_apply_material_you_title),
-                c.getString(R.string.settings_apply_material_you_summary), bc,
-                ThemePreferenceFragment.class, R.string.settings_theme_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Video
-    // -------------------------------------------------------------------------
-
-    private void addVideoPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_mute_video_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_mute_nsfw_video_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_video_player_ignore_nav_bar_title),
-                c.getString(R.string.settings_video_player_ignore_nav_bar_summary), bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_video_player_automatic_landscape_orientation), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_loop_video_title),
-                c.getString(R.string.settings_loop_video_summary), bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_default_playback_speed_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_reddit_video_default_resolution), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_video_autoplay_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_simultaneous_autoplay_limit_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_legacy_autoplay_video_controller_ui_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_mute_autoplaying_videos_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_remember_mute), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_autoplay_nsfw_videos_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_autoplay_comment_gif_title),
-                c.getString(R.string.settings_autoplay_comment_gif_summary), bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_easier_to_watch_in_full_screen_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_start_autoplay_visible_area_offset_portrait_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-        add(items, c.getString(R.string.settings_start_autoplay_visible_area_offset_landscape_title), null, bc,
-                VideoPreferenceFragment.class, R.string.settigns_video_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Gestures & Buttons
-    // -------------------------------------------------------------------------
-
-    private void addGesturesAndButtonsPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_swipe_to_go_back_title),
-                c.getString(R.string.settings_swipe_to_go_back_summary), bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_lock_toolbar_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_volume_keys_navigate_comments_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_volume_keys_navigate_posts_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_pull_to_refresh_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_swipe_between_posts_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_tab_switching_sensitivity), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_swipe_right_to_go_back_sensitivity), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_swipe_action_sensitivity_in_comments), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_navigation_drawer_swipe_area), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_swipe_vertically_to_go_back_from_media_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_lock_jump_to_next_top_level_comment_button_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_swap_tap_and_long_title), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.long_press_post_non_media_area), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.long_press_post_media), null, bc,
-                GesturesAndButtonsPreferenceFragment.class, R.string.settings_gestures_and_buttons_title);
-        add(items, c.getString(R.string.settings_swipe_action_title), null, bc,
-                SwipeActionPreferenceFragment.class, R.string.settings_swipe_action_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Swipe Action
-    // -------------------------------------------------------------------------
-
-    private void addSwipeActionPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_gestures_and_buttons_title);
-        String self = c.getString(R.string.settings_swipe_action_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_enable_swipe_action_title), null, bc,
-                SwipeActionPreferenceFragment.class, R.string.settings_swipe_action_title);
-        add(items, c.getString(R.string.settings_swipe_action_swipe_left_title), null, bc,
-                SwipeActionPreferenceFragment.class, R.string.settings_swipe_action_title);
-        add(items, c.getString(R.string.settings_swipe_action_swipe_right_title), null, bc,
-                SwipeActionPreferenceFragment.class, R.string.settings_swipe_action_title);
-        add(items, c.getString(R.string.settings_swipe_action_threshold), null, bc,
-                SwipeActionPreferenceFragment.class, R.string.settings_swipe_action_title);
-        add(items, c.getString(R.string.settings_swipe_action_haptic_feedback_title), null, bc,
-                SwipeActionPreferenceFragment.class, R.string.settings_swipe_action_title);
-        add(items, c.getString(R.string.settings_disable_swiping_between_tabs_title), null, bc,
-                SwipeActionPreferenceFragment.class, R.string.settings_swipe_action_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Security
-    // -------------------------------------------------------------------------
-
-    private void addSecurityPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_security_title);
-        add(items, c.getString(R.string.settings_require_authentication_to_show_accounts), null, bc,
-                SecurityPreferenceFragment.class, R.string.settings_security_title);
-        add(items, c.getString(R.string.settings_secure_mode_title),
-                c.getString(R.string.settings_secure_mode_summary), bc,
-                SecurityPreferenceFragment.class, R.string.settings_security_title);
-        add(items, c.getString(R.string.settings_app_lock_title),
-                c.getString(R.string.settings_app_lock_summary), bc,
-                SecurityPreferenceFragment.class, R.string.settings_security_title);
-        add(items, c.getString(R.string.settings_app_lock_timeout_title), null, bc,
-                SecurityPreferenceFragment.class, R.string.settings_security_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Data Saving Mode
-    // -------------------------------------------------------------------------
-
-    private void addDataSavingModePreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_data_saving_mode);
-        add(items, c.getString(R.string.settings_data_saving_mode), null, bc,
-                DataSavingModePreferenceFragment.class, R.string.settings_data_saving_mode);
-        add(items, c.getString(R.string.settings_disable_image_preview_title), null, bc,
-                DataSavingModePreferenceFragment.class, R.string.settings_data_saving_mode);
-        add(items, c.getString(R.string.settings_only_disable_preview_in_video_and_gif_posts_title), null, bc,
-                DataSavingModePreferenceFragment.class, R.string.settings_data_saving_mode);
-        add(items, c.getString(R.string.settings_reddit_video_default_resolution), null, bc,
-                DataSavingModePreferenceFragment.class, R.string.settings_data_saving_mode);
-    }
-
-    // -------------------------------------------------------------------------
-    // Proxy
-    // -------------------------------------------------------------------------
-
-    private void addProxyPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_proxy_title);
-        add(items, c.getString(R.string.settings_proxy_enabled),
-                c.getString(R.string.restart_app_see_changes), bc,
-                ProxyPreferenceFragment.class, R.string.settings_proxy_title);
-        add(items, c.getString(R.string.settings_proxy_type), null, bc,
-                ProxyPreferenceFragment.class, R.string.settings_proxy_title);
-        add(items, c.getString(R.string.settings_proxy_hostname), null, bc,
-                ProxyPreferenceFragment.class, R.string.settings_proxy_title);
-        add(items, c.getString(R.string.settings_proxy_port), null, bc,
-                ProxyPreferenceFragment.class, R.string.settings_proxy_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Sort Type
-    // -------------------------------------------------------------------------
-
-    private void addSortTypePreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_sort_type_title);
-        add(items, c.getString(R.string.settings_save_sort_type_title), null, bc,
-                SortTypePreferenceFragment.class, R.string.settings_sort_type_title);
-        add(items, c.getString(R.string.settings_subreddit_default_sort_type_title), null, bc,
-                SortTypePreferenceFragment.class, R.string.settings_sort_type_title);
-        add(items, c.getString(R.string.settings_subreddit_default_sort_time_title), null, bc,
-                SortTypePreferenceFragment.class, R.string.settings_sort_type_title);
-        add(items, c.getString(R.string.settings_user_default_sort_type_title), null, bc,
-                SortTypePreferenceFragment.class, R.string.settings_sort_type_title);
-        add(items, c.getString(R.string.settings_user_default_sort_time_title), null, bc,
-                SortTypePreferenceFragment.class, R.string.settings_sort_type_title);
-        add(items, c.getString(R.string.settings_respect_subreddit_recommended_comment_sort_type_title),
-                c.getString(R.string.settings_respect_subreddit_recommended_comment_sort_type_summary), bc,
-                SortTypePreferenceFragment.class, R.string.settings_sort_type_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Download Location
-    // -------------------------------------------------------------------------
-
-    private void addDownloadLocationPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_download_location_title);
-        add(items, c.getString(R.string.settings_image_download_location_title), null, bc,
-                DownloadLocationPreferenceFragment.class, R.string.settings_download_location_title);
-        add(items, c.getString(R.string.settings_gif_download_location_title), null, bc,
-                DownloadLocationPreferenceFragment.class, R.string.settings_download_location_title);
-        add(items, c.getString(R.string.settings_video_download_location_title), null, bc,
-                DownloadLocationPreferenceFragment.class, R.string.settings_download_location_title);
-        add(items, c.getString(R.string.settings_separate_folder_for_each_subreddit), null, bc,
-                DownloadLocationPreferenceFragment.class, R.string.settings_download_location_title);
-        add(items, c.getString(R.string.settings_save_nsfw_media_in_different_folder_title), null, bc,
-                DownloadLocationPreferenceFragment.class, R.string.settings_download_location_title);
-        add(items, c.getString(R.string.settings_nsfw_download_location_title), null, bc,
-                DownloadLocationPreferenceFragment.class, R.string.settings_download_location_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Miscellaneous
-    // -------------------------------------------------------------------------
-
-    private void addMiscellaneousPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_save_front_page_scrolled_position_title),
-                c.getString(R.string.settings_save_front_page_scrolled_position_summary), bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_link_handler_title), null, bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_main_page_back_button_action), null, bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_enable_search_history_title),
-                c.getString(R.string.only_for_logged_in_user), bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_disable_profile_avatar_animation_title), null, bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_language_title), null, bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_enable_fold_support_title), null, bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-        add(items, c.getString(R.string.settings_post_feed_max_resolution_title), null, bc,
-                MiscellaneousPreferenceFragment.class, R.string.settings_miscellaneous_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Advanced
-    // -------------------------------------------------------------------------
-
-    private void addAdvancedPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_all_subreddits_data_in_database_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_all_users_data_in_database_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_all_sort_type_data_in_database_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_all_post_layout_data_in_database_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_all_themes_in_database_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_front_page_scrolled_positions_in_database_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_read_posts_in_database_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_delete_all_legacy_settings_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_reset_all_settings_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_backup_settings_title),
-                c.getString(R.string.settings_backup_settings_summary), bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_restore_settings_title), null, bc,
-                AdvancedPreferenceFragment.class, R.string.settings_advanced_master_title);
-        add(items, c.getString(R.string.settings_crash_reports_title), null, bc,
-                CrashReportsFragment.class, R.string.settings_crash_reports_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // About
-    // -------------------------------------------------------------------------
-
-    private void addAboutPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_about_master_title);
-        add(items, c.getString(R.string.settings_acknowledgement_master_title), null, bc,
-                AcknowledgementFragment.class, R.string.settings_acknowledgement_master_title);
-        add(items, c.getString(R.string.settings_credits_master_title), null, bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_translation_title),
-                c.getString(R.string.settings_translation_summary), bc,
-                TranslationFragment.class, R.string.settings_translation_title);
-        add(items, c.getString(R.string.settings_open_source_title),
-                c.getString(R.string.settings_open_source_summary), bc,
-                AboutPreferenceFragment.class, R.string.settings_about_master_title);
-        add(items, c.getString(R.string.settings_email_title),
-                c.getString(R.string.settings_email_summary), bc,
-                AboutPreferenceFragment.class, R.string.settings_about_master_title);
-        add(items, c.getString(R.string.settings_reddit_account_title),
-                c.getString(R.string.settings_reddit_account_summary), bc,
-                AboutPreferenceFragment.class, R.string.settings_about_master_title);
-        add(items, c.getString(R.string.settings_subreddit_title),
-                c.getString(R.string.settings_subreddit_summary), bc,
-                AboutPreferenceFragment.class, R.string.settings_about_master_title);
-        add(items, c.getString(R.string.settings_share_title),
-                c.getString(R.string.settings_share_summary), bc,
-                AboutPreferenceFragment.class, R.string.settings_about_master_title);
-        add(items, c.getString(R.string.settings_version_title), null, bc,
-                AboutPreferenceFragment.class, R.string.settings_about_master_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Credits
-    // -------------------------------------------------------------------------
-
-    private void addCreditsPreferences(Context c, List<SettingsSearchItem> items) {
-        String parent = c.getString(R.string.settings_about_master_title);
-        String self = c.getString(R.string.settings_credits_master_title);
-        String bc = parent + " \u203a " + self;
-        add(items, c.getString(R.string.settings_credits_icon_foreground_title),
-                c.getString(R.string.settings_credits_icon_foreground_summary), bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_icon_background_title),
-                c.getString(R.string.settings_credits_icon_background_summary), bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_error_image_title),
-                c.getString(R.string.settings_credits_error_image_summary), bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_crosspost_icon_title),
-                c.getString(R.string.settings_credits_crosspost_icon_summary), bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_thumbtack_icon_title),
-                c.getString(R.string.settings_credits_thumbtack_icon_summary), bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_best_rocket_icon_title),
-                c.getString(R.string.settings_credits_best_rocket_icon_summary), bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_material_icons_title), null, bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_national_flags), null, bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_ufo_capturing_animation_title), null, bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_love_animation_title), null, bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-        add(items, c.getString(R.string.settings_credits_lock_screen_animation_title), null, bc,
-                CreditsPreferenceFragment.class, R.string.settings_credits_master_title);
-    }
-
-    // -------------------------------------------------------------------------
-    // Debug
-    // -------------------------------------------------------------------------
-
-    private void addDebugPreferences(Context c, List<SettingsSearchItem> items) {
-        String bc = c.getString(R.string.settings_debug_title);
-        add(items, c.getString(R.string.settings_screen_width_dp_title),
-                c.getString(R.string.settings_screen_width_dp_summary), bc,
-                DebugPreferenceFragment.class, R.string.settings_debug_title);
-        add(items, c.getString(R.string.settings_smallest_screen_width_dp_title),
-                c.getString(R.string.settings_smallest_screen_width_dp_summary), bc,
-                DebugPreferenceFragment.class, R.string.settings_debug_title);
-        add(items, c.getString(R.string.settings_is_tablet_title),
-                c.getString(R.string.settings_is_tablet_summary_false), bc,
-                DebugPreferenceFragment.class, R.string.settings_debug_title);
+    /** Resolves an attribute that may be either a string resource or a literal. */
+    @Nullable
+    private static String stringAttribute(Context c, XmlResourceParser parser, int index) {
+        int resId = parser.getAttributeResourceValue(index, 0);
+        return resId != 0 ? c.getString(resId) : parser.getAttributeValue(index);
     }
 }
