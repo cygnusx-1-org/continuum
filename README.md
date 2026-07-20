@@ -140,7 +140,7 @@ Here are other ways you can help:
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 # Related project
-[Slide](https://github.com/cygnusx-1-org/Slide) is another Android [Reddit](https://www.reddit.com/) client app. It is a fork of the original project. It is also in the [Google Play Store](https://play.google.com/store/apps/details?id=me.edgan.redditslide&hl=en_US).
+[Slide](https://github.com/cygnusx-1-org/Slide) is another Android [Reddit](https://www.reddit.com/) client app. It is a fork of the original project.
 
 # License
 Distributed under the AGPL-3.0 License. See <a href="https://github.com/cygnusx-1-org/continuum/blob/master/LICENSE">LICENSE</a> for more information.
