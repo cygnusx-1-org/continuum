@@ -199,7 +199,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private CustomThemeWrapper mCustomThemeWrapper;
     private Locale mLocale;
     private boolean canStartActivity = true;
-    private boolean mDisableSwipingBetweenTabs;
     @PostType
     private int mPostType;
     private int mPostLayout;
@@ -362,7 +361,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mDisableImagePreview = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW, false);
             mOnlyDisablePreviewInVideoAndGifPosts = sharedPreferences.getBoolean(SharedPreferencesUtils.ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS, false);
             mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
-            mDisableSwipingBetweenTabs = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
 
             mPostHistorySharedPreferences = postHistorySharedPreferences;
             if (postHistorySharedPreferences != null) {
@@ -3951,6 +3949,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
+    /**
+     * Read live rather than cached at construction. These gallery touch listeners disable the
+     * activity's pager for the duration of a gesture and restore it afterwards, so a value cached
+     * here would overwrite whatever the activity's preference observer had set -- silently undoing
+     * the user's "Disable Swiping Between Tabs" choice on the next gallery touch, until the feed
+     * was rebuilt.
+     */
+    private boolean isSwipingBetweenTabsDisabled() {
+        return mSharedPreferences != null
+                && mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
+    }
+
     public abstract class PostBaseGalleryTypeViewHolder extends PostBaseViewHolder {
         FrameLayout frameLayout;
         RecyclerView galleryRecyclerView;
@@ -4128,7 +4138,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             }
 
                             if (mActivity.mViewPager2 != null) {
-                                mActivity.mViewPager2.setUserInputEnabled(!mDisableSwipingBetweenTabs);
+                                mActivity.mViewPager2.setUserInputEnabled(!isSwipingBetweenTabsDisabled());
                             }
                             mActivity.unlockSwipeRightToGoBack();
                             swipeLocked = false;
@@ -5136,7 +5146,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             }
 
                             if (mActivity.mViewPager2 != null) {
-                                mActivity.mViewPager2.setUserInputEnabled(!mDisableSwipingBetweenTabs);
+                                mActivity.mViewPager2.setUserInputEnabled(!isSwipingBetweenTabsDisabled());
                             }
                             mActivity.unlockSwipeRightToGoBack();
                     }

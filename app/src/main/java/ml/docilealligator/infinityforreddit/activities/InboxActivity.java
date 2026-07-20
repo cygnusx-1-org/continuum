@@ -49,6 +49,7 @@ import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -299,6 +300,8 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
         }
 
         fixViewPager2Sensitivity(binding.viewPagerInboxActivity);
+        binding.viewPagerInboxActivity.setUserInputEnabled(
+                !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false));
     }
 
     @Override

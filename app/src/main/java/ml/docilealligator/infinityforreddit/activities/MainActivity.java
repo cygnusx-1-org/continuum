@@ -442,7 +442,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         mViewPager2 = binding.includedAppBar.viewPagerMainActivity;
 
-        mBackButtonAction = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION, "0"));
+        // MainActivity is the only activity that survives a trip to Settings, so this has to
+        // track the preference rather than being read once.
+        SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION, "0")
+                .observe(this, action -> mBackButtonAction = Integer.parseInt(action));
         mLockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
         mDisableSwipingBetweenTabs = mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
 
