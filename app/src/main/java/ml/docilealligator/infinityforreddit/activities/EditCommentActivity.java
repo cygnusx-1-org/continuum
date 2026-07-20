@@ -83,6 +83,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
     private static final String UPLOADED_IMAGES_STATE = "UIS";
     private static final String GIPHY_GIF_STATE = "GGS";
+    private static final String CAPTURED_IMAGE_URI_STATE = "CIUS";
 
     @Inject
     @Named("oauth")
@@ -103,11 +104,15 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
     @Inject
     Executor mExecutor;
     private String mFullName;
+    @Nullable
     private String mAccessToken;
+    @Nullable
     private String mCommentContent;
     private boolean isSubmitting = false;
+    @Nullable
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
+    @Nullable
     private GiphyGif giphyGif;
     private ActivityEditCommentBinding binding;
     public EditCommentActivityViewModel editCommentActivityViewModel;
@@ -158,13 +163,14 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         setSupportActionBar(binding.toolbarEditCommentActivity);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mFullName = getIntent().getStringExtra(EXTRA_FULLNAME);
+        mFullName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_FULLNAME));
         mAccessToken = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCESS_TOKEN, null);
         mCommentContent = getIntent().getStringExtra(EXTRA_CONTENT);
         ArrayList<MediaMetadata> mediaMetadataList = getIntent().getParcelableArrayListExtra(EXTRA_MEDIA_METADATA_LIST);
 
-        if (mediaMetadataList != null) {
-            StringBuilder sb = new StringBuilder(mCommentContent);
+        String commentContent = mCommentContent;
+        if (mediaMetadataList != null && commentContent != null) {
+            StringBuilder sb = new StringBuilder(commentContent);
             for (MediaMetadata m : mediaMetadataList) {
                 int index = sb.indexOf(m.original.url);
                 if (index >= 0) {
@@ -183,8 +189,12 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         binding.commentEditTextEditCommentActivity.setText(mCommentContent);
 
         if (savedInstanceState != null) {
-            uploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            ArrayList<UploadedImage> restoredUploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            if (restoredUploadedImages != null) {
+                uploadedImages = restoredUploadedImages;
+            }
             giphyGif = savedInstanceState.getParcelable(GIPHY_GIF_STATE);
+            capturedImageUri = savedInstanceState.getParcelable(CAPTURED_IMAGE_URI_STATE);
         }
 
         MarkdownBottomBarRecyclerViewAdapter adapter = new MarkdownBottomBarRecyclerViewAdapter(
@@ -417,17 +427,23 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST_CODE) {
-                if (data == null) {
+                Uri imageUri = data == null ? null : data.getData();
+                if (imageUri == null) {
                     Toast.makeText(EditCommentActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
                     return;
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, data.getData(), uploadedImages);
+                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+                Uri imageUri = capturedImageUri;
+                if (imageUri == null) {
+                    Toast.makeText(EditCommentActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, capturedImageUri, uploadedImages);
+                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages);
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 editComment();
             }
@@ -439,6 +455,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(UPLOADED_IMAGES_STATE, uploadedImages);
         outState.putParcelable(GIPHY_GIF_STATE, giphyGif);
+        outState.putParcelable(CAPTURED_IMAGE_URI_STATE, capturedImageUri);
     }
 
     @Override
@@ -468,6 +485,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
             capturedImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("captured_image", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (IOException ex) {
             Toast.makeText(this, R.string.error_creating_temp_file, Toast.LENGTH_SHORT).show();

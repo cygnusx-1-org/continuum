@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -19,11 +20,10 @@ import ml.docilealligator.infinityforreddit.databinding.ItemSubscribedSubredditM
 import ml.docilealligator.infinityforreddit.subreddit.SubredditWithSelection;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 
-@SuppressWarnings("NullAway.Init")
 public class SubredditMultiselectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final BaseActivity activity;
-    private ArrayList<SubredditWithSelection> subscribedSubreddits;
+    private ArrayList<SubredditWithSelection> subscribedSubreddits = new ArrayList<>();
     private final RequestManager glide;
     private final int primaryTextColor;
     private final int colorAccent;
@@ -45,30 +45,22 @@ public class SubredditMultiselectionRecyclerViewAdapter extends RecyclerView.Ada
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof SubscribedSubredditViewHolder) {
-            ((SubscribedSubredditViewHolder) holder).binding.nameTextViewItemSubscribedSubredditMultiselection.setText(subscribedSubreddits.get(position).getName());
-            glide.load(subscribedSubreddits.get(position).getIconUrl())
+            SubredditWithSelection subreddit = subscribedSubreddits.get(position);
+            SubscribedSubredditViewHolder subredditViewHolder = (SubscribedSubredditViewHolder) holder;
+
+            subredditViewHolder.binding.nameTextViewItemSubscribedSubredditMultiselection.setText(subreddit.getName());
+            glide.load(subreddit.getIconUrl())
                     .transform(new RoundedCornersTransformation(72, 0))
                     .error(glide.load(R.drawable.subreddit_default_icon)
                             .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(((SubscribedSubredditViewHolder) holder).binding.iconGifImageViewItemSubscribedSubredditMultiselection);
-            ((SubscribedSubredditViewHolder) holder).binding.checkboxItemSubscribedSubredditMultiselection.setChecked(subscribedSubreddits.get(position).isSelected());
-            ((SubscribedSubredditViewHolder) holder).binding.checkboxItemSubscribedSubredditMultiselection.setOnClickListener(view -> {
-                if (subscribedSubreddits.get(position).isSelected()) {
-                    ((SubscribedSubredditViewHolder) holder).binding.checkboxItemSubscribedSubredditMultiselection.setChecked(false);
-                    subscribedSubreddits.get(position).setSelected(false);
-                } else {
-                    ((SubscribedSubredditViewHolder) holder).binding.checkboxItemSubscribedSubredditMultiselection.setChecked(true);
-                    subscribedSubreddits.get(position).setSelected(true);
-                }
-            });
-            ((SubscribedSubredditViewHolder) holder).itemView.setOnClickListener(view ->
-                    ((SubscribedSubredditViewHolder) holder).binding.checkboxItemSubscribedSubredditMultiselection.performClick());
+                    .into(subredditViewHolder.binding.iconGifImageViewItemSubscribedSubredditMultiselection);
+            subredditViewHolder.binding.checkboxItemSubscribedSubredditMultiselection.setChecked(subreddit.isSelected());
         }
     }
 
     @Override
     public int getItemCount() {
-        return subscribedSubreddits == null ? 0 : subscribedSubreddits.size();
+        return subscribedSubreddits.size();
     }
 
     @Override
@@ -79,7 +71,7 @@ public class SubredditMultiselectionRecyclerViewAdapter extends RecyclerView.Ada
         }
     }
 
-    public void setSubscribedSubreddits(List<SubscribedSubredditData> subscribedSubreddits, String selectedSubreddits) {
+    public void setSubscribedSubreddits(List<SubscribedSubredditData> subscribedSubreddits, @Nullable String selectedSubreddits) {
         this.subscribedSubreddits = SubredditWithSelection.convertSubscribedSubreddits(subscribedSubreddits);
         Set<String> selectedSet = new HashSet<>();
         if (selectedSubreddits != null && !selectedSubreddits.isEmpty()) {
@@ -120,6 +112,24 @@ public class SubredditMultiselectionRecyclerViewAdapter extends RecyclerView.Ada
             if (activity.typeface != null) {
                 binding.nameTextViewItemSubscribedSubredditMultiselection.setTypeface(activity.typeface);
             }
+
+            // Read the position at click time: setSubscribedSubreddits replaces the whole list and
+            // calls notifyDataSetChanged(), which does not rebind until the next layout pass, so an
+            // index captured during bind could toggle a different subreddit — silently, since the
+            // change only surfaces later via getAllSelectedSubreddits().
+            binding.checkboxItemSubscribedSubredditMultiselection.setOnClickListener(view -> {
+                int position = getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) {
+                    return;
+                }
+
+                SubredditWithSelection subreddit = subscribedSubreddits.get(position);
+                boolean nowSelected = !subreddit.isSelected();
+                subreddit.setSelected(nowSelected);
+                binding.checkboxItemSubscribedSubredditMultiselection.setChecked(nowSelected);
+            });
+            itemView.setOnClickListener(view ->
+                    binding.checkboxItemSubscribedSubredditMultiselection.performClick());
         }
     }
 }

@@ -16,7 +16,9 @@ public interface AccountDao {
     @Query("SELECT EXISTS (SELECT 1 FROM accounts WHERE username = '-')")
     boolean isAnonymousAccountInserted();
 
-    @Query("SELECT * FROM accounts WHERE username != '-'")
+    // Ordered so the account chooser's rows keep a stable, predictable position across re-emissions
+    // of this LiveData, and match the order the navigation drawer already uses.
+    @Query("SELECT * FROM accounts WHERE username != '-' ORDER BY username COLLATE NOCASE ASC")
     LiveData<List<Account>> getAllAccountsLiveData();
 
     @Query("SELECT * FROM accounts WHERE username != '-'")

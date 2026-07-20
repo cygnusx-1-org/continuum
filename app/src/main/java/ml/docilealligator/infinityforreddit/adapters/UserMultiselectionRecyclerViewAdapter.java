@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -19,11 +20,10 @@ import ml.docilealligator.infinityforreddit.databinding.ItemSubscribedUserMultiS
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.user.UserWithSelection;
 
-@SuppressWarnings("NullAway.Init")
 public class UserMultiselectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final BaseActivity activity;
-    private ArrayList<UserWithSelection> subscribedUsers;
+    private ArrayList<UserWithSelection> subscribedUsers = new ArrayList<>();
     private final RequestManager glide;
     private final int primaryTextColor;
     private final int colorAccent;
@@ -45,30 +45,22 @@ public class UserMultiselectionRecyclerViewAdapter extends RecyclerView.Adapter<
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof SubscribedUserViewHolder) {
-            ((SubscribedUserViewHolder) holder).binding.nameTextViewItemSubscribedUserMultiselection.setText(subscribedUsers.get(position).getName());
-            glide.load(subscribedUsers.get(position).getIconUrl())
+            UserWithSelection user = subscribedUsers.get(position);
+            SubscribedUserViewHolder userViewHolder = (SubscribedUserViewHolder) holder;
+
+            userViewHolder.binding.nameTextViewItemSubscribedUserMultiselection.setText(user.getName());
+            glide.load(user.getIconUrl())
                     .transform(new RoundedCornersTransformation(72, 0))
                     .error(glide.load(R.drawable.subreddit_default_icon)
                             .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(((SubscribedUserViewHolder) holder).binding.iconGifImageViewItemSubscribedUserMultiselection);
-            ((SubscribedUserViewHolder) holder).binding.checkboxItemSubscribedUserMultiselection.setChecked(subscribedUsers.get(position).isSelected());
-            ((SubscribedUserViewHolder) holder).binding.checkboxItemSubscribedUserMultiselection.setOnClickListener(view -> {
-                if (subscribedUsers.get(position).isSelected()) {
-                    ((SubscribedUserViewHolder) holder).binding.checkboxItemSubscribedUserMultiselection.setChecked(false);
-                    subscribedUsers.get(position).setSelected(false);
-                } else {
-                    ((SubscribedUserViewHolder) holder).binding.checkboxItemSubscribedUserMultiselection.setChecked(true);
-                    subscribedUsers.get(position).setSelected(true);
-                }
-            });
-            ((SubscribedUserViewHolder) holder).itemView.setOnClickListener(view ->
-                    ((SubscribedUserViewHolder) holder).binding.checkboxItemSubscribedUserMultiselection.performClick());
+                    .into(userViewHolder.binding.iconGifImageViewItemSubscribedUserMultiselection);
+            userViewHolder.binding.checkboxItemSubscribedUserMultiselection.setChecked(user.isSelected());
         }
     }
 
     @Override
     public int getItemCount() {
-        return subscribedUsers == null ? 0 : subscribedUsers.size();
+        return subscribedUsers.size();
     }
 
     @Override
@@ -79,7 +71,7 @@ public class UserMultiselectionRecyclerViewAdapter extends RecyclerView.Adapter<
         }
     }
 
-    public void setSubscribedUsers(List<SubscribedUserData> subscribedUsers, String selectedUsers) {
+    public void setSubscribedUsers(List<SubscribedUserData> subscribedUsers, @Nullable String selectedUsers) {
         this.subscribedUsers = UserWithSelection.convertSubscribedUsers(subscribedUsers);
 
         Set<String> selectedSet = new HashSet<>();
@@ -122,6 +114,24 @@ public class UserMultiselectionRecyclerViewAdapter extends RecyclerView.Adapter<
             if (activity.typeface != null) {
                 binding.nameTextViewItemSubscribedUserMultiselection.setTypeface(activity.typeface);
             }
+
+            // Read the position at click time: setSubscribedUsers replaces the whole list and calls
+            // notifyDataSetChanged(), which does not rebind until the next layout pass, so an index
+            // captured during bind could toggle a different user — silently, since the change only
+            // surfaces later via getAllSelectedUsers().
+            binding.checkboxItemSubscribedUserMultiselection.setOnClickListener(view -> {
+                int position = getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) {
+                    return;
+                }
+
+                UserWithSelection user = subscribedUsers.get(position);
+                boolean nowSelected = !user.isSelected();
+                user.setSelected(nowSelected);
+                binding.checkboxItemSubscribedUserMultiselection.setChecked(nowSelected);
+            });
+            itemView.setOnClickListener(view ->
+                    binding.checkboxItemSubscribedUserMultiselection.performClick());
         }
     }
 }

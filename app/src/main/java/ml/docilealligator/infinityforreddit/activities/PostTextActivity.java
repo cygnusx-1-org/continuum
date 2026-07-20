@@ -805,16 +805,14 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostTextActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostTextActivity);
 
-            binding.accountNameTextViewPostTextActivity.setText(selectedAccount.getAccountName());
-        }
+        binding.accountNameTextViewPostTextActivity.setText(account.getAccountName());
     }
 }

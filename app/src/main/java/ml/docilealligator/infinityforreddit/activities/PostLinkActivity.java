@@ -766,17 +766,15 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostLinkActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostLinkActivity);
 
-            binding.accountNameTextViewPostLinkActivity.setText(selectedAccount.getAccountName());
-        }
+        binding.accountNameTextViewPostLinkActivity.setText(account.getAccountName());
     }
 
     @Subscribe

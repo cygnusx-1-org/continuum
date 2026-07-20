@@ -134,7 +134,7 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
                 .get(SubscribedSubredditViewModel.class);
         mSubscribedSubredditViewModel.getAllSubscribedSubreddits().observe(this, subscribedSubredditData -> {
             binding.swipeRefreshLayoutSubscribedSubscribedSubredditsMultiselectionActivity.setRefreshing(false);
-            if (subscribedSubredditData == null || subscribedSubredditData.size() == 0) {
+            if (subscribedSubredditData.isEmpty()) {
                 binding.recyclerViewSubscribedSubscribedSubredditsMultiselectionActivity.setVisibility(View.GONE);
                 binding.noSubscriptionsLinearLayoutSubscribedSubredditsMultiselectionActivity.setVisibility(View.VISIBLE);
             } else {
@@ -161,12 +161,10 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
             finish();
             return true;
         } else if (itemId == R.id.action_save_subreddit_multiselection_activity) {
-            if (mAdapter != null) {
-                Intent returnIntent = new Intent();
-                returnIntent.putParcelableArrayListExtra(EXTRA_RETURN_SELECTED_SUBREDDITS,
-                        mAdapter.getAllSelectedSubreddits());
-                setResult(RESULT_OK, returnIntent);
-            }
+            Intent returnIntent = new Intent();
+            returnIntent.putParcelableArrayListExtra(EXTRA_RETURN_SELECTED_SUBREDDITS,
+                    mAdapter.getAllSelectedSubreddits());
+            setResult(RESULT_OK, returnIntent);
             finish();
             return true;
         } else if (itemId == R.id.action_search_subreddit_multiselection_activity) {
@@ -182,7 +180,7 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SUBREDDIT_SEARCH_REQUEST_CODE && resultCode == RESULT_OK && data != null && mAdapter != null) {
+        if (requestCode == SUBREDDIT_SEARCH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             Intent returnIntent = new Intent();
             ArrayList<SubredditWithSelection> selectedSubreddits = mAdapter.getAllSelectedSubreddits();
             ArrayList<SubredditData> searchedSubreddits = data.getParcelableArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_SUBREDDITS);

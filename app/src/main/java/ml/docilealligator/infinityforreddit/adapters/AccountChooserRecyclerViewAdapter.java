@@ -17,7 +17,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerAccountBind
 public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final BaseActivity baseActivity;
-    private ArrayList<Account> accounts = new ArrayList<>();
+    private List<Account> accounts = new ArrayList<>();
     private final RequestManager glide;
     private final int primaryTextColor;
     private final ItemClickListener itemClickListener;
@@ -40,23 +40,24 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof AccountViewHolder) {
-            glide.load(accounts.get(position).getProfileImageUrl())
+            Account account = accounts.get(position);
+            AccountViewHolder accountViewHolder = (AccountViewHolder) holder;
+
+            glide.load(account.getProfileImageUrl())
                     .error(glide.load(R.drawable.subreddit_default_icon))
                     .transform(new RoundedCornersTransformation(128, 0))
-                    .into(((AccountViewHolder) holder).binding.profileImageItemAccount);
-            ((AccountViewHolder) holder).binding.usernameTextViewItemAccount.setText(accounts.get(position).getAccountName());
-            holder.itemView.setOnClickListener(view ->
-                    itemClickListener.onClick(accounts.get(position)));
+                    .into(accountViewHolder.binding.profileImageItemAccount);
+            accountViewHolder.binding.usernameTextViewItemAccount.setText(account.getAccountName());
         }
     }
 
     @Override
     public int getItemCount() {
-        return accounts == null ? 0 : accounts.size();
+        return accounts.size();
     }
 
     public void changeAccountsDataset(List<Account> accounts) {
-        this.accounts = (ArrayList<Account>) accounts;
+        this.accounts = accounts;
         notifyDataSetChanged();
     }
 
@@ -70,6 +71,19 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
                 binding.usernameTextViewItemAccount.setTypeface(baseActivity.typeface);
             }
             binding.usernameTextViewItemAccount.setTextColor(primaryTextColor);
+
+            // Read the position at click time, not the one captured during bind: the accounts
+            // LiveData can re-emit while the chooser is open, and notifyDataSetChanged() does not
+            // rebind until the next layout pass. A stale index here would submit as the wrong
+            // account, which the user gets no visual cue about.
+            itemView.setOnClickListener(view -> {
+                int position = getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) {
+                    return;
+                }
+
+                itemClickListener.onClick(accounts.get(position));
+            });
         }
     }
 

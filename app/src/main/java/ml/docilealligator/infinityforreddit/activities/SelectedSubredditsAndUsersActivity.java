@@ -51,7 +51,6 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
     CustomThemeWrapper mCustomThemeWrapper;
     private LinearLayoutManagerBugFixed linearLayoutManager;
     private SelectedSubredditsRecyclerViewAdapter adapter;
-    private ArrayList<ExpandedSubredditInMultiReddit> subreddits;
     private ActivitySelectedSubredditsBinding binding;
 
     @Override
@@ -107,6 +106,7 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSelectedSubredditsAndUsersActivity);
 
+        ArrayList<ExpandedSubredditInMultiReddit> subreddits;
         if (savedInstanceState != null) {
             subreddits = Objects.requireNonNull(savedInstanceState.getParcelableArrayList(SELECTED_SUBREDDITS_STATE));
         } else {
@@ -163,11 +163,9 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
             finish();
             return true;
         } else if (item.getItemId() == R.id.action_save_selected_subreddits_activity) {
-            if (adapter != null) {
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra(EXTRA_RETURN_SELECTED_SUBREDDITS, adapter.getSubreddits());
-                setResult(Activity.RESULT_OK, returnIntent);
-            }
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra(EXTRA_RETURN_SELECTED_SUBREDDITS, adapter.getSubreddits());
+            setResult(Activity.RESULT_OK, returnIntent);
             finish();
         }
         return false;
@@ -180,16 +178,13 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
             if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE) {
                 if (data != null) {
                     ArrayList<SubredditWithSelection> subredditWithSelections = Objects.requireNonNull(data.getParcelableArrayListExtra(SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS));
-                    subreddits = new ArrayList<>(subredditWithSelections.stream().map(
+                    ArrayList<ExpandedSubredditInMultiReddit> selectedSubreddits = new ArrayList<>(subredditWithSelections.stream().map(
                             (subredditWithSelection) -> new ExpandedSubredditInMultiReddit(subredditWithSelection.getName(), subredditWithSelection.getIconUrl())
                     ).collect(Collectors.toList()));
-                    adapter.addSubreddits(subreddits);
+                    adapter.addSubreddits(selectedSubreddits);
                 }
             } else if (requestCode == USER_SELECTION_REQUEST_CODE) {
                 if (data != null) {
-                    if (subreddits == null) {
-                        subreddits = new ArrayList<>();
-                    }
                     ArrayList<String> selectedUsernames = data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES);
                     if (selectedUsernames != null) {
                         for (String username : selectedUsernames) {
@@ -204,9 +199,7 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (adapter != null) {
-            outState.putParcelableArrayList(SELECTED_SUBREDDITS_STATE, adapter.getSubreddits());
-        }
+        outState.putParcelableArrayList(SELECTED_SUBREDDITS_STATE, adapter.getSubreddits());
     }
 
     @Override

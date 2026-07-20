@@ -62,6 +62,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     private static final int MARKDOWN_PREVIEW_REQUEST_CODE = 300;
 
     private static final String UPLOADED_IMAGES_STATE = "UIS";
+    private static final String CAPTURED_IMAGE_URI_STATE = "CIUS";
 
     @Inject
     @Named("oauth")
@@ -80,9 +81,12 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     @Inject
     Executor mExecutor;
     private String mFullName;
+    @Nullable
     private String mAccessToken;
+    @Nullable
     private String mPostContent;
     private boolean isSubmitting = false;
+    @Nullable
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
     private ActivityEditPostBinding binding;
@@ -134,14 +138,18 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
         setSupportActionBar(binding.toolbarEditPostActivity);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mFullName = getIntent().getStringExtra(EXTRA_FULLNAME);
+        mFullName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_FULLNAME));
         mAccessToken = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCESS_TOKEN, null);
         binding.postTitleTextViewEditPostActivity.setText(getIntent().getStringExtra(EXTRA_TITLE));
         mPostContent = getIntent().getStringExtra(EXTRA_CONTENT);
         binding.postContentEditTextEditPostActivity.setText(mPostContent);
 
         if (savedInstanceState != null) {
-            uploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            ArrayList<UploadedImage> restoredUploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            if (restoredUploadedImages != null) {
+                uploadedImages = restoredUploadedImages;
+            }
+            capturedImageUri = savedInstanceState.getParcelable(CAPTURED_IMAGE_URI_STATE);
         }
 
         MarkdownBottomBarRecyclerViewAdapter adapter = new MarkdownBottomBarRecyclerViewAdapter(
@@ -265,6 +273,16 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                         @Override
                         public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                             isSubmitting = false;
+
+                            // Retrofit routes every HTTP response here — onFailure only covers
+                            // network and parse errors — so without this check a 401/403/500 would
+                            // report the edit as successful and finish, and the caller's RESULT_OK
+                            // would refresh the post back to its unchanged text.
+                            if (!response.isSuccessful()) {
+                                Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
+                                return;
+                            }
+
                             Toast.makeText(EditPostActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
                             Intent returnIntent = new Intent();
                             setResult(RESULT_OK, returnIntent);
@@ -286,17 +304,23 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST_CODE) {
-                if (data == null) {
+                Uri imageUri = data == null ? null : data.getData();
+                if (imageUri == null) {
                     Toast.makeText(EditPostActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
                     return;
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, data.getData(), uploadedImages);
+                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+                Uri imageUri = capturedImageUri;
+                if (imageUri == null) {
+                    Toast.makeText(EditPostActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, capturedImageUri, uploadedImages);
+                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages);
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 editPost();
             }
@@ -307,6 +331,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(UPLOADED_IMAGES_STATE, uploadedImages);
+        outState.putParcelable(CAPTURED_IMAGE_URI_STATE, capturedImageUri);
     }
 
     private void promptAlertDialog(int titleResId, int messageResId) {
@@ -346,6 +371,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
             capturedImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("captured_image", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (IOException ex) {
             Toast.makeText(this, R.string.error_creating_temp_file, Toast.LENGTH_SHORT).show();

@@ -839,17 +839,15 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostVideoActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostVideoActivity);
 
-            binding.accountNameTextViewPostVideoActivity.setText(selectedAccount.getAccountName());
-        }
+        binding.accountNameTextViewPostVideoActivity.setText(account.getAccountName());
     }
 
     @Subscribe

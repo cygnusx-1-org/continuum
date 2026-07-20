@@ -180,6 +180,7 @@
     <string name="cannot_fetch_sidebar">Cannot fetch sidebar</string>
     <string name="cannot_fetch_multireddit">Cannot fetch multireddit info</string>
     <string name="cannot_fetch_multireddit_tap_to_retry">Unable to fetch multireddit information. Tap to retry.</string>
+    <string name="cannot_fetch_user_flairs">Cannot fetch user flairs</string>
 
     <string name="subscribe">Subscribe</string>
     <string name="unsubscribe">Unsubscribe</string>

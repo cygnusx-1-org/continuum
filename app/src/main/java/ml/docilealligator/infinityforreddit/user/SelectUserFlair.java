@@ -23,7 +23,7 @@ public class SelectUserFlair {
         void failed(@Nullable String errorMessage);
     }
 
-    public static void selectUserFlair(Executor executor, Handler handler, Retrofit oauthRetrofit, String accessToken, @Nullable UserFlair userFlair,
+    public static void selectUserFlair(Executor executor, Handler handler, Retrofit oauthRetrofit, @Nullable String accessToken, @Nullable UserFlair userFlair,
                                        String subredditName, @NonNull String accountName, SelectUserFlairListener selectUserFlairListener) {
 
         Map<String, String> params = new HashMap<>();

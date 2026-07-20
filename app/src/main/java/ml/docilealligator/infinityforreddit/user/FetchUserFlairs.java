@@ -19,7 +19,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class FetchUserFlairs {
-    public static void fetchUserFlairsInSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit, String accessToken, String subredditName, FetchUserFlairsInSubredditListener fetchUserFlairsInSubredditListener) {
+    public static void fetchUserFlairsInSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit, @Nullable String accessToken, String subredditName, FetchUserFlairsInSubredditListener fetchUserFlairsInSubredditListener) {
         oauthRetrofit.create(RedditAPI.class).getUserFlairs(APIUtils.getOAuthHeader(accessToken), subredditName)
                 .enqueue(new Callback<>() {
                     @Override

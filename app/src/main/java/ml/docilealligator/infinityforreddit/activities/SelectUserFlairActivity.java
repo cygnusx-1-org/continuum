@@ -50,10 +50,11 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
+    @Nullable
     private ArrayList<UserFlair> mUserFlairs;
     private String mSubredditName;
-    private UserFlairRecyclerViewAdapter mAdapter;
     private ActivitySelectUserFlairBinding binding;
 
     @Override
@@ -104,7 +105,7 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSelectUserFlairActivity);
 
-        mSubredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
+        mSubredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
         setTitle(mSubredditName);
 
         if (savedInstanceState != null) {
@@ -114,31 +115,58 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
     }
 
     private void bindView() {
-        if (mUserFlairs == null) {
+        ArrayList<UserFlair> userFlairs = mUserFlairs;
+        if (userFlairs == null) {
             FetchUserFlairs.fetchUserFlairsInSubreddit(mExecutor, mHandler, mOauthRetrofit, accessToken, mSubredditName,
                     new FetchUserFlairs.FetchUserFlairsInSubredditListener() {
                         @Override
-                        public void fetchSuccessful(ArrayList<UserFlair> userFlairs) {
-                            mUserFlairs = userFlairs;
-                            instantiateRecyclerView();
+                        public void fetchSuccessful(@Nullable ArrayList<UserFlair> fetchedUserFlairs) {
+                            if (isFinishing() || isDestroyed()) {
+                                return;
+                            }
+
+                            // A 403 means the subreddit has no user flairs; normalize that to an
+                            // empty list so the adapter always has one to render.
+                            ArrayList<UserFlair> flairs = fetchedUserFlairs == null ? new ArrayList<>() : fetchedUserFlairs;
+                            mUserFlairs = flairs;
+                            instantiateRecyclerView(flairs);
                         }
 
                         @Override
                         public void fetchFailed() {
-
+                            onFetchFailed();
                         }
                     });
         } else {
-            instantiateRecyclerView();
+            instantiateRecyclerView(userFlairs);
         }
     }
 
-    private void instantiateRecyclerView() {
-        mAdapter = new UserFlairRecyclerViewAdapter(this, mCustomThemeWrapper, mUserFlairs, (userFlair, editUserFlair) -> {
+    /**
+     * The fetch runs from {@link #onCreate}, and the content view stays empty until
+     * {@link #instantiateRecyclerView} fills it, so a failure would otherwise strand the user on a
+     * blank screen with no message and nothing to tap. Report and leave instead. This is a Toast
+     * rather than a Snackbar because {@code finish()} tears down the view hierarchy a Snackbar
+     * anchors to, so it would never be seen.
+     */
+    private void onFetchFailed() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+
+        Toast.makeText(this, R.string.cannot_fetch_user_flairs, Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private void instantiateRecyclerView(ArrayList<UserFlair> userFlairs) {
+        UserFlairRecyclerViewAdapter adapter = new UserFlairRecyclerViewAdapter(this, mCustomThemeWrapper, userFlairs, (userFlair, editUserFlair) -> {
             if (editUserFlair) {
+                // The adapter only passes editUserFlair == true from a flair row's edit button,
+                // never from the leading "clear flair" row, so the flair is always present here.
+                UserFlair flairToEdit = Objects.requireNonNull(userFlair);
                 View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_flair, null);
                 EditText flairEditText = dialogView.findViewById(R.id.flair_edit_text_edit_flair_dialog);
-                flairEditText.setText(userFlair.getText());
+                flairEditText.setText(flairToEdit.getText());
                 flairEditText.requestFocus();
                 Utils.showKeyboard(this, new Handler(), flairEditText);
                 new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
@@ -147,8 +175,8 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
                         .setPositiveButton(R.string.ok, (dialogInterface, i)
                                 -> {
                             Utils.hideKeyboard(this);
-                            userFlair.setText(flairEditText.getText().toString());
-                            selectUserFlair(userFlair);
+                            flairToEdit.setText(flairEditText.getText().toString());
+                            selectUserFlair(flairToEdit);
                         })
                         .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
                             Utils.hideKeyboard(this);
@@ -176,7 +204,7 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
         });
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(SelectUserFlairActivity.this);
         binding.recyclerViewSelectUserFlairActivity.setLayoutManager(mLinearLayoutManager);
-        binding.recyclerViewSelectUserFlairActivity.setAdapter(mAdapter);
+        binding.recyclerViewSelectUserFlairActivity.setAdapter(adapter);
     }
 
     private void selectUserFlair(@Nullable UserFlair userFlair) {
@@ -184,6 +212,15 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
                 new SelectUserFlair.SelectUserFlairListener() {
                     @Override
                     public void success() {
+                        if (isFinishing() || isDestroyed()) {
+                            // The request outlived the instance that started it (a rotation, say),
+                            // so this result can no longer reach the live screen — it stays open on
+                            // the flair list with the change already applied server-side. Fixing
+                            // that needs the request hoisted off the activity instance; see the
+                            // deferred list in CHUNKS.md.
+                            return;
+                        }
+
                         if (userFlair == null) {
                             Toast.makeText(SelectUserFlairActivity.this, R.string.clear_user_flair_success, Toast.LENGTH_SHORT).show();
                         } else {
@@ -193,13 +230,17 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
                     }
 
                     @Override
-                    public void failed(String errorMessage) {
-                        if (errorMessage == null || errorMessage.equals("")) {
-                            if (userFlair == null) {
-                                Snackbar.make(binding.getRoot(), R.string.clear_user_flair_success, Snackbar.LENGTH_SHORT).show();
-                            } else {
-                                Snackbar.make(binding.getRoot(), R.string.select_user_flair_success, Snackbar.LENGTH_SHORT).show();
-                            }
+                    public void failed(@Nullable String errorMessage) {
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+
+                        // Reddit reports plenty of failures with nothing to quote: OkHttp leaves
+                        // Response.message() empty on HTTP/2, and Throwable.getMessage() is null for
+                        // many IOExceptions. Fall back to a failure string rather than the success
+                        // one this used to show.
+                        if (errorMessage == null || errorMessage.isEmpty()) {
+                            Snackbar.make(binding.getRoot(), R.string.update_flair_failed, Snackbar.LENGTH_SHORT).show();
                         } else {
                             Snackbar.make(binding.getRoot(), errorMessage, Snackbar.LENGTH_SHORT).show();
                         }

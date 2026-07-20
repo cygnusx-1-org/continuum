@@ -26,11 +26,7 @@ public class SelectedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<
         this.activity = activity;
         this.customThemeWrapper = customThemeWrapper;
         this.glide = glide;
-        if (subreddits == null) {
-            this.subreddits = new ArrayList<>();
-        } else {
-            this.subreddits = subreddits;
-        }
+        this.subreddits = subreddits;
     }
 
     @NonNull
@@ -43,16 +39,15 @@ public class SelectedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof SubredditViewHolder) {
-            glide.load(subreddits.get(holder.getBindingAdapterPosition()).getIconUrl())
+            ExpandedSubredditInMultiReddit subreddit = subreddits.get(position);
+            SubredditViewHolder subredditViewHolder = (SubredditViewHolder) holder;
+
+            glide.load(subreddit.getIconUrl())
                     .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0)))
                     .error(glide.load(R.drawable.subreddit_default_icon)
                             .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(72, 0))))
-                    .into(((SubredditViewHolder) holder).binding.iconImageViewItemSelectedSubreddit);
-            ((SubredditViewHolder) holder).binding.subredditNameItemSelectedSubreddit.setText(subreddits.get(holder.getBindingAdapterPosition()).getName());
-            ((SubredditViewHolder) holder).binding.deleteImageViewItemSelectedSubreddit.setOnClickListener(view -> {
-                subreddits.remove(holder.getBindingAdapterPosition());
-                notifyItemRemoved(holder.getBindingAdapterPosition());
-            });
+                    .into(subredditViewHolder.binding.iconImageViewItemSelectedSubreddit);
+            subredditViewHolder.binding.subredditNameItemSelectedSubreddit.setText(subreddit.getName());
         }
     }
 
@@ -77,7 +72,9 @@ public class SelectedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<
 
     public void addUserInSubredditType(String username) {
         subreddits.add(new ExpandedSubredditInMultiReddit(username, null));
-        notifyItemInserted(subreddits.size());
+        // The appended item is at size() - 1; notifying at size() reports a position past the end,
+        // which desyncs RecyclerView's bookkeeping against getItemCount().
+        notifyItemInserted(subreddits.size() - 1);
     }
 
     public ArrayList<ExpandedSubredditInMultiReddit> getSubreddits() {
@@ -97,6 +94,20 @@ public class SelectedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<
             if (activity.typeface != null) {
                 binding.subredditNameItemSelectedSubreddit.setTypeface(activity.typeface);
             }
+
+            // Read the position once, at click time. notifyItemRemoved starts a ~250ms disappear
+            // animation during which the row is still laid out and still takes touches, and its
+            // position reads as NO_POSITION — so a second tap on a row already being deleted would
+            // otherwise call subreddits.remove(-1).
+            binding.deleteImageViewItemSelectedSubreddit.setOnClickListener(view -> {
+                int position = getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) {
+                    return;
+                }
+
+                subreddits.remove(position);
+                notifyItemRemoved(position);
+            });
         }
     }
 }

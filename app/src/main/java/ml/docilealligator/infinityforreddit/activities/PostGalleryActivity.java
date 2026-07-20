@@ -806,17 +806,15 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostGalleryActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostGalleryActivity);
 
-            binding.accountNameTextViewPostGalleryActivity.setText(selectedAccount.getAccountName());
-        }
+        binding.accountNameTextViewPostGalleryActivity.setText(account.getAccountName());
     }
 
     public void setCaptionAndUrl(int position, String caption, String url) {

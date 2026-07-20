@@ -46,7 +46,7 @@ public class UserFlairRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
                 ((UserFlairViewHolder) holder).binding.userFlairHtmlTextViewItemUserFlair.setText(R.string.clear_user_flair);
                 ((UserFlairViewHolder) holder).binding.editUserFlairImageViewItemUserFlair.setVisibility(View.GONE);
             } else {
-                UserFlair userFlair = userFlairs.get(holder.getBindingAdapterPosition() - 1);
+                UserFlair userFlair = userFlairs.get(position - 1);
                 if (userFlair.getHtmlText() == null || userFlair.getHtmlText().equals("")) {
                     ((UserFlairViewHolder) holder).binding.userFlairHtmlTextViewItemUserFlair.setText(userFlair.getText());
                 } else {
@@ -63,7 +63,8 @@ public class UserFlairRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
 
     @Override
     public int getItemCount() {
-        return userFlairs == null ? 1 : userFlairs.size() + 1;
+        // The flairs plus the leading "clear flair" row.
+        return userFlairs.size() + 1;
     }
 
     class UserFlairViewHolder extends RecyclerView.ViewHolder {
@@ -81,15 +82,27 @@ public class UserFlairRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
             }
 
             itemView.setOnClickListener(view -> {
-                if (getBindingAdapterPosition() == 0) {
+                int position = getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) {
+                    return;
+                }
+
+                if (position == 0) {
                     itemClickListener.onClick(null, false);
                 } else {
-                    itemClickListener.onClick(userFlairs.get(getBindingAdapterPosition() - 1), false);
+                    itemClickListener.onClick(userFlairs.get(position - 1), false);
                 }
             });
 
             binding.editUserFlairImageViewItemUserFlair.setOnClickListener(view -> {
-                itemClickListener.onClick(userFlairs.get(getBindingAdapterPosition() - 1), true);
+                // Position 0 is the "clear flair" row, whose edit icon onBindViewHolder hides, so
+                // this only ever fires for a real flair.
+                int position = getBindingAdapterPosition();
+                if (position == RecyclerView.NO_POSITION || position == 0) {
+                    return;
+                }
+
+                itemClickListener.onClick(userFlairs.get(position - 1), true);
             });
         }
     }

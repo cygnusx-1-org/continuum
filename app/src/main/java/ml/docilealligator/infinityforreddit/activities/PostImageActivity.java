@@ -778,20 +778,18 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostImageActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostImageActivity);
 
-            binding.accountNameTextViewPostImageActivity.setText(selectedAccount.getAccountName());
+        binding.accountNameTextViewPostImageActivity.setText(account.getAccountName());
 
-            // Flair requirements are per-account: re-fetch with the newly selected account's token.
-            notifyControllerOfSubreddit();
-        }
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 
     private void captureImage() {

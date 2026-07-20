@@ -840,19 +840,17 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
 
-            binding.accountNameTextViewSubmitCrosspostActivity.setText(selectedAccount.getAccountName());
+        binding.accountNameTextViewSubmitCrosspostActivity.setText(account.getAccountName());
 
-            fetchCrosspostableSubreddits();
-        }
+        fetchCrosspostableSubreddits();
     }
 
     @Subscribe
