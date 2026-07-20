@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -93,7 +92,6 @@ public class CustomThemeListingActivity extends BaseActivity implements
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ActivityCustomThemeListingBinding binding;
-    private ActivityResultLauncher<Intent> customizeThemeActivityResultLauncher;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

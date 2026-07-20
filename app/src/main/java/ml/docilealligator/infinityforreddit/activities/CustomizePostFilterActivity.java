@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -79,6 +80,8 @@ public class CustomizePostFilterActivity extends BaseActivity {
     private PostFilter postFilter;
     private boolean fromSettings;
     private String originalName;
+    @Nullable
+    private AlertDialog activeDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -168,13 +171,14 @@ public class CustomizePostFilterActivity extends BaseActivity {
 
         binding.excludeAddSubredditsImageViewCustomizePostFilterActivity.setOnClickListener(view -> {
             Intent intent = new Intent(this, SubredditMultiselectionActivity.class);
-            String s = binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString().trim();
-            intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS, binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString().trim());
+            intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS,
+                    Objects.requireNonNull(binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.getText()).toString().trim());
             startActivityForResult(intent, ADD_EXCLUDE_SUBREDDITS_REQUEST_CODE);
         });
         binding.containAddSubredditsImageViewCustomizePostFilterActivity.setOnClickListener(view -> {
             Intent intent = new Intent(this, SubredditMultiselectionActivity.class);
-            intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS, binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString().trim());
+            intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS,
+                    Objects.requireNonNull(binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText()).toString().trim());
             startActivityForResult(intent, ADD_CONTAIN_SUBREDDITS_REQUEST_CODE);
         });
         binding.excludeAddUsersImageViewCustomizePostFilterActivity.setOnClickListener(view -> {
@@ -191,18 +195,20 @@ public class CustomizePostFilterActivity extends BaseActivity {
         });
 
         if (savedInstanceState != null) {
-            postFilter = savedInstanceState.getParcelable(POST_FILTER_STATE);
-            originalName = savedInstanceState.getString(ORIGINAL_NAME_STATE);
+            // onSaveInstanceState always writes both keys.
+            postFilter = Objects.requireNonNull(savedInstanceState.getParcelable(POST_FILTER_STATE));
+            originalName = Objects.requireNonNull(savedInstanceState.getString(ORIGINAL_NAME_STATE));
         } else {
-            postFilter = getIntent().getParcelableExtra(EXTRA_POST_FILTER);
-            if (postFilter == null) {
+            PostFilter postFilterExtra = getIntent().getParcelableExtra(EXTRA_POST_FILTER);
+            if (postFilterExtra == null) {
                 postFilter = new PostFilter();
                 originalName = "";
             } else {
+                postFilter = postFilterExtra;
                 if (!fromSettings) {
                     originalName = "";
                 } else {
-                    originalName = postFilter.name;
+                    originalName = postFilterExtra.name;
                 }
             }
             bindView();
@@ -241,71 +247,82 @@ public class CustomizePostFilterActivity extends BaseActivity {
         String excludeUser = intent.getStringExtra(EXTRA_EXCLUDE_USER);
         String excludeFlair = intent.getStringExtra(EXTRA_EXCLUDE_FLAIR);
         String containFlair = intent.getStringExtra(EXTRA_CONTAIN_FLAIR);
-        String excludeDomain = intent.getStringExtra(EXTRA_EXCLUDE_DOMAIN);
-        String containDomain = intent.getStringExtra(EXTRA_CONTAIN_DOMAIN);
+        // Reduced to a bare domain up front, so a value that yields no domain at all is skipped
+        // entirely rather than appended after its separator.
+        String excludeDomain = domainOf(intent.getStringExtra(EXTRA_EXCLUDE_DOMAIN));
+        String containDomain = domainOf(intent.getStringExtra(EXTRA_CONTAIN_DOMAIN));
         String containSubreddit = intent.getStringExtra(EXTRA_CONTAIN_SUBREDDIT);
         String containUser = intent.getStringExtra(EXTRA_CONTAIN_USER);
 
         if (excludeSubreddit != null && !excludeSubreddit.equals("")) {
-            if (!binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+            if (!Objects.requireNonNull(binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.append(",");
             }
             binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.append(excludeSubreddit);
         }
         if (containSubreddit != null && !containSubreddit.equals("")) {
-            if (!binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+            if (!Objects.requireNonNull(binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.append(",");
             }
             binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.append(containSubreddit);
         }
         if (containUser != null && !containUser.equals("")) {
-            if (!binding.containsUsersTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+            if (!Objects.requireNonNull(binding.containsUsersTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.containsUsersTextInputEditTextCustomizePostFilterActivity.append(",");
             }
             binding.containsUsersTextInputEditTextCustomizePostFilterActivity.append(containUser);
         }
         if (excludeUser != null && !excludeUser.equals("")) {
-            if (!binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+            if (!Objects.requireNonNull(binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.append(",");
             }
             binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.append(excludeUser);
         }
         if (excludeFlair != null && !excludeFlair.equals("")) {
-            if (!binding.excludesFlairsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+            if (!Objects.requireNonNull(binding.excludesFlairsTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.excludesFlairsTextInputEditTextCustomizePostFilterActivity.append(",");
             }
             binding.excludesFlairsTextInputEditTextCustomizePostFilterActivity.append(excludeFlair);
         }
         if (containFlair != null && !containFlair.equals("")) {
-            if (!binding.containsFlairsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+            if (!Objects.requireNonNull(binding.containsFlairsTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.containsFlairsTextInputEditTextCustomizePostFilterActivity.append(",");
             }
             binding.containsFlairsTextInputEditTextCustomizePostFilterActivity.append(containFlair);
         }
-        if (excludeDomain != null && !excludeDomain.equals("")) {
-            if (!binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+        if (excludeDomain != null) {
+            if (!Objects.requireNonNull(binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity.append(",");
             }
-            binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity.append(Uri.parse(excludeDomain).getHost());
+            binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity.append(excludeDomain);
         }
-        if (containDomain != null && !containDomain.equals("")) {
-            if (!binding.containDomainsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
+        if (containDomain != null) {
+            if (!Objects.requireNonNull(binding.containDomainsTextInputEditTextCustomizePostFilterActivity.getText()).toString().equals("")) {
                 binding.containDomainsTextInputEditTextCustomizePostFilterActivity.append(",");
             }
-            binding.containDomainsTextInputEditTextCustomizePostFilterActivity.append(Uri.parse(containDomain).getHost());
+            binding.containDomainsTextInputEditTextCustomizePostFilterActivity.append(containDomain);
         }
-        if (containUser != null && !containUser.equals("")) {
-            if (!binding.containsUsersTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
-                binding.containsUsersTextInputEditTextCustomizePostFilterActivity.append(",");
-            }
-            binding.containsUsersTextInputEditTextCustomizePostFilterActivity.append(containUser);
+    }
+
+    /**
+     * Reduces a post URL to the domain this filter stores, or null when there is no domain to store.
+     *
+     * <p>{@link Uri#getHost()} is null for anything without a scheme — a bare "example.com" parses as
+     * a relative path — and in that case the value already is the domain. It is also null for a
+     * scheme with no authority ("https://"), which is neither a URL nor a domain; returning null for
+     * that lets the caller skip it, instead of appending a stray separator or throwing on
+     * {@code Editable.append(null)}.
+     */
+    @Nullable
+    private static String domainOf(@Nullable String urlOrDomain) {
+        if (urlOrDomain == null || urlOrDomain.isEmpty()) {
+            return null;
         }
-        if (containSubreddit != null && !containSubreddit.equals("")) {
-            if (!binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("")) {
-                binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.append(",");
-            }
-            binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.append(containSubreddit);
+        String host = Uri.parse(urlOrDomain).getHost();
+        if (host != null && !host.isEmpty()) {
+            return host;
         }
+        return urlOrDomain.contains("://") ? null : urlOrDomain;
     }
 
     @Override
@@ -572,6 +589,15 @@ public class CustomizePostFilterActivity extends BaseActivity {
                 new SavePostFilter.SavePostFilterListener() {
                     @Override
                     public void success() {
+                        // isFinishing(), deliberately not isDestroyed(). A configuration change
+                        // destroys this instance but keeps the activity record and its token, so
+                        // startActivity/setResult/finish() below still reach the relaunched instance
+                        // and must run — guarding on isDestroyed() would drop the result and strand
+                        // the editor open. A back-press is the opposite case: the user abandoned the
+                        // screen, so launching FilteredPostsActivity at them would be wrong.
+                        if (isFinishing()) {
+                            return;
+                        }
                         if (getIntent().getBooleanExtra(EXTRA_START_FILTERED_POSTS_WHEN_FINISH, false)) {
                             Intent intent = new Intent(CustomizePostFilterActivity.this, FilteredPostsActivity.class);
                             intent.putExtras(getIntent());
@@ -587,7 +613,12 @@ public class CustomizePostFilterActivity extends BaseActivity {
 
                     @Override
                     public void duplicate() {
-                        new MaterialAlertDialogBuilder(CustomizePostFilterActivity.this, R.style.MaterialAlertDialogTheme)
+                        // Showing a dialog on a destroyed activity throws BadTokenException, and this
+                        // fires from a background database read that can outlive a rotation.
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+                        activeDialog = new MaterialAlertDialogBuilder(CustomizePostFilterActivity.this, R.style.MaterialAlertDialogTheme)
                                 .setTitle(getString(R.string.duplicate_post_filter_dialog_title, postFilter.name))
                                 .setMessage(R.string.duplicate_post_filter_dialog_message)
                                 .setPositiveButton(R.string.override, (dialogInterface, i) -> savePostFilter(postFilter.name))
@@ -603,12 +634,16 @@ public class CustomizePostFilterActivity extends BaseActivity {
         if (resultCode == RESULT_OK && data != null) {
             if (requestCode == ADD_EXCLUDE_SUBREDDITS_REQUEST_CODE) {
                 ArrayList<SubredditWithSelection> subredditWithSelections = data.getParcelableArrayListExtra(SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
-                updateSubredditsUsersNames(new ArrayList<>(subredditWithSelections.stream().map(SubredditWithSelection::getName).collect(Collectors.toList())),
-                        binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity);
+                if (subredditWithSelections != null) {
+                    updateSubredditsUsersNames(new ArrayList<>(subredditWithSelections.stream().map(SubredditWithSelection::getName).collect(Collectors.toList())),
+                            binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity);
+                }
             } else if (requestCode == ADD_CONTAIN_SUBREDDITS_REQUEST_CODE) {
                 ArrayList<SubredditWithSelection> subredditWithSelections = data.getParcelableArrayListExtra(SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS);
-                updateSubredditsUsersNames(new ArrayList<>(subredditWithSelections.stream().map(SubredditWithSelection::getName).collect(Collectors.toList())),
-                        binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity);
+                if (subredditWithSelections != null) {
+                    updateSubredditsUsersNames(new ArrayList<>(subredditWithSelections.stream().map(SubredditWithSelection::getName).collect(Collectors.toList())),
+                            binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity);
+                }
             } else if (requestCode == ADD_EXCLUDE_USERS_REQUEST_CODE) {
                 ArrayList<String> usernames = data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES);
                 updateSubredditsUsersNames(usernames, binding.excludesUsersTextInputEditTextCustomizePostFilterActivity);
@@ -621,9 +656,9 @@ public class CustomizePostFilterActivity extends BaseActivity {
 
     private void updateSubredditsUsersNames(@Nullable ArrayList<String> subredditNames,
                                       com.google.android.material.textfield.TextInputEditText targetEditText) {
-        if (subredditNames == null || subredditNames.isEmpty() || targetEditText == null) return;
+        if (subredditNames == null || subredditNames.isEmpty()) return;
 
-        String current = targetEditText.getText().toString().trim();
+        String current = Objects.requireNonNull(targetEditText.getText()).toString().trim();
         if (!current.isEmpty() && current.charAt(current.length() - 1) != ',') {
             targetEditText.setText(current + ",");
         }
@@ -638,27 +673,27 @@ public class CustomizePostFilterActivity extends BaseActivity {
 
 
     private void constructPostFilter() throws PatternSyntaxException {
-        postFilter.name = binding.nameTextInputEditTextCustomizePostFilterActivity.getText().toString();
+        postFilter.name = Objects.requireNonNull(binding.nameTextInputEditTextCustomizePostFilterActivity.getText()).toString();
         postFilter.maxVote = binding.maxVoteTextInputEditTextCustomizePostFilterActivity.getText() == null || binding.maxVoteTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("") ? -1 : Integer.parseInt(binding.maxVoteTextInputEditTextCustomizePostFilterActivity.getText().toString());
         postFilter.minVote = binding.minVoteTextInputEditTextCustomizePostFilterActivity.getText() == null || binding.minVoteTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("") ? -1 : Integer.parseInt(binding.minVoteTextInputEditTextCustomizePostFilterActivity.getText().toString());
         postFilter.maxComments = binding.maxCommentsTextInputEditTextCustomizePostFilterActivity.getText() == null || binding.maxCommentsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("") ? -1 : Integer.parseInt(binding.maxCommentsTextInputEditTextCustomizePostFilterActivity.getText().toString());
         postFilter.minComments = binding.minCommentsTextInputEditTextCustomizePostFilterActivity.getText() == null || binding.minCommentsTextInputEditTextCustomizePostFilterActivity.getText().toString().equals("") ? -1 : Integer.parseInt(binding.minCommentsTextInputEditTextCustomizePostFilterActivity.getText().toString());
         postFilter.maxAwards = -1;
         postFilter.minAwards = -1;
-        postFilter.postTitleExcludesRegex = binding.titleExcludesRegexTextInputEditTextCustomizePostFilterActivity.getText().toString();
+        postFilter.postTitleExcludesRegex = Objects.requireNonNull(binding.titleExcludesRegexTextInputEditTextCustomizePostFilterActivity.getText()).toString();
         Pattern.compile(postFilter.postTitleExcludesRegex);
-        postFilter.postTitleContainsRegex = binding.titleContainsRegexTextInputEditTextCustomizePostFilterActivity.getText().toString();
+        postFilter.postTitleContainsRegex = Objects.requireNonNull(binding.titleContainsRegexTextInputEditTextCustomizePostFilterActivity.getText()).toString();
         Pattern.compile(postFilter.postTitleContainsRegex);
-        postFilter.postTitleExcludesStrings = binding.titleExcludesStringsTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.postTitleContainsStrings = binding.titleContainsStringsTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.excludeSubreddits = binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.containSubreddits = binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.excludeUsers = binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.containUsers = binding.containsUsersTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.excludeFlairs = binding.excludesFlairsTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.containFlairs = binding.containsFlairsTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.excludeDomains = binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity.getText().toString();
-        postFilter.containDomains = binding.containDomainsTextInputEditTextCustomizePostFilterActivity.getText().toString();
+        postFilter.postTitleExcludesStrings = Objects.requireNonNull(binding.titleExcludesStringsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.postTitleContainsStrings = Objects.requireNonNull(binding.titleContainsStringsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.excludeSubreddits = Objects.requireNonNull(binding.excludesSubredditsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.containSubreddits = Objects.requireNonNull(binding.containsSubredditsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.excludeUsers = Objects.requireNonNull(binding.excludesUsersTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.containUsers = Objects.requireNonNull(binding.containsUsersTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.excludeFlairs = Objects.requireNonNull(binding.excludesFlairsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.containFlairs = Objects.requireNonNull(binding.containsFlairsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.excludeDomains = Objects.requireNonNull(binding.excludeDomainsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
+        postFilter.containDomains = Objects.requireNonNull(binding.containDomainsTextInputEditTextCustomizePostFilterActivity.getText()).toString();
         postFilter.containTextType = binding.postTypeTextSwitchCustomizePostFilterActivity.isChecked();
         postFilter.containLinkType = binding.postTypeLinkSwitchCustomizePostFilterActivity.isChecked();
         postFilter.containImageType = binding.postTypeImageSwitchCustomizePostFilterActivity.isChecked();
@@ -667,6 +702,18 @@ public class CustomizePostFilterActivity extends BaseActivity {
         postFilter.containGalleryType = binding.postTypeGallerySwitchCustomizePostFilterActivity.isChecked();
         postFilter.onlyNSFW = binding.onlyNsfwSwitchCustomizePostFilterActivity.isChecked();
         postFilter.onlySpoiler = binding.onlySpoilerSwitchCustomizePostFilterActivity.isChecked();
+    }
+
+    @Override
+    protected void onDestroy() {
+        // The duplicate-name prompt is a raw AlertDialog rather than a DialogFragment, so one left
+        // showing across a rotation leaks its window and this activity with it.
+        AlertDialog dialog = activeDialog;
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        activeDialog = null;
+        super.onDestroy();
     }
 
     @Override

@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -87,12 +88,20 @@ public class CustomizeThemeActivity extends BaseActivity {
     @Inject
     Executor mExecutor;
 
+    @SuppressWarnings("NullAway.Init") // Set from the intent or saved state in onCreate, or by the async theme load.
     private String themeName;
+    @Nullable
     private OnlineCustomThemeMetadata onlineCustomThemeMetadata;
     private boolean isPredefinedTheme;
+    @Nullable
     private ArrayList<CustomThemeSettingsItem> customThemeSettingsItems;
+    @Nullable
     private CustomizeThemeRecyclerViewAdapter adapter;
     private ActivityCustomizeThemeBinding binding;
+    @Nullable
+    private Call<String> themeDownloadCall;
+    @Nullable
+    private AlertDialog activeDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -143,83 +152,109 @@ public class CustomizeThemeActivity extends BaseActivity {
         }
 
         if (savedInstanceState != null) {
-            customThemeSettingsItems = savedInstanceState.getParcelableArrayList(CUSTOM_THEME_SETTINGS_ITEMS_STATE);
-            themeName = savedInstanceState.getString(THEME_NAME_STATE);
+            // onSaveInstanceState writes these two together, so restore them together or not at all;
+            // a partial restore would leave the theme name without the settings items it belongs to.
+            ArrayList<CustomThemeSettingsItem> savedSettingsItems =
+                    savedInstanceState.getParcelableArrayList(CUSTOM_THEME_SETTINGS_ITEMS_STATE);
+            String savedThemeName = savedInstanceState.getString(THEME_NAME_STATE);
+            if (savedSettingsItems != null && savedThemeName != null) {
+                customThemeSettingsItems = savedSettingsItems;
+                themeName = savedThemeName;
+            }
         }
 
         binding.progressBarCustomizeThemeActivity.setVisibility(View.GONE);
 
         int androidVersion = Build.VERSION.SDK_INT;
 
+        // Both are pure functions of the intent, which survives recreation, so read them on every pass:
+        // a restored instance needs them as much as a fresh one, and reading them only on the
+        // not-yet-loaded path left a rotated online theme with no metadata, which silently downgraded
+        // "modify this theme" into "upload a duplicate".
+        isPredefinedTheme = getIntent().getBooleanExtra(EXTRA_IS_PREDEFIINED_THEME, false);
+        OnlineCustomThemeMetadata metadata = getIntent().getParcelableExtra(EXTRA_ONLINE_CUSTOM_THEME_METADATA);
+        onlineCustomThemeMetadata = metadata;
+
         if (customThemeSettingsItems == null) {
             if (getIntent().hasExtra(EXTRA_THEME_TYPE)) {
                 int themeType = getIntent().getIntExtra(EXTRA_THEME_TYPE, EXTRA_LIGHT_THEME);
                 GetCustomTheme.getCustomTheme(mExecutor, new Handler(), redditDataRoomDatabase, themeType, customTheme -> {
+                    if (isFinishing() || isDestroyed()) {
+                        return;
+                    }
+                    ArrayList<CustomThemeSettingsItem> settingsItems;
                     if (customTheme == null) {
                         isPredefinedTheme = true;
                         switch (themeType) {
                             case EXTRA_DARK_THEME:
-                                customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
+                                settingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
                                         CustomizeThemeActivity.this,
                                         CustomThemeWrapper.getIndigoDark(CustomizeThemeActivity.this),
                                         androidVersion);
                                 themeName = getString(R.string.theme_name_indigo_dark);
                                 break;
                             case EXTRA_AMOLED_THEME:
-                                customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
+                                settingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
                                         CustomizeThemeActivity.this,
                                         CustomThemeWrapper.getIndigoAmoled(CustomizeThemeActivity.this),
                                         androidVersion);
                                 themeName = getString(R.string.theme_name_indigo_amoled);
                                 break;
                             default:
-                                customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
+                                settingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
                                         CustomizeThemeActivity.this,
                                         CustomThemeWrapper.getIndigo(CustomizeThemeActivity.this),
                                         androidVersion);
                                 themeName = getString(R.string.theme_name_indigo);
                         }
                     } else {
-                        customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
+                        settingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
                                 CustomizeThemeActivity.this, customTheme, androidVersion);
                         themeName = customTheme.name;
                     }
+                    customThemeSettingsItems = settingsItems;
 
-                    adapter = new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
-                    binding.recyclerViewCustomizeThemeActivity.setAdapter(adapter);
-                    adapter.setCustomThemeSettingsItem(customThemeSettingsItems);
+                    CustomizeThemeRecyclerViewAdapter themeAdapter =
+                            new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
+                    adapter = themeAdapter;
+                    binding.recyclerViewCustomizeThemeActivity.setAdapter(themeAdapter);
+                    themeAdapter.setCustomThemeSettingsItem(settingsItems);
                 });
             } else {
-                isPredefinedTheme = getIntent().getBooleanExtra(EXTRA_IS_PREDEFIINED_THEME, false);
-                themeName = getIntent().getStringExtra(EXTRA_THEME_NAME);
-                onlineCustomThemeMetadata = getIntent().getParcelableExtra(EXTRA_ONLINE_CUSTOM_THEME_METADATA);
+                // Every launch site that omits EXTRA_THEME_TYPE sets EXTRA_THEME_NAME.
+                themeName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_THEME_NAME));
 
-                adapter = new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
-                binding.recyclerViewCustomizeThemeActivity.setAdapter(adapter);
+                CustomizeThemeRecyclerViewAdapter themeAdapter =
+                        new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
+                adapter = themeAdapter;
+                binding.recyclerViewCustomizeThemeActivity.setAdapter(themeAdapter);
                 if (isPredefinedTheme) {
                     customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
                             CustomizeThemeActivity.this,
                             CustomThemeWrapper.getPredefinedCustomTheme(this, themeName),
                             androidVersion);
 
-                    adapter = new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
-                    binding.recyclerViewCustomizeThemeActivity.setAdapter(adapter);
-                    adapter.setCustomThemeSettingsItem(customThemeSettingsItems);
+                    themeAdapter.setCustomThemeSettingsItem(customThemeSettingsItems);
                 } else {
-                    if (onlineCustomThemeMetadata != null) {
+                    if (metadata != null) {
                         binding.progressBarCustomizeThemeActivity.setVisibility(View.VISIBLE);
-                        onlineCustomThemesRetrofit.create(ServerAPI.class)
-                                .getCustomTheme(onlineCustomThemeMetadata.name, onlineCustomThemeMetadata.username)
-                                .enqueue(new Callback<>() {
+                        Call<String> downloadCall = onlineCustomThemesRetrofit.create(ServerAPI.class)
+                                .getCustomTheme(metadata.name, metadata.username);
+                        themeDownloadCall = downloadCall;
+                        downloadCall.enqueue(new Callback<>() {
                                     @Override
                                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                                        if (response.isSuccessful()) {
+                                        if (isFinishing() || isDestroyed()) {
+                                            return;
+                                        }
+                                        String responseBody = response.body();
+                                        if (response.isSuccessful() && responseBody != null) {
                                             customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
                                                     CustomizeThemeActivity.this,
-                                                    CustomTheme.fromJson(response.body()),
+                                                    CustomTheme.fromJson(responseBody),
                                                     androidVersion);
 
-                                            adapter.setCustomThemeSettingsItem(customThemeSettingsItems);
+                                            themeAdapter.setCustomThemeSettingsItem(customThemeSettingsItems);
 
                                             binding.progressBarCustomizeThemeActivity.setVisibility(View.GONE);
                                         } else {
@@ -230,6 +265,9 @@ public class CustomizeThemeActivity extends BaseActivity {
 
                                     @Override
                                     public void onFailure(@NonNull Call<String> call, @NonNull Throwable throwable) {
+                                        if (isFinishing() || isDestroyed()) {
+                                            return;
+                                        }
                                         Toast.makeText(CustomizeThemeActivity.this, R.string.cannot_download_theme_data, Toast.LENGTH_SHORT).show();
                                         finish();
                                     }
@@ -237,24 +275,29 @@ public class CustomizeThemeActivity extends BaseActivity {
                     } else {
                         GetCustomTheme.getCustomTheme(mExecutor, new Handler(), redditDataRoomDatabase,
                                 themeName, customTheme -> {
+                                    if (isFinishing() || isDestroyed()) {
+                                        return;
+                                    }
                                     customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
                                             CustomizeThemeActivity.this, customTheme, androidVersion);
 
-                                    adapter.setCustomThemeSettingsItem(customThemeSettingsItems);
+                                    themeAdapter.setCustomThemeSettingsItem(customThemeSettingsItems);
                                 });
                     }
                 }
             }
         } else {
-            adapter = new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
-            binding.recyclerViewCustomizeThemeActivity.setAdapter(adapter);
-            adapter.setCustomThemeSettingsItem(customThemeSettingsItems);
+            CustomizeThemeRecyclerViewAdapter themeAdapter =
+                    new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
+            adapter = themeAdapter;
+            binding.recyclerViewCustomizeThemeActivity.setAdapter(themeAdapter);
+            themeAdapter.setCustomThemeSettingsItem(customThemeSettingsItems);
         }
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                new MaterialAlertDialogBuilder(CustomizeThemeActivity.this, R.style.MaterialAlertDialogTheme)
+                activeDialog = new MaterialAlertDialogBuilder(CustomizeThemeActivity.this, R.style.MaterialAlertDialogTheme)
                         .setTitle(R.string.discard)
                         .setPositiveButton(R.string.discard_dialog_button, (dialogInterface, i)
                                 -> {
@@ -281,74 +324,87 @@ public class CustomizeThemeActivity extends BaseActivity {
             triggerBackPress();
             return true;
         } else if (itemId == R.id.action_preview_customize_theme_activity) {
+            ArrayList<CustomThemeSettingsItem> settingsItems = customThemeSettingsItems;
+            if (settingsItems == null) {
+                // The online download has not landed yet; there is nothing to preview.
+                Snackbar.make(binding.coordinatorCustomizeThemeActivity, R.string.theme_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
             Intent intent = new Intent(this, CustomThemePreviewActivity.class);
-            intent.putParcelableArrayListExtra(CustomThemePreviewActivity.EXTRA_CUSTOM_THEME_SETTINGS_ITEMS, customThemeSettingsItems);
+            intent.putParcelableArrayListExtra(CustomThemePreviewActivity.EXTRA_CUSTOM_THEME_SETTINGS_ITEMS, settingsItems);
             startActivity(intent);
 
             return true;
         } else if (itemId == R.id.action_save_customize_theme_activity) {
-            if (adapter != null) {
-                themeName = adapter.getThemeName();
-                if (themeName.equals("")) {
-                    Snackbar.make(binding.coordinatorCustomizeThemeActivity, R.string.no_theme_name, Snackbar.LENGTH_SHORT).show();
-                    return true;
-                }
-                CustomTheme customTheme = CustomTheme.convertSettingsItemsToCustomTheme(customThemeSettingsItems, themeName);
-                if (onlineCustomThemeMetadata != null && onlineCustomThemeMetadata.username.equals(accountName)) {
-                    // This custom theme is uploaded by the current user
-                    final int[] option = {0};
-                    new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
-                            .setTitle(R.string.save_theme_options_title)
-                            //.setMessage(R.string.save_theme_options_message)
-                            .setSingleChoiceItems(R.array.save_theme_options, 0, (dialog, which) -> option[0] = which)
-                            .setPositiveButton(R.string.ok, (dialogInterface, which) -> {
-                                switch (option[0]) {
-                                    case 0:
-                                        saveThemeLocally(customTheme);
-                                        break;
-                                    case 1:
-                                        saveThemeOnline(customTheme, false);
-                                        break;
-                                    case 2:
-                                        saveThemeLocally(customTheme);
-                                        saveThemeOnline(customTheme, false);
-                                        break;
-                                }
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .show();
-                } else {
-                    /*// This custom theme is from the server but not uploaded by the current user, or it is local
-                    final int[] option = {0};
-                    new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
-                            .setTitle(R.string.save_theme_options_title)
-                            //.setMessage(R.string.save_theme_options_message)
-                            .setSingleChoiceItems(R.array.save_theme_options_anonymous_included, 0, (dialog, which) -> option[0] = which)
-                            .setPositiveButton(R.string.ok, (dialogInterface, which) -> {
-                                switch (option[0]) {
-                                    case 0:
-                                        saveThemeLocally(customTheme);
-                                        break;
-                                    case 1:
-                                        saveThemeOnline(customTheme, false);
-                                        break;
-                                    case 2:
-                                        saveThemeOnline(customTheme, true);
-                                        break;
-                                    case 3:
-                                        saveThemeLocally(customTheme);
-                                        saveThemeOnline(customTheme, false);
-                                        break;
-                                    case 4:
-                                        saveThemeLocally(customTheme);
-                                        saveThemeOnline(customTheme, true);
-                                        break;
-                                }
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .show();*/
-                    saveThemeLocally(customTheme);
-                }
+            CustomizeThemeRecyclerViewAdapter themeAdapter = adapter;
+            ArrayList<CustomThemeSettingsItem> settingsItems = customThemeSettingsItems;
+            if (themeAdapter == null || settingsItems == null) {
+                // Either the database read or the online download is still in flight, so there is
+                // nothing to save yet. Both halves report the same way; a bare `adapter != null`
+                // check used to make the database case a silent no-op.
+                Snackbar.make(binding.coordinatorCustomizeThemeActivity, R.string.theme_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+            themeName = themeAdapter.getThemeName();
+            if (themeName.equals("")) {
+                Snackbar.make(binding.coordinatorCustomizeThemeActivity, R.string.no_theme_name, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+            CustomTheme customTheme = CustomTheme.convertSettingsItemsToCustomTheme(settingsItems, themeName);
+            if (onlineCustomThemeMetadata != null && onlineCustomThemeMetadata.username.equals(accountName)) {
+                // This custom theme is uploaded by the current user
+                final int[] option = {0};
+                activeDialog = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                        .setTitle(R.string.save_theme_options_title)
+                        //.setMessage(R.string.save_theme_options_message)
+                        .setSingleChoiceItems(R.array.save_theme_options, 0, (dialog, which) -> option[0] = which)
+                        .setPositiveButton(R.string.ok, (dialogInterface, which) -> {
+                            switch (option[0]) {
+                                case 0:
+                                    saveThemeLocally(customTheme);
+                                    break;
+                                case 1:
+                                    saveThemeOnline(customTheme, false);
+                                    break;
+                                case 2:
+                                    saveThemeLocally(customTheme);
+                                    saveThemeOnline(customTheme, false);
+                                    break;
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+            } else {
+                /*// This custom theme is from the server but not uploaded by the current user, or it is local
+                final int[] option = {0};
+                new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                        .setTitle(R.string.save_theme_options_title)
+                        //.setMessage(R.string.save_theme_options_message)
+                        .setSingleChoiceItems(R.array.save_theme_options_anonymous_included, 0, (dialog, which) -> option[0] = which)
+                        .setPositiveButton(R.string.ok, (dialogInterface, which) -> {
+                            switch (option[0]) {
+                                case 0:
+                                    saveThemeLocally(customTheme);
+                                    break;
+                                case 1:
+                                    saveThemeOnline(customTheme, false);
+                                    break;
+                                case 2:
+                                    saveThemeOnline(customTheme, true);
+                                    break;
+                                case 3:
+                                    saveThemeLocally(customTheme);
+                                    saveThemeOnline(customTheme, false);
+                                    break;
+                                case 4:
+                                    saveThemeLocally(customTheme);
+                                    saveThemeOnline(customTheme, true);
+                                    break;
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();*/
+                saveThemeLocally(customTheme);
             }
 
             return true;
@@ -361,19 +417,28 @@ public class CustomizeThemeActivity extends BaseActivity {
         InsertCustomTheme.insertCustomTheme(mExecutor, new Handler(), redditDataRoomDatabase, lightThemeSharedPreferences,
                 darkThemeSharedPreferences, amoledThemeSharedPreferences, customTheme,
                 false, () -> {
-                    Toast.makeText(CustomizeThemeActivity.this, R.string.theme_saved_locally, Toast.LENGTH_SHORT).show();
+                    // Posted above the guard: the theme is already committed, so the rest of the app
+                    // has to be told to re-render regardless of what became of this screen.
                     EventBus.getDefault().post(new RecreateActivityEvent());
+                    // isFinishing(), deliberately not isDestroyed(): a configuration change destroys
+                    // this instance but keeps the activity token, so finish() still closes the
+                    // relaunched screen and must run. After a back-press it is already redundant.
+                    if (isFinishing()) {
+                        return;
+                    }
+                    Toast.makeText(CustomizeThemeActivity.this, R.string.theme_saved_locally, Toast.LENGTH_SHORT).show();
                     finish();
                 });
     }
 
     private void saveThemeOnline(CustomTheme customTheme, boolean anonymous) {
         Call<String> request;
+        OnlineCustomThemeMetadata metadata = onlineCustomThemeMetadata;
         // TODO server access token
-        if (onlineCustomThemeMetadata != null) {
+        if (metadata != null) {
             request = onlineCustomThemesRetrofit.create(ServerAPI.class).modifyTheme(
                     APIUtils.getServerHeader("", accountName, anonymous),
-                    onlineCustomThemeMetadata.id,
+                    metadata.id,
                     customTheme.name,
                     customTheme.getJSONModel()
             );
@@ -388,6 +453,13 @@ public class CustomizeThemeActivity extends BaseActivity {
         request.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                // isFinishing() rather than the isDestroyed() used by the download callbacks above:
+                // a relaunched instance does not repeat this upload, so on a configuration change
+                // setResult/finish() must still run or the theme sits on the server while the listing
+                // keeps showing the old name and colour. Only a back-press means nobody is waiting.
+                if (isFinishing()) {
+                    return;
+                }
                 if (response.isSuccessful()) {
                     Toast.makeText(CustomizeThemeActivity.this, R.string.theme_saved_online, Toast.LENGTH_SHORT).show();
                     Intent returnIntent = new Intent();
@@ -404,17 +476,46 @@ public class CustomizeThemeActivity extends BaseActivity {
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable throwable) {
+                // isFinishing() for the same reason as onResponse: nothing retries this upload, so
+                // suppressing the message on a mere configuration change would make the failure silent.
+                if (isFinishing()) {
+                    return;
+                }
                 Toast.makeText(CustomizeThemeActivity.this, R.string.upload_theme_failed, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
+    protected void onDestroy() {
+        // The relaunched instance restarts this download itself, so let go of the in-flight one
+        // rather than paying for a response nobody will read. Cancelling surfaces as onFailure,
+        // which that callback's isDestroyed() guard absorbs. Deliberately NOT done for
+        // saveThemeOnline's request: nothing retries an upload, so cancelling it would throw away
+        // the theme the user just saved.
+        Call<String> downloadCall = themeDownloadCall;
+        if (downloadCall != null) {
+            downloadCall.cancel();
+            themeDownloadCall = null;
+        }
+        // These dialogs are raw AlertDialogs rather than DialogFragments, so one left showing
+        // across a rotation leaks its window and this activity with it.
+        AlertDialog dialog = activeDialog;
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
+        activeDialog = null;
+        super.onDestroy();
+    }
+
+    @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (adapter != null) {
-            outState.putParcelableArrayList(CUSTOM_THEME_SETTINGS_ITEMS_STATE, customThemeSettingsItems);
-            outState.putString(THEME_NAME_STATE, adapter.getThemeName());
+        CustomizeThemeRecyclerViewAdapter themeAdapter = adapter;
+        ArrayList<CustomThemeSettingsItem> settingsItems = customThemeSettingsItems;
+        if (themeAdapter != null && settingsItems != null) {
+            outState.putParcelableArrayList(CUSTOM_THEME_SETTINGS_ITEMS_STATE, settingsItems);
+            outState.putString(THEME_NAME_STATE, themeAdapter.getThemeName());
         }
     }
 

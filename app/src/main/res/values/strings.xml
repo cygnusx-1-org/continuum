@@ -1200,6 +1200,7 @@
     <string name="copy_theme_faied">Cannot copy the theme configuration</string>
     <string name="cannot_find_theme">Cannot find this theme</string>
     <string name="cannot_download_theme_data">Cannot download theme data</string>
+    <string name="theme_not_loaded_yet">Theme is still loading, please try again</string>
     <string name="import_theme">Import Theme</string>
     <string name="no_data_in_clipboard">Cannot find data in clipboard</string>
     <string name="import_theme_success">Import theme successfully</string>
