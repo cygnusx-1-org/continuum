@@ -46,6 +46,7 @@ public class WebViewActivity extends BaseActivity {
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
     private String url;
+    @SuppressWarnings("NullAway.Init")
     private ActivityWebViewBinding binding;
 
     @Override
@@ -55,6 +56,9 @@ public class WebViewActivity extends BaseActivity {
         setImmersiveModeNotApplicableBelowAndroid16();
 
         super.onCreate(savedInstanceState);
+
+        String dataString = getIntent().getDataString();
+        url = dataString != null ? dataString : "";
 
         try {
             binding = ActivityWebViewBinding.inflate(getLayoutInflater());
@@ -101,7 +105,6 @@ public class WebViewActivity extends BaseActivity {
         binding.webViewWebViewActivity.getSettings().setJavaScriptEnabled(true);
         binding.webViewWebViewActivity.getSettings().setDomStorageEnabled(true);
 
-        url = getIntent().getDataString();
         if (savedInstanceState == null) {
             binding.toolbarWebViewActivity.setTitle(url);
             binding.webViewWebViewActivity.loadUrl(url);

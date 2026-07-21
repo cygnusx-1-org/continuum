@@ -74,6 +74,7 @@ public class WikiActivity extends BaseActivity {
     SharedPreferences mCurrentAccountSharedPreferences;
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
+    @Nullable
     private String wikiMarkdown;
     private String mSubredditName;
     private EmoteCloseBracketInlineProcessor emoteCloseBracketInlineProcessor;
@@ -148,7 +149,7 @@ public class WikiActivity extends BaseActivity {
 
         mGlide = Glide.with(this);
 
-        mSubredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
+        mSubredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
 
         binding.swipeRefreshLayoutWikiActivity.setEnabled(mSharedPreferences.getBoolean(SharedPreferencesUtils.PULL_TO_REFRESH, true));
         binding.swipeRefreshLayoutWikiActivity.setOnRefreshListener(this::loadWiki);
@@ -255,7 +256,7 @@ public class WikiActivity extends BaseActivity {
         Glide.with(this).clear(binding.fetchWikiImageViewWikiActivity);
         binding.fetchWikiLinearLayoutWikiActivity.setVisibility(View.GONE);
 
-        mRetrofit.create(RedditAPI.class).getWikiPage(mSubredditName, getIntent().getStringExtra(EXTRA_WIKI_PATH)).enqueue(new Callback<>() {
+        mRetrofit.create(RedditAPI.class).getWikiPage(mSubredditName, Objects.requireNonNull(getIntent().getStringExtra(EXTRA_WIKI_PATH))).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful()) {
@@ -355,7 +356,7 @@ public class WikiActivity extends BaseActivity {
 
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
-        String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
             if (emotePlugin != null) {
                 emotePlugin.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);

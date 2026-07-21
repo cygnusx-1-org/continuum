@@ -116,7 +116,7 @@ public class FullMarkdownActivity extends BaseActivity {
             }
         }
 
-        String markdown = getIntent().getStringExtra(EXTRA_MARKDOWN);
+        String markdown = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_MARKDOWN));
         boolean isNsfw = getIntent().getBooleanExtra(EXTRA_IS_NSFW, false);
         int markdownColor = mCustomThemeWrapper.getCommentColor();
         MarkwonPlugin miscPlugin = new AbstractMarkwonPlugin() {

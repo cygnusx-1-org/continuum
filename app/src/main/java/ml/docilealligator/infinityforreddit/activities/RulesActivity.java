@@ -123,7 +123,7 @@ public class RulesActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarRulesActivity);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mSubredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
+        mSubredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
 
         mAdapter = new RulesRecyclerViewAdapter(this, mCustomThemeWrapper, mSliderPanel, mSubredditName);
         binding.recyclerViewRulesActivity.setAdapter(mAdapter);
@@ -231,7 +231,7 @@ public class RulesActivity extends BaseActivity {
 
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
-        String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (mAdapter != null && dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
             mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
         }

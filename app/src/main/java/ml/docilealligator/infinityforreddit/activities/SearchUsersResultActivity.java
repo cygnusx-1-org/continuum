@@ -106,18 +106,21 @@ public class SearchUsersResultActivity extends BaseActivity implements ActivityT
 
         String query = getIntent().getStringExtra(EXTRA_QUERY);
 
-        if (savedInstanceState == null) {
-            mFragment = new UserListingFragment();
+        Fragment fragment = savedInstanceState == null
+                ? null
+                : getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+        if (fragment == null) {
+            UserListingFragment userListingFragment = new UserListingFragment();
             Bundle bundle = new Bundle();
             bundle.putString(UserListingFragment.EXTRA_QUERY, query);
             bundle.putBoolean(UserListingFragment.EXTRA_IS_GETTING_USER_INFO, true);
             bundle.putBoolean(UserListingFragment.EXTRA_IS_MULTI_SELECTION, getIntent().getBooleanExtra(EXTRA_IS_MULTI_SELECTION, false));
-            mFragment.setArguments(bundle);
-        } else {
-            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+            userListingFragment.setArguments(bundle);
+            fragment = userListingFragment;
         }
+        mFragment = fragment;
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_layout_search_users_result_activity, mFragment)
+                .replace(R.id.frame_layout_search_users_result_activity, fragment)
                 .commit();
     }
 

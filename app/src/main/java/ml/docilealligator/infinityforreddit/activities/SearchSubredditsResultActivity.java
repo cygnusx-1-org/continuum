@@ -107,18 +107,21 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
 
         String query = getIntent().getStringExtra(EXTRA_QUERY);
 
-        if (savedInstanceState == null) {
-            mFragment = new SubredditListingFragment();
+        Fragment fragment = savedInstanceState == null
+                ? null
+                : getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+        if (fragment == null) {
+            SubredditListingFragment subredditListingFragment = new SubredditListingFragment();
             Bundle bundle = new Bundle();
             bundle.putString(SubredditListingFragment.EXTRA_QUERY, query);
             bundle.putBoolean(SubredditListingFragment.EXTRA_IS_GETTING_SUBREDDIT_INFO, true);
             bundle.putBoolean(SubredditListingFragment.EXTRA_IS_MULTI_SELECTION, getIntent().getBooleanExtra(EXTRA_IS_MULTI_SELECTION, false));
-            mFragment.setArguments(bundle);
-        } else {
-            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+            subredditListingFragment.setArguments(bundle);
+            fragment = subredditListingFragment;
         }
+        mFragment = fragment;
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_layout_search_subreddits_result_activity, mFragment)
+                .replace(R.id.frame_layout_search_subreddits_result_activity, fragment)
                 .commit();
     }
 

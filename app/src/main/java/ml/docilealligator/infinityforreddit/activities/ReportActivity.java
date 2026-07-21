@@ -60,7 +60,9 @@ public class ReportActivity extends BaseActivity {
     Executor mExecutor;
     private String mFullname;
     private String mSubredditName;
+    @Nullable
     private ArrayList<ReportReason> generalReasons;
+    @Nullable
     private ArrayList<ReportReason> rulesReasons;
     private ReportReasonRecyclerViewAdapter mAdapter;
     private ActivityReportBinding binding;
@@ -112,8 +114,8 @@ public class ReportActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarReportActivity);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mFullname = getIntent().getStringExtra(EXTRA_THING_FULLNAME);
-        mSubredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
+        mFullname = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_THING_FULLNAME));
+        mSubredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
 
         if (savedInstanceState != null) {
             generalReasons = savedInstanceState.getParcelableArrayList(GENERAL_REASONS_STATE);

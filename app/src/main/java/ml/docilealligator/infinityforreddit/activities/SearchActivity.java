@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -104,19 +105,26 @@ public class SearchActivity extends BaseActivity {
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
+    @Nullable
     private String query;
+    @Nullable
     private String searchInSubredditOrUserName;
+    @Nullable
     private MultiReddit searchInMultiReddit;
     @SelectThingReturnKey.THING_TYPE
     private int searchInThingType;
     private boolean searchOnlySubreddits;
     private boolean searchOnlyUsers;
     private boolean searchSubredditsAndUsers;
+    @SuppressWarnings("NullAway.Init")
     private SearchActivityRecyclerViewAdapter adapter;
     private SubredditAutocompleteRecyclerViewAdapter subredditAutocompleteRecyclerViewAdapter;
     private Handler handler;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
+    @Nullable
     RecentSearchQueryViewModel mRecentSearchQueryViewModel;
     private ActivityResultLauncher<Intent> requestThingSelectionForCurrentActivityLauncher;
     private ActivityResultLauncher<Intent> requestThingSelectionForAnotherActivityLauncher;
@@ -521,7 +529,7 @@ public class SearchActivity extends BaseActivity {
                 }
                 break;
             case SelectThingReturnKey.THING_TYPE.MULTIREDDIT:
-                binding.subredditNameTextViewSearchActivity.setText(searchInMultiReddit.getDisplayName());
+                binding.subredditNameTextViewSearchActivity.setText(Objects.requireNonNull(searchInMultiReddit).getDisplayName());
 
         }
     }
@@ -607,7 +615,7 @@ public class SearchActivity extends BaseActivity {
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             } else if (requestCode == SUICIDE_PREVENTION_ACTIVITY_REQUEST_CODE) {
-                openSearchResult(data.getStringExtra(SuicidePreventionActivity.EXTRA_RETURN_QUERY));
+                openSearchResult(Objects.requireNonNull(data.getStringExtra(SuicidePreventionActivity.EXTRA_RETURN_QUERY)));
             }
         }
 

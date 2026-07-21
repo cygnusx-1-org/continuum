@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.thing;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -17,7 +18,7 @@ public class ReportThing {
         void failed();
     }
 
-    public static void reportThing(Retrofit oauthRetrofit, String accessToken, String thingFullname,
+    public static void reportThing(Retrofit oauthRetrofit, @Nullable String accessToken, String thingFullname,
                                    String subredditName, String reasonType, String reason,
                                    ReportThingListener reportThingListener) {
         Map<String, String> header = APIUtils.getOAuthHeader(accessToken);
