@@ -62,6 +62,7 @@ import ml.docilealligator.infinityforreddit.post.RedditGalleryPayload;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.UploadImageUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -153,6 +154,8 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     private ActivityPostGalleryBinding binding;
     private FlairRequirementController flairController;
 
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -162,6 +165,10 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         super.onCreate(savedInstanceState);
         binding = ActivityPostGalleryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::launchCaptureImageIntent,
+                () -> Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -522,17 +529,29 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     }
 
     public void captureImage() {
+        cameraCapturePermissionHelper.launch();
+    }
+
+    private void launchCaptureImageIntent() {
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
             imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("temp_img", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (IOException ex) {
+            imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.error_creating_temp_file, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.no_camera_available, Snackbar.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            imageUri = null;
+            Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show();
         }
     }
 

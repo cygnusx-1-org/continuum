@@ -42,6 +42,7 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityEditPostBinding;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -91,6 +92,8 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
     private ActivityEditPostBinding binding;
 
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -101,6 +104,10 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
 
         binding = ActivityEditPostBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::launchCaptureImageIntent,
+                () -> Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -366,17 +373,29 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
 
     @Override
     public void captureImage() {
+        cameraCapturePermissionHelper.launch();
+    }
+
+    private void launchCaptureImageIntent() {
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
             capturedImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("captured_image", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
             pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (IOException ex) {
+            capturedImageUri = null;
             Toast.makeText(this, R.string.error_creating_temp_file, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            capturedImageUri = null;
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            capturedImageUri = null;
+            Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show();
         }
     }
 

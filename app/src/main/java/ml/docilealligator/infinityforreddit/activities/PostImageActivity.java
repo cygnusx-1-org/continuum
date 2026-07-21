@@ -1,13 +1,11 @@
 package ml.docilealligator.infinityforreddit.activities;
 
-import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,11 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -59,6 +54,7 @@ import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -122,7 +118,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     @Nullable
     private Uri imageUri;
     private int primaryTextColor;
-    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
     private int flairBackgroundColor;
     private int flairTextColor;
     private int spoilerBackgroundColor;
@@ -149,17 +145,12 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
 
         super.onCreate(savedInstanceState);
 
-        requestCameraPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(), isGranted -> {
-                    if (isGranted) {
-                        captureImage();
-                    } else {
-                        Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.camera_permission_required, Snackbar.LENGTH_SHORT).show();
-                    }
-                });
-
         binding = ActivityPostImageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::captureImage,
+                () -> Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -366,13 +357,8 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             binding.receivePostReplyNotificationsSwitchMaterialPostImageActivity.performClick();
         });
 
-        binding.captureFabPostImageActivity.setOnClickListener(view -> {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                captureImage();
-            } else {
-                requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
-            }
-        });
+        binding.captureFabPostImageActivity.setOnClickListener(view ->
+                cameraCapturePermissionHelper.launch());
 
         binding.selectFromLibraryFabPostImageActivity.setOnClickListener(view -> {
             Intent intent = new Intent();
@@ -799,11 +785,19 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
                     File.createTempFile("temp_img", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (IOException ex) {
+            imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.error_creating_temp_file, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.no_camera_available, Snackbar.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            imageUri = null;
+            Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show();
         }
     }
 

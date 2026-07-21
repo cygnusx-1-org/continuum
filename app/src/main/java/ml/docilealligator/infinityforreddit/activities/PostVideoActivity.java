@@ -3,14 +3,12 @@ package ml.docilealligator.infinityforreddit.activities;
 import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
 import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
 
-import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -23,12 +21,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -70,6 +65,7 @@ import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
@@ -137,7 +133,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     private Uri videoUri;
     private boolean loadSubredditIconSuccessful = true;
     private boolean isPosting;
-    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
     private boolean wasPlaying;
     private int primaryTextColor;
     private int flairBackgroundColor;
@@ -172,14 +168,9 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         binding = ActivityPostVideoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        requestCameraPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(), isGranted -> {
-                    if (isGranted) {
-                        captureVideo();
-                    } else {
-                        Snackbar.make(binding.coordinatorLayoutPostVideoActivity, R.string.camera_permission_required, Snackbar.LENGTH_SHORT).show();
-                    }
-                });
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::captureVideo,
+                () -> Snackbar.make(binding.coordinatorLayoutPostVideoActivity, R.string.camera_permission_required_capture_video, Snackbar.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -419,13 +410,8 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
             binding.receivePostReplyNotificationsSwitchMaterialPostVideoActivity.performClick();
         });
 
-        binding.captureFabPostVideoActivity.setOnClickListener(view -> {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                captureVideo();
-            } else {
-                requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
-            }
-        });
+        binding.captureFabPostVideoActivity.setOnClickListener(view ->
+                cameraCapturePermissionHelper.launch());
 
         binding.selectFromLibraryFabPostVideoActivity.setOnClickListener(view -> {
             Intent intent = new Intent();
@@ -571,6 +557,8 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
             startActivityForResult(takeVideoIntent, CAPTURE_VIDEO_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            Toast.makeText(this, R.string.camera_permission_required_capture_video, Toast.LENGTH_SHORT).show();
         }
     }
 

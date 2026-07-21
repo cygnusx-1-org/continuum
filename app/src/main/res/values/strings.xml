@@ -1794,6 +1794,8 @@
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="align_qr_code">Align QR code within the frame</string>
     <string name="camera_permission_required">Camera permission is required to scan QR codes</string>
+    <string name="camera_permission_required_capture">Camera permission is required to take a photo</string>
+    <string name="camera_permission_required_capture_video">Camera permission is required to record a video</string>
     <string name="qr_code_scanned_press_ok">QR code scanned successfully. Press OK to apply.</string>
     <string name="qr_code_scanned_dialog_closed">QR code scanned, but dialog was closed. Please try again.</string>
 
