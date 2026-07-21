@@ -30,7 +30,12 @@ public class CommentFilterUsageOptionsBottomSheetFragment extends LandscapeExpan
         // Inflate the layout for this fragment
         FragmentCommentFilterUsageOptionsBottomSheetBinding binding = FragmentCommentFilterUsageOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        CommentFilterUsage commentFilterUsage = getArguments().getParcelable(EXTRA_COMMENT_FILTER_USAGE);
+        Bundle args = getArguments();
+        CommentFilterUsage commentFilterUsage = args == null ? null : args.getParcelable(EXTRA_COMMENT_FILTER_USAGE);
+        if (commentFilterUsage == null) {
+            binding.getRoot().post(this::dismiss);
+            return binding.getRoot();
+        }
 
         binding.editTextViewCommentFilterUsageOptionsBottomSheetFragment.setOnClickListener(view -> {
             activity.editCommentFilterUsage(commentFilterUsage);

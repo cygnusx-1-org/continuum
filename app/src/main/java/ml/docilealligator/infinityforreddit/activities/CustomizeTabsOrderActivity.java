@@ -83,9 +83,11 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
     private boolean dragging = false;
     // All of the current account's own multireddits (favorite + non-favorite), for the "MultiReddit"
     // add option's picker — independent of the "Show MultiReddits" toggle.
+    @Nullable
     private List<MultiReddit> ownMultiReddits;
     // All of the account's subscribed subreddits (favorite + non-favorite), for the "Subscribed
     // Subreddits" add option's picker — independent of the "Show ... Subreddits" toggles.
+    @Nullable
     private List<SubscribedSubredditData> subscribedSubreddits;
 
     @Override
@@ -178,7 +180,7 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
             }
 
             @Override
-            public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+            public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
                 super.onSelectedChanged(viewHolder, actionState);
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                     dragging = true;
@@ -447,7 +449,7 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
         addTab(postType, name, null);
     }
 
-    private void addTab(int postType, String name, String displayName) {
+    private void addTab(int postType, String name, @Nullable String displayName) {
         MainPageTabInput tab = new MainPageTabInput(postType, name, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_USER);
         tab.displayName = displayName;
         tabs.add(tab);

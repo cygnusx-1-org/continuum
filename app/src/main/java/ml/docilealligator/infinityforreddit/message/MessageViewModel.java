@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -22,7 +23,7 @@ public class MessageViewModel extends ViewModel {
     private final LiveData<PagedList<Message>> messages;
     private final MutableLiveData<String> whereLiveData;
 
-    public MessageViewModel(Executor executor, Handler handler, Retrofit retrofit, Locale locale, String accessToken, String where) {
+    public MessageViewModel(Executor executor, Handler handler, Retrofit retrofit, Locale locale, @Nullable String accessToken, String where) {
         messageDataSourceFactory = new MessageDataSourceFactory(executor, handler, retrofit, locale, accessToken, where);
 
         initialLoadingState = Transformations.switchMap(messageDataSourceFactory.getMessageDataSourceLiveData(),
@@ -85,10 +86,11 @@ public class MessageViewModel extends ViewModel {
         private final Handler handler;
         private final Retrofit retrofit;
         private final Locale locale;
+        @Nullable
         private final String accessToken;
         private final String where;
 
-        public Factory(Executor executor, Handler handler, Retrofit retrofit, Locale locale, String accessToken, String where) {
+        public Factory(Executor executor, Handler handler, Retrofit retrofit, Locale locale, @Nullable String accessToken, String where) {
             this.executor = executor;
             this.handler = handler;
             this.retrofit = retrofit;

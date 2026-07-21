@@ -106,7 +106,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarCommentFilterUsageListingActivity);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        commentFilter = getIntent().getParcelableExtra(EXTRA_COMMENT_FILTER);
+        commentFilter = Objects.requireNonNull(getIntent().getParcelableExtra(EXTRA_COMMENT_FILTER));
 
         setTitle(commentFilter.name);
 
@@ -136,7 +136,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
         }
     }
 
-    private void editAndCommentFilterUsageNameOfUsage(int type, String nameOfUsage) {
+    private void editAndCommentFilterUsageNameOfUsage(int type, @Nullable String nameOfUsage) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_post_or_comment_filter_name_of_usage, null);
         TextView messageTextView = dialogView.findViewById(R.id.message_text_view_edit_post_or_comment_filter_name_of_usage_dialog);
         messageTextView.setVisibility(View.GONE);
@@ -164,8 +164,8 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
                     Utils.hideKeyboard(this);
 
                     CommentFilterUsage commentFilterUsage;
-                    if (!textInputEditText.getText().toString().equals("")) {
-                        commentFilterUsage = new CommentFilterUsage(commentFilter.name, type, textInputEditText.getText().toString());
+                    if (!Objects.requireNonNull(textInputEditText.getText()).toString().equals("")) {
+                        commentFilterUsage = new CommentFilterUsage(commentFilter.name, type, Objects.requireNonNull(textInputEditText.getText()).toString());
                         SaveCommentFilterUsage.saveCommentFilterUsage(redditDataRoomDatabase, executor, commentFilterUsage);
                     }
                 })

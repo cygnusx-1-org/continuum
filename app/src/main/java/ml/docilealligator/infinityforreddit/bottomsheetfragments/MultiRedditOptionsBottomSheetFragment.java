@@ -68,7 +68,9 @@ public class MultiRedditOptionsBottomSheetFragment extends LandscapeExpandedRoun
         });
 
         binding.deleteMultiRedditTextViewMultiRedditOptionsBottomSheetFragment.setOnClickListener(view -> {
-            subscribedThingListingActivity.deleteMultiReddit(multiReddit);
+            if (multiReddit != null) {
+                subscribedThingListingActivity.deleteMultiReddit(multiReddit);
+            }
             dismiss();
         });
 

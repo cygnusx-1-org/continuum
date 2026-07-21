@@ -29,7 +29,7 @@ public class FetchMessage {
     public static final int MESSAGE_TYPE_PRIVATE_MESSAGE = 1;
     public static final int MESSAGE_TYPE_NOTIFICATION = 2;
 
-    static void fetchInbox(Executor executor, Handler handler,  Retrofit oauthRetrofit, Locale locale, String accessToken, String where,
+    static void fetchInbox(Executor executor, Handler handler,  Retrofit oauthRetrofit, Locale locale, @Nullable String accessToken, String where,
                            @Nullable String after, int messageType, FetchMessagesListener fetchMessagesListener) {
         oauthRetrofit.create(RedditAPI.class).getMessages(APIUtils.getOAuthHeader(accessToken), where, after).enqueue(new Callback<>() {
             @Override

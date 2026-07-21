@@ -28,7 +28,12 @@ public class CommentFilterOptionsBottomSheetFragment extends LandscapeExpandedRo
         // Inflate the layout for this fragment
         FragmentCommentFilterOptionsBottomSheetBinding binding = FragmentCommentFilterOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        CommentFilter commentFilter = getArguments().getParcelable(EXTRA_COMMENT_FILTER);
+        Bundle args = getArguments();
+        CommentFilter commentFilter = args == null ? null : args.getParcelable(EXTRA_COMMENT_FILTER);
+        if (commentFilter == null) {
+            binding.getRoot().post(this::dismiss);
+            return binding.getRoot();
+        }
 
         binding.editTextViewCommentFilterOptionsBottomSheetFragment.setOnClickListener(view -> {
             activity.editCommentFilter(commentFilter);

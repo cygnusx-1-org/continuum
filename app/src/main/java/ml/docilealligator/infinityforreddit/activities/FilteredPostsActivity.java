@@ -91,12 +91,17 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     public SubredditViewModel mSubredditViewModel;
+    @Nullable
     private String name;
+    @Nullable
     private String userWhere;
     @PostType
     private int postType;
+    @SuppressWarnings("NullAway.Init")
     private PostFragment mFragment;
+    @Nullable
     private Menu mMenu;
     private boolean isNsfwSubreddit = false;
     private ActivityFilteredThingBinding binding;
@@ -251,9 +256,14 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         }
 
         if (savedInstanceState != null) {
-            mFragment = (PostFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_filtered_posts_activity, mFragment).commit();
-            bindView(postFilter, false);
+            PostFragment restoredFragment = (PostFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+            if (restoredFragment != null) {
+                mFragment = restoredFragment;
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_filtered_posts_activity, restoredFragment).commit();
+                bindView(postFilter, false);
+            } else {
+                bindView(postFilter, true);
+            }
         } else {
             bindView(postFilter, true);
         }
@@ -301,7 +311,12 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
             case PostType.SEARCH:
                 Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.search);
                 break;
-            case PostType.SUBREDDIT:
+            case PostType.SUBREDDIT: {
+                String name = this.name;
+                if (name == null) {
+                    finish();
+                    return;
+                }
                 if (name.equals("popular") || name.equals("all")) {
                     Objects.requireNonNull(getSupportActionBar()).setTitle(name.substring(0, 1).toUpperCase() + name.substring(1));
                 } else {
@@ -318,8 +333,14 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                     });
                 }
                 break;
+            }
             case PostType.MULTIREDDIT:
-            case PostType.ANONYMOUS_MULTIREDDIT:
+            case PostType.ANONYMOUS_MULTIREDDIT: {
+                String name = this.name;
+                if (name == null) {
+                    finish();
+                    return;
+                }
                 String multiRedditName;
                 if (name.endsWith("/")) {
                     multiRedditName = name.substring(0, name.length() - 1);
@@ -329,6 +350,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 }
                 Objects.requireNonNull(getSupportActionBar()).setTitle(multiRedditName);
                 break;
+            }
             case PostType.USER:
                 String usernamePrefixed = "u/" + name;
                 Objects.requireNonNull(getSupportActionBar()).setTitle(usernamePrefixed);
@@ -432,9 +454,9 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CUSTOMIZE_POST_FILTER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == CUSTOMIZE_POST_FILTER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             if (mFragment != null) {
-                mFragment.changePostFilter(data.getParcelableExtra(CustomizePostFilterActivity.RETURN_EXTRA_POST_FILTER));
+                mFragment.changePostFilter(Objects.requireNonNull(data.getParcelableExtra(CustomizePostFilterActivity.RETURN_EXTRA_POST_FILTER)));
             }
         }
     }

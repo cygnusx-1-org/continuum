@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.thing;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -13,7 +14,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class ReplyNotificationsToggle {
-    public static void toggleEnableNotification(Handler handler, Retrofit oauthRetrofit, String accessToken,
+    public static void toggleEnableNotification(Handler handler, Retrofit oauthRetrofit, @Nullable String accessToken,
                                                 Comment comment, SendNotificationListener sendNotificationListener) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.ID_KEY, comment.getFullName());

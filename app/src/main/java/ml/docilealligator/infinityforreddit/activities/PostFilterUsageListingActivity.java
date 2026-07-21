@@ -63,7 +63,8 @@ public class PostFilterUsageListingActivity extends BaseActivity {
     private PostFilterUsageRecyclerViewAdapter adapter;
     private PostFilter postFilter;
     private ActivityPostFilterApplicationBinding binding;
-        private TextInputEditText textInputEditText;
+    @SuppressWarnings("NullAway.Init")
+    private TextInputEditText textInputEditText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -116,7 +117,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
         setSupportActionBar(binding.toolbarPostFilterApplicationActivity);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        postFilter = getIntent().getParcelableExtra(EXTRA_POST_FILTER);
+        postFilter = Objects.requireNonNull(getIntent().getParcelableExtra(EXTRA_POST_FILTER));
 
         setTitle(postFilter.name);
 
@@ -160,7 +161,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
         }
     }
 
-    private void editAndPostFilterUsageNameOfUsage(int type, String nameOfUsage) {
+    private void editAndPostFilterUsageNameOfUsage(int type, @Nullable String nameOfUsage) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_post_or_comment_filter_name_of_usage, null);
         TextInputLayout textInputLayout = dialogView.findViewById(R.id.text_input_layout_edit_post_or_comment_filter_name_of_usage_dialog);
         textInputEditText = dialogView.findViewById(R.id.text_input_edit_text_edit_post_or_comment_filter_name_of_usage_dialog);
@@ -183,7 +184,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                 textInputEditText.setHint(R.string.settings_tab_subreddit_name);
                 excludeIv.setOnClickListener(v -> {
                     Intent intent = new Intent(this, SubredditMultiselectionActivity.class);
-                    intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS, textInputEditText.getText().toString().trim());
+                    intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS, Objects.requireNonNull(textInputEditText.getText()).toString().trim());
                     startActivityForResult(intent, ADD_SUBREDDITS_REQUEST_CODE);
                 });
                 break;
@@ -192,7 +193,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                 titleStringId = R.string.user;
                 excludeIv.setOnClickListener(view -> {
                     Intent intent = new Intent(this, UserMultiselectionActivity.class);
-                    intent.putExtra(UserMultiselectionActivity.EXTRA_GET_SELECTED_USERS, textInputEditText.getText().toString().trim());
+                    intent.putExtra(UserMultiselectionActivity.EXTRA_GET_SELECTED_USERS, Objects.requireNonNull(textInputEditText.getText()).toString().trim());
                     startActivityForResult(intent, ADD_USERS_REQUEST_CODE);
                 });
                 break;
@@ -212,10 +213,10 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                     Utils.hideKeyboard(this);
 
                     PostFilterUsage postFilterUsage;
-                    if (textInputEditText.getText().toString().equals("")) {
+                    if (Objects.requireNonNull(textInputEditText.getText()).toString().equals("")) {
                         postFilterUsage = new PostFilterUsage(postFilter.name, type, PostFilterUsage.NO_USAGE);
                     } else {
-                        postFilterUsage = new PostFilterUsage(postFilter.name, type, textInputEditText.getText().toString());
+                        postFilterUsage = new PostFilterUsage(postFilter.name, type, Objects.requireNonNull(textInputEditText.getText()).toString());
                     }
 
                     SavePostFilterUsage.savePostFilterUsage(redditDataRoomDatabase, executor, postFilterUsage);
@@ -286,7 +287,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                                         @Nullable ArrayList<String> newItems) {
         if (newItems == null || newItems.isEmpty()) return;
 
-        String currentCsv = field.getText().toString().trim();
+        String currentCsv = Objects.requireNonNull(field.getText()).toString().trim();
         List<String> toAdd = getToAdd(currentCsv, newItems);
         if (toAdd.isEmpty()) return;
 

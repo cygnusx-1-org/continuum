@@ -226,7 +226,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
                 .show();
     }
 
-    public void excludeSubredditInFilter(String subredditName, PostFilter postFilter) {
+    public void excludeSubredditInFilter(String subredditName, @Nullable PostFilter postFilter) {
         Intent intent = new Intent(this, CustomizePostFilterActivity.class);
         intent.putExtra(CustomizePostFilterActivity.EXTRA_EXCLUDE_SUBREDDIT, subredditName);
         if (postFilter != null) {
@@ -235,7 +235,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void excludeUserInFilter(String username, PostFilter postFilter) {
+    public void excludeUserInFilter(String username, @Nullable PostFilter postFilter) {
         Intent intent = new Intent(this, CustomizePostFilterActivity.class);
         intent.putExtra(CustomizePostFilterActivity.EXTRA_EXCLUDE_USER, username);
         if (postFilter != null) {

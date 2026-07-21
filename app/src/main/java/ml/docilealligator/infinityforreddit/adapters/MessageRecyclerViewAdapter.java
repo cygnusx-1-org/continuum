@@ -65,6 +65,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     private final BaseActivity mActivity;
     private final Retrofit mOauthRetrofit;
     private final Markwon mMarkwon;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     private final int mMessageType;
@@ -84,7 +85,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
 
     public MessageRecyclerViewAdapter(BaseActivity activity, Retrofit oauthRetrofit,
                                       CustomThemeWrapper customThemeWrapper,
-                                      String accessToken, String accountName, String where,
+                                      @Nullable String accessToken, String accountName, String where,
                                       RetryLoadingMoreCallback retryLoadingMoreCallback) {
         super(DIFF_CALLBACK);
         mActivity = activity;

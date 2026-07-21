@@ -19,6 +19,7 @@ import androidx.browser.customtabs.CustomTabsService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -368,7 +369,7 @@ public class LinkResolverActivity extends AppCompatActivity {
                             } else if (path.matches(USER_PATTERN)) {
                                 String userName = segments.get(1);
                                 String where = segments.size() > 2 ? segments.get(2) : null;
-                                String currentAccount = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
+                                String currentAccount = Objects.requireNonNull(mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, ""));
                                 boolean loggedIn = currentAccount != null && !currentAccount.isEmpty();
                                 boolean isSelf = loggedIn
                                         && (currentAccount.equalsIgnoreCase(userName) || userName.equalsIgnoreCase("me"));

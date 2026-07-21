@@ -28,7 +28,12 @@ public class PostFilterOptionsBottomSheetFragment extends LandscapeExpandedRound
         // Inflate the layout for this fragment
         FragmentPostFilterOptionsBottomSheetBinding binding = FragmentPostFilterOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        PostFilter postFilter = getArguments().getParcelable(EXTRA_POST_FILTER);
+        Bundle args = getArguments();
+        PostFilter postFilter = args == null ? null : args.getParcelable(EXTRA_POST_FILTER);
+        if (postFilter == null) {
+            binding.getRoot().post(this::dismiss);
+            return binding.getRoot();
+        }
 
         binding.editTextViewPostFilterOptionsBottomSheetFragment.setOnClickListener(view -> {
             activity.editPostFilter(postFilter);

@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.message;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -11,7 +12,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class ReadMessage {
-    public static void readMessage(Retrofit oauthRetrofit, String accessToken, String commaSeparatedFullnames,
+    public static void readMessage(Retrofit oauthRetrofit, @Nullable String accessToken, String commaSeparatedFullnames,
                                    ReadMessageListener readMessageListener) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.ID_KEY, commaSeparatedFullnames);

@@ -98,6 +98,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private final ImageAndGifEntry mImageAndGifEntry;
     private final VideoEntry mVideoEntry;
     private final RecyclerView.RecycledViewPool recycledViewPool;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     private final int mColorPrimaryLightTheme;
@@ -128,7 +129,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     public CommentsListingRecyclerViewAdapter(BaseActivity activity, CommentsListingFragment fragment,
                                               Retrofit oauthRetrofit,
                                               CustomThemeWrapper customThemeWrapper, Locale locale,
-                                              SharedPreferences sharedPreferences, String accessToken,
+                                              SharedPreferences sharedPreferences, @Nullable String accessToken,
                                               @NonNull String accountName, String username,
                                               RetryLoadingMoreCallback retryLoadingMoreCallback) {
         super(DIFF_CALLBACK);

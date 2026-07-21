@@ -14,6 +14,7 @@ class MessageDataSourceFactory extends DataSource.Factory {
     private final Handler handler;
     private final Retrofit oauthRetrofit;
     private final Locale locale;
+    @Nullable
     private final String accessToken;
     private String where;
 
@@ -21,7 +22,7 @@ class MessageDataSourceFactory extends DataSource.Factory {
     private MessageDataSource messageDataSource;
     private final MutableLiveData<MessageDataSource> messageDataSourceLiveData;
 
-    MessageDataSourceFactory(Executor executor, Handler handler, Retrofit oauthRetrofit, Locale locale, String accessToken, String where) {
+    MessageDataSourceFactory(Executor executor, Handler handler, Retrofit oauthRetrofit, Locale locale, @Nullable String accessToken, String where) {
         this.executor = executor;
         this.handler = handler;
         this.oauthRetrofit = oauthRetrofit;
