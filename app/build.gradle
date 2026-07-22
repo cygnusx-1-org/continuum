@@ -142,6 +142,9 @@ android {
         unitTests.includeAndroidResources = true
         unitTests.all {
             useJUnitPlatform()
+            // JDK 21+ warns (and a future JDK will refuse) when Mockito's inline maker self-attaches
+            // its agent at runtime; allow it explicitly. byte-buddy 1.18.11 already reads Java 25.
+            jvmArgs "-XX:+EnableDynamicAgentLoading"
         }
     }
 
@@ -498,6 +501,17 @@ dependencies {
     // verifyRoborazziDebug / compareRoborazziDebug Gradle tasks. See RoborazziLayoutTest.
     testImplementation "io.github.takahirom.roborazzi:roborazzi:1.64.0"
     testImplementation "io.github.takahirom.roborazzi:roborazzi-junit-rule:1.64.0"
+
+    // ViewModel unit tests. Mockito's inline maker provides mockStatic() for the Java network/DB
+    // helpers the ViewModels delegate to (UploadImageUtils/SendComment); core-testing supplies
+    // InstantTaskExecutorRule for synchronous LiveData. byte-buddy/byte-buddy-agent are pinned to
+    // 1.18.11 so the inline maker reads Java 25 (class file v69) bytecode natively on this JDK-25
+    // toolchain — force-upgrading the older byte-buddy Mockito 5.23.0 would otherwise pull in.
+    testImplementation "org.mockito:mockito-core:5.23.0"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:5.4.0"
+    testImplementation "net.bytebuddy:byte-buddy:1.18.11"
+    testImplementation "net.bytebuddy:byte-buddy-agent:1.18.11"
+    testImplementation "androidx.arch.core:core-testing:2.2.0"
 
     androidTestImplementation "androidx.test.ext:junit:1.0.0"
     androidTestImplementation "androidx.test:rules:1.5.0"

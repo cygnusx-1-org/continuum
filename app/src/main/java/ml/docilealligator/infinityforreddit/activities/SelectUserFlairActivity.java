@@ -13,6 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
@@ -27,9 +28,10 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySelectUserFlairBinding;
 import ml.docilealligator.infinityforreddit.user.FetchUserFlairs;
-import ml.docilealligator.infinityforreddit.user.SelectUserFlair;
 import ml.docilealligator.infinityforreddit.user.UserFlair;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.SelectFlairResult;
+import ml.docilealligator.infinityforreddit.viewmodels.SelectUserFlairViewModel;
 import retrofit2.Retrofit;
 
 public class SelectUserFlairActivity extends BaseActivity implements ActivityToolbarInterface {
@@ -56,6 +58,7 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
     private ArrayList<UserFlair> mUserFlairs;
     private String mSubredditName;
     private ActivitySelectUserFlairBinding binding;
+    private SelectUserFlairViewModel selectUserFlairViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -107,6 +110,25 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
 
         mSubredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
         setTitle(mSubredditName);
+
+        selectUserFlairViewModel = new ViewModelProvider(this,
+                SelectUserFlairViewModel.Companion.provideFactory(mExecutor, mOauthRetrofit))
+                .get(SelectUserFlairViewModel.class);
+        // The request runs in the ViewModel so its result reaches whichever instance is live after a
+        // rotation, instead of firing on a dead one (CHUNKS deferred item 4).
+        selectUserFlairViewModel.getSelectResult().observe(this, result -> {
+            if (result instanceof SelectFlairResult.Success) {
+                boolean cleared = ((SelectFlairResult.Success) result).getCleared();
+                Toast.makeText(this, cleared ? R.string.clear_user_flair_success : R.string.select_user_flair_success,
+                        Toast.LENGTH_SHORT).show();
+                finish();
+            } else if (result instanceof SelectFlairResult.Failure) {
+                String errorMessage = ((SelectFlairResult.Failure) result).getMessage();
+                Snackbar.make(binding.getRoot(),
+                        (errorMessage == null || errorMessage.isEmpty()) ? getString(R.string.update_flair_failed) : errorMessage,
+                        Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         if (savedInstanceState != null) {
             mUserFlairs = savedInstanceState.getParcelableArrayList(USER_FLAIRS_STATE);
@@ -208,44 +230,10 @@ public class SelectUserFlairActivity extends BaseActivity implements ActivityToo
     }
 
     private void selectUserFlair(@Nullable UserFlair userFlair) {
-        SelectUserFlair.selectUserFlair(mExecutor, mHandler, mOauthRetrofit, accessToken, userFlair, mSubredditName, accountName,
-                new SelectUserFlair.SelectUserFlairListener() {
-                    @Override
-                    public void success() {
-                        if (isFinishing() || isDestroyed()) {
-                            // The request outlived the instance that started it (a rotation, say),
-                            // so this result can no longer reach the live screen — it stays open on
-                            // the flair list with the change already applied server-side. Fixing
-                            // that needs the request hoisted off the activity instance; see the
-                            // deferred list in CHUNKS.md.
-                            return;
-                        }
-
-                        if (userFlair == null) {
-                            Toast.makeText(SelectUserFlairActivity.this, R.string.clear_user_flair_success, Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(SelectUserFlairActivity.this, R.string.select_user_flair_success, Toast.LENGTH_SHORT).show();
-                        }
-                        finish();
-                    }
-
-                    @Override
-                    public void failed(@Nullable String errorMessage) {
-                        if (isFinishing() || isDestroyed()) {
-                            return;
-                        }
-
-                        // Reddit reports plenty of failures with nothing to quote: OkHttp leaves
-                        // Response.message() empty on HTTP/2, and Throwable.getMessage() is null for
-                        // many IOExceptions. Fall back to a failure string rather than the success
-                        // one this used to show.
-                        if (errorMessage == null || errorMessage.isEmpty()) {
-                            Snackbar.make(binding.getRoot(), R.string.update_flair_failed, Snackbar.LENGTH_SHORT).show();
-                        } else {
-                            Snackbar.make(binding.getRoot(), errorMessage, Snackbar.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+        // Reddit reports plenty of failures with nothing to quote (empty Response.message() on HTTP/2,
+        // null Throwable.getMessage() for many IOExceptions); the observer falls back to
+        // update_flair_failed rather than the success string this used to show.
+        selectUserFlairViewModel.selectUserFlair(accessToken, userFlair, mSubredditName, accountName);
     }
 
     @Override

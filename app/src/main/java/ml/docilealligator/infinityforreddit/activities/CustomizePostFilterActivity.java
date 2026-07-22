@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +22,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -39,9 +40,10 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityCustomizePostFilterBinding;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
-import ml.docilealligator.infinityforreddit.postfilter.SavePostFilter;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditWithSelection;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.CustomizePostFilterViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.SavePostFilterResult;
 
 public class CustomizePostFilterActivity extends BaseActivity {
 
@@ -82,6 +84,7 @@ public class CustomizePostFilterActivity extends BaseActivity {
     private String originalName;
     @Nullable
     private AlertDialog activeDialog;
+    private CustomizePostFilterViewModel customizePostFilterViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,6 +97,40 @@ public class CustomizePostFilterActivity extends BaseActivity {
         setContentView(binding.getRoot());
 
         applyCustomTheme();
+
+        customizePostFilterViewModel = new ViewModelProvider(this,
+                CustomizePostFilterViewModel.Companion.provideFactory(mExecutor, mRedditDataRoomDatabase))
+                .get(CustomizePostFilterViewModel.class);
+        // The save runs in the ViewModel so its result — and the duplicate-name dialog — reaches the
+        // live instance after a rotation, instead of firing on a dead one (CHUNKS deferred item 4). On
+        // a back-press there is no observer, so a completed save no longer launches FilteredPosts at a
+        // user who left; on a rotation the relaunched instance's observer picks it up.
+        customizePostFilterViewModel.getSaveResult().observe(this, result -> {
+            if (result instanceof SavePostFilterResult.Success) {
+                if (getIntent().getBooleanExtra(EXTRA_START_FILTERED_POSTS_WHEN_FINISH, false)) {
+                    Intent intent = new Intent(this, FilteredPostsActivity.class);
+                    intent.putExtras(getIntent());
+                    intent.putExtra(FilteredPostsActivity.EXTRA_CONSTRUCTED_POST_FILTER, postFilter);
+                    startActivity(intent);
+                } else {
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(RETURN_EXTRA_POST_FILTER, postFilter);
+                    setResult(Activity.RESULT_OK, returnIntent);
+                }
+                finish();
+            } else if (result instanceof SavePostFilterResult.Duplicate) {
+                activeDialog = new MaterialAlertDialogBuilder(CustomizePostFilterActivity.this, R.style.MaterialAlertDialogTheme)
+                        .setTitle(getString(R.string.duplicate_post_filter_dialog_title, postFilter.name))
+                        .setMessage(R.string.duplicate_post_filter_dialog_message)
+                        .setPositiveButton(R.string.override, (dialogInterface, i) -> customizePostFilterViewModel.savePostFilter(postFilter, postFilter.name))
+                        .setNegativeButton(R.string.cancel, null)
+                        .show();
+            } else if (result instanceof SavePostFilterResult.Failure) {
+                // The DB write threw (and rolled back); the guard has been released, so the user can retry.
+                Snackbar.make(binding.coordinatorLayoutCustomizePostFilterActivity,
+                        R.string.save_post_filter_failed, Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         if (isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             if (isChangeStatusBarIconColor()) {
@@ -573,7 +610,7 @@ public class CustomizePostFilterActivity extends BaseActivity {
                 constructPostFilter();
 
                 if (!postFilter.name.equals("")) {
-                    savePostFilter(originalName);
+                    customizePostFilterViewModel.savePostFilter(postFilter, originalName);
                 } else {
                     Toast.makeText(CustomizePostFilterActivity.this, R.string.post_filter_requires_a_name, Toast.LENGTH_LONG).show();
                 }
@@ -582,50 +619,6 @@ public class CustomizePostFilterActivity extends BaseActivity {
             }
         }
         return false;
-    }
-
-    private void savePostFilter(String originalName) {
-        SavePostFilter.savePostFilter(mExecutor, new Handler(), mRedditDataRoomDatabase, postFilter, originalName,
-                new SavePostFilter.SavePostFilterListener() {
-                    @Override
-                    public void success() {
-                        // isFinishing(), deliberately not isDestroyed(). A configuration change
-                        // destroys this instance but keeps the activity record and its token, so
-                        // startActivity/setResult/finish() below still reach the relaunched instance
-                        // and must run — guarding on isDestroyed() would drop the result and strand
-                        // the editor open. A back-press is the opposite case: the user abandoned the
-                        // screen, so launching FilteredPostsActivity at them would be wrong.
-                        if (isFinishing()) {
-                            return;
-                        }
-                        if (getIntent().getBooleanExtra(EXTRA_START_FILTERED_POSTS_WHEN_FINISH, false)) {
-                            Intent intent = new Intent(CustomizePostFilterActivity.this, FilteredPostsActivity.class);
-                            intent.putExtras(getIntent());
-                            intent.putExtra(FilteredPostsActivity.EXTRA_CONSTRUCTED_POST_FILTER, postFilter);
-                            startActivity(intent);
-                        } else {
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra(RETURN_EXTRA_POST_FILTER, postFilter);
-                            setResult(Activity.RESULT_OK, returnIntent);
-                        }
-                        finish();
-                    }
-
-                    @Override
-                    public void duplicate() {
-                        // Showing a dialog on a destroyed activity throws BadTokenException, and this
-                        // fires from a background database read that can outlive a rotation.
-                        if (isFinishing() || isDestroyed()) {
-                            return;
-                        }
-                        activeDialog = new MaterialAlertDialogBuilder(CustomizePostFilterActivity.this, R.style.MaterialAlertDialogTheme)
-                                .setTitle(getString(R.string.duplicate_post_filter_dialog_title, postFilter.name))
-                                .setMessage(R.string.duplicate_post_filter_dialog_message)
-                                .setPositiveButton(R.string.override, (dialogInterface, i) -> savePostFilter(postFilter.name))
-                                .setNegativeButton(R.string.cancel, null)
-                                .show();
-                    }
-                });
     }
 
     @Override

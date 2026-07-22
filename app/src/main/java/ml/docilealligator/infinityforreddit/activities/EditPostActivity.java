@@ -20,13 +20,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -34,22 +33,19 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
-import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UploadedImagesBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.ActivityEditPostBinding;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
-import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.EditPostActivityViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.EditPostResult;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class EditPostActivity extends BaseActivity implements UploadImageEnabledActivity {
@@ -91,6 +87,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
     private ActivityEditPostBinding binding;
+    private EditPostActivityViewModel editPostViewModel;
 
     private CameraCapturePermissionHelper cameraCapturePermissionHelper;
 
@@ -158,6 +155,24 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
             }
             capturedImageUri = savedInstanceState.getParcelable(CAPTURED_IMAGE_URI_STATE);
         }
+
+        editPostViewModel = new ViewModelProvider(this,
+                EditPostActivityViewModel.Companion.provideFactory(mOauthRetrofit))
+                .get(EditPostActivityViewModel.class);
+        // The edit runs in the ViewModel so its result survives a rotation and reaches whichever
+        // instance is live; a stale Activity no longer eats the outcome (CHUNKS deferred item 4).
+        editPostViewModel.isSubmitting().observe(this, submitting -> isSubmitting = Boolean.TRUE.equals(submitting));
+        editPostViewModel.getEditResult().observe(this, result -> {
+            if (result instanceof EditPostResult.Success) {
+                Toast.makeText(EditPostActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK, new Intent());
+                finish();
+            } else if (result instanceof EditPostResult.Failure) {
+                String message = ((EditPostResult.Failure) result).getMessage();
+                Snackbar.make(binding.coordinatorLayoutEditPostActivity,
+                        message != null ? message : getString(R.string.post_failed), Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         MarkdownBottomBarRecyclerViewAdapter adapter = new MarkdownBottomBarRecyclerViewAdapter(
                 mCustomThemeWrapper, new MarkdownBottomBarRecyclerViewAdapter.ItemClickListener() {
@@ -265,55 +280,12 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     }
 
     private void editPost() {
-        if (!isSubmitting) {
-            isSubmitting = true;
-
-            Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
-
-            Map<String, String> params = new HashMap<>();
-            params.put(APIUtils.API_TYPE_KEY, APIUtils.API_TYPE_JSON);
-            params.put(APIUtils.THING_ID_KEY, mFullName);
-            params.put(APIUtils.TEXT_KEY, binding.postContentEditTextEditPostActivity.getText().toString());
-
-            mOauthRetrofit.create(RedditAPI.class)
-                    .editPostOrComment(APIUtils.getOAuthHeader(mAccessToken), params)
-                    .enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            isSubmitting = false;
-
-                            // Retrofit routes every HTTP response here — onFailure only covers
-                            // network and parse errors — so without this check a 401/403/500 would
-                            // report the edit as successful and finish, and the caller's RESULT_OK
-                            // would refresh the post back to its unchanged text.
-                            if (!response.isSuccessful()) {
-                                Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            // Reddit reports API-level failures (editing an archived post, a rate limit, …)
-                            // inside an otherwise-200 body via api_type=json. Without this, such an edit was
-                            // reported as successful and the caller's RESULT_OK refreshed the post unchanged.
-                            String apiError = APIUtils.parseApiErrorMessage(response.body());
-                            if (apiError != null) {
-                                Snackbar.make(binding.coordinatorLayoutEditPostActivity, apiError, Snackbar.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            Toast.makeText(EditPostActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
-                            Intent returnIntent = new Intent();
-                            setResult(RESULT_OK, returnIntent);
-                            finish();
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            isSubmitting = false;
-                            Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                        }
-                    });
-
+        if (isSubmitting) {
+            return;
         }
+        Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
+        editPostViewModel.editPost(mAccessToken, mFullName,
+                binding.postContentEditTextEditPostActivity.getText().toString());
     }
 
     @Override

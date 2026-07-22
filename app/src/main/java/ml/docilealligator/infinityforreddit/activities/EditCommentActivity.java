@@ -42,10 +42,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
-import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UploadedImagesBottomSheetFragment;
-import ml.docilealligator.infinityforreddit.comment.Comment;
-import ml.docilealligator.infinityforreddit.comment.ParseComment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.ActivityEditCommentBinding;
@@ -57,15 +54,13 @@ import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
-import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.EditCommentActivityViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.EditCommentResult;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
-import org.json.JSONObject;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class EditCommentActivity extends BaseActivity implements UploadImageEnabledActivity,
@@ -241,8 +236,34 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
         editCommentActivityViewModel = new ViewModelProvider(
                 this,
-                EditCommentActivityViewModel.Companion.provideFactory(new EditCommentActivityRepository(mRedditDataRoomDatabase.commentDraftDao()))
+                EditCommentActivityViewModel.Companion.provideFactory(
+                        new EditCommentActivityRepository(mRedditDataRoomDatabase.commentDraftDao()), mExecutor, mOauthRetrofit)
         ).get(EditCommentActivityViewModel.class);
+        // The edit runs in the ViewModel so a rotation mid-edit no longer drops the result on a dead
+        // instance (CHUNKS deferred item 4).
+        editCommentActivityViewModel.isSubmitting().observe(this, submitting -> isSubmitting = Boolean.TRUE.equals(submitting));
+        editCommentActivityViewModel.getEditResult().observe(this, result -> {
+            if (result instanceof EditCommentResult.Success) {
+                EditCommentResult.Success success = (EditCommentResult.Success) result;
+                Toast.makeText(EditCommentActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
+                Intent returnIntent = new Intent();
+                if (success.getComment() != null) {
+                    returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, success.getComment());
+                } else {
+                    returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(success.getEditedContent()));
+                }
+                returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
+                setResult(RESULT_OK, returnIntent);
+                editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
+                    finish();
+                    return Unit.INSTANCE;
+                });
+            } else if (result instanceof EditCommentResult.Failure) {
+                String message = ((EditCommentResult.Failure) result).getMessage();
+                Snackbar.make(binding.coordinatorLayoutEditCommentActivity,
+                        message != null ? message : getString(R.string.post_failed), Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         if (savedInstanceState == null) {
             editCommentActivityViewModel.getCommentDraft(mFullName).observe(this, commentDraft -> {
@@ -330,99 +351,28 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
     }
 
     private void editComment() {
-        if (!isSubmitting) {
-            isSubmitting = true;
-
-            Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
-
-            String content = binding.commentEditTextEditCommentActivity.getText().toString();
-
-            Map<String, String> params = new HashMap<>();
-            params.put(APIUtils.API_TYPE_KEY, APIUtils.API_TYPE_JSON);
-            params.put(APIUtils.THING_ID_KEY, mFullName);
-            if (!uploadedImages.isEmpty() || giphyGif != null) {
-                try {
-                    params.put(APIUtils.RICHTEXT_JSON_KEY, new RichTextJSONConverter().constructRichTextJSON(this, content, uploadedImages, giphyGif));
-                    params.put(APIUtils.TEXT_KEY, "");
-                } catch (JSONException e) {
-                    isSubmitting = false;
-                    Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.convert_to_richtext_json_failed, Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-            } else {
-                params.put(APIUtils.TEXT_KEY, content);
-            }
-
-            Handler handler = new Handler(getMainLooper());
-            mExecutor.execute(() -> {
-                try {
-                    Response<String> response = mOauthRetrofit.create(RedditAPI.class)
-                            .editPostOrComment(APIUtils.getOAuthHeader(mAccessToken), params).execute();
-                    if (response.isSuccessful() && response.body() != null) {
-                        String body = response.body();
-
-                        // Reddit reports API-level failures (editing an archived comment, a rate limit, …)
-                        // inside an otherwise-200 body via api_type=json. Check for that before treating the
-                        // response as a successful edit — the old catch(JSONException) below reported
-                        // edit_success with the local text, which swallowed exactly these error bodies.
-                        String apiError = APIUtils.parseApiErrorMessage(body);
-                        if (apiError != null) {
-                            handler.post(() -> {
-                                isSubmitting = false;
-                                Snackbar.make(binding.coordinatorLayoutEditCommentActivity, apiError, Snackbar.LENGTH_SHORT).show();
-                            });
-                            return;
-                        }
-
-                        // No API error: the edit succeeded. Prefer returning the parsed comment; if the
-                        // returned thing can't be parsed, fall back to the locally edited text — the edit
-                        // did land, and both callers (ViewPostDetail/ViewUserDetail) handle either extra.
-                        Comment comment = null;
-                        try {
-                            JSONObject data = new JSONObject(body);
-                            if (!data.has(JSONUtils.ID_KEY) && data.has(JSONUtils.JSON_KEY)) {
-                                data = data.getJSONObject(JSONUtils.JSON_KEY).getJSONObject(JSONUtils.DATA_KEY)
-                                        .getJSONArray(JSONUtils.THINGS_KEY).getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY);
-                            }
-                            comment = ParseComment.parseSingleComment(data, 0);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        Comment parsedComment = comment;
-                        handler.post(() -> {
-                            isSubmitting = false;
-                            Toast.makeText(EditCommentActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
-
-                            Intent returnIntent = new Intent();
-                            if (parsedComment != null) {
-                                returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, parsedComment);
-                            } else {
-                                returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(content));
-                            }
-                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
-                            setResult(RESULT_OK, returnIntent);
-
-                            editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
-                                finish();
-                                return Unit.INSTANCE;
-                            });
-                        });
-                    } else {
-                        handler.post(() -> {
-                            isSubmitting = false;
-                            Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                        });
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    handler.post(() -> {
-                        isSubmitting = false;
-                        Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                    });
-                }
-            });
+        if (isSubmitting) {
+            return;
         }
+        Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
+
+        String content = binding.commentEditTextEditCommentActivity.getText().toString();
+        Map<String, String> params = new HashMap<>();
+        params.put(APIUtils.API_TYPE_KEY, APIUtils.API_TYPE_JSON);
+        params.put(APIUtils.THING_ID_KEY, mFullName);
+        if (!uploadedImages.isEmpty() || giphyGif != null) {
+            try {
+                params.put(APIUtils.RICHTEXT_JSON_KEY, new RichTextJSONConverter().constructRichTextJSON(this, content, uploadedImages, giphyGif));
+                params.put(APIUtils.TEXT_KEY, "");
+            } catch (JSONException e) {
+                Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.convert_to_richtext_json_failed, Snackbar.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            params.put(APIUtils.TEXT_KEY, content);
+        }
+
+        editCommentActivityViewModel.editComment(mAccessToken, params, content);
     }
 
     private void promptAlertDialog(int titleResId, int messageResId, boolean canSaveDraft) {

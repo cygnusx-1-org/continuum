@@ -60,7 +60,6 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.CopyTextBottomS
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.GiphyGifInfoBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UploadedImagesBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.comment.Comment;
-import ml.docilealligator.infinityforreddit.comment.SendComment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.ActivityCommentBinding;
@@ -81,6 +80,7 @@ import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.CommentActivityViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.SendCommentResult;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
@@ -145,6 +145,8 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
     private GiphyGif giphyGif;
     @Nullable
     private Menu mMenu;
+    @Nullable
+    private Snackbar sendingSnackbar;
     @SuppressWarnings("NullAway.Init")
     public CommentActivityViewModel commentActivityViewModel;
 
@@ -388,8 +390,40 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
 
         commentActivityViewModel = new ViewModelProvider(
                 this,
-                CommentActivityViewModel.Companion.provideFactory(new CommentActivityRepository(mRedditDataRoomDatabase.commentDraftDao()))
+                CommentActivityViewModel.Companion.provideFactory(
+                        new CommentActivityRepository(mRedditDataRoomDatabase.commentDraftDao()), mExecutor, getApplicationContext())
         ).get(CommentActivityViewModel.class);
+        // The send runs in the ViewModel so a rotation mid-send delivers the result to the live
+        // instance instead of a dead one (CHUNKS deferred item 4).
+        commentActivityViewModel.isSubmitting().observe(this, submitting -> {
+            isSubmitting = Boolean.TRUE.equals(submitting);
+            setSendMenuItemEnabled(!isSubmitting);
+            if (!isSubmitting && sendingSnackbar != null) {
+                sendingSnackbar.dismiss();
+            }
+        });
+        commentActivityViewModel.getSendResult().observe(this, result -> {
+            if (result instanceof SendCommentResult.Success) {
+                Comment comment = ((SendCommentResult.Success) result).getComment();
+                Toast.makeText(CommentActivity.this, R.string.send_comment_success, Toast.LENGTH_SHORT).show();
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra(RETURN_EXTRA_COMMENT_DATA_KEY, comment);
+                returnIntent.putExtra(EXTRA_PARENT_FULLNAME_KEY, parentFullname);
+                if (isReplying) {
+                    returnIntent.putExtra(EXTRA_PARENT_POSITION_KEY, parentPosition);
+                }
+                setResult(RESULT_OK, returnIntent);
+                commentActivityViewModel.deleteCommentDraft(parentFullname, () -> {
+                    finish();
+                    return Unit.INSTANCE;
+                });
+            } else if (result instanceof SendCommentResult.Failure) {
+                String errorMessage = ((SendCommentResult.Failure) result).getMessage();
+                Snackbar.make(binding.commentCoordinatorLayout,
+                        (errorMessage == null || errorMessage.isEmpty()) ? getString(R.string.send_comment_failed) : errorMessage,
+                        Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         if (savedInstanceState == null) {
             commentActivityViewModel.getCommentDraft(parentFullname).observe(this, commentDraft -> {
@@ -504,6 +538,8 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
         getMenuInflater().inflate(R.menu.comment_activity, menu);
         mMenu = menu;
         applyMenuItemTheme(menu);
+        // Re-apply the in-flight state to the freshly inflated menu (e.g. after a rotation mid-send).
+        setSendMenuItemEnabled(!isSubmitting);
         return true;
     }
 
@@ -520,87 +556,55 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             intent.putExtra(FullMarkdownActivity.EXTRA_SUBMIT_POST, true);
             startActivityForResult(intent, MARKDOWN_PREVIEW_REQUEST_CODE);
         } else if (itemId == R.id.action_send_comment_activity) {
-            sendComment(item);
+            sendComment();
             return true;
         }
 
         return false;
     }
 
-    public void sendComment(@Nullable MenuItem item) {
-        if (!isSubmitting) {
-            isSubmitting = true;
+    public void sendComment() {
+        if (isSubmitting) {
+            return;
+        }
 
-            if (binding.commentCommentEditText.getText() == null || binding.commentCommentEditText.getText().toString().equals("")) {
-                isSubmitting = false;
-                Snackbar.make(binding.commentCoordinatorLayout, R.string.comment_content_required, Snackbar.LENGTH_SHORT).show();
-                return;
-            }
+        if (binding.commentCommentEditText.getText() == null || binding.commentCommentEditText.getText().toString().isEmpty()) {
+            Snackbar.make(binding.commentCoordinatorLayout, R.string.comment_content_required, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
 
-            Account account = selectedAccount;
-            if (account == null) {
-                isSubmitting = false;
-                Snackbar.make(binding.commentCoordinatorLayout, R.string.account_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
-                return;
-            }
+        Account account = selectedAccount;
+        if (account == null) {
+            Snackbar.make(binding.commentCoordinatorLayout, R.string.account_not_loaded_yet, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
 
-            if (item != null) {
-                item.setEnabled(false);
-                setMenuItemIconAlpha(item, 130);
-            }
+        // The send button's disabled state and this "sending" snackbar are driven by the ViewModel's
+        // isSubmitting observer, so they survive a rotation mid-send.
+        sendingSnackbar = Snackbar.make(binding.commentCoordinatorLayout, R.string.sending_comment, Snackbar.LENGTH_INDEFINITE);
+        sendingSnackbar.show();
 
-            Snackbar sendingSnackbar = Snackbar.make(binding.commentCoordinatorLayout, R.string.sending_comment, Snackbar.LENGTH_INDEFINITE);
-            sendingSnackbar.show();
+        Retrofit newAuthenticatorOauthRetrofit = mOauthRetrofit.newBuilder()
+            .client(new OkHttpClient.Builder().authenticator(new AnyAccountAccessTokenAuthenticator(APIUtils.getClientId(getApplicationContext()), mRetrofit, mRedditDataRoomDatabase, account, mCurrentAccountSharedPreferences))
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectionPool(new ConnectionPool(0, 1, TimeUnit.NANOSECONDS))
+            .build())
+            .build();
 
-            Retrofit newAuthenticatorOauthRetrofit = mOauthRetrofit.newBuilder()
-                .client(new OkHttpClient.Builder().authenticator(new AnyAccountAccessTokenAuthenticator(APIUtils.getClientId(getApplicationContext()), mRetrofit, mRedditDataRoomDatabase, account, mCurrentAccountSharedPreferences))
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .connectionPool(new ConnectionPool(0, 1, TimeUnit.NANOSECONDS))
-                .build())
-                .build();
-            SendComment.sendComment(this, mExecutor, new Handler(), binding.commentCommentEditText.getText().toString(),
-                    parentFullname, parentDepth, uploadedImages, giphyGif, newAuthenticatorOauthRetrofit, account,
-                    new SendComment.SendCommentListener() {
-                        @Override
-                        public void sendCommentSuccess(Comment comment) {
-                            isSubmitting = false;
-                            if (item != null) {
-                                item.setEnabled(true);
-                                setMenuItemIconAlpha(item, 255);
-                            }
-                            Toast.makeText(CommentActivity.this, R.string.send_comment_success, Toast.LENGTH_SHORT).show();
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra(RETURN_EXTRA_COMMENT_DATA_KEY, comment);
-                            returnIntent.putExtra(EXTRA_PARENT_FULLNAME_KEY, parentFullname);
-                            if (isReplying) {
-                                returnIntent.putExtra(EXTRA_PARENT_POSITION_KEY, parentPosition);
-                            }
-                            setResult(RESULT_OK, returnIntent);
-                            commentActivityViewModel.deleteCommentDraft(parentFullname, () -> {
-                                finish();
-                                return Unit.INSTANCE;
-                            });
-                        }
+        commentActivityViewModel.sendComment(newAuthenticatorOauthRetrofit, account,
+                binding.commentCommentEditText.getText().toString(), parentFullname, parentDepth, uploadedImages, giphyGif);
+    }
 
-                        @Override
-                        public void sendCommentFailed(@Nullable String errorMessage) {
-                            isSubmitting = false;
-                            sendingSnackbar.dismiss();
-
-                            if (item != null) {
-                                item.setEnabled(true);
-                                setMenuItemIconAlpha(item, 255);
-                            }
-
-                            if (errorMessage == null || errorMessage.isEmpty()) {
-                                Snackbar.make(binding.commentCoordinatorLayout, R.string.send_comment_failed, Snackbar.LENGTH_SHORT).show();
-                            } else {
-                                Snackbar.make(binding.commentCoordinatorLayout, errorMessage, Snackbar.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
+    private void setSendMenuItemEnabled(boolean enabled) {
+        if (mMenu == null) {
+            return;
+        }
+        MenuItem sendItem = mMenu.findItem(R.id.action_send_comment_activity);
+        if (sendItem != null) {
+            sendItem.setEnabled(enabled);
+            setMenuItemIconAlpha(sendItem, enabled ? 255 : 130);
         }
     }
 
@@ -663,7 +667,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                 // field pointing at a URI that is about to be removed.
                 capturedImageUri = null;
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
-                sendComment(mMenu == null ? null : mMenu.findItem(R.id.action_send_comment_activity));
+                sendComment();
             }
         } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
             // Camera cancelled/dismissed — the temp output file was created but never used.

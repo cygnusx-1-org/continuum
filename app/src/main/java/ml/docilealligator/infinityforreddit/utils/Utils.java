@@ -584,6 +584,28 @@ public final class Utils {
         }
     }
 
+    /**
+     * True iff [uri] is a camera-capture temp file this app created — a FileProvider content URI
+     * served by this app's own {@code <applicationId>.provider} authority. A user's picked or shared
+     * image comes through a different authority (MediaStore, the photo picker, another app), so this
+     * cleanly separates "our scratch file we may delete" from "the user's file we must never touch".
+     */
+    public static boolean isOwnCaptureUri(Context context, @Nullable Uri uri) {
+        return uri != null && (context.getPackageName() + ".provider").equals(uri.getAuthority());
+    }
+
+    /**
+     * Deletes a camera-capture temp file this app created once a post submit has consumed it, and
+     * only such a file (see {@link #isOwnCaptureUri}) — never a picked/shared image. Resolves
+     * deferred item 2's PostImage/PostGallery carry-over: those two keep the captured file as post
+     * content until {@code SubmitPostService} submits, so it can only be reclaimed on submit success.
+     */
+    public static void deleteCapturedImageFileQuietly(Context context, @Nullable Uri uri) {
+        if (isOwnCaptureUri(context, uri)) {
+            deleteContentUriFileQuietly(context, uri);
+        }
+    }
+
     @Nullable
     public static String getFileName(Context context, Uri uri) {
         ContentResolver contentResolver = context.getContentResolver();

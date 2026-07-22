@@ -819,6 +819,9 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         flairController.setPosting(false);
         mPostingSnackbar.dismiss();
         if (submitImagePostEvent.postSuccess) {
+            // The capture temp file has now been uploaded and the post accepted, so reclaim it; a
+            // picked/shared image is under a different authority and is left untouched (deferred item 2).
+            Utils.deleteCapturedImageFileQuietly(this, imageUri);
             Intent intent = new Intent(PostImageActivity.this, ViewUserDetailActivity.class);
             intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, accountName);
             startActivity(intent);

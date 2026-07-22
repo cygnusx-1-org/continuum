@@ -26,6 +26,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +38,9 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -63,14 +66,11 @@ import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
-import ml.docilealligator.infinityforreddit.utils.JSONUtils;
-import ml.docilealligator.infinityforreddit.utils.UploadImageUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.PostGalleryViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.UploadOutcome;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParserException;
 import retrofit2.Retrofit;
 
 public class PostGalleryActivity extends BaseActivity implements FlairBottomSheetFragment.FlairSelectionCallback,
@@ -151,6 +151,8 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     @Nullable
     private Uri imageUri;
     private boolean isUploading;
+    private PostGalleryViewModel postGalleryViewModel;
+    private final Set<String> appliedOutcomeIds = new HashSet<>();
     private ActivityPostGalleryBinding binding;
     private FlairRequirementController flairController;
 
@@ -237,6 +239,29 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
             }
         });
 
+        postGalleryViewModel = new ViewModelProvider(this,
+                PostGalleryViewModel.Companion.provideFactory(mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
+                        getApplicationContext().getContentResolver()))
+                .get(PostGalleryViewModel.class);
+        // Uploads run in the ViewModel so they survive a rotation; their outcomes accumulate and are
+        // applied (by the image's UUID id, idempotently) to whichever adapter is live, so nothing is
+        // re-uploaded on recreation (CHUNKS deferred item 3).
+        postGalleryViewModel.getUploadOutcomes().observe(this, outcomes -> {
+            for (UploadOutcome outcome : outcomes) {
+                if (!appliedOutcomeIds.add(outcome.getId())) {
+                    continue;
+                }
+                if (outcome instanceof UploadOutcome.Uploaded) {
+                    adapter.setImageAsUploaded(outcome.getId(), ((UploadOutcome.Uploaded) outcome).getMediaId());
+                } else if (outcome instanceof UploadOutcome.Failed) {
+                    adapter.removeFailedToUploadImage(outcome.getId());
+                }
+            }
+        });
+        postGalleryViewModel.isUploading().observe(this, uploading -> isUploading = Boolean.TRUE.equals(uploading));
+        postGalleryViewModel.getUploadFailed().observe(this, ignored ->
+                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.upload_image_failed, Snackbar.LENGTH_LONG).show());
+
         if (savedInstanceState != null) {
             selectedAccount = savedInstanceState.getParcelable(SELECTED_ACCOUNT_STATE);
             subredditName = savedInstanceState.getString(SUBREDDIT_NAME_STATE);
@@ -265,17 +290,10 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
             }
 
             if (redditGalleryImageInfoList != null) {
+                // The list (with any already-completed payloads) is restored here; the ViewModel still
+                // holds the in-flight uploads and applies their outcomes to this adapter as they finish,
+                // so there is nothing to re-upload — no more duplicate media asset (CHUNKS deferred item 3).
                 adapter.setRedditGalleryImageInfoList(redditGalleryImageInfoList);
-                // A missing payload means the upload had not finished when the state was saved.
-                // uploadImage() reports back through the adapter it captured, which belonged to
-                // the destroyed instance, so that result can never reach this one — restarting
-                // the upload is the only way a recreated activity gets a payload. Do not "fix"
-                // this into a skip-if-already-uploading check; it would leave the image stuck.
-                for (RedditGallerySubmissionRecyclerViewAdapter.RedditGalleryImageInfo imageInfo : redditGalleryImageInfoList) {
-                    if (imageInfo.payload == null) {
-                        uploadImage(Uri.parse(imageInfo.imageUrlString), imageInfo.id);
-                    }
-                }
             }
 
             if (subredditName != null) {
@@ -557,29 +575,6 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         }
     }
 
-    private void uploadImage(Uri uploadUri, String imageId) {
-        Handler handler = new Handler();
-        isUploading = true;
-        mExecutor.execute(() -> {
-            try {
-                String response = UploadImageUtils.uploadImage(mOauthRetrofit, mUploadMediaRetrofit, getContentResolver(),
-                        accessToken, uploadUri, true, false);
-                String mediaId = new JSONObject(response).getJSONObject(JSONUtils.ASSET_KEY).getString(JSONUtils.ASSET_ID_KEY);
-                handler.post(() -> {
-                    adapter.setImageAsUploaded(imageId, mediaId);
-                    isUploading = false;
-                });
-            } catch (XmlPullParserException | JSONException | IOException e) {
-                e.printStackTrace();
-                handler.post(() -> {
-                    adapter.removeFailedToUploadImage(imageId);
-                    Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.upload_image_failed, Snackbar.LENGTH_LONG).show();
-                    isUploading = false;
-                });
-            }
-        });
-    }
-
     private void displaySubredditIcon() {
         if (iconUrl != null && !iconUrl.isEmpty()) {
             mGlide.load(iconUrl)
@@ -793,7 +788,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
 
                 imageUri = pickedImageUri;
                 String pickedImageId = adapter.addImage(pickedImageUri.toString());
-                uploadImage(pickedImageUri, pickedImageId);
+                postGalleryViewModel.uploadImage(pickedImageUri, pickedImageId, accessToken);
             }
         } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -804,7 +799,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                 }
 
                 String capturedImageId = adapter.addImage(capturedImageUri.toString());
-                uploadImage(capturedImageUri, capturedImageId);
+                postGalleryViewModel.uploadImage(capturedImageUri, capturedImageId, accessToken);
             } else {
                 // Camera cancelled/dismissed — drop the unused temp output file (it was never added
                 // to the gallery adapter, so nothing else references it).
@@ -863,6 +858,12 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         flairController.setPosting(false);
         mPostingSnackbar.dismiss();
         if (submitGalleryPostEvent.postSuccess) {
+            // Each image was uploaded to Reddit's media host and the post accepted, so reclaim any
+            // capture temp files this app created; picked images are under other authorities and are
+            // left untouched (deferred item 2).
+            for (RedditGallerySubmissionRecyclerViewAdapter.RedditGalleryImageInfo info : adapter.getRedditGalleryImageInfoList()) {
+                Utils.deleteCapturedImageFileQuietly(this, Uri.parse(info.imageUrlString));
+            }
             Intent intent = new Intent(this, LinkResolverActivity.class);
             intent.setData(Uri.parse(submitGalleryPostEvent.postUrl));
             startActivity(intent);
