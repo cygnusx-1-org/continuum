@@ -711,7 +711,7 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.postTextContentEditTextPostTextActivity,
-                        binding.coordinatorLayoutPostTextActivity, pickedImageUri, uploadedImages);
+                        binding.coordinatorLayoutPostTextActivity, pickedImageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Uri capturedImageUri = this.capturedImageUri;
                 if (capturedImageUri == null) {
@@ -720,10 +720,17 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.postTextContentEditTextPostTextActivity,
-                        binding.coordinatorLayoutPostTextActivity, capturedImageUri, uploadedImages);
+                        binding.coordinatorLayoutPostTextActivity, capturedImageUri, uploadedImages, true);
+                // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
+                // field pointing at a URI that is about to be removed.
+                this.capturedImageUri = null;
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 submitPost();
             }
+        } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            // Camera cancelled/dismissed — the temp output file was created but never used.
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
         }
 
     }
@@ -798,9 +805,11 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
         try {
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
         } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show();
         }
@@ -833,5 +842,8 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
                 .into(binding.accountIconGifImageViewPostTextActivity);
 
         binding.accountNameTextViewPostTextActivity.setText(account.getAccountName());
+
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 }

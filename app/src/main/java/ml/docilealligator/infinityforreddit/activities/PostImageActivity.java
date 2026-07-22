@@ -742,6 +742,11 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 loadImage();
+            } else {
+                // Camera cancelled/dismissed — drop the unused temp output file rather than leaving
+                // imageUri pointing at an empty capture that would otherwise be submitted.
+                Utils.deleteContentUriFileQuietly(this, imageUri);
+                imageUri = null;
             }
         }
     }
@@ -793,9 +798,11 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         try {
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
             imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.no_camera_available, Snackbar.LENGTH_SHORT).show();
         } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
             imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show();
         }

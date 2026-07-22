@@ -547,9 +547,11 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         try {
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
             imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.no_camera_available, Snackbar.LENGTH_SHORT).show();
         } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
             imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show();
         }
@@ -803,6 +805,11 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
 
                 String capturedImageId = adapter.addImage(capturedImageUri.toString());
                 uploadImage(capturedImageUri, capturedImageId);
+            } else {
+                // Camera cancelled/dismissed — drop the unused temp output file (it was never added
+                // to the gallery adapter, so nothing else references it).
+                Utils.deleteContentUriFileQuietly(this, imageUri);
+                imageUri = null;
             }
         }
     }
@@ -834,6 +841,9 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                 .into(binding.accountIconGifImageViewPostGalleryActivity);
 
         binding.accountNameTextViewPostGalleryActivity.setText(account.getAccountName());
+
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 
     public void setCaptionAndUrl(int position, String caption, String url) {

@@ -271,6 +271,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
             Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
 
             Map<String, String> params = new HashMap<>();
+            params.put(APIUtils.API_TYPE_KEY, APIUtils.API_TYPE_JSON);
             params.put(APIUtils.THING_ID_KEY, mFullName);
             params.put(APIUtils.TEXT_KEY, binding.postContentEditTextEditPostActivity.getText().toString());
 
@@ -287,6 +288,15 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                             // would refresh the post back to its unchanged text.
                             if (!response.isSuccessful()) {
                                 Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            // Reddit reports API-level failures (editing an archived post, a rate limit, …)
+                            // inside an otherwise-200 body via api_type=json. Without this, such an edit was
+                            // reported as successful and the caller's RESULT_OK refreshed the post unchanged.
+                            String apiError = APIUtils.parseApiErrorMessage(response.body());
+                            if (apiError != null) {
+                                Snackbar.make(binding.coordinatorLayoutEditPostActivity, apiError, Snackbar.LENGTH_SHORT).show();
                                 return;
                             }
 
@@ -318,7 +328,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages);
+                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Uri imageUri = capturedImageUri;
                 if (imageUri == null) {
@@ -327,10 +337,17 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages);
+                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages, true);
+                // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
+                // field pointing at a URI that is about to be removed.
+                capturedImageUri = null;
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 editPost();
             }
+        } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            // Camera cancelled/dismissed — the temp output file was created but never used.
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
         }
     }
 
@@ -391,9 +408,11 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
         try {
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
         } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show();
         }

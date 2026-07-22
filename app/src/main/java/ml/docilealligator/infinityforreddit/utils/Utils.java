@@ -514,62 +514,104 @@ public final class Utils {
     public static void uploadImageToReddit(Context context, Executor executor, Retrofit oauthRetrofit,
                                            Retrofit uploadMediaRetrofit, @Nullable String accessToken, EditText editText,
                                            CoordinatorLayout coordinatorLayout, Uri imageUri,
-                                           ArrayList<UploadedImage> uploadedImages) {
+                                           ArrayList<UploadedImage> uploadedImages, boolean deleteSourceAfterUpload) {
         Toast.makeText(context, R.string.uploading_image, Toast.LENGTH_SHORT).show();
         Handler handler = new Handler();
         executor.execute(() -> {
             try {
                 String imageKeyOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
                         context.getContentResolver(), accessToken, imageUri, true);
-                handler.post(() -> {
-                    if (imageKeyOrError != null && !imageKeyOrError.startsWith("Error: ")) {
-                        String fileName = Utils.getFileName(context, imageUri);
-                        if (fileName == null) {
-                            fileName = imageKeyOrError;
-                        }
-                        uploadedImages.add(new UploadedImage(fileName, imageKeyOrError));
+                if (imageKeyOrError != null && !imageKeyOrError.startsWith("Error: ")) {
+                    // Uploaded — resolve the display name and drop the scratch file here, on the executor
+                    // thread, while the upload has just read the Uri. Both are I/O; only the editText and
+                    // snackbar work in the post() below needs the UI thread. getFileName() runs before the
+                    // delete so it still sees the file.
+                    String fileName = Utils.getFileName(context, imageUri);
+                    String resolvedName = fileName != null ? fileName : imageKeyOrError;
+                    if (deleteSourceAfterUpload) {
+                        deleteContentUriFileQuietly(context, imageUri);
+                    }
+
+                    String imageKey = imageKeyOrError;
+                    handler.post(() -> {
+                        uploadedImages.add(new UploadedImage(resolvedName, imageKey));
 
                         int start = Math.max(editText.getSelectionStart(), 0);
                         int end = Math.max(editText.getSelectionEnd(), 0);
                         int realStart = Math.min(start, end);
                         if (realStart > 0 && editText.getText().toString().charAt(realStart - 1) != '\n') {
                             editText.getText().replace(realStart, Math.max(start, end),
-                                    "\n![](" + imageKeyOrError + ")\n",
-                                    0, "\n![]()\n".length() + imageKeyOrError.length());
+                                    "\n![](" + imageKey + ")\n",
+                                    0, "\n![]()\n".length() + imageKey.length());
                         } else {
                             editText.getText().replace(realStart, Math.max(start, end),
-                                    "![](" + imageKeyOrError + ")\n",
-                                    0, "![]()\n".length() + imageKeyOrError.length());
+                                    "![](" + imageKey + ")\n",
+                                    0, "![]()\n".length() + imageKey.length());
                         }
                         Snackbar.make(coordinatorLayout, R.string.upload_image_success, Snackbar.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show();
+                    });
+                } else {
+                    if (deleteSourceAfterUpload) {
+                        deleteContentUriFileQuietly(context, imageUri);
                     }
-                });
+                    handler.post(() -> Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show());
+                }
             } catch (XmlPullParserException | JSONException | IOException e) {
                 e.printStackTrace();
+                if (deleteSourceAfterUpload) {
+                    deleteContentUriFileQuietly(context, imageUri);
+                }
                 handler.post(() -> Toast.makeText(context, R.string.error_processing_image, Toast.LENGTH_LONG).show());
             }
         });
     }
 
+    /**
+     * Deletes the file backing a content Uri, swallowing any failure. Used to clean up the temporary
+     * camera-capture files that {@code captureImage()} writes to {@code getExternalFilesDir(...)} and
+     * hands to the camera via FileProvider — they are pure capture/upload scratch and nothing else
+     * deletes them. Only call this for app-owned FileProvider Uris, never for a user-picked
+     * {@code content://} gallery image.
+     */
+    public static void deleteContentUriFileQuietly(Context context, @Nullable Uri uri) {
+        if (uri == null) {
+            return;
+        }
+        try {
+            context.getContentResolver().delete(uri, null, null);
+        } catch (Exception e) {
+            // Best effort — a leftover scratch file is not worth crashing over.
+        }
+    }
+
     @Nullable
     public static String getFileName(Context context, Uri uri) {
         ContentResolver contentResolver = context.getContentResolver();
-        if (contentResolver != null) {
-            Cursor cursor = contentResolver.query(uri, null, null, null, null);
-            if (cursor != null) {
-                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                cursor.moveToFirst();
-                String fileName = cursor.getString(nameIndex);
-                if (fileName != null && fileName.contains(".")) {
-                    fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-                }
-                return fileName;
-            }
+        if (contentResolver == null) {
+            return null;
         }
-
-        return null;
+        try (Cursor cursor = contentResolver.query(uri, null, null, null, null)) {
+            if (cursor == null) {
+                return null;
+            }
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            // Guard the missing-column and empty-cursor cases: getString(-1) and getString() on an
+            // unpositioned cursor both throw. A provider need not expose DISPLAY_NAME; return null and
+            // let the caller fall back rather than crash.
+            if (nameIndex < 0 || !cursor.moveToFirst()) {
+                return null;
+            }
+            String fileName = cursor.getString(nameIndex);
+            if (fileName != null && fileName.contains(".")) {
+                fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+            }
+            return fileName;
+        } catch (RuntimeException e) {
+            // A misbehaving provider can throw from query() (e.g. SecurityException); treat it as
+            // "name unknown" and let the caller fall back rather than crash. RuntimeException is the
+            // precise type here — nothing in this block declares a checked exception.
+            return null;
+        }
     }
 
     public static void setTitleWithCustomFontToMenuItem(@Nullable Typeface typeface, MenuItem item, @Nullable String desiredTitle) {

@@ -14,6 +14,9 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by alex on 2/23/18.
@@ -269,6 +272,42 @@ public class APIUtils {
     // Concatenated subreddit name works too
     public static int subredditAPICallLimit(@Nullable String subredditName) {
         return 100;
+    }
+
+    /**
+     * Extracts the human-readable error from a Reddit {@code api_type=json} response envelope
+     * ({@code {"json":{"errors":[[code,message,field],...]}}}). Returns the last error's message
+     * (falling back to its code) with the first letter capitalized, or {@code null} when the body
+     * carries no error — an empty {@code errors} array, no {@code json} envelope, or an unparseable
+     * body. Reddit reports API-level failures (archived thing, rate limit, …) inside an otherwise
+     * HTTP-200 body, so callers of endpoints sent with {@code api_type=json} must consult this even
+     * when {@code response.isSuccessful()} is true. Same extraction as
+     * {@link ml.docilealligator.infinityforreddit.user.SelectUserFlair} and
+     * {@code ParseComment.parseSentCommentErrorMessage}.
+     */
+    @Nullable
+    public static String parseApiErrorMessage(@Nullable String responseBody) {
+        if (responseBody == null) {
+            return null;
+        }
+        try {
+            JSONArray errors = new JSONObject(responseBody).getJSONObject(JSONUtils.JSON_KEY)
+                    .getJSONArray(JSONUtils.ERRORS_KEY);
+            if (errors.length() == 0) {
+                return null;
+            }
+            JSONArray error = errors.getJSONArray(errors.length() - 1);
+            if (error.length() == 0) {
+                return null;
+            }
+            String errorString = error.length() >= 2 ? error.getString(1) : error.getString(0);
+            if (errorString.isEmpty()) {
+                return null;
+            }
+            return errorString.substring(0, 1).toUpperCase() + errorString.substring(1);
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     // Application-only (anonymous/userless) Reddit OAuth token management

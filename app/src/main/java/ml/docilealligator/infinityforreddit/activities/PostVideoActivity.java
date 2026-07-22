@@ -836,6 +836,9 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
                 .into(binding.accountIconGifImageViewPostVideoActivity);
 
         binding.accountNameTextViewPostVideoActivity.setText(account.getAccountName());
+
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 
     @Subscribe

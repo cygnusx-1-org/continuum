@@ -648,7 +648,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.commentCommentEditText,
-                        binding.commentCoordinatorLayout, imageUri, uploadedImages);
+                        binding.commentCoordinatorLayout, imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Uri imageUri = capturedImageUri;
                 if (imageUri == null) {
@@ -658,10 +658,17 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         accessToken, binding.commentCommentEditText,
-                        binding.commentCoordinatorLayout, imageUri, uploadedImages);
+                        binding.commentCoordinatorLayout, imageUri, uploadedImages, true);
+                // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
+                // field pointing at a URI that is about to be removed.
+                capturedImageUri = null;
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 sendComment(mMenu == null ? null : mMenu.findItem(R.id.action_send_comment_activity));
             }
+        } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            // Camera cancelled/dismissed — the temp output file was created but never used.
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
         }
     }
 
@@ -719,9 +726,11 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
         try {
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
         } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show();
         }

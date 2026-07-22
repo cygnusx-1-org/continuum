@@ -851,6 +851,9 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         binding.accountNameTextViewSubmitCrosspostActivity.setText(account.getAccountName());
 
         fetchCrosspostableSubreddits();
+
+        // Flair requirements are per-account: re-fetch for the selected target sub with the new token.
+        onSubredditChangedNotifyController(subredditName, subredditIsUser);
     }
 
     @Subscribe

@@ -57,6 +57,7 @@ import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
+import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.EditCommentActivityViewModel;
@@ -337,6 +338,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
             String content = binding.commentEditTextEditCommentActivity.getText().toString();
 
             Map<String, String> params = new HashMap<>();
+            params.put(APIUtils.API_TYPE_KEY, APIUtils.API_TYPE_JSON);
             params.put(APIUtils.THING_ID_KEY, mFullName);
             if (!uploadedImages.isEmpty() || giphyGif != null) {
                 try {
@@ -357,13 +359,47 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                     Response<String> response = mOauthRetrofit.create(RedditAPI.class)
                             .editPostOrComment(APIUtils.getOAuthHeader(mAccessToken), params).execute();
                     if (response.isSuccessful() && response.body() != null) {
-                        Comment comment = ParseComment.parseSingleComment(new JSONObject(response.body()), 0);
+                        String body = response.body();
+
+                        // Reddit reports API-level failures (editing an archived comment, a rate limit, …)
+                        // inside an otherwise-200 body via api_type=json. Check for that before treating the
+                        // response as a successful edit — the old catch(JSONException) below reported
+                        // edit_success with the local text, which swallowed exactly these error bodies.
+                        String apiError = APIUtils.parseApiErrorMessage(body);
+                        if (apiError != null) {
+                            handler.post(() -> {
+                                isSubmitting = false;
+                                Snackbar.make(binding.coordinatorLayoutEditCommentActivity, apiError, Snackbar.LENGTH_SHORT).show();
+                            });
+                            return;
+                        }
+
+                        // No API error: the edit succeeded. Prefer returning the parsed comment; if the
+                        // returned thing can't be parsed, fall back to the locally edited text — the edit
+                        // did land, and both callers (ViewPostDetail/ViewUserDetail) handle either extra.
+                        Comment comment = null;
+                        try {
+                            JSONObject data = new JSONObject(body);
+                            if (!data.has(JSONUtils.ID_KEY) && data.has(JSONUtils.JSON_KEY)) {
+                                data = data.getJSONObject(JSONUtils.JSON_KEY).getJSONObject(JSONUtils.DATA_KEY)
+                                        .getJSONArray(JSONUtils.THINGS_KEY).getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY);
+                            }
+                            comment = ParseComment.parseSingleComment(data, 0);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        Comment parsedComment = comment;
                         handler.post(() -> {
                             isSubmitting = false;
                             Toast.makeText(EditCommentActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
 
                             Intent returnIntent = new Intent();
-                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, comment);
+                            if (parsedComment != null) {
+                                returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, parsedComment);
+                            } else {
+                                returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(content));
+                            }
                             returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
                             setResult(RESULT_OK, returnIntent);
 
@@ -383,22 +419,6 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                     handler.post(() -> {
                         isSubmitting = false;
                         Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    handler.post(() -> {
-                        isSubmitting = false;
-                        Toast.makeText(EditCommentActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
-
-                        Intent returnIntent = new Intent();
-                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(content));
-                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
-                        setResult(RESULT_OK, returnIntent);
-
-                        editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
-                            finish();
-                            return Unit.INSTANCE;
-                        });
                     });
                 }
             });
@@ -441,7 +461,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages);
+                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
                 Uri imageUri = capturedImageUri;
                 if (imageUri == null) {
@@ -450,10 +470,17 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages);
+                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages, true);
+                // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
+                // field pointing at a URI that is about to be removed.
+                capturedImageUri = null;
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 editComment();
             }
+        } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            // Camera cancelled/dismissed — the temp output file was created but never used.
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
         }
     }
 
@@ -505,9 +532,11 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         try {
             startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
         } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
             capturedImageUri = null;
             Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show();
         }

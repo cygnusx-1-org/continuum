@@ -775,6 +775,9 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
                 .into(binding.accountIconGifImageViewPostLinkActivity);
 
         binding.accountNameTextViewPostLinkActivity.setText(account.getAccountName());
+
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 
     @Subscribe
