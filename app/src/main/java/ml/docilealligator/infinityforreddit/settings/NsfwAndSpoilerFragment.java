@@ -120,6 +120,7 @@ public class NsfwAndSpoilerFragment extends Fragment {
 
         binding.blurNsfwLinearLayoutNsfwAndSpoilerFragment.setOnClickListener(view -> binding.blurNsfwSwitchNsfwAndSpoilerFragment.performClick());
         binding.blurNsfwSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            blurNsfw = b;
             nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.BLUR_NSFW_BASE, b).apply();
             EventBus.getDefault().post(new ChangeNSFWBlurEvent(b, doNotBlurNsfwInNsfwSubreddits));
         });
@@ -128,6 +129,7 @@ public class NsfwAndSpoilerFragment extends Fragment {
             binding.doNotBlurNsfwInNsfwSubredditsSwitchNsfwAndSpoilerFragment.performClick();
         });
         binding.doNotBlurNsfwInNsfwSubredditsSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            doNotBlurNsfwInNsfwSubreddits = b;
             nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS, b).apply();
             EventBus.getDefault().post(new ChangeNSFWBlurEvent(blurNsfw, b));
         });

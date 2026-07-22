@@ -126,9 +126,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final boolean mDisableProfileAvatarAnimation;
     private final boolean mShowUserPrefix;
     private final boolean mHideTheNumberOfVotes;
-    private final boolean mNeedBlurNsfw;
-    private final boolean mDoNotBlurNsfwInNsfwSubreddits;
-    private final boolean mNeedBlurSpoiler;
+    private boolean mNeedBlurNsfw;
+    private boolean mDoNotBlurNsfwInNsfwSubreddits;
+    private boolean mNeedBlurSpoiler;
     private final int mDepthThreshold;
     private final CommentRecyclerViewAdapterCallback mCommentRecyclerViewAdapterCallback;
     private final Drawable expandDrawable;
@@ -821,6 +821,25 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
     public void updatePost(@NonNull Post post) {
         mPost = post;
+        applyImageBlur();
+    }
+
+    public void setBlurNsfwAndDoNotBlurNsfwInNsfwSubreddits(boolean needBlurNsfw, boolean doNotBlurNsfwInNsfwSubreddits) {
+        mNeedBlurNsfw = needBlurNsfw;
+        mDoNotBlurNsfwInNsfwSubreddits = doNotBlurNsfwInNsfwSubreddits;
+        applyImageBlur();
+    }
+
+    public void setBlurSpoiler(boolean needBlurSpoiler) {
+        mNeedBlurSpoiler = needBlurSpoiler;
+        applyImageBlur();
+    }
+
+    private void applyImageBlur() {
+        Post post = mPost;
+        if (post == null) {
+            return;
+        }
         mImageAndGifEntry.setBlurImage(
                 (post.isNSFW() && mNeedBlurNsfw
                         && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()))

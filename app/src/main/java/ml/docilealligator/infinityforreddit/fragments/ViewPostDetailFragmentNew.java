@@ -1418,10 +1418,16 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         if (mPostAdapter != null) {
             mPostAdapter.setBlurNsfwAndDoNotBlurNsfwInNsfwSubreddits(event.needBlurNSFW, event.doNotBlurNsfwInNsfwSubreddits);
         }
-        if (mCommentsRecyclerView != null) {
+        if (mCommentsAdapter != null) {
+            mCommentsAdapter.setBlurNsfwAndDoNotBlurNsfwInNsfwSubreddits(event.needBlurNSFW, event.doNotBlurNsfwInNsfwSubreddits);
+        }
+        if (mCommentsRecyclerView == null) {
             refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
         } else {
-            refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+            if (mPostAdapter != null) {
+                refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+            }
+            refreshAdapter(mCommentsRecyclerView);
         }
     }
 
@@ -1430,10 +1436,16 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         if (mPostAdapter != null) {
             mPostAdapter.setBlurSpoiler(event.needBlurSpoiler);
         }
-        if (mCommentsRecyclerView != null) {
+        if (mCommentsAdapter != null) {
+            mCommentsAdapter.setBlurSpoiler(event.needBlurSpoiler);
+        }
+        if (mCommentsRecyclerView == null) {
             refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
         } else {
-            refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+            if (mPostAdapter != null) {
+                refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+            }
+            refreshAdapter(mCommentsRecyclerView);
         }
     }
 
