@@ -622,6 +622,12 @@ public abstract class PostFragmentBase extends Fragment {
                 post.setHidden(event.post.isHidden());
                 post.setSpoiler(event.post.isSpoiler());
                 post.setFlair(event.post.getFlair());
+                // These must mirror every field FetchRemovedPost can recover: Recover Post restores
+                // the deleted author and their flair, so forward them here or the feed row keeps
+                // showing "[deleted]" while the detail view shows the real author.
+                post.setAuthor(event.post.getAuthor());
+                post.setAuthorFlair(event.post.getAuthorFlair());
+                post.setAuthorFlairHTML(event.post.getAuthorFlairHTML());
                 post.setSaved(event.post.isSaved());
                 post.setIsStickied(event.post.isStickied());
                 post.setApproved(event.post.isApproved());

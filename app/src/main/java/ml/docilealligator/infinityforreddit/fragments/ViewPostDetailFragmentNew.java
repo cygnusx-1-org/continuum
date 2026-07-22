@@ -79,6 +79,7 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostCommentSortTypeBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.comment.Comment;
+import ml.docilealligator.infinityforreddit.comment.FetchRemovedComment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AdjustableTouchSlopItemTouchHelper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
@@ -871,6 +872,31 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
     public void editComment(String commentContentMarkdown, int position) {
         viewPostDetailFragmentViewModel.editComment(commentContentMarkdown, position);
+    }
+
+    public void recoverComment(Comment comment, int position) {
+        Toast.makeText(mActivity, R.string.fetching_removed_comment, Toast.LENGTH_SHORT).show();
+        FetchRemovedComment.fetchRemovedComment(mArcticShiftRetrofit, comment, new FetchRemovedComment.FetchRemovedCommentListener() {
+            @Override
+            public void fetchSuccess(String recoveredMarkdown, @Nullable String recoveredAuthor,
+                                     @Nullable String recoveredAuthorFlair, @Nullable String recoveredAuthorFlairHTML) {
+                // The archive request outlives this fragment; ignore a late reply once it is torn
+                // down so we don't touch a null activity/ViewModel.
+                if (mActivity == null || !isAdded()) {
+                    return;
+                }
+                viewPostDetailFragmentViewModel.recoverComment(comment, recoveredMarkdown, recoveredAuthor,
+                        recoveredAuthorFlair, recoveredAuthorFlairHTML, position);
+            }
+
+            @Override
+            public void fetchFailed() {
+                if (mActivity == null || !isAdded()) {
+                    return;
+                }
+                Toast.makeText(mActivity, R.string.show_removed_comment_failed, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void changeSortType(SortType sortType) {

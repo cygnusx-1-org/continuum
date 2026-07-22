@@ -277,9 +277,17 @@ public class Comment implements Parcelable {
         return authorFlair;
     }
 
+    public void setAuthorFlair(@Nullable String authorFlair) {
+        this.authorFlair = authorFlair;
+    }
+
     @Nullable
     public String getAuthorFlairHTML() {
         return authorFlairHTML;
+    }
+
+    public void setAuthorFlairHTML(@Nullable String authorFlairHTML) {
+        this.authorFlairHTML = authorFlairHTML;
     }
 
     @Nullable

@@ -7,4 +7,7 @@ import retrofit2.http.Query;
 public interface ArcticShiftAPI {
     @GET("api/posts/ids")
     Call<String> getRemovedPost(@Query("ids") String postId);
+
+    @GET("api/comments/ids")
+    Call<String> getRemovedComment(@Query("ids") String commentId);
 }

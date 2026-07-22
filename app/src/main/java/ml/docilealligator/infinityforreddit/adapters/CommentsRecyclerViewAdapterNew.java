@@ -168,6 +168,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 public boolean areContentsTheSame(
                         @NonNull Comment oldComment, @NonNull Comment newComment) {
                     return Objects.equals(oldComment.getCommentMarkdown(), newComment.getCommentMarkdown())
+                            && Objects.equals(oldComment.getAuthor(), newComment.getAuthor())
+                            && Objects.equals(oldComment.getAuthorFlair(), newComment.getAuthorFlair())
+                            && Objects.equals(oldComment.getAuthorFlairHTML(), newComment.getAuthorFlairHTML())
                             && Objects.equals(oldComment.getApprovedBy(), newComment.getApprovedBy())
                             && Objects.equals(oldComment.getMoreChildrenIds(), newComment.getMoreChildrenIds())
                             && Objects.equals(oldComment.getMediaMetadataMap(), newComment.getMediaMetadataMap())

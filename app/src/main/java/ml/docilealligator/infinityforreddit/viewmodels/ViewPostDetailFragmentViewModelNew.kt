@@ -1549,6 +1549,37 @@ class ViewPostDetailFragmentViewModelNew(
         }
     }
 
+    fun recoverComment(comment: Comment, recoveredMarkdown: String, recoveredAuthor: String?,
+                       recoveredAuthorFlair: String?, recoveredAuthorFlairHTML: String?, position: Int) {
+        _dataState.value.comments?.let {
+            val updatedComments = ArrayList(it)
+
+            if (position < it.size && position >= 0) {
+                val targetPosition = if (it[position].id.equals(comment.id)) {
+                    position
+                } else {
+                    findCommentPosition(comment.fullName, position)
+                }
+                if (targetPosition in it.indices) {
+                    val updatedComment = Comment(it[targetPosition])
+                    updatedComment.commentMarkdown = recoveredMarkdown
+                    updatedComment.commentRawText = recoveredMarkdown
+                    if (recoveredAuthor != null) {
+                        updatedComment.setAuthor(recoveredAuthor)
+                        updatedComment.setAuthorFlair(recoveredAuthorFlair)
+                        updatedComment.setAuthorFlairHTML(recoveredAuthorFlairHTML)
+                    }
+
+                    updatedComments[targetPosition] = updatedComment
+
+                    _dataState.value = _dataState.value.copy(
+                        comments = updatedComments
+                    )
+                }
+            }
+        }
+    }
+
     fun editComment(commentContentMarkdown: String?, position: Int) {
         _dataState.value.comments?.let {
             if (position < it.size && position >= 0) {

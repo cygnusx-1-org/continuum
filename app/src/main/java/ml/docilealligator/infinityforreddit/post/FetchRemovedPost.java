@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.post;
 
+import android.text.Html;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.Locale;
@@ -40,6 +41,17 @@ public class FetchRemovedPost {
 
                         if (result.title != null) {
                             post.setTitle(result.title);
+                        }
+                        if (result.author != null) {
+                            post.setAuthor(result.author);
+                            post.setAuthorFlair(result.authorFlair);
+                            post.setAuthorFlairHTML(result.authorFlairHTML);
+                        }
+                        // Only restore link flair the removal stripped: fill it in when the post
+                        // currently has none, but never overwrite a flair that is still present (it
+                        // may be the surviving original or a mod's post-removal reason flair).
+                        if (!result.flair.isEmpty() && post.getFlair().isEmpty()) {
+                            post.setFlair(result.flair);
                         }
                         if (result.link != null) {
                             // The original post was a link post; rebuild it as one so the recovered
@@ -118,7 +130,21 @@ public class FetchRemovedPost {
                 return null;
             }
 
-            return new Result(title, body, link);
+            // Restore the original author when the poster's account was deleted (post shows
+            // "[deleted]"). Keep it only when the archive holds a real username, so we never swap one
+            // "[deleted]"/"[removed]" placeholder for another. Flair is only meaningful alongside a
+            // recovered author, so it is parsed only in that case.
+            String author = readString(post, "author");
+            if (isRemovalPlaceholder(author)) {
+                author = null;
+            }
+            // Always non-null (""); only applied when the author is recovered (see onResponse).
+            String authorFlair = parseAuthorFlairText(post);
+            String authorFlairHTML = parseAuthorFlairHtml(post);
+            // Post's own link flair (independent of the author); "" when absent.
+            String flair = parseLinkFlair(post);
+
+            return new Result(title, body, link, author, authorFlair, authorFlairHTML, flair);
         } catch (JSONException e) {
             return null;
         }
@@ -166,12 +192,76 @@ public class FetchRemovedPost {
 
     @Nullable
     private static String readString(JSONObject obj, String key) {
+        // isNull() is true for both an absent key and a JSON null; optString(key, null) alone would
+        // return the literal string "null" for the latter (org.json quirk).
+        if (obj.isNull(key)) {
+            return null;
+        }
         String value = obj.optString(key, null);
         return value == null || value.trim().isEmpty() ? null : value;
     }
 
     private static boolean readBoolean(JSONObject obj, String key) {
         return obj.optBoolean(key, false);
+    }
+
+    /**
+     * Rebuilds an author's flair HTML from an archive object's {@code author_flair_richtext} array,
+     * mirroring {@code ParseComment}/{@code ParsePost}. Returns "" when there is no flair. Shared with
+     * {@code FetchRemovedComment}.
+     */
+    public static String parseAuthorFlairHtml(JSONObject obj) {
+        StringBuilder builder = new StringBuilder();
+        JSONArray flairArray = obj.optJSONArray("author_flair_richtext");
+        if (flairArray != null) {
+            for (int i = 0; i < flairArray.length(); i++) {
+                JSONObject flairObject = flairArray.optJSONObject(i);
+                if (flairObject == null) {
+                    continue;
+                }
+                String e = flairObject.optString("e", "");
+                if (e.equals("text")) {
+                    builder.append(Html.escapeHtml(flairObject.optString("t", "")));
+                } else if (e.equals("emoji")) {
+                    builder.append("<img src=\"").append(Html.escapeHtml(flairObject.optString("u", ""))).append("\">");
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+    /** The plain-text author flair from an archive object, or "" when absent. */
+    public static String parseAuthorFlairText(JSONObject obj) {
+        return obj.isNull("author_flair_text") ? "" : obj.optString("author_flair_text", "");
+    }
+
+    /**
+     * Rebuilds a post's link flair from an archive object, mirroring {@code ParsePost}: the
+     * {@code link_flair_richtext} array rendered to HTML when present, otherwise the plain
+     * {@code link_flair_text}. Returns "" when the post has no flair.
+     */
+    private static String parseLinkFlair(JSONObject obj) {
+        StringBuilder builder = new StringBuilder();
+        JSONArray flairArray = obj.optJSONArray("link_flair_richtext");
+        if (flairArray != null) {
+            for (int i = 0; i < flairArray.length(); i++) {
+                JSONObject flairObject = flairArray.optJSONObject(i);
+                if (flairObject == null) {
+                    continue;
+                }
+                String e = flairObject.optString("e", "");
+                if (e.equals("text")) {
+                    builder.append(Html.escapeHtml(flairObject.optString("t", "")));
+                } else if (e.equals("emoji")) {
+                    builder.append("<img src=\"").append(Html.escapeHtml(flairObject.optString("u", ""))).append("\">");
+                }
+            }
+        }
+        String flair = builder.toString();
+        if (flair.isEmpty() && !obj.isNull("link_flair_text")) {
+            flair = obj.optString("link_flair_text", "");
+        }
+        return flair;
     }
 
     private static final class Result {
@@ -181,11 +271,21 @@ public class FetchRemovedPost {
         final String body;
         @Nullable
         final String link;
+        @Nullable
+        final String author;
+        final String authorFlair;
+        final String authorFlairHTML;
+        final String flair;
 
-        Result(@Nullable String title, @Nullable String body, @Nullable String link) {
+        Result(@Nullable String title, @Nullable String body, @Nullable String link, @Nullable String author,
+               String authorFlair, String authorFlairHTML, String flair) {
             this.title = title;
             this.body = body;
             this.link = link;
+            this.author = author;
+            this.authorFlair = authorFlair;
+            this.authorFlairHTML = authorFlairHTML;
+            this.flair = flair;
         }
     }
 

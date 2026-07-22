@@ -34,8 +34,8 @@ public class Post implements Parcelable {
     private String authorNamePrefixed;
     @Nullable
     private String authorIconUrl;
-    private final String authorFlair;
-    private final String authorFlairHTML;
+    private String authorFlair;
+    private String authorFlairHTML;
     private String title;
     @Nullable
     private String selfText;
@@ -367,8 +367,16 @@ public class Post implements Parcelable {
         return authorFlair;
     }
 
+    public void setAuthorFlair(String authorFlair) {
+        this.authorFlair = authorFlair;
+    }
+
     public String getAuthorFlairHTML() {
         return authorFlairHTML;
+    }
+
+    public void setAuthorFlairHTML(String authorFlairHTML) {
+        this.authorFlairHTML = authorFlairHTML;
     }
 
     @Nullable

@@ -29,6 +29,7 @@ import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentCommentMoreBottomSheetBinding;
+import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.ShareScreenshotUtilsKt;
@@ -275,6 +276,18 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 } else {
                     commentModerationActionBottomSheetFragment.show(activity.getSupportFragmentManager(), commentModerationActionBottomSheetFragment.getTag());
                 }
+                dismiss();
+            });
+        }
+
+        boolean canRecoverComment = activity instanceof ViewPostDetailActivity
+                && (comment.isRemoved() || comment.isAuthorDeleted()
+                    || FetchRemovedPost.isRemovalPlaceholder(comment.getCommentRawText())
+                    || FetchRemovedPost.isRemovalPlaceholder(comment.getCommentMarkdown()));
+        if (canRecoverComment) {
+            binding.recoverCommentTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
+            binding.recoverCommentTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+                ((ViewPostDetailActivity) activity).recoverComment(comment, bundle.getInt(EXTRA_POSITION));
                 dismiss();
             });
         }

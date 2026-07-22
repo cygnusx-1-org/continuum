@@ -1866,10 +1866,13 @@
     <string name="post_spam_status">This post is removed as spam</string>
     <string name="comment_removed_status">This comment is removed</string>
     <string name="recover_post">Recover Post</string>
+    <string name="recover_comment">Recover Comment</string>
     <string name="action_bypass_saved_cache">Bypass cache</string>
     <string name="bypass_saved_cache_on">Fetching fresh saved posts…</string>
     <string name="fetching_removed_post">Fetching removed post</string>
     <string name="show_removed_post_failed">Could not find the removed post</string>
+    <string name="fetching_removed_comment">Fetching removed comment</string>
+    <string name="show_removed_comment_failed">Could not find the removed comment</string>
     <string name="comment_spam_status">This comment is removed as spam</string>
 
     <string name="copying_multi_reddit">Copying</string>

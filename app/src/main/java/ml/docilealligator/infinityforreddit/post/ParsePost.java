@@ -228,7 +228,7 @@ public class ParsePost {
                 JSONObject flairObject = flairArray.getJSONObject(i);
                 String e = flairObject.getString(JSONUtils.E_KEY);
                 if (e.equals("text")) {
-                    authorFlairHTMLBuilder.append(flairObject.getString(JSONUtils.T_KEY));
+                    authorFlairHTMLBuilder.append(Html.escapeHtml(flairObject.getString(JSONUtils.T_KEY)));
                 } else if (e.equals("emoji")) {
                     authorFlairHTMLBuilder.append("<img src=\"").append(Html.escapeHtml(flairObject.getString(JSONUtils.U_KEY))).append("\">");
                 }
