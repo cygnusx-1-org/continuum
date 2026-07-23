@@ -1,9 +1,11 @@
 package ml.docilealligator.infinityforreddit.post;
 
+import android.net.Uri;
 import android.text.Html;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,14 +56,31 @@ public class FetchRemovedPost {
                         if (!result.flair.isEmpty() && post.getFlair().isEmpty()) {
                             post.setFlair(result.flair);
                         }
-                        if (result.link != null) {
+                        if (result.redgifsId != null) {
+                            // The original was a redgifs post; rebuild it as the app renders a live
+                            // one — a redgifs video (VIDEO_TYPE + isRedgifs, media.redgifs.com mp4) —
+                            // plus the recovered Reddit preview frame, so it plays (or at least shows
+                            // the poster when the redgifs video was itself deleted) instead of a link.
+                            post.setPostType(Post.VIDEO_TYPE);
+                            post.setIsRedgifs(true);
+                            post.setRedgifsId(result.redgifsId);
+                            post.setVideoUrl(result.redgifsVideoUrl);
+                            post.setVideoDownloadUrl(result.redgifsVideoUrl);
+                            // Restore the redgifs watch url too, so the card's domain/share match a
+                            // live redgifs post (the removal had rewritten url to the self permalink).
+                            if (result.redgifsUrl != null) {
+                                post.setUrl(result.redgifsUrl);
+                            }
+                            if (result.mediaPreviews != null && post.getPreviews().isEmpty()) {
+                                post.setPreviews(result.mediaPreviews);
+                            }
+                            applyRecoveredBody(post, result.body);
+                        } else if (result.link != null) {
                             // The original post was a link post; rebuild it as one so the recovered
                             // destination renders as a tappable link card rather than as body text.
                             post.setUrl(result.link);
                             post.setPostType(Post.NO_PREVIEW_LINK_TYPE);
-                            post.setSelfText("");
-                            post.setSelfTextPlain("");
-                            post.setSelfTextPlainTrimmed("");
+                            applyRecoveredBody(post, result.body);
                         } else if (result.mediaUrl != null) {
                             // The original post was an image/gif whose url the removal rewrote to the
                             // self permalink; rebuild it as media so the picture renders rather than a
@@ -78,9 +97,7 @@ public class FetchRemovedPost {
                             if (result.mediaThumbnail != null) {
                                 post.setThumbnailUrl(result.mediaThumbnail);
                             }
-                            post.setSelfText("");
-                            post.setSelfTextPlain("");
-                            post.setSelfTextPlainTrimmed("");
+                            applyRecoveredBody(post, result.body);
                         } else if (result.body != null) {
                             // The original was a self/text post; restore its body and re-type it as
                             // text. A removed self post arrives typed NO_PREVIEW_LINK_TYPE — its live
@@ -91,9 +108,7 @@ public class FetchRemovedPost {
                             if (result.isSelf) {
                                 post.setPostType(Post.TEXT_TYPE);
                             }
-                            post.setSelfText(result.body);
-                            post.setSelfTextPlain("");
-                            post.setSelfTextPlainTrimmed("");
+                            applyRecoveredBody(post, result.body);
                         }
                         listener.fetchSuccess(post);
                     }
@@ -144,39 +159,60 @@ public class FetchRemovedPost {
                 body = null;
             }
 
-            // A media/link post with no selftext still loses its destination on removal — Reddit
-            // rewrites the url to the self permalink — so recover the original url. Rebuild an
-            // image/gif as real media (below) so the picture renders; recover any other destination
-            // as a tappable link. Skip self-posts and a url that merely points back at *this* post's
-            // own comments permalink, but keep a url that points at a *different* thread (a genuine
-            // link post — otherwise the over-broad "/comments/" skip would drop it entirely).
+            // A media/link post loses its destination on removal — Reddit rewrites the url to the
+            // self permalink — so recover the original url. Rebuild a redgifs post as its video and
+            // an image/gif as real media (below) so it renders; recover any other destination as a
+            // tappable link. Recover this even when a caption (body) survived: the media is the point
+            // of the post, and the caption is kept and shown alongside it (previously a surviving
+            // body short-circuited this block, dropping the image/video). Skip self-posts and a url
+            // that merely points back at *this* post's own comments permalink, but keep a url that
+            // points at a *different* thread (a genuine link post).
+            String redgifsId = null;
+            String redgifsVideoUrl = null;
+            String redgifsUrl = null;
             String mediaUrl = null;
             int mediaPostType = -1;
             ArrayList<Post.Preview> mediaPreviews = null;
             String mediaThumbnail = null;
-            if (body == null && link == null && !isSelf) {
+            if (link == null && !isSelf) {
                 String url = readString(post, "url");
-                if (url != null && !url.contains("/comments/" + postId + "/")) {
-                    int recoveredType = classifyMedia(post, url);
-                    if (recoveredType == Post.IMAGE_TYPE || recoveredType == Post.GIF_TYPE) {
-                        // Prefer the post's own direct url as the preview: the archive
-                        // preview.images[].url points at the legacy i.redditmedia.com host, which is
-                        // frequently dead for old removed posts. Reuse only its width/height.
-                        mediaUrl = url;
-                        mediaPostType = recoveredType;
-                        mediaPreviews = buildMediaPreviews(post, url);
-                        String thumbnail = readString(post, "thumbnail");
-                        if (thumbnail != null && thumbnail.startsWith("http")) {
-                            mediaThumbnail = thumbnail;
-                        }
+                // Skip a url that only points back at this post itself — its own comments permalink
+                // (Reddit's post-removal rewrite) or its own /gallery/<id> page — since recovering
+                // that as a link yields a dead self-link.
+                if (url != null && !pointsBackAtSamePost(url, postId)) {
+                    String recoveredRedgifsId = isRedgifs(url) ? ParsePost.getRedgifsId(post) : null;
+                    if (recoveredRedgifsId != null) {
+                        // Rebuild redgifs exactly as ParsePost does for a live post: keep its watch
+                        // url and restore the Reddit-hosted preview frame (external-preview.redd.it),
+                        // which Reddit keeps alive after removal — even when the redgifs video itself
+                        // was later deleted — so the card still shows a poster image.
+                        redgifsId = recoveredRedgifsId;
+                        redgifsVideoUrl = ParsePost.getRedgifsVideoUrl(recoveredRedgifsId);
+                        redgifsUrl = url;
+                        mediaPreviews = buildPreviews(post);
                     } else {
-                        // Not a recognized image — recover as a tappable link (see onResponse).
-                        link = url;
+                        int recoveredType = classifyMedia(post, url);
+                        if (recoveredType == Post.IMAGE_TYPE || recoveredType == Post.GIF_TYPE) {
+                            // Prefer the post's own direct url as the preview: the archive
+                            // preview.images[].url points at the legacy i.redditmedia.com host, which
+                            // is frequently dead for old removed posts. Reuse only its width/height.
+                            mediaUrl = url;
+                            mediaPostType = recoveredType;
+                            mediaPreviews = buildMediaPreviews(post, url);
+                            String thumbnail = readString(post, "thumbnail");
+                            if (thumbnail != null && thumbnail.startsWith("http")) {
+                                mediaThumbnail = thumbnail;
+                            }
+                        } else {
+                            // Not a recognized image — recover as a tappable link (see onResponse).
+                            link = url;
+                        }
                     }
                 }
             }
 
-            if (title == null && body == null && link == null && mediaUrl == null) {
+            if (title == null && body == null && link == null && mediaUrl == null
+                    && redgifsId == null) {
                 return null;
             }
 
@@ -195,7 +231,8 @@ public class FetchRemovedPost {
             String flair = parseLinkFlair(post);
 
             return new Result(title, body, link, author, authorFlair, authorFlairHTML, flair,
-                    mediaUrl, mediaPostType, mediaPreviews, mediaThumbnail, isSelf);
+                    mediaUrl, mediaPostType, mediaPreviews, mediaThumbnail, isSelf,
+                    redgifsId, redgifsVideoUrl, redgifsUrl);
         } catch (JSONException e) {
             return null;
         }
@@ -268,6 +305,74 @@ public class FetchRemovedPost {
         ArrayList<Post.Preview> previews = new ArrayList<>();
         previews.add(new Post.Preview(url, width, height, "", ""));
         return previews;
+    }
+
+    /**
+     * Rebuilds the preview list from the archive's Reddit-hosted preview
+     * (external-preview.redd.it / preview.redd.it). Used for a recovered redgifs post: Reddit keeps
+     * that preview frame alive after removal — even when the redgifs video itself was later deleted —
+     * so the card still renders a poster image. Returns null when the archive has no usable preview.
+     */
+    @Nullable
+    private static ArrayList<Post.Preview> buildPreviews(JSONObject post) {
+        JSONObject preview = post.optJSONObject("preview");
+        if (preview == null) {
+            return null;
+        }
+        JSONArray images = preview.optJSONArray("images");
+        JSONObject image = images == null || images.length() == 0 ? null : images.optJSONObject(0);
+        JSONObject source = image == null ? null : image.optJSONObject("source");
+        if (source == null) {
+            return null;
+        }
+        String url = source.optString("url", null);
+        if (url == null || !url.startsWith("http")) {
+            return null;
+        }
+        // The archive stores the url html-escaped (&amp;); the image loader needs the raw url.
+        url = Html.fromHtml(url, Html.FROM_HTML_MODE_LEGACY).toString();
+        int width = source.optInt("width", 0);
+        int height = source.optInt("height", 0);
+        ArrayList<Post.Preview> previews = new ArrayList<>();
+        previews.add(new Post.Preview(url, width, height, "", ""));
+        return previews;
+    }
+
+    /** Whether a recovered url is a redgifs watch/embed link, mirroring ParsePost's authority check. */
+    private static boolean isRedgifs(@NonNull String url) {
+        String host = Uri.parse(url).getHost();
+        return host != null && host.contains("redgifs.com");
+    }
+
+    /**
+     * Whether the recovered url only points back at this same removed post — Reddit's post-removal
+     * rewrite to the post's own comments permalink ({@code …/comments/<id>/…}), or the post's own
+     * {@code /gallery/<id>} page. Both are the removed post itself, so recovering either as a link
+     * yields a dead self-link. Matches on exact path segments (not a bare substring) so a longer id
+     * that merely starts with this one — or another thread's permalink (a genuine crosspost link) —
+     * can't match.
+     */
+    private static boolean pointsBackAtSamePost(@NonNull String url, String postId) {
+        List<String> segments = Uri.parse(url).getPathSegments();
+        for (int i = 0; i + 1 < segments.size(); i++) {
+            String segment = segments.get(i);
+            if (("comments".equals(segment) || "gallery".equals(segment))
+                    && segments.get(i + 1).equals(postId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Applies a recovered self-text/caption: the body when one survived (shown alongside a recovered
+     * image/video/link), otherwise "" to clear the removal placeholder. selfTextPlain/Trimmed are
+     * reset to "" as every recovery branch did before.
+     */
+    private static void applyRecoveredBody(Post post, @Nullable String body) {
+        post.setSelfText(body != null ? body : "");
+        post.setSelfTextPlain("");
+        post.setSelfTextPlainTrimmed("");
     }
 
     /**
@@ -408,11 +513,21 @@ public class FetchRemovedPost {
         // The archive's is_self: when true the original was a text post, so a recovered body is
         // re-typed TEXT_TYPE (see onResponse) rather than left as the removed post's link type.
         final boolean isSelf;
+        // Recovered redgifs: redgifsId non-null iff the post is rebuilt as a redgifs video (see
+        // onResponse), with redgifsVideoUrl the media.redgifs.com mp4 the app plays and redgifsUrl
+        // the watch page restored as the post's url.
+        @Nullable
+        final String redgifsId;
+        @Nullable
+        final String redgifsVideoUrl;
+        @Nullable
+        final String redgifsUrl;
 
         Result(@Nullable String title, @Nullable String body, @Nullable String link, @Nullable String author,
                String authorFlair, String authorFlairHTML, String flair,
                @Nullable String mediaUrl, int mediaPostType,
-               @Nullable ArrayList<Post.Preview> mediaPreviews, @Nullable String mediaThumbnail, boolean isSelf) {
+               @Nullable ArrayList<Post.Preview> mediaPreviews, @Nullable String mediaThumbnail, boolean isSelf,
+               @Nullable String redgifsId, @Nullable String redgifsVideoUrl, @Nullable String redgifsUrl) {
             this.title = title;
             this.body = body;
             this.link = link;
@@ -425,6 +540,9 @@ public class FetchRemovedPost {
             this.mediaPreviews = mediaPreviews;
             this.mediaThumbnail = mediaThumbnail;
             this.isSelf = isSelf;
+            this.redgifsId = redgifsId;
+            this.redgifsVideoUrl = redgifsVideoUrl;
+            this.redgifsUrl = redgifsUrl;
         }
     }
 

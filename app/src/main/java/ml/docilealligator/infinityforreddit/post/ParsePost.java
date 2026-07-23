@@ -1062,8 +1062,10 @@ public class ParsePost {
         return post;
     }
 
+    // Package-private so FetchRemovedPost can rebuild a recovered redgifs post the same way a live
+    // one is parsed (VIDEO_TYPE + isRedgifs, media.redgifs.com/<id>.mp4).
     @Nullable
-    private static String getRedgifsId(JSONObject data) {
+    static String getRedgifsId(JSONObject data) {
         try {
             String redgifsId = data.getJSONObject(JSONUtils.MEDIA_KEY).getJSONObject(JSONUtils.O_EMBED_KEY).getString(JSONUtils.THUMBNAIL_URL_KEY);
             redgifsId = redgifsId.substring(redgifsId.lastIndexOf("/") + 1);
@@ -1079,7 +1081,7 @@ public class ParsePost {
         }
     }
 
-    private static String getRedgifsVideoUrl(String redgifsId) {
+    static String getRedgifsVideoUrl(String redgifsId) {
         return "https://media.redgifs.com/" + redgifsId + ".mp4";
     }
 
