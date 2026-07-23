@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.post;
 import android.text.Html;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +34,7 @@ public class FetchRemovedPost {
                             return;
                         }
 
-                        Result result = parseResponse(response.body());
+                        Result result = parseResponse(response.body(), post.getId());
                         if (result == null) {
                             listener.fetchFailed();
                             return;
@@ -61,7 +62,35 @@ public class FetchRemovedPost {
                             post.setSelfText("");
                             post.setSelfTextPlain("");
                             post.setSelfTextPlainTrimmed("");
+                        } else if (result.mediaUrl != null) {
+                            // The original post was an image/gif whose url the removal rewrote to the
+                            // self permalink; rebuild it as media so the picture renders rather than a
+                            // bare link. Only restore the preview the removal stripped — never clobber
+                            // one the live post somehow still has.
+                            post.setUrl(result.mediaUrl);
+                            post.setPostType(result.mediaPostType);
+                            if (result.mediaPostType == Post.GIF_TYPE) {
+                                post.setVideoUrl(result.mediaUrl);
+                            }
+                            if (result.mediaPreviews != null && post.getPreviews().isEmpty()) {
+                                post.setPreviews(result.mediaPreviews);
+                            }
+                            if (result.mediaThumbnail != null) {
+                                post.setThumbnailUrl(result.mediaThumbnail);
+                            }
+                            post.setSelfText("");
+                            post.setSelfTextPlain("");
+                            post.setSelfTextPlainTrimmed("");
                         } else if (result.body != null) {
+                            // The original was a self/text post; restore its body and re-type it as
+                            // text. A removed self post arrives typed NO_PREVIEW_LINK_TYPE — its live
+                            // url is the self permalink and its body is gone — which renders an empty
+                            // "LINK" card; setting TEXT_TYPE drops the card so it reads as plain text.
+                            // (getItemViewType still upgrades to the link holder if a body-link preview
+                            // survives, so a legitimate self-post preview is not lost.)
+                            if (result.isSelf) {
+                                post.setPostType(Post.TEXT_TYPE);
+                            }
                             post.setSelfText(result.body);
                             post.setSelfTextPlain("");
                             post.setSelfTextPlainTrimmed("");
@@ -81,7 +110,7 @@ public class FetchRemovedPost {
      * schema drift or error envelope from the archive can't be mistaken for "found but empty".
      */
     @Nullable
-    private static Result parseResponse(String responseBody) {
+    private static Result parseResponse(String responseBody, String postId) {
         try {
             JSONObject obj = new JSONObject(responseBody);
             JSONArray data = obj.optJSONArray("data");
@@ -115,18 +144,39 @@ public class FetchRemovedPost {
                 body = null;
             }
 
-            // A media post with no selftext still loses its destination on removal — Reddit rewrites
-            // the url to the self permalink — so recover the original url into the body. A bare URL
-            // is valid markdown and renders as a tappable link. Skip self-posts and any url that
-            // merely points back at the comments permalink.
+            // A media/link post with no selftext still loses its destination on removal — Reddit
+            // rewrites the url to the self permalink — so recover the original url. Rebuild an
+            // image/gif as real media (below) so the picture renders; recover any other destination
+            // as a tappable link. Skip self-posts and a url that merely points back at *this* post's
+            // own comments permalink, but keep a url that points at a *different* thread (a genuine
+            // link post — otherwise the over-broad "/comments/" skip would drop it entirely).
+            String mediaUrl = null;
+            int mediaPostType = -1;
+            ArrayList<Post.Preview> mediaPreviews = null;
+            String mediaThumbnail = null;
             if (body == null && link == null && !isSelf) {
                 String url = readString(post, "url");
-                if (url != null && !url.contains("/comments/")) {
-                    body = url;
+                if (url != null && !url.contains("/comments/" + postId + "/")) {
+                    int recoveredType = classifyMedia(post, url);
+                    if (recoveredType == Post.IMAGE_TYPE || recoveredType == Post.GIF_TYPE) {
+                        // Prefer the post's own direct url as the preview: the archive
+                        // preview.images[].url points at the legacy i.redditmedia.com host, which is
+                        // frequently dead for old removed posts. Reuse only its width/height.
+                        mediaUrl = url;
+                        mediaPostType = recoveredType;
+                        mediaPreviews = buildMediaPreviews(post, url);
+                        String thumbnail = readString(post, "thumbnail");
+                        if (thumbnail != null && thumbnail.startsWith("http")) {
+                            mediaThumbnail = thumbnail;
+                        }
+                    } else {
+                        // Not a recognized image — recover as a tappable link (see onResponse).
+                        link = url;
+                    }
                 }
             }
 
-            if (title == null && body == null && link == null) {
+            if (title == null && body == null && link == null && mediaUrl == null) {
                 return null;
             }
 
@@ -144,10 +194,80 @@ public class FetchRemovedPost {
             // Post's own link flair (independent of the author); "" when absent.
             String flair = parseLinkFlair(post);
 
-            return new Result(title, body, link, author, authorFlair, authorFlairHTML, flair);
+            return new Result(title, body, link, author, authorFlair, authorFlairHTML, flair,
+                    mediaUrl, mediaPostType, mediaPreviews, mediaThumbnail, isSelf);
         } catch (JSONException e) {
             return null;
         }
+    }
+
+    /**
+     * Classifies a recovered non-self post's url into a continuum media {@link Post} type, using the
+     * archive's {@code post_hint}/{@code domain} plus the url's file extension. Returns
+     * {@link Post#GIF_TYPE} for gifs, {@link Post#IMAGE_TYPE} for still images, or {@code -1} when the
+     * url is not a recognized image (a real external/reddit link, recovered as a plain link instead).
+     */
+    private static int classifyMedia(JSONObject post, String url) {
+        // Compare on the path alone: a query string (?s=…) or fragment must not defeat the extension.
+        String path = url;
+        int query = path.indexOf('?');
+        if (query >= 0) {
+            path = path.substring(0, query);
+        }
+        int fragment = path.indexOf('#');
+        if (fragment >= 0) {
+            path = path.substring(0, fragment);
+        }
+        path = path.toLowerCase(Locale.ENGLISH);
+
+        // A hosted/rich video or a video-container url (imgur .gifv/.mp4, .webm) is not displayable
+        // as an image or gif — the image loader can't decode it — so let it fall through to link
+        // recovery rather than rebuild a broken media post. (Rebuilding it as a playable video is out
+        // of scope; the tappable link is the safe fallback, matching the old url-into-body behavior.)
+        if (readBoolean(post, "is_video")
+                || path.endsWith(".gifv") || path.endsWith(".mp4") || path.endsWith(".webm")) {
+            return -1;
+        }
+        // A .gif takes the gif path (the loader animates it), not the image path where an image
+        // holder may show only a static frame; check it before the image-domain heuristic below so a
+        // .gif on an image host (i.redd.it/i.imgur.com) is still classified as a gif.
+        if (path.endsWith(".gif")) {
+            return Post.GIF_TYPE;
+        }
+        String postHint = readString(post, "post_hint");
+        String domain = readString(post, "domain");
+        if ("image".equals(postHint)
+                || path.endsWith(".jpg") || path.endsWith(".jpeg")
+                || path.endsWith(".png") || path.endsWith(".webp")
+                || "i.redd.it".equalsIgnoreCase(domain) || "i.imgur.com".equalsIgnoreCase(domain)) {
+            return Post.IMAGE_TYPE;
+        }
+        return -1;
+    }
+
+    /**
+     * Builds a one-element preview list pointing at the post's own direct media {@code url} — the
+     * reliable image even for old posts, whereas the archive's {@code preview} urls point at the
+     * legacy {@code i.redditmedia.com} host that is frequently dead. The archive preview's
+     * {@code width}/{@code height} are reused for aspect ratio when present, else 0/0 (the loader
+     * falls back to a fixed-height layout).
+     */
+    private static ArrayList<Post.Preview> buildMediaPreviews(JSONObject post, String url) {
+        int width = 0;
+        int height = 0;
+        JSONObject preview = post.optJSONObject("preview");
+        if (preview != null) {
+            JSONArray images = preview.optJSONArray("images");
+            JSONObject image = images == null || images.length() == 0 ? null : images.optJSONObject(0);
+            JSONObject source = image == null ? null : image.optJSONObject("source");
+            if (source != null) {
+                width = source.optInt("width", 0);
+                height = source.optInt("height", 0);
+            }
+        }
+        ArrayList<Post.Preview> previews = new ArrayList<>();
+        previews.add(new Post.Preview(url, width, height, "", ""));
+        return previews;
     }
 
     /**
@@ -276,9 +396,23 @@ public class FetchRemovedPost {
         final String authorFlair;
         final String authorFlairHTML;
         final String flair;
+        // Recovered image/gif: mediaUrl non-null iff the post is rebuilt as media (see onResponse);
+        // mediaPostType is then Post.IMAGE_TYPE or Post.GIF_TYPE, else -1.
+        @Nullable
+        final String mediaUrl;
+        final int mediaPostType;
+        @Nullable
+        final ArrayList<Post.Preview> mediaPreviews;
+        @Nullable
+        final String mediaThumbnail;
+        // The archive's is_self: when true the original was a text post, so a recovered body is
+        // re-typed TEXT_TYPE (see onResponse) rather than left as the removed post's link type.
+        final boolean isSelf;
 
         Result(@Nullable String title, @Nullable String body, @Nullable String link, @Nullable String author,
-               String authorFlair, String authorFlairHTML, String flair) {
+               String authorFlair, String authorFlairHTML, String flair,
+               @Nullable String mediaUrl, int mediaPostType,
+               @Nullable ArrayList<Post.Preview> mediaPreviews, @Nullable String mediaThumbnail, boolean isSelf) {
             this.title = title;
             this.body = body;
             this.link = link;
@@ -286,6 +420,11 @@ public class FetchRemovedPost {
             this.authorFlair = authorFlair;
             this.authorFlairHTML = authorFlairHTML;
             this.flair = flair;
+            this.mediaUrl = mediaUrl;
+            this.mediaPostType = mediaPostType;
+            this.mediaPreviews = mediaPreviews;
+            this.mediaThumbnail = mediaThumbnail;
+            this.isSelf = isSelf;
         }
     }
 
