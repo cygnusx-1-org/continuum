@@ -438,15 +438,21 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 return Futures.immediateFuture(filterToPage(cached));
             }
             // First search after a tab reopen: if the persistent cache holds the whole saved list and
-            // is still fresh, filter it instead of re-walking the network.
+            // is still fresh, filter it instead of re-walking the network. The cache read touches Room
+            // and disk, so it MUST run on the executor: loadFuture() is invoked on the main thread (the
+            // feed is a PagingLiveData driven from a CoroutineLiveData on Dispatchers.Main.immediate).
             if (reset && isSavedFeed() && SavedPostCache.isFresh(accountName, userWhere)) {
-                SavedPostCache.Cached hit = SavedPostCache.load(accountName, userWhere, postFilter, readPostsList);
-                if (hit != null && hit.complete) {
-                    if (savedSearchCache != null) {
-                        savedSearchCache.set(hit.posts);
+                return Futures.submitAsync(() -> {
+                    SavedPostCache.Cached hit = SavedPostCache.load(accountName, userWhere, postFilter, readPostsList);
+                    if (hit != null && hit.complete) {
+                        if (savedSearchCache != null) {
+                            savedSearchCache.set(hit.posts);
+                        }
+                        return Futures.immediateFuture(filterToPage(hit.posts));
                     }
-                    return Futures.immediateFuture(filterToPage(hit.posts));
-                }
+                    // Cache miss (file cleared / incomplete): walk the listing over the network.
+                    return catchErrors(loadAllUserPostsFiltered(api, loadParams.getKey(), 0));
+                }, executor);
             }
             // Load the entire saved listing up front, then filter, so every match is presented at
             // once (with the normal loading indicator) rather than trickling in as pages arrive.
@@ -454,12 +460,17 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
 
         // Tab open (no search): serve the whole saved list from the fresh persistent cache with no
-        // network call. nextKey null == "no more" (the cache holds the entire list).
+        // network call. The cache read touches Room and disk, so it MUST run on the executor (see
+        // above); loadFuture() runs on the main thread. nextKey null == "no more".
         if (reset && isSavedFeed() && SavedPostCache.isFresh(accountName, userWhere)) {
-            SavedPostCache.Cached hit = SavedPostCache.load(accountName, userWhere, postFilter, readPostsList);
-            if (hit != null && hit.complete) {
-                return Futures.immediateFuture(new LoadResult.Page<>(hit.posts, null, null));
-            }
+            return Futures.submitAsync(() -> {
+                SavedPostCache.Cached hit = SavedPostCache.load(accountName, userWhere, postFilter, readPostsList);
+                if (hit != null && hit.complete) {
+                    return Futures.<LoadResult<String, Post>>immediateFuture(new LoadResult.Page<>(hit.posts, null, null));
+                }
+                // Cache miss after a fresh check (file cleared / incomplete): fall back to the network.
+                return catchErrors(loadUserPostsWithKey(api, loadParams.getKey()));
+            }, executor);
         }
         return catchErrors(loadUserPostsWithKey(api, loadParams.getKey()));
     }
