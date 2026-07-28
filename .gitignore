@@ -134,3 +134,5 @@ changelog_override.txt
 mirakle.gradle
 
 notes/*
+
+android-button-masher/*
