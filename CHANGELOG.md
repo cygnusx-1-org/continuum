@@ -18,22 +18,6 @@ Note v8a is the 64-bit build, and should be considered the default choice.
 * Improved Inbox
 * Massive effort to avoid app crashes via null checks with NullAway
 
-8.2.5.9.9.9 / 2026-7-28
-============
-Note v8a is the 64-bit build, and should be considered the default choice.
-
-* Fixed Tapping a post's flair or post type label crashes the app when doing so from the "Saved posts" screen. #350
-* Improved Recover Post
-* Added Recover Comment
-* Fixed NSFW/spoiler blur not updating live in feed and comments
-* Improved Fixed Disable Swiping Between Tabs being undone by gallery touches
-* Improved Disable Swiping Between Tabs
-* Made the main page back button action apply without a restart
-* Routed more Reddit deep-link types in-app and honored their sort
-* Fixed Blurry Thumbnails in Compact Layout #339
-* Improved Inbox
-* Massive effort to avoid app crashes via null checks with NullAway
-
 8.2.5.9.9.8 / 2026-7-14
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
