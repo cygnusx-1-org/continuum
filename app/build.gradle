@@ -266,7 +266,14 @@ if (githubPropertiesFile.exists()) {
     githubProperties.load(new FileInputStream(githubPropertiesFile))
 
     githubRelease {
-        def releaseNotes = System.getenv("RELEASE_NOTES") ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
+        // Read the release notes from the -PreleaseNotes Gradle property first, falling back to the
+        // RELEASE_NOTES environment variable. Mirakle runs this build remotely and does not forward
+        // environment variables to the remote Gradle invocation, so a -P property (part of the
+        // command line) is the reliable channel; the env var is only a local-build fallback. Fall
+        // back to a generic note when neither is set.
+        def releaseNotes = (providers.gradleProperty("releaseNotes")
+                .orElse(providers.environmentVariable("RELEASE_NOTES"))
+                .getOrElse("")).trim() ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
 
         // RELEASE_VARIANT (set by scripts/release-github.sh) selects where the release is
         // published: "beta" targets the separate continuum-beta repo with the beta APKs;

@@ -47,7 +47,20 @@ if [ "${#DIRTY_APKS[@]}" -gt 0 ]; then
   exit 1
 fi
 
+CHANGELOG_OVERRIDE_FILENAME="changelog_override.txt"
+
 RELEASE_NOTES="${1}"
+# Fall back to changelog_override.txt when no release notes were passed on the command line, so a
+# direct `scripts/release-github.sh` invocation still picks up this release's notes.
+if [ -z "${RELEASE_NOTES}" ] && [ -f "${CHANGELOG_OVERRIDE_FILENAME}" ]; then
+  RELEASE_NOTES="$(cat "${CHANGELOG_OVERRIDE_FILENAME}")"
+fi
+
+if [ -z "${RELEASE_NOTES}" ]; then
+  echo "Error: release notes are empty and ${CHANGELOG_OVERRIDE_FILENAME} was not found or is empty." >&2
+  exit 1
+fi
+
 export RELEASE_NOTES
 export RELEASE_VARIANT="${VARIANT}"
 
@@ -55,4 +68,8 @@ echo "Release variant: ${VARIANT}"
 echo "Release notes set to: $RELEASE_NOTES"
 
 ./gradlew "${ASSEMBLE_TASK}"
-./gradlew githubRelease
+
+# Mirakle does not reliably forward environment variables to the remote Gradle invocation, so pass
+# the release notes as a Gradle project property (part of the command line, which survives the
+# handoff) rather than relying on the exported RELEASE_NOTES env var.
+./gradlew githubRelease "-PreleaseNotes=${RELEASE_NOTES}"
