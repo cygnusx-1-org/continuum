@@ -1236,7 +1236,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     public void changeSortType(SortType sortType) {
         if (mPostViewModel != null) {
-            if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_SORT_TYPE, true)) {
+            if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_POST_SORT, true)) {
                 switch (postType) {
                     case PostType.FRONT_PAGE:
                         mSortTypeSharedPreferences.edit().putString(SharedPreferencesUtils.SORT_TYPE_BEST_POST, sortType.getType().name()).apply();

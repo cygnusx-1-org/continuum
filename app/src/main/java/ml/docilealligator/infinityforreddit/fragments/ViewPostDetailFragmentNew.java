@@ -470,6 +470,16 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             }
         }
 
+        String commentDefaultSortTypeName = mSharedPreferences.getString(
+                SharedPreferencesUtils.COMMENT_DEFAULT_SORT_TYPE, SortType.Type.CONFIDENCE.name());
+        SortType.Type commentDefaultSortType;
+        try {
+            commentDefaultSortType = SortType.Type.valueOf(
+                    commentDefaultSortTypeName != null ? commentDefaultSortTypeName : SortType.Type.CONFIDENCE.name());
+        } catch (IllegalArgumentException e) {
+            commentDefaultSortType = SortType.Type.CONFIDENCE;
+        }
+
         viewPostDetailFragmentViewModel = new ViewModelProvider(
                 this,
                 ViewPostDetailFragmentViewModelNew.Companion.provideFactory(
@@ -477,6 +487,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                         mActivity.accountName, mPost, postId, singleCommentId, comments, children,
                         sortType, mSortTypeSharedPreferences, mPostHistorySharedPreferences,
                         mSharedPreferences.getBoolean(SharedPreferencesUtils.RESPECT_SUBREDDIT_RECOMMENDED_COMMENT_SORT_TYPE, false),
+                        mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_COMMENT_SORT, true),
+                        commentDefaultSortType,
                         mPostHistorySharedPreferences.getBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false),
                         !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_TOP_LEVEL_COMMENTS_FIRST, false),
                         getArguments().getString(EXTRA_CONTEXT_NUMBER, "8")
@@ -584,10 +596,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 mActivity.displayToolbarSortAndTitle(this);
                 binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.GONE);
                 mGlide.clear(binding.fetchPostInfoImageViewViewPostDetailFragment);
-
-                if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_SORT_TYPE, true)) {
-                    mSortTypeSharedPreferences.edit().putString(SharedPreferencesUtils.SORT_TYPE_POST_COMMENT, sortType.name()).apply();
-                }
+                // Persisting the comment sort is handled in the view model on an explicit user
+                // pick (per subreddit), so the auto-resolved sort here is never written back.
             }
         });
 

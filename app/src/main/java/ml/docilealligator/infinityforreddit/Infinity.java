@@ -115,6 +115,17 @@ public class Infinity extends Application implements LifecycleObserver {
         PostFilter.subredditFilterPrefixMatching = mSharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_PREFIX_MATCHING, false);
         PostFilter.subredditFilterSuffixMatching = mSharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_SUFFIX_MATCHING, false);
 
+        // One-time migration: the combined "Save Sort Type" toggle was split into separate
+        // post-feed and comment toggles. Preserve a user's old choice (e.g. off) for both.
+        if (!mSharedPreferences.contains(SharedPreferencesUtils.SAVE_POST_SORT)
+                && mSharedPreferences.contains(SharedPreferencesUtils.SAVE_SORT_TYPE)) {
+            boolean savedSortType = mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_SORT_TYPE, true);
+            mSharedPreferences.edit()
+                    .putBoolean(SharedPreferencesUtils.SAVE_POST_SORT, savedSortType)
+                    .putBoolean(SharedPreferencesUtils.SAVE_COMMENT_SORT, savedSortType)
+                    .apply();
+        }
+
         try {
             if (FontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))) {
                 typeface = Typeface.createFromFile(getExternalFilesDir("fonts") + "/font_family.ttf");

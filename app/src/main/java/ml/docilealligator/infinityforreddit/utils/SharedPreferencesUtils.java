@@ -68,6 +68,7 @@ public class SharedPreferencesUtils {
     public static final String SORT_TYPE_SEARCH_SUBREDDIT = "sort_type_search_subreddit";
     public static final String SORT_TYPE_SEARCH_USER = "sort_type_search_user";
     public static final String SORT_TYPE_POST_COMMENT = "sort_type_post_comment";
+    public static final String SORT_TYPE_SUBREDDIT_COMMENT_BASE = "sort_type_subreddit_comment_";
 
     public static final String POST_LAYOUT_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_layout";
     public static final String POST_LAYOUT_FRONT_PAGE_POST = "post_layout_best_post";
@@ -189,7 +190,12 @@ public class SharedPreferencesUtils {
     public static final String SUBREDDIT_FILTER_PREFIX_MATCHING = "subreddit_filter_prefix_matching";
     public static final String SUBREDDIT_FILTER_SUFFIX_MATCHING = "subreddit_filter_suffix_matching";
     public static final String ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS = "only_disable_preview_in_video_and_gif_posts";
+    // Legacy combined toggle, kept only so the split can be migrated. Superseded by
+    // SAVE_POST_SORT + SAVE_COMMENT_SORT.
     public static final String SAVE_SORT_TYPE = "save_sort_type";
+    public static final String SAVE_POST_SORT = "save_post_sort";
+    public static final String SAVE_COMMENT_SORT = "save_comment_sort";
+    public static final String COMMENT_DEFAULT_SORT_TYPE = "comment_default_sort_type";
     public static final String SUBREDDIT_DEFAULT_SORT_TYPE = "subreddit_default_sort_type";
     public static final String SUBREDDIT_DEFAULT_SORT_TIME = "subreddit_default_sort_time";
     public static final String USER_DEFAULT_SORT_TYPE = "user_default_sort_type";

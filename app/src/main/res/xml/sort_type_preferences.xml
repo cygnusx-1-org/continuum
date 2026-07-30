@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
+        app:title="@string/settings_sort_category_post_feeds" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
-        app:key="save_sort_type"
-        app:title="@string/settings_save_sort_type_title" />
+        app:key="save_post_sort"
+        app:title="@string/settings_save_post_sort_title"
+        app:summary="@string/settings_save_post_sort_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="HOT"
@@ -36,6 +40,23 @@
         app:entryValues="@array/settings_default_sort_time_values"
         app:key="user_default_sort_time"
         app:title="@string/settings_user_default_sort_time_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
+        app:title="@string/settings_sort_category_comments" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="save_comment_sort"
+        app:title="@string/settings_save_comment_sort_title"
+        app:summary="@string/settings_save_comment_sort_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="CONFIDENCE"
+        app:entries="@array/settings_comment_default_sort_type"
+        app:entryValues="@array/settings_comment_default_sort_type_values"
+        app:key="comment_default_sort_type"
+        app:title="@string/settings_comment_default_sort_type_title"
         app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference

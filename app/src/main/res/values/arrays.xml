@@ -578,6 +578,24 @@
         <item>ALL</item>
     </string-array>
 
+    <string-array name="settings_comment_default_sort_type">
+        <item>Best</item>
+        <item>Top</item>
+        <item>New</item>
+        <item>Controversial</item>
+        <item>Old</item>
+        <item>QA</item>
+    </string-array>
+
+    <string-array name="settings_comment_default_sort_type_values">
+        <item>CONFIDENCE</item>
+        <item>TOP</item>
+        <item>NEW</item>
+        <item>CONTROVERSIAL</item>
+        <item>OLD</item>
+        <item>QA</item>
+    </string-array>
+
     <string-array name="settings_default_search_result_tab">
         <item>@string/posts</item>
         <item>@string/subreddits</item>
