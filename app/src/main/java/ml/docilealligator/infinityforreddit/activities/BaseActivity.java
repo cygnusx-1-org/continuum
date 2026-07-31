@@ -133,7 +133,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         resources.updateConfiguration(config, resources.getDisplayMetrics());
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
-        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, "2"));
+        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM));
         immersiveInterface = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                 mSharedPreferences.getBoolean(SharedPreferencesUtils.IMMERSIVE_INTERFACE_KEY, true);
         if (immersiveInterface && config.orientation == Configuration.ORIENTATION_LANDSCAPE) {

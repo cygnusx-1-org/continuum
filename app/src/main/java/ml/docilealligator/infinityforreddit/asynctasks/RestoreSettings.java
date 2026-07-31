@@ -27,6 +27,8 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
+import ml.docilealligator.infinityforreddit.customtheme.CustomThemeDao;
+import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
@@ -176,7 +178,7 @@ public class RestoreSettings {
                                 }
                                 if (customThemesFile.exists()) {
                                     List<CustomTheme> customThemes = getListFromFile(customThemesFile, new TypeToken<List<CustomTheme>>() {}.getType());
-                                    redditDataRoomDatabase.customThemeDao().insertAll(customThemes);
+                                    restoreCustomThemes(context, redditDataRoomDatabase, customThemes);
                                 }
                                 if (postFiltersFile.exists()) {
                                     List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
@@ -283,6 +285,71 @@ public class RestoreSettings {
                 }
             }
         });
+    }
+
+    /**
+     * Merges the backed up themes into whatever is already here. Restored themes carry their own
+     * light/dark/amoled flags, so the matching flags have to be cleared first — two rows claiming a
+     * slot make the LIMIT 1 lookups for it return whichever SQLite reaches first — but only for the
+     * slots the backup actually fills, or a backup holding no theme for a slot would leave it empty
+     * while its restored colours stay in the preferences.
+     */
+    private static void restoreCustomThemes(Context context, RedditDataRoomDatabase redditDataRoomDatabase,
+                                            List<CustomTheme> customThemes) {
+        CustomThemeDao customThemeDao = redditDataRoomDatabase.customThemeDao();
+        String defaultThemeName = context.getString(R.string.theme_name_solarized_amoled);
+
+        CustomTheme existingDefaultTheme = customThemeDao.getCustomTheme(defaultThemeName);
+
+        boolean restoresLightTheme = false;
+        boolean restoresDarkTheme = false;
+        boolean restoresAmoledTheme = false;
+        boolean restoresDefaultTheme = false;
+        for (CustomTheme customTheme : customThemes) {
+            restoresLightTheme |= customTheme.isLightTheme;
+            restoresDarkTheme |= customTheme.isDarkTheme;
+            restoresAmoledTheme |= customTheme.isAmoledTheme;
+            restoresDefaultTheme |= defaultThemeName.equalsIgnoreCase(customTheme.name);
+        }
+
+        if (restoresLightTheme) {
+            customThemeDao.unsetLightTheme();
+        }
+        if (restoresDarkTheme) {
+            customThemeDao.unsetDarkTheme();
+        }
+        if (restoresAmoledTheme) {
+            customThemeDao.unsetAmoledTheme();
+        }
+        customThemeDao.insertAll(customThemes);
+
+        // The seeded theme is left over from this install's first launch, not something the user made
+        // or backed up, so drop it once the restored themes have taken every slot it held. The backup
+        // has no theme of that name here, so insertAll left the row alone and the slots it still holds
+        // are the ones it came in with, minus whatever was just unset. Serializing to tell the seeded
+        // row from a theme the user named the same is the expensive part, so it comes last, on the
+        // only path that can delete anything.
+        if (existingDefaultTheme != null && !restoresDefaultTheme
+                && !(existingDefaultTheme.isLightTheme && !restoresLightTheme)
+                && !(existingDefaultTheme.isDarkTheme && !restoresDarkTheme)
+                && !(existingDefaultTheme.isAmoledTheme && !restoresAmoledTheme)
+                && isSeededTheme(context, existingDefaultTheme)) {
+            // Its stored name, not the resource string: the lookup above matches case-insensitively.
+            customThemeDao.deleteCustomTheme(existingDefaultTheme.name);
+        }
+    }
+
+    /**
+     * Whether the row is the theme the first launch seeded rather than one the user wrote and gave the
+     * same name. Its colours are what identify it: the slot flags are the part switching themes is
+     * meant to change, so they are matched to the row before comparing rather than tested.
+     */
+    private static boolean isSeededTheme(Context context, CustomTheme customTheme) {
+        CustomTheme seededTheme = CustomThemeWrapper.getSolarizedAmoled(context);
+        seededTheme.isLightTheme = customTheme.isLightTheme;
+        seededTheme.isDarkTheme = customTheme.isDarkTheme;
+        seededTheme.isAmoledTheme = customTheme.isAmoledTheme;
+        return customTheme.getJSONModel().equals(seededTheme.getJSONModel());
     }
 
     private static boolean importSharedPreferencsFromFile(SharedPreferences sharedPreferences, String uriString) {

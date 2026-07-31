@@ -1051,11 +1051,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                 intent = new Intent(MainActivity.this, AccountSavedThingActivity.class);
                             }
                         } else if (stringId == R.string.light_theme) {
-                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, "0").apply();
+                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_LIGHT).apply();
                             AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
                             mCustomThemeWrapper.setThemeType(CustomThemeSharedPreferencesUtils.LIGHT);
                         } else if (stringId == R.string.dark_theme) {
-                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, "1").apply();
+                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_DARK).apply();
                             AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES);
                             if (mSharedPreferences.getBoolean(SharedPreferencesUtils.AMOLED_DARK_KEY, false)) {
                                 mCustomThemeWrapper.setThemeType(CustomThemeSharedPreferencesUtils.AMOLED);

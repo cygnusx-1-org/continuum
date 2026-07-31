@@ -14,6 +14,10 @@ public class SharedPreferencesUtils {
     public static final String NOTIFICATION_INTERVAL_KEY = "notificaiton_interval";
     public static final String LAZY_MODE_INTERVAL_KEY = "lazy_mode_interval";
     public static final String THEME_KEY = "theme";
+    // Values of THEME_KEY, matching R.array.settings_theme_values.
+    public static final String THEME_LIGHT = "0";
+    public static final String THEME_DARK = "1";
+    public static final String THEME_FOLLOW_SYSTEM = "2";
     public static final String ICON_FOREGROUND_KEY = "icon_foreground";
     public static final String ICON_BACKGROUND_KEY = "icon_background";
     public static final String ERROR_IMAGE_KEY = "error_image";
@@ -496,6 +500,8 @@ public class SharedPreferencesUtils {
     public static final String HAS_REQUESTED_NOTIFICATION_PERMISSION = "has_requested_notification_permission";
     public static final String DO_NOT_SHOW_REDDIT_API_INFO_V2_AGAIN = "do_not_show_reddit_api_info_v2_again";
     public static final String MATERIAL_YOU_SENTRY_COLOR = "material_you_sentry_color";
+    public static final String DEFAULT_THEME_APPLIED = "default_theme_applied";
+    public static final String DEFAULT_THEME_IN_PROGRESS = "default_theme_in_progress";
 
     public static final String PROXY_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.proxy";
     public static final String PROXY_ENABLED = "proxy_enabled";

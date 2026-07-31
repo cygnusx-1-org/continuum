@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
 import android.os.Handler;
+import androidx.annotation.Nullable;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
@@ -38,6 +39,7 @@ public class GetCustomTheme {
     }
 
     public interface GetCustomThemeListener {
-        void success(CustomTheme customTheme);
+        // Null whenever no theme of that name or type is stored.
+        void success(@Nullable CustomTheme customTheme);
     }
 }

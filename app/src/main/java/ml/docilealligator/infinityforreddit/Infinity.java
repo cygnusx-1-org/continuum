@@ -31,6 +31,7 @@ import ml.docilealligator.infinityforreddit.activities.LockScreenActivity;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.NetworkWifiStatusReceiver;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.WallpaperChangeReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.customtheme.DefaultTheme;
 import ml.docilealligator.infinityforreddit.events.ChangeAppLockEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ToggleSecureModeEvent;
@@ -107,6 +108,11 @@ public class Infinity extends Application implements LifecycleObserver {
         mAppComponent.inject(this);
 
         APIUtils.initConfigurableFields(this);
+
+        // Writes the theme preferences before the first activity reads them; the theme row follows
+        // on the executor.
+        DefaultTheme.applyOnFirstLaunch(this, mSharedPreferences, amoledThemeSharedPreferences,
+                mInternalSharedPreferences, executor, redditDataRoomDatabase);
 
         appLock = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.APP_LOCK, false);
         appLockTimeout = Long.parseLong(mSecuritySharedPreferences.getString(SharedPreferencesUtils.APP_LOCK_TIMEOUT, "600000"));

@@ -29,7 +29,9 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.adapters.CustomizeThemeRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.apis.ServerAPI;
+import ml.docilealligator.infinityforreddit.asynctasks.DeleteTheme;
 import ml.docilealligator.infinityforreddit.asynctasks.GetCustomTheme;
+import ml.docilealligator.infinityforreddit.asynctasks.GetThemesWithName;
 import ml.docilealligator.infinityforreddit.asynctasks.InsertCustomTheme;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeSettingsItem;
@@ -62,6 +64,7 @@ public class CustomizeThemeActivity extends BaseActivity {
     public static final String RETURN_EXTRA_INDEX_IN_THEME_LIST = "REIITL";
     private static final String CUSTOM_THEME_SETTINGS_ITEMS_STATE = "CTSIS";
     private static final String THEME_NAME_STATE = "TNS";
+    private static final String ORIGINAL_THEME_NAME_STATE = "OTNS";
 
     @Inject
     @Named("online_custom_themes")
@@ -90,6 +93,12 @@ public class CustomizeThemeActivity extends BaseActivity {
 
     @SuppressWarnings("NullAway.Init") // Set from the intent or saved state in onCreate, or by the async theme load.
     private String themeName;
+    /**
+     * The name this screen opened on, so that saving under a different one counts as a new theme, or —
+     * when only the capitalisation differs — as a rename of this one.
+     */
+    @Nullable
+    private String originalThemeName;
     @Nullable
     private OnlineCustomThemeMetadata onlineCustomThemeMetadata;
     private boolean isPredefinedTheme;
@@ -161,6 +170,9 @@ public class CustomizeThemeActivity extends BaseActivity {
                 customThemeSettingsItems = savedSettingsItems;
                 themeName = savedThemeName;
             }
+            // Carried across the recreation of its own: a rename made before a rotation still has to
+            // be treated as a rename when the theme is saved.
+            originalThemeName = savedInstanceState.getString(ORIGINAL_THEME_NAME_STATE);
         }
 
         binding.progressBarCustomizeThemeActivity.setVisibility(View.GONE);
@@ -213,6 +225,7 @@ public class CustomizeThemeActivity extends BaseActivity {
                         themeName = customTheme.name;
                     }
                     customThemeSettingsItems = settingsItems;
+                    originalThemeName = themeName;
 
                     CustomizeThemeRecyclerViewAdapter themeAdapter =
                             new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
@@ -223,6 +236,9 @@ public class CustomizeThemeActivity extends BaseActivity {
             } else {
                 // Every launch site that omits EXTRA_THEME_TYPE sets EXTRA_THEME_NAME.
                 themeName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_THEME_NAME));
+                if (originalThemeName == null) {
+                    originalThemeName = themeName;
+                }
 
                 CustomizeThemeRecyclerViewAdapter themeAdapter =
                         new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
@@ -278,8 +294,24 @@ public class CustomizeThemeActivity extends BaseActivity {
                                     if (isFinishing() || isDestroyed()) {
                                         return;
                                     }
+                                    // The row is gone if the theme was deleted or renamed while this
+                                    // screen was opening, or if the intent names a theme that no
+                                    // longer exists. A predefined name still has a theme to fall back
+                                    // on; anything else would silently offer Indigo under the missing
+                                    // theme's name and re-create it on save, so give up instead.
+                                    CustomTheme themeToEdit = customTheme;
+                                    if (themeToEdit == null) {
+                                        if (!isPredefinedThemeName(themeName)) {
+                                            Toast.makeText(CustomizeThemeActivity.this,
+                                                    R.string.cannot_find_theme, Toast.LENGTH_SHORT).show();
+                                            finish();
+                                            return;
+                                        }
+                                        themeToEdit = CustomThemeWrapper.getPredefinedCustomTheme(
+                                                CustomizeThemeActivity.this, themeName);
+                                    }
                                     customThemeSettingsItems = CustomThemeSettingsItem.convertCustomThemeToSettingsItem(
-                                            CustomizeThemeActivity.this, customTheme, androidVersion);
+                                            CustomizeThemeActivity.this, themeToEdit, androidVersion);
 
                                     themeAdapter.setCustomThemeSettingsItem(customThemeSettingsItems);
                                 });
@@ -367,8 +399,10 @@ public class CustomizeThemeActivity extends BaseActivity {
                                     saveThemeOnline(customTheme, false);
                                     break;
                                 case 2:
-                                    saveThemeLocally(customTheme);
-                                    saveThemeOnline(customTheme, false);
+                                    // Upload only once it is stored, or a refused local save would
+                                    // still publish the theme — and saveThemeOnline finishes this
+                                    // screen, taking the refusal off it before it can be read.
+                                    saveThemeLocally(customTheme, () -> saveThemeOnline(customTheme, false));
                                     break;
                             }
                         })
@@ -413,22 +447,104 @@ public class CustomizeThemeActivity extends BaseActivity {
         return false;
     }
 
+    private boolean isPredefinedThemeName(String name) {
+        for (CustomTheme predefinedTheme : CustomThemeWrapper.getPredefinedThemes(this)) {
+            if (predefinedTheme.name.equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void saveThemeLocally(CustomTheme customTheme) {
+        saveThemeLocally(customTheme, null);
+    }
+
+    /**
+     * @param onSaved run in place of the toast and finish() once the theme is stored, for callers with
+     *                more to do. It does not run when the save is refused as a duplicate, so work that
+     *                follows a save cannot go ahead without one.
+     */
+    private void saveThemeLocally(CustomTheme customTheme, @Nullable Runnable onSaved) {
+        String previousThemeName = originalThemeName;
+        // Saving under the name this screen opened on overwrites that theme, which is what editing it
+        // — or applying a predefined one — means. Any other name creates a theme, and creating one
+        // over a name already taken is the same duplicate that importing rejects.
+        if (previousThemeName == null || customTheme.name.equals(previousThemeName)) {
+            insertThemeLocally(customTheme, false, null, onSaved);
+            return;
+        }
+        if (!customTheme.name.equalsIgnoreCase(previousThemeName)) {
+            insertThemeLocally(customTheme, true, null, onSaved);
+            return;
+        }
+        // Changing nothing but the capitalisation is still the same theme, so it renames rather than
+        // making a second one — but only once every row the new name reaches turns out to be that
+        // theme. A second theme differing from it in case alone is somebody else's work, and the
+        // insert would overwrite it and the delete would take the wrong row.
+        GetThemesWithName.getThemesWithName(mExecutor, new Handler(), redditDataRoomDatabase,
+                customTheme.name, themesWithName -> {
+                    if (themesWithName.isEmpty()) {
+                        insertThemeLocally(customTheme, false, null, onSaved);
+                    } else if (themesWithName.size() == 1
+                            && themesWithName.get(0).name.equals(previousThemeName)) {
+                        insertThemeLocally(customTheme, false, previousThemeName, onSaved);
+                    } else {
+                        reportDuplicateThemeName(customTheme.name);
+                    }
+                });
+    }
+
+    /**
+     * @param renamedFrom the row this theme is replacing under a different capitalisation, deleted once
+     *                    the new one is in place, or null when nothing is being renamed.
+     */
+    private void insertThemeLocally(CustomTheme customTheme, boolean checkDuplicate,
+                                    @Nullable String renamedFrom, @Nullable Runnable onSaved) {
         InsertCustomTheme.insertCustomTheme(mExecutor, new Handler(), redditDataRoomDatabase, lightThemeSharedPreferences,
                 darkThemeSharedPreferences, amoledThemeSharedPreferences, customTheme,
-                false, () -> {
-                    // Posted above the guard: the theme is already committed, so the rest of the app
-                    // has to be told to re-render regardless of what became of this screen.
-                    EventBus.getDefault().post(new RecreateActivityEvent());
-                    // isFinishing(), deliberately not isDestroyed(): a configuration change destroys
-                    // this instance but keeps the activity token, so finish() still closes the
-                    // relaunched screen and must run. After a back-press it is already redundant.
-                    if (isFinishing()) {
-                        return;
+                checkDuplicate, new InsertCustomTheme.InsertCustomThemeListener() {
+                    @Override
+                    public void success() {
+                        if (renamedFrom != null) {
+                            // The insert wrote a second row under the new capitalisation and took any
+                            // slot the old one held, leaving it behind with nothing to revert.
+                            DeleteTheme.deleteTheme(mExecutor, new Handler(), redditDataRoomDatabase,
+                                    renamedFrom, (isLightTheme, isDarkTheme, isAmoledTheme) -> {});
+                            originalThemeName = customTheme.name;
+                        }
+                        // Posted above the guard: the theme is already committed, so the rest of the
+                        // app has to be told to re-render regardless of what became of this screen.
+                        EventBus.getDefault().post(new RecreateActivityEvent());
+                        if (onSaved != null) {
+                            onSaved.run();
+                            return;
+                        }
+                        // isFinishing(), deliberately not isDestroyed(): a configuration change
+                        // destroys this instance but keeps the activity token, so finish() still
+                        // closes the relaunched screen and must run. After a back-press it is
+                        // already redundant.
+                        if (isFinishing()) {
+                            return;
+                        }
+                        Toast.makeText(CustomizeThemeActivity.this, R.string.theme_saved_locally, Toast.LENGTH_SHORT).show();
+                        finish();
                     }
-                    Toast.makeText(CustomizeThemeActivity.this, R.string.theme_saved_locally, Toast.LENGTH_SHORT).show();
-                    finish();
+
+                    @Override
+                    public void duplicate() {
+                        reportDuplicateThemeName(customTheme.name);
+                    }
                 });
+    }
+
+    private void reportDuplicateThemeName(String themeName) {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        Snackbar.make(binding.coordinatorCustomizeThemeActivity,
+                getString(R.string.theme_name_already_taken, themeName),
+                Snackbar.LENGTH_LONG).show();
     }
 
     private void saveThemeOnline(CustomTheme customTheme, boolean anonymous) {
@@ -517,6 +633,7 @@ public class CustomizeThemeActivity extends BaseActivity {
             outState.putParcelableArrayList(CUSTOM_THEME_SETTINGS_ITEMS_STATE, settingsItems);
             outState.putString(THEME_NAME_STATE, themeAdapter.getThemeName());
         }
+        outState.putString(ORIGINAL_THEME_NAME_STATE, originalThemeName);
     }
 
     @Override
