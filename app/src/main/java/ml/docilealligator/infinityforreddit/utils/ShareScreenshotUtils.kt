@@ -342,7 +342,9 @@ private fun getBitmapFromView(rootView: View): Bitmap {
 }
 
 private fun generateQRCode(baseActivity: BaseActivity, customThemeWrapper: CustomThemeWrapper, url: String): Drawable {
-    val data: QrData.Url = QrData.Url(url)
+    val data: QrData.Url = QrData.Url(
+        RedditLinkUtils.applyLinkDomain(baseActivity.defaultSharedPreferences, url)
+    )
     return QrCodeDrawable(
         data, QrVectorOptions.Builder()
             .setLogo(

@@ -118,6 +118,7 @@ public class SharedPreferencesUtils {
     public static final String EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE = "_ephemeral_custom_tab_package";
     public static final String SPECIFIC_BROWSER_PACKAGE = "specific_browser_package";
     public static final String SPECIFIC_BROWSER_PACKAGE_BASE = "_specific_browser_package";
+    public static final String USE_OLD_REDDIT_DOMAIN = "use_old_reddit_domain";
     public static final String VIDEO_AUTOPLAY = "video_autoplay";
     public static final String VIDEO_AUTOPLAY_VALUE_ALWAYS_ON = "2";
     public static final String VIDEO_AUTOPLAY_VALUE_ON_WIFI = "1";

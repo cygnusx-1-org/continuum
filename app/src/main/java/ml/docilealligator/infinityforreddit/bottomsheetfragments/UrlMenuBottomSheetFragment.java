@@ -20,6 +20,8 @@ import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentUrlMenuBottomSheetBinding;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSheetDialogFragment {
@@ -51,8 +53,9 @@ public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSh
 
         Uri uri = Uri.parse(url);
         if (uri.getScheme() == null && uri.getHost() == null) {
-            url = "https://www.reddit.com" + url;
+            url = APIUtils.API_BASE_URI + url;
         }
+        url = RedditLinkUtils.applyLinkDomain(activity, url);
 
         binding.linkTextViewUrlMenuBottomSheetFragment.setText(url);
 

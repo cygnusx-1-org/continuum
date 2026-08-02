@@ -8,9 +8,11 @@ import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROL
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -69,6 +71,7 @@ import ml.docilealligator.infinityforreddit.font.FontStyle;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -677,13 +680,25 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     public void copyLink(String link) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard != null) {
-            ClipData clip = ClipData.newPlainText("simple text", link);
+            ClipData clip = ClipData.newPlainText("simple text",
+                    RedditLinkUtils.applyLinkDomain(getDefaultSharedPreferences(), link));
             clipboard.setPrimaryClip(clip);
             if (android.os.Build.VERSION.SDK_INT < 33) {
                 Toast.makeText(this, R.string.copy_success, Toast.LENGTH_SHORT).show();
             }
         } else {
             Toast.makeText(this, R.string.copy_link_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void shareLink(String link) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyLinkDomain(getDefaultSharedPreferences(), link));
+        try {
+            startActivity(Intent.createChooser(intent, getString(R.string.share)));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.no_activity_found_for_share, Toast.LENGTH_SHORT).show();
         }
     }
 

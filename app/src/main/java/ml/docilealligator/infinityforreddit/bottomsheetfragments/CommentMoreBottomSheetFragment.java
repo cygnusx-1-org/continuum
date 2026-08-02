@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.bottomsheetfragments;
 
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -10,7 +9,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -163,13 +161,9 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
 
         binding.shareTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
             dismiss();
-            try {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, comment.getPermalink());
-                activity.startActivity(Intent.createChooser(intent, getString(R.string.share)));
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(activity, R.string.no_activity_found_for_share, Toast.LENGTH_SHORT).show();
+            String permalink = comment.getPermalink();
+            if (permalink != null) {
+                activity.shareLink(permalink);
             }
         });
 

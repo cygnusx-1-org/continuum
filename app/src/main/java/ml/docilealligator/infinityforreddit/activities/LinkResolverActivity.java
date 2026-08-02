@@ -26,6 +26,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -523,6 +524,10 @@ public class LinkResolverActivity extends AppCompatActivity {
 
     private void deepLinkError(Uri uri) {
         PackageManager pm = getPackageManager();
+
+        // Every link the app hands off instead of opening itself passes through here, so this is
+        // the one place the configured Reddit domain has to be applied for outbound links.
+        uri = Uri.parse(RedditLinkUtils.applyLinkDomain(mSharedPreferences, uri.toString()));
 
         String authority = uri.getAuthority();
         if(authority != null && (authority.contains("reddit.com") || authority.contains("redd.it") || authority.contains("reddit.app.link"))) {

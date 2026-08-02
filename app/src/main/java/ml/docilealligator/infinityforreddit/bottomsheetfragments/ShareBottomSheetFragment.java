@@ -1,9 +1,8 @@
 package ml.docilealligator.infinityforreddit.bottomsheetfragments;
 
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +29,7 @@ import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRounded
 import ml.docilealligator.infinityforreddit.databinding.FragmentShareLinkBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.ShareScreenshotUtilsKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -70,8 +70,11 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
         // Inflate the layout for this fragment
         FragmentShareLinkBottomSheetBinding binding = FragmentShareLinkBottomSheetBinding.inflate(inflater, container, false);
 
-        String postLink = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_POST_LINK));
-        String mediaLink = getArguments().containsKey(EXTRA_MEDIA_LINK) ? getArguments().getString(EXTRA_MEDIA_LINK) : null;
+        SharedPreferences defaultSharedPreferences = activity.getDefaultSharedPreferences();
+        String postLink = RedditLinkUtils.applyLinkDomain(defaultSharedPreferences,
+                java.util.Objects.requireNonNull(getArguments().getString(EXTRA_POST_LINK)));
+        String mediaLink = RedditLinkUtils.applyLinkDomainOrNull(defaultSharedPreferences,
+                getArguments().containsKey(EXTRA_MEDIA_LINK) ? getArguments().getString(EXTRA_MEDIA_LINK) : null);
         Post post = getArguments().getParcelable(EXTRA_POST);
         ArrayList<Comment> comments = getArguments().getParcelableArrayList(EXTRA_COMMENTS);
 
@@ -198,14 +201,7 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
     }
 
     private void shareLink(String link) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, link);
-            activity.startActivity(Intent.createChooser(intent, getString(R.string.share)));
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(activity, R.string.no_activity_found_for_share, Toast.LENGTH_SHORT).show();
-        }
+        activity.shareLink(link);
     }
 
     private void copyLink(String link) {
