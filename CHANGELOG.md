@@ -2,6 +2,16 @@
 
 ---
 
+8.2.5.9.9.9.1 / 2026-8-4
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Making a comment sometimes crashes the app #352
+* Implemented Optionally use `old` instead of `www` for sharing #333
+* Made Solarized Amoled the default theme and hardened theme management
+* Hardened Reddit video downloads against a lost or deleted download folder
+* Fixed App is not respecting post's default sort type for comments. #348
+
 8.2.5.9.9.9 / 2026-7-28
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
