@@ -130,3 +130,9 @@ github.properties
 changelog_override.txt
 
 .claude
+
+mirakle.gradle
+
+notes/*
+
+android-button-masher/*
