@@ -1093,12 +1093,12 @@ class ViewPostDetailFragmentViewModelNew(
         refresh(fetchPost = false, fetchComments = true)
     }
 
-    fun expandComment(position: Int) {
+    fun toggleExpandComment(position: Int): Boolean {
         _dataState.value.comments?.let { comments ->
             val comment = comments.getOrNull(position)
             comment?.let {
                 if (it.isExpanded) {
-                    collapseComment(position)
+                    return collapseComment(position)
                 } else {
                     val updatedComment = Comment(it)
                     updatedComment.setExpanded(true)
@@ -1108,14 +1108,20 @@ class ViewPostDetailFragmentViewModelNew(
 
                     val updatedComments = ArrayList(comments)
                     updatedComments[position] = updatedComment
-                    updatedComments.addAll(position + 1, newList)
+                    if (newList.isNotEmpty()) {
+                        updatedComments.addAll(position + 1, newList)
+                    }
 
                     _dataState.value = _dataState.value.copy(
                         comments = updatedComments
                     )
+
+                    return newList.isNotEmpty()
                 }
             }
         }
+
+        return false
     }
 
     private fun expandComment(
@@ -1131,7 +1137,7 @@ class ViewPostDetailFragmentViewModelNew(
         }
     }
 
-    fun collapseComment(position: Int) {
+    fun collapseComment(position: Int): Boolean {
         _dataState.value.comments?.let { comments ->
             val comment = comments.getOrNull(position)
             comment?.let {
@@ -1158,8 +1164,12 @@ class ViewPostDetailFragmentViewModelNew(
                 _dataState.value = _dataState.value.copy(
                     comments = updatedComments
                 )
+
+                return allChildrenSize > 0
             }
         }
+
+        return false
     }
 
     fun addComment(comment: Comment) {
@@ -1507,6 +1517,82 @@ class ViewPostDetailFragmentViewModelNew(
                         null, position
                     )
                 )
+            }
+        }
+    }
+
+    fun toggleSaveComment(comment: Comment, position: Int) {
+        viewModelScope.launch {
+            _dataState.value.comments?.let {
+                if (accessToken != null) {
+                    val updatedComments = ArrayList(it)
+
+                    var oldComment: Comment? = it.getOrNull(position)
+                    if (!oldComment?.id.equals(comment.id)) {
+                        val currentPosition = findCommentPosition(comment.fullName, position)
+                        if (currentPosition >= 0 && currentPosition < it.size) {
+                            oldComment = it[currentPosition]
+                        }
+                    }
+
+                    oldComment?.let {
+                        if (oldComment.isSaved) {
+                            if (unsaveThing(
+                                    oauthRetrofit, accessToken, oldComment.fullName
+                                )) {
+                                val updatedComment = Comment(oldComment)
+                                updatedComment.isSaved = !oldComment.isSaved
+
+                                updatedComments[position] = updatedComment
+
+                                _dataState.value = _dataState.value.copy(
+                                    comments = updatedComments
+                                )
+
+                                commentModerationEventLiveData.postValue(
+                                    CommentModerationEvent.Unsaved(
+                                        oldComment,
+                                        position
+                                    )
+                                )
+                            } else {
+                                commentModerationEventLiveData.postValue(
+                                    CommentModerationEvent.UnsaveFailed(
+                                        oldComment,
+                                        position
+                                    )
+                                )
+                            }
+                        } else {
+                            if (saveThing(
+                                    oauthRetrofit, accessToken, oldComment.fullName
+                                )) {
+                                val updatedComment = Comment(oldComment)
+                                updatedComment.isSaved = !oldComment.isSaved
+
+                                updatedComments[position] = updatedComment
+
+                                _dataState.value = _dataState.value.copy(
+                                    comments = updatedComments
+                                )
+
+                                commentModerationEventLiveData.postValue(
+                                    CommentModerationEvent.Saved(
+                                        oldComment,
+                                        position
+                                    )
+                                )
+                            } else {
+                                commentModerationEventLiveData.postValue(
+                                    CommentModerationEvent.SaveFailed(
+                                        oldComment,
+                                        position
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

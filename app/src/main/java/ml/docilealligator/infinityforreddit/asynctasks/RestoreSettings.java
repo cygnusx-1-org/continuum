@@ -24,6 +24,7 @@ import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.comment.CommentDraft;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
@@ -33,6 +34,7 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
+import ml.docilealligator.infinityforreddit.reminder.Reminder;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
@@ -156,6 +158,8 @@ public class RestoreSettings {
                                 File accountsFile = new File(f.getAbsolutePath() + "/accounts.json");
                                 File readPostsFile = new File(f.getAbsolutePath() + "/read_posts.json");
                                 File localSavedFile = new File(f.getAbsolutePath() + "/local_saved.json");
+                                File commentDraftsFile = new File(f.getAbsolutePath() + "/comment_drafts.json");
+                                File remindersFile = new File(f.getAbsolutePath() + "/reminders.json");
 
                                 if (anonymousSubscribedSubredditsFile.exists()) {
                                     List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
@@ -241,6 +245,20 @@ public class RestoreSettings {
                                     List<LocalSavedThing> localSaved = getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType());
                                     if (localSaved != null) {
                                         redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
+                                    }
+                                }
+
+                                if (commentDraftsFile.exists()) {
+                                    List<CommentDraft> commentDrafts = getListFromFile(commentDraftsFile, new TypeToken<List<CommentDraft>>() {}.getType());
+                                    if (commentDrafts != null) {
+                                        redditDataRoomDatabase.commentDraftDao().insertAll(commentDrafts);
+                                    }
+                                }
+
+                                if (remindersFile.exists()) {
+                                    List<Reminder> reminders = getListFromFile(remindersFile, new TypeToken<List<Reminder>>() {}.getType());
+                                    if (reminders != null) {
+                                        redditDataRoomDatabase.reminderDao().insertAll(reminders);
                                     }
                                 }
                             }

@@ -208,6 +208,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final int mMaxResolution;
     private final PostDetailRecyclerViewAdapterCallback mPostDetailRecyclerViewAdapterCallback;
     private Supplier<ArrayList<Comment>> mCommentsSupplier;
+    private int itemWidth;
 
     private final int mColorAccent;
     private final int mCardViewColor;
@@ -1017,6 +1018,48 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     }
                 }
             }
+
+            if (itemWidth < 250) {
+                if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                    ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                }
+                if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                    ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
+                }
+                if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                    ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.GONE);
+                }
+            } else if (itemWidth < 316) {
+                if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                    ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                }
+                if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                    ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                    ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.GONE);
+                }
+            } else if (itemWidth < 420) {
+                if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                    ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                }
+                if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                    ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                    ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                    ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                    ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                    ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.VISIBLE);
+                }
+            }
         }
     }
 
@@ -1218,6 +1261,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 }
             }
         }
+    }
+
+    public void provideItemWidth(int width) {
+        itemWidth = width;
     }
 
     public void addOneComment() {

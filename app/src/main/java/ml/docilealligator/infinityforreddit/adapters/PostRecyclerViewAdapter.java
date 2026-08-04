@@ -291,6 +291,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean canPlayVideo = true;
     private RecyclerView.RecycledViewPool mGalleryRecycledViewPool;
     private MultiPlayPlayerSelector multiPlayPlayerSelector;
+    private int itemWidth;
 
     // postHistorySharedPreferences will be null when being used in HistoryPostFragment.
     public PostRecyclerViewAdapter(BaseActivity activity, PostFragmentBase fragment, RedditDataRoomDatabase redditDataRoomDatabase,
@@ -1333,6 +1334,48 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                 mCallback.currentlyBindItem(holder.getBindingAdapterPosition());
             }
+
+            if (itemWidth < 250) {
+                if (((PostViewHolder) holder).commentsCountButton != null) {
+                    ((PostViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                }
+                if (((PostViewHolder) holder).saveButton != null) {
+                    ((PostViewHolder) holder).saveButton.setVisibility(View.GONE);
+                }
+                if (((PostViewHolder) holder).shareButton != null) {
+                    ((PostViewHolder) holder).shareButton.setVisibility(View.GONE);
+                }
+            } else if (itemWidth < 316) {
+                if (((PostViewHolder) holder).commentsCountButton != null) {
+                    ((PostViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                }
+                if (((PostViewHolder) holder).saveButton != null) {
+                    ((PostViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostViewHolder) holder).shareButton != null) {
+                    ((PostViewHolder) holder).shareButton.setVisibility(View.GONE);
+                }
+            } else if (itemWidth < 420) {
+                if (((PostViewHolder) holder).commentsCountButton != null) {
+                    ((PostViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                }
+                if (((PostViewHolder) holder).saveButton != null) {
+                    ((PostViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostViewHolder) holder).shareButton != null) {
+                    ((PostViewHolder) holder).shareButton.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (((PostViewHolder) holder).commentsCountButton != null) {
+                    ((PostViewHolder) holder).commentsCountButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostViewHolder) holder).saveButton != null) {
+                    ((PostViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostViewHolder) holder).shareButton != null) {
+                    ((PostViewHolder) holder).shareButton.setVisibility(View.VISIBLE);
+                }
+            }
         } else if (holder instanceof PostGalleryViewHolder) {
             Post post = getItem(position);
             if (post != null) {
@@ -2238,6 +2281,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setCanPlayVideo(boolean canPlayVideo) {
         this.canPlayVideo = canPlayVideo;
+    }
+
+    public void provideItemWidth(int width) {
+        itemWidth = width;
     }
 
     public abstract class PostViewHolder extends RecyclerView.ViewHolder {

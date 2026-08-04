@@ -45,7 +45,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
     public static final String EXTRA_COMMENT = "ECF";
     public static final String EXTRA_EDIT_AND_DELETE_AVAILABLE = "EEADA";
     public static final String EXTRA_POSITION = "EP";
-    public static final String EXTRA_SHOW_REPLY_AND_SAVE_OPTION = "ESSARO";
+    public static final String EXTRA_SHOW_REPLY_OPTION = "ESRO";
     public static final String EXTRA_IS_NSFW = "EIN";
     public static final String EXTRA_POST = "EPO";
     public static final String EXTRA_THREAD_COMMENTS = "ETC";
@@ -77,7 +77,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
             return binding.getRoot();
         }
         boolean editAndDeleteAvailable = bundle.getBoolean(EXTRA_EDIT_AND_DELETE_AVAILABLE, false);
-        boolean showReplyAndSaveOption = bundle.getBoolean(EXTRA_SHOW_REPLY_AND_SAVE_OPTION, false);
+        boolean showReplyOption = bundle.getBoolean(EXTRA_SHOW_REPLY_OPTION, false);
 
         if (!activity.accountName.equals(Account.ANONYMOUS_ACCOUNT) && !"".equals(activity.accessToken)) {
             if (editAndDeleteAvailable) {
@@ -131,7 +131,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
             });
         }
 
-        if (showReplyAndSaveOption) {
+        if (showReplyOption) {
             if (!comment.isLocked()) {
                 binding.replyTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
                 binding.replyTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
@@ -148,22 +148,25 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                     dismiss();
                 });
             }
-            binding.saveTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
-            if (comment.isSaved()) {
-                binding.saveTextViewCommentMoreBottomSheetFragment.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(activity, R.drawable.ic_bookmark_day_night_24dp), null, null, null);
-                binding.saveTextViewCommentMoreBottomSheetFragment.setText(R.string.unsave_comment);
-            } else {
-                binding.saveTextViewCommentMoreBottomSheetFragment.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(activity, R.drawable.ic_bookmark_border_day_night_24dp), null, null, null);
-                binding.saveTextViewCommentMoreBottomSheetFragment.setText(R.string.save_comment);
-            }
-
-            binding.saveTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
-                if (activity instanceof ViewPostDetailActivity) {
-                    ((ViewPostDetailActivity) activity).saveComment(comment, bundle.getInt(EXTRA_POSITION));
-                }
-                dismiss();
-            });
         }
+
+        binding.saveTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
+        if (comment.isSaved()) {
+            binding.saveTextViewCommentMoreBottomSheetFragment.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(activity, R.drawable.ic_bookmark_day_night_24dp), null, null, null);
+            binding.saveTextViewCommentMoreBottomSheetFragment.setText(R.string.unsave_comment);
+        } else {
+            binding.saveTextViewCommentMoreBottomSheetFragment.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(activity, R.drawable.ic_bookmark_border_day_night_24dp), null, null, null);
+            binding.saveTextViewCommentMoreBottomSheetFragment.setText(R.string.save_comment);
+        }
+
+        binding.saveTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+            if (activity instanceof ViewPostDetailActivity) {
+                ((ViewPostDetailActivity) activity).toggleSaveComment(comment, bundle.getInt(EXTRA_POSITION));
+            } else if (activity instanceof ViewUserDetailActivity) {
+                ((ViewUserDetailActivity) activity).toggleSaveComment(comment, bundle.getInt(EXTRA_POSITION));
+            }
+            dismiss();
+        });
 
         binding.shareTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
             dismiss();

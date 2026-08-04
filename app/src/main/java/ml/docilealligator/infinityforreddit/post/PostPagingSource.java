@@ -7,6 +7,7 @@ import androidx.paging.ListenableFuturePagingSource;
 import androidx.paging.PagingState;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.RedditError;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
@@ -32,6 +34,7 @@ import ml.docilealligator.infinityforreddit.utils.SavedPostCache;
 import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
 import ml.docilealligator.infinityforreddit.utils.SavedThingSearchFilter;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import okhttp3.ResponseBody;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -260,7 +263,16 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     public LoadResult<String, Post> transformData(Response<String> response) {
         if (!response.isSuccessful()) {
-            return new LoadResult.Error<>(new PostPagingSourceError(response.code(), "Error getting response"));
+            //{"reason": "banned", "message": "Not Found", "error": 404}
+            try (ResponseBody errorBody = response.errorBody()) {
+                if (errorBody != null) {
+                    RedditError redditError = new Gson().fromJson(errorBody.string(), RedditError.class);
+                    return new LoadResult.Error<>(new PostPagingSourceError(response.code(), redditError.getReason()));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return new LoadResult.Error<>(new PostPagingSourceError(response.code(), null));
         }
         return transformData(parseListing(response.body()));
     }
@@ -344,7 +356,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         if (loadParams.getKey() == null) {
             boolean savePostFeedScrolledPosition = sortType != null && sortType.getType() == SortType.Type.BEST && sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION, false);
             if (savePostFeedScrolledPosition) {
-                String accountNameForCache = accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_ANONYMOUS : accountName;
+                String accountNameForCache = Account.ANONYMOUS_ACCOUNT.equals(accountName) ? SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_ANONYMOUS : accountName;
                 afterKey = postFeedScrolledPositionSharedPreferences.getString(accountNameForCache + SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE, null);
             } else {
                 afterKey = null;
@@ -366,7 +378,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private ListenableFuture<Response<String>> fetchSubredditPosts(LoadParams<String> loadParams, RedditAPI api, int limit) {
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+        if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
             return api.getSubredditBestPostsListenableFuture(subredditOrUserName, sortType.getType(),
                     sortType.getTime(), loadParams.getKey(), limit);
         } else {
@@ -409,7 +421,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private ListenableFuture<Response<String>> fetchUserPosts(RedditAPI api, String afterKey) {
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+        if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
             return api.getUserPostsListenableFuture(subredditOrUserName, afterKey, sortType.getType(),
                     sortType.getTime(), 100);
         } else {
@@ -599,7 +611,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private ListenableFuture<LoadResult<String, Post>> loadSearchPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
         ListenableFuture<Response<String>> searchPosts;
         if (subredditOrUserName == null) {
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                 searchPosts = api.searchPostsListenableFuture(query, loadParams.getKey(), sortType.getType(), sortType.getTime(),
                         trendingSource);
             } else {
@@ -607,7 +619,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                         sortType.getTime(), trendingSource, APIUtils.getOAuthHeader(accessToken));
             }
         } else {
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                 searchPosts = api.searchPostsInSpecificSubredditListenableFuture(subredditOrUserName, query,
                         sortType.getType(), sortType.getTime(), loadParams.getKey());
             } else {
@@ -629,7 +641,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     private ListenableFuture<LoadResult<String, Post>> loadDuplicatesPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
         ListenableFuture<Response<String>> duplicatesPosts;
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+        if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
             duplicatesPosts = api.getDuplicatesListenableFuture(subredditOrUserName, loadParams.getKey(),
                     APIUtils.ANONYMOUS_USER_AGENT);
         } else {
@@ -693,7 +705,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         // When searching within multi-reddit, keep original behavior (no user post merging)
         if (query != null && !query.isEmpty()) {
             ListenableFuture<Response<String>> multiRedditPosts;
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                 multiRedditPosts = api.searchMultiRedditPostsListenableFuture(multiRedditPath, query, loadParams.getKey(),
                         sortType.getType(), sortType.getTime());
             } else {
@@ -712,11 +724,11 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
         // Determine if we have users to merge (or might have on first load)
         boolean hasUsers = multiRedditUsernames != null && !multiRedditUsernames.isEmpty();
-        boolean mightHaveUsers = !multiRedditUsernamesFetched && !accountName.equals(Account.ANONYMOUS_ACCOUNT);
+        boolean mightHaveUsers = !multiRedditUsernamesFetched && !Account.ANONYMOUS_ACCOUNT.equals(accountName);
 
         // Fetch multi-reddit posts (use reduced limit when merging with user posts)
         ListenableFuture<Response<String>> multiRedditPosts;
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+        if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
             multiRedditPosts = api.getMultiRedditPostsListenableFuture(multiRedditPath, sortType.getType(), multiAfterKey, sortType.getTime());
         } else if (hasUsers || mightHaveUsers) {
             multiRedditPosts = api.getMultiRedditPostsOauthListenableFuture(multiRedditPath, sortType.getType(), multiAfterKey,
@@ -794,7 +806,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 continue;
             }
             String userAfter = (currentUserAfterKeys != null) ? currentUserAfterKeys.get(username) : null;
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                 futures.add(api.getUserPostsListenableFuture(username, userAfter, sortType.getType(), sortType.getTime(), 25));
             } else {
                 futures.add(api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken, username, "submitted",

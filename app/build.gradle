@@ -91,9 +91,9 @@ android {
         }
 
         minSdk 24
-        targetSdk 35
-        versionCode 224
-        versionName "8.3.0.1-beta3" + gitVersionSuffix()
+        targetSdk 36
+        versionCode 226
+        versionName "8.3.0.1-beta5" + gitVersionSuffix()
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }

@@ -127,10 +127,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final boolean mNeedBlurNsfw;
     private final boolean mDoNotBlurNsfwInNsfwSubreddits;
     private final boolean mNeedBlurSpoiler;
-    private final int mDepthThreshold;
+    //private final int mDepthThreshold;
     private final CommentRecyclerViewAdapterCallback mCommentRecyclerViewAdapterCallback;
     private final Drawable expandDrawable;
     private final Drawable collapseDrawable;
+    private int itemWidth;
 
     private final int mSecondaryTextColor;
     private final int mPrimaryTextColor;
@@ -336,7 +337,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
         mShowUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_USER_PREFIX, false);
         mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS, false);
-        mDepthThreshold = sharedPreferences.getInt(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD, 5);
+        //mDepthThreshold = sharedPreferences.getInt(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD, 5);
 
         mCommentRecyclerViewAdapterCallback = commentRecyclerViewAdapterCallback;
 
@@ -574,13 +575,13 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                 ((CommentBaseViewHolder) holder).commentIndentationView.setShowOnlyOneDivider(mShowOnlyOneCommentLevelIndicator);
                 ((CommentBaseViewHolder) holder).commentIndentationView.setLevelAndColors(comment.getDepth(), verticalBlockColors);
-                if (comment.getDepth() >= mDepthThreshold) {
+                /*if (comment.getDepth() >= mDepthThreshold) {
                     ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
                     ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
                 } else {
                     ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
                     ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.VISIBLE);
-                }
+                }*/
 
                 if (comment.hasReply()) {
                     if (comment.isExpanded()) {
@@ -631,6 +632,49 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     if (mDividerType == DIVIDER_PARENT && comment.getDepth() == 0) {
                         RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
                         params.setMargins(0, (int) Utils.convertDpToPixel(16, mActivity), 0, 0);
+                    }
+                }
+
+                int bottomToolbarWidth = itemWidth - comment.getDepth() * 12;
+                if (bottomToolbarWidth > 420) {
+                    if (((CommentBaseViewHolder) holder).saveButton != null) {
+                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                    }
+                    if (((CommentBaseViewHolder) holder).replyButton != null) {
+                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.VISIBLE);
+                    }
+                    if (((CommentBaseViewHolder) holder).expandButton != null && comment.hasReply()) {
+                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
+                    }
+                } else if (bottomToolbarWidth > 350) {
+                    if (((CommentBaseViewHolder) holder).saveButton != null) {
+                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                    }
+                    if (((CommentBaseViewHolder) holder).replyButton != null) {
+                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
+                    }
+                    if (((CommentBaseViewHolder) holder).expandButton != null && comment.hasReply()) {
+                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
+                    }
+                } else if (bottomToolbarWidth > 300) {
+                    if (((CommentBaseViewHolder) holder).saveButton != null) {
+                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
+                    }
+                    if (((CommentBaseViewHolder) holder).replyButton != null) {
+                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
+                    }
+                    if (((CommentBaseViewHolder) holder).expandButton != null && comment.hasReply()) {
+                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    if (((CommentBaseViewHolder) holder).saveButton != null) {
+                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
+                    }
+                    if (((CommentBaseViewHolder) holder).replyButton != null) {
+                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
+                    }
+                    if (((CommentBaseViewHolder) holder).expandButton != null) {
+                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.GONE);
                     }
                 }
             }
@@ -720,6 +764,25 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                         params.setMargins(0, (int) Utils.convertDpToPixel(16, mActivity), 0, 0);
                     }
                 }
+
+                int bottomToolbarWidth = itemWidth - comment.getDepth() * 12;
+                if (bottomToolbarWidth > 400) {
+                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
+                } else if (bottomToolbarWidth > 350) {
+                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
+                } else if (bottomToolbarWidth > 300) {
+                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
+                } else {
+                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
+                }
             }
         } else if (holder instanceof LoadMoreChildCommentsViewHolder) {
             Comment placeholder = getItem(position);
@@ -794,13 +857,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         }
     }
 
-    public void setSaveComment(int position, boolean isSaved) {
-        Comment comment = getItem(position);
-        if (comment != null) {
-            comment.setSaved(isSaved);
-        }
-    }
-
     public int getSearchedPosition() {
         return mSearchedPosition;
     }
@@ -859,8 +915,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         );
     }
 
+    public void provideItemWidth(int width) {
+        itemWidth = width;
+    }
+
     public interface CommentRecyclerViewAdapterCallback {
-        void expandComment(int position);
+        boolean toggleExpandComment(int position);
         void collapseComment(int position);
         void fetchMoreChildComments(int position);
     }
@@ -1070,9 +1130,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_COMMENT, comment);
                     bundle.putInt(CommentMoreBottomSheetFragment.EXTRA_POSITION, getBindingAdapterPosition());
                     bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_IS_NSFW, mPost.isNSFW());
-                    if (comment.getDepth() >= mDepthThreshold) {
-                        bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_AND_SAVE_OPTION, true);
-                    }
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_POST, mPost);
                     int commentPos = getBindingAdapterPosition();
                     List<Comment> currentList = getCurrentList();
@@ -1380,9 +1437,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 if (currentPosition == RecyclerView.NO_POSITION) {
                     return;
                 }
-                if (expandButton.getVisibility() == View.VISIBLE) {
-                    mCommentRecyclerViewAdapterCallback.expandComment(currentPosition);
-                } else if (mFullyCollapseComment) {
+                if (!mCommentRecyclerViewAdapterCallback.toggleExpandComment(currentPosition)
+                        && mFullyCollapseComment) {
                     mCommentRecyclerViewAdapterCallback.collapseComment(currentPosition);
                 }
             });
@@ -1441,9 +1497,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             }
         }
 
-        private boolean expandComments() {
+        private void expandComments() {
             expandButton.performClick();
-            return true;
         }
 
         private boolean hideToolbar() {
@@ -1558,7 +1613,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             itemView.setOnClickListener(view -> {
                 int currentPosition = getBindingAdapterPosition();
                 if (currentPosition != RecyclerView.NO_POSITION) {
-                    mCommentRecyclerViewAdapterCallback.expandComment(currentPosition);
+                    mCommentRecyclerViewAdapterCallback.toggleExpandComment(currentPosition);
                 }
             });
 

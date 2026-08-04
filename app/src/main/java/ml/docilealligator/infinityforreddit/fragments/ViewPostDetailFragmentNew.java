@@ -201,6 +201,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private int commentScrollPosition = -1;
     private FragmentViewPostDetailBinding binding;
     private RecyclerView mCommentsRecyclerView;
+    private View.OnLayoutChangeListener onLayoutChangeListener;
+    private int recyclerViewWidth;
     public ViewPostDetailFragmentViewModelNew viewPostDetailFragmentViewModel;
     public ViewPostDetailActivityViewModel viewPostDetailActivityViewModel;
 
@@ -496,8 +498,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 mSharedPreferences, mNsfwAndSpoilerSharedPreferences,
                 new CommentsRecyclerViewAdapterNew.CommentRecyclerViewAdapterCallback() {
                     @Override
-                    public void expandComment(int position) {
-                        viewPostDetailFragmentViewModel.expandComment(position);
+                    public boolean toggleExpandComment(int position) {
+                        return viewPostDetailFragmentViewModel.toggleExpandComment(position);
                     }
 
                     @Override
@@ -682,6 +684,34 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return false;
         }
         setupMenu();
+        if (onLayoutChangeListener != null) {
+            if (mCommentsRecyclerView != null) {
+                mCommentsRecyclerView.removeOnLayoutChangeListener(onLayoutChangeListener);
+            } else {
+                binding.postDetailRecyclerViewViewPostDetailFragment.removeOnLayoutChangeListener(onLayoutChangeListener);
+            }
+        }
+
+        onLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            int width = right - left;
+            if (recyclerViewWidth == width) {
+                return;
+            }
+            recyclerViewWidth = width;
+            v.post(() -> {
+                int widthInDp = Utils.convertPxToDp(width, mActivity);
+                if (mPostAdapter != null) {
+                    mPostAdapter.provideItemWidth(widthInDp);
+                }
+                if (mCommentsAdapter != null) {
+                    mCommentsAdapter.provideItemWidth(widthInDp);
+                }
+                refreshAdapter(binding.postDetailRecyclerViewViewPostDetailFragment);
+                if (mCommentsRecyclerView != null) {
+                    refreshAdapter(mCommentsRecyclerView);
+                }
+            });
+        };
 
         if (mCommentsRecyclerView != null) {
             if (binding.postDetailRecyclerViewViewPostDetailFragment.getAdapter() == null) {
@@ -690,10 +720,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             if (mCommentsRecyclerView.getAdapter() == null) {
                 mCommentsRecyclerView.setAdapter(mConcatAdapter);
             }
+            mCommentsRecyclerView.addOnLayoutChangeListener(onLayoutChangeListener);
         } else {
             if (binding.postDetailRecyclerViewViewPostDetailFragment.getAdapter() == null) {
                 binding.postDetailRecyclerViewViewPostDetailFragment.setAdapter(mConcatAdapter);
             }
+            binding.postDetailRecyclerViewViewPostDetailFragment.addOnLayoutChangeListener(onLayoutChangeListener);
         }
 
         return true;
@@ -867,10 +899,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         }
     }
 
-    public void saveComment(int position, boolean isSaved) {
-        if (mCommentsAdapter != null) {
-            mCommentsAdapter.setSaveComment(position, isSaved);
-        }
+    public void toggleSaveComment(@NonNull Comment comment, int position) {
+        viewPostDetailFragmentViewModel.toggleSaveComment(comment, position);
     }
 
     public void searchComment(String query, boolean searchNextComment) {
@@ -1217,6 +1247,14 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         Bridge.clear(this);
         EventBus.getDefault().unregister(this);
         binding.postDetailRecyclerViewViewPostDetailFragment.addOnWindowFocusChangedListener(null);
+        if (onLayoutChangeListener != null) {
+            if (mCommentsRecyclerView != null) {
+                mCommentsRecyclerView.removeOnLayoutChangeListener(onLayoutChangeListener);
+            } else {
+                binding.postDetailRecyclerViewViewPostDetailFragment.removeOnLayoutChangeListener(onLayoutChangeListener);
+            }
+            onLayoutChangeListener = null;
+        }
         super.onDestroyView();
     }
 

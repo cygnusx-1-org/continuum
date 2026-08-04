@@ -9,7 +9,6 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
-import ml.docilealligator.infinityforreddit.customviews.preference.SliderPreference;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 public class CommentPreferenceFragment extends CustomFontPreferenceFragmentCompat {
@@ -26,7 +25,7 @@ public class CommentPreferenceFragment extends CustomFontPreferenceFragmentCompa
 
         SwitchPreference showCommentDividerSwitchPreference = findPreference(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER);
         ListPreference commentDividerTypeListPreference = findPreference(SharedPreferencesUtils.COMMENT_DIVIDER_TYPE);
-        SliderPreference showFewerToolbarOptionsThresholdSliderPreference = findPreference(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD);
+        //SliderPreference showFewerToolbarOptionsThresholdSliderPreference = findPreference(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD);
 
         if (showCommentDividerSwitchPreference != null && commentDividerTypeListPreference != null) {
             commentDividerTypeListPreference.setVisible(sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, false));
@@ -36,8 +35,8 @@ public class CommentPreferenceFragment extends CustomFontPreferenceFragmentCompa
             });
         }
 
-        if (showFewerToolbarOptionsThresholdSliderPreference != null) {
+        /*if (showFewerToolbarOptionsThresholdSliderPreference != null) {
             showFewerToolbarOptionsThresholdSliderPreference.setSummaryTemplate(R.string.settings_show_fewer_toolbar_options_threshold_summary);
-        }
+        }*/
     }
 }

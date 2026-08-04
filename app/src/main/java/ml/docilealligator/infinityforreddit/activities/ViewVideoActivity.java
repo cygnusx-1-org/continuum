@@ -443,7 +443,8 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         /*isNSFW = intent.getBooleanExtra(EXTRA_IS_NSFW, false);*/
         if (savedInstanceState == null) {
-            if (mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION, false)) {
+            if (!getResources().getBoolean(R.bool.isTablet)
+                    && mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION, false)) {
                 originalOrientation = resources.getConfiguration().orientation;
                 try {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
