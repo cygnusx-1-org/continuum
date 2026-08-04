@@ -2,6 +2,12 @@
 
 ---
 
+8.3.0.1-beta5 / 2026-8-3
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Updated to upstream's 8.3.0-beta5
+
 8.3.0.1-beta3 / 2026-7-9
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
