@@ -280,6 +280,36 @@ public final class Utils {
         }
     }
 
+    /**
+     * Returns the bare id of a Reddit fullname, e.g. "t3_abc123" -> "abc123". Reddit intermittently
+     * sends an empty or unprefixed value for fullname fields such as {@code link_id}, so anything
+     * that is not shaped like a fullname is passed through untouched instead of being chopped at a
+     * fixed offset (which threw StringIndexOutOfBoundsException on an empty value).
+     */
+    public static String idFromFullname(@Nullable String fullname) {
+        if (fullname == null) {
+            return "";
+        }
+        if (fullname.length() > 3 && fullname.charAt(0) == 't' && Character.isDigit(fullname.charAt(1))
+                && fullname.charAt(2) == '_') {
+            return fullname.substring(3);
+        }
+        return fullname;
+    }
+
+    /**
+     * Upper-cases the first character of {@code text}. Returns null for a null or empty value so
+     * callers fall back to a generic message rather than crashing on the empty strings the API
+     * sometimes returns.
+     */
+    @Nullable
+    public static String capitalizeFirstLetter(@Nullable String text) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+        return text.substring(0, 1).toUpperCase(Locale.getDefault()) + text.substring(1);
+    }
+
     public static String trimTrailingWhitespace(String source) {
 
         if (source == null) {

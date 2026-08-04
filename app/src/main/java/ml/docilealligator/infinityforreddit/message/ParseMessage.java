@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
@@ -82,30 +83,6 @@ public class ParseMessage {
     @WorkerThread
     @Nullable
     public static String parseRepliedMessageErrorMessage(@Nullable String response) {
-        try {
-            JSONObject responseObject = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY);
-
-            if (responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() != 0) {
-                JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY)
-                        .getJSONArray(responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() - 1);
-                if (error.length() != 0) {
-                    String errorString;
-                    if (error.length() >= 2) {
-                        errorString = error.getString(1);
-                    } else {
-                        errorString = error.getString(0);
-                    }
-                    return errorString.substring(0, 1).toUpperCase() + errorString.substring(1);
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return APIUtils.parseApiErrorMessage(response);
     }
 }

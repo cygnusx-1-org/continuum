@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
@@ -50,7 +51,7 @@ public class ParseComment {
                 }
 
                 handler.post(() -> parseCommentListener.onParseCommentSuccess(newComments, commentData, parentId, moreChildrenIds));
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
                 handler.post(parseCommentListener::onParseCommentFailed);
             }
@@ -126,7 +127,7 @@ public class ParseComment {
                                 // assume that it is parent of this call
                                 newComments.add(comment);
                             }
-                        } catch (JSONException e) {
+                        } catch (JSONException | RuntimeException e) {
                             // Well we need to catch and ignore the exception to not show "error loading comments" to users
                             e.printStackTrace();
                         }
@@ -144,7 +145,7 @@ public class ParseComment {
                 }
 
                 handler.post(() -> parseCommentListener.onParseCommentSuccess(newComments, commentData, null, moreChildrenIds));
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
                 handler.post(parseCommentListener::onParseCommentFailed);
             }
@@ -165,9 +166,11 @@ public class ParseComment {
                 Comment comment = parseSingleComment(sentCommentData, depth);
 
                 handler.post(() -> parseSentCommentListener.onParseSentCommentSuccess(comment));
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
+                // RuntimeException too: this runs on a bare executor thread, so an unexpected field in
+                // the response must surface as a failed send instead of killing the process.
                 e.printStackTrace();
-                String errorMessage = parseSentCommentErrorMessage(response);
+                String errorMessage = APIUtils.parseApiErrorMessage(response);
                 handler.post(() -> parseSentCommentListener.onParseSentCommentFailed(errorMessage));
             }
         });
@@ -293,7 +296,10 @@ public class ParseComment {
         }
         String authorFlair = singleCommentData.isNull(JSONUtils.AUTHOR_FLAIR_TEXT_KEY) ? "" : singleCommentData.getString(JSONUtils.AUTHOR_FLAIR_TEXT_KEY);
         String linkAuthor = singleCommentData.has(JSONUtils.LINK_AUTHOR_KEY) ? singleCommentData.getString(JSONUtils.LINK_AUTHOR_KEY) : null;
-        String linkId = singleCommentData.getString(JSONUtils.LINK_ID_KEY).substring(3);
+        // Reddit sometimes returns an empty link_id in the response to a freshly sent comment, so this
+        // must not assume a "t3_" prefix is there to strip.
+        String linkId = singleCommentData.isNull(JSONUtils.LINK_ID_KEY)
+                ? "" : Utils.idFromFullname(singleCommentData.getString(JSONUtils.LINK_ID_KEY));
         String subredditName = singleCommentData.getString(JSONUtils.SUBREDDIT_KEY);
         String parentId = singleCommentData.getString(JSONUtils.PARENT_ID_KEY);
         boolean isSubmitter = singleCommentData.getBoolean(JSONUtils.IS_SUBMITTER_KEY);
@@ -345,35 +351,6 @@ public class ParseComment {
                 linkId, subredditName, parentId, score, voteType, isSubmitter, distinguished,
                 permalink, depth, collapsed, hasReply, scoreHidden, saved, sendReplies, locked, canModComment,
                 approved, approvedAtUTC, approvedBy, removed, spam, edited, mediaMetadataMap);
-    }
-
-    @Nullable
-    private static String parseSentCommentErrorMessage(@Nullable String response) {
-        try {
-            JSONObject responseObject = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY);
-
-            if (responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() != 0) {
-                JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY)
-                        .getJSONArray(responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() - 1);
-                if (error.length() != 0) {
-                    String errorString;
-                    if (error.length() >= 2) {
-                        errorString = error.getString(1);
-                    } else {
-                        errorString = error.getString(0);
-                    }
-                    return errorString.substring(0, 1).toUpperCase() + errorString.substring(1);
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     @Nullable

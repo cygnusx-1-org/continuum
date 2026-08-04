@@ -10,6 +10,7 @@ import java.util.Objects;
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class Comment implements Parcelable {
     public static final int VOTE_TYPE_NO_VOTE = 0;
@@ -142,7 +143,7 @@ public class Comment implements Parcelable {
             this.fullName = parentFullName;
         } else {
             this.fullName = parentFullName;
-            this.parentId = parentFullName.substring(3);
+            this.parentId = Utils.idFromFullname(parentFullName);
         }
         this.depth = depth;
         this.placeholderType = placeholderType;

@@ -35,6 +35,7 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,7 +127,8 @@ public class PullNotificationWorker extends Worker {
                             String summary;
                             if (kind.equals(Message.TYPE_COMMENT) || kind.equals(Message.TYPE_LINK)) {
                                 title = message.getAuthor();
-                                summary = message.getSubject().substring(0, 1).toUpperCase() + message.getSubject().substring(1);
+                                String capitalizedSubject = Utils.capitalizeFirstLetter(message.getSubject());
+                                summary = capitalizedSubject == null ? message.getSubject() : capitalizedSubject;
                             } else {
                                 title = message.getTitle() == null || message.getTitle().equals("") ? message.getSubject() : message.getTitle();
                                 if (kind.equals(Message.TYPE_ACCOUNT)) {

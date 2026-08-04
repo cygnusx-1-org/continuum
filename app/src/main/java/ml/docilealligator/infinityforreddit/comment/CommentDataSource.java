@@ -381,7 +381,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                 Comment comment = ParseComment.parseSingleComment(commentJSON, 0);
                 comment.setSaved(true);
                 out.add(comment);
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
             }
         }
@@ -473,7 +473,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
             try {
                 JSONObject commentJSON = commentsJSONArray.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
                 comments.add(ParseComment.parseSingleComment(commentJSON, 0));
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
             }
         }
@@ -501,7 +501,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                 try {
                     JSONObject commentJSON = commentsJSONArray.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
                     comments.add(ParseComment.parseSingleComment(commentJSON, 0));
-                } catch (JSONException e) {
+                } catch (JSONException | RuntimeException e) {
                     e.printStackTrace();
                 }
             }

@@ -1065,6 +1065,8 @@ class ViewPostDetailFragmentViewModelNew(
                         } catch (e: JSONException) {
                             // Well we need to catch and ignore the exception to not show "error loading comments" to users
                             e.printStackTrace()
+                        } catch (e: RuntimeException) {
+                            e.printStackTrace()
                         }
                     }
                 }

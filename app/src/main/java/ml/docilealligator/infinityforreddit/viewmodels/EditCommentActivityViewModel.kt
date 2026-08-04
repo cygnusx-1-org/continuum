@@ -89,6 +89,10 @@ class EditCommentActivityViewModel(
                         comment = ParseComment.parseSingleComment(data, 0)
                     } catch (e: JSONException) {
                         e.printStackTrace()
+                    } catch (e: RuntimeException) {
+                        // The edit itself succeeded; an unexpected field in the response must leave the
+                        // Activity falling back to the local text, not crash this executor thread.
+                        e.printStackTrace()
                     }
                     postResult(EditCommentResult.Success(comment, editedContent))
                 } else {

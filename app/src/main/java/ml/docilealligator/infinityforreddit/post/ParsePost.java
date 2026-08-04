@@ -189,11 +189,15 @@ public class ParsePost {
                     if (isNSFW) {
                         postId = post.getString(JSONUtils.ID_KEY);
                     } else {
-                        postId = post.getString(JSONUtils.LINK_ID_KEY).substring("t3_".length());
+                        postId = Utils.idFromFullname(post.getString(JSONUtils.LINK_ID_KEY));
                     }
-                    handler.post(() -> parseRandomPostListener.onParseRandomPostSuccess(postId, subredditName));
+                    if (postId.isEmpty()) {
+                        handler.post(parseRandomPostListener::onParseRandomPostFailed);
+                    } else {
+                        handler.post(() -> parseRandomPostListener.onParseRandomPostSuccess(postId, subredditName));
+                    }
                 }
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
                 handler.post(parseRandomPostListener::onParseRandomPostFailed);
             }

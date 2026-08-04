@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,14 +47,12 @@ public class SelectUserFlair {
                                 JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY)
                                         .getJSONArray(responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() - 1);
                                 if (error.length() != 0) {
-                                    String errorString;
-                                    if (error.length() >= 2) {
-                                        errorString = error.getString(1);
-                                    } else {
-                                        errorString = error.getString(0);
-                                    }
+                                    // Null when the error carries no message; the listener falls back to a
+                                    // generic failure rather than being handed an empty string.
+                                    String errorMessage = Utils.capitalizeFirstLetter(
+                                            error.length() >= 2 ? error.getString(1) : error.getString(0));
 
-                                    handler.post(() -> selectUserFlairListener.failed(errorString.substring(0, 1).toUpperCase() + errorString.substring(1)));
+                                    handler.post(() -> selectUserFlairListener.failed(errorMessage));
                                 } else {
                                     handler.post(selectUserFlairListener::success);
                                 }

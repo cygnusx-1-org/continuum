@@ -281,9 +281,7 @@ public class APIUtils {
      * carries no error — an empty {@code errors} array, no {@code json} envelope, or an unparseable
      * body. Reddit reports API-level failures (archived thing, rate limit, …) inside an otherwise
      * HTTP-200 body, so callers of endpoints sent with {@code api_type=json} must consult this even
-     * when {@code response.isSuccessful()} is true. Same extraction as
-     * {@link ml.docilealligator.infinityforreddit.user.SelectUserFlair} and
-     * {@code ParseComment.parseSentCommentErrorMessage}.
+     * when {@code response.isSuccessful()} is true.
      */
     @Nullable
     public static String parseApiErrorMessage(@Nullable String responseBody) {
@@ -300,11 +298,7 @@ public class APIUtils {
             if (error.length() == 0) {
                 return null;
             }
-            String errorString = error.length() >= 2 ? error.getString(1) : error.getString(0);
-            if (errorString.isEmpty()) {
-                return null;
-            }
-            return errorString.substring(0, 1).toUpperCase() + errorString.substring(1);
+            return Utils.capitalizeFirstLetter(error.length() >= 2 ? error.getString(1) : error.getString(0));
         } catch (JSONException e) {
             return null;
         }

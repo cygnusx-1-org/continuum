@@ -101,26 +101,37 @@ public class CrashReportsFragment extends Fragment {
     /**
      * Fetch the logs from CrashyReporter and open browser to create GitHub issue page.
      * Issue will have logs, device model, app version, and Android version prefilled.
+     * <p>
+     * Each parameter name below is a field {@code id} in
+     * {@code .github/ISSUE_TEMPLATE/bug_report.yml} — that per-field prefill is what an issue
+     * form supports, and it is why {@code template} can be sent here at all. (A Markdown template
+     * would take a whole-body {@code body} parameter instead, which GitHub treats as mutually
+     * exclusive with {@code template}.) The form declares its own label, but a URL carrying query
+     * parameters does not pick up template defaults, so {@code labels} is sent explicitly.
      * @return if successful
      */
     private boolean createGithubIssueWithLogs() {
         Intent intent = new Intent(getContext(), LinkResolverActivity.class);
-        String logs, model, appVersion, androidVersion;
+        String logs, device, version, androidVersion;
         try {
             List<String> logLines = CrashyReporter.INSTANCE.getLogsAsStrings();
             if (logLines == null) {
                 return false;
             }
-            logs = String.join("\n", logLines);
+            String rawLogs = String.join("\n", logLines);
             // limit size to 6800 characters to avoid `414 URI Too Long`
-            logs = URLEncoder.encode("```\n" + (logs.length() > 0 ? logs.substring(0, Math.min(6800, logs.length())) : "No logs found.") + "\n```", "UTF-8");
-            model = URLEncoder.encode(Build.MANUFACTURER + " " + Build.MODEL, "UTF-8");
-            appVersion = URLEncoder.encode(BuildConfig.VERSION_NAME, "UTF-8");
+            logs = URLEncoder.encode("```\n" + (rawLogs.isEmpty()
+                    ? "No logs found." : rawLogs.substring(0, Math.min(6800, rawLogs.length()))) + "\n```", "UTF-8");
+            device = URLEncoder.encode(Build.MANUFACTURER + " " + Build.MODEL, "UTF-8");
+            version = URLEncoder.encode(BuildConfig.VERSION_NAME, "UTF-8");
             androidVersion = URLEncoder.encode(Build.VERSION.RELEASE, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             return false;
         }
-        Uri githubIssueUri = Uri.parse(String.format("https://github.com/Docile-Alligator/Infinity-For-Reddit/issues/new?labels=possible-bug&device=%s&version=%s&android_version=%s&logs=%s&&template=BUG_REPORT.yml", model, appVersion, androidVersion, logs));
+        Uri githubIssueUri = Uri.parse(String.format(
+                "https://github.com/cygnusx-1-org/continuum/issues/new?template=bug_report.yml&labels=bug"
+                        + "&device=%s&android_version=%s&version=%s&logs=%s",
+                device, androidVersion, version, logs));
         intent.setData(githubIssueUri);
         startActivity(intent);
         return true;
