@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -131,7 +132,7 @@ public class FetchMultiRedditInfo {
                             )
                     );
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("FetchMultiRedditInfo", "parseMultiRedditInfo failed", e);
                 }
             }
 

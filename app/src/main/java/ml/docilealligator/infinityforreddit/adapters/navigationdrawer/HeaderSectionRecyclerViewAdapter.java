@@ -86,7 +86,7 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
                 if (hideKarma) {
                     int karmaTextHeight = ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.getHeight();
                     ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.setVisibility(View.GONE);
-                    ((NavHeaderViewHolder) holder).binding.nameTextViewNavHeaderMain.setTranslationY(karmaTextHeight / 2);
+                    ((NavHeaderViewHolder) holder).binding.nameTextViewNavHeaderMain.setTranslationY(karmaTextHeight / 2f);
                 } else {
                     ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.setVisibility(View.VISIBLE);
                     ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.setText(baseActivity.getString(R.string.karma_info, karma));

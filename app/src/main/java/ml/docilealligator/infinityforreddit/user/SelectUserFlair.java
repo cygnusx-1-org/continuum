@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class SelectUserFlair {
                                 handler.post(selectUserFlairListener::success);
                             }
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            Log.e("SelectUserFlair", "onResponse failed", e);
                         }
                     });
                 } else {

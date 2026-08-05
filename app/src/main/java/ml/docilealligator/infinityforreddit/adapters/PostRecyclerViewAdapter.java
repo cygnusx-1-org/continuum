@@ -182,13 +182,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private BaseActivity mActivity;
     private PostFragmentBase mFragment;
     private SharedPreferences mSharedPreferences;
-    private SharedPreferences mCurrentAccountSharedPreferences;
     @Nullable
     private SharedPreferences mPostHistorySharedPreferences;
     private RedditDataRoomDatabase mRedditDataRoomDatabase;
     private Executor mExecutor;
     private Retrofit mOauthRetrofit;
-    private Retrofit mRedgifsRetrofit;
     private Provider<StreamableAPI> mStreamableApiProvider;
     @Nullable
     private String mAccessToken;
@@ -310,11 +308,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mActivity = activity;
             mFragment = fragment;
             mSharedPreferences = sharedPreferences;
-            mCurrentAccountSharedPreferences = currentAccountSharedPreferences;
             mRedditDataRoomDatabase = redditDataRoomDatabase;
             mExecutor = executor;
             mOauthRetrofit = oauthRetrofit;
-            mRedgifsRetrofit = redgifsRetrofit;
             mStreamableApiProvider = streamableApiProvider;
             mAccessToken = accessToken;
             mAccountName = accountName;
@@ -879,7 +875,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     String authorName = post.isAuthorDeleted() ? post.getSubredditName() : post.getAuthor();
                     mFragment.loadIcon(authorName, post.isAuthorDeleted(), (subredditOrUserName, iconUrl) -> {
                         if (mActivity != null && getItemCount() > 0) {
-                            if (iconUrl == null || iconUrl.isEmpty() && authorName.equals(subredditOrUserName)) {
+                            if (iconUrl == null || (iconUrl.isEmpty() && authorName.equals(subredditOrUserName))) {
                                 mGlide.load(R.drawable.subreddit_default_icon)
                                         .transform(new RoundedCornersTransformation(72, 0))
                                         .into(((PostViewHolder) holder).iconGifImageView);
@@ -1701,7 +1697,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             Post.Preview preview = ((PostGalleryViewHolder) holder).preview;
             if (preview != null) {
                 String url;
-                boolean blurImage = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()) && !(post.getPostType() == Post.GIF_TYPE && mAutoplay && mAutoplayNsfwVideos)) || post.isSpoiler() && mNeedBlurSpoiler;
+                boolean blurImage = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()) && !(post.getPostType() == Post.GIF_TYPE && mAutoplay && mAutoplayNsfwVideos)) || (post.isSpoiler() && mNeedBlurSpoiler);
                 if (post.getPostType() == Post.GIF_TYPE && mAutoplay && !blurImage) {
                     url = post.getUrl();
                 } else {

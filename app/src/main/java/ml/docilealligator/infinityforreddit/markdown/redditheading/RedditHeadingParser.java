@@ -109,6 +109,7 @@ public class RedditHeadingParser extends AbstractBlockParser {
                 if (isSetextHeadingRest(line, index + 1, '=')) {
                     return 1;
                 }
+                break;
             case '-':
                 if (isSetextHeadingRest(line, index + 1, '-')) {
                     return 2;

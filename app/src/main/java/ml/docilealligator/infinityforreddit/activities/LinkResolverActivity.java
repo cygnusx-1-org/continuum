@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -344,6 +345,7 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 intent.putExtra(ViewPostDetailActivity.EXTRA_NEW_ACCOUNT_NAME, newAccountName);
                                 startActivity(intent);
                             } else if (path.matches(WIKI_PATTERN)) {
+                                @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
                                 String[] pathSegments = path.split("/");
                                 String wikiPage;
                                 if (pathSegments.length == 4) {
@@ -567,6 +569,7 @@ public class LinkResolverActivity extends AppCompatActivity {
                 startActivity(intent);
                 return;
             } catch (ActivityNotFoundException ignored) {
+                Log.d("LinkResolverActivity", "openInSpecificBrowser: ignoring ActivityNotFoundException", ignored);
             }
         }
         openInBrowser(uri, pm, true);

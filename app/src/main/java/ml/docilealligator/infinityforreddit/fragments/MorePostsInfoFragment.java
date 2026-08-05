@@ -68,6 +68,7 @@ public class MorePostsInfoFragment extends Fragment {
             case LoadingMorePostsStatus.NO_MORE_POSTS:
                 binding.infoTextViewMorePostsInfoFragment.setText(R.string.no_more_posts);
                 binding.progressBarViewMorePostsInfoFragment.setVisibility(View.GONE);
+                break;
             case LoadingMorePostsStatus.LOADED:
                 binding.progressBarViewMorePostsInfoFragment.setVisibility(View.GONE);
                 break;

@@ -229,6 +229,7 @@ public class UserMultiRedditsActivity extends BaseActivity {
     private String ownerOf(MultiReddit multiReddit) {
         String path = multiReddit.getPath();
         if (path != null) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] segments = path.split("/");
             if (segments.length > 2 && "user".equals(segments[1])) {
                 return segments[2];

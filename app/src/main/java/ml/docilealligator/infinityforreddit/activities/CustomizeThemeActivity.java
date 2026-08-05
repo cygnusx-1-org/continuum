@@ -87,7 +87,7 @@ public class CustomizeThemeActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
 
@@ -228,7 +228,7 @@ public class CustomizeThemeActivity extends BaseActivity {
                     originalThemeName = themeName;
 
                     CustomizeThemeRecyclerViewAdapter themeAdapter =
-                            new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
+                            new CustomizeThemeRecyclerViewAdapter(this, mCustomThemeWrapper, themeName);
                     adapter = themeAdapter;
                     binding.recyclerViewCustomizeThemeActivity.setAdapter(themeAdapter);
                     themeAdapter.setCustomThemeSettingsItem(settingsItems);
@@ -241,7 +241,7 @@ public class CustomizeThemeActivity extends BaseActivity {
                 }
 
                 CustomizeThemeRecyclerViewAdapter themeAdapter =
-                        new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
+                        new CustomizeThemeRecyclerViewAdapter(this, mCustomThemeWrapper, themeName);
                 adapter = themeAdapter;
                 binding.recyclerViewCustomizeThemeActivity.setAdapter(themeAdapter);
                 if (isPredefinedTheme) {
@@ -320,7 +320,7 @@ public class CustomizeThemeActivity extends BaseActivity {
             }
         } else {
             CustomizeThemeRecyclerViewAdapter themeAdapter =
-                    new CustomizeThemeRecyclerViewAdapter(this, customThemeWrapper, themeName);
+                    new CustomizeThemeRecyclerViewAdapter(this, mCustomThemeWrapper, themeName);
             adapter = themeAdapter;
             binding.recyclerViewCustomizeThemeActivity.setAdapter(themeAdapter);
             themeAdapter.setCustomThemeSettingsItem(customThemeSettingsItems);
@@ -648,7 +648,7 @@ public class CustomizeThemeActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -656,7 +656,7 @@ public class CustomizeThemeActivity extends BaseActivity {
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeThemeActivity,
                 binding.collapsingToolbarLayoutCustomizeThemeActivity, binding.toolbarCustomizeThemeActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCustomizeThemeActivity);
-        binding.coordinatorCustomizeThemeActivity.setBackgroundColor(customThemeWrapper.getBackgroundColor());
-        binding.progressBarCustomizeThemeActivity.setIndicatorColor(customThemeWrapper.getColorAccent());
+        binding.coordinatorCustomizeThemeActivity.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.progressBarCustomizeThemeActivity.setIndicatorColor(mCustomThemeWrapper.getColorAccent());
     }
 }

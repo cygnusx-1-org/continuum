@@ -326,7 +326,7 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
         setSupportActionBar(binding.toolbar);
 
         binding.subscribeSubredditChipThemePreviewActivity.setOnClickListener(view -> {
-            if (binding.subscribeSubredditChipThemePreviewActivity.getText().equals(getResources().getString(R.string.subscribe))) {
+            if (binding.subscribeSubredditChipThemePreviewActivity.getText().toString().equals(getResources().getString(R.string.subscribe))) {
                 binding.subscribeSubredditChipThemePreviewActivity.setText(R.string.unsubscribe);
                 binding.subscribeSubredditChipThemePreviewActivity.setChipBackgroundColor(ColorStateList.valueOf(subscribedColor));
             } else {

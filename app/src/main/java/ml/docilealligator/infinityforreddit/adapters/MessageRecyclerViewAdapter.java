@@ -23,6 +23,7 @@ import io.noties.markwon.inlineparser.HtmlInlineProcessor;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
 import io.noties.markwon.movement.MovementMethodPlugin;
+import java.util.Locale;
 import java.util.Objects;
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.R;
@@ -187,7 +188,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 ((DataViewHolder) holder).binding.authorTextViewItemMessage.setText(recipientUsername);
                 String subjectRaw = displayedMessage.getSubject();
                 String subject = (subjectRaw == null || subjectRaw.isEmpty()) ? "" :
-                        subjectRaw.substring(0, 1).toUpperCase() + subjectRaw.substring(1);
+                        subjectRaw.substring(0, 1).toUpperCase(Locale.getDefault()) + subjectRaw.substring(1);
                 ((DataViewHolder) holder).binding.subjectTextViewItemMessage.setText(subject);
                 mMarkwon.setMarkdown(((DataViewHolder) holder).binding.contentCustomMarkwonViewItemMessage, displayedMessage.getBody());
             }
@@ -338,6 +339,8 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                                 }
 
                                 @Override
+                                // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+                                @SuppressWarnings("ReferenceEquality")
                                 public void readFailed() {
                                     displayedMessage.setNew(true);
                                     // The holder may have been recycled onto another row while the

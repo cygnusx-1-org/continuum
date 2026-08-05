@@ -45,8 +45,7 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
             Object span = spanArray[i];
             int spanStart = spannable.getSpanStart(span);
             int spanEnd = spannable.getSpanEnd(span);
-            int spanFlags = spannable.getSpanFlags(span);
-            spanList.add(new SpanInfo(span, spanStart, spanEnd, spanFlags));
+            spanList.add(new SpanInfo(span, spanStart, spanEnd));
         }
         return spanList;
     }
@@ -283,13 +282,11 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
         public final Object what;
         public final int start;
         public final int end;
-        public final int flags;
 
-        private SpanInfo(Object what, int start, int end, int flags) {
+        private SpanInfo(Object what, int start, int end) {
             this.what = what;
             this.start = start;
             this.end = end;
-            this.flags = flags;
         }
     }
 }

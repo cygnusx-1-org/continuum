@@ -84,7 +84,6 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
 
     private boolean immersiveInterface;
     private boolean changeStatusBarIconColor;
-    private boolean transparentStatusBarAfterToolbarCollapsed;
     private boolean hasDrawerLayout = false;
     private boolean isImmersiveInterfaceApplicable = true;
     @SuppressWarnings("NullAway.Init")
@@ -505,7 +504,6 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     }
 
     protected void setTransparentStatusBarAfterToolbarCollapsed() {
-        this.transparentStatusBarAfterToolbarCollapsed = true;
     }
 
     protected void setHasDrawerLayout() {
@@ -615,7 +613,9 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
                 int touchSlop = (int) touchSlopBox;
                 touchSlopField.set(recyclerView, touchSlop * Integer.parseInt(getDefaultSharedPreferences().getString(SharedPreferencesUtils.TAB_SWITCHING_SENSITIVITY, "4")));
             }
-        } catch (NoSuchFieldException | IllegalAccessException ignore) {}
+        } catch (NoSuchFieldException | IllegalAccessException ignore) {
+            Log.d("BaseActivity", "fixViewPager2Sensitivity: ignoring NoSuchFieldException | IllegalAccessException", ignore);
+        }
     }
 
     protected void setOtherActivitiesFabContentDescription(FloatingActionButton fab, int fabOption) {

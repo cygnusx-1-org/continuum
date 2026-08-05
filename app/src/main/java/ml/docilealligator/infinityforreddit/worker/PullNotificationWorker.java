@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -13,6 +14,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -255,7 +257,7 @@ public class PullNotificationWorker extends Worker {
         String clientId = APIUtils.getClientId(getApplicationContext());
         Map<String, String> authHeader = new HashMap<>();
         String credentials = String.format("%s:%s", clientId, "");
-        String auth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
+        String auth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(StandardCharsets.UTF_8), android.util.Base64.NO_WRAP);
         authHeader.put(APIUtils.AUTHORIZATION_KEY, auth);
 
         Call<String> accessTokenCall = api.getAccessToken(authHeader, params);
@@ -283,7 +285,7 @@ public class PullNotificationWorker extends Worker {
 
             return "";
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            Log.e("PullNotificationWorker", "refreshAccessToken failed", e);
         }
 
         return "";

@@ -75,7 +75,9 @@ public class SubredditMultiselectionRecyclerViewAdapter extends RecyclerView.Ada
         this.subscribedSubreddits = SubredditWithSelection.convertSubscribedSubreddits(subscribedSubreddits);
         Set<String> selectedSet = new HashSet<>();
         if (selectedSubreddits != null && !selectedSubreddits.isEmpty()) {
-            for (String name : selectedSubreddits.split(",")) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
+            String[] selectedSubredditParts = selectedSubreddits.split(",");
+            for (String name : selectedSubredditParts) {
                 String trimmed = name.trim();
                 if (!trimmed.isEmpty()) {
                     selectedSet.add(trimmed);

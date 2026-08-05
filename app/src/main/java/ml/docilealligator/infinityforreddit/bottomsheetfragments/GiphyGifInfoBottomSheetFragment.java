@@ -33,6 +33,7 @@ public class GiphyGifInfoBottomSheetFragment extends LandscapeExpandedRoundedBot
         return binding.getRoot();
     }
 
+    @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         this.activity = (BaseActivity) context;

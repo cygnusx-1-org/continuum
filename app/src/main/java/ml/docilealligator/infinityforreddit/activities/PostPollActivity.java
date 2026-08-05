@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -572,7 +574,9 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             fCursorDrawable.set(editor, drawables);
-        } catch (Throwable ignored) { }
+        } catch (Throwable ignored) {
+            Log.d("PostPollActivity", "setCursorDrawableColor: ignoring Throwable", ignored);
+        }
     }
 
     private void displaySubredditIcon() {
@@ -937,7 +941,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             if (submitPollPostEvent.errorMessage == null || submitPollPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostPollActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostPollActivity, submitPollPostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostPollActivity, submitPollPostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitPollPostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

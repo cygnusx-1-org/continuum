@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
 import android.text.Html;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -78,12 +79,12 @@ public class FetchUserFlairs {
 
                     userFlairs.add(new UserFlair(id, text, authorFlairHTMLBuilder.toString(), editable, maxEmojis));
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("FetchUserFlairs", "parseUserFlairs failed", e);
                 }
             }
             return userFlairs;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("FetchUserFlairs", "parseUserFlairs failed", e);
         }
         return null;
     }

@@ -477,8 +477,6 @@ public class DownloadRedditVideoService extends JobService {
             try {
                 byte[] fileReader = new byte[4096];
 
-                long fileSize = body.contentLength();
-                long fileSizeDownloaded = 0;
 
                 inputStream = body.byteStream();
                 outputStream = new FileOutputStream(file);
@@ -492,7 +490,6 @@ public class DownloadRedditVideoService extends JobService {
 
                     outputStream.write(fileReader, 0, read);
 
-                    fileSizeDownloaded += read;
                 }
 
                 outputStream.flush();
@@ -587,7 +584,7 @@ public class DownloadRedditVideoService extends JobService {
             muxer.stop();
             muxer.release();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            e.printStackTrace();
+            Log.e("DownloadRedditVideoService", "muxVideoAndAudio failed", e);
         } catch (IOException e) {
             e.printStackTrace();
             return false;

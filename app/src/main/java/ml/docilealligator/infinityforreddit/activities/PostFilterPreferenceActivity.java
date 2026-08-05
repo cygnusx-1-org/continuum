@@ -49,7 +49,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
     public PostFilterWithUsageViewModel postFilterWithUsageViewModel;
@@ -132,7 +132,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
             }
         });
 
-        adapter = new PostFilterWithUsageRecyclerViewAdapter(this, customThemeWrapper, postFilter -> {
+        adapter = new PostFilterWithUsageRecyclerViewAdapter(this, mCustomThemeWrapper, postFilter -> {
             if (post != null) {
                 showPostFilterOptions(post, postFilter);
             } else if (subredditName != null) {
@@ -273,7 +273,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -282,11 +282,11 @@ public class PostFilterPreferenceActivity extends BaseActivity {
                 binding.collapsingToolbarLayoutPostFilterPreferenceActivity, binding.toolbarPostFilterPreferenceActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutPostFilterPreferenceActivity);
         applyFABTheme(binding.fabPostFilterPreferenceActivity);
-        binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
-        binding.subredditFilterPrefixMatchingTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getPrimaryTextColor());
-        binding.subredditFilterPrefixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getSecondaryTextColor());
-        binding.subredditFilterSuffixMatchingTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getPrimaryTextColor());
-        binding.subredditFilterSuffixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(customThemeWrapper.getSecondaryTextColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.subredditFilterPrefixMatchingTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
+        binding.subredditFilterPrefixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
+        binding.subredditFilterSuffixMatchingTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
+        binding.subredditFilterSuffixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
     }
 
     @Override

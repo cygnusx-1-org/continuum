@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import me.zhanghai.android.fastscroll.PopupTextProvider;
@@ -357,9 +358,9 @@ public class MultiRedditListingRecyclerViewAdapter extends RecyclerView.Adapter<
             case VIEW_TYPE_MULTI_REDDIT:
                 int offset = (mFavoriteMultiReddits != null && mFavoriteMultiReddits.size() > 0) ?
                         mFavoriteMultiReddits.size() + 2 : 0;
-                return mMultiReddits.get(position - offset).getDisplayName().substring(0, 1).toUpperCase();
+                return mMultiReddits.get(position - offset).getDisplayName().substring(0, 1).toUpperCase(Locale.getDefault());
             case VIEW_TYPE_FAVORITE_MULTI_REDDIT:
-                return mFavoriteMultiReddits.get(position - 1).getDisplayName().substring(0, 1).toUpperCase();
+                return mFavoriteMultiReddits.get(position - 1).getDisplayName().substring(0, 1).toUpperCase(Locale.getDefault());
             default:
                 return "";
         }

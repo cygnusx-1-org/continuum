@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.thing;
 
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.io.IOException;
@@ -220,7 +221,7 @@ public class FetchRedgifsVideoLinks {
                 return newAccessToken;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("FetchRedgifsVideoLinks", "refreshAccessToken failed", e);
         }
         return "";
     }

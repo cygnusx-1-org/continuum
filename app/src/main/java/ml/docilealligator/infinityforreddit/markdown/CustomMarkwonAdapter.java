@@ -27,7 +27,6 @@ import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntr
 import org.commonmark.node.Node;
 
 public class CustomMarkwonAdapter extends MarkwonAdapter {
-    private BaseActivity activity;
     private final SparseArray<Entry<Node, Holder>> entries;
     private final Entry<Node, Holder> defaultEntry;
     private final MarkwonReducer reducer;
@@ -50,7 +49,6 @@ public class CustomMarkwonAdapter extends MarkwonAdapter {
             @NonNull SparseArray<Entry<Node, Holder>> entries,
             @NonNull Entry<Node, Holder> defaultEntry,
             @NonNull MarkwonReducer reducer) {
-        this.activity = activity;
         this.entries = entries;
         this.defaultEntry = defaultEntry;
         this.reducer = reducer;

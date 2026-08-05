@@ -102,7 +102,6 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         }
 
         if (versionPreference != null) {
-            String appName = getString(R.string.application_name);
             String summary = String.format("%s (%s)", BuildConfig.VERSION_NAME, BuildConfig.APPLICATION_ID);
             versionPreference.setSummary(summary);
 

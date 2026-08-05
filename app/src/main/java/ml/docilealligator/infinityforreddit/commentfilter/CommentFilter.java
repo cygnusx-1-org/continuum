@@ -11,6 +11,7 @@ import androidx.room.PrimaryKey;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 
@@ -68,7 +69,7 @@ public class CommentFilter implements Parcelable {
         if (commentFilter.excludeStrings != null && !commentFilter.excludeStrings.equals("")) {
             String[] titles = commentFilter.excludeStrings.split(",", 0);
             for (String t : titles) {
-                if (!t.trim().equals("") && comment.getCommentRawText() != null && comment.getCommentRawText().toLowerCase().contains(t.toLowerCase().trim())) {
+                if (!t.trim().equals("") && comment.getCommentRawText() != null && comment.getCommentRawText().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
                     return false;
                 }
             }

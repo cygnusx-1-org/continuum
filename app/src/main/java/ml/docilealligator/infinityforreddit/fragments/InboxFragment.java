@@ -17,8 +17,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -64,8 +62,6 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
     @SuppressWarnings("NullAway.Init")
     private MessageRecyclerViewAdapter mAdapter;
     @SuppressWarnings("NullAway.Init")
-    private RequestManager mGlide;
-    @SuppressWarnings("NullAway.Init")
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
     private BaseActivity mActivity;
     private FragmentInboxBinding binding;
@@ -89,7 +85,6 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
         if (arguments == null) {
             return binding.getRoot();
         }
-        mGlide = Glide.with(this);
 
         if (mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {

@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -126,7 +127,7 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
         boolean isGettingSubredditInfo = getArguments().getBoolean(EXTRA_IS_GETTING_SUBREDDIT_INFO);
 
         String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_SUBREDDIT, SortType.Type.RELEVANCE.value));
-        sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
+        sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)));
         boolean nsfw = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE, false);
 
         mAdapter = new SubredditListingRecyclerViewAdapter(mActivity, mExecutor, mOauthRetrofit, mRetrofit,

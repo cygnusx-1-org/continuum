@@ -6,6 +6,7 @@ import static ml.docilealligator.infinityforreddit.comment.Comment.VOTE_TYPE_UPV
 
 import android.os.Handler;
 import android.text.Html;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
@@ -129,7 +130,7 @@ public class ParseComment {
                             }
                         } catch (JSONException | RuntimeException e) {
                             // Well we need to catch and ignore the exception to not show "error loading comments" to users
-                            e.printStackTrace();
+                            Log.e("ParseComment", "parseMoreComment failed", e);
                         }
                     }
                 }

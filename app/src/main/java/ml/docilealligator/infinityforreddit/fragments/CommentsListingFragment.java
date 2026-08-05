@@ -26,8 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -100,7 +99,6 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     CustomThemeWrapper customThemeWrapper;
     @Inject
     Executor mExecutor;
-    private RequestManager mGlide;
     private BaseActivity mActivity;
     @Nullable
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
@@ -151,7 +149,6 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
         applyTheme();
 
-        mGlide = Glide.with(mActivity);
 
         if (mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
@@ -310,9 +307,9 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
                 String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name()));
                 if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
                     String sortTime = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name()));
-                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()), SortType.Time.valueOf(sortTime.toUpperCase()));
+                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)), SortType.Time.valueOf(sortTime.toUpperCase(Locale.US)));
                 } else {
-                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
+                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)));
                 }
             }
             // The list is sorted correctly regardless, but the host toolbar's sort subtitle is only

@@ -17,6 +17,7 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -318,7 +319,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                     return;
                 }
                 if (name.equals("popular") || name.equals("all")) {
-                    Objects.requireNonNull(getSupportActionBar()).setTitle(name.substring(0, 1).toUpperCase() + name.substring(1));
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1));
                 } else {
                     String subredditNamePrefixed = "r/" + name;
                     Objects.requireNonNull(getSupportActionBar()).setTitle(subredditNamePrefixed);

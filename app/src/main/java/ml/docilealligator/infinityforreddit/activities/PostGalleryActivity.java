@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -872,7 +873,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
             if (submitGalleryPostEvent.errorMessage == null || submitGalleryPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, submitGalleryPostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, submitGalleryPostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitGalleryPostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

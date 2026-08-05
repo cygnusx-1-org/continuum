@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,9 +78,8 @@ public class FollowedUsersListingFragment extends Fragment implements FragmentCo
 
         applyTheme();
 
-        Resources resources = getResources();
 
-        if ((mActivity instanceof BaseActivity && mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge())) {
+        if (mActivity != null && mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
                 @NonNull
                 @Override

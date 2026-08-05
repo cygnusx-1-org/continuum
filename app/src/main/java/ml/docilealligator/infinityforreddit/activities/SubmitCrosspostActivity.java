@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -582,7 +584,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             showCouldNotVerifyDialog();
             return false;
         }
-        String key = (targetIsUser ? "u_" + targetSubName : targetSubName).toLowerCase();
+        String key = (targetIsUser ? "u_" + targetSubName : targetSubName).toLowerCase(Locale.US);
         if (crosspostableSubreddits.contains(key)) {
             return true;
         }
@@ -616,6 +618,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                                     subscribed = data.getBoolean("user_is_subscriber");
                                 }
                             } catch (Exception ignored) {
+                                Log.d("SubmitCrosspostActivity", "onResponse: ignoring Exception", ignored);
                             }
                         }
                         showBlockDialog(targetSubName, subscribed);
@@ -795,7 +798,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 boolean pickedIsUser = data.getIntExtra(SelectThingReturnKey.RETURN_EXTRA_THING_TYPE, SelectThingReturnKey.THING_TYPE.SUBREDDIT) == SelectThingReturnKey.THING_TYPE.USER;
 
                 if (crosspostableSubreddits != null && pickedName != null) {
-                    String key = (pickedIsUser ? "u_" + pickedName : pickedName).toLowerCase();
+                    String key = (pickedIsUser ? "u_" + pickedName : pickedName).toLowerCase(Locale.US);
                     if (!crosspostableSubreddits.contains(key)) {
                         explainCrosspostBlock(pickedName, pickedIsUser);
                         return;
@@ -875,7 +878,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             if (submitCrosspostEvent.errorMessage == null || submitCrosspostEvent.errorMessage.equals("")) {
                 Snackbar.make(binding.getRoot(), R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.getRoot(), submitCrosspostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.getRoot(), submitCrosspostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitCrosspostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

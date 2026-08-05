@@ -61,6 +61,7 @@ public class BlockQuoteWithExceptionParser extends AbstractBlockParser {
     }
 
     public static class Factory extends AbstractBlockParserFactory {
+        @Override
         public BlockStart tryStart(ParserState state, MatchedBlockParser matchedBlockParser) {
             int nextNonSpace = state.getNextNonSpaceIndex();
             // Potential for a spoiler opening

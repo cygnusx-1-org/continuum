@@ -5,17 +5,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -111,35 +113,65 @@ public class RestoreSettings {
                         for (File f : restoreFiles) {
                             if (f.isFile()) {
                                 if (f.getName().equals(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + "_private.txt")) {
-                                    result = result & importSharedPreferencsFromFile(defaultPrefsPrivate, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(defaultPrefsPrivate, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().equals(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + ".txt")) {
-                                    result = result & importSharedPreferencsFromFile(defaultSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(defaultSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.LIGHT_THEME_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(lightThemeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(lightThemeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.DARK_THEME_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(darkThemeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(darkThemeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.AMOLED_THEME_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(amoledThemeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(amoledThemeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(sortTypeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(sortTypeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postLayoutSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postLayoutSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postDetailsSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postDetailsSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postFeedScrolledPositionSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postFeedScrolledPositionSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(mainActivityTabsSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(mainActivityTabsSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(proxySharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(proxySharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(nsfwAndSpoilerSharedPreferencs, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(nsfwAndSpoilerSharedPreferencs, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(bottomAppBarSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(bottomAppBarSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postHistorySharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postHistorySharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(navigationDrawerSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(navigationDrawerSharedPreferences, f.toString());
+                                    result = result && imported;
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {
                                 if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
@@ -382,28 +414,28 @@ public class RestoreSettings {
                 result = true;
             }
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            Log.e("RestoreSettings", "importSharedPreferencsFromFile failed", e);
         } finally {
             try {
                 if (input != null) {
                     input.close();
                 }
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Log.e("RestoreSettings", "importSharedPreferencsFromFile failed", ex);
             }
         }
         return result;
     }
 
     private static <T> List<T> getListFromFile(File file, Type dataType) {
-        try (JsonReader reader = new JsonReader(new FileReader(file))) {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             Gson gson = new Gson();
             List<T> result = gson.fromJson(reader, dataType);
             if (result != null) {
                 return result;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("RestoreSettings", "getListFromFile failed", e);
         }
 
         return Collections.emptyList();

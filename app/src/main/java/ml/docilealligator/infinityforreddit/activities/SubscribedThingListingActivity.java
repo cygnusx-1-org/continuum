@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -736,6 +737,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
             Set<String> usernames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
             for (String path : mRedditDataRoomDatabase.multiRedditDao().getFollowedMultiRedditPaths(accountName)) {
                 if (path != null) {
+                    @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
                     String[] segments = path.split("/");
                     if (segments.length > 2 && "user".equals(segments[1])) {
                         usernames.add(segments[2]);
@@ -838,7 +840,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("SubscribedThingListingActivity", "showFollowFailureReason failed", e);
             }
             int finalMessageRes = messageRes;
             mHandler.post(() -> {
@@ -1010,6 +1012,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                             case 2:
                                 return Utils.getTabTextWithCustomFont(typeface, getString(R.string.multi_reddits));
                         }
+                    // fall through
                     case EXTRA_THING_SELECTION_TYPE_SUBREDDIT:
                         return Utils.getTabTextWithCustomFont(typeface, getString(R.string.subreddits));
                     case EXTRA_THING_SELECTION_TYPE_USER:

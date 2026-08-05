@@ -57,7 +57,7 @@ public class SearchHistoryActivity extends BaseActivity {
 
     private ActivitySearchHistoryBinding binding;
     private SearchActivityRecyclerViewAdapter mAdapter;
-    private Handler mHandler;
+    private Handler mSearchHistoryHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,7 +117,7 @@ public class SearchHistoryActivity extends BaseActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.search_history);
 
-        mHandler = new Handler();
+        mSearchHistoryHandler = new Handler();
 
         mAdapter = new SearchActivityRecyclerViewAdapter(this, mCustomThemeWrapper,
                 new SearchActivityRecyclerViewAdapter.ItemOnClickListener() {
@@ -142,7 +142,7 @@ public class SearchHistoryActivity extends BaseActivity {
                     public void onDelete(RecentSearchQuery recentSearchQuery) {
                         mExecutor.execute(() -> {
                             mRedditDataRoomDatabase.recentSearchQueryDao().deleteRecentSearchQueries(recentSearchQuery);
-                            mHandler.post(() -> Snackbar.make(binding.getRoot(), R.string.recent_search_deleted, Snackbar.LENGTH_SHORT)
+                            mSearchHistoryHandler.post(() -> Snackbar.make(binding.getRoot(), R.string.recent_search_deleted, Snackbar.LENGTH_SHORT)
                                     .setAction(R.string.undo, v -> mExecutor.execute(() ->
                                             mRedditDataRoomDatabase.recentSearchQueryDao().insert(recentSearchQuery)))
                                     .show());

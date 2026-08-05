@@ -37,6 +37,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Executor;
@@ -166,10 +167,7 @@ public class DownloadMediaService extends JobService {
                 if (redgifsId != null && redgifsId.contains("-")) {
                     redgifsId = redgifsId.substring(0, redgifsId.indexOf('-'));
                 }
-            } else if (post.isImgur()) {
-                url = post.getVideoUrl();
-                extras.putString(EXTRA_URL, url);
-            } else { // Standard Reddit video
+            } else { // Imgur or standard Reddit video
                 url = post.getVideoUrl();
                 extras.putString(EXTRA_URL, url);
             }
@@ -505,8 +503,11 @@ public class DownloadMediaService extends JobService {
 
                 Log.d("ImgurDownload", "Processing album/gallery with media types: " + concatMediaTypes);
 
+                @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
                 String[] urls = concatUrls.split(" ");
+                @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
                 String[] mediaTypes = concatMediaTypes.split(" ");
+                @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
                 String[] fileNames = concatFileNames.split(" ");
 
                 Log.d("ImgurDownload", "Split into " + urls.length + " items to download");
@@ -710,18 +711,18 @@ public class DownloadMediaService extends JobService {
                             if (files != null) {
                                 for (DocumentFile file : files) {
                                     if (file.getName() != null) {
-                                        existingFileNames.add(file.getName().toLowerCase());
+                                        existingFileNames.add(file.getName().toLowerCase(Locale.US));
                                     }
                                 }
                             }
 
-                            if (existingFileNames.contains(fileName.toLowerCase())) {
+                            if (existingFileNames.contains(fileName.toLowerCase(Locale.US))) {
                                 int num = 1;
                                 String newFileName;
                                 do {
                                     newFileName = baseName + " (" + num + ")" + extension;
                                     num++;
-                                } while (existingFileNames.contains(newFileName.toLowerCase()));
+                                } while (existingFileNames.contains(newFileName.toLowerCase(Locale.US)));
                                 fileName = newFileName;
                             }
 
@@ -920,8 +921,6 @@ public class DownloadMediaService extends JobService {
                 OutputStream outputStream = new FileOutputStream(destinationFileUriString);
                 byte[] fileReader = new byte[4096];
 
-                long fileSize = body.contentLength();
-                long fileSizeDownloaded = 0;
 
                 while (true) {
                     int read = inputStream.read(fileReader);
@@ -932,7 +931,6 @@ public class DownloadMediaService extends JobService {
 
                     outputStream.write(fileReader, 0, read);
 
-                    fileSizeDownloaded += read;
                 }
 
                 outputStream.flush();

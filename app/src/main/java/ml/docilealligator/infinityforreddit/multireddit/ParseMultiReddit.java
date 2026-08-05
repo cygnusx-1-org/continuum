@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -35,7 +36,7 @@ public class ParseMultiReddit {
                     try {
                         multiReddits.add(parseMultiReddit(arrayResponse.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY)));
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("ParseMultiReddit", "parseMultiRedditsList failed", e);
                     }
                 }
 

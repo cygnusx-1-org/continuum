@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class ParsePost {
                         newPostsIds.add(post.getId());
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("ParsePost", "parsePostsSync failed", e);
                 }
             }
 
@@ -222,7 +223,7 @@ public class ParsePost {
                 subredditIconUrl = srDetail.getString(JSONUtils.ICON_IMG_KEY);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("ParsePost", "parseBasicData failed", e);
         }
         String author = data.getString(JSONUtils.AUTHOR_KEY);
         StringBuilder authorFlairHTMLBuilder = new StringBuilder();
@@ -407,6 +408,10 @@ public class ParsePost {
         return url;
     }
 
+    // `locked` is unread here but is one of ~30 positional boolean parameters mirroring the
+    // Post constructor; dropping it from this signature and its 7 call sites risks silently
+    // misaligning the neighbouring booleans, so it stays.
+    @SuppressWarnings("UnusedVariable")
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,
                                   String subredditName, String subredditNamePrefixed, @Nullable String subredditIconUrl,
                                   String author, String authorFlair, String authorFlairHTML,
@@ -666,7 +671,9 @@ public class ParsePost {
                             if (!mp4Variant.isEmpty()) {
                                 post.setMp4Variant(mp4Variant);
                             }
-                        } catch (Exception ignore) {}
+                        } catch (Exception ignore) {
+                            Log.d("ParsePost", "parseData: ignoring Exception", ignore);
+                        }
                     } else if (uri.getAuthority() != null && uri.getAuthority().contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
                         // Imgur gifv/mp4
                         int postType = Post.VIDEO_TYPE;
@@ -888,7 +895,9 @@ public class ParsePost {
                         post.setStreamableShortCode(shortCode);
                     }
                 }
-            } catch (IllegalArgumentException ignore) { }
+            } catch (IllegalArgumentException ignore) {
+                Log.d("ParsePost", "parseData: ignoring IllegalArgumentException", ignore);
+            }
         } else if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
             if (!data.isNull(JSONUtils.GALLERY_DATA_KEY)) {
                 try {
@@ -986,7 +995,7 @@ public class ParsePost {
 ]
 }
                      */
-                    e.printStackTrace();
+                    Log.e("ParsePost", "parseData failed", e);
                 }
             } else if (post.getPostType() == Post.LINK_TYPE) {
                 String authority = uri.getAuthority();

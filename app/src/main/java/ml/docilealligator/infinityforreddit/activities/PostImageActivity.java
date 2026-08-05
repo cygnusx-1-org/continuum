@@ -31,6 +31,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -669,7 +670,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             }
 
             // Fallback: check file extension if MIME type detection fails
-            if (!isGif && imageUri.toString().toLowerCase().endsWith(".gif")) {
+            if (!isGif && imageUri.toString().toLowerCase(Locale.US).endsWith(".gif")) {
                 isGif = true;
             }
 
@@ -830,7 +831,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             if (submitImagePostEvent.errorMessage == null || submitImagePostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitImagePostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitImagePostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitImagePostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }
@@ -854,7 +855,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             if (submitVideoOrGifPostEvent.errorMessage == null || submitVideoOrGifPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitVideoOrGifPostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitVideoOrGifPostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitVideoOrGifPostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

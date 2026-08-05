@@ -78,7 +78,7 @@ public class CustomThemeListingActivity extends BaseActivity implements
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     @Named("light_theme")
     SharedPreferences lightThemeSharedPreferences;
@@ -208,12 +208,12 @@ public class CustomThemeListingActivity extends BaseActivity implements
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
     protected void applyCustomTheme() {
-        binding.coordinatorLayoutCustomThemeListingActivity.setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.coordinatorLayoutCustomThemeListingActivity.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeThemeListingActivity,
                 binding.collapsingToolbarLayoutCustomizeThemeListingActivity, binding.toolbarCustomizeThemeListingActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCustomizeThemeListingActivity);

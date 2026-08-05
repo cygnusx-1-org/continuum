@@ -372,6 +372,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         });
     }
 
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public void displayToolbarSortAndTitle(ViewPostDetailFragmentNew fragment) {
         if (mSectionsPagerAdapter != null && fragment == mSectionsPagerAdapter.getCurrentFragment()) {
             updateToolbar(fragment);

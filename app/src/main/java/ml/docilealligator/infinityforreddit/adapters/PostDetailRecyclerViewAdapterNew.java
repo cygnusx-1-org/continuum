@@ -155,10 +155,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final Executor mExecutor;
     private final Retrofit mRetrofit;
     private final Retrofit mOauthRetrofit;
-    private final Retrofit mRedgifsRetrofit;
     private final Provider<StreamableAPI> mStreamableApiProvider;
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
-    private final SharedPreferences mCurrentAccountSharedPreferences;
     private final SharedPreferences mPostHistorySharedPreferences;
     private final VideoMuteManager mVideoMuteManager;
     private final RequestManager mGlide;
@@ -267,14 +265,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mExecutor = executor;
         mRetrofit = retrofit;
         mOauthRetrofit = oauthRetrofit;
-        mRedgifsRetrofit = redgifsRetrofit;
         mStreamableApiProvider = streamableApiProvider;
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mVideoMuteManager = videoMuteManager;
         mGlide = glide;
         mMaxResolution = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
         mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
-        mCurrentAccountSharedPreferences = currentAccountSharedPreferences;
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         int markdownColor = customThemeWrapper.getPostContentColor();
         int postSpoilerBackgroundColor = markdownColor | 0xFF000000;

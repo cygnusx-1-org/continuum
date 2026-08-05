@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.customtheme;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -583,6 +584,7 @@ public class CustomTheme implements Parcelable {
                         obj.add(field.getName(), context.serialize(field.get(src)));
                     }
                 } catch (IllegalAccessException ignored) {
+                    Log.d("CustomTheme", "serialize: ignoring IllegalAccessException", ignored);
                 }
             }
             return obj;

@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.customtheme;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.paging.ListenableFuturePagingSource;
@@ -24,11 +25,9 @@ import retrofit2.Retrofit;
 public class OnlineCustomThemePagingSource extends ListenableFuturePagingSource<String, OnlineCustomThemeMetadata> {
     private final Executor executor;
     private final ServerAPI api;
-    private final RedditDataRoomDatabase redditDataRoomDatabase;
 
     public OnlineCustomThemePagingSource(Executor executor, Retrofit onlineCustomThemesRetrofit, RedditDataRoomDatabase redditDataRoomDatabase) {
         this.executor = executor;
-        this.redditDataRoomDatabase = redditDataRoomDatabase;
         api = onlineCustomThemesRetrofit.create(ServerAPI.class);
     }
 
@@ -67,6 +66,7 @@ public class OnlineCustomThemePagingSource extends ListenableFuturePagingSource<
                         themeMetadataList.add(OnlineCustomThemeMetadata.fromJson(themesArray.getJSONObject(i).toString()));
                     } catch (JsonParseException ignore) {
 
+                        Log.d("OnlineCustomThemePagingSource", "transformData: ignoring JsonParseException", ignore);
                     }
                 }
 

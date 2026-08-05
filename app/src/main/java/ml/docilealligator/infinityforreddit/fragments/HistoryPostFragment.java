@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -38,7 +37,6 @@ import ml.docilealligator.infinityforreddit.FetchPostFilterAndConcatenatedSubred
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.adapters.Paging3LoadingStateAdapter;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
@@ -78,18 +76,10 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     @SuppressWarnings("NullAway.Init")
     HistoryPostViewModel mHistoryPostViewModel;
     @Inject
-    @Named("no_oauth")
-    Retrofit mRetrofit;
-    @Inject
-    @Named("oauth")
-    Retrofit mOauthRetrofit;
-    @Inject
     @Named("redgifs")
     Retrofit mRedgifsRetrofit;
     @Inject
     Provider<StreamableAPI> mStreamableApiProvider;
-    @Inject
-    RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
     @Named("current_account")
     SharedPreferences mCurrentAccountSharedPreferences;
@@ -107,8 +97,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     SharedPreferences mPostFeedScrolledPositionSharedPreferences;
     @Inject
     ExoCreator mExoCreator;
-    @Inject
-    Executor mExecutor;
     private PostRecyclerViewAdapter mAdapter;
     private int maxPosition = -1;
     @Nullable

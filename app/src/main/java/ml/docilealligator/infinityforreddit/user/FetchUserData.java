@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -127,7 +128,7 @@ public class FetchUserData {
                                     UserData userData = parseUserDataBase(children.getJSONObject(i), false);
                                     userDataList.add(userData);
                                 } catch (JSONException e) {
-                                    e.printStackTrace();
+                                    Log.e("FetchUserData", "onResponse failed", e);
                                 }
                             }
 

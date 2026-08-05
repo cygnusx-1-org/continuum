@@ -150,6 +150,8 @@ public class DownloadLocationPreferenceFragment extends CustomFontPreferenceFrag
         }
     }
 
+    // URLDecoder.decode(String, Charset) needs API 33; minSdk is 24, so the String overload stays.
+    @SuppressWarnings("JdkObsolete")
     private String formatDownloadPath(@Nullable String uriString) {
         if (uriString == null || uriString.isEmpty()) {
             return "";

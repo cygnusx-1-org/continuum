@@ -592,8 +592,7 @@ public class SubredditSettingData {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SubredditSettingData that = (SubredditSettingData) o;
+        if (!(o instanceof SubredditSettingData that)) return false;
         return defaultSet == that.defaultSet && toxicityThresholdChatLevel == that.toxicityThresholdChatLevel
                 && crowdControlChatLevel == that.crowdControlChatLevel && restrictPosting == that.restrictPosting
                 && allowImages == that.allowImages && freeFormReports == that.freeFormReports && showMedia == that.showMedia

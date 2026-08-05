@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.customviews;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +21,9 @@ public class ViewPagerBugFixed extends ViewPager {
     public boolean onTouchEvent(MotionEvent ev) {
         try {
             return super.onTouchEvent(ev);
-        } catch (IllegalArgumentException ignore) {}
+        } catch (IllegalArgumentException ignore) {
+            Log.d("ViewPagerBugFixed", "onTouchEvent: ignoring IllegalArgumentException", ignore);
+        }
 
         return false;
     }
@@ -29,7 +32,9 @@ public class ViewPagerBugFixed extends ViewPager {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         try {
             return super.onInterceptTouchEvent(ev);
-        } catch (IllegalArgumentException ignore) {}
+        } catch (IllegalArgumentException ignore) {
+            Log.d("ViewPagerBugFixed", "onInterceptTouchEvent: ignoring IllegalArgumentException", ignore);
+        }
 
         return false;
     }

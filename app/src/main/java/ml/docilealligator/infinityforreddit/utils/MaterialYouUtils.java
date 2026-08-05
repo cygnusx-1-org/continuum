@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import java.util.concurrent.Executor;
@@ -46,6 +47,7 @@ public class MaterialYouUtils {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ignored) {
+            Log.d("MaterialYouUtils", "changeThemeSync: ignoring InterruptedException", ignored);
         }
         if (changeTheme(context, redditDataRoomDatabase, customThemeWrapper, lightThemeSharedPreferences, darkThemeSharedPreferences, amoledThemeSharedPreferences, internalSharedPreferences)) {
             EventBus.getDefault().post(new RecreateActivityEvent());
@@ -63,7 +65,9 @@ public class MaterialYouUtils {
         executor.execute(() -> {
             try {
                 Thread.sleep(2000);
-            } catch (InterruptedException ignored) { }
+            } catch (InterruptedException ignored) {
+                Log.d("MaterialYouUtils", "changeThemeASync: ignoring InterruptedException", ignored);
+            }
             if (changeTheme(context, redditDataRoomDatabase, customThemeWrapper, lightThemeSharedPreferences, darkThemeSharedPreferences, amoledThemeSharedPreferences, internalSharedPreferences)) {
                 handler.post(() -> {
                     if (materialYouListener != null) {

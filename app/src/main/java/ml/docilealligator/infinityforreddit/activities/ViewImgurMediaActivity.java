@@ -467,13 +467,13 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
                                 type, image.getString(JSONUtils.LINK_KEY)));
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("ViewImgurMediaActivity", "parseImgurImages failed", e);
                 }
             }
 
             return images;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("ViewImgurMediaActivity", "parseImgurImages failed", e);
         }
 
         return null;
@@ -498,7 +498,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
                         type, image.getString(JSONUtils.LINK_KEY));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("ViewImgurMediaActivity", "parseImgurImage failed", e);
         }
 
         return null;

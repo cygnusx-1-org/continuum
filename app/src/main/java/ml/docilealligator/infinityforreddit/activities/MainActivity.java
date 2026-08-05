@@ -2185,7 +2185,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return resolved.get(position).title;
         }
 
-        private class ResolvedTab {
+        private static class ResolvedTab {
             final int postType;
             final String name;
             final String title;

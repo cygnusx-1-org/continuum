@@ -4,6 +4,9 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 
+// Fields are read reflectively by Gson when this model is serialised into the
+// multireddit create/update request body, so they are not dead despite having no reader here.
+@SuppressWarnings("UnusedVariable")
 public class MultiRedditJSONModel {
     @Nullable
     private String display_name;

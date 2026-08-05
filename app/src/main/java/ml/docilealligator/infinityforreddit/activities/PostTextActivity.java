@@ -33,6 +33,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -770,7 +771,7 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
             if (submitTextOrLinkPostEvent.errorMessage == null || submitTextOrLinkPostEvent.errorMessage.equals("")) {
                 Snackbar.make(binding.coordinatorLayoutPostTextActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostTextActivity, submitTextOrLinkPostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostTextActivity, submitTextOrLinkPostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitTextOrLinkPostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

@@ -45,7 +45,7 @@ public class CommentFilterPreferenceActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
     public CommentFilterWithUsageViewModel commentFilterWithUsageViewModel;
@@ -187,7 +187,7 @@ public class CommentFilterPreferenceActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -196,7 +196,7 @@ public class CommentFilterPreferenceActivity extends BaseActivity {
                 binding.collapsingToolbarLayoutCommentFilterPreferenceActivity, binding.toolbarCommentFilterPreferenceActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCommentFilterPreferenceActivity);
         applyFABTheme(binding.fabCommentFilterPreferenceActivity);
-        binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
     }
 
     @Override

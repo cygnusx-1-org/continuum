@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.postfilter;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
@@ -242,7 +243,7 @@ public class PostFilter implements Parcelable {
                         return false;
                     }
                 } catch (PatternSyntaxException e) {
-                    e.printStackTrace();
+                    Log.e("PostFilter", "isPostAllowed failed", e);
                 }
             }
         }
@@ -263,7 +264,7 @@ public class PostFilter implements Parcelable {
                         break;
                     }
                 } catch (PatternSyntaxException e) {
-                    e.printStackTrace();
+                    Log.e("PostFilter", "isPostAllowed failed", e);
                 }
             }
             if (!matched) {
@@ -273,7 +274,7 @@ public class PostFilter implements Parcelable {
         if (postFilter.postTitleExcludesStrings != null && !postFilter.postTitleExcludesStrings.equals("")) {
             String[] titles = postFilter.postTitleExcludesStrings.split(",", 0);
             for (String t : titles) {
-                if (!t.trim().equals("") && post.getTitle().toLowerCase().contains(t.toLowerCase().trim())) {
+                if (!t.trim().equals("") && post.getTitle().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
                     return false;
                 }
             }
@@ -282,7 +283,7 @@ public class PostFilter implements Parcelable {
             String[] titles = postFilter.postTitleContainsStrings.split(",", 0);
             boolean hasRequiredString = false;
             for (String t : titles) {
-                if (post.getTitle().toLowerCase().contains(t.toLowerCase().trim())) {
+                if (post.getTitle().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
                     hasRequiredString = true;
                     break;
                 }
@@ -368,19 +369,19 @@ public class PostFilter implements Parcelable {
         }
         if (post.getUrl() != null && postFilter.excludeDomains != null && !postFilter.excludeDomains.equals("")) {
             String[] domains = postFilter.excludeDomains.split(",", 0);
-            String url = post.getUrl().toLowerCase();
+            String url = post.getUrl().toLowerCase(Locale.US);
             for (String f : domains) {
-                if (!f.trim().equals("") && url.contains(f.trim().toLowerCase())) {
+                if (!f.trim().equals("") && url.contains(f.trim().toLowerCase(Locale.US))) {
                     return false;
                 }
             }
         }
         if (post.getUrl() != null && postFilter.containDomains != null && !postFilter.containDomains.equals("")) {
             String[] domains = postFilter.containDomains.split(",", 0);
-            String url = post.getUrl().toLowerCase();
+            String url = post.getUrl().toLowerCase(Locale.US);
             boolean hasRequiredDomain = false;
             for (String f : domains) {
-                if (url.contains(f.trim().toLowerCase())) {
+                if (url.contains(f.trim().toLowerCase(Locale.US))) {
                     hasRequiredDomain = true;
                     break;
                 }

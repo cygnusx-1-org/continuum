@@ -49,7 +49,7 @@ public class GlideImageGetter implements Html.ImageGetter {
             imagesHandler.addImage(source);
         }
 
-        BitmapDrawablePlaceholder drawable = new BitmapDrawablePlaceholder(textSize);
+        BitmapDrawablePlaceholder drawable = new BitmapDrawablePlaceholder();
 
         TextView containerView = container.get();
         if (containerView != null) {
@@ -75,7 +75,7 @@ public class GlideImageGetter implements Html.ImageGetter {
         @Nullable
         protected Drawable drawable;
 
-        BitmapDrawablePlaceholder(float textSize) {
+        BitmapDrawablePlaceholder() {
             super(Objects.requireNonNull(container.get()).getResources(),
                     Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
         }

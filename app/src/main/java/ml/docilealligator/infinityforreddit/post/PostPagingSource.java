@@ -970,6 +970,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         // For anonymous multireddit, extract user entries from concatenated name on first call
         if (postType == PostType.ANONYMOUS_MULTIREDDIT && !multiRedditUsernamesFetched) {
             multiRedditUsernamesFetched = true;
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] parts = (subredditOrUserName == null ? "" : subredditOrUserName).split("\\+");
             List<String> subreddits = new ArrayList<>();
             multiRedditUsernames = new ArrayList<>();

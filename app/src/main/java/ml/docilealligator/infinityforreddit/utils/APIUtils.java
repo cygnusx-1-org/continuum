@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +52,7 @@ public class APIUtils {
     public static final String DURATION = "permanent";
     public static final String SCOPE_KEY = "scope";
 
-    public static final String[] SCOPE_LIST = {
+    private static final String[] SCOPE_LIST = {
         "account", "creddits", "edit", "flair", "history", "identity", "livemanage", "modconfig", "modcontributors",
         "modflair", "modlog", "modmail", "modothers", "modposts", "modwiki", "modself", "mysubreddits", "privatemessages",
         "read", "report", "save", "submit", "subscribe", "vote", "wikiedit", "wikiread"
@@ -223,7 +224,7 @@ public class APIUtils {
         Map<String, String> params = new HashMap<>();
         String clientId = getClientId(appContext);
         String credentials = String.format("%s:%s", clientId, "");
-        String auth = "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+        String auth = "Basic " + Base64.encodeToString(credentials.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
         params.put(APIUtils.AUTHORIZATION_KEY, auth);
 
         return params;

@@ -221,8 +221,46 @@ tasks.withType(JavaCompile).configureEach { compileTask ->
     }
     options.errorprone {
         enabled = compileTask.name == 'compileDebugJavaWithJavac'
-        disableAllChecks = true
         check('NullAway', CheckSeverity.ERROR)
+
+        // Error Prone's own bug patterns run alongside NullAway. Two categories are excluded
+        // wholesale by path, because a finding there is never ours to act on:
+        //
+        //  - build/generated: annotation-processor and data-binding output. Every *Binding.java
+        //    emits a labelled `missingId:` block, which alone accounted for 231 ERROR-severity
+        //    LabelledBreakTarget hits. NullAway already ignores this code via
+        //    TreatGeneratedAsUnannotated; excludedPaths does the same for the other checks.
+        //  - customviews/slidr and videoautoplay: vendored third-party sources (Slidr by
+        //    Gabriele Guerrisi; Toro by Nam Nguyen, Apache-2.0) copied into the tree. Their
+        //    `==` comparisons on Views are deliberate identity checks, and rewriting them to
+        //    .equals() would change library semantics and complicate future upstream re-syncs.
+        //    Neither package carries a @NullMarked package-info.java (JSpecify's @NullMarked is
+        //    per-package, not recursive, so customviews/package-info.java does NOT cover
+        //    customviews/slidr), so excluding them costs NullAway coverage nothing.
+        excludedPaths = '.*/(build/generated|customviews/slidr|videoautoplay)/.*'
+
+        // Style, modernization, and Javadoc checks are off: they flag idiom rather than defects,
+        // and on a fork of an upstream Java codebase they produce churn that makes merges harder
+        // without making the app more correct. The remaining checks are the ones where a finding
+        // indicates something actually wrong. Counts are from the 2026-08 baseline scan.
+        check('PatternMatchingInstanceof', CheckSeverity.OFF)        // 322 - `instanceof Foo f` rewrite
+        check('StatementSwitchToExpressionSwitch', CheckSeverity.OFF) // 154 - arrow-switch rewrite
+        check('NonApiType', CheckSeverity.OFF)                       // 144 - ArrayList vs List in signatures
+        check('EffectivelyPrivate', CheckSeverity.OFF)               // 51  - narrow visibility
+        check('UnnecessaryParentheses', CheckSeverity.OFF)           // 23
+        check('MissingSummary', CheckSeverity.OFF)                   // 22  - Javadoc
+        check('EmptyBlockTag', CheckSeverity.OFF)                    // 21  - Javadoc
+        check('UnnecessaryAssignment', CheckSeverity.OFF)            // 3
+        check('InlineMeSuggester', CheckSeverity.OFF)                // 3   - for library authors
+        check('VariableNameSameAsType', CheckSeverity.OFF)           // 5
+        check('InconsistentCapitalization', CheckSeverity.OFF)       // 2
+        check('NotJavadoc', CheckSeverity.OFF)                       // 2   - Javadoc
+        check('MixedMutabilityReturnType', CheckSeverity.OFF)        // 1
+        check('ProtectedMembersInFinalClass', CheckSeverity.OFF)     // 1
+        check('ExposedPrivateType', CheckSeverity.OFF)               // 1
+        check('InvalidParam', CheckSeverity.OFF)                     // 1   - Javadoc
+        check('InvalidLink', CheckSeverity.OFF)                      // 1   - Javadoc
+
         option('NullAway:OnlyNullMarked', 'true')
         option('NullAway:JSpecifyMode', 'true')
         option('NullAway:ExcludedFieldAnnotations', 'androidx.room.Embedded,androidx.room.Relation,com.google.gson.annotations.SerializedName')

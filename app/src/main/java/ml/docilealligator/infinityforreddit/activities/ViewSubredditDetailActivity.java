@@ -564,8 +564,8 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 }
 
                 if (subredditData.isNSFW()) {
-                    if (nsfwWarningBuilder == null
-                            && mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) || !mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false)) {
+                    if ((nsfwWarningBuilder == null
+                            && mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)) || !mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false)) {
                         nsfwWarningBuilder = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
                                 .setTitle(R.string.warning)
                                 .setMessage(R.string.this_is_a_nsfw_subreddit)

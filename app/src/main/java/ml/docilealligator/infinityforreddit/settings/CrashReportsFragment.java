@@ -110,6 +110,8 @@ public class CrashReportsFragment extends Fragment {
      * parameters does not pick up template defaults, so {@code labels} is sent explicitly.
      * @return if successful
      */
+    // URLEncoder.encode(String, Charset) needs API 33; minSdk is 24, so the String overload stays.
+    @SuppressWarnings("JdkObsolete")
     private boolean createGithubIssueWithLogs() {
         Intent intent = new Intent(getContext(), LinkResolverActivity.class);
         String logs, device, version, androidVersion;

@@ -48,7 +48,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
     private ActivityCommentFilterUsageListingBinding binding;
@@ -115,7 +115,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
             newCommentFilterUsageBottomSheetFragment.show(getSupportFragmentManager(), newCommentFilterUsageBottomSheetFragment.getTag());
         });
 
-        adapter = new CommentFilterUsageRecyclerViewAdapter(this, customThemeWrapper, commentFilterUsage -> {
+        adapter = new CommentFilterUsageRecyclerViewAdapter(this, mCustomThemeWrapper, commentFilterUsage -> {
             CommentFilterUsageOptionsBottomSheetFragment commentFilterUsageOptionsBottomSheetFragment = new CommentFilterUsageOptionsBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable(CommentFilterUsageOptionsBottomSheetFragment.EXTRA_COMMENT_FILTER_USAGE, commentFilterUsage);
@@ -142,7 +142,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
         messageTextView.setVisibility(View.GONE);
         TextInputLayout textInputLayout = dialogView.findViewById(R.id.text_input_layout_edit_post_or_comment_filter_name_of_usage_dialog);
         TextInputEditText textInputEditText = dialogView.findViewById(R.id.text_input_edit_text_edit_post_or_comment_filter_name_of_usage_dialog);
-        int primaryTextColor = customThemeWrapper.getPrimaryTextColor();
+        int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
         textInputLayout.setBoxStrokeColor(primaryTextColor);
         textInputLayout.setDefaultHintTextColor(ColorStateList.valueOf(primaryTextColor));
         textInputEditText.setTextColor(primaryTextColor);
@@ -206,7 +206,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -215,6 +215,6 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
                 binding.collapsingToolbarLayoutCommentFilterUsageListingActivity, binding.toolbarCommentFilterUsageListingActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCommentFilterUsageListingActivity);
         applyFABTheme(binding.fabCommentFilterUsageListingActivity);
-        binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
     }
 }

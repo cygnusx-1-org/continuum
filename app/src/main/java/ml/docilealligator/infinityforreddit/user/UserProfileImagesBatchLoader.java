@@ -1,14 +1,16 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -53,9 +55,9 @@ public class UserProfileImagesBatchLoader {
         mRetrofit = retrofit;
         mOauthRetrofit = oauthRetrofit;
         mAuthorFullNameToImageMap = new HashMap<>();
-        mCommentQueue = new LinkedList<>();
+        mCommentQueue = new ArrayDeque<>();
         mAuthorFullNameToListenerMap = new HashMap<>();
-        mCallingComments = new LinkedList<>();
+        mCallingComments = new ArrayList<>();
         mLoadingAuthorFullNames = new HashSet<>();
     }
 
@@ -225,12 +227,12 @@ public class UserProfileImagesBatchLoader {
                             mAuthorFullNameToImageMap.put(s, imageUrl);
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("UserProfileImagesBatchLoader", "parseUserProfileImages failed", e);
                     }
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("UserProfileImagesBatchLoader", "parseUserProfileImages failed", e);
         }
     }
 

@@ -1788,6 +1788,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Subscribe
+    @Override
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
         if (mAdapter != null) {
             String autoplay = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER));

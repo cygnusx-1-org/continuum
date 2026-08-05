@@ -156,6 +156,8 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
     /**
      * Set a listener that will get called whenever any link is clicked on the TextView.
      */
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public EvenBetterLinkMovementMethod setOnLinkClickListener(@Nullable OnLinkClickListener clickListener) {
         if (this == singleInstance) {
             throw new UnsupportedOperationException("Setting a click listener on the instance returned by getInstance() is not supported to avoid memory " +
@@ -169,6 +171,8 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
     /**
      * Set a listener that will get called whenever any link is clicked on the TextView.
      */
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public EvenBetterLinkMovementMethod setOnLinkLongClickListener(@Nullable OnLinkLongClickListener longClickListener) {
         if (this == singleInstance) {
             throw new UnsupportedOperationException("Setting a long-click listener on the instance returned by getInstance() is not supported to avoid " +
@@ -204,6 +208,8 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
     }
 
     @Override
+    // Compares ClickableSpan identity deliberately: the same span instance must be under both ACTION_DOWN and ACTION_UP.
+    @SuppressWarnings("ReferenceEquality")
     public boolean onTouchEvent(final TextView textView, Spannable text, MotionEvent event) {
         if (activeTextViewHashcode != textView.hashCode()) {
             // Bug workaround: TextView stops calling onTouchEvent() once any URL is highlighted.

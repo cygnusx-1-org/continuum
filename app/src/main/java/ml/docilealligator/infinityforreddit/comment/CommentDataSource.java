@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.comment;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -382,7 +383,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                 comment.setSaved(true);
                 out.add(comment);
             } catch (JSONException | RuntimeException e) {
-                e.printStackTrace();
+                Log.e("CommentDataSource", "hydrateLocalComments failed", e);
             }
         }
         return lastItem;
@@ -474,7 +475,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                 JSONObject commentJSON = commentsJSONArray.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
                 comments.add(ParseComment.parseSingleComment(commentJSON, 0));
             } catch (JSONException | RuntimeException e) {
-                e.printStackTrace();
+                Log.e("CommentDataSource", "parseCommentsSync failed", e);
             }
         }
         return new ParsedComments(comments, after);
@@ -502,7 +503,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                     JSONObject commentJSON = commentsJSONArray.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
                     comments.add(ParseComment.parseSingleComment(commentJSON, 0));
                 } catch (JSONException | RuntimeException e) {
-                    e.printStackTrace();
+                    Log.e("CommentDataSource", "parseComments failed", e);
                 }
             }
             parseCommentsAsyncTaskListener.parseSuccessful(comments, after);

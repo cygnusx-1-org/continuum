@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.network;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.IOException;
@@ -86,7 +87,7 @@ public class ServerAccessTokenAuthenticator implements Authenticator {
             }
             return "";
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            Log.e("ServerAccessTokenAuthenticator", "refreshAccessToken failed", e);
         }
 
         return "";

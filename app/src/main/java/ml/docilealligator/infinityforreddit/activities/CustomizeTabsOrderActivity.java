@@ -76,7 +76,6 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
     private MainPageTabsRecyclerViewAdapter adapter;
     private ItemTouchHelper itemTouchHelper;
     private List<MainPageTabInput> tabs;
-    private boolean changed = false;
     // Which "Show ..." toggles are on, and the latest live items for each (only enabled sources).
     private Set<Integer> enabledSources;
     private final Map<Integer, List<MainPageTabInput>> liveBySource = new HashMap<>();
@@ -460,7 +459,6 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
 
     private void persist() {
         MainPageTabsUtils.save(mMainActivityTabsSharedPreferences, accountName, tabs);
-        changed = true;
         Intent returnIntent = new Intent();
         returnIntent.putExtra(EXTRA_CHANGED, true);
         setResult(Activity.RESULT_OK, returnIntent);

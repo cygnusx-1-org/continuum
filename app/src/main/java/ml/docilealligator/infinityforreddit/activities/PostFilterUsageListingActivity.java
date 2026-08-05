@@ -56,7 +56,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
     public PostFilterUsageViewModel postFilterUsageViewModel;
@@ -126,7 +126,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
             newPostFilterUsageBottomSheetFragment.show(getSupportFragmentManager(), newPostFilterUsageBottomSheetFragment.getTag());
         });
 
-        adapter = new PostFilterUsageRecyclerViewAdapter(this, customThemeWrapper, postFilterUsage -> {
+        adapter = new PostFilterUsageRecyclerViewAdapter(this, mCustomThemeWrapper, postFilterUsage -> {
             PostFilterUsageOptionsBottomSheetFragment postFilterUsageOptionsBottomSheetFragment = new PostFilterUsageOptionsBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable(PostFilterUsageOptionsBottomSheetFragment.EXTRA_POST_FILTER_USAGE, postFilterUsage);
@@ -167,10 +167,10 @@ public class PostFilterUsageListingActivity extends BaseActivity {
         textInputEditText = dialogView.findViewById(R.id.text_input_edit_text_edit_post_or_comment_filter_name_of_usage_dialog);
         ImageView excludeIv = dialogView.findViewById(R.id.add_subreddits_users_image_view_customize_post_filter_activity);
 
-        int primaryIconColor = customThemeWrapper.getPrimaryIconColor();
+        int primaryIconColor = mCustomThemeWrapper.getPrimaryIconColor();
         excludeIv.setImageDrawable(
                 Utils.getTintedDrawable(this, R.drawable.ic_add_24dp, primaryIconColor));
-        int primaryTextColor = customThemeWrapper.getPrimaryTextColor();
+        int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
         textInputLayout.setBoxStrokeColor(primaryTextColor);
         textInputLayout.setDefaultHintTextColor(ColorStateList.valueOf(primaryTextColor));
         textInputEditText.setTextColor(primaryTextColor);
@@ -258,7 +258,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -267,7 +267,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                 binding.collapsingToolbarLayoutPostFilterApplicationActivity, binding.toolbarPostFilterApplicationActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutPostFilterApplicationActivity);
         applyFABTheme(binding.fabPostFilterApplicationActivity);
-        binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -299,7 +299,9 @@ public class PostFilterUsageListingActivity extends BaseActivity {
     private static List<String> getToAdd(String currentCsv, List<String> candidates) {
         Set<String> existing = new HashSet<>();
         if (!currentCsv.isEmpty()) {
-            for (String u : currentCsv.split(",")) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
+            String[] existingCsvParts = currentCsv.split(",");
+            for (String u : existingCsvParts) {
                 String t = u.trim();
                 if (!t.isEmpty()) existing.add(t);
             }

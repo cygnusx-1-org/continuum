@@ -582,6 +582,8 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
         });
     }
 
+    // Glide's FutureTarget is intentionally not retained: the RequestListener below does the work, and the request is bound to this screen's lifecycle.
+    @SuppressWarnings("FutureReturnValueIgnored")
     private void shareGif() {
         Toast.makeText(activity, R.string.save_gif_first, Toast.LENGTH_SHORT).show();
         glide.asGif().load(media.url).listener(new RequestListener<>() {

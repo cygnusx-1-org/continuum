@@ -43,6 +43,7 @@ import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.ImageLoader;
 import com.github.piasy.biv.loader.glide.GlideImageLoader;
 import java.io.File;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -174,12 +175,12 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         // Detect APNG/avatar images - check URL extension or if it's an icon/avatar
         // Use animated-capable view for avatars since they may be APNG
-        if (mImageUrl != null && (mImageUrl.toLowerCase().endsWith(".apng") ||
-            mImageUrl.toLowerCase().contains(".apng?") ||
-            mImageUrl.toLowerCase().contains(".apng&"))) {
+        if (mImageUrl != null && (mImageUrl.toLowerCase(Locale.US).endsWith(".apng") ||
+            mImageUrl.toLowerCase(Locale.US).contains(".apng?") ||
+            mImageUrl.toLowerCase(Locale.US).contains(".apng&"))) {
             isApng = true;
-        } else if (mImageFileName != null && (mImageFileName.toLowerCase().contains("-icon.") ||
-                   mImageFileName.toLowerCase().contains("avatar"))) {
+        } else if (mImageFileName != null && (mImageFileName.toLowerCase(Locale.US).contains("-icon.") ||
+                   mImageFileName.toLowerCase(Locale.US).contains("avatar"))) {
             // Avatar/icon images - treat as potentially animated
             isApng = true;
         }
@@ -504,7 +505,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         if (mImageUrl != null) {
             String urlExt = org.apache.commons.io.FilenameUtils.getExtension(mImageUrl);
             if (urlExt != null && !urlExt.isEmpty() && urlExt.matches("(?i)(jpg|jpeg|png|apng|gif|mp4|webm|mov|avi)")) {
-                extension = "." + urlExt.toLowerCase().substring(0, Math.min(urlExt.length(), 5));
+                extension = "." + urlExt.toLowerCase(Locale.US).substring(0, Math.min(urlExt.length(), 5));
             } else if (isApng) {
                 extension = ".apng";
             } else if (isGif) {
@@ -565,6 +566,8 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         });
     }
 
+    // Glide's FutureTarget is intentionally not retained: the RequestListener below does the work, and the request is bound to this screen's lifecycle.
+    @SuppressWarnings("FutureReturnValueIgnored")
     private void shareGif() {
         Toast.makeText(ViewImageOrGifActivity.this, R.string.save_gif_first, Toast.LENGTH_SHORT).show();
         glide.asGif().load(mImageUrl).listener(new RequestListener<>() {

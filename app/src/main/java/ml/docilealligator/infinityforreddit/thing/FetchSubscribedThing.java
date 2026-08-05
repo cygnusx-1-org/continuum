@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.thing;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class FetchSubscribedThing {
                                         suggestedCommentSort, isNSFW));
                             }
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            Log.e("FetchSubscribedThing", "fetchSubscribedThing failed", e);
                         }
                     }
                     subscribedSubredditData.addAll(newSubscribedSubredditData);

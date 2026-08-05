@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import me.zhanghai.android.fastscroll.PopupTextProvider;
@@ -451,7 +452,7 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
                                 mFavoriteSubscribedSubredditData.size() + 2 : 0;
                     }
 
-                    return mSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase();
+                    return mSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase(Locale.getDefault());
                 }
             case VIEW_TYPE_FAVORITE_SUBREDDIT:
                 int offset;
@@ -464,7 +465,7 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
                 } else {
                     offset = 1;
                 }
-                return mFavoriteSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase();
+                return mFavoriteSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase(Locale.getDefault());
             default:
                 return "";
         }

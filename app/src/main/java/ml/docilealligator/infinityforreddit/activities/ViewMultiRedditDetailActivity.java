@@ -839,6 +839,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         boolean isFollowedEntry = multiReddit != null && multiReddit.isFollowed();
         boolean isNotOwned;
         if (multiReddit == null && multiPath != null) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] segments = multiPath.split("/");
             isNotOwned = segments.length > 2 && !segments[1].equals(accountName);
         } else {
@@ -1021,6 +1022,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         if (multiReddit != null) {
             title = multiReddit.getDisplayName() + "'s subreddits";
         } else if (multiPath != null) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] segments = multiPath.split("/");
             title = segments[segments.length - 1] + "'s subreddits";
         } else {

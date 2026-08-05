@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import ml.docilealligator.infinityforreddit.Constants;
@@ -37,7 +39,7 @@ public class MainPageTabsUtils {
     }.getType();
 
     /** Group sources in the order they were historically appended after the fixed tabs. */
-    public static final int[] GROUP_SOURCES = {
+    private static final int[] GROUP_SOURCES = {
             SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS,
             SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_MULTIREDDITS,
             SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_SUBSCRIBED_SUBREDDITS,
@@ -100,6 +102,7 @@ public class MainPageTabsUtils {
         try {
             tabs = gson.fromJson(json, LIST_TYPE);
         } catch (Exception ignored) {
+            Log.d("MainPageTabsUtils", "load: ignoring Exception", ignored);
         }
         return tabs == null ? defaultTabs() : tabs;
     }
@@ -282,7 +285,7 @@ public class MainPageTabsUtils {
     /** Dedup key for a tab: type + case-insensitive name. Name-based types key on their name; the
      *  rest key on the type alone (only one Home / Popular / All / ... allowed). */
     public static String userKey(int postType, String name) {
-        String n = isNameBasedType(postType) && name != null ? name.toLowerCase() : "";
+        String n = isNameBasedType(postType) && name != null ? name.toLowerCase(Locale.US) : "";
         return postType + "|" + n;
     }
 
@@ -294,6 +297,7 @@ public class MainPageTabsUtils {
         if (path == null) {
             return "";
         }
+        @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
         String[] parts = path.split("/");
         String username = null;
         String multiName = null;
@@ -336,6 +340,7 @@ public class MainPageTabsUtils {
         if (label == null) {
             return null;
         }
+        @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
         String[] parts = label.split("/");
         boolean hasUser = false;
         String multiName = null;

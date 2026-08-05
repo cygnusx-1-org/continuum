@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -301,7 +302,9 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
             drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             fCursorDrawable.set(editor, drawables);
-        } catch (Throwable ignored) { }
+        } catch (Throwable ignored) {
+            Log.d("CustomizeCommentFilterActivity", "setCursorDrawableColor: ignoring Throwable", ignored);
+        }
     }
 
     @Override

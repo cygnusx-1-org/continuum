@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.message;
 
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.text.SimpleDateFormat;
@@ -24,7 +25,7 @@ public class ParseMessage {
                     messages.add(message);
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e("ParseMessage", "parseMessages failed", e);
             }
         }
         return messages;

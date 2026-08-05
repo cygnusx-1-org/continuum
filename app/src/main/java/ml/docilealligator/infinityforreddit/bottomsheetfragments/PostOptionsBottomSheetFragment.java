@@ -66,8 +66,6 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
     private BaseActivity mBaseActivity;
     private Post mPost;
-    @SuppressWarnings("NullAway.Init")
-    private FragmentPostOptionsBottomSheetBinding binding;
     private boolean isDownloading = false;
     private boolean isDownloadingGallery = false;
 

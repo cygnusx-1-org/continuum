@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -217,6 +218,7 @@ public class FollowedMultiRedditListingRecyclerViewAdapter extends RecyclerView.
     private String ownerOf(MultiReddit multiReddit) {
         String path = multiReddit.getPath();
         if (path != null) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] segments = path.split("/");
             if (segments.length > 2 && "user".equals(segments[1])) {
                 return segments[2];
@@ -230,7 +232,7 @@ public class FollowedMultiRedditListingRecyclerViewAdapter extends RecyclerView.
     public String getPopupText(@NonNull android.view.View view, int position) {
         Object row = mRows.get(position);
         String text = row instanceof String ? (String) row : ((MultiReddit) row).getDisplayName();
-        return text.isEmpty() ? "" : text.substring(0, 1).toUpperCase();
+        return text.isEmpty() ? "" : text.substring(0, 1).toUpperCase(Locale.getDefault());
     }
 
     class HeaderViewHolder extends RecyclerView.ViewHolder {

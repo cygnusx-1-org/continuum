@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -63,12 +64,12 @@ public class FetchFlairs {
 
                     flairs.add(new Flair(id, text, editable));
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("FetchFlairs", "parseFlairs failed", e);
                 }
             }
             return flairs;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("FetchFlairs", "parseFlairs failed", e);
         }
         return null;
     }

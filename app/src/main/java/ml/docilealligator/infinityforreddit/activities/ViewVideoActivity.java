@@ -80,7 +80,6 @@ import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerControlView;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
 import app.futured.hauler.DragDirection;
-import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.util.Objects;
@@ -461,7 +460,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                                     try {
                                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                                         disable();
-                                    } catch (Exception ignore) {}
+                                    } catch (Exception ignore) {
+                                        Log.d("ViewVideoActivity", "epsilonCheck: ignoring Exception", ignore);
+                                    }
                                 }
                             }
 
@@ -471,7 +472,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                         };
                         orientationEventListener.enable();
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                    Log.d("ViewVideoActivity", "onCreate: ignoring Exception", ignore);
+                }
             }
         }
 
@@ -598,7 +601,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             }
         }
 
-        MaterialButton playPauseButton = findViewById(R.id.exo_play_pause_button_exo_playback_control_view);
         Drawable playDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_play_arrow_24dp, null);
         Drawable pauseDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_24dp, null);
         binding.getPlayPauseButton().setOnClickListener(view -> {
@@ -729,7 +731,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         // Produces DataSource instances through which media data is loaded.
         dataSourceFactory = new CacheDataSource.Factory().setCache(mSimpleCache).setUpstreamDataSourceFactory(new OkHttpDataSource.Factory(mOkHttpClient).setUserAgent(APIUtils.USER_AGENT));
 
-        String redgifsId = null;
         /*if (videoType == VIDEO_TYPE_STREAMABLE) {
             *//*if (savedInstanceState != null) {
                 videoDownloadUrl = savedInstanceState.getString(VIDEO_DOWNLOAD_URL_STATE);
@@ -1403,7 +1404,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         if (originalOrientation != null) {
             try {
                 setRequestedOrientation(originalOrientation);
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+                Log.d("ViewVideoActivity", "onStop: ignoring Exception", ignore);
+            }
         }
     }
 

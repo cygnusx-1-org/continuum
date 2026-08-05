@@ -76,7 +76,9 @@ public class UserMultiselectionRecyclerViewAdapter extends RecyclerView.Adapter<
 
         Set<String> selectedSet = new HashSet<>();
         if (selectedUsers != null && !selectedUsers.isEmpty()) {
-            for (String name : selectedUsers.split(",")) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
+            String[] selectedUserParts = selectedUsers.split(",");
+            for (String name : selectedUserParts) {
                 String trimmed = name.trim();
                 if (!trimmed.isEmpty()) {
                     selectedSet.add(trimmed);
