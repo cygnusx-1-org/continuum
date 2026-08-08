@@ -24,6 +24,7 @@ import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.loadingindicator.LoadingIndicator
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily
@@ -92,13 +93,21 @@ class RoborazziLayoutTest(
             "dark" to CustomThemeSharedPreferencesUtils.DARK,
         )
 
-        /** Feed/list item layouts under test. The *_with_preview cards are the richest (most prone to overflow). */
+        /**
+         * Feed/list item layouts under test. The *_with_preview cards are the richest (most prone to
+         * overflow). Each compact family is covered on both thumbnail sides: the left- and
+         * right-thumbnail files are separate layouts that drift apart independently.
+         */
         private val LAYOUTS: Map<String, Int> = linkedMapOf(
             "card" to R.layout.item_post_with_preview,
             "card2" to R.layout.item_post_card_2_with_preview,
+            "card2CompactLink" to R.layout.item_post_card_2_compact_link,
+            "card2CompactLinkRight" to R.layout.item_post_card_2_compact_link_right_thumbnail,
             "card3" to R.layout.item_post_card_3_with_preview,
             "compact" to R.layout.item_post_compact,
+            "compactRight" to R.layout.item_post_compact_right_thumbnail,
             "compact2" to R.layout.item_post_compact_2,
+            "compact2Right" to R.layout.item_post_compact_2_right_thumbnail,
             "gallery" to R.layout.item_post_gallery,
             "subreddit" to R.layout.item_subreddit_listing,
             "multireddit" to R.layout.item_multi_reddit,
@@ -243,11 +252,27 @@ class RoborazziLayoutTest(
      *   - text gets the real primary text colour, and empty wide slots (titles/body) get sample copy
      *     long enough to wrap differently per width (the dp-sensitive behaviour we test) — narrow
      *     labels/counters are left empty so they don't balloon vertically;
-     *   - empty image slots show a generated sample image; pre-set icons are tinted the icon colour.
+     *   - empty image slots show a generated sample image; pre-set icons are tinted the icon colour;
+     *   - compact thumbnail boxes, which the XML leaves GONE for the adapter to reveal per post, are
+     *     shown so the goldens cover the thumbnail slot and the spacing around it.
      * Generic (no per-layout view-id coupling) so it survives layout changes; a future refinement
      * could bind real Post/Comment fixtures through the adapters for pixel-exact fidelity.
      */
     private fun applyTheme(view: View, palette: Palette) {
+        // The Material loading indicator animates, so the frame it happens to land on differs run to
+        // run and the capture is not reproducible (it is why the gallery golden drifts). INVISIBLE,
+        // not GONE: the indicator is the only non-GONE child holding the gallery card and the card_2
+        // image slot open, so removing it from layout would collapse those items to nothing. This
+        // keeps every measurement identical and only skips the non-reproducible draw.
+        if (view is LoadingIndicator) {
+            view.visibility = View.INVISIBLE
+        }
+        // Keyed on the square thumbnail dimen rather than per-layout ids, the same way
+        // PostRecyclerViewAdapter sizes these boxes. This matches only the preview wrapper; the
+        // no-preview link fallback stays GONE, so exactly one of the two shows, as in the app.
+        if (view.visibility == View.GONE && view.isCompactThumbnailBox()) {
+            view.visibility = View.VISIBLE
+        }
         when (view) {
             is MaterialCardView -> view.setCardBackgroundColor(palette.cardBackground)
             is MaterialButton -> {
@@ -272,6 +297,13 @@ class RoborazziLayoutTest(
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) applyTheme(view.getChildAt(i), palette)
         }
+    }
+
+    /** True for a view laid out as the square compact-post thumbnail box. */
+    private fun View.isCompactThumbnailBox(): Boolean {
+        val box = resources.getDimensionPixelSize(R.dimen.post_compact_thumbnail_size)
+        val lp = layoutParams ?: return false
+        return lp.width == box && lp.height == box
     }
 }
 

@@ -103,6 +103,7 @@
         android:id="@+id/title_and_image_linear_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:paddingStart="8dp"
         android:paddingEnd="0dp"
