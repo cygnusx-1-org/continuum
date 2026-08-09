@@ -48,13 +48,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.markdown.RedditAutolink;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
@@ -74,62 +74,19 @@ public final class Utils {
     private static final long YEAR_MILLIS = 12 * MONTH_MILLIS;
 
     public static String HOSTNAME_REGEX = "^(?=^.{1,253}$)(([a-z\\d]([a-z\\d-]{0,62}[a-z\\d])*[\\.]){1,3}[a-z]{1,61})$";
-    private static final Pattern[] REGEX_PATTERNS = {
-            Pattern.compile("((?<=[\\s])|^)/[rRuU]/[\\w-]+/{0,1}"),
-            Pattern.compile("((?<=[\\s])|^)[rRuU]/[\\w-]+/{0,1}"),
-            Pattern.compile("\\^{2,}"),
-            //Sometimes the reddit preview images and gifs have a caption and the markdown will become [caption](image_link)
-            //Matches preview.redd.it and i.redd.it media
-            //For i.redd.it media, it only matches [caption](image-link. Notice there is no ) at the end.
-            //i.redd.it: (\\[(?:(?!((?<!\\\\)\\[)).)*?]\\()?https://i.redd.it/\\w+.(jpg|png|jpeg|gif)"
-            Pattern.compile("((?:\\[(.*?)]\\()?(https://preview.redd.it/(\\w+).(?:jpg|png|jpeg)(?:\\?+[-a-zA-Z0-9()@:%_+.~#?&/=]*|)))|((?:\\[(.*?)]\\()?(https://i.redd.it/(\\w+).(?:jpg|png|jpeg|gif)))"),
-            Pattern.compile("(?:\\[(.*?)]\\()?(https://reddit\\.com/link/([^/]+)/video/([^/]+)/player)")
-    };
+    private static final Pattern SUPERSCRIPT_CARETS_PATTERN = Pattern.compile("\\^{2,}");
+    //Sometimes the reddit preview images and gifs have a caption and the markdown will become [caption](image_link)
+    //Matches preview.redd.it and i.redd.it media
+    //For i.redd.it media, it only matches [caption](image-link. Notice there is no ) at the end.
+    //i.redd.it: (\\[(?:(?!((?<!\\\\)\\[)).)*?]\\()?https://i.redd.it/\\w+.(jpg|png|jpeg|gif)"
+    private static final Pattern REDDIT_IMAGE_PATTERN = Pattern.compile("((?:\\[(.*?)]\\()?(https://preview.redd.it/(\\w+).(?:jpg|png|jpeg)(?:\\?+[-a-zA-Z0-9()@:%_+.~#?&/=]*|)))|((?:\\[(.*?)]\\()?(https://i.redd.it/(\\w+).(?:jpg|png|jpeg|gif)))");
+    private static final Pattern REDDIT_VIDEO_PATTERN = Pattern.compile("(?:\\[(.*?)]\\()?(https://reddit\\.com/link/([^/]+)/video/([^/]+)/player)");
 
     public static String modifyMarkdown(String markdown) {
-        String regexed = replaceOutsideMarkdownLinks(markdown, REGEX_PATTERNS[0], "[$0](https://www.reddit.com$0)");
-        regexed = replaceOutsideMarkdownLinks(regexed, REGEX_PATTERNS[1], "[$0](https://www.reddit.com/$0)");
-        regexed = REGEX_PATTERNS[2].matcher(regexed).replaceAll("^");
+        String regexed = RedditAutolink.linkify(markdown);
+        regexed = SUPERSCRIPT_CARETS_PATTERN.matcher(regexed).replaceAll("^");
 
         return regexed;
-    }
-
-    /**
-     * Performs regex replacement only on text that is not inside the text portion of a markdown
-     * link (i.e., not inside the [...] of [...](url)). This prevents corrupting existing
-     * markdown links by nesting link syntax inside them.
-     */
-    private static String replaceOutsideMarkdownLinks(String text, Pattern pattern, String replacement) {
-        Pattern markdownLinkPattern = Pattern.compile("\\[(?:[^\\[\\]]|\\\\\\[|\\\\\\])*]\\([^)]*\\)");
-        Matcher linkMatcher = markdownLinkPattern.matcher(text);
-
-        List<int[]> linkRanges = new ArrayList<>();
-        while (linkMatcher.find()) {
-            linkRanges.add(new int[]{linkMatcher.start(), linkMatcher.end()});
-        }
-
-        if (linkRanges.isEmpty()) {
-            return pattern.matcher(text).replaceAll(replacement);
-        }
-
-        Matcher matcher = pattern.matcher(text);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            boolean insideLink = false;
-            for (int[] range : linkRanges) {
-                if (matcher.start() >= range[0] && matcher.end() <= range[1]) {
-                    insideLink = true;
-                    break;
-                }
-            }
-            if (insideLink) {
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group()));
-            } else {
-                matcher.appendReplacement(sb, replacement);
-            }
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
     }
 
     private static final Pattern PROCESSING_IMG_PATTERN = Pattern.compile("\\*?Processing img (\\w+)\\.{3}\\*?");
@@ -139,7 +96,7 @@ public final class Utils {
             StringBuilder markdownStringBuilder = new StringBuilder(markdown);
             int start = 0;
             while (true) {
-                Matcher videoMatcher = REGEX_PATTERNS[4].matcher(markdownStringBuilder);
+                Matcher videoMatcher = REDDIT_VIDEO_PATTERN.matcher(markdownStringBuilder);
 
                 if (videoMatcher.find(start)) {
                     String id = videoMatcher.group(4);
@@ -190,8 +147,8 @@ public final class Utils {
         StringBuilder markdownStringBuilder = new StringBuilder(markdown);
         int start = 0;
         while (true) {
-            Matcher previewReddItAndIReddItImageMatcher = REGEX_PATTERNS[3].matcher(markdownStringBuilder);
-            Matcher videoMatcher = REGEX_PATTERNS[4].matcher(markdownStringBuilder);
+            Matcher previewReddItAndIReddItImageMatcher = REDDIT_IMAGE_PATTERN.matcher(markdownStringBuilder);
+            Matcher videoMatcher = REDDIT_VIDEO_PATTERN.matcher(markdownStringBuilder);
 
             if (previewReddItAndIReddItImageMatcher.find(start)) {
                 if (previewReddItAndIReddItImageMatcher.group(1) != null) {

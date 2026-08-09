@@ -145,6 +145,10 @@ android {
             // JDK 21+ warns (and a future JDK will refuse) when Mockito's inline maker self-attaches
             // its agent at runtime; allow it explicitly. byte-buddy 1.18.11 already reads Java 25.
             jvmArgs "-XX:+EnableDynamicAgentLoading"
+            // Gradle's 512m default is not enough for the Robolectric/Roborazzi screenshot tests:
+            // the executor dies with an OutOfMemoryError partway through a full-suite run, which
+            // surfaces as unrelated-looking test failures rather than as an obvious memory problem.
+            maxHeapSize = "1g"
         }
     }
 
