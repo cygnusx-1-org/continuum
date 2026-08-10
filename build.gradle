@@ -13,7 +13,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:9.3.0'
         classpath 'com.android.tools.build:gradle-kotlin:9.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "io.github.takahirom.roborazzi:roborazzi-gradle-plugin:1.64.0"
+        classpath "io.github.takahirom.roborazzi:roborazzi-gradle-plugin:1.71.0"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

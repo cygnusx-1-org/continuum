@@ -547,8 +547,8 @@ dependencies {
     // Roborazzi: render View layouts at arbitrary smallest-width-dp configs (no emulator) and
     // diff them against committed golden PNGs. Driven by the recordRoborazziDebug /
     // verifyRoborazziDebug / compareRoborazziDebug Gradle tasks. See RoborazziLayoutTest.
-    testImplementation "io.github.takahirom.roborazzi:roborazzi:1.64.0"
-    testImplementation "io.github.takahirom.roborazzi:roborazzi-junit-rule:1.64.0"
+    testImplementation "io.github.takahirom.roborazzi:roborazzi:1.71.0"
+    testImplementation "io.github.takahirom.roborazzi:roborazzi-junit-rule:1.71.0"
 
     // ViewModel unit tests. Mockito's inline maker provides mockStatic() for the Java network/DB
     // helpers the ViewModels delegate to (UploadImageUtils/SendComment); core-testing supplies
