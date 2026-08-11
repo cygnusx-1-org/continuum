@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.adapters
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.view.LayoutInflater
@@ -28,10 +29,48 @@ class CommentsStatusRecyclerViewAdapter(
         const val VIEW_TYPE_VIEW_ALL_COMMENTS: Int = 17
     }
 
+    // This adapter sits in a ConcatAdapter, where a child's notifyDataSetChanged() becomes a
+    // notifyDataSetChanged() on the whole concatenation - every visible comment gets rebound,
+    // markdown and avatars included. The callers push their state on every view model emission,
+    // so the notify has to wait until one of these flags actually moves.
+    private var stateChanged = false
+
     var isSingleCommentThreadMode: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                stateChanged = true
+            }
+        }
     var isInitiallyLoading: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                stateChanged = true
+            }
+        }
     var isInitiallyLoadingFailed: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                stateChanged = true
+            }
+        }
     var emptyComments: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                stateChanged = true
+            }
+        }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun notifyIfStateChanged() {
+        if (stateChanged) {
+            stateChanged = false
+            notifyDataSetChanged()
+        }
+    }
 
     private val colorAccent = activity.customThemeWrapper.colorAccent
     private val secondaryTextColor = activity.customThemeWrapper.secondaryTextColor
