@@ -16,6 +16,7 @@ class MessageDataSource extends PageKeyedDataSource<String, Message> {
     private final Handler handler;
     private final Retrofit oauthRetrofit;
     private final Locale locale;
+    @Nullable
     private final String accessToken;
     private final String where;
     private final int messageType;
@@ -24,10 +25,12 @@ class MessageDataSource extends PageKeyedDataSource<String, Message> {
     private final MutableLiveData<NetworkState> initialLoadStateLiveData;
     private final MutableLiveData<Boolean> hasPostLiveData;
 
+    @Nullable
     private LoadParams<String> params;
+    @Nullable
     private LoadCallback<String, Message> callback;
 
-    MessageDataSource(Executor executor, Handler handler, Retrofit oauthRetrofit, Locale locale, String accessToken, String where) {
+    MessageDataSource(Executor executor, Handler handler, Retrofit oauthRetrofit, Locale locale, @Nullable String accessToken, String where) {
         this.executor = executor;
         this.handler = handler;
         this.oauthRetrofit = oauthRetrofit;
@@ -57,7 +60,9 @@ class MessageDataSource extends PageKeyedDataSource<String, Message> {
     }
 
     void retryLoadingMore() {
-        loadAfter(params, callback);
+        if (params != null && callback != null) {
+            loadAfter(params, callback);
+        }
     }
 
     @Override

@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.adapters.navigationdrawer;
 
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.ConcatAdapter;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -52,7 +53,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         postSectionRecyclerViewAdapter = new PostSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
                 navigationDrawerSharedPreferences, itemClickListener);
         preferenceSectionRecyclerViewAdapter = new PreferenceSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
-                accountName, nsfwAndSpoilerSharedPreferences, navigationDrawerSharedPreferences, itemClickListener);
+                accountName, sharedPreferences, nsfwAndSpoilerSharedPreferences, navigationDrawerSharedPreferences, itemClickListener);
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter = new FavoriteSubscribedSubredditsSectionRecyclerViewAdapter(
                 baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences, itemClickListener);
         subscribedSubredditsRecyclerViewAdapter = new SubscribedSubredditsRecyclerViewAdapter(baseActivity, glide,
@@ -112,7 +113,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         }
     }
 
-    public void updateAccountInfo(String profileImageUrl, String bannerImageUrl, int karma) {
+    public void updateAccountInfo(@Nullable String profileImageUrl, @Nullable String bannerImageUrl, int karma) {
         headerSectionRecyclerViewAdapter.updateAccountInfo(profileImageUrl, bannerImageUrl, karma);
     }
 
@@ -134,6 +135,10 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
 
     public void setNSFWEnabled(boolean isNSFWEnabled) {
         preferenceSectionRecyclerViewAdapter.setNSFWEnabled(isNSFWEnabled);
+    }
+
+    public void setShowThumbnailOnTheLeft(boolean showThumbnailOnTheLeft) {
+        preferenceSectionRecyclerViewAdapter.setShowThumbnailOnTheLeft(showThumbnailOnTheLeft);
     }
 
     public void setFavoriteSubscribedSubreddits(List<SubscribedSubredditData> favoriteSubscribedSubreddits) {
@@ -167,6 +172,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION, false));
         subscribedSubredditsRecyclerViewAdapter.setHideSubscribedSubredditsSection(
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS, false));
+        preferenceSectionRecyclerViewAdapter.refreshVisibleRows(navigationDrawerSharedPreferences);
     }
 
     public interface ItemClickListener {

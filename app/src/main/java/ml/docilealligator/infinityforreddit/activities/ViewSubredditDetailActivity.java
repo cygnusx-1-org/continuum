@@ -60,6 +60,7 @@ import io.noties.markwon.core.MarkwonTheme;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -114,6 +115,7 @@ import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -132,6 +134,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     public static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     public static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
     public static final String EXTRA_VIEW_SIDEBAR = "EVSB";
+    // Initial sort carried by an opening deep link (e.g. reddit.com/r/x/top), as SortType.Type/Time names.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String FETCH_SUBREDDIT_INFO_STATE = "FSIS";
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
@@ -181,9 +186,16 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private NavigationWrapper navigationWrapper;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private String subredditName;
+    @Nullable
+    private String initialSortType;
+    @Nullable
+    private String initialSortTime;
+    @Nullable
     private String description;
     private boolean mFetchSubredditInfoSuccess = false;
     private boolean isNsfwSubreddit = false;
@@ -192,7 +204,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private boolean hideFab;
     private boolean showBottomAppBar;
     private boolean lockBottomAppBar;
+    @Nullable
     private String mMessageFullname;
+    @Nullable
     private String mNewAccountName;
     private RequestManager glide;
     private int expandedTabTextColor;
@@ -205,13 +219,15 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private int subscribedColor;
     private int fabOption;
     private int topSystemBarHeight;
+    @Nullable
     private MaterialAlertDialogBuilder nsfwWarningBuilder;
+    @Nullable
     private Bitmap subredditIconBitmap;
     private ActivityViewSubredditDetailBinding binding;
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -394,7 +410,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         lockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
         boolean hideSubredditDescription = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_DESCRIPTION, false);
 
-        subredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY);
+        subredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY));
+        initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
+        initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
 
         fragmentManager = getSupportFragmentManager();
 
@@ -530,7 +548,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
                 String subredditFullName = "r/" + subredditData.getName();
                 if (!title.equals(subredditFullName)) {
-                    getSupportActionBar().setTitle(subredditFullName);
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(subredditFullName);
                 }
                 binding.subredditNameTextViewViewSubredditDetailActivity.setText(subredditFullName);
                 String nSubscribers = getString(R.string.subscribers_number_detail, subredditData.getNSubscribers());
@@ -546,8 +564,8 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 }
 
                 if (subredditData.isNSFW()) {
-                    if (nsfwWarningBuilder == null
-                            && mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) || !mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false)) {
+                    if ((nsfwWarningBuilder == null
+                            && mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)) || !mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false)) {
                         nsfwWarningBuilder = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
                                 .setTitle(R.string.warning)
                                 .setMessage(R.string.this_is_a_nsfw_subreddit)
@@ -568,7 +586,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 MultiReddit multiReddit = data.getParcelableExtra(SelectThingReturnKey.RETRUN_EXTRA_MULTIREDDIT);
                 if (multiReddit != null) {
                     AddSubredditOrUserToMultiReddit.addSubredditOrUserToMultiReddit(mOauthRetrofit,
-                            accessToken, multiReddit.getPath(), subredditName,
+                            Objects.requireNonNull(accessToken), multiReddit.getPath(), subredditName,
                             new AddSubredditOrUserToMultiReddit.AddSubredditOrUserToMultiRedditListener() {
                                 @Override
                                 public void success() {
@@ -858,7 +876,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @ExperimentalBadgeUtils
     private void bindView() {
         if (mMessageFullname != null) {
-            ReadMessage.readMessage(mOauthRetrofit, accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
+            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
                 public void readSuccess() {
                     mMessageFullname = null;
@@ -1140,7 +1158,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                                 });
                     } else {
                         SubredditSubscription.unsubscribeToSubreddit(mExecutor, new Handler(), mOauthRetrofit,
-                                accessToken, subredditName, accountName, mRedditDataRoomDatabase,
+                                Objects.requireNonNull(accessToken), subredditName, accountName, mRedditDataRoomDatabase,
                                 new SubredditSubscription.SubredditSubscriptionListener() {
                                     @Override
                                     public void onSubredditSubscriptionSuccess() {
@@ -1327,7 +1345,8 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         } else if (itemId == R.id.action_share_view_subreddit_detail_activity) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, "https://www.reddit.com/r/" + subredditName);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyLinkDomain(
+                    getDefaultSharedPreferences(), APIUtils.API_BASE_URI + "/r/" + subredditName));
             if (shareIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
             } else {
@@ -1591,7 +1610,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -1665,7 +1684,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -1686,7 +1705,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -1699,7 +1718,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -1745,6 +1764,12 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 Bundle bundle = new Bundle();
                 bundle.putString(PostFragment.EXTRA_NAME, subredditName);
                 bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostType.SUBREDDIT);
+                if (initialSortType != null) {
+                    bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+                    if (initialSortTime != null) {
+                        bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+                    }
+                }
                 fragment.setArguments(bundle);
                 return fragment;
             }

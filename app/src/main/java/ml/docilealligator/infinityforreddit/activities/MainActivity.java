@@ -22,7 +22,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -64,11 +63,11 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
-import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
@@ -106,6 +105,7 @@ import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompa
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
+import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.multireddit.FetchMyMultiReddits;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
@@ -117,6 +117,8 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.settings.MainPageTabInput;
+import ml.docilealligator.infinityforreddit.settings.MainPageTabsUtils;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
@@ -160,9 +162,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
     private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
 
+    @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel multiRedditViewModel;
+    @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel followedMultiRedditViewModel;
+    @SuppressWarnings("NullAway.Init")
     SubscribedSubredditViewModel subscribedSubredditViewModel;
+    @SuppressWarnings("NullAway.Init")
     AccountViewModel accountViewModel;
     @Inject
     @Named("oauth")
@@ -207,7 +213,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @Inject
     Executor mExecutor;
     private FragmentManager fragmentManager;
+    @SuppressWarnings("NullAway.Init")
     private SectionsPagerAdapter sectionsPagerAdapter;
+    @SuppressWarnings("NullAway.Init")
     private NavigationDrawerRecyclerViewMergedAdapter adapter;
     private NavigationWrapper navigationWrapper;
     // Tracks the AppBar collapsed/expanded state so it can be persisted across rotation;
@@ -222,13 +230,17 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     // rail (no bottom app bar), so we can't read translationY there; this field carries the
     // portrait hidden-state across the landscape intermediate so a P→L→P round trip keeps it.
     private boolean mBottomBarHidden = false;
+    @SuppressWarnings("NullAway.Init")
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private boolean mFetchUserInfoSuccess = false;
     private boolean mFetchSubscriptionsSuccess = false;
     private boolean mFetchMultiredditsSuccess = false;
     private boolean mDrawerOnAccountSwitch = false;
+    @Nullable
     private String mMessageFullname;
+    @Nullable
     private String mNewAccountName;
     private boolean hideFab;
     private boolean showBottomAppBar;
@@ -241,14 +253,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private boolean mShowUsersMultiReddits;
     private boolean mShowFavoriteSubscribedSubreddits;
     private boolean mShowSubscribedSubreddits;
-    private int mLastTabLayoutItemCount = -1;
     private int fabOption;
     private int inboxCount;
     private ActivityMainBinding binding;
 
     @ExperimentalBadgeUtils
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         SplashScreen.installSplashScreen(this);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -431,7 +442,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         mViewPager2 = binding.includedAppBar.viewPagerMainActivity;
 
-        mBackButtonAction = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION, "0"));
+        // MainActivity is the only activity that survives a trip to Settings, so this has to
+        // track the preference rather than being read once.
+        SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION, "0")
+                .observe(this, action -> mBackButtonAction = Integer.parseInt(action));
         mLockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
         mDisableSwipingBetweenTabs = mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
 
@@ -1037,11 +1051,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                 intent = new Intent(MainActivity.this, AccountSavedThingActivity.class);
                             }
                         } else if (stringId == R.string.light_theme) {
-                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, "0").apply();
+                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_LIGHT).apply();
                             AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
                             mCustomThemeWrapper.setThemeType(CustomThemeSharedPreferencesUtils.LIGHT);
                         } else if (stringId == R.string.dark_theme) {
-                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, "1").apply();
+                            mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_DARK).apply();
                             AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES);
                             if (mSharedPreferences.getBoolean(SharedPreferencesUtils.AMOLED_DARK_KEY, false)) {
                                 mCustomThemeWrapper.setThemeType(CustomThemeSharedPreferencesUtils.AMOLED);
@@ -1056,6 +1070,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             String nsfwKey = (accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE;
                             mNsfwAndSpoilerSharedPreferences.edit().putBoolean(nsfwKey, false).apply();
                             EventBus.getDefault().post(new ChangeNSFWEvent(false));
+                        } else if (stringId == R.string.settings_show_thumbnail_on_the_left_in_compact_layout) {
+                            boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+                            mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, newValue).apply();
+                            EventBus.getDefault().post(new ShowThumbnailOnTheLeftInCompactLayoutEvent(newValue));
                         } else if (stringId == R.string.settings) {
                             intent = new Intent(MainActivity.this, SettingsActivity.class);
                         } else if (stringId == R.string.add_account) {
@@ -1065,7 +1083,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             String currentClientId = defaultPrefs.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, getString(R.string.default_client_id));
                             // Only block login when overrides are on but no custom Client ID has been set.
                             // With overrides off, the valid built-in default Client ID is used.
-                            if (overridesEnabled && currentClientId.equals(getString(R.string.default_client_id))) {
+                            if (overridesEnabled && getString(R.string.default_client_id).equals(currentClientId)) {
                                 new MaterialAlertDialogBuilder(MainActivity.this, R.style.MaterialAlertDialogTheme)
                                         .setMessage(R.string.set_client_id_dialog_message)
                                         .setPositiveButton(R.string.ok, null)
@@ -1136,85 +1154,22 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         binding.navDrawerRecyclerViewMainActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
         binding.navDrawerRecyclerViewMainActivity.setAdapter(adapter.getConcatAdapter());
 
-        int tabCount = mMainActivityTabsSharedPreferences.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_TAB_COUNT, Constants.DEFAULT_TAB_COUNT);
         mShowFavoriteMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS, false);
         mShowMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_MULTIREDDITS, false);
         mShowFavoriteUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS, false);
         mShowUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_USERS_MULTIREDDITS, false);
         mShowFavoriteSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS, false);
         mShowSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS, false);
-        sectionsPagerAdapter = new SectionsPagerAdapter(this, tabCount, mShowFavoriteMultiReddits,
-                mShowMultiReddits, mShowFavoriteUsersMultiReddits, mShowUsersMultiReddits,
-                mShowFavoriteSubscribedSubreddits, mShowSubscribedSubreddits);
+        sectionsPagerAdapter = new SectionsPagerAdapter(this,
+                MainPageTabsUtils.load(mMainActivityTabsSharedPreferences, accountName));
         binding.includedAppBar.viewPagerMainActivity.setAdapter(sectionsPagerAdapter);
         binding.includedAppBar.viewPagerMainActivity.setUserInputEnabled(!mDisableSwipingBetweenTabs);
         if (mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES, true)) {
-            // Start scrollable so tabs render at their natural width; adjustTabLayoutMode() then
-            // switches to fixed/fill when they fit the screen, or keeps scrollable when they overflow.
+            // Always scrollable so tabs render at their natural width and never wrap.
             binding.includedAppBar.tabLayoutMainActivity.setTabMode(TabLayout.MODE_SCROLLABLE);
             new TabLayoutMediator(binding.includedAppBar.tabLayoutMainActivity, binding.includedAppBar.viewPagerMainActivity, (tab, position) -> {
-                switch (position) {
-                    case 0:
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, mMainActivityTabsSharedPreferences.getString((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_TAB_1_TITLE, getString(R.string.home)));
-                        break;
-                    case 1:
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, mMainActivityTabsSharedPreferences.getString((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_TAB_2_TITLE, getString(R.string.popular)));
-                        break;
-                    case 2:
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, mMainActivityTabsSharedPreferences.getString((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_TAB_3_TITLE, getString(R.string.all)));
-                        break;
-                    case 3:
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, mMainActivityTabsSharedPreferences.getString((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_TAB_4_TITLE, getString(R.string.upvoted)));
-                        break;
-                    case 4:
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, mMainActivityTabsSharedPreferences.getString((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_TAB_5_TITLE, getString(R.string.downvoted)));
-                        break;
-                    case 5:
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, mMainActivityTabsSharedPreferences.getString((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_TAB_6_TITLE, getString(R.string.saved)));
-                        break;
-                }
-                if (position >= tabCount && (mShowFavoriteMultiReddits || mShowMultiReddits ||
-                        mShowFavoriteUsersMultiReddits || mShowUsersMultiReddits ||
-                        mShowFavoriteSubscribedSubreddits || mShowSubscribedSubreddits)
-                        && sectionsPagerAdapter != null) {
-                    if (position - tabCount < sectionsPagerAdapter.favoriteMultiReddits.size()) {
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.favoriteMultiReddits.get(position - tabCount).getDisplayName());
-                    } else if (position - tabCount - sectionsPagerAdapter.favoriteMultiReddits.size() < sectionsPagerAdapter.multiReddits.size()) {
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.multiReddits.get(position - tabCount
-                                - sectionsPagerAdapter.favoriteMultiReddits.size()).getDisplayName());
-                    } else if (position - tabCount - sectionsPagerAdapter.favoriteMultiReddits.size()
-                            - sectionsPagerAdapter.multiReddits.size() < sectionsPagerAdapter.favoriteSubscribedSubreddits.size()) {
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.favoriteSubscribedSubreddits.get(position - tabCount
-                                - sectionsPagerAdapter.favoriteMultiReddits.size()
-                                - sectionsPagerAdapter.multiReddits.size()).getName());
-                    } else if (position - tabCount - sectionsPagerAdapter.favoriteMultiReddits.size()
-                            - sectionsPagerAdapter.multiReddits.size()
-                            - sectionsPagerAdapter.favoriteSubscribedSubreddits.size() < sectionsPagerAdapter.subscribedSubreddits.size()) {
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.subscribedSubreddits.get(position - tabCount
-                                - sectionsPagerAdapter.favoriteMultiReddits.size()
-                                - sectionsPagerAdapter.multiReddits.size()
-                                - sectionsPagerAdapter.favoriteSubscribedSubreddits.size()).getName());
-                    } else if (position - tabCount - sectionsPagerAdapter.favoriteMultiReddits.size()
-                            - sectionsPagerAdapter.multiReddits.size()
-                            - sectionsPagerAdapter.favoriteSubscribedSubreddits.size()
-                            - sectionsPagerAdapter.subscribedSubreddits.size() < sectionsPagerAdapter.favoriteUsersMultiReddits.size()) {
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.favoriteUsersMultiReddits.get(position - tabCount
-                                - sectionsPagerAdapter.favoriteMultiReddits.size()
-                                - sectionsPagerAdapter.multiReddits.size()
-                                - sectionsPagerAdapter.favoriteSubscribedSubreddits.size()
-                                - sectionsPagerAdapter.subscribedSubreddits.size()).getDisplayName());
-                    } else if (position - tabCount - sectionsPagerAdapter.favoriteMultiReddits.size()
-                            - sectionsPagerAdapter.multiReddits.size()
-                            - sectionsPagerAdapter.favoriteSubscribedSubreddits.size()
-                            - sectionsPagerAdapter.subscribedSubreddits.size()
-                            - sectionsPagerAdapter.favoriteUsersMultiReddits.size() < sectionsPagerAdapter.usersMultiReddits.size()) {
-                        Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.usersMultiReddits.get(position - tabCount
-                                - sectionsPagerAdapter.favoriteMultiReddits.size()
-                                - sectionsPagerAdapter.multiReddits.size()
-                                - sectionsPagerAdapter.favoriteSubscribedSubreddits.size()
-                                - sectionsPagerAdapter.subscribedSubreddits.size()
-                                - sectionsPagerAdapter.favoriteUsersMultiReddits.size()).getDisplayName());
-                    }
+                if (sectionsPagerAdapter != null) {
+                    Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.getPageTitle(position));
                 }
             }).attach();
 
@@ -1253,21 +1208,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     }
                 }
             });
-
-            // Re-evaluate fixed-vs-scrollable only when the number of tabs actually changes
-            // (dynamic tabs load async, and each section emits separately).
-            sectionsPagerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                @Override
-                public void onChanged() {
-                    int itemCount = sectionsPagerAdapter.getItemCount();
-                    if (itemCount != mLastTabLayoutItemCount) {
-                        mLastTabLayoutItemCount = itemCount;
-                        adjustTabLayoutMode();
-                    }
-                }
-            });
-            mLastTabLayoutItemCount = sectionsPagerAdapter.getItemCount();
-            adjustTabLayoutMode();
         } else {
             binding.includedAppBar.tabLayoutMainActivity.setVisibility(View.GONE);
         }
@@ -1357,7 +1297,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         if (!accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             if (mMessageFullname != null) {
-                ReadMessage.readMessage(mOauthRetrofit, accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
+                ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
                     @Override
                     public void readSuccess() {
                         mMessageFullname = null;
@@ -1487,7 +1427,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
     private void loadMultiReddits() {
         if (!accountName.equals(Account.ANONYMOUS_ACCOUNT) && !mFetchMultiredditsSuccess) {
-            FetchMyMultiReddits.fetchMyMultiReddits(mExecutor, mHandler, mOauthRetrofit, accessToken,
+            FetchMyMultiReddits.fetchMyMultiReddits(mExecutor, mHandler, mOauthRetrofit, Objects.requireNonNull(accessToken),
                     new FetchMyMultiReddits.FetchMyMultiRedditsListener() {
                         @Override
                         public void success(ArrayList<MultiReddit> multiReddits) {
@@ -1514,11 +1454,27 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         @ExperimentalBadgeUtils
                         @Override
                         public void onFetchUserDataSuccess(UserData userData, int inboxCount) {
-                            MainActivity.this.inboxCount = inboxCount;
-                            mCurrentAccountSharedPreferences.edit().putInt(SharedPreferencesUtils.INBOX_COUNT, inboxCount).apply();
                             accountName = userData.getName();
                             mFetchUserInfoSuccess = true;
-                            EventBus.getDefault().post(new ChangeInboxCountEvent(inboxCount));
+                            if (inboxCount > 0) {
+                                // Reddit's inbox_count can stay stuck on items that can't be cleared
+                                // in-app (archived PMs, chat, ...). Reconcile against the real unread
+                                // listing so a genuinely-empty inbox drops to no badge. See issue #334.
+                                FetchMessage.fetchUnreadMessagesCount(mExecutor, mHandler, mOauthRetrofit, Objects.requireNonNull(accessToken),
+                                        new FetchMessage.FetchUnreadMessagesCountListener() {
+                                            @Override
+                                            public void fetchSuccess(int unreadCount, boolean hasMore) {
+                                                applyInboxCount(hasMore ? inboxCount : unreadCount);
+                                            }
+
+                                            @Override
+                                            public void fetchFailed() {
+                                                applyInboxCount(inboxCount);
+                                            }
+                                        });
+                            } else {
+                                applyInboxCount(Math.max(0, inboxCount));
+                            }
                         }
 
                         @Override
@@ -1540,6 +1496,12 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         }
                     });*/
         }
+    }
+
+    private void applyInboxCount(int count) {
+        inboxCount = count;
+        mCurrentAccountSharedPreferences.edit().putInt(SharedPreferencesUtils.INBOX_COUNT, count).apply();
+        EventBus.getDefault().post(new ChangeInboxCountEvent(count));
     }
 
     @ExperimentalBadgeUtils
@@ -1608,38 +1570,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             }
         }
         return result;
-    }
-
-    /**
-     * Use a fixed, width-filling tab bar when all tabs fit the screen, and only fall back to a
-     * scrollable bar when they would overflow. Measured at the tabs' natural (scrollable) width.
-     */
-    private void adjustTabLayoutMode() {
-        TabLayout tabLayout = binding.includedAppBar.tabLayoutMainActivity;
-        if (tabLayout.getVisibility() != View.VISIBLE) {
-            return;
-        }
-        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
-        tabLayout.post(() -> {
-            if (tabLayout.getWidth() == 0 || !(tabLayout.getChildAt(0) instanceof ViewGroup)) {
-                return;
-            }
-            ViewGroup tabStrip = (ViewGroup) tabLayout.getChildAt(0);
-            // The strip's children should map 1:1 to the tabs. If they don't, the internal view
-            // structure isn't what we expect, so don't trust the measurement and stay scrollable.
-            if (tabStrip.getChildCount() == 0 || tabStrip.getChildCount() != tabLayout.getTabCount()) {
-                return;
-            }
-            int totalTabsWidth = 0;
-            for (int i = 0; i < tabStrip.getChildCount(); i++) {
-                totalTabsWidth += tabStrip.getChildAt(i).getWidth();
-            }
-            int available = tabLayout.getWidth() - tabLayout.getPaddingStart() - tabLayout.getPaddingEnd();
-            if (totalTabsWidth > 0 && totalTabsWidth <= available) {
-                tabLayout.setTabMode(TabLayout.MODE_FIXED);
-                tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-            }
-        });
     }
 
     @Override
@@ -1797,6 +1727,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
     }
 
+    @Subscribe
+    public void onShowThumbnailOnTheLeftInCompactLayoutEvent(ShowThumbnailOnTheLeftInCompactLayoutEvent event) {
+        if (adapter != null) {
+            adapter.setShowThumbnailOnTheLeft(event.showThumbnailOnTheLeftInCompactLayout);
+        }
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRecreateActivityEvent(RecreateActivityEvent recreateActivityEvent) {
         ActivityCompat.recreate(this);
@@ -1844,7 +1781,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @ExperimentalBadgeUtils
     @Subscribe
     public void onChangeInboxCountEvent(ChangeInboxCountEvent event) {
-        this.inboxCount = event.inboxCount;
+        // A negative value is a delta (e.g. -1 when a single message is read), a non-negative
+        // value is an absolute count. Mirror the semantics NavigationWrapper#setInboxCount uses.
+        if (event.inboxCount < 0) {
+            this.inboxCount = Math.max(0, this.inboxCount + event.inboxCount);
+        } else {
+            this.inboxCount = event.inboxCount;
+        }
         setInboxCount();
     }
 
@@ -1982,7 +1925,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -2056,7 +1999,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -2077,7 +2020,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -2090,7 +2033,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -2111,178 +2054,183 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     }
 
     private class SectionsPagerAdapter extends FragmentStateAdapter {
-        int tabCount;
-        boolean showFavoriteMultiReddits;
-        boolean showMultiReddits;
-        boolean showFavoriteUsersMultiReddits;
-        boolean showUsersMultiReddits;
-        boolean showFavoriteSubscribedSubreddits;
-        boolean showSubscribedSubreddits;
+        List<MainPageTabInput> tabInputs;
         List<MultiReddit> favoriteMultiReddits;
         List<MultiReddit> multiReddits;
         List<MultiReddit> favoriteUsersMultiReddits;
         List<MultiReddit> usersMultiReddits;
         List<SubscribedSubredditData> favoriteSubscribedSubreddits;
         List<SubscribedSubredditData> subscribedSubreddits;
+        // Whether each source's LiveData has emitted yet — merge() must not prune a source's saved
+        // items until its live list is actually known (empty != not-loaded).
+        boolean favoriteMultiRedditsLoaded;
+        boolean multiRedditsLoaded;
+        boolean favoriteUsersMultiRedditsLoaded;
+        boolean usersMultiRedditsLoaded;
+        boolean favoriteSubscribedSubredditsLoaded;
+        boolean subscribedSubredditsLoaded;
 
-        SectionsPagerAdapter(FragmentActivity fa, int tabCount, boolean showFavoriteMultiReddits,
-                            boolean showMultiReddits, boolean showFavoriteUsersMultiReddits,
-                            boolean showUsersMultiReddits, boolean showFavoriteSubscribedSubreddits,
-                            boolean showSubscribedSubreddits) {
+        SectionsPagerAdapter(FragmentActivity fa, List<MainPageTabInput> tabInputs) {
             super(fa);
-            this.tabCount = tabCount;
+            this.tabInputs = tabInputs;
             favoriteMultiReddits = new ArrayList<>();
             multiReddits = new ArrayList<>();
             favoriteUsersMultiReddits = new ArrayList<>();
             usersMultiReddits = new ArrayList<>();
             favoriteSubscribedSubreddits = new ArrayList<>();
             subscribedSubreddits = new ArrayList<>();
-            this.showFavoriteMultiReddits = showFavoriteMultiReddits;
-            this.showMultiReddits = showMultiReddits;
-            this.showFavoriteUsersMultiReddits = showFavoriteUsersMultiReddits;
-            this.showUsersMultiReddits = showUsersMultiReddits;
-            this.showFavoriteSubscribedSubreddits = showFavoriteSubscribedSubreddits;
-            this.showSubscribedSubreddits = showSubscribedSubreddits;
+        }
+
+        // The ordered tab list flattened into concrete pages: each user tab becomes one page and
+        // each group placeholder expands into its dynamic list, with duplicates removed (a tab that
+        // is both explicitly added and pulled in by a "Show ..." toggle appears only once — the
+        // earliest occurrence wins). Cached and rebuilt whenever the inputs or dynamic lists change.
+        @Nullable
+        private List<ResolvedTab> resolvedTabsCache;
+
+        private List<ResolvedTab> resolvedTabs() {
+            if (resolvedTabsCache == null) {
+                resolvedTabsCache = buildResolvedTabs();
+            }
+            return resolvedTabsCache;
+        }
+
+        // Rebuild the resolved tab list and only notify (which makes TabLayoutMediator tear down and
+        // rebuild every tab, jolting the strip's scroll) when it has actually changed. The dynamic
+        // lists' LiveData re-emit identical data repeatedly during the initial sync, and churning the
+        // adapter on each of those was what made the tab strip jump around.
+        private void refreshTabs() {
+            List<ResolvedTab> newResolved = buildResolvedTabs();
+            if (resolvedTabsCache != null && sameResolvedTabs(resolvedTabsCache, newResolved)) {
+                return;
+            }
+            resolvedTabsCache = newResolved;
+            notifyDataSetChanged();
+        }
+
+        private boolean sameResolvedTabs(List<ResolvedTab> a, List<ResolvedTab> b) {
+            if (a.size() != b.size()) {
+                return false;
+            }
+            for (int i = 0; i < a.size(); i++) {
+                ResolvedTab x = a.get(i);
+                ResolvedTab y = b.get(i);
+                if (x.postType != y.postType
+                        || !java.util.Objects.equals(x.name, y.name)
+                        || !java.util.Objects.equals(x.title, y.title)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private List<ResolvedTab> buildResolvedTabs() {
+            java.util.Map<Integer, List<MainPageTabInput>> live = new java.util.HashMap<>();
+            java.util.Set<Integer> enabled = new java.util.HashSet<>();
+            collectSource(live, enabled, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS,
+                    mShowFavoriteMultiReddits, favoriteMultiRedditsLoaded,
+                    MainPageTabsUtils.fromMultiReddits(favoriteMultiReddits, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS));
+            collectSource(live, enabled, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_MULTIREDDITS,
+                    mShowMultiReddits, multiRedditsLoaded,
+                    MainPageTabsUtils.fromMultiReddits(multiReddits, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_MULTIREDDITS));
+            collectSource(live, enabled, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_SUBSCRIBED_SUBREDDITS,
+                    mShowFavoriteSubscribedSubreddits, favoriteSubscribedSubredditsLoaded,
+                    MainPageTabsUtils.fromSubreddits(favoriteSubscribedSubreddits, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_SUBSCRIBED_SUBREDDITS));
+            collectSource(live, enabled, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_SUBSCRIBED_SUBREDDITS,
+                    mShowSubscribedSubreddits, subscribedSubredditsLoaded,
+                    MainPageTabsUtils.fromSubreddits(subscribedSubreddits, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_SUBSCRIBED_SUBREDDITS));
+            collectSource(live, enabled, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_USERS_MULTIREDDITS,
+                    mShowFavoriteUsersMultiReddits, favoriteUsersMultiRedditsLoaded,
+                    MainPageTabsUtils.fromMultiReddits(favoriteUsersMultiReddits, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_USERS_MULTIREDDITS));
+            collectSource(live, enabled, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_USERS_MULTIREDDITS,
+                    mShowUsersMultiReddits, usersMultiRedditsLoaded,
+                    MainPageTabsUtils.fromMultiReddits(usersMultiReddits, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_USERS_MULTIREDDITS));
+
+            List<ResolvedTab> out = new ArrayList<>();
+            for (MainPageTabInput t : MainPageTabsUtils.merge(tabInputs, live, enabled)) {
+                out.add(new ResolvedTab(t.postType, t.name, MainPageTabsUtils.getEffectiveTabLabel(MainActivity.this, t)));
+            }
+            return out;
+        }
+
+        // A source contributes items only while its toggle is on; a source that is on but hasn't
+        // loaded yet is left out of the live map so merge() keeps (rather than prunes) its saved items.
+        private void collectSource(java.util.Map<Integer, List<MainPageTabInput>> live, java.util.Set<Integer> enabled,
+                                   int source, boolean show, boolean loaded, List<MainPageTabInput> items) {
+            if (show) {
+                enabled.add(source);
+                if (loaded) {
+                    live.put(source, items);
+                }
+            }
         }
 
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            // First, handle the fixed tabs based on their position
-            if (position < tabCount) {
-                String tabPostTypeKey;
-                String tabNameKey;
-                int defaultPostType;
-                String defaultName = ""; // Default name is usually empty or a generic term
-
-                switch (position) {
-                    case 0:
-                        tabPostTypeKey = SharedPreferencesUtils.MAIN_PAGE_TAB_1_POST_TYPE;
-                        tabNameKey = SharedPreferencesUtils.MAIN_PAGE_TAB_1_NAME;
-                        defaultPostType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_HOME;
-                        // Default name for Home is often not needed or handled by MAIN_PAGE_TAB_POST_TYPE_HOME
-                        break;
-                    case 1:
-                        tabPostTypeKey = SharedPreferencesUtils.MAIN_PAGE_TAB_2_POST_TYPE;
-                        tabNameKey = SharedPreferencesUtils.MAIN_PAGE_TAB_2_NAME;
-                        defaultPostType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_POPULAR;
-                        break;
-                    case 2:
-                        tabPostTypeKey = SharedPreferencesUtils.MAIN_PAGE_TAB_3_POST_TYPE;
-                        tabNameKey = SharedPreferencesUtils.MAIN_PAGE_TAB_3_NAME;
-                        defaultPostType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_ALL;
-                        break;
-                    case 3:
-                        tabPostTypeKey = SharedPreferencesUtils.MAIN_PAGE_TAB_4_POST_TYPE;
-                        tabNameKey = SharedPreferencesUtils.MAIN_PAGE_TAB_4_NAME;
-                        defaultPostType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_ALL; // Default to 'All' or similar
-                        break;
-                    case 4:
-                        tabPostTypeKey = SharedPreferencesUtils.MAIN_PAGE_TAB_5_POST_TYPE;
-                        tabNameKey = SharedPreferencesUtils.MAIN_PAGE_TAB_5_NAME;
-                        defaultPostType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_ALL; // Default to 'All' or similar
-                        break;
-                    case 5:
-                        tabPostTypeKey = SharedPreferencesUtils.MAIN_PAGE_TAB_6_POST_TYPE;
-                        tabNameKey = SharedPreferencesUtils.MAIN_PAGE_TAB_6_NAME;
-                        defaultPostType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_ALL; // Default to 'All' or similar
-                        break;
-                    default:
-                        // Should not happen if getItemCount() is correct
-                        // Return a default/fallback fragment or throw an error
-                        return generatePostFragment(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_POPULAR, "");
-                }
-
-                int postType = mMainActivityTabsSharedPreferences.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + tabPostTypeKey, defaultPostType);
-                String name = mMainActivityTabsSharedPreferences.getString((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + tabNameKey, defaultName);
-                return generatePostFragment(postType, name);
+            List<ResolvedTab> resolved = resolvedTabs();
+            if (position < 0 || position >= resolved.size()) {
+                // Fallback if position is out of bounds, though getItemCount should prevent this.
+                return generatePostFragment(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_POPULAR, "");
             }
+            ResolvedTab tab = resolved.get(position);
+            return generatePostFragment(tab.postType, tab.name);
+        }
 
-            // Handle dynamic tabs (favorites, multireddits, etc.) that appear after the fixed tabs
-            // The position here is relative to the end of the fixed tabs
-            int dynamicPosition = position - tabCount;
+        String getPageTitle(int position) {
+            List<ResolvedTab> resolved = resolvedTabs();
+            if (position < 0 || position >= resolved.size()) {
+                return "";
+            }
+            return resolved.get(position).title;
+        }
 
-            if (showFavoriteMultiReddits) {
-                if (dynamicPosition < favoriteMultiReddits.size()) {
-                    int postType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT;
-                    String name = favoriteMultiReddits.get(dynamicPosition).getPath();
-                    return generatePostFragment(postType, name);
-                }
-                dynamicPosition -= favoriteMultiReddits.size();
-            }
+        private static class ResolvedTab {
+            final int postType;
+            final String name;
+            final String title;
 
-            if (showMultiReddits) {
-                if (dynamicPosition < multiReddits.size()) {
-                    int postType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT;
-                    String name = multiReddits.get(dynamicPosition).getPath();
-                    return generatePostFragment(postType, name);
-                }
-                dynamicPosition -= multiReddits.size();
+            ResolvedTab(int postType, String name, String title) {
+                this.postType = postType;
+                this.name = name;
+                this.title = title;
             }
-
-            if (showFavoriteSubscribedSubreddits) {
-                if (dynamicPosition < favoriteSubscribedSubreddits.size()) {
-                    int postType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT;
-                    String name = favoriteSubscribedSubreddits.get(dynamicPosition).getName();
-                    return generatePostFragment(postType, name);
-                }
-                dynamicPosition -= favoriteSubscribedSubreddits.size();
-            }
-            if (showSubscribedSubreddits) {
-                if (dynamicPosition < subscribedSubreddits.size()) {
-                    int postType = SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT;
-                    String name = subscribedSubreddits.get(dynamicPosition).getName();
-                    return generatePostFragment(postType, name);
-                }
-                dynamicPosition -= subscribedSubreddits.size();
-            }
-
-            if (showFavoriteUsersMultiReddits) {
-                if (dynamicPosition < favoriteUsersMultiReddits.size()) {
-                    return generatePostFragment(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT,
-                            favoriteUsersMultiReddits.get(dynamicPosition).getPath());
-                }
-                dynamicPosition -= favoriteUsersMultiReddits.size();
-            }
-
-            if (showUsersMultiReddits) {
-                if (dynamicPosition < usersMultiReddits.size()) {
-                    return generatePostFragment(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT,
-                            usersMultiReddits.get(dynamicPosition).getPath());
-                }
-            }
-            // Fallback if position is out of bounds for dynamic tabs, though getItemCount should prevent this.
-            return generatePostFragment(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_POPULAR, ""); // Default fallback
         }
 
         public void setFavoriteMultiReddits(List<MultiReddit> favoriteMultiReddits) {
             this.favoriteMultiReddits = favoriteMultiReddits;
-            notifyDataSetChanged();
+            favoriteMultiRedditsLoaded = true;
+            refreshTabs();
         }
 
         public void setMultiReddits(List<MultiReddit> multiReddits) {
             this.multiReddits = multiReddits;
-            notifyDataSetChanged();
+            multiRedditsLoaded = true;
+            refreshTabs();
         }
 
         public void setFavoriteUsersMultiReddits(List<MultiReddit> favoriteUsersMultiReddits) {
             this.favoriteUsersMultiReddits = favoriteUsersMultiReddits;
-            notifyDataSetChanged();
+            favoriteUsersMultiRedditsLoaded = true;
+            refreshTabs();
         }
 
         public void setUsersMultiReddits(List<MultiReddit> usersMultiReddits) {
             this.usersMultiReddits = usersMultiReddits;
-            notifyDataSetChanged();
+            usersMultiRedditsLoaded = true;
+            refreshTabs();
         }
 
         public void setFavoriteSubscribedSubreddits(List<SubscribedSubredditData> favoriteSubscribedSubreddits) {
             this.favoriteSubscribedSubreddits = favoriteSubscribedSubreddits;
-            notifyDataSetChanged();
+            favoriteSubscribedSubredditsLoaded = true;
+            refreshTabs();
         }
 
         public void setSubscribedSubreddits(List<SubscribedSubredditData> subscribedSubreddits) {
             this.subscribedSubreddits = subscribedSubreddits;
-            notifyDataSetChanged();
+            subscribedSubredditsLoaded = true;
+            refreshTabs();
         }
 
         private Fragment generatePostFragment(int postType, String name) {
@@ -2366,17 +2314,59 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         @Override
         public int getItemCount() {
-            return tabCount + favoriteMultiReddits.size() + multiReddits.size() +
-                    favoriteSubscribedSubreddits.size() + subscribedSubreddits.size() +
-                    favoriteUsersMultiReddits.size() + usersMultiReddits.size();
+            return resolvedTabs().size();
+        }
+
+        // Content-based stable ids: a fragment's identity is its tab (type + name), NOT its index.
+        // The dynamic tabs load async and reshuffle the list as each source arrives; with position-
+        // based ids ViewPager2 would lose track of the current page and drift off the first tab.
+        // Keying on content lets it keep the current page (e.g. Home stays first, so it stays put).
+        private final java.util.Map<String, Long> tabIds = new java.util.HashMap<>();
+        private long nextTabId = 0;
+
+        private long idForKey(String key) {
+            Long id = tabIds.get(key);
+            if (id == null) {
+                id = nextTabId++;
+                tabIds.put(key, id);
+            }
+            return id;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            List<ResolvedTab> resolved = resolvedTabs();
+            if (position < 0 || position >= resolved.size()) {
+                return RecyclerView.NO_ID;
+            }
+            ResolvedTab tab = resolved.get(position);
+            return idForKey(MainPageTabsUtils.userKey(tab.postType, tab.name));
+        }
+
+        @Override
+        public boolean containsItem(long itemId) {
+            for (ResolvedTab tab : resolvedTabs()) {
+                if (idForKey(MainPageTabsUtils.userKey(tab.postType, tab.name)) == itemId) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Fragments are stored in the FragmentManager under "f" + getItemId(position). Our item ids
+        // are content-based (not the position), so lookups must go through getItemId — never "f" +
+        // position, which is only correct while the id/position mapping is the identity.
+        @Nullable
+        private Fragment rawFragmentAtPosition(int position) {
+            if (fragmentManager == null || position < 0 || position >= getItemCount()) {
+                return null;
+            }
+            return fragmentManager.findFragmentByTag("f" + getItemId(position));
         }
 
         @Nullable
         private PostFragment getCurrentFragment() {
-            if (fragmentManager == null) {
-                return null;
-            }
-            Fragment fragment = fragmentManager.findFragmentByTag("f" + binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
+            Fragment fragment = rawFragmentAtPosition(binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
             if (fragment instanceof PostFragment) {
                 return (PostFragment) fragment;
             }
@@ -2385,18 +2375,12 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         @Nullable
         private Fragment getCurrentRawFragment() {
-            if (fragmentManager == null) {
-                return null;
-            }
-            return fragmentManager.findFragmentByTag("f" + binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
+            return rawFragmentAtPosition(binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
         }
 
         @Nullable
         private PostFragment getFragmentAtPosition(int position) {
-            if (fragmentManager == null) {
-                return null;
-            }
-            Fragment fragment = fragmentManager.findFragmentByTag("f" + position);
+            Fragment fragment = rawFragmentAtPosition(position);
             if (fragment instanceof PostFragment) {
                 return (PostFragment) fragment;
             }
@@ -2405,10 +2389,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         @Nullable
         private Fragment getRawFragmentAtPosition(int position) {
-            if (fragmentManager == null) {
-                return null;
-            }
-            return fragmentManager.findFragmentByTag("f" + position);
+            return rawFragmentAtPosition(position);
         }
 
         boolean handleKeyDown(int keyCode) {
@@ -2450,7 +2431,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         void changeNSFW(boolean nsfw) {
             for (int i = 0; i < getItemCount(); i++) {
-                Fragment fragment = fragmentManager.findFragmentByTag("f" + i);
+                Fragment fragment = rawFragmentAtPosition(i);
                 if (fragment instanceof PostFragment) {
                     ((PostFragment) fragment).changeNSFW(nsfw);
                 }

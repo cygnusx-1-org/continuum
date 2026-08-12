@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 
 public class UserWithSelection implements Parcelable {
@@ -19,8 +20,8 @@ public class UserWithSelection implements Parcelable {
     }
 
     protected UserWithSelection(Parcel in) {
-        name = in.readString();
-        iconUrl = in.readString();
+        name = Objects.requireNonNull(in.readString());
+        iconUrl = Objects.requireNonNull(in.readString());
         selected = in.readByte() != 0;
     }
 
@@ -81,6 +82,20 @@ public class UserWithSelection implements Parcelable {
         } else {
             return this.getName().compareToIgnoreCase(((UserWithSelection) obj).getName()) == 0;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        // Must agree with equals(), which uses String.compareToIgnoreCase. That normalises one
+        // char at a time via toUpperCase then toLowerCase, which is not the same as
+        // String.toLowerCase: for '\u0130' the two disagree, which would leave equal instances
+        // with different hashes. Mirror the per-character normalisation exactly.
+        String name = getName();
+        int hash = 0;
+        for (int i = 0; i < name.length(); i++) {
+            hash = 31 * hash + Character.toLowerCase(Character.toUpperCase(name.charAt(i)));
+        }
+        return hash;
     }
 
     @Override

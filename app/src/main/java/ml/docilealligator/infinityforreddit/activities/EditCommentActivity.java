@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,10 +42,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
-import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UploadedImagesBottomSheetFragment;
-import ml.docilealligator.infinityforreddit.comment.Comment;
-import ml.docilealligator.infinityforreddit.comment.ParseComment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.ActivityEditCommentBinding;
@@ -55,14 +53,14 @@ import ml.docilealligator.infinityforreddit.thing.GiphyGif;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.EditCommentActivityViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.EditCommentResult;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
-import org.json.JSONObject;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class EditCommentActivity extends BaseActivity implements UploadImageEnabledActivity,
@@ -82,6 +80,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
     private static final String UPLOADED_IMAGES_STATE = "UIS";
     private static final String GIPHY_GIF_STATE = "GGS";
+    private static final String CAPTURED_IMAGE_URI_STATE = "CIUS";
 
     @Inject
     @Named("oauth")
@@ -102,17 +101,23 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
     @Inject
     Executor mExecutor;
     private String mFullName;
+    @Nullable
     private String mAccessToken;
+    @Nullable
     private String mCommentContent;
     private boolean isSubmitting = false;
+    @Nullable
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
+    @Nullable
     private GiphyGif giphyGif;
     private ActivityEditCommentBinding binding;
     public EditCommentActivityViewModel editCommentActivityViewModel;
 
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -121,6 +126,10 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
         binding = ActivityEditCommentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::launchCaptureImageIntent,
+                () -> Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -155,15 +164,16 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
             });
         }
         setSupportActionBar(binding.toolbarEditCommentActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mFullName = getIntent().getStringExtra(EXTRA_FULLNAME);
+        mFullName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_FULLNAME));
         mAccessToken = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCESS_TOKEN, null);
         mCommentContent = getIntent().getStringExtra(EXTRA_CONTENT);
         ArrayList<MediaMetadata> mediaMetadataList = getIntent().getParcelableArrayListExtra(EXTRA_MEDIA_METADATA_LIST);
 
-        if (mediaMetadataList != null) {
-            StringBuilder sb = new StringBuilder(mCommentContent);
+        String commentContent = mCommentContent;
+        if (mediaMetadataList != null && commentContent != null) {
+            StringBuilder sb = new StringBuilder(commentContent);
             for (MediaMetadata m : mediaMetadataList) {
                 int index = sb.indexOf(m.original.url);
                 if (index >= 0) {
@@ -182,8 +192,12 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         binding.commentEditTextEditCommentActivity.setText(mCommentContent);
 
         if (savedInstanceState != null) {
-            uploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            ArrayList<UploadedImage> restoredUploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            if (restoredUploadedImages != null) {
+                uploadedImages = restoredUploadedImages;
+            }
             giphyGif = savedInstanceState.getParcelable(GIPHY_GIF_STATE);
+            capturedImageUri = savedInstanceState.getParcelable(CAPTURED_IMAGE_URI_STATE);
         }
 
         MarkdownBottomBarRecyclerViewAdapter adapter = new MarkdownBottomBarRecyclerViewAdapter(
@@ -222,8 +236,34 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
         editCommentActivityViewModel = new ViewModelProvider(
                 this,
-                EditCommentActivityViewModel.Companion.provideFactory(new EditCommentActivityRepository(mRedditDataRoomDatabase.commentDraftDao()))
+                EditCommentActivityViewModel.Companion.provideFactory(
+                        new EditCommentActivityRepository(mRedditDataRoomDatabase.commentDraftDao()), mExecutor, mOauthRetrofit)
         ).get(EditCommentActivityViewModel.class);
+        // The edit runs in the ViewModel so a rotation mid-edit no longer drops the result on a dead
+        // instance (CHUNKS deferred item 4).
+        editCommentActivityViewModel.isSubmitting().observe(this, submitting -> isSubmitting = Boolean.TRUE.equals(submitting));
+        editCommentActivityViewModel.getEditResult().observe(this, result -> {
+            if (result instanceof EditCommentResult.Success) {
+                EditCommentResult.Success success = (EditCommentResult.Success) result;
+                Toast.makeText(EditCommentActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
+                Intent returnIntent = new Intent();
+                if (success.getComment() != null) {
+                    returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, success.getComment());
+                } else {
+                    returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(success.getEditedContent()));
+                }
+                returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
+                setResult(RESULT_OK, returnIntent);
+                editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
+                    finish();
+                    return Unit.INSTANCE;
+                });
+            } else if (result instanceof EditCommentResult.Failure) {
+                String message = ((EditCommentResult.Failure) result).getMessage();
+                Snackbar.make(binding.coordinatorLayoutEditCommentActivity,
+                        message != null ? message : getString(R.string.post_failed), Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         if (savedInstanceState == null) {
             editCommentActivityViewModel.getCommentDraft(mFullName).observe(this, commentDraft -> {
@@ -311,80 +351,28 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
     }
 
     private void editComment() {
-        if (!isSubmitting) {
-            isSubmitting = true;
-
-            Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
-
-            String content = binding.commentEditTextEditCommentActivity.getText().toString();
-
-            Map<String, String> params = new HashMap<>();
-            params.put(APIUtils.THING_ID_KEY, mFullName);
-            if (!uploadedImages.isEmpty() || giphyGif != null) {
-                try {
-                    params.put(APIUtils.RICHTEXT_JSON_KEY, new RichTextJSONConverter().constructRichTextJSON(this, content, uploadedImages, giphyGif));
-                    params.put(APIUtils.TEXT_KEY, "");
-                } catch (JSONException e) {
-                    isSubmitting = false;
-                    Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.convert_to_richtext_json_failed, Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-            } else {
-                params.put(APIUtils.TEXT_KEY, content);
-            }
-
-            Handler handler = new Handler(getMainLooper());
-            mExecutor.execute(() -> {
-                try {
-                    Response<String> response = mOauthRetrofit.create(RedditAPI.class)
-                            .editPostOrComment(APIUtils.getOAuthHeader(mAccessToken), params).execute();
-                    if (response.isSuccessful() && response.body() != null) {
-                        Comment comment = ParseComment.parseSingleComment(new JSONObject(response.body()), 0);
-                        handler.post(() -> {
-                            isSubmitting = false;
-                            Toast.makeText(EditCommentActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
-
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT, comment);
-                            returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
-                            setResult(RESULT_OK, returnIntent);
-
-                            editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
-                                finish();
-                                return Unit.INSTANCE;
-                            });
-                        });
-                    } else {
-                        handler.post(() -> {
-                            isSubmitting = false;
-                            Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                        });
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    handler.post(() -> {
-                        isSubmitting = false;
-                        Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    handler.post(() -> {
-                        isSubmitting = false;
-                        Toast.makeText(EditCommentActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
-
-                        Intent returnIntent = new Intent();
-                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_CONTENT, Utils.modifyMarkdown(content));
-                        returnIntent.putExtra(RETURN_EXTRA_EDITED_COMMENT_POSITION, getIntent().getIntExtra(EXTRA_POSITION, 0));
-                        setResult(RESULT_OK, returnIntent);
-
-                        editCommentActivityViewModel.deleteCommentDraft(mFullName, () -> {
-                            finish();
-                            return Unit.INSTANCE;
-                        });
-                    });
-                }
-            });
+        if (isSubmitting) {
+            return;
         }
+        Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
+
+        String content = binding.commentEditTextEditCommentActivity.getText().toString();
+        Map<String, String> params = new HashMap<>();
+        params.put(APIUtils.API_TYPE_KEY, APIUtils.API_TYPE_JSON);
+        params.put(APIUtils.THING_ID_KEY, mFullName);
+        if (!uploadedImages.isEmpty() || giphyGif != null) {
+            try {
+                params.put(APIUtils.RICHTEXT_JSON_KEY, new RichTextJSONConverter().constructRichTextJSON(this, content, uploadedImages, giphyGif));
+                params.put(APIUtils.TEXT_KEY, "");
+            } catch (JSONException e) {
+                Snackbar.make(binding.coordinatorLayoutEditCommentActivity, R.string.convert_to_richtext_json_failed, Snackbar.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            params.put(APIUtils.TEXT_KEY, content);
+        }
+
+        editCommentActivityViewModel.editComment(mAccessToken, params, content);
     }
 
     private void promptAlertDialog(int titleResId, int messageResId, boolean canSaveDraft) {
@@ -416,20 +404,33 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST_CODE) {
-                if (data == null) {
+                Uri imageUri = data == null ? null : data.getData();
+                if (imageUri == null) {
                     Toast.makeText(EditCommentActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
                     return;
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, data.getData(), uploadedImages);
+                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+                Uri imageUri = capturedImageUri;
+                if (imageUri == null) {
+                    Toast.makeText(EditCommentActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.commentEditTextEditCommentActivity,
-                        binding.coordinatorLayoutEditCommentActivity, capturedImageUri, uploadedImages);
+                        binding.coordinatorLayoutEditCommentActivity, imageUri, uploadedImages, true);
+                // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
+                // field pointing at a URI that is about to be removed.
+                capturedImageUri = null;
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 editComment();
             }
+        } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            // Camera cancelled/dismissed — the temp output file was created but never used.
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
         }
     }
 
@@ -438,6 +439,7 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(UPLOADED_IMAGES_STATE, uploadedImages);
         outState.putParcelable(GIPHY_GIF_STATE, giphyGif);
+        outState.putParcelable(CAPTURED_IMAGE_URI_STATE, capturedImageUri);
     }
 
     @Override
@@ -462,16 +464,31 @@ public class EditCommentActivity extends BaseActivity implements UploadImageEnab
 
     @Override
     public void captureImage() {
+        cameraCapturePermissionHelper.launch();
+    }
+
+    private void launchCaptureImageIntent() {
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
             capturedImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("captured_image", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
-            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (IOException ex) {
+            capturedImageUri = null;
             Toast.makeText(this, R.string.error_creating_temp_file, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
+            Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -32,6 +32,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -126,10 +127,15 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
+    @Nullable
     private String mQuery;
+    @Nullable
     private String mSearchInSubredditOrUserName;
+    @Nullable
     private MultiReddit mSearchInMultiReddit;
     @SelectThingReturnKey.THING_TYPE
     private int mSearchInThingType;
@@ -141,7 +147,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     private ActivitySearchResultBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -211,7 +217,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         }
 
         setSupportActionBar(binding.toolbarSearchResultActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSearchResultActivity);
 
         // Get the intent, verify the action and get the query
@@ -269,7 +275,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         applyFABTheme(binding.fabSearchResultActivity);
     }
 
-    private void bindView(Bundle savedInstanceState) {
+    private void bindView(@Nullable Bundle savedInstanceState) {
         sectionsPagerAdapter = new SectionsPagerAdapter(this);
         binding.viewPagerSearchResultActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerSearchResultActivity.setUserInputEnabled(!mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false));
@@ -630,7 +636,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -707,7 +713,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -728,7 +734,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -741,7 +747,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -842,7 +848,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
                     break;
                 case SelectThingReturnKey.THING_TYPE.MULTIREDDIT:
                     bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostType.MULTIREDDIT);
-                    bundle.putString(PostFragment.EXTRA_NAME, mSearchInMultiReddit.getPath());
+                    bundle.putString(PostFragment.EXTRA_NAME, Objects.requireNonNull(mSearchInMultiReddit).getPath());
             }
             bundle.putString(PostFragment.EXTRA_QUERY, mQuery);
             bundle.putString(PostFragment.EXTRA_TRENDING_SOURCE, getIntent().getStringExtra(EXTRA_TRENDING_SOURCE));

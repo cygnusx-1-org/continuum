@@ -2,6 +2,84 @@
 
 ---
 
+8.2.5.9.9.9.1 / 2026-8-4
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Making a comment sometimes crashes the app #352
+* Implemented Optionally use `old` instead of `www` for sharing #333
+* Made Solarized Amoled the default theme and hardened theme management
+* Hardened Reddit video downloads against a lost or deleted download folder
+* Fixed App is not respecting post's default sort type for comments. #348
+
+8.2.5.9.9.9 / 2026-7-28
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Tapping a post's flair or post type label crashes the app when doing so from the "Saved posts" screen. #350
+* Improved Recover Post
+* Added Recover Comment
+* Fixed NSFW/spoiler blur not updating live in feed and comments
+* Improved Fixed Disable Swiping Between Tabs being undone by gallery touches
+* Improved Disable Swiping Between Tabs
+* Made the main page back button action apply without a restart
+* Routed more Reddit deep-link types in-app and honored their sort
+* Fixed Blurry Thumbnails in Compact Layout #339
+* Improved Inbox
+* Massive effort to avoid app crashes via null checks with NullAway
+
+8.2.5.9.9.8 / 2026-7-14
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Replaced all icons with a cleaner versions. Thanks to @98xe!
+* Started a new process to make null checks crashes a non-issue within the Continuum code
+
+8.2.5.9.9.7 / 2026-7-11
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed YouTube title suggestion
+* Added Quick Toggles settings to hide the theme, NSFW, and thumbnail quick toggles in the navigation drawer
+* Added Saved search
+* Improved "Recovery Post"
+
+8.2.5.9.9.6 / 2026-7-6
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Enable subreddit filtering by keyword #326
+* Added Local Saved to mirror saves locally and surface ones Reddit drops
+* Added removed-post recovery via Arctic Shift API with a "Recover Post" action
+* Implemented Restore ability to customize tab names #328
+* Changed the "/m/" prefix for multireddit tabs to "m/" for increased consistently with the rest of the app
+* Fixed "m//" to "m/" for user multireddit tabs
+* Shortened "/m/user/username/m/multireddit-name" to "u/m/multireddit-name" for user multireddit tabs
+* Made the main page tab bar always scrollable
+
+"Made the main page tab bar always scrollable" makes the titles not try to span the full width. This change was made to make the behavior consistent. With the fixed(fills the width of the screen) shorter titles could get line wrapped.
+
+8.2.5.9.9.5 / 2026-7-4
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented rearrangeable tabs
+* Prefixed multireddit tabs with /m/
+
+8.2.5.9.9.4 / 2026-7-2
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed option to add comment top padding back #113 Thanks @KaKi87
+* Fixed Crash on hiding posts twice in a session #321
+
+8.2.5.9.9.3 / 2026-6-30
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Added Translate feature in the overflow menu for posts and comments via Google Translate
+* Added Read Aloud feature in the overflow menu for posts and comments
+
 8.2.5.9.9.2 / 2026-6-30
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
@@ -44,7 +122,7 @@ Note v8a is the 64-bit build, and should be considered the default choice.
 was `5.0`.
 
 This was done to allow the modernization of various libraries. The biggest
-being an upgrade of the main video library from 1.8.0 to 1.10.1(latest). 
+being an upgrade of the main video library from 1.8.0 to 1.10.1(latest).
 
 The other big thing in this release is no need to restart the app a lot less.
 Most settings now just work. The big exception is `Post Filters`, which would
@@ -80,11 +158,11 @@ work, but it would work like the old way for most people. The catch is that
 the max length of a subreddit is 21 and the max length of a username is 20.
 So after doing the math based on those, the font sizes, upper case vs lower
 case, the UI scaling, other text, etc it wouldn't work even on my phone in
-the worst case scenario. 
+the worst case scenario.
 
 Examples:
 subreddit AAAAAAAAAAAAAAAAAAAAA 21
-username  PaleRulerGoingAlone7  20 
+username  PaleRulerGoingAlone7  20
 
 8.2.5.9.5 / 2026-6-22
 ============
@@ -416,7 +494,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Added feature to allow the user to "Halve the post limit" on failure 
+* Added feature to allow the user to "Halve the post limit" on failure
 * Upgraded to 8.1.2
 
 8.1.1.1 / 2026-2-12
@@ -430,7 +508,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Fixed crash on start with 8.1.0.1 
+* Fixed crash on start with 8.1.0.1
 
 8.1.0.1 / 2026-1-23
 ============
@@ -465,7 +543,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 ============
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Fixed Confirm to exit doesn't really exit #154 
+* Fixed Confirm to exit doesn't really exit #154
 * Upgraded to 8.0.7
 
 8.0.5.1 / 2025-10-17
@@ -491,7 +569,7 @@ the comments not loading
 ===========
 Note v8a is the 64-bit build, and should be considered the default choose.
 
-* Keep pinned posts pinned even when filtering or hiding read posts 
+* Keep pinned posts pinned even when filtering or hiding read posts
 * Make double tapping tabs cause a scroll to the top #148
 * Fix the + button in apply post filter not working correctly
 * Upgraded to 8.0.2
@@ -560,7 +638,7 @@ Note v8a is the 64-bit build, and should be considered the default choose.
 * Fixed Make the comments more compact #18
 * Enabled "Swap Tap and Long Press Comments" by default
 * Fixed Incorrect FAB icon and action in bottom bar customization #39
-* Fixed Sensible download names #13  
+* Fixed Sensible download names #13
 * Fixed Simplify download path #38
 
 7.4.4.3 / 2025-4-16

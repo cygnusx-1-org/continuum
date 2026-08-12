@@ -6,12 +6,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -34,6 +37,7 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -125,7 +129,8 @@ public class PullNotificationWorker extends Worker {
                             String summary;
                             if (kind.equals(Message.TYPE_COMMENT) || kind.equals(Message.TYPE_LINK)) {
                                 title = message.getAuthor();
-                                summary = message.getSubject().substring(0, 1).toUpperCase() + message.getSubject().substring(1);
+                                String capitalizedSubject = Utils.capitalizeFirstLetter(message.getSubject());
+                                summary = capitalizedSubject == null ? message.getSubject() : capitalizedSubject;
                             } else {
                                 title = message.getTitle() == null || message.getTitle().equals("") ? message.getSubject() : message.getTitle();
                                 if (kind.equals(Message.TYPE_ACCOUNT)) {
@@ -213,6 +218,7 @@ public class PullNotificationWorker extends Worker {
         return Result.success();
     }
 
+    @Nullable
     private Response<String> fetchMessages(Account account, int retryCount) throws IOException, JSONException {
         if (retryCount < 0) {
             return null;
@@ -251,7 +257,7 @@ public class PullNotificationWorker extends Worker {
         String clientId = APIUtils.getClientId(getApplicationContext());
         Map<String, String> authHeader = new HashMap<>();
         String credentials = String.format("%s:%s", clientId, "");
-        String auth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
+        String auth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(StandardCharsets.UTF_8), android.util.Base64.NO_WRAP);
         authHeader.put(APIUtils.AUTHORIZATION_KEY, auth);
 
         Call<String> accessTokenCall = api.getAccessToken(authHeader, params);
@@ -270,7 +276,7 @@ public class PullNotificationWorker extends Worker {
                     mRedditDataRoomDatabase.accountDao().updateAccessTokenAndRefreshToken(account.getAccountName(), newAccessToken, newRefreshToken);
                 }
 
-                if (mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT).equals(account.getAccountName())) {
+                if (account.getAccountName().equals(mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT))) {
                     mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, newAccessToken).apply();
                 }
 
@@ -279,7 +285,7 @@ public class PullNotificationWorker extends Worker {
 
             return "";
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            Log.e("PullNotificationWorker", "refreshAccessToken failed", e);
         }
 
         return "";

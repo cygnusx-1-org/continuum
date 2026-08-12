@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.paging.PagedListAdapter;
@@ -28,6 +29,7 @@ import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.MarkwonPlugin;
 import io.noties.markwon.core.MarkwonTheme;
 import java.util.Locale;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -50,6 +52,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemCommentBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterErrorBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterLoadingBinding;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
@@ -62,10 +65,12 @@ import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment, RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_DATA = 0;
     private static final int VIEW_TYPE_ERROR = 1;
@@ -73,12 +78,12 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private static final DiffUtil.ItemCallback<Comment> DIFF_CALLBACK = new DiffUtil.ItemCallback<Comment>() {
         @Override
         public boolean areItemsTheSame(@NonNull Comment comment, @NonNull Comment t1) {
-            return comment.getId().equals(t1.getId());
+            return java.util.Objects.equals(comment.getId(), t1.getId());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull Comment comment, @NonNull Comment t1) {
-            return comment.getCommentMarkdown().equals(t1.getCommentMarkdown());
+            return java.util.Objects.equals(comment.getCommentMarkdown(), t1.getCommentMarkdown());
         }
     };
     private final BaseActivity mActivity;
@@ -93,6 +98,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private final ImageAndGifEntry mImageAndGifEntry;
     private final VideoEntry mVideoEntry;
     private final RecyclerView.RecycledViewPool recycledViewPool;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     private final int mColorPrimaryLightTheme;
@@ -112,15 +118,18 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private final boolean mShowElapsedTime;
     private final String mTimeFormatPattern;
     private final boolean mShowCommentDivider;
+    private final boolean mShowCommentTopPadding;
+    private final int mCommentTopPaddingPx;
     private final boolean mShowAbsoluteNumberOfVotes;
     private boolean canStartActivity = true;
+    @Nullable
     private NetworkState networkState;
     private final RetryLoadingMoreCallback mRetryLoadingMoreCallback;
 
     public CommentsListingRecyclerViewAdapter(BaseActivity activity, CommentsListingFragment fragment,
                                               Retrofit oauthRetrofit,
                                               CustomThemeWrapper customThemeWrapper, Locale locale,
-                                              SharedPreferences sharedPreferences, String accessToken,
+                                              SharedPreferences sharedPreferences, @Nullable String accessToken,
                                               @NonNull String accountName, String username,
                                               RetryLoadingMoreCallback retryLoadingMoreCallback) {
         super(DIFF_CALLBACK);
@@ -134,9 +143,11 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         mAccountName = accountName;
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
         mShowCommentDivider = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, false);
+        mShowCommentTopPadding = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_TOP_PADDING, false);
+        mCommentTopPaddingPx = (int) Utils.convertDpToPixel(8, activity);
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
-        mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
+        mTimeFormatPattern = Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mRetryLoadingMoreCallback = retryLoadingMoreCallback;
         mColorPrimaryLightTheme = customThemeWrapper.getColorPrimaryLightTheme();
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
@@ -288,7 +299,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 mImageAndGifEntry.setCurrentCommentId(comment.getId());
                 mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
                 mVideoPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
-                ((CommentBaseViewHolder) holder).markwonAdapter.setMarkdown(mMarkwon, comment.getCommentMarkdown());
+                ((CommentBaseViewHolder) holder).markwonAdapter.setMarkdown(mMarkwon, java.util.Objects.requireNonNullElse(comment.getCommentMarkdown(), ""));
                 // noinspection NotifyDataSetChanged
                 ((CommentBaseViewHolder) holder).markwonAdapter.notifyDataSetChanged();
 
@@ -327,7 +338,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     public int getItemViewType(int position) {
         // Reached at the end
         if (hasExtraRow() && position == getItemCount() - 1) {
-            if (networkState.getStatus() == NetworkState.Status.LOADING) {
+            if (Objects.requireNonNull(networkState).getStatus() == NetworkState.Status.LOADING) {
                 return VIEW_TYPE_LOADING;
             } else {
                 return VIEW_TYPE_ERROR;
@@ -362,7 +373,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         return networkState != null && networkState.getStatus() != NetworkState.Status.SUCCESS;
     }
 
-    public void setNetworkState(NetworkState newNetworkState) {
+    public void setNetworkState(@Nullable NetworkState newNetworkState) {
         NetworkState previousState = this.networkState;
         boolean previousExtraRow = hasExtraRow();
         this.networkState = newNetworkState;
@@ -373,7 +384,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
             } else {
                 notifyItemInserted(super.getItemCount());
             }
-        } else if (newExtraRow && !previousState.equals(newNetworkState)) {
+        } else if (newExtraRow && !Objects.equals(previousState, newNetworkState)) {
             notifyItemChanged(getItemCount() - 1);
         }
     }
@@ -497,6 +508,14 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
             this.replyButton = replyButton;
             this.commentDivider = commentDivider;
 
+            int commentTopMargin = mShowCommentTopPadding ? mCommentTopPaddingPx : 0;
+            ViewGroup.MarginLayoutParams linearLayoutParams = (ViewGroup.MarginLayoutParams) linearLayout.getLayoutParams();
+            linearLayoutParams.topMargin = commentTopMargin;
+            linearLayout.setLayoutParams(linearLayoutParams);
+            ViewGroup.MarginLayoutParams markdownLayoutParams = (ViewGroup.MarginLayoutParams) commentMarkdownView.getLayoutParams();
+            markdownLayoutParams.topMargin = commentTopMargin;
+            commentMarkdownView.setLayoutParams(markdownLayoutParams);
+
             replyButton.setVisibility(View.GONE);
 
             ((ConstraintLayout.LayoutParams) authorTextView.getLayoutParams()).setMarginStart(0);
@@ -585,7 +604,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 Comment comment = getItem(getBindingAdapterPosition());
                 if (comment != null) {
                     Bundle bundle = new Bundle();
-                    if (comment.getAuthor().equals(mAccountName)) {
+                    if (java.util.Objects.equals(comment.getAuthor(), mAccountName)) {
                         bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_EDIT_AND_DELETE_AVAILABLE, true);
                     }
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_COMMENT, comment);
@@ -807,6 +826,8 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                             @Override
                             public void success() {
                                 comment.setSaved(false);
+                                LocalSaved.onUnsaved(mActivity, mAccountName, comment.getFullName());
+                                SavedCommentCacheNotifier.onSavedCommentChanged();
                                 if (getBindingAdapterPosition() == position) {
                                     saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                                 }
@@ -828,6 +849,9 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                             @Override
                             public void success() {
                                 comment.setSaved(true);
+                                LocalSaved.onSaved(mActivity, mOauthRetrofit, mAccessToken,
+                                        mAccountName, comment.getFullName());
+                                SavedCommentCacheNotifier.onSavedCommentChanged();
                                 if (getBindingAdapterPosition() == position) {
                                     saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
                                 }

@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -25,8 +26,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,6 +38,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.activities.ActivityToolbarInterface;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.adapters.CommentsListingRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.comment.Comment;
@@ -63,7 +65,15 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
     public static final String EXTRA_USERNAME = "EN";
     public static final String EXTRA_ARE_SAVED_COMMENTS = "EISC";
+    public static final String EXTRA_ARE_LOCAL_SAVED_COMMENTS = "EIALSC";
+    // Sort carried by an opening deep link (e.g. /user/x/comments?sort=top), as SortType.Type/Time names.
+    // Applied once on fresh creation; overrides the saved/default comment sort for that launch only.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
+    private static final String SORT_TYPE_STATE = "STS";
+    private static final String SORT_TIME_STATE = "STMS";
 
+    @SuppressWarnings("NullAway.Init")
     CommentViewModel mCommentViewModel;
     @Inject
     @Named("no_oauth")
@@ -89,14 +99,26 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     CustomThemeWrapper customThemeWrapper;
     @Inject
     Executor mExecutor;
-    private RequestManager mGlide;
     private BaseActivity mActivity;
+    @Nullable
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
+    @SuppressWarnings("NullAway.Init")
     private CommentsListingRecyclerViewAdapter mAdapter;
+    @SuppressWarnings("NullAway.Init")
     private SortType sortType;
+    // True on a fresh (non-recreation) launch; gates the one-time deep-link sort override in bindView.
+    private boolean freshCreation;
+    // Live sort restored across a config change (captured from savedInstanceState in onCreateView,
+    // consumed by bindView which has no savedInstanceState of its own since it is posted).
+    @Nullable
+    private String restoredSortTypeName;
+    @Nullable
+    private String restoredSortTimeName;
     private ColorDrawable backgroundSwipeRight;
     private ColorDrawable backgroundSwipeLeft;
+    @SuppressWarnings("NullAway.Init")
     private Drawable drawableSwipeRight;
+    @SuppressWarnings("NullAway.Init")
     private Drawable drawableSwipeLeft;
     private int swipeLeftAction;
     private int swipeRightAction;
@@ -111,9 +133,15 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         binding = FragmentCommentsListingBinding.inflate(inflater, container, false);
+
+        freshCreation = savedInstanceState == null;
+        if (savedInstanceState != null) {
+            restoredSortTypeName = savedInstanceState.getString(SORT_TYPE_STATE);
+            restoredSortTimeName = savedInstanceState.getString(SORT_TIME_STATE);
+        }
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 
@@ -121,7 +149,6 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
         applyTheme();
 
-        mGlide = Glide.with(mActivity);
 
         if (mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
@@ -272,13 +299,24 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
             if (arguments == null) {
                 return;
             }
-            String username = arguments.getString(EXTRA_USERNAME);
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name());
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
-                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name());
-                sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()), SortType.Time.valueOf(sortTime.toUpperCase()));
+            String username = Objects.requireNonNull(arguments.getString(EXTRA_USERNAME));
+            SortType overrideSortType = getOverrideSortType(arguments);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
             } else {
-                sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
+                String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_COMMENT, SortType.Type.NEW.name()));
+                if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
+                    String sortTime = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_COMMENT, SortType.Time.ALL.name()));
+                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)), SortType.Time.valueOf(sortTime.toUpperCase(Locale.US)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)));
+                }
+            }
+            // The list is sorted correctly regardless, but the host toolbar's sort subtitle is only
+            // set via its page-change callback, which can fire before this posted bindView assigns
+            // sortType. Notify now that it is ready (mirrors PostFragment).
+            if (mActivity instanceof ActivityToolbarInterface) {
+                ((ActivityToolbarInterface) mActivity).displaySortType();
             }
 
             mAdapter = new CommentsListingRecyclerViewAdapter(mActivity, this, mOauthRetrofit, customThemeWrapper,
@@ -303,14 +341,17 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
             CommentViewModel.Factory factory;
 
+            boolean areLocalSavedComments = arguments.getBoolean(EXTRA_ARE_LOCAL_SAVED_COMMENTS);
             if (mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 factory = new CommentViewModel.Factory(mExecutor, mActivity.mHandler, mRetrofit,
                         null, mActivity.accountName, username, sortType,
-                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS));
+                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS), areLocalSavedComments,
+                        mRedditDataRoomDatabase);
             } else {
                 factory = new CommentViewModel.Factory(mExecutor, mActivity.mHandler, mOauthRetrofit,
                         mActivity.accessToken, mActivity.accountName, username, sortType,
-                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS));
+                        arguments.getBoolean(EXTRA_ARE_SAVED_COMMENTS), areLocalSavedComments,
+                        mRedditDataRoomDatabase);
             }
 
             mCommentViewModel = new ViewModelProvider(this, factory).get(CommentViewModel.class);
@@ -370,21 +411,59 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
         this.sortType = sortType;
     }
 
+    /**
+     * Resolves a sort that should take precedence over the saved/default comment sort: the live sort
+     * restored across a config change, or a sort carried by an opening deep link on fresh creation.
+     * Returns null to fall back to the saved/default sort. Malformed values are ignored.
+     */
+    @Nullable
+    private SortType getOverrideSortType(Bundle arguments) {
+        String typeName;
+        String timeName;
+        if (freshCreation) {
+            typeName = arguments.getString(EXTRA_INITIAL_SORT_TYPE);
+            timeName = arguments.getString(EXTRA_INITIAL_SORT_TIME);
+        } else {
+            typeName = restoredSortTypeName;
+            timeName = restoredSortTimeName;
+        }
+        if (typeName == null) {
+            return null;
+        }
+        try {
+            SortType.Type type = SortType.Type.valueOf(typeName);
+            return timeName == null ? new SortType(type) : new SortType(type, SortType.Time.valueOf(timeName));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (sortType != null) {
+            outState.putString(SORT_TYPE_STATE, sortType.getType().name());
+            if (sortType.getTime() != null) {
+                outState.putString(SORT_TIME_STATE, sortType.getTime().name());
+            }
+        }
+    }
+
     private void initializeSwipeActionDrawable() {
         if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
             backgroundSwipeRight = new ColorDrawable(customThemeWrapper.getDownvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         } else {
             backgroundSwipeRight = new ColorDrawable(customThemeWrapper.getUpvoted());
-            drawableSwipeRight = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         }
 
         if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
             backgroundSwipeLeft = new ColorDrawable(customThemeWrapper.getUpvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
         } else {
             backgroundSwipeLeft = new ColorDrawable(customThemeWrapper.getDownvoted());
-            drawableSwipeLeft = ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null);
+            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(mActivity.getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
         }
     }
 
@@ -399,6 +478,21 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
         binding.fetchCommentsInfoLinearLayoutCommentsListingFragment.setVisibility(View.GONE);
         mCommentViewModel.refresh();
         mAdapter.setNetworkState(null);
+    }
+
+    // Client-side search used by the Saved screen's (Local) Comments tabs.
+    public void filterSaved(String query) {
+        if (mCommentViewModel != null) {
+            mCommentViewModel.search(query);
+        }
+    }
+
+    // A comment was saved/unsaved in-app: drop the in-memory Saved search cache so a search in
+    // progress refetches rather than re-surfacing the just-changed comment.
+    public void onSavedThingChanged() {
+        if (mCommentViewModel != null) {
+            mCommentViewModel.invalidateInMemorySavedSearchCache();
+        }
     }
 
     @Override
@@ -462,7 +556,7 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
         if (mAdapter != null) {
-            String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+            String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
             if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
                 mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
                 refreshAdapter(binding.recyclerViewCommentsListingFragment, mAdapter);

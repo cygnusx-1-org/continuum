@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -16,6 +17,7 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import java.util.List;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 
 public class QRCodeScannerActivity extends AppCompatActivity {
@@ -35,7 +37,7 @@ public class QRCodeScannerActivity extends AppCompatActivity {
             });
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // No flags that would clear the activity stack
@@ -44,7 +46,7 @@ public class QRCodeScannerActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar_qrcode_scanner_activity);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         }
         setTitle(R.string.scan_qr_code);
 

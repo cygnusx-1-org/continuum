@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.markdown.superscript;
 
+import androidx.annotation.Nullable;
 import org.commonmark.internal.Delimiter;
 import org.commonmark.node.Node;
 
@@ -12,6 +13,7 @@ public class SuperscriptOpeningBracket {
     /**
      * Previous superscript opening bracket.
      */
+    @Nullable
     public final SuperscriptOpeningBracket previous;
 
     /**
@@ -19,9 +21,10 @@ public class SuperscriptOpeningBracket {
      */
     public final Delimiter previousDelimiter;
 
+    @Nullable
     public final Integer start;
 
-    public SuperscriptOpeningBracket(Node node, SuperscriptOpeningBracket previous, Delimiter previousDelimiter) {
+    public SuperscriptOpeningBracket(Node node, @Nullable SuperscriptOpeningBracket previous, Delimiter previousDelimiter) {
         this.node = node;
         this.previous = previous;
         this.previousDelimiter = previousDelimiter;

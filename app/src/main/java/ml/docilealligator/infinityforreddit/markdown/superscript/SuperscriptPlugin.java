@@ -4,6 +4,7 @@ import android.text.Spannable;
 import android.text.Spanned;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.MarkwonSpansFactory;
 import io.noties.markwon.MarkwonVisitor;
@@ -44,12 +45,12 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
             Object span = spanArray[i];
             int spanStart = spannable.getSpanStart(span);
             int spanEnd = spannable.getSpanEnd(span);
-            int spanFlags = spannable.getSpanFlags(span);
-            spanList.add(new SpanInfo(span, spanStart, spanEnd, spanFlags));
+            spanList.add(new SpanInfo(span, spanStart, spanEnd));
         }
         return spanList;
     }
 
+    @Nullable
     private static SpanInfo matchSuperscriptAtPosition(List<SpanInfo> spans, int value) {
         for (var span : spans)
             if (span.what.getClass() == SuperscriptSpan.class && !((SuperscriptSpan) span.what).isBracketed && span.start <= value && value <= span.end)
@@ -57,6 +58,7 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
         return null;
     }
 
+    @Nullable
     private static SpanInfo matchSpanAtPosition(List<SpanInfo> spans, int value, Object spanClass) {
         for (var span : spans)
             if (span.what.getClass() == spanClass && span.start <= value && value <= span.end)
@@ -64,6 +66,7 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
         return null;
     }
 
+    @Nullable
     private static SpanInfo matchNonTextSpanAtBoundary(List<SpanInfo> spans, int value) {
         for (var span : spans)
             if ((span.end == value || span.start == value) && span.what.getClass() != CodeSpan.class && span.what.getClass() != SuperscriptSpan.class && span.what.getClass() != TextViewSpan.class)
@@ -236,7 +239,7 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
             spans.remove(superscriptMarker);
 
             boolean isNextOpeningOfLocalNode = nextOpening != null && opening.node.getParent().equals(nextOpening.node.getParent());
-            if (opening.start >= text.length() || (matchSpanAtPosition(spans, opening.start, CodeSpan.class) == null && Character.isWhitespace(text.charAt(opening.start))) || (isNextOpeningOfLocalNode && opening.start.equals(nextOpening.start))) {
+            if (opening.start >= text.length() || (matchSpanAtPosition(spans, opening.start, CodeSpan.class) == null && Character.isWhitespace(text.charAt(opening.start))) || (isNextOpeningOfLocalNode && nextOpening != null && opening.start.equals(nextOpening.start))) {
                 superscriptOpeningList.remove(i);
                 i--;
                 continue;
@@ -259,7 +262,7 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
                     //Skip to end of CodeSpan
                     j = codeSpanAtPosition.end;
                     currentChar = peek(j, text);
-                    if (currentChar == '\0' || Character.isWhitespace(currentChar) || (isNextOpeningOfLocalNode && j == nextOpening.start) || isInsideDelimited) {
+                    if (currentChar == '\0' || Character.isWhitespace(currentChar) || (isNextOpeningOfLocalNode && nextOpening != null && j == nextOpening.start) || isInsideDelimited) {
                         superscriptOpeningList.remove(i);
                         i--;
                         continue outerLoop;
@@ -279,13 +282,11 @@ public class SuperscriptPlugin extends AbstractMarkwonPlugin {
         public final Object what;
         public final int start;
         public final int end;
-        public final int flags;
 
-        private SpanInfo(Object what, int start, int end, int flags) {
+        private SpanInfo(Object what, int start, int end) {
             this.what = what;
             this.start = start;
             this.end = end;
-            this.flags = flags;
         }
     }
 }

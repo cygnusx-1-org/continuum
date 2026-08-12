@@ -3,9 +3,11 @@ package ml.docilealligator.infinityforreddit.postfilter;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import java.util.Objects;
 
 @Entity(tableName = "post_filter_usage", primaryKeys = {"name", "usage", "name_of_usage"},
         foreignKeys = @ForeignKey(entity = PostFilter.class, parentColumns = "name",
@@ -33,7 +35,7 @@ public class PostFilterUsage implements Parcelable {
     @ColumnInfo(name = "name_of_usage")
     public String nameOfUsage;
 
-    public PostFilterUsage(@NonNull String name, int usage, String nameOfUsage) {
+    public PostFilterUsage(@NonNull String name, int usage, @Nullable String nameOfUsage) {
         this.name = name;
         this.usage = usage;
         if (nameOfUsage == null || nameOfUsage.equals("")) {
@@ -44,9 +46,9 @@ public class PostFilterUsage implements Parcelable {
     }
 
     protected PostFilterUsage(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         usage = in.readInt();
-        nameOfUsage = in.readString();
+        nameOfUsage = Objects.requireNonNull(in.readString());
     }
 
     public static final Creator<PostFilterUsage> CREATOR = new Creator<PostFilterUsage>() {

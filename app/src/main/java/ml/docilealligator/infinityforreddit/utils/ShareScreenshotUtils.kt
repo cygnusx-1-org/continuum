@@ -160,8 +160,9 @@ fun sharePostAsScreenshot(
         }
 
         else -> {
-            if (post.selfTextPlainTrimmed != null && post.selfTextPlainTrimmed.isNotEmpty()) {
-                binding.contentTextViewSharedPost.text = post.selfTextPlainTrimmed
+            val selfTextTrimmed = post.selfTextPlainTrimmed
+            if (!selfTextTrimmed.isNullOrEmpty()) {
+                binding.contentTextViewSharedPost.text = selfTextTrimmed
             }
             binding.imageViewSharedPost.visibility = View.GONE
         }
@@ -284,8 +285,9 @@ fun sharePostWithCommentsAsScreenshot(
         }
 
         else -> {
-            if (post.selfTextPlainTrimmed != null && post.selfTextPlainTrimmed.isNotEmpty()) {
-                binding.contentTextViewSharedPostWithComments.text = post.selfTextPlainTrimmed
+            val selfTextTrimmed = post.selfTextPlainTrimmed
+            if (!selfTextTrimmed.isNullOrEmpty()) {
+                binding.contentTextViewSharedPostWithComments.text = selfTextTrimmed
             }
             binding.imageViewSharedPostWithComments.visibility = View.GONE
         }
@@ -315,7 +317,7 @@ fun shareCommentAsScreenshot(
     binding.userTextViewSharedComment.setTypeface(baseActivity.typeface)
     binding.contentTextViewSharedComment.setTypeface(baseActivity.contentTypeface)
 
-    binding.qrCodeImageViewSharedComment.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, comment.permalink))
+    binding.qrCodeImageViewSharedComment.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, comment.permalink ?: ""))
 
     measureView(binding.getRoot())
     shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), screenshotFileName(comment))
@@ -340,7 +342,9 @@ private fun getBitmapFromView(rootView: View): Bitmap {
 }
 
 private fun generateQRCode(baseActivity: BaseActivity, customThemeWrapper: CustomThemeWrapper, url: String): Drawable {
-    val data: QrData.Url = QrData.Url(url)
+    val data: QrData.Url = QrData.Url(
+        RedditLinkUtils.applyLinkDomain(baseActivity.defaultSharedPreferences, url)
+    )
     return QrCodeDrawable(
         data, QrVectorOptions.Builder()
             .setLogo(

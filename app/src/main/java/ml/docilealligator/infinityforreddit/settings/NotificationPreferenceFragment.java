@@ -1,6 +1,5 @@
 package ml.docilealligator.infinityforreddit.settings;
 
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +11,7 @@ import android.provider.Settings;
 import android.view.View;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.preference.ListPreference;
@@ -43,13 +43,12 @@ public class NotificationPreferenceFragment extends CustomFontPreferenceFragment
     SharedPreferences mInternalSharedPreferences;
     private boolean enableNotification;
     private long notificationInterval;
-    private WorkManager workManager;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.notification_preferences, rootKey);
 
-        workManager = WorkManager.getInstance(mActivity);
+        WorkManager workManager = WorkManager.getInstance(mActivity);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 

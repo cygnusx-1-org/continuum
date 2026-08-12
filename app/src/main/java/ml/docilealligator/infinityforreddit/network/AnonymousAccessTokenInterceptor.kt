@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.network
 
 import android.content.Context
+import android.util.Log
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.utils.APIUtils
@@ -17,6 +18,10 @@ class AnonymousAccessTokenInterceptor(
 ) : Interceptor {
     private val cachedAccessToken = AtomicReference<String?>(null)
     private val refreshLock = Any()
+
+    private companion object {
+        const val TAG = "AnonymousAccessTokenInterceptor"
+    }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
@@ -84,9 +89,15 @@ class AnonymousAccessTokenInterceptor(
                 APIUtils.getHttpBasicAuthHeader(context), params
             ).execute()
             if (response.isSuccessful) {
-                val newAccessToken = JSONObject(response.body()).getString(APIUtils.ACCESS_TOKEN_KEY)
-                redditDataRoomDatabase.accountDaoKt().setAnonymousAccessToken(newAccessToken)
-                cachedAccessToken.set(newAccessToken)
+                val newAccessToken = response.body()?.let {
+                    JSONObject(it).getString(APIUtils.ACCESS_TOKEN_KEY)
+                }
+                if (newAccessToken == null) {
+                    Log.w(TAG, "Anonymous token refresh succeeded but returned an empty body")
+                } else {
+                    redditDataRoomDatabase.accountDaoKt().setAnonymousAccessToken(newAccessToken)
+                    cachedAccessToken.set(newAccessToken)
+                }
 
                 newAccessToken
             } else {

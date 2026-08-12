@@ -13,6 +13,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemRecentSearchQueryBin
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 
+@SuppressWarnings("NullAway.Init")
 public class SearchActivityRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final BaseActivity activity;
     private List<RecentSearchQuery> recentSearchQueries;

@@ -26,6 +26,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,14 +51,15 @@ import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.TitleSuggestionUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import okhttp3.ResponseBody;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFragment.FlairSelectionCallback,
         AccountChooserBottomSheetFragment.AccountChooserListener {
@@ -76,11 +79,13 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
     private static final String IS_NSFW_STATE = "INS";
 
     private static final int SUBREDDIT_SELECTION_REQUEST_CODE = 0;
-    private static final int MARKDOWN_PREVIEW_REQUEST_CODE = 300;
 
     @Inject
     @Named("no_oauth")
     Retrofit mRetrofit;
+    @Inject
+    @Named("title_suggestion")
+    Retrofit mTitleSuggestionRetrofit;
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
@@ -99,8 +104,18 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
+    private TitleSuggestion titleSuggestionApi;
+    @Nullable
+    private Call<ResponseBody> titleSuggestionCall;
+    @Nullable
     private Account selectedAccount;
+    /** Set once the current-account read lands, so a null {@link #selectedAccount} can tell
+     * "no account exists" apart from "still loading". */
+    private boolean accountLoadFinished;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
@@ -113,19 +128,20 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMemu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private ActivityPostLinkBinding binding;
     private FlairRequirementController flairController;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -173,7 +189,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
         }
 
         setSupportActionBar(binding.toolbarPostLinkActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mGlide = Glide.with(this);
 
@@ -341,34 +357,57 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
             if (!URLUtil.isHttpsUrl(url) && !URLUtil.isHttpUrl(url)) {
                 url = "https://" + url;
             }
-            mRetrofit.newBuilder()
-                    .baseUrl("http://localhost/")
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .build().create(TitleSuggestion.class).getHtml(url).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                    if (response.isSuccessful()) {
-                        String body = response.body();
-                        if (body != null) {
-                            int start = body.indexOf("<title>");
-                            if (start >= 0) {
-                                int end = body.indexOf("</title>");
-                                if (end > start) {
-                                    binding.postTitleEditTextPostLinkActivity.setText(body.substring(start + 7, end));
-                                    return;
-                                }
-                            }
-                        }
+            String oEmbedUrl = TitleSuggestionUtils.youTubeOEmbedUrl(url);
+            boolean isYouTube = oEmbedUrl != null;
+            String requestUrl = oEmbedUrl != null ? oEmbedUrl : url;
 
-                        Toast.makeText(PostLinkActivity.this, R.string.suggest_title_failed, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(PostLinkActivity.this, R.string.suggest_title_failed, Toast.LENGTH_SHORT).show();
+            if (titleSuggestionCall != null) {
+                titleSuggestionCall.cancel();
+            }
+            Call<ResponseBody> suggestionCall = titleSuggestionApi().get(requestUrl);
+            titleSuggestionCall = suggestionCall;
+            suggestionCall.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    ResponseBody errorBody = response.errorBody();
+                    if (errorBody != null) {
+                        errorBody.close();
                     }
+
+                    ResponseBody body = response.body();
+                    if (call.isCanceled() || !response.isSuccessful() || body == null) {
+                        if (body != null) {
+                            body.close();
+                        }
+                        if (!call.isCanceled()) {
+                            suggestTitleFailed();
+                        }
+                        return;
+                    }
+
+                    // readTitle blocks on the network and scans up to 1 MiB; keep it off the main thread.
+                    mExecutor.execute(() -> {
+                        String title = TitleSuggestionUtils.readTitle(body, isYouTube);
+                        runOnUiThread(() -> {
+                            if (call.isCanceled() || isDestroyed() || isFinishing()) {
+                                return;
+                            }
+                            if (title == null) {
+                                suggestTitleFailed();
+                            } else {
+                                binding.postTitleEditTextPostLinkActivity.setText(title);
+                            }
+                        });
+                    });
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                    Toast.makeText(PostLinkActivity.this, R.string.suggest_title_failed, Toast.LENGTH_SHORT).show();
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    // Cancelling a Call reports failure; the Activity is gone or a newer request won.
+                    if (call.isCanceled()) {
+                        return;
+                    }
+                    suggestTitleFailed();
                 }
             });
         });
@@ -414,8 +453,13 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
         Handler handler = new Handler();
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
-            selectedAccount = account;
             handler.post(() -> {
+                accountLoadFinished = true;
+                if (selectedAccount != null) {
+                    // The user picked an account while this load was in flight; don't stomp it.
+                    return;
+                }
+                selectedAccount = account;
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -519,6 +563,13 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
     }
 
     private void loadSubredditIcon() {
+        String subredditName = this.subredditName;
+        if (subredditName == null) {
+            // Nothing to fetch: fall back to the default icon, as the failed-fetch path used to.
+            displaySubredditIcon();
+            loadSubredditIconSuccessful = true;
+            return;
+        }
         LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
             iconUrl = iconImageUrl;
@@ -540,7 +591,6 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_link_activity, menu);
         applyMenuItemTheme(menu);
-        mMemu = menu;
         flairController.setPosting(isPosting);
         flairController.setMenu(menu);
         return true;
@@ -565,6 +615,15 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
 
             if (binding.postLinkEditTextPostLinkActivity.getText() == null || binding.postLinkEditTextPostLinkActivity.getText().toString().isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostLinkActivity, R.string.link_required, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+
+            Account selectedAccount = this.selectedAccount;
+            if (selectedAccount == null) {
+                // A finished read with no account means there is nothing left to wait for.
+                Snackbar.make(binding.coordinatorLayoutPostLinkActivity,
+                        accountLoadFinished ? R.string.login_first : R.string.account_not_loaded_yet,
+                        Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
@@ -649,6 +708,9 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE) {
+                if (data == null) {
+                    return;
+                }
                 subredditName = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME);
                 iconUrl = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_ICON);
                 subredditSelected = true;
@@ -664,14 +726,31 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
                 binding.flairCustomTextViewPostLinkActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
                 applyFlairLabelStyle();
                 notifyControllerOfSubreddit();
-            }/* else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
-                submitPost(mMenu.findItem(R.id.action_send_post_text_activity));
-            }*/
+            }
         }
+    }
+
+    private void suggestTitleFailed() {
+        Toast.makeText(PostLinkActivity.this, R.string.suggest_title_failed, Toast.LENGTH_SHORT).show();
+    }
+
+    /** Built once and only from the main thread. */
+    private TitleSuggestion titleSuggestionApi() {
+        TitleSuggestion titleSuggestionApi = this.titleSuggestionApi;
+        if (titleSuggestionApi == null) {
+            titleSuggestionApi = mTitleSuggestionRetrofit.create(TitleSuggestion.class);
+            this.titleSuggestionApi = titleSuggestionApi;
+        }
+        return titleSuggestionApi;
     }
 
     @Override
     protected void onDestroy() {
+        if (titleSuggestionCall != null) {
+            // Otherwise an in-flight fetch pins this Activity until the 30s read timeout.
+            titleSuggestionCall.cancel();
+            titleSuggestionCall = null;
+        }
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
@@ -688,17 +767,18 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostLinkActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostLinkActivity);
 
-            binding.accountNameTextViewPostLinkActivity.setText(selectedAccount.getAccountName());
-        }
+        binding.accountNameTextViewPostLinkActivity.setText(account.getAccountName());
+
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 
     @Subscribe
@@ -720,7 +800,7 @@ public class PostLinkActivity extends BaseActivity implements FlairBottomSheetFr
             if (submitTextOrLinkPostEvent.errorMessage == null || submitTextOrLinkPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostLinkActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostLinkActivity, submitTextOrLinkPostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostLinkActivity, submitTextOrLinkPostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitTextOrLinkPostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

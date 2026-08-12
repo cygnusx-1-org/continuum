@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -70,7 +72,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
     private ActivityLoginChromeCustomTabBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -100,7 +102,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarLoginChromeCustomTabActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
         if (intent != null && intent.getData() != null) {
@@ -161,7 +163,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
                 uri.getQueryParameter("code"), uri.getQueryParameter("state"), uri.getQueryParameter("error"));
         switch (redirect.action) {
             case EXCHANGE_CODE:
-                exchangeCodeForToken(redirect.authCode);
+                exchangeCodeForToken(Objects.requireNonNull(redirect.authCode));
                 break;
             case ACCESS_DENIED:
                 Toast.makeText(this, R.string.access_denied, Toast.LENGTH_SHORT).show();
@@ -198,14 +200,14 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
                     finish();
                     return;
                 }
-                String accessToken = result.accessToken;
-                String refreshToken = result.refreshToken;
+                String accessToken = Objects.requireNonNull(result.accessToken);
+                String refreshToken = Objects.requireNonNull(result.refreshToken);
 
                 FetchMyInfo.fetchAccountInfo(mExecutor, mHandler, mOauthRetrofit,
                         mRedditDataRoomDatabase, accessToken,
                         new FetchMyInfo.FetchMyInfoListener() {
                             @Override
-                            public void onFetchMyInfoSuccess(String name, String profileImageUrl, String bannerImageUrl, int karma, boolean isMod) {
+                            public void onFetchMyInfoSuccess(String name, String profileImageUrl, @Nullable String bannerImageUrl, int karma, boolean isMod) {
                                 mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, accessToken)
                                     .putString(SharedPreferencesUtils.ACCOUNT_NAME, name)
                                     .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, profileImageUrl).apply();

@@ -1,13 +1,11 @@
 package ml.docilealligator.infinityforreddit.activities;
 
-import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,11 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -36,6 +31,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -58,6 +55,7 @@ import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -105,52 +103,55 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Account selectedAccount;
+    /** Set once the current-account read lands, so a null {@link #selectedAccount} can tell
+     * "no account exists" apart from "still loading". */
+    private boolean accountLoadFinished;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
     private boolean loadSubredditIconSuccessful = true;
     private boolean isPosting;
+    @Nullable
     private Uri imageUri;
     private int primaryTextColor;
-    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
     private int flairBackgroundColor;
     private int flairTextColor;
     private int spoilerBackgroundColor;
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMemu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private ActivityPostImageBinding binding;
     private FlairRequirementController flairController;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
 
         super.onCreate(savedInstanceState);
 
-        requestCameraPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(), isGranted -> {
-                    if (isGranted) {
-                        captureImage();
-                    } else {
-                        Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.camera_permission_required, Snackbar.LENGTH_SHORT).show();
-                    }
-                });
-
         binding = ActivityPostImageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::captureImage,
+                () -> Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -190,7 +191,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         }
 
         setSupportActionBar(binding.toolbarPostImageActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mGlide = Glide.with(this);
 
@@ -357,13 +358,8 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             binding.receivePostReplyNotificationsSwitchMaterialPostImageActivity.performClick();
         });
 
-        binding.captureFabPostImageActivity.setOnClickListener(view -> {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                captureImage();
-            } else {
-                requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
-            }
-        });
+        binding.captureFabPostImageActivity.setOnClickListener(view ->
+                cameraCapturePermissionHelper.launch());
 
         binding.selectFromLibraryFabPostImageActivity.setOnClickListener(view -> {
             Intent intent = new Intent();
@@ -420,8 +416,13 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         Handler handler = new Handler();
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
-            selectedAccount = account;
             handler.post(() -> {
+                accountLoadFinished = true;
+                if (selectedAccount != null) {
+                    // The user picked an account while this load was in flight; don't stomp it.
+                    return;
+                }
+                selectedAccount = account;
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -530,6 +531,13 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     }
 
     private void loadSubredditIcon() {
+        String subredditName = this.subredditName;
+        if (subredditName == null) {
+            // Nothing to fetch: fall back to the default icon, as the failed-fetch path used to.
+            displaySubredditIcon();
+            loadSubredditIconSuccessful = true;
+            return;
+        }
         LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
             iconUrl = iconImageUrl;
@@ -552,7 +560,6 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_image_activity, menu);
         applyMenuItemTheme(menu);
-        mMemu = menu;
         flairController.setPosting(isPosting);
         flairController.setMenu(menu);
         return true;
@@ -577,6 +584,15 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
 
             if (imageUri == null) {
                 Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.select_an_image, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+
+            Account selectedAccount = this.selectedAccount;
+            if (selectedAccount == null) {
+                // A finished read with no account means there is nothing left to wait for.
+                Snackbar.make(binding.coordinatorLayoutPostImageActivity,
+                        accountLoadFinished ? R.string.login_first : R.string.account_not_loaded_yet,
+                        Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
@@ -654,7 +670,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             }
 
             // Fallback: check file extension if MIME type detection fails
-            if (!isGif && imageUri.toString().toLowerCase().endsWith(".gif")) {
+            if (!isGif && imageUri.toString().toLowerCase(Locale.US).endsWith(".gif")) {
                 isGif = true;
             }
 
@@ -727,6 +743,11 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 loadImage();
+            } else {
+                // Camera cancelled/dismissed — drop the unused temp output file rather than leaving
+                // imageUri pointing at an empty capture that would otherwise be submitted.
+                Utils.deleteContentUriFileQuietly(this, imageUri);
+                imageUri = null;
             }
         }
     }
@@ -749,17 +770,18 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostImageActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostImageActivity);
 
-            binding.accountNameTextViewPostImageActivity.setText(selectedAccount.getAccountName());
-        }
+        binding.accountNameTextViewPostImageActivity.setText(account.getAccountName());
+
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 
     private void captureImage() {
@@ -768,11 +790,22 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("temp_img", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (IOException ex) {
+            imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.error_creating_temp_file, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
+            imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.no_camera_available, Snackbar.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
+            imageUri = null;
+            Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -787,6 +820,9 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
         flairController.setPosting(false);
         mPostingSnackbar.dismiss();
         if (submitImagePostEvent.postSuccess) {
+            // The capture temp file has now been uploaded and the post accepted, so reclaim it; a
+            // picked/shared image is under a different authority and is left untouched (deferred item 2).
+            Utils.deleteCapturedImageFileQuietly(this, imageUri);
             Intent intent = new Intent(PostImageActivity.this, ViewUserDetailActivity.class);
             intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, accountName);
             startActivity(intent);
@@ -795,7 +831,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             if (submitImagePostEvent.errorMessage == null || submitImagePostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitImagePostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitImagePostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitImagePostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }
@@ -819,7 +855,7 @@ public class PostImageActivity extends BaseActivity implements FlairBottomSheetF
             if (submitVideoOrGifPostEvent.errorMessage == null || submitVideoOrGifPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostImageActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitVideoOrGifPostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostImageActivity, submitVideoOrGifPostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitVideoOrGifPostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

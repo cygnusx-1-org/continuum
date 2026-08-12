@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.thing;
 
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import retrofit2.Retrofit;
 public class FetchRedgifsVideoLinks {
     public static void fetchRedgifsVideoLinks(Executor executor, Handler handler, Retrofit redgifsRetrofit,
                                               SharedPreferences currentAccountSharedPreferences,
-                                              String redgifsId,
+                                              @Nullable String redgifsId,
                                               FetchVideoLinkListener fetchVideoLinkListener) {
         executor.execute(() -> {
             try {
@@ -70,7 +71,7 @@ public class FetchRedgifsVideoLinks {
     @Nullable
     public static String fetchRedgifsVideoLinkSync(Retrofit redgifsRetrofit,
                                               SharedPreferences currentAccountSharedPreferences,
-                                              String redgifsId) {
+                                              @Nullable String redgifsId) {
         try {
             // Get valid token
             String accessToken = getValidAccessToken(redgifsRetrofit, currentAccountSharedPreferences);
@@ -127,7 +128,7 @@ public class FetchRedgifsVideoLinks {
         });
     }
 
-    private static void parseRedgifsVideoLinks(Handler handler, String response,
+    private static void parseRedgifsVideoLinks(Handler handler, @Nullable String response,
                                               FetchVideoLinkListener fetchVideoLinkListener) {
         /*try {
             *//*String mp4 = new JSONObject(response).getJSONObject(JSONUtils.GIF_KEY).getJSONObject(JSONUtils.URLS_KEY)
@@ -173,7 +174,7 @@ public class FetchRedgifsVideoLinks {
     }
 
     @Nullable
-    private static String parseRedgifsVideoLinks(String response) {
+    private static String parseRedgifsVideoLinks(@Nullable String response) {
         try {
             JSONObject jsonResponse = new JSONObject(response);
             JSONObject gif = jsonResponse.getJSONObject(JSONUtils.GIF_KEY);
@@ -220,7 +221,7 @@ public class FetchRedgifsVideoLinks {
                 return newAccessToken;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("FetchRedgifsVideoLinks", "refreshAccessToken failed", e);
         }
         return "";
     }

@@ -12,6 +12,7 @@ import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostFilterUsageEmbeddedBinding;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 
+@SuppressWarnings("NullAway.Init")
 public class PostFilterUsageEmbeddedRecyclerViewAdapter extends RecyclerView.Adapter<PostFilterUsageEmbeddedRecyclerViewAdapter.EntryViewHolder> {
 
     private final BaseActivity baseActivity;

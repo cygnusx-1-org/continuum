@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +42,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.livefront.bridge.Bridge;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -57,6 +59,7 @@ import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDeta
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.MorePostsInfoFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewPostDetailFragmentNew;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
@@ -67,7 +70,9 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
+import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel;
 import org.greenrobot.eventbus.EventBus;
@@ -87,6 +92,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     public static final String EXTRA_IS_NSFW_SUBREDDIT = "EINS";
     public static final int EDIT_COMMENT_REQUEST_CODE = 3;
     @State
+    @Nullable
     String mNewAccountName;
     @Inject
     @Named("no_oauth")
@@ -112,34 +118,48 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     @Inject
     UserProfileImagesBatchLoader mLoader;
     @State
+    @Nullable
     ArrayList<Post> posts;
     @PostType
     @State
     int postType;
     @State
+    @Nullable
     String subredditName;
     @State
+    @Nullable
     String concatenatedSubredditNames;
     @State
+    @Nullable
     String username;
     @State
+    @Nullable
     String userWhere;
     @State
+    @Nullable
     String multiPath;
     @State
+    @Nullable
     String query;
     @State
+    @Nullable
     String trendingSource;
     @ReadPostType
     @State
     int readPostType;
     @State
+    @Nullable
     PostFilter postFilter;
+    // Passed to fetchMorePosts() as a @NonNull sort type; restored by Bridge / set from the post-list
+    // event, which NullAway can't see, so its init is asserted rather than proven.
+    @SuppressWarnings("NullAway.Init")
     @State
     SortType.Type sortType;
     @State
+    @Nullable
     SortType.Time sortTime;
     @State
+    @Nullable
     Post post;
     @State
     @LoadingMorePostsStatus
@@ -157,7 +177,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     private ReadPostsListInterface readPostsList;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -314,16 +334,19 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     fragment.setStatus(loadMorePostsState.getStatus());
                 }
                 if (loadMorePostsState.getStatus() == LoadingMorePostsStatus.LOADED) {
-                    if (loadMorePostsState.getChangePage()) {
-                        binding.viewPager2ViewPostDetailActivity.setCurrentItem(
-                                viewPostDetailActivityViewModel.getPosts().size() - 1,
-                                false
+                    ArrayList<Post> loadedPosts = viewPostDetailActivityViewModel.getPosts();
+                    if (loadedPosts != null) {
+                        if (loadMorePostsState.getChangePage()) {
+                            binding.viewPager2ViewPostDetailActivity.setCurrentItem(
+                                    loadedPosts.size() - 1,
+                                    false
+                            );
+                        }
+                        mSectionsPagerAdapter.notifyItemRangeInserted(
+                                loadedPosts.size(),
+                                loadMorePostsState.getNNewPosts()
                         );
                     }
-                    mSectionsPagerAdapter.notifyItemRangeInserted(
-                            viewPostDetailActivityViewModel.getPosts().size(),
-                            loadMorePostsState.getNNewPosts()
-                    );
                 }
             }
         });
@@ -349,6 +372,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         });
     }
 
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public void displayToolbarSortAndTitle(ViewPostDetailFragmentNew fragment) {
         if (mSectionsPagerAdapter != null && fragment == mSectionsPagerAdapter.getCurrentFragment()) {
             updateToolbar(fragment);
@@ -444,7 +469,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
-    private void checkNewAccountAndBindView(Bundle savedInstanceState) {
+    private void checkNewAccountAndBindView(@Nullable Bundle savedInstanceState) {
         if (mNewAccountName != null) {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT) || !accountName.equals(mNewAccountName)) {
                 AccountManagement.switchAccount(mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
@@ -468,7 +493,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
-    private void bindView(Bundle savedInstanceState) {
+    private void bindView(@Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             binding.viewPager2ViewPostDetailActivity.setCurrentItem(getIntent().getIntExtra(EXTRA_POST_LIST_POSITION, 0), false);
         }
@@ -543,6 +568,15 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
+    public void recoverComment(Comment comment, int position) {
+        if (mSectionsPagerAdapter != null) {
+            ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
+            if (fragment != null) {
+                fragment.recoverComment(comment, position);
+            }
+        }
+    }
+
     public void deleteComment(String fullName, int position) {
         if (mSectionsPagerAdapter != null) {
             ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
@@ -567,6 +601,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             SaveThing.unsaveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
                 @Override
                 public void success() {
+                    LocalSaved.onUnsaved(ViewPostDetailActivity.this, accountName, comment.getFullName());
+                    SavedCommentCacheNotifier.onSavedCommentChanged();
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         fragment.saveComment(position, false);
@@ -588,6 +624,9 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             SaveThing.saveThing(mOauthRetrofit, accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
                 @Override
                 public void success() {
+                    LocalSaved.onSaved(ViewPostDetailActivity.this, mOauthRetrofit, accessToken,
+                            accountName, comment.getFullName());
+                    SavedCommentCacheNotifier.onSavedCommentChanged();
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         fragment.saveComment(position, true);
@@ -619,8 +658,9 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     }
 
     public void searchComment(ViewPostDetailFragmentNew fragment, boolean searchNextComment) {
-        if (!binding.searchTextInputEditTextViewPostDetailActivity.getText().toString().isEmpty()) {
-            fragment.searchComment(binding.searchTextInputEditTextViewPostDetailActivity.getText().toString(), searchNextComment);
+        Editable searchText = binding.searchTextInputEditTextViewPostDetailActivity.getText();
+        if (searchText != null && !searchText.toString().isEmpty()) {
+            fragment.searchComment(searchText.toString(), searchNextComment);
         }
     }
 
@@ -654,8 +694,11 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             this.trendingSource = event.trendingSource;
             this.readPostType = event.readPostType;
             this.postFilter = event.postFilter;
-            this.sortType = event.sortType.getType();
-            this.sortTime = event.sortType.getTime();
+            SortType eventSortType = event.sortType;
+            if (eventSortType != null) {
+                this.sortType = eventSortType.getType();
+                this.sortTime = eventSortType.getTime();
+            }
             this.readPostsList = event.readPostsList;
 
             if (mSectionsPagerAdapter != null) {
@@ -720,10 +763,10 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         if (requestCode == EDIT_COMMENT_REQUEST_CODE) {
             if (data != null && resultCode == Activity.RESULT_OK) {
                 if (data.hasExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)) {
-                    editComment((Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT),
+                    editComment(Objects.requireNonNull((Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)),
                             data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                 } else {
-                    editComment(data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT),
+                    editComment(Objects.requireNonNull(data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT)),
                             data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                 }
             }
@@ -733,13 +776,15 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {
                         Comment comment = data.getParcelableExtra(RETURN_EXTRA_COMMENT_DATA_KEY);
-                        if (comment != null && comment.getDepth() == 0) {
-                            fragment.addComment(comment);
-                        } else {
-                            String parentFullname = data.getStringExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY);
-                            int parentPosition = data.getIntExtra(CommentActivity.EXTRA_PARENT_POSITION_KEY, -1);
-                            if (parentFullname != null && parentPosition >= 0) {
-                                fragment.addChildComment(comment, parentFullname, parentPosition);
+                        if (comment != null) {
+                            if (comment.getDepth() == 0) {
+                                fragment.addComment(comment);
+                            } else {
+                                String parentFullname = data.getStringExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY);
+                                int parentPosition = data.getIntExtra(CommentActivity.EXTRA_PARENT_POSITION_KEY, -1);
+                                if (parentFullname != null && parentPosition >= 0) {
+                                    fragment.addChildComment(comment, parentFullname, parentPosition);
+                                }
                             }
                         }
                     }
@@ -756,6 +801,25 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         this.post = viewPostDetailActivityViewModel.getPost();
         this.posts = viewPostDetailActivityViewModel.getPosts();
         Bridge.saveInstanceState(this, outState);
+    }
+
+    public TextToSpeechHelper getTextToSpeechHelper() {
+        // Owned by the ViewModel so playback survives configuration changes (e.g. rotation).
+        return viewPostDetailActivityViewModel.getTextToSpeechHelper(this);
+    }
+
+    public void stopTextToSpeech() {
+        viewPostDetailActivityViewModel.stopTextToSpeech();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Release the TTS engine when the activity is no longer visible (backgrounded or
+        // left), but keep it alive across a configuration change such as rotation.
+        if (viewPostDetailActivityViewModel != null && !isChangingConfigurations()) {
+            viewPostDetailActivityViewModel.shutdownTextToSpeech();
+        }
     }
 
     @Override

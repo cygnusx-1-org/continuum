@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelKt;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.PagingData;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import retrofit2.Retrofit;
@@ -30,28 +31,30 @@ public class CustomThemeViewModel extends ViewModel {
 
     @Nullable
     public LiveData<List<CustomTheme>> getAllCustomThemes() {
-        return localCustomThemeRepository.getAllCustomThemes();
+        return Objects.requireNonNull(localCustomThemeRepository).getAllCustomThemes();
     }
 
     public LiveData<CustomTheme> getCurrentLightThemeLiveData() {
-        return localCustomThemeRepository.getCurrentLightCustomTheme();
+        return Objects.requireNonNull(localCustomThemeRepository).getCurrentLightCustomTheme();
     }
 
     public LiveData<CustomTheme> getCurrentDarkThemeLiveData() {
-        return localCustomThemeRepository.getCurrentDarkCustomTheme();
+        return Objects.requireNonNull(localCustomThemeRepository).getCurrentDarkCustomTheme();
     }
 
     @Nullable
     public LiveData<CustomTheme> getCurrentAmoledThemeLiveData() {
-        return localCustomThemeRepository.getCurrentAmoledCustomTheme();
+        return Objects.requireNonNull(localCustomThemeRepository).getCurrentAmoledCustomTheme();
     }
 
     public LiveData<PagingData<OnlineCustomThemeMetadata>> getOnlineCustomThemeMetadata() {
-        return onlineCustomThemeRepository.getOnlineCustomThemeMetadata();
+        return Objects.requireNonNull(onlineCustomThemeRepository).getOnlineCustomThemeMetadata();
     }
 
     public static class Factory extends ViewModelProvider.NewInstanceFactory {
+        @Nullable
         private Executor executor;
+        @Nullable
         private Retrofit retrofit;
         private final RedditDataRoomDatabase mRedditDataRoomDatabase;
         private final boolean isOnline;
@@ -72,7 +75,7 @@ public class CustomThemeViewModel extends ViewModel {
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             if (isOnline) {
-                return (T) new CustomThemeViewModel(executor, retrofit, mRedditDataRoomDatabase);
+                return (T) new CustomThemeViewModel(Objects.requireNonNull(executor), Objects.requireNonNull(retrofit), mRedditDataRoomDatabase);
             } else {
                 return (T) new CustomThemeViewModel(mRedditDataRoomDatabase);
             }

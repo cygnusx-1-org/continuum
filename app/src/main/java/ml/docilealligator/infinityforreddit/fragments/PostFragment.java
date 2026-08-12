@@ -104,8 +104,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public static final String EXTRA_POST_TYPE = "EPT";
     public static final String EXTRA_FILTER = "EF";
     public static final String EXTRA_DISABLE_READ_POSTS = "EDRP";
+    // Sort carried by an opening deep link (e.g. reddit.com/r/x/top), as SortType.Type/Time names.
+    // Applied once on fresh creation; overrides the saved/default sort for that launch only.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String IS_IN_LAZY_MODE_STATE = "IILMS";
+    private static final String SORT_TYPE_STATE = "STS";
+    private static final String SORT_TIME_STATE = "STMS";
     private static final String RECYCLER_VIEW_POSITION_STATE = "RVPS";
     private static final String RECYCLER_VIEW_POSITION_OFFSET_STATE = "RVPOS";
     private static final String RECYCLER_VIEW_USER_ANCHOR_STATE = "RVUA";
@@ -122,6 +128,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private int userAnchorPos = RecyclerView.NO_POSITION;
     private int userAnchorOffset = 0;
 
+    @SuppressWarnings("NullAway.Init")
     PostViewModel mPostViewModel;
     @Inject
     @Named("redgifs")
@@ -152,15 +159,23 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private int postType;
     private boolean savePostFeedScrolledPosition;
     private PostRecyclerViewAdapter mAdapter;
+    @Nullable
     private String subredditName;
+    @Nullable
     private String username;
+    @Nullable
     private String query;
+    @Nullable
     private String trendingSource;
+    @Nullable
     private String where;
+    @Nullable
     private String multiRedditPath;
+    @Nullable
     private String concatenatedSubredditNames;
     private int maxPosition = -1;
     private SortType sortType;
+    @Nullable
     private PostFilter postFilter;
     private ReadPostsListInterface readPostsList;
     private FragmentPostBinding binding;
@@ -196,8 +211,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentPostBinding.inflate(inflater, container, false);
 
@@ -291,7 +306,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             query = getArguments().getString(EXTRA_QUERY);
             trendingSource = getArguments().getString(EXTRA_TRENDING_SOURCE);
             if (savedInstanceState == null) {
-                postFragmentId += query.hashCode();
+                postFragmentId += Objects.requireNonNull(query).hashCode();
             }
 
             usage = PostFilterUsage.SEARCH_TYPE;
@@ -299,7 +314,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_POST, SortType.Type.RELEVANCE.name());
             String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SEARCH_POST, SortType.Time.ALL.name());
-            sortType = new SortType(SortType.Type.valueOf(sort), SortType.Time.valueOf(sortTime));
+            sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
@@ -355,29 +370,31 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         } else if (postType == PostType.SUBREDDIT) {
             subredditName = getArguments().getString(EXTRA_NAME);
             if (savedInstanceState == null) {
-                postFragmentId += subredditName.hashCode();
+                postFragmentId += Objects.requireNonNull(subredditName).hashCode();
             }
 
             usage = PostFilterUsage.SUBREDDIT_TYPE;
             nameOfUsage = subredditName;
 
-            String sort;
-            String sortTime = null;
-
-            sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + subredditName,
-                    mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TYPE, SortType.Type.HOT.name()));
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
-                sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + subredditName,
-                        mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
+            } else {
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + subredditName,
+                        mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TYPE, SortType.Type.HOT.name()));
+                String sortTime = null;
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + subredditName,
+                            mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
+                }
+                if (sortTime != null) {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
             boolean displaySubredditName = subredditName != null && (subredditName.equals("popular") || subredditName.equals("all"));
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout);
-
-            if (sortTime != null) {
-                sortType = new SortType(SortType.Type.valueOf(sort), SortType.Time.valueOf(sortTime));
-            } else {
-                sortType = new SortType(SortType.Type.valueOf(sort));
-            }
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mCustomThemeWrapper, locale,
@@ -427,29 +444,31 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             multiRedditPath = getArguments().getString(EXTRA_NAME);
             query = getArguments().getString(EXTRA_QUERY);
             if (savedInstanceState == null) {
-                postFragmentId += multiRedditPath.hashCode() + (query == null ? 0 : query.hashCode());
+                postFragmentId += Objects.requireNonNull(multiRedditPath).hashCode() + (query == null ? 0 : query.hashCode());
             }
 
             usage = PostFilterUsage.MULTIREDDIT_TYPE;
             nameOfUsage = multiRedditPath;
 
-            String sort;
-            String sortTime = null;
-
-            sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                    SortType.Type.HOT.name());
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
-                sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                        SortType.Time.ALL.name());
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
+            } else {
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                        SortType.Type.HOT.name());
+                String sortTime = null;
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                            SortType.Time.ALL.name());
+                }
+                if (sortTime != null) {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
                     defaultPostLayout);
-
-            if (sortTime != null) {
-                sortType = new SortType(SortType.Type.valueOf(sort), SortType.Time.valueOf(sortTime));
-            } else {
-                sortType = new SortType(SortType.Type.valueOf(sort));
-            }
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mCustomThemeWrapper, locale,
@@ -502,20 +521,25 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             username = getArguments().getString(EXTRA_USER_NAME);
             where = getArguments().getString(EXTRA_USER_WHERE);
             if (savedInstanceState == null) {
-                postFragmentId += username.hashCode();
+                postFragmentId += Objects.requireNonNull(username).hashCode();
             }
 
             usage = PostFilterUsage.USER_TYPE;
             nameOfUsage = username;
 
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_POST_BASE + username,
-                    mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TYPE, SortType.Type.NEW.name()));
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
-                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_POST_BASE + username,
-                        mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
-                sortType = new SortType(SortType.Type.valueOf(sort), SortType.Time.valueOf(sortTime));
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
             } else {
-                sortType = new SortType(SortType.Type.valueOf(sort));
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_POST_BASE + username,
+                        mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TYPE, SortType.Type.NEW.name()));
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_POST_BASE + username,
+                            mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout);
 
@@ -571,11 +595,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             nameOfUsage = PostFilterUsage.NO_USAGE;
 
             String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + Account.ANONYMOUS_ACCOUNT, SortType.Type.HOT.name());
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
+            if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
                 String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + Account.ANONYMOUS_ACCOUNT, SortType.Time.ALL.name());
-                sortType = new SortType(SortType.Type.valueOf(sort), SortType.Time.valueOf(sortTime));
+                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
             } else {
-                sortType = new SortType(SortType.Type.valueOf(sort));
+                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
 
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
@@ -624,18 +648,23 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         } else if (postType == PostType.ANONYMOUS_MULTIREDDIT) {
             multiRedditPath = getArguments().getString(EXTRA_NAME);
             if (savedInstanceState == null) {
-                postFragmentId += multiRedditPath.hashCode();
+                postFragmentId += Objects.requireNonNull(multiRedditPath).hashCode();
             }
 
             usage = PostFilterUsage.MULTIREDDIT_TYPE;
             nameOfUsage = multiRedditPath;
 
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Type.HOT.name());
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
-                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Time.ALL.name());
-                sortType = new SortType(SortType.Type.valueOf(sort), SortType.Time.valueOf(sortTime));
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
             } else {
-                sortType = new SortType(SortType.Type.valueOf(sort));
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Type.HOT.name());
+                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+                    String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_MULTI_REDDIT_POST_BASE + multiRedditPath, SortType.Time.ALL.name());
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+                } else {
+                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+                }
             }
 
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout);
@@ -688,7 +717,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             // The post id is carried in EXTRA_NAME and used as the duplicates listing key.
             subredditName = getArguments().getString(EXTRA_NAME);
             if (savedInstanceState == null) {
-                postFragmentId += subredditName.hashCode();
+                postFragmentId += Objects.requireNonNull(subredditName).hashCode();
             }
 
             usage = PostFilterUsage.HOME_TYPE;
@@ -730,11 +759,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             nameOfUsage = PostFilterUsage.NO_USAGE;
 
             String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_BEST_POST, SortType.Type.BEST.name());
-            if (sort.equals(SortType.Type.CONTROVERSIAL.name()) || sort.equals(SortType.Type.TOP.name())) {
+            if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
                 String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_BEST_POST, SortType.Time.ALL.name());
-                sortType = new SortType(SortType.Type.valueOf(sort), SortType.Time.valueOf(sortTime));
+                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
             } else {
-                sortType = new SortType(SortType.Type.valueOf(sort));
+                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
 
@@ -922,7 +951,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilterAndConcatenatedSubredditNames(mRedditDataRoomDatabase, mExecutor, new Handler(), usage, nameOfUsage,
                                 (postFilter, concatenatedSubredditNames) -> {
                                     if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
-                                        this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                        Objects.requireNonNull(this.postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
                                         this.concatenatedSubredditNames = concatenatedSubredditNames;
                                         if (concatenatedSubredditNames == null) {
                                             showErrorView(R.string.anonymous_front_page_no_subscriptions);
@@ -939,7 +968,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilterAndConcatenatedSubredditNames(mRedditDataRoomDatabase, mExecutor, new Handler(), multiRedditPath, usage, nameOfUsage,
                                 (postFilter, concatenatedSubredditNames) -> {
                                     if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
-                                        this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                        Objects.requireNonNull(this.postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
                                         this.concatenatedSubredditNames = concatenatedSubredditNames;
                                         if (concatenatedSubredditNames == null) {
                                             showErrorView(R.string.anonymous_multireddit_no_subreddit);
@@ -985,34 +1014,34 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, subredditName,
-                    query, trendingSource, postType, sortType, postFilter, readPostsList)
+                    query, trendingSource, postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
         } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, subredditName,
-                    postType, sortType, postFilter, readPostsList)
+                    postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
         } else if (postType == PostType.MULTIREDDIT) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, multiRedditPath,
-                    query, postType, sortType, postFilter, readPostsList)
+                    query, postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
         } else if (postType == PostType.USER) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, username,
-                    postType, sortType, postFilter, where, readPostsList)
+                    postType, sortType, Objects.requireNonNull(postFilter), where, readPostsList)
             ).get(PostViewModel.class);
         } else {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
                     mActivity.accountName, mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    mPostHistorySharedPreferences, postType, sortType, postFilter, readPostsList)
+                    mPostHistorySharedPreferences, postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
         }
 
@@ -1028,14 +1057,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     // Safe to call again on pull-to-refresh: it lets the feed pick up newly added/removed
     // subreddits and recover from the empty state, where no post view model was ever created and
     // mAdapter.refresh() would otherwise do nothing.
-    private void loadAnonymousFrontPageOrMultireddit(int usage, String nameOfUsage) {
+    private void loadAnonymousFrontPageOrMultireddit(int usage, @Nullable String nameOfUsage) {
         FetchPostFilterAndConcatenatedSubredditNames.FetchPostFilterAndConcatenatecSubredditNamesListener listener =
                 (fetchedPostFilter, fetchedConcatenatedSubredditNames) -> {
                     if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
                         if (postFilter == null) {
                             postFilter = fetchedPostFilter;
                         }
-                        postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)
+                        Objects.requireNonNull(postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)
                                 && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
                         concatenatedSubredditNames = fetchedConcatenatedSubredditNames;
                         if (concatenatedSubredditNames == null) {
@@ -1060,31 +1089,31 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
     }
 
-    private void initializeAndBindPostViewModelForAnonymous(String concatenatedSubredditNames) {
+    private void initializeAndBindPostViewModelForAnonymous(@Nullable String concatenatedSubredditNames) {
         if (postType == PostType.SEARCH) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, null, subredditName,
-                    query, trendingSource, postType, sortType, postFilter, readPostsList)
+                    query, trendingSource, postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
         } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
             mPostViewModel = new ViewModelProvider(this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName,
                     mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    null, subredditName, postType, sortType, postFilter, readPostsList)
+                    null, subredditName, postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
         } else if (postType == PostType.USER) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, null, username,
-                    postType, sortType, postFilter, where, readPostsList)
+                    postType, sortType, Objects.requireNonNull(postFilter), where, readPostsList)
             ).get(PostViewModel.class);
         } else {
             //Anonymous front page or multireddit
             boolean reusedExistingViewModel = mPostViewModel != null;
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, mSharedPreferences, concatenatedSubredditNames,
-                    postType, sortType, postFilter, readPostsList)
+                    postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
             if (reusedExistingViewModel) {
                 // On a reload (e.g. after subscribing) ViewModelProvider.get() hands back the existing
@@ -1102,8 +1131,13 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         mPostViewModel.getPosts().observe(getViewLifecycleOwner(), posts -> mAdapter.submitData(getViewLifecycleOwner().getLifecycle(), posts));
 
         mPostViewModel.moderationEventLiveData.observe(getViewLifecycleOwner(), moderationEvent -> {
-            EventBus.getDefault().post(new PostUpdateEventToPostList(moderationEvent.getPost(), moderationEvent.getPosition()));
-            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(moderationEvent.getPost()));
+            // getPost() is @Nullable (only DeleteFailed carries a null post); guard so a null-post
+            // event still shows its toast instead of crashing.
+            Post moderatedPost = moderationEvent.getPost();
+            if (moderatedPost != null) {
+                EventBus.getDefault().post(new PostUpdateEventToPostList(moderatedPost, moderationEvent.getPosition()));
+                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(moderatedPost));
+            }
             Toast.makeText(mActivity, moderationEvent.getToastMessageResId(), Toast.LENGTH_SHORT).show();
         });
 
@@ -1202,7 +1236,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     public void changeSortType(SortType sortType) {
         if (mPostViewModel != null) {
-            if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_SORT_TYPE, true)) {
+            if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_POST_SORT, true)) {
                 switch (postType) {
                     case PostType.FRONT_PAGE:
                         mSortTypeSharedPreferences.edit().putString(SharedPreferencesUtils.SORT_TYPE_BEST_POST, sortType.getType().name()).apply();
@@ -1342,6 +1376,45 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         outState.putParcelable(POST_FILTER_STATE, postFilter);
         outState.putString(CONCATENATED_SUBREDDIT_NAMES_STATE, concatenatedSubredditNames);
         outState.putLong(POST_FRAGMENT_ID_STATE, postFragmentId);
+
+        // Only the subreddit/multireddit/user paths restore this (see getOverrideSortType).
+        if ((postType == PostType.SUBREDDIT || postType == PostType.MULTIREDDIT
+                || postType == PostType.ANONYMOUS_MULTIREDDIT || postType == PostType.USER)
+                && sortType != null) {
+            outState.putString(SORT_TYPE_STATE, sortType.getType().name());
+            if (sortType.getTime() != null) {
+                outState.putString(SORT_TIME_STATE, sortType.getTime().name());
+            }
+        }
+    }
+
+    /**
+     * Resolves a sort that should take precedence over the saved/default sort: the live sort
+     * restored across a config change, or a sort carried by an opening deep link on fresh
+     * creation. Returns null to fall back to the saved/default sort. Only consulted by the
+     * subreddit, multireddit (incl. anonymous), and user paths.
+     */
+    @Nullable
+    private SortType getOverrideSortType(@Nullable Bundle savedInstanceState) {
+        String typeName;
+        String timeName;
+        if (savedInstanceState != null) {
+            typeName = savedInstanceState.getString(SORT_TYPE_STATE);
+            timeName = savedInstanceState.getString(SORT_TIME_STATE);
+        } else {
+            Bundle args = getArguments();
+            typeName = args == null ? null : args.getString(EXTRA_INITIAL_SORT_TYPE);
+            timeName = args == null ? null : args.getString(EXTRA_INITIAL_SORT_TIME);
+        }
+        if (typeName == null) {
+            return null;
+        }
+        try {
+            SortType.Type type = SortType.Type.valueOf(typeName);
+            return timeName == null ? new SortType(type) : new SortType(type, SortType.Time.valueOf(timeName));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     @Override
@@ -1362,6 +1435,30 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
     }
 
+    // Client-side search used by the Saved screen. Filters the loaded posts against the query and
+    // keeps loading further pages while the query is active (see PostViewModel#buildSearchLayer).
+    public void filterSaved(String query) {
+        if (mPostViewModel != null) {
+            mPostViewModel.searchSaved(query);
+        }
+    }
+
+    // "Bypass cache (fetch fresh)" toggle on the Saved screen: drop the hard-TTL cache and reload
+    // the whole history from the network.
+    public void forceFreshSaved() {
+        if (mPostViewModel != null) {
+            mPostViewModel.forceFreshSavedLoad();
+        }
+    }
+
+    // A thing was saved/unsaved in-app: drop the in-memory Saved search cache so a search in progress
+    // refetches rather than re-surfacing the just-changed item.
+    public void onSavedThingChanged() {
+        if (mPostViewModel != null) {
+            mPostViewModel.invalidateInMemorySavedSearchCache();
+        }
+    }
+
     @Override
     public void refresh() {
         binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
@@ -1378,6 +1475,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             return;
         }
         saveCache();
+        // Drop any cached Saved-search listing so a refresh while a search is active refetches.
+        if (mPostViewModel != null) {
+            mPostViewModel.invalidateSavedSearchCache();
+        }
         mAdapter.refresh();
         goBackToTop();
     }
@@ -1440,7 +1541,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     public void changeNSFW(boolean nsfw) {
-        postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && nsfw;
+        Objects.requireNonNull(postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && nsfw;
         if (mPostViewModel != null) {
             mPostViewModel.changePostFilter(postFilter);
         }
@@ -1535,6 +1636,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Override
+    @Nullable
     public PostFilter getPostFilter() {
         return postFilter;
     }
@@ -1686,10 +1788,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Subscribe
+    @Override
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
         if (mAdapter != null) {
-            String autoplay = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
-            String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+            String autoplay = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER));
+            String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
             boolean stateChanged = false;
             if (autoplay.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI)) {
                 mAdapter.setAutoplay(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_WIFI);

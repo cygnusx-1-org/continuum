@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
+import android.util.Log;
 import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -285,13 +286,13 @@ public class JSONUtils {
 }
 }
                          */
-                        e.printStackTrace();
+                        Log.e("JSONUtils", "parseMediaMetadata failed", e);
                     }
                 }
                 return mediaMetadataMap;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("JSONUtils", "parseMediaMetadata failed", e);
         }
 
         return null;
@@ -308,6 +309,7 @@ public class JSONUtils {
     @Nullable
     private static MediaMetadata createGiphyFallbackMetadata(String key) {
         // Key format: "giphy|{id}" or "giphy|{id}|downsized"
+        @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
         String[] parts = key.split("\\|");
         if (parts.length < 2) {
             return null;

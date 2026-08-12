@@ -14,6 +14,10 @@ public class SharedPreferencesUtils {
     public static final String NOTIFICATION_INTERVAL_KEY = "notificaiton_interval";
     public static final String LAZY_MODE_INTERVAL_KEY = "lazy_mode_interval";
     public static final String THEME_KEY = "theme";
+    // Values of THEME_KEY, matching R.array.settings_theme_values.
+    public static final String THEME_LIGHT = "0";
+    public static final String THEME_DARK = "1";
+    public static final String THEME_FOLLOW_SYSTEM = "2";
     public static final String ICON_FOREGROUND_KEY = "icon_foreground";
     public static final String ICON_BACKGROUND_KEY = "icon_background";
     public static final String ERROR_IMAGE_KEY = "error_image";
@@ -68,6 +72,7 @@ public class SharedPreferencesUtils {
     public static final String SORT_TYPE_SEARCH_SUBREDDIT = "sort_type_search_subreddit";
     public static final String SORT_TYPE_SEARCH_USER = "sort_type_search_user";
     public static final String SORT_TYPE_POST_COMMENT = "sort_type_post_comment";
+    public static final String SORT_TYPE_SUBREDDIT_COMMENT_BASE = "sort_type_subreddit_comment_";
 
     public static final String POST_LAYOUT_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_layout";
     public static final String POST_LAYOUT_FRONT_PAGE_POST = "post_layout_best_post";
@@ -113,6 +118,7 @@ public class SharedPreferencesUtils {
     public static final String EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE = "_ephemeral_custom_tab_package";
     public static final String SPECIFIC_BROWSER_PACKAGE = "specific_browser_package";
     public static final String SPECIFIC_BROWSER_PACKAGE_BASE = "_specific_browser_package";
+    public static final String USE_OLD_REDDIT_DOMAIN = "use_old_reddit_domain";
     public static final String VIDEO_AUTOPLAY = "video_autoplay";
     public static final String VIDEO_AUTOPLAY_VALUE_ALWAYS_ON = "2";
     public static final String VIDEO_AUTOPLAY_VALUE_ON_WIFI = "1";
@@ -134,6 +140,7 @@ public class SharedPreferencesUtils {
     public static final String COMMENT_TOOLBAR_HIDE_ON_CLICK = "comment_toolbar_hide_on_click";
     public static final String FULLY_COLLAPSE_COMMENT = "fully_collapse_comment";
     public static final String SHOW_COMMENT_DIVIDER = "show_comment_divider";
+    public static final String SHOW_COMMENT_TOP_PADDING = "show_comment_top_padding";
     public static final String SHOW_ABSOLUTE_NUMBER_OF_VOTES = "show_absolute_number_of_votes";
     public static final String CUSTOMIZE_LIGHT_THEME = "customize_light_theme";
     public static final String CUSTOMIZE_DARK_THEME = "customize_dark_theme";
@@ -185,8 +192,15 @@ public class SharedPreferencesUtils {
     public static final String LANGUAGE_DEFAULT_VALUE = "auto";
     public static final String ENABLE_SEARCH_HISTORY = "enable_search_history";
     public static final String POST_FILTER = "post_filter";
+    public static final String SUBREDDIT_FILTER_PREFIX_MATCHING = "subreddit_filter_prefix_matching";
+    public static final String SUBREDDIT_FILTER_SUFFIX_MATCHING = "subreddit_filter_suffix_matching";
     public static final String ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS = "only_disable_preview_in_video_and_gif_posts";
+    // Legacy combined toggle, kept only so the split can be migrated. Superseded by
+    // SAVE_POST_SORT + SAVE_COMMENT_SORT.
     public static final String SAVE_SORT_TYPE = "save_sort_type";
+    public static final String SAVE_POST_SORT = "save_post_sort";
+    public static final String SAVE_COMMENT_SORT = "save_comment_sort";
+    public static final String COMMENT_DEFAULT_SORT_TYPE = "comment_default_sort_type";
     public static final String SUBREDDIT_DEFAULT_SORT_TYPE = "subreddit_default_sort_type";
     public static final String SUBREDDIT_DEFAULT_SORT_TIME = "subreddit_default_sort_time";
     public static final String USER_DEFAULT_SORT_TYPE = "user_default_sort_type";
@@ -342,6 +356,19 @@ public class SharedPreferencesUtils {
     public static final String MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS = "_main_page_show_favorite_users_multireddits";
     public static final String MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS = "_main_page_show_subscribed_subreddits";
     public static final String MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS = "_main_page_show_favorite_subscribed_subreddits";
+    // Ordered, variable-length replacement for the fixed MAIN_PAGE_TAB_N_* slots. Stores a
+    // JSON List<MainPageTabInput> (account-prefixed). The legacy keys above are kept only so a
+    // first launch can migrate the old configuration into this list (see MainPageTabsUtils).
+    public static final String MAIN_PAGE_TABS_ORDER = "_main_page_tabs_order";
+    // MainPageTabInput.source: where a list entry came from. USER = a single tab the user added;
+    // the GROUP_* values are placeholders that expand into a "Show ..." toggle's dynamic list.
+    public static final int MAIN_PAGE_TAB_SOURCE_USER = 0;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS = 1;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_MULTIREDDITS = 2;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_SUBSCRIBED_SUBREDDITS = 3;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_SUBSCRIBED_SUBREDDITS = 4;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_USERS_MULTIREDDITS = 5;
+    public static final int MAIN_PAGE_TAB_SOURCE_GROUP_USERS_MULTIREDDITS = 6;
 
     public static final String BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.bottom_app_bar";
     public static final String MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT = "main_activity_bottom_app_bar_option_count";
@@ -454,6 +481,9 @@ public class SharedPreferencesUtils {
     public static final String COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION = "collapse_subscribed_subreddits_section";
     public static final String HIDE_FAVORITE_SUBREDDITS_SECTION = "hide_favorite_subreddits_sections";
     public static final String HIDE_SUBSCRIBED_SUBREDDITS_SECTIONS = "hide_subscribed_subreddits_sections";
+    public static final String SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER = "show_theme_toggle_in_navigation_drawer";
+    public static final String SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER = "show_nsfw_toggle_in_navigation_drawer";
+    public static final String SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER = "show_thumbnail_on_the_left_toggle_in_navigation_drawer";
 
     public static final String POST_DETAILS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_details";
     public static final String SEPARATE_POST_AND_COMMENTS_IN_PORTRAIT_MODE = "separate_post_and_comments_in_portrait_mode";
@@ -471,6 +501,8 @@ public class SharedPreferencesUtils {
     public static final String HAS_REQUESTED_NOTIFICATION_PERMISSION = "has_requested_notification_permission";
     public static final String DO_NOT_SHOW_REDDIT_API_INFO_V2_AGAIN = "do_not_show_reddit_api_info_v2_again";
     public static final String MATERIAL_YOU_SENTRY_COLOR = "material_you_sentry_color";
+    public static final String DEFAULT_THEME_APPLIED = "default_theme_applied";
+    public static final String DEFAULT_THEME_IN_PROGRESS = "default_theme_in_progress";
 
     public static final String PROXY_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.proxy";
     public static final String PROXY_ENABLED = "proxy_enabled";

@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Handler;
+import androidx.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
@@ -49,7 +50,7 @@ public class ReplyMessage {
     }
 
     public interface ReplyMessageListener {
-        void replyMessageSuccess(Message message);
-        void replyMessageFailed(String errorMessage);
+        void replyMessageSuccess(@Nullable Message message);
+        void replyMessageFailed(@Nullable String errorMessage);
     }
 }

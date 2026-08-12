@@ -29,6 +29,7 @@ public class GiphyGifBlockParser extends AbstractBlockParser {
     }
 
     @Override
+    @Nullable
     public BlockContinue tryContinue(ParserState parserState) {
         return null;
     }

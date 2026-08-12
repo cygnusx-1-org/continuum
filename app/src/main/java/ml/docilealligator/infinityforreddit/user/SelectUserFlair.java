@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,10 +22,10 @@ import retrofit2.Retrofit;
 public class SelectUserFlair {
     public interface SelectUserFlairListener {
         void success();
-        void failed(String errorMessage);
+        void failed(@Nullable String errorMessage);
     }
 
-    public static void selectUserFlair(Executor executor, Handler handler, Retrofit oauthRetrofit, String accessToken, @Nullable UserFlair userFlair,
+    public static void selectUserFlair(Executor executor, Handler handler, Retrofit oauthRetrofit, @Nullable String accessToken, @Nullable UserFlair userFlair,
                                        String subredditName, @NonNull String accountName, SelectUserFlairListener selectUserFlairListener) {
 
         Map<String, String> params = new HashMap<>();
@@ -46,14 +48,12 @@ public class SelectUserFlair {
                                 JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY)
                                         .getJSONArray(responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() - 1);
                                 if (error.length() != 0) {
-                                    String errorString;
-                                    if (error.length() >= 2) {
-                                        errorString = error.getString(1);
-                                    } else {
-                                        errorString = error.getString(0);
-                                    }
+                                    // Null when the error carries no message; the listener falls back to a
+                                    // generic failure rather than being handed an empty string.
+                                    String errorMessage = Utils.capitalizeFirstLetter(
+                                            error.length() >= 2 ? error.getString(1) : error.getString(0));
 
-                                    handler.post(() -> selectUserFlairListener.failed(errorString.substring(0, 1).toUpperCase() + errorString.substring(1)));
+                                    handler.post(() -> selectUserFlairListener.failed(errorMessage));
                                 } else {
                                     handler.post(selectUserFlairListener::success);
                                 }
@@ -61,7 +61,7 @@ public class SelectUserFlair {
                                 handler.post(selectUserFlairListener::success);
                             }
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            Log.e("SelectUserFlair", "onResponse failed", e);
                         }
                     });
                 } else {

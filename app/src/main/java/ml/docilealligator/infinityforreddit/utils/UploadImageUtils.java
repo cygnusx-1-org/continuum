@@ -29,7 +29,7 @@ import retrofit2.Retrofit;
 public class UploadImageUtils {
     @Nullable
     public static String uploadVideoPosterImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit,
-                                                String accessToken, Bitmap image) throws IOException, JSONException, XmlPullParserException {
+                                                @Nullable String accessToken, Bitmap image) throws IOException, JSONException, XmlPullParserException {
         RedditAPI api = oauthRetrofit.create(RedditAPI.class);
 
         Map<String, String> uploadImageParams = new HashMap<>();
@@ -63,19 +63,19 @@ public class UploadImageUtils {
 
     @Nullable
     public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
-                                     String accessToken, Uri imageUri) throws IOException, JSONException, XmlPullParserException {
+                                     @Nullable String accessToken, Uri imageUri) throws IOException, JSONException, XmlPullParserException {
         return uploadImage(oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, imageUri, false);
     }
 
     @Nullable
     public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
-                                     String accessToken, Uri imageUri, boolean getImageKey) throws IOException, JSONException, XmlPullParserException {
+                                     @Nullable String accessToken, Uri imageUri, boolean getImageKey) throws IOException, JSONException, XmlPullParserException {
         return uploadImage(oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, imageUri, false, getImageKey);
     }
 
     @Nullable
     public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
-                                     String accessToken, Uri imageUri,
+                                     @Nullable String accessToken, Uri imageUri,
                                      boolean returnResponseForGallerySubmission,
                                      boolean getImageKey) throws IOException, JSONException, XmlPullParserException {
         String mimeType = contentResolver.getType(imageUri);
@@ -119,13 +119,16 @@ public class UploadImageUtils {
     }
 
     @Nullable
-    public static String parseImageFromXMLResponseFromAWS(String response) throws XmlPullParserException, IOException {
+    public static String parseImageFromXMLResponseFromAWS(@Nullable String response) throws XmlPullParserException, IOException {
         //Get Image URL
         return parseImageFromXMLResponseFromAWS(response, false);
     }
 
     @Nullable
-    public static String parseImageFromXMLResponseFromAWS(String response, boolean getImageKey) throws XmlPullParserException, IOException {
+    public static String parseImageFromXMLResponseFromAWS(@Nullable String response, boolean getImageKey) throws XmlPullParserException, IOException {
+        if (response == null) {
+            return null;
+        }
         XmlPullParser xmlPullParser = XmlPullParserFactory.newInstance().newPullParser();
         xmlPullParser.setInput(new StringReader(response));
 
@@ -147,7 +150,12 @@ public class UploadImageUtils {
         return null;
     }
 
-    public static Map<String, RequestBody> parseJSONResponseFromAWS(String response) throws JSONException {
+    public static Map<String, RequestBody> parseJSONResponseFromAWS(@Nullable String response) throws JSONException {
+        if (response == null) {
+            // This parses Reddit's /api/media/asset.json reply (the presigned S3 upload form),
+            // not the S3 upload itself despite the method name.
+            throw new JSONException("Empty response from Reddit's media asset request");
+        }
         JSONObject responseObject = new JSONObject(response);
         JSONArray nameValuePairs = responseObject.getJSONObject(JSONUtils.ARGS_KEY).getJSONArray(JSONUtils.FIELDS_KEY);
 

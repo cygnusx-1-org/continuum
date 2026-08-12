@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
@@ -31,10 +32,12 @@ import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
 import ml.docilealligator.infinityforreddit.activities.SubmitCrosspostActivity;
+import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostOptionsBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
+import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.HidePost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
@@ -44,6 +47,7 @@ import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
@@ -62,13 +66,15 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
     private BaseActivity mBaseActivity;
     private Post mPost;
-    private FragmentPostOptionsBottomSheetBinding binding;
     private boolean isDownloading = false;
     private boolean isDownloadingGallery = false;
 
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
+    @Inject
+    @Named("arctic_shift")
+    Retrofit mArcticShiftRetrofit;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -112,17 +118,17 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mPost = getArguments().getParcelable(EXTRA_POST);
+            mPost = java.util.Objects.requireNonNull(getArguments().getParcelable(EXTRA_POST));
         } else {
             dismiss();
         }
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ((Infinity) mBaseActivity.getApplication()).getAppComponent().inject(this);
         // Inflate the layout for this fragment
         FragmentPostOptionsBottomSheetBinding binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);
@@ -194,6 +200,49 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                     shareBottomSheetFragment.show(mBaseActivity.getSupportFragmentManager(), shareBottomSheetFragment.getTag());
                 }
 
+                dismiss();
+            });
+
+            if (mBaseActivity instanceof ViewPostDetailActivity) {
+                binding.readAloudTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                TextToSpeechHelper helper = ((ViewPostDetailActivity) mBaseActivity).getTextToSpeechHelper();
+                if (helper.isSpeaking()) {
+                    binding.readAloudTextViewPostOptionsBottomSheetFragment.setText(R.string.stop_reading);
+                }
+                binding.readAloudTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    if (helper.isSpeaking()) {
+                        helper.stop();
+                    } else {
+                        StringBuilder textToSpeak = new StringBuilder();
+                        if (mPost.getTitle() != null) {
+                            textToSpeak.append(mPost.getTitle());
+                        }
+                        String selfText = mPost.getSelfTextPlain();
+                        if (selfText != null && !selfText.isEmpty()) {
+                            if (textToSpeak.length() > 0) {
+                                textToSpeak.append("\n\n");
+                            }
+                            textToSpeak.append(selfText);
+                        }
+                        helper.speak(textToSpeak.toString());
+                    }
+                    dismiss();
+                });
+            }
+
+            binding.translateTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                StringBuilder textToTranslate = new StringBuilder();
+                if (mPost.getTitle() != null) {
+                    textToTranslate.append(mPost.getTitle());
+                }
+                String selfText = mPost.getSelfTextPlain();
+                if (selfText != null && !selfText.isEmpty()) {
+                    if (textToTranslate.length() > 0) {
+                        textToTranslate.append("\n\n");
+                    }
+                    textToTranslate.append(selfText);
+                }
+                Utils.translateText(mBaseActivity, textToTranslate.toString());
                 dismiss();
             });
 
@@ -342,6 +391,28 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                     }
                 }
             });
+
+            boolean canRecoverPost = mPost.isRemoved() || mPost.isAuthorDeleted()
+                    || "[removed]".equals(mPost.getSelfText()) || "[deleted]".equals(mPost.getSelfText());
+            if (canRecoverPost) {
+                binding.recoverPostTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                binding.recoverPostTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    Toast.makeText(mBaseActivity, R.string.fetching_removed_post, Toast.LENGTH_SHORT).show();
+                    FetchRemovedPost.fetchRemovedPost(mArcticShiftRetrofit, mPost, new FetchRemovedPost.FetchRemovedPostListener() {
+                        @Override
+                        public void fetchSuccess(Post post) {
+                            EventBus.getDefault().post(new PostUpdateEventToPostList(post, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)));
+                            EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                        }
+
+                        @Override
+                        public void fetchFailed() {
+                            Toast.makeText(mBaseActivity, R.string.show_removed_post_failed, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    dismiss();
+                });
+            }
 
             if (mPost.isApproved()) {
                 binding.statusTextViewPostOptionsBottomSheetFragment.setText(getString(R.string.approved_status, mPost.getApprovedBy()));

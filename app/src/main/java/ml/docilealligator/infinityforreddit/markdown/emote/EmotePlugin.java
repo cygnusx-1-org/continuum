@@ -28,6 +28,7 @@ import io.noties.markwon.image.DrawableUtils;
 import io.noties.markwon.image.ImageProps;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -112,7 +113,7 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
                 @NonNull GlideStore glideStore, int embeddedMediaType,
                 @NonNull final OnEmoteClickListener onEmoteClickListener) {
         this.asyncDrawableLoader = new GlideAsyncDrawableLoader(glideStore);
-        String dataSavingModeString = baseActivity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingModeString = Objects.requireNonNull(baseActivity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
             dataSavingMode = true;
         } else if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {

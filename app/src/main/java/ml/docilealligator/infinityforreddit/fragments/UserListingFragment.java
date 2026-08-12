@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -19,6 +20,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -87,8 +90,8 @@ public class UserListingFragment extends Fragment implements FragmentCommunicato
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentUserListingBinding.inflate(inflater, container, false);
 
@@ -120,10 +123,10 @@ public class UserListingFragment extends Fragment implements FragmentCommunicato
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
         binding.recyclerViewUserListingFragment.setLayoutManager(mLinearLayoutManager);
 
-        mQuery = getArguments().getString(EXTRA_QUERY);
+        mQuery = Objects.requireNonNull(getArguments().getString(EXTRA_QUERY));
         boolean isGettingUserInfo = getArguments().getBoolean(EXTRA_IS_GETTING_USER_INFO);
-        String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_USER, SortType.Type.RELEVANCE.value);
-        sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
+        String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_USER, SortType.Type.RELEVANCE.value));
+        sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)));
         boolean nsfw = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE, false);
 
         mAdapter = new UserListingRecyclerViewAdapter(mActivity, mExecutor, mOauthRetrofit, mRetrofit,
@@ -251,6 +254,7 @@ public class UserListingFragment extends Fragment implements FragmentCommunicato
         return sortType;
     }
 
+    @Nullable
     public ArrayList<String> getSelectedUsernames() {
         if (mUserListingViewModel != null) {
             List<UserData> allUsers = mUserListingViewModel.getUsers().getValue();

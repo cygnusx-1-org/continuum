@@ -62,6 +62,9 @@ public class OnlineCustomThemeListingRecyclerViewAdapter extends PagingDataAdapt
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof OnlineCustomThemeViewHolder) {
             OnlineCustomThemeMetadata onlineCustomThemeMetadata = getItem(position);
+            if (onlineCustomThemeMetadata == null) {
+                return;
+            }
             ((OnlineCustomThemeViewHolder) holder).binding.colorPrimaryItemUserCustomTheme.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(onlineCustomThemeMetadata.colorPrimary)));
             ((OnlineCustomThemeViewHolder) holder).binding.nameTextViewItemUserCustomTheme.setText(onlineCustomThemeMetadata.name);
             ((OnlineCustomThemeViewHolder) holder).binding.addImageViewItemUserCustomTheme.setOnClickListener(view -> {

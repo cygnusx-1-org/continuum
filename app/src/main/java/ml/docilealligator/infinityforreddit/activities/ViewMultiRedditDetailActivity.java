@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -29,6 +30,7 @@ import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -89,6 +91,9 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
     public static final String EXTRA_MULTIREDDIT_DATA = "EMD";
     public static final String EXTRA_MULTIREDDIT_PATH = "EMP";
+    // Initial sort carried by an opening deep link (e.g. reddit.com/user/x/m/y/top), as SortType.Type/Time names.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
     private static final String FRAGMENT_OUT_STATE_KEY = "FOSK";
 
@@ -125,14 +130,23 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private MultiReddit multiReddit;
+    @SuppressWarnings("NullAway.Init")
     private String multiPath;
+    @Nullable
+    private String initialSortType;
+    @Nullable
+    private String initialSortTime;
+    @SuppressWarnings("NullAway.Init")
     private Fragment mFragment;
     private int fabOption;
     private boolean hideFab;
     private boolean showBottomAppBar;
     private boolean lockBottomAppBar;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private NavigationWrapper navigationWrapper;
     private ActivityViewMultiRedditDetailBinding binding;
@@ -146,7 +160,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
     @ExperimentalBadgeUtils
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
         super.onCreate(savedInstanceState);
 
@@ -258,30 +272,38 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
             }
         }
 
+        initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
+        initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
+
         multiReddit = getIntent().getParcelableExtra(EXTRA_MULTIREDDIT_DATA);
         if (multiReddit == null) {
-            multiPath = getIntent().getStringExtra(EXTRA_MULTIREDDIT_PATH);
-            if (multiPath != null) {
-                binding.toolbarViewMultiRedditDetailActivity.setTitle(multiPath.substring(multiPath.lastIndexOf("/", multiPath.length() - 2) + 1));
-            } else {
+            String multiRedditPath = getIntent().getStringExtra(EXTRA_MULTIREDDIT_PATH);
+            if (multiRedditPath == null) {
                 Toast.makeText(this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
+            multiPath = multiRedditPath;
+            binding.toolbarViewMultiRedditDetailActivity.setTitle(multiRedditPath.substring(multiRedditPath.lastIndexOf("/", multiRedditPath.length() - 2) + 1));
         } else {
             multiPath = multiReddit.getPath();
             binding.toolbarViewMultiRedditDetailActivity.setTitle(multiReddit.getDisplayName());
         }
 
         setSupportActionBar(binding.toolbarViewMultiRedditDetailActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarViewMultiRedditDetailActivity);
 
         lockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
 
         if (savedInstanceState != null) {
-            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE_KEY);
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
+            Fragment restoredFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE_KEY);
+            if (restoredFragment != null) {
+                mFragment = restoredFragment;
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
+            } else {
+                initializeFragment();
+            }
         } else {
             initializeFragment();
         }
@@ -498,6 +520,12 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 && multiPath != null && multiPath.startsWith("/user/-/m/");
         bundle.putInt(PostFragment.EXTRA_POST_TYPE,
                 isAnonymousLocalMulti ? PostType.ANONYMOUS_MULTIREDDIT : PostType.MULTIREDDIT);
+        if (initialSortType != null) {
+            bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+            if (initialSortTime != null) {
+                bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+            }
+        }
         mFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
     }
@@ -685,7 +713,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -759,7 +787,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -780,7 +808,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -793,7 +821,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -811,6 +839,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         boolean isFollowedEntry = multiReddit != null && multiReddit.isFollowed();
         boolean isNotOwned;
         if (multiReddit == null && multiPath != null) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] segments = multiPath.split("/");
             isNotOwned = segments.length > 2 && !segments[1].equals(accountName);
         } else {
@@ -889,7 +918,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                         FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
                     }
                 } else {
-                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
+                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, Objects.requireNonNull(accessToken), multiPath, listener);
                 }
             }
             return true;
@@ -953,7 +982,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                     FetchMultiRedditInfo.publicFetchMultiRedditInfo(mExecutor, new Handler(), mRetrofit, multiPath, listener);
                 } else {
-                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, accessToken, multiPath, listener);
+                    FetchMultiRedditInfo.fetchMultiRedditInfo(mExecutor, new Handler(), mOauthRetrofit, Objects.requireNonNull(accessToken), multiPath, listener);
                 }
             }
             return true;
@@ -993,6 +1022,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         if (multiReddit != null) {
             title = multiReddit.getDisplayName() + "'s subreddits";
         } else if (multiPath != null) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] segments = multiPath.split("/");
             title = segments[segments.length - 1] + "'s subreddits";
         } else {

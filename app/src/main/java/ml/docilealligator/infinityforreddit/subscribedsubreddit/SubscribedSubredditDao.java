@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.subscribedsubreddit;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -28,6 +29,7 @@ public interface SubscribedSubredditDao {
     LiveData<List<SubscribedSubredditData>> getAllFavoriteSubscribedSubredditsWithSearchQuery(String accountName, String searchQuery);
 
     @Query("SELECT * from subscribed_subreddits WHERE name = :subredditName COLLATE NOCASE AND username = :accountName COLLATE NOCASE LIMIT 1")
+    @Nullable
     SubscribedSubredditData getSubscribedSubreddit(String subredditName, String accountName);
 
     @Query("DELETE FROM subscribed_subreddits WHERE name = :subredditName COLLATE NOCASE AND username = :accountName COLLATE NOCASE")

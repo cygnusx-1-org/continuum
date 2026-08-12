@@ -31,9 +31,9 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
     private final Retrofit retrofit;
     private final Executor executor;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
+    @Nullable
     private final String accessToken;
     private final String accountName;
-    private final SharedPreferences sharedPreferences;
     private final String username;
     private final int readPostType;
     private final PostFilter postFilter;
@@ -46,7 +46,6 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
         this.redditDataRoomDatabase = redditDataRoomDatabase;
         this.accessToken = accessToken;
         this.accountName = accountName;
-        this.sharedPreferences = sharedPreferences;
         this.username = username;
         this.readPostType = readPostType;
         this.postFilter = postFilter;

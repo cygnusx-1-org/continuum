@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import androidx.documentfile.provider.DocumentFile;
 import com.google.gson.Gson;
 import java.io.File;
@@ -13,11 +14,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.BuildConfig;
@@ -27,6 +32,7 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
@@ -75,7 +81,7 @@ public class BackupSettings {
                 try {
                     FileUtils.deleteDirectory(backupDirFile);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e("BackupSettings", "backupSettings failed", e);
                 }
             }
             backupDirFile.mkdirs();
@@ -151,19 +157,23 @@ public class BackupSettings {
             String readPostsJson = new Gson().toJson(readPosts);
             boolean res24 = saveDatabaseTableToFile(readPostsJson, databaseDirFile.getAbsolutePath(), "/read_posts.json");
 
+            List<LocalSavedThing> localSaved = redditDataRoomDatabase.localSavedThingDao().getAllForBackup();
+            String localSavedJson = new Gson().toJson(localSaved);
+            boolean res25 = saveDatabaseTableToFile(localSavedJson, databaseDirFile.getAbsolutePath(), "/local_saved.json");
+
 
             boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri, password);
 
             try {
                 FileUtils.deleteDirectory(new File(cacheDir + "/Backup/"));
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e("BackupSettings", "backupSettings failed", e);
             }
 
             handler.post(() -> {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
-                        && res18 && res19 && res20 && res21 && res22 && res23 && res24 && zipRes && resPrivate;
+                        && res18 && res19 && res20 && res21 && res22 && res23 && res24 && res25 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {
@@ -189,7 +199,7 @@ public class BackupSettings {
 
     private static boolean saveDatabaseTableToFile(String dataJson, String backupDir, String fileName) {
         File databaseTableFile = new File(backupDir + fileName);
-        try (PrintWriter out = new PrintWriter(databaseTableFile.getAbsolutePath())) {
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(databaseTableFile), StandardCharsets.UTF_8))) {
             out.println(dataJson);
             // PrintWriter swallows IO errors; surface them so a failed dump fails the backup.
             if (out.checkError()) {
@@ -206,7 +216,7 @@ public class BackupSettings {
         OutputStream outputStream = null;
         boolean result = false;
         try {
-            String time = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(System.currentTimeMillis()));
+            String time = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.US).format(LocalDateTime.now(ZoneId.systemDefault()));
             String fileName = "Continuum_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
             String filePath = cacheDir + "/Backup/" + fileName;
             try (ZipFile zip = new ZipFile(filePath, password.toCharArray())) {
@@ -249,7 +259,7 @@ public class BackupSettings {
             }
             result = true;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("BackupSettings", "zipAndMoveToDestinationDir failed", e);
 
         } finally {
             if (outputStream != null) {

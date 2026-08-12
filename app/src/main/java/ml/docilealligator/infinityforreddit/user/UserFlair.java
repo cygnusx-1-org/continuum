@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.Objects;
 
 public class UserFlair implements Parcelable {
     private final String id;
@@ -19,9 +20,9 @@ public class UserFlair implements Parcelable {
     }
 
     protected UserFlair(Parcel in) {
-        id = in.readString();
-        text = in.readString();
-        htmlText = in.readString();
+        id = Objects.requireNonNull(in.readString());
+        text = Objects.requireNonNull(in.readString());
+        htmlText = Objects.requireNonNull(in.readString());
         editable = in.readByte() != 0;
         maxEmojis = in.readInt();
     }

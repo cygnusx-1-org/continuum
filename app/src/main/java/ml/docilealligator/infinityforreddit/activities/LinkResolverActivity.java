@@ -7,9 +7,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsClient;
@@ -18,11 +20,14 @@ import androidx.browser.customtabs.CustomTabsService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -43,12 +48,24 @@ public class LinkResolverActivity extends AppCompatActivity {
     private static final String POST_PATTERN_2 = "/(u|U|user)/[\\w-]+/comments/\\w+/?\\w+/?";
     private static final String POST_PATTERN_3 = "/[\\w-]+$";
     private static final String COMMENT_PATTERN = "/(r|u|U|user)/[\\w.-]+/comments/\\w+/?[\\w-]+/\\w+/?";
-    private static final String SUBREDDIT_PATTERN = "/[rR]/[\\w.-]+/?";
-    private static final String USER_PATTERN = "/(u|U|user)/[\\w-]+/?";
+    // Optional listing-sort suffix that Reddit appends to a subreddit/multireddit URL,
+    // e.g. /r/name/new or /r/a+b/top. Kept out of the captured subreddit name (see segments.get(1)).
+    private static final String SUBREDDIT_SORT_SUFFIX = "(/(best|hot|new|rising|top|controversial))?";
+    private static final String SUBREDDIT_PATTERN = "/[rR]/[\\w.-]+" + SUBREDDIT_SORT_SUFFIX + "/?";
+    // A user profile, optionally with a "where" sub-listing (Reddit sorts users via ?sort=, not a path segment).
+    private static final String USER_WHERE_SUFFIX = "(/(overview|submitted|posts|comments|saved|hidden|upvoted|downvoted|gilded|awards))?";
+    private static final String USER_PATTERN = "/(u|U|user)/[\\w-]+" + USER_WHERE_SUFFIX + "/?";
     private static final String SHARELINK_SUBREDDIT_PATTERN = "/r/[\\w.-]+/s/[\\w-]+";
     private static final String SHARELINK_USER_PATTERN = "/u/[\\w-]+/s/[\\w-]+";
+    // Subreddit-less post permalink shortcuts: /comments/<id>[/...] and /gallery/<id>
+    // (Reddit 301s /gallery/<id> to /comments/<id>). The post id is the second path segment.
+    private static final String POST_WITHOUT_SUBREDDIT_PATTERN = "/comments/\\w+(/[\\w-]+)*/?";
+    private static final String REDDIT_GALLERY_PATTERN = "/gallery/\\w+/?";
     private static final String SIDEBAR_PATTERN = "/[rR]/[\\w.-]+/about/sidebar";
-    private static final String MULTIREDDIT_PATTERN_2 = "/[rR]/(\\w+\\+?)+/?";
+    private static final String MULTIREDDIT_PATTERN_2 = "/[rR]/(\\w+\\+?)+" + SUBREDDIT_SORT_SUFFIX + "/?";
+    // A user's multireddit: /user/<name>/m/<multi> (or the /me/m/<multi> shortcut), optional sort suffix.
+    private static final String MULTIREDDIT_USER_PATTERN = "/(u|U|user)/[\\w-]+/m/[\\w-]+" + SUBREDDIT_SORT_SUFFIX + "/?";
+    private static final String MULTIREDDIT_ME_PATTERN = "/me/m/[\\w-]+" + SUBREDDIT_SORT_SUFFIX + "/?";
     private static final String REDD_IT_POST_PATTERN = "/\\w+/?";
     private static final String REDGIFS_PATTERN = "/watch/[\\w-]+$";
     private static final String IMGUR_GALLERY_PATTERN = "/gallery/\\w+/?";
@@ -80,8 +97,71 @@ public class LinkResolverActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Threads a listing-sort suffix (e.g. /r/x/top or /user/x/m/y/top?t=week) through to the
+     * target listing activity so it opens on the sort the link requested. {@code sortIndex} is
+     * the path-segment index of the sort keyword. No-op when the URL carries no recognized sort
+     * segment there. Sort segments are already constrained to the known set by the callers' patterns.
+     */
+    private void putInitialSort(Intent intent, List<String> segments, int sortIndex, Uri uri,
+                                String typeExtraKey, String timeExtraKey) {
+        if (segments.size() <= sortIndex) {
+            return;
+        }
+        SortType.Type sortType = urlSegmentToSortType(segments.get(sortIndex));
+        if (sortType == null) {
+            return;
+        }
+        intent.putExtra(typeExtraKey, sortType.name());
+        if (sortType == SortType.Type.TOP || sortType == SortType.Type.CONTROVERSIAL) {
+            // Match the app's own default (ALL) for top/controversial when the link omits ?t=.
+            SortType.Time sortTime = urlParamToSortTime(uri.getQueryParameter("t"));
+            intent.putExtra(timeExtraKey, (sortTime != null ? sortTime : SortType.Time.ALL).name());
+        }
+    }
+
+    /**
+     * User pages carry their sort as ?sort=/?t= query params (not a path segment), so parse those
+     * and thread them to {@link ViewUserDetailActivity}'s submitted tab. No-op when absent/unknown.
+     */
+    private void putUserQuerySort(Intent intent, Uri uri) {
+        SortType.Type sortType = urlSegmentToSortType(uri.getQueryParameter("sort"));
+        if (sortType == null) {
+            return;
+        }
+        intent.putExtra(ViewUserDetailActivity.EXTRA_INITIAL_SORT_TYPE, sortType.name());
+        if (sortType == SortType.Type.TOP || sortType == SortType.Type.CONTROVERSIAL) {
+            SortType.Time sortTime = urlParamToSortTime(uri.getQueryParameter("t"));
+            intent.putExtra(ViewUserDetailActivity.EXTRA_INITIAL_SORT_TIME,
+                    (sortTime != null ? sortTime : SortType.Time.ALL).name());
+        }
+    }
+
+    @Nullable
+    private static SortType.Type urlSegmentToSortType(@Nullable String segment) {
+        for (SortType.Type type : SortType.Type.values()) {
+            if (type.value.equals(segment)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private static SortType.Time urlParamToSortTime(@Nullable String param) {
+        if (param == null) {
+            return null;
+        }
+        for (SortType.Time time : SortType.Time.values()) {
+            if (time.value.equals(param)) {
+                return time;
+            }
+        }
+        return null;
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -203,11 +283,25 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 } catch (Exception e) {
                                     deepLinkError(uri);
                                 }
-                            } else if(segments.size() == 4 && segments.get(0).equals("user") && segments.get(2).equals("m")) {
-                                // Multireddit
-                                Intent intent = new Intent(this, ViewMultiRedditDetailActivity.class);
-                                intent.putExtra(ViewMultiRedditDetailActivity.EXTRA_MULTIREDDIT_PATH, path);
-                                startActivity(intent);
+                            } else if (path.matches(MULTIREDDIT_USER_PATTERN) || path.matches(MULTIREDDIT_ME_PATTERN)) {
+                                // Multireddit: /user/<name>/m/<multi> or the /me/m/<multi> shortcut,
+                                // optionally with a listing-sort suffix. Normalize both to /user/<owner>/m/<multi>.
+                                boolean meForm = segments.get(0).equals("me");
+                                int mIndex = meForm ? 1 : 2;
+                                String multiOwner = meForm
+                                        ? mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "")
+                                        : segments.get(1);
+                                if (meForm && (multiOwner == null || multiOwner.isEmpty())) {
+                                    // /me/ has no meaning without a signed-in account.
+                                    deepLinkError(uri);
+                                } else {
+                                    String multiPath = "/user/" + multiOwner + "/m/" + segments.get(mIndex + 1);
+                                    Intent intent = new Intent(this, ViewMultiRedditDetailActivity.class);
+                                    intent.putExtra(ViewMultiRedditDetailActivity.EXTRA_MULTIREDDIT_PATH, multiPath);
+                                    putInitialSort(intent, segments, mIndex + 2, uri,
+                                            ViewMultiRedditDetailActivity.EXTRA_INITIAL_SORT_TYPE, ViewMultiRedditDetailActivity.EXTRA_INITIAL_SORT_TIME);
+                                    startActivity(intent);
+                                }
                             } else if (path.matches(POST_PATTERN) || path.matches(POST_PATTERN_2)) {
                                 int commentsIndex = segments.lastIndexOf("comments");
                                 if (commentsIndex >= 0 && commentsIndex < segments.size() - 1) {
@@ -237,7 +331,21 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 } else {
                                     deepLinkError(uri);
                                 }
+                            } else if (path.matches(POST_WITHOUT_SUBREDDIT_PATTERN) || path.matches(REDDIT_GALLERY_PATTERN)) {
+                                // /comments/<id>[/<slug>[/<comment id>]] and /gallery/<id> — post
+                                // permalinks with no subreddit segment. The single-comment form is
+                                // exactly id/slug/commentId (mirrors COMMENT_PATTERN); shorter forms open
+                                // the post, and Reddit produces nothing deeper.
+                                Intent intent = new Intent(this, ViewPostDetailActivity.class);
+                                intent.putExtra(ViewPostDetailActivity.EXTRA_POST_ID, segments.get(1));
+                                if (segments.size() == 4) {
+                                    intent.putExtra(ViewPostDetailActivity.EXTRA_SINGLE_COMMENT_ID, segments.get(3));
+                                }
+                                intent.putExtra(ViewPostDetailActivity.EXTRA_MESSAGE_FULLNAME, messageFullname);
+                                intent.putExtra(ViewPostDetailActivity.EXTRA_NEW_ACCOUNT_NAME, newAccountName);
+                                startActivity(intent);
                             } else if (path.matches(WIKI_PATTERN)) {
+                                @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
                                 String[] pathSegments = path.split("/");
                                 String wikiPage;
                                 if (pathSegments.length == 4) {
@@ -255,34 +363,57 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 startActivity(intent);
                             } else if (path.matches(SUBREDDIT_PATTERN)) {
                                 Intent intent = new Intent(this, ViewSubredditDetailActivity.class);
-                                intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, path.substring(3));
+                                intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, segments.get(1));
                                 intent.putExtra(ViewSubredditDetailActivity.EXTRA_MESSAGE_FULLNAME, messageFullname);
                                 intent.putExtra(ViewSubredditDetailActivity.EXTRA_NEW_ACCOUNT_NAME, newAccountName);
+                                putInitialSort(intent, segments, 2, uri,
+                                        ViewSubredditDetailActivity.EXTRA_INITIAL_SORT_TYPE, ViewSubredditDetailActivity.EXTRA_INITIAL_SORT_TIME);
                                 startActivity(intent);
                             } else if (path.matches(USER_PATTERN)) {
-                                Intent intent = new Intent(this, ViewUserDetailActivity.class);
-                                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, segments.get(1));
-                                intent.putExtra(ViewUserDetailActivity.EXTRA_MESSAGE_FULLNAME, messageFullname);
-                                intent.putExtra(ViewUserDetailActivity.EXTRA_NEW_ACCOUNT_NAME, newAccountName);
-                                startActivity(intent);
+                                String userName = segments.get(1);
+                                String where = segments.size() > 2 ? segments.get(2) : null;
+                                String currentAccount = Objects.requireNonNull(mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, ""));
+                                boolean loggedIn = currentAccount != null && !currentAccount.isEmpty();
+                                boolean isSelf = loggedIn
+                                        && (currentAccount.equalsIgnoreCase(userName) || userName.equalsIgnoreCase("me"));
+                                if (isSelf && ("upvoted".equals(where) || "downvoted".equals(where) || "hidden".equals(where))) {
+                                    // Private account listings — only meaningful for the signed-in user.
+                                    Intent intent = new Intent(this, AccountPostsActivity.class);
+                                    intent.putExtra(AccountPostsActivity.EXTRA_USER_WHERE, where);
+                                    startActivity(intent);
+                                } else {
+                                    Intent intent = new Intent(this, ViewUserDetailActivity.class);
+                                    intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, userName);
+                                    intent.putExtra(ViewUserDetailActivity.EXTRA_MESSAGE_FULLNAME, messageFullname);
+                                    intent.putExtra(ViewUserDetailActivity.EXTRA_NEW_ACCOUNT_NAME, newAccountName);
+                                    if ("comments".equals(where)) {
+                                        intent.putExtra(ViewUserDetailActivity.EXTRA_INITIAL_TAB, ViewUserDetailActivity.TAB_COMMENTS);
+                                    }
+                                    // Both the submitted and comments tabs honor ?sort=/?t=; the activity
+                                    // applies it to whichever tab the link targets.
+                                    putUserQuerySort(intent, uri);
+                                    startActivity(intent);
+                                }
                             } else if (path.matches(SIDEBAR_PATTERN)) {
                                 Intent intent = new Intent(this, ViewSubredditDetailActivity.class);
                                 intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, path.substring(3, path.length() - 14));
                                 intent.putExtra(ViewSubredditDetailActivity.EXTRA_VIEW_SIDEBAR, true);
                                 startActivity(intent);
                             } else if (path.matches(MULTIREDDIT_PATTERN_2)) {
-                                String subredditName = path.substring(3);
+                                String subredditName = segments.get(1);
                                 Intent intent = new Intent(this, ViewSubredditDetailActivity.class);
                                 intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, subredditName);
                                 intent.putExtra(ViewSubredditDetailActivity.EXTRA_MESSAGE_FULLNAME, messageFullname);
                                 intent.putExtra(ViewSubredditDetailActivity.EXTRA_NEW_ACCOUNT_NAME, newAccountName);
+                                putInitialSort(intent, segments, 2, uri,
+                                        ViewSubredditDetailActivity.EXTRA_INITIAL_SORT_TYPE, ViewSubredditDetailActivity.EXTRA_INITIAL_SORT_TIME);
                                 startActivity(intent);
                             } else if (authority.equals("redd.it") && path.matches(REDD_IT_POST_PATTERN)) {
                                 Intent intent = new Intent(this, ViewPostDetailActivity.class);
                                 intent.putExtra(ViewPostDetailActivity.EXTRA_POST_ID, path.substring(1));
                                 startActivity(intent);
-                            } else if (uri.getPath().matches(SHARELINK_SUBREDDIT_PATTERN)
-                                    || uri.getPath().matches(SHARELINK_USER_PATTERN)) {
+                            } else if (path.matches(SHARELINK_SUBREDDIT_PATTERN)
+                                    || path.matches(SHARELINK_USER_PATTERN)) {
                                 mRetrofit.callFactory().newCall(new Request.Builder().url(uri.toString()).build()).enqueue(new Callback() {
                                     @Override
                                     public void onResponse(@NonNull Call call, @NonNull Response response) {
@@ -396,6 +527,10 @@ public class LinkResolverActivity extends AppCompatActivity {
     private void deepLinkError(Uri uri) {
         PackageManager pm = getPackageManager();
 
+        // Every link the app hands off instead of opening itself passes through here, so this is
+        // the one place the configured Reddit domain has to be applied for outbound links.
+        uri = Uri.parse(RedditLinkUtils.applyLinkDomain(mSharedPreferences, uri.toString()));
+
         String authority = uri.getAuthority();
         if(authority != null && (authority.contains("reddit.com") || authority.contains("redd.it") || authority.contains("reddit.app.link"))) {
             openInCustomTabs(uri, pm, false, false);
@@ -434,6 +569,7 @@ public class LinkResolverActivity extends AppCompatActivity {
                 startActivity(intent);
                 return;
             } catch (ActivityNotFoundException ignored) {
+                Log.d("LinkResolverActivity", "openInSpecificBrowser: ignoring ActivityNotFoundException", ignored);
             }
         }
         openInBrowser(uri, pm, true);

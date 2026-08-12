@@ -2,13 +2,19 @@ package ml.docilealligator.infinityforreddit.postfilter;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -38,28 +44,40 @@ public class PostFilter implements Parcelable {
     public boolean onlyNSFW;
     @ColumnInfo(name = "only_spoiler")
     public boolean onlySpoiler;
+    @Nullable
     @ColumnInfo(name = "post_title_excludes_regex")
     public String postTitleExcludesRegex;
+    @Nullable
     @ColumnInfo(name = "post_title_contains_regex")
     public String postTitleContainsRegex;
+    @Nullable
     @ColumnInfo(name = "post_title_excludes_strings")
     public String postTitleExcludesStrings;
+    @Nullable
     @ColumnInfo(name = "post_title_contains_strings")
     public String postTitleContainsStrings;
+    @Nullable
     @ColumnInfo(name = "exclude_subreddits")
     public String excludeSubreddits;
+    @Nullable
     @ColumnInfo(name = "contain_subreddits")
     public String containSubreddits;
+    @Nullable
     @ColumnInfo(name = "exclude_users")
     public String excludeUsers;
+    @Nullable
     @ColumnInfo(name = "contain_users")
     public String containUsers;
+    @Nullable
     @ColumnInfo(name = "contain_flairs")
     public String containFlairs;
+    @Nullable
     @ColumnInfo(name = "exclude_flairs")
     public String excludeFlairs;
+    @Nullable
     @ColumnInfo(name =  "exclude_domains")
     public String excludeDomains;
+    @Nullable
     @ColumnInfo(name =  "contain_domains")
     public String containDomains;
     @ColumnInfo(name = "contain_text_type")
@@ -79,12 +97,40 @@ public class PostFilter implements Parcelable {
     @Ignore
     public ArrayList<String> postTitleContainsRegexes = new ArrayList<>();
 
+    /**
+     * Global setting (mirrored from SharedPreferences, initialised in Infinity and updated live
+     * from the Post Filter screen). When enabled, an "Exclude subreddits" entry of at least
+     * {@link #SUBREDDIT_FILTER_PREFIX_MIN_LENGTH} characters matches any subreddit whose name
+     * starts with it (e.g. "android" hides r/androiddev). Shorter entries keep exact matching.
+     */
+    public static volatile boolean subredditFilterPrefixMatching = false;
+    public static final int SUBREDDIT_FILTER_PREFIX_MIN_LENGTH = 6;
+
+    /**
+     * Global setting (mirrored from SharedPreferences, initialised in Infinity and updated live
+     * from the Post Filter screen). When enabled, an "Exclude subreddits" entry of at least
+     * {@link #SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH} characters matches any subreddit whose name
+     * ends with it (e.g. "memes" hides r/dankmemes). Shorter entries keep exact matching.
+     */
+    public static volatile boolean subredditFilterSuffixMatching = false;
+    public static final int SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH = 5;
+
+    /**
+     * Lower-cased subreddit names that prefix/suffix matching must never hide: the current
+     * account's subscribed subreddits plus the {@code u_username} profile subreddits of the users
+     * it follows. Refreshed from the database whenever a feed loads its post filter (so an
+     * "Exclude subreddits" entry like "story" cannot accidentally hide r/history when you are
+     * subscribed to it). Exact-name entries are still honoured. Reassigned wholesale, never mutated
+     * in place, so readers on the paging thread always see a complete set.
+     */
+    public static volatile Set<String> neverHideSubredditsLowerCase = Collections.emptySet();
+
     public PostFilter() {
 
     }
 
     protected PostFilter(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         maxVote = in.readInt();
         minVote = in.readInt();
         maxComments = in.readInt();
@@ -130,7 +176,7 @@ public class PostFilter implements Parcelable {
         }
     };
 
-    public static boolean isPostAllowed(Post post, PostFilter postFilter) {
+    public static boolean isPostAllowed(@Nullable Post post, @Nullable PostFilter postFilter) {
         if (postFilter == null || post == null) {
             return true;
         }
@@ -197,7 +243,7 @@ public class PostFilter implements Parcelable {
                         return false;
                     }
                 } catch (PatternSyntaxException e) {
-                    e.printStackTrace();
+                    Log.e("PostFilter", "isPostAllowed failed", e);
                 }
             }
         }
@@ -218,7 +264,7 @@ public class PostFilter implements Parcelable {
                         break;
                     }
                 } catch (PatternSyntaxException e) {
-                    e.printStackTrace();
+                    Log.e("PostFilter", "isPostAllowed failed", e);
                 }
             }
             if (!matched) {
@@ -228,7 +274,7 @@ public class PostFilter implements Parcelable {
         if (postFilter.postTitleExcludesStrings != null && !postFilter.postTitleExcludesStrings.equals("")) {
             String[] titles = postFilter.postTitleExcludesStrings.split(",", 0);
             for (String t : titles) {
-                if (!t.trim().equals("") && post.getTitle().toLowerCase().contains(t.toLowerCase().trim())) {
+                if (!t.trim().equals("") && post.getTitle().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
                     return false;
                 }
             }
@@ -237,7 +283,7 @@ public class PostFilter implements Parcelable {
             String[] titles = postFilter.postTitleContainsStrings.split(",", 0);
             boolean hasRequiredString = false;
             for (String t : titles) {
-                if (post.getTitle().toLowerCase().contains(t.toLowerCase().trim())) {
+                if (post.getTitle().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
                     hasRequiredString = true;
                     break;
                 }
@@ -317,19 +363,19 @@ public class PostFilter implements Parcelable {
         }
         if (post.getUrl() != null && postFilter.excludeDomains != null && !postFilter.excludeDomains.equals("")) {
             String[] domains = postFilter.excludeDomains.split(",", 0);
-            String url = post.getUrl().toLowerCase();
+            String url = post.getUrl().toLowerCase(Locale.US);
             for (String f : domains) {
-                if (!f.trim().equals("") && url.contains(f.trim().toLowerCase())) {
+                if (!f.trim().equals("") && url.contains(f.trim().toLowerCase(Locale.US))) {
                     return false;
                 }
             }
         }
         if (post.getUrl() != null && postFilter.containDomains != null && !postFilter.containDomains.equals("")) {
             String[] domains = postFilter.containDomains.split(",", 0);
-            String url = post.getUrl().toLowerCase();
+            String url = post.getUrl().toLowerCase(Locale.US);
             boolean hasRequiredDomain = false;
             for (String f : domains) {
-                if (url.contains(f.trim().toLowerCase())) {
+                if (url.contains(f.trim().toLowerCase(Locale.US))) {
                     hasRequiredDomain = true;
                     break;
                 }

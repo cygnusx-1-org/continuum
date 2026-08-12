@@ -161,6 +161,8 @@
     <string name="profile">Profile</string>
     <string name="subscriptions">Subscriptions</string>
     <string name="multi_reddit">Multireddit</string>
+    <string name="user_multi_reddit">User Multireddit</string>
+    <string name="subscribed_subreddits">Subscribed Subreddits</string>
     <string name="history">History</string>
     <string name="inbox">Inbox</string>
     <string name="inbox_with_count">Inbox (%1$,d)</string>
@@ -178,6 +180,7 @@
     <string name="cannot_fetch_sidebar">Cannot fetch sidebar</string>
     <string name="cannot_fetch_multireddit">Cannot fetch multireddit info</string>
     <string name="cannot_fetch_multireddit_tap_to_retry">Unable to fetch multireddit information. Tap to retry.</string>
+    <string name="cannot_fetch_user_flairs">Cannot fetch user flairs</string>
 
     <string name="subscribe">Subscribe</string>
     <string name="unsubscribe">Unsubscribe</string>
@@ -224,6 +227,7 @@
 
     <string name="select_a_subreddit">Please select a subreddit first</string>
     <string name="title_required">The post needs a good title</string>
+    <string name="account_not_loaded_yet">Account is still loading, please try again</string>
     <string name="crosspost_not_subscribed_title">Not subscribed</string>
     <string name="crosspost_not_subscribed_message">You\'re not subscribed to r/%1$s, so you can\'t crosspost there. Subscribe first, then try again.</string>
     <string name="crosspost_disallowed_title">Crossposts not allowed</string>
@@ -269,6 +273,8 @@
     <string name="users_multireddits">Users MultiReddits</string>
     <string name="posts">Posts</string>
     <string name="comments">Comments</string>
+    <string name="local_posts">Local Posts</string>
+    <string name="local_comments">Local Comments</string>
     <string name="about">About</string>
 
     <string name="bottom_sheet_post_text">Text</string>
@@ -476,6 +482,8 @@
     <string name="settings_category_comment_title">Comment</string>
     <string name="settings_show_top_level_comments_first_title">Show Top-level Comments First</string>
     <string name="settings_show_comment_divider_title">Show Comment Divider</string>
+    <string name="settings_show_comment_top_padding_title">Show Comment Top Padding</string>
+    <string name="settings_show_comment_top_padding_summary">Increase padding above the username and between the header and comment body</string>
     <string name="settings_comment_toolbar_hide_on_click">Click to Show/Hide Comment Toolbar</string>
     <string name="settings_fully_collapse_comment_title">Fully Collapse Comment</string>
     <string name="settings_comment_toolbar_hidden">Comment Toolbar Hidden by Default</string>
@@ -491,6 +499,7 @@
     <string name="settings_default_link_post_layout">Default Link Post Layout</string>
     <string name="settings_show_divider_in_compact_layout">Show Divider</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">Show Thumbnail on the Left</string>
+    <string name="settings_show_thumbnail_on_the_right_in_compact_layout">Show Thumbnail on the Right</string>
     <string name="bottom_app_bar_option_toggle_thumbnail_side">Toggle Thumbnail Side</string>
     <string name="settings_number_of_columns_in_post_feed_title">The Number of Columns in Post Feed</string>
     <string name="settings_number_of_columns_in_post_feed_portrait_title">Portrait</string>
@@ -584,6 +593,18 @@
     <string name="app_will_restart">Going back after changing a value will cause the app to restart.</string>
     <string name="settings_tab_count">Tab Count</string>
     <string name="settings_show_tab_names">Show Tab Names</string>
+    <string name="settings_enable_tabs">Enable Tabs</string>
+    <string name="settings_edit_tabs_title">Tabs</string>
+    <string name="settings_edit_tabs_summary">Add, remove, and reorder tabs</string>
+    <string name="settings_add_tab">Add tab</string>
+    <string name="tab_already_added">This tab has already been added</string>
+    <string name="cannot_delete_last_tab">At least one tab is required</string>
+    <string name="move_to_top">Move to top</string>
+    <string name="move_to_bottom">Move to bottom</string>
+    <string name="customize_tabs_hint">Long-press a tab for options.</string>
+    <string name="reset_name">Reset name</string>
+    <string name="content_description_drag_to_reorder">Drag to reorder</string>
+    <string name="content_description_delete">Delete</string>
     <string name="settings_tab_1_summary">Tab 1</string>
     <string name="settings_tab_2_summary">Tab 2</string>
     <string name="settings_tab_3_summary">Tab 3</string>
@@ -591,7 +612,7 @@
     <string name="settings_tab_5_summary">Tab 5</string>
     <string name="settings_tab_6_summary">Tab 6</string>
     <string name="settings_more_tabs_summary">More Tabs</string>
-    <string name="settings_more_tabs_info_summary">Enabling the following options will cause an unintended behaviour:\nTabs may lose all the content after switching to others. This is the same as refreshing the page.</string>
+    <string name="settings_more_tabs_info_summary">Changing these effects the list above</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">Show Favorite MultiReddits</string>
     <string name="settings_more_tabs_show_multireddits_title">Show MultiReddits</string>
     <string name="settings_more_tabs_show_favorite_users_multireddits_title">Show Favorite Users MultiReddits</string>
@@ -639,7 +660,7 @@
     <string name="settings_credits_national_flags_summary">Icon made by Freepik from www.flaticon.com</string>
     <string name="settings_miscellaneous_title">Miscellaneous</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">Respect Subreddit Recommended Comment Sort Type By Default</string>
-    <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">Comment sort type will not be saved</string>
+    <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">Used when enabled until you pick a sort when Save Comment Sort is enabled, not used when disabled, and used when enabled when Save Comment Sort is disabled</string>
     <string name="settings_post_filter_title">Post Filter</string>
     <string name="settings_subreddit_filter_category">Hide Subreddits</string>
     <string name="settings_subreddit_filter_popular_and_all">In r/popular and r/all</string>
@@ -666,6 +687,13 @@
     <string name="settings_hide_read_posts_automatically_summary">The setting is not applied when viewing posts from searches, specific users, or subreddits.</string>
     <string name="settings_sort_type_title">Sort Type</string>
     <string name="settings_save_sort_type_title">Save Sort Type</string>
+    <string name="settings_sort_category_post_feeds">Post Feeds</string>
+    <string name="settings_sort_category_comments">Comments</string>
+    <string name="settings_save_post_sort_title">Save Post Sort</string>
+    <string name="settings_save_post_sort_summary">Remember each subreddit\'s and user\'s feed sort</string>
+    <string name="settings_save_comment_sort_title">Save Comment Sort</string>
+    <string name="settings_save_comment_sort_summary">Remember each subreddit\'s comment sort</string>
+    <string name="settings_comment_default_sort_type_title">Comment Default Sort Type</string>
     <string name="settings_subreddit_default_sort_type_title">Subreddit Default Sort Type</string>
     <string name="settings_subreddit_default_sort_time_title">Subreddit Default Sort Time</string>
     <string name="settings_user_default_sort_type_title">User Default Sort Type</string>
@@ -683,6 +711,7 @@
     <string name="settings_hide_the_number_of_votes">Hide the Number of Votes</string>
     <string name="settings_hide_the_number_of_comments">Hide the Number of Comments</string>
     <string name="settings_show_avatar_on_the_right">Show Avatar on the Right</string>
+    <string name="settings_category_backup_and_restore_title">Backup and Restore</string>
     <string name="settings_backup_settings_title">Backup Settings</string>
     <string name="settings_backup_settings_summary">Includes accounts, Client ID, and Giphy API Key. You will be prompted to enter a password when creating the backup.</string>
     <string name="settings_restore_settings_title">Restore Settings</string>
@@ -699,6 +728,10 @@
     <string name="settings_collapse_subscribed_subreddits_section_title">Collapse Subscribed Subreddits Section</string>
     <string name="settings_hide_favorite_subreddits_sections_title">Hide Favorite Subreddits Section</string>
     <string name="settings_hide_subscribed_subreddits_sections_title">Hide Subscribed Subreddits Section</string>
+    <string name="settings_quick_toggles_title">Quick Toggles</string>
+    <string name="settings_show_theme_toggle_in_navigation_drawer_title">Show Theme Toggle</string>
+    <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">Show NSFW Toggle</string>
+    <string name="settings_show_thumbnail_on_the_left_toggle_in_navigation_drawer_title">Show Thumbnail on the Left Toggle</string>
     <string name="settings_default_search_result_tab">Default Search Result Tab</string>
     <string name="settings_crash_reports_title">Crash Reports</string>
     <string name="settings_nsfw_and_spoiler_dangerous_group_title">Dangerous</string>
@@ -730,6 +763,8 @@
     <string name="settings_link_handler_value_internal_browser">Internal Browser</string>
     <string name="settings_link_handler_value_specific_browser">Specific Browser</string>
     <string name="settings_specific_browser_title">Specific Browser</string>
+    <string name="settings_use_old_reddit_domain_title">Use old.reddit.com</string>
+    <string name="settings_use_old_reddit_domain_summary">Use old.reddit.com instead of www.reddit.com for Reddit links you share, copy, or open outside the app</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">Legacy Video Controller UI</string>
     <string name="settings_custom_font_family_title">Custom Font Family</string>
     <string name="settings_custom_title_font_family_title">Custom Title Font Family</string>
@@ -772,6 +807,10 @@
     <string name="settings_over_18_and_spoiler_summary">Show or blur NSFW content and blur spoilers</string>
     <string name="settings_post_filter_summary">Create and manage filters that hide posts</string>
     <string name="settings_comment_filter_summary">Create and manage filters that hide comments</string>
+    <string name="settings_subreddit_filter_prefix_matching">Enable subreddit filter prefix matching</string>
+    <string name="settings_subreddit_filter_prefix_matching_summary">When on, an \"Exclude subreddits\" entry of at least six characters also hides every subreddit whose name starts with it. For example, excluding \"android\" also hides r/androiddev, and \"pokemongo\" also hides r/pokemongoraids. Subreddits you are subscribed to and users you follow are never hidden this way, but subreddits in your multireddits are not spared.</string>
+    <string name="settings_subreddit_filter_suffix_matching">Enable subreddit filter suffix matching</string>
+    <string name="settings_subreddit_filter_suffix_matching_summary">When on, an \"Exclude subreddits\" entry of at least five characters also hides every subreddit whose name ends with it. For example, excluding \"memes\" hides r/memes plus every subreddit ending in \"memes\", such as r/dankmemes and r/couplememes. Watch out for unintended matches: excluding \"story\" also hides r/history. Subreddits you are subscribed to and users you follow are never hidden this way, but subreddits in your multireddits are not spared.</string>
     <string name="settings_sort_type_summary">Default sort type and time range for subreddits, users, and comments</string>
     <string name="settings_download_location_summary">Choose folders for downloaded images, GIFs, videos, and NSFW media</string>
     <string name="settings_miscellaneous_summary">Link handling, browser, search history, language, and fold support</string>
@@ -1171,6 +1210,7 @@
     <string name="copy_theme_faied">Cannot copy the theme configuration</string>
     <string name="cannot_find_theme">Cannot find this theme</string>
     <string name="cannot_download_theme_data">Cannot download theme data</string>
+    <string name="theme_not_loaded_yet">Theme is still loading, please try again</string>
     <string name="import_theme">Import Theme</string>
     <string name="no_data_in_clipboard">Cannot find data in clipboard</string>
     <string name="import_theme_success">Import theme successfully</string>
@@ -1187,6 +1227,7 @@
     <string name="save_locally_and_online">Save both locally and online</string>
     <string name="save_locally_and_online_anonymous">Save both locally and online (anonymously)</string>
     <string name="theme_saved_locally">Theme saved locally</string>
+    <string name="theme_name_already_taken">A theme called %1$s already exists. Choose another name.</string>
     <string name="theme_saved_online">Theme saved online</string>
     <string name="upload_theme_failed">Failed to upload this theme. Try again later.</string>
 
@@ -1369,6 +1410,7 @@
     <string name="post_filter_requires_a_name">What is the name of this post filter?</string>
     <string name="duplicate_post_filter_dialog_title">\'%1$s\' Already Exists</string>
     <string name="duplicate_post_filter_dialog_message">Override it?</string>
+    <string name="save_post_filter_failed">Unable to save post filter</string>
     <string name="apply_to">Apply to</string>
     <string name="post_filter_usage_home">Home</string>
     <string name="post_filter_usage_history">History</string>
@@ -1763,6 +1805,8 @@
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="align_qr_code">Align QR code within the frame</string>
     <string name="camera_permission_required">Camera permission is required to scan QR codes</string>
+    <string name="camera_permission_required_capture">Camera permission is required to take a photo</string>
+    <string name="camera_permission_required_capture_video">Camera permission is required to record a video</string>
     <string name="qr_code_scanned_press_ok">QR code scanned successfully. Press OK to apply.</string>
     <string name="qr_code_scanned_dialog_closed">QR code scanned, but dialog was closed. Please try again.</string>
 
@@ -1831,11 +1875,25 @@
     <string name="post_removed_status">This post is removed</string>
     <string name="post_spam_status">This post is removed as spam</string>
     <string name="comment_removed_status">This comment is removed</string>
+    <string name="recover_post">Recover Post</string>
+    <string name="recover_comment">Recover Comment</string>
+    <string name="action_bypass_saved_cache">Bypass cache</string>
+    <string name="bypass_saved_cache_on">Fetching fresh saved posts…</string>
+    <string name="fetching_removed_post">Fetching removed post</string>
+    <string name="show_removed_post_failed">Could not find the removed post</string>
+    <string name="fetching_removed_comment">Fetching removed comment</string>
+    <string name="show_removed_comment_failed">Could not find the removed comment</string>
     <string name="comment_spam_status">This comment is removed as spam</string>
 
     <string name="copying_multi_reddit">Copying</string>
 
+    <string name="read_aloud">Read Aloud</string>
+    <string name="stop_reading">Stop Reading</string>
+    <string name="translate">Translate</string>
+    <string name="tts_not_available">Text-to-speech is not available</string>
+
     <string name="settings_search_settings">Search Settings</string>
     <string name="settings_search_hint">Search settings…</string>
     <string name="settings_search_no_results">No results found</string>
+    <string name="settings_search_loading">Loading settings…</string>
 </resources>

@@ -5,18 +5,20 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
-import androidx.annotation.Nullable;
+import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,9 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
+import ml.docilealligator.infinityforreddit.customtheme.CustomThemeDao;
+import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
@@ -108,35 +113,65 @@ public class RestoreSettings {
                         for (File f : restoreFiles) {
                             if (f.isFile()) {
                                 if (f.getName().equals(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + "_private.txt")) {
-                                    result = result & importSharedPreferencsFromFile(defaultPrefsPrivate, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(defaultPrefsPrivate, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().equals(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + ".txt")) {
-                                    result = result & importSharedPreferencsFromFile(defaultSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(defaultSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.LIGHT_THEME_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(lightThemeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(lightThemeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.DARK_THEME_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(darkThemeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(darkThemeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.AMOLED_THEME_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(amoledThemeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(amoledThemeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(sortTypeSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(sortTypeSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postLayoutSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postLayoutSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postDetailsSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postDetailsSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postFeedScrolledPositionSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postFeedScrolledPositionSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(mainActivityTabsSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(mainActivityTabsSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(proxySharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(proxySharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(nsfwAndSpoilerSharedPreferencs, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(nsfwAndSpoilerSharedPreferencs, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(bottomAppBarSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(bottomAppBarSharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(postHistorySharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(postHistorySharedPreferences, f.toString());
+                                    result = result && imported;
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE)) {
-                                    result = result & importSharedPreferencsFromFile(navigationDrawerSharedPreferences, f.toString());
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(navigationDrawerSharedPreferences, f.toString());
+                                    result = result && imported;
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {
                                 if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
@@ -154,6 +189,7 @@ public class RestoreSettings {
                                 File commentFilterUsageFile = new File(f.getAbsolutePath() + "/comment_filter_usage.json");
                                 File accountsFile = new File(f.getAbsolutePath() + "/accounts.json");
                                 File readPostsFile = new File(f.getAbsolutePath() + "/read_posts.json");
+                                File localSavedFile = new File(f.getAbsolutePath() + "/local_saved.json");
 
                                 if (anonymousSubscribedSubredditsFile.exists()) {
                                     List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
@@ -174,7 +210,7 @@ public class RestoreSettings {
                                 }
                                 if (customThemesFile.exists()) {
                                     List<CustomTheme> customThemes = getListFromFile(customThemesFile, new TypeToken<List<CustomTheme>>() {}.getType());
-                                    redditDataRoomDatabase.customThemeDao().insertAll(customThemes);
+                                    restoreCustomThemes(context, redditDataRoomDatabase, customThemes);
                                 }
                                 if (postFiltersFile.exists()) {
                                     List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
@@ -196,7 +232,9 @@ public class RestoreSettings {
                                 }
                                 if (accountsFile.exists()) {
                                     List<Account> accounts = getListFromFile(accountsFile, new TypeToken<List<Account>>() {}.getType());
-                                    if (accounts != null) {
+                                    // Only replace local accounts when the backup actually has some; an empty
+                                    // or unreadable accounts.json (now an empty list, not null) must not wipe them.
+                                    if (!accounts.isEmpty()) {
                                         // Clear existing accounts before inserting restored ones
                                         redditDataRoomDatabase.accountDao().deleteAllAccounts();
                                         // Inserted rows keep the is_current_user flag from the backup, so more
@@ -229,8 +267,16 @@ public class RestoreSettings {
                                 // Restore read_posts after accounts so the FK on username is satisfied.
                                 if (readPostsFile.exists()) {
                                     List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
-                                    if (readPosts != null) {
+                                    if (!readPosts.isEmpty()) {
                                         redditDataRoomDatabase.readPostDao().insertAll(readPosts);
+                                    }
+                                }
+
+                                // Restore local_saved after accounts so the FK on username is satisfied.
+                                if (localSavedFile.exists()) {
+                                    List<LocalSavedThing> localSaved = getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType());
+                                    if (!localSaved.isEmpty()) {
+                                        redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
                                     }
                                 }
                             }
@@ -273,6 +319,71 @@ public class RestoreSettings {
         });
     }
 
+    /**
+     * Merges the backed up themes into whatever is already here. Restored themes carry their own
+     * light/dark/amoled flags, so the matching flags have to be cleared first — two rows claiming a
+     * slot make the LIMIT 1 lookups for it return whichever SQLite reaches first — but only for the
+     * slots the backup actually fills, or a backup holding no theme for a slot would leave it empty
+     * while its restored colours stay in the preferences.
+     */
+    private static void restoreCustomThemes(Context context, RedditDataRoomDatabase redditDataRoomDatabase,
+                                            List<CustomTheme> customThemes) {
+        CustomThemeDao customThemeDao = redditDataRoomDatabase.customThemeDao();
+        String defaultThemeName = context.getString(R.string.theme_name_solarized_amoled);
+
+        CustomTheme existingDefaultTheme = customThemeDao.getCustomTheme(defaultThemeName);
+
+        boolean restoresLightTheme = false;
+        boolean restoresDarkTheme = false;
+        boolean restoresAmoledTheme = false;
+        boolean restoresDefaultTheme = false;
+        for (CustomTheme customTheme : customThemes) {
+            restoresLightTheme |= customTheme.isLightTheme;
+            restoresDarkTheme |= customTheme.isDarkTheme;
+            restoresAmoledTheme |= customTheme.isAmoledTheme;
+            restoresDefaultTheme |= defaultThemeName.equalsIgnoreCase(customTheme.name);
+        }
+
+        if (restoresLightTheme) {
+            customThemeDao.unsetLightTheme();
+        }
+        if (restoresDarkTheme) {
+            customThemeDao.unsetDarkTheme();
+        }
+        if (restoresAmoledTheme) {
+            customThemeDao.unsetAmoledTheme();
+        }
+        customThemeDao.insertAll(customThemes);
+
+        // The seeded theme is left over from this install's first launch, not something the user made
+        // or backed up, so drop it once the restored themes have taken every slot it held. The backup
+        // has no theme of that name here, so insertAll left the row alone and the slots it still holds
+        // are the ones it came in with, minus whatever was just unset. Serializing to tell the seeded
+        // row from a theme the user named the same is the expensive part, so it comes last, on the
+        // only path that can delete anything.
+        if (existingDefaultTheme != null && !restoresDefaultTheme
+                && !(existingDefaultTheme.isLightTheme && !restoresLightTheme)
+                && !(existingDefaultTheme.isDarkTheme && !restoresDarkTheme)
+                && !(existingDefaultTheme.isAmoledTheme && !restoresAmoledTheme)
+                && isSeededTheme(context, existingDefaultTheme)) {
+            // Its stored name, not the resource string: the lookup above matches case-insensitively.
+            customThemeDao.deleteCustomTheme(existingDefaultTheme.name);
+        }
+    }
+
+    /**
+     * Whether the row is the theme the first launch seeded rather than one the user wrote and gave the
+     * same name. Its colours are what identify it: the slot flags are the part switching themes is
+     * meant to change, so they are matched to the row before comparing rather than tested.
+     */
+    private static boolean isSeededTheme(Context context, CustomTheme customTheme) {
+        CustomTheme seededTheme = CustomThemeWrapper.getSolarizedAmoled(context);
+        seededTheme.isLightTheme = customTheme.isLightTheme;
+        seededTheme.isDarkTheme = customTheme.isDarkTheme;
+        seededTheme.isAmoledTheme = customTheme.isAmoledTheme;
+        return customTheme.getJSONModel().equals(seededTheme.getJSONModel());
+    }
+
     private static boolean importSharedPreferencsFromFile(SharedPreferences sharedPreferences, String uriString) {
         boolean result = false;
         ObjectInputStream input = null;
@@ -303,29 +414,31 @@ public class RestoreSettings {
                 result = true;
             }
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            Log.e("RestoreSettings", "importSharedPreferencsFromFile failed", e);
         } finally {
             try {
                 if (input != null) {
                     input.close();
                 }
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Log.e("RestoreSettings", "importSharedPreferencsFromFile failed", ex);
             }
         }
         return result;
     }
 
-    @Nullable
     private static <T> List<T> getListFromFile(File file, Type dataType) {
-        try (JsonReader reader = new JsonReader(new FileReader(file))) {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             Gson gson = new Gson();
-            return gson.fromJson(reader, dataType);
+            List<T> result = gson.fromJson(reader, dataType);
+            if (result != null) {
+                return result;
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("RestoreSettings", "getListFromFile failed", e);
         }
 
-        return null;
+        return Collections.emptyList();
     }
 
     public interface RestoreSettingsListener {

@@ -9,7 +9,9 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.preference.EditTextPreference;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -44,7 +47,7 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
     }
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.miscellaneous_preferences, rootKey);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
@@ -179,7 +182,7 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
             String label = pm.getApplicationLabel(info.activityInfo.applicationInfo).toString();
             browsers.add(new String[]{label, pkg});
         }
-        Collections.sort(browsers, Comparator.comparing(b -> b[0].toLowerCase()));
+        Collections.sort(browsers, Comparator.comparing(b -> b[0].toLowerCase(Locale.getDefault())));
         return browsers;
     }
 
@@ -206,9 +209,10 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
                 String label = pm.getApplicationLabel(pm.getApplicationInfo(si.packageName, 0)).toString();
                 browsers.add(new String[]{label, si.packageName});
             } catch (PackageManager.NameNotFoundException ignored) {
+                Log.d("MiscellaneousPreferenceFragment", "findEphemeralBrowsers: ignoring PackageManager.NameNotFoundException", ignored);
             }
         }
-        Collections.sort(browsers, Comparator.comparing(b -> b[0].toLowerCase()));
+        Collections.sort(browsers, Comparator.comparing(b -> b[0].toLowerCase(Locale.getDefault())));
         return browsers;
     }
 
@@ -222,7 +226,14 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         pref.setEntries(entries.toArray(new CharSequence[0]));
         pref.setEntryValues(values.toArray(new CharSequence[0]));
         String current = pref.getValue();
-        if ((current == null || !values.contains(current)) && !values.isEmpty()) {
+        boolean currentIsKnown = false;
+        for (CharSequence v : values) {
+            if (v.toString().equals(current)) {
+                currentIsKnown = true;
+                break;
+            }
+        }
+        if (!currentIsKnown && !values.isEmpty()) {
             pref.setValue(values.get(0).toString());
         }
     }

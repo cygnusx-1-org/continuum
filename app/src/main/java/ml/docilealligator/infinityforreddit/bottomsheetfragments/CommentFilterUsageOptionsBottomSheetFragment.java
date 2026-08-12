@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.activities.CommentFilterUsageListingActivity;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
@@ -24,12 +25,17 @@ public class CommentFilterUsageOptionsBottomSheetFragment extends LandscapeExpan
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         FragmentCommentFilterUsageOptionsBottomSheetBinding binding = FragmentCommentFilterUsageOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        CommentFilterUsage commentFilterUsage = getArguments().getParcelable(EXTRA_COMMENT_FILTER_USAGE);
+        Bundle args = getArguments();
+        CommentFilterUsage commentFilterUsage = args == null ? null : args.getParcelable(EXTRA_COMMENT_FILTER_USAGE);
+        if (commentFilterUsage == null) {
+            binding.getRoot().post(this::dismiss);
+            return binding.getRoot();
+        }
 
         binding.editTextViewCommentFilterUsageOptionsBottomSheetFragment.setOnClickListener(view -> {
             activity.editCommentFilterUsage(commentFilterUsage);

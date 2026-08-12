@@ -6,6 +6,7 @@ import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTI
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 import androidx.preference.ListPreference;
@@ -29,10 +30,11 @@ public class SecurityPreferenceFragment extends CustomFontPreferenceFragmentComp
     @Named("default")
     SharedPreferences sharedPreferences;
 
+    @Nullable
     String rootKey;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         this.rootKey = rootKey;
     }
 

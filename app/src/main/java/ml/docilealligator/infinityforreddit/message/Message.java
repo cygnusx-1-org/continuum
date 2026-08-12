@@ -2,7 +2,9 @@ package ml.docilealligator.infinityforreddit.message;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Message implements Parcelable {
     public static final String TYPE_COMMENT = "t1";
@@ -21,6 +23,7 @@ public class Message implements Parcelable {
     private final String author;
     private final String destination;
     private final String parentFullName;
+    @Nullable
     private final String title;
     private final String body;
     private final String context;
@@ -31,10 +34,11 @@ public class Message implements Parcelable {
     private final int score;
     private final int nComments;
     private final long timeUTC;
+    @Nullable
     private ArrayList<Message> replies;
 
     Message(String kind, String subredditName, String subredditNamePrefixed, String id, String fullname,
-            String subject, String author, String destination, String parentFullName, String title, String body,
+            String subject, String author, String destination, String parentFullName, @Nullable String title, String body,
             String context, String distinguished, String formattedTime, boolean wasComment, boolean isNew,
             int score, int nComments, long timeUTC) {
         this.kind = kind;
@@ -60,20 +64,20 @@ public class Message implements Parcelable {
 
 
     protected Message(Parcel in) {
-        kind = in.readString();
-        subredditName = in.readString();
-        subredditNamePrefixed = in.readString();
-        id = in.readString();
-        fullname = in.readString();
-        subject = in.readString();
-        author = in.readString();
-        destination = in.readString();
-        parentFullName = in.readString();
+        kind = Objects.requireNonNull(in.readString());
+        subredditName = Objects.requireNonNull(in.readString());
+        subredditNamePrefixed = Objects.requireNonNull(in.readString());
+        id = Objects.requireNonNull(in.readString());
+        fullname = Objects.requireNonNull(in.readString());
+        subject = Objects.requireNonNull(in.readString());
+        author = Objects.requireNonNull(in.readString());
+        destination = Objects.requireNonNull(in.readString());
+        parentFullName = Objects.requireNonNull(in.readString());
         title = in.readString();
-        body = in.readString();
-        context = in.readString();
-        distinguished = in.readString();
-        formattedTime = in.readString();
+        body = Objects.requireNonNull(in.readString());
+        context = Objects.requireNonNull(in.readString());
+        distinguished = Objects.requireNonNull(in.readString());
+        formattedTime = Objects.requireNonNull(in.readString());
         wasComment = in.readByte() != 0;
         isNew = in.readByte() != 0;
         score = in.readInt();
@@ -159,6 +163,7 @@ public class Message implements Parcelable {
         return parentFullName;
     }
 
+    @Nullable
     public String getTitle() {
         return title;
     }
@@ -203,6 +208,7 @@ public class Message implements Parcelable {
         return timeUTC;
     }
 
+    @Nullable
     public ArrayList<Message> getReplies() {
         return replies;
     }

@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.apis;
 
+import androidx.annotation.Nullable;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Map;
 import retrofit2.Call;
@@ -14,7 +15,7 @@ import retrofit2.http.Query;
 
 public interface ServerAPI {
     @GET("/themes/")
-    ListenableFuture<Response<String>> getCustomThemesListenableFuture(@Query("page") String page);
+    ListenableFuture<Response<String>> getCustomThemesListenableFuture(@Query("page") @Nullable String page);
 
     @GET("/themes/theme")
     Call<String> getCustomTheme(@Query("name") String themeName, @Query("username") String username);
@@ -32,5 +33,5 @@ public interface ServerAPI {
 
     @FormUrlEncoded
     @POST("/redditUserAuth/refresh_access_token")
-    Call<String> refreshAccessToken(@Field("username") String username, @Field("refresh_token") String refreshToken);
+    Call<String> refreshAccessToken(@Field("username") String username, @Field("refresh_token") @Nullable String refreshToken);
 }

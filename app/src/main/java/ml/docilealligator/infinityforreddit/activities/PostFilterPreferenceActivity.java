@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,6 +31,7 @@ import ml.docilealligator.infinityforreddit.postfilter.DeletePostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterWithUsage;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterWithUsageViewModel;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class PostFilterPreferenceActivity extends BaseActivity {
@@ -47,7 +49,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
     public PostFilterWithUsageViewModel postFilterWithUsageViewModel;
@@ -55,7 +57,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
     private ActivityPostFilterPreferenceBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -84,10 +86,17 @@ public class PostFilterPreferenceActivity extends BaseActivity {
                             allInsets.right,
                             BaseActivity.IGNORE_MARGIN);
 
-                    binding.recyclerViewPostFilterPreferenceActivity.setPadding(
+                    binding.contentLinearLayoutPostFilterPreferenceActivity.setPadding(
                             allInsets.left,
                             0,
                             allInsets.right,
+                            0
+                    );
+
+                    binding.recyclerViewPostFilterPreferenceActivity.setPadding(
+                            0,
+                            0,
+                            0,
                             allInsets.bottom
                     );
 
@@ -103,7 +112,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarPostFilterPreferenceActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         Post post = getIntent().getParcelableExtra(EXTRA_POST);
         String subredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
@@ -123,7 +132,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
             }
         });
 
-        adapter = new PostFilterWithUsageRecyclerViewAdapter(this, customThemeWrapper, postFilter -> {
+        adapter = new PostFilterWithUsageRecyclerViewAdapter(this, mCustomThemeWrapper, postFilter -> {
             if (post != null) {
                 showPostFilterOptions(post, postFilter);
             } else if (subredditName != null) {
@@ -140,6 +149,24 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         });
 
         binding.recyclerViewPostFilterPreferenceActivity.setAdapter(adapter);
+
+        binding.subredditFilterPrefixMatchingSwitchPostFilterPreferenceActivity.setChecked(
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_PREFIX_MATCHING, false));
+        binding.subredditFilterPrefixMatchingSwitchPostFilterPreferenceActivity.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_PREFIX_MATCHING, isChecked).apply();
+            PostFilter.subredditFilterPrefixMatching = isChecked;
+        });
+        binding.subredditFilterPrefixMatchingLinearLayoutPostFilterPreferenceActivity.setOnClickListener(view ->
+                binding.subredditFilterPrefixMatchingSwitchPostFilterPreferenceActivity.performClick());
+
+        binding.subredditFilterSuffixMatchingSwitchPostFilterPreferenceActivity.setChecked(
+                sharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_SUFFIX_MATCHING, false));
+        binding.subredditFilterSuffixMatchingSwitchPostFilterPreferenceActivity.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_SUFFIX_MATCHING, isChecked).apply();
+            PostFilter.subredditFilterSuffixMatching = isChecked;
+        });
+        binding.subredditFilterSuffixMatchingLinearLayoutPostFilterPreferenceActivity.setOnClickListener(view ->
+                binding.subredditFilterSuffixMatchingSwitchPostFilterPreferenceActivity.performClick());
 
         postFilterWithUsageViewModel = new ViewModelProvider(this,
                 new PostFilterWithUsageViewModel.Factory(redditDataRoomDatabase)).get(PostFilterWithUsageViewModel.class);
@@ -199,7 +226,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
                 .show();
     }
 
-    public void excludeSubredditInFilter(String subredditName, PostFilter postFilter) {
+    public void excludeSubredditInFilter(String subredditName, @Nullable PostFilter postFilter) {
         Intent intent = new Intent(this, CustomizePostFilterActivity.class);
         intent.putExtra(CustomizePostFilterActivity.EXTRA_EXCLUDE_SUBREDDIT, subredditName);
         if (postFilter != null) {
@@ -208,7 +235,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void excludeUserInFilter(String username, PostFilter postFilter) {
+    public void excludeUserInFilter(String username, @Nullable PostFilter postFilter) {
         Intent intent = new Intent(this, CustomizePostFilterActivity.class);
         intent.putExtra(CustomizePostFilterActivity.EXTRA_EXCLUDE_USER, username);
         if (postFilter != null) {
@@ -246,7 +273,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -255,7 +282,11 @@ public class PostFilterPreferenceActivity extends BaseActivity {
                 binding.collapsingToolbarLayoutPostFilterPreferenceActivity, binding.toolbarPostFilterPreferenceActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutPostFilterPreferenceActivity);
         applyFABTheme(binding.fabPostFilterPreferenceActivity);
-        binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
+        binding.subredditFilterPrefixMatchingTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
+        binding.subredditFilterPrefixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
+        binding.subredditFilterSuffixMatchingTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
+        binding.subredditFilterSuffixMatchingDescriptionTextViewPostFilterPreferenceActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
     }
 
     @Override

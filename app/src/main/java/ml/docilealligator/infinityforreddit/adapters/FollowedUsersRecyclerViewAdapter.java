@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import me.zhanghai.android.fastscroll.PopupTextProvider;
@@ -24,6 +25,7 @@ import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.thing.FavoriteThing;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements PopupTextProvider {
     private static final int VIEW_TYPE_FAVORITE_USER_DIVIDER = 0;
     private static final int VIEW_TYPE_FAVORITE_USER = 1;
@@ -36,6 +38,7 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     private final Executor mExecutor;
     private final Retrofit mOauthRetrofit;
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     private final RequestManager glide;
@@ -179,9 +182,9 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
             case VIEW_TYPE_USER:
                 int offset = (mFavoriteSubscribedUserData != null && !mFavoriteSubscribedUserData.isEmpty()) ?
                         mFavoriteSubscribedUserData.size() + 2 : 0;
-                return mSubscribedUserData.get(position - offset).getName().substring(0, 1).toUpperCase();
+                return mSubscribedUserData.get(position - offset).getName().substring(0, 1).toUpperCase(Locale.getDefault());
             case VIEW_TYPE_FAVORITE_USER:
-                return mFavoriteSubscribedUserData.get(position - 1).getName().substring(0, 1).toUpperCase();
+                return mFavoriteSubscribedUserData.get(position - 1).getName().substring(0, 1).toUpperCase(Locale.getDefault());
             default:
                 return "";
         }

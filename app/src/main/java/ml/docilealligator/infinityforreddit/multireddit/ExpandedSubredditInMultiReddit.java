@@ -3,18 +3,21 @@ package ml.docilealligator.infinityforreddit.multireddit;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import java.util.Objects;
 
 public class ExpandedSubredditInMultiReddit implements Parcelable {
     private String name;
+    @Nullable
     private String iconUrl;
 
-    public ExpandedSubredditInMultiReddit(String name, String iconUrl) {
+    public ExpandedSubredditInMultiReddit(String name, @Nullable String iconUrl) {
         this.name = name;
         this.iconUrl = iconUrl;
     }
 
     protected ExpandedSubredditInMultiReddit(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         iconUrl = in.readString();
     }
 
@@ -34,6 +37,7 @@ public class ExpandedSubredditInMultiReddit implements Parcelable {
         return name;
     }
 
+    @Nullable
     public String getIconUrl() {
         return iconUrl;
     }

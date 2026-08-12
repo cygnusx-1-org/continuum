@@ -42,6 +42,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -79,9 +80,9 @@ import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerControlView;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
 import app.futured.hauler.DragDirection;
-import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -144,7 +145,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     public static final int VIDEO_TYPE_V_REDD_IT = 4;
     public static final int VIDEO_TYPE_DIRECT = 3;
     public static final int VIDEO_TYPE_REDGIFS = 2;
-    private static final int VIDEO_TYPE_NORMAL = 0;
+    public static final int VIDEO_TYPE_NORMAL = 0;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 0;
 
     /*private static final String IS_MUTE_STATE = "IMS";
@@ -156,6 +157,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private static final String PLAYBACK_SPEED_STATE = "PSS";
     private static final String SET_NON_DATA_SAVING_MODE_DEFAULT_RESOLUTION_ALREADY_STATE = "PSS";*/
 
+    @Nullable
     public Typeface typeface;
 
     //private Uri mVideoUri;
@@ -179,6 +181,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     private int dataSavingModeDefaultResolution;
     private int nonDataSavingModeDefaultResolution;*/
     //private boolean setDefaultResolutionAlready = false;
+    @Nullable
     private Integer originalOrientation;
     /*private int playbackSpeed = 100;
     private boolean useBottomAppBar;*/
@@ -266,7 +269,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -278,7 +281,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         }
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
-        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, "2"));
+        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM));
         switch (systemThemeType) {
             case 0:
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
@@ -311,12 +314,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 }
         }
 
-        getTheme().applyStyle(FontStyle.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
-        getTheme().applyStyle(TitleFontStyle.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
-        getTheme().applyStyle(ContentFontStyle.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
-        getTheme().applyStyle(FontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())).getResId(), true);
-        getTheme().applyStyle(TitleFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
-        getTheme().applyStyle(ContentFontFamily.valueOf(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
+        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
+        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
+        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         binding = new ViewVideoActivityBindingAdapter(ActivityViewVideoZoomableBinding.inflate(getLayoutInflater()));
         setContentView(binding.getRoot());
@@ -339,7 +342,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         Resources resources = getResources();
 
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
         binding.getBottomAppBar().setVisibility(View.VISIBLE);
         binding.getBackButton().setOnClickListener(view -> {
             finish();
@@ -401,7 +404,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             /*videoFallbackDirectUrl = post.getVideoFallBackDirectUrl();*/
         }
 
-        String dataSavingModeString = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingModeString = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         int networkType = Utils.getConnectedNetwork(this);
         boolean isDataSavingMode = false;
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
@@ -457,7 +460,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                                     try {
                                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                                         disable();
-                                    } catch (Exception ignore) {}
+                                    } catch (Exception ignore) {
+                                        Log.d("ViewVideoActivity", "epsilonCheck: ignoring Exception", ignore);
+                                    }
                                 }
                             }
 
@@ -467,7 +472,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                         };
                         orientationEventListener.enable();
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                    Log.d("ViewVideoActivity", "onCreate: ignoring Exception", ignore);
+                }
             }
         }
 
@@ -594,7 +601,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             }
         }
 
-        MaterialButton playPauseButton = findViewById(R.id.exo_play_pause_button_exo_playback_control_view);
         Drawable playDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_play_arrow_24dp, null);
         Drawable pauseDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_24dp, null);
         binding.getPlayPauseButton().setOnClickListener(view -> {
@@ -725,7 +731,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         // Produces DataSource instances through which media data is loaded.
         dataSourceFactory = new CacheDataSource.Factory().setCache(mSimpleCache).setUpstreamDataSourceFactory(new OkHttpDataSource.Factory(mOkHttpClient).setUserAgent(APIUtils.USER_AGENT));
 
-        String redgifsId = null;
         /*if (videoType == VIDEO_TYPE_STREAMABLE) {
             *//*if (savedInstanceState != null) {
                 videoDownloadUrl = savedInstanceState.getString(VIDEO_DOWNLOAD_URL_STATE);
@@ -899,6 +904,17 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                 }
             }
         });
+
+        viewVideoViewModel.getErrorResId().observe(this, messageRes -> {
+            if (messageRes == null) {
+                return;
+            }
+            // The fetch failed — removed post, dead link, or a provider outage — so no video URI
+            // will ever arrive. Without this the indeterminate spinner stays up forever and the
+            // error the ViewModel recorded is never shown to anyone.
+            binding.getLoadingIndicator().setVisibility(View.GONE);
+            Toast.makeText(this, messageRes, Toast.LENGTH_LONG).show();
+        });
     }
 
     private void applyCustomTheme() {
@@ -906,7 +922,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         binding.getPlayPauseButton().setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getFABIconColor()));
     }
 
-    private void preparePlayer(Bundle savedInstanceState) {
+    private void preparePlayer(@Nullable Bundle savedInstanceState) {
         if (mSharedPreferences.getBoolean(SharedPreferencesUtils.LOOP_VIDEO, true)) {
             player.setRepeatMode(Player.REPEAT_MODE_ALL);
         } else {
@@ -1388,7 +1404,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         if (originalOrientation != null) {
             try {
                 setRequestedOrientation(originalOrientation);
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+                Log.d("ViewVideoActivity", "onStop: ignoring Exception", ignore);
+            }
         }
     }
 
@@ -1487,7 +1505,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     }*/
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 

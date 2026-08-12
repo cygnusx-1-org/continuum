@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreference;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -15,8 +16,12 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiver;
 
+// Fields are populated after construction via setCustomFont/setCustomThemeWrapper and null-checked
+// at use; suppress only the field-init check.
+@SuppressWarnings("NullAway.Init")
 public class CustomFontSwitchPreference extends SwitchPreference implements CustomFontReceiver, CustomThemeWrapperReceiver {
     private CustomThemeWrapper customThemeWrapper;
+    @Nullable
     private Typeface typeface;
     private MaterialSwitch materialSwitch;
 
@@ -91,7 +96,7 @@ public class CustomFontSwitchPreference extends SwitchPreference implements Cust
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 

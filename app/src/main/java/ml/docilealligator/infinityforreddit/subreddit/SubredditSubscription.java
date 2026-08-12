@@ -2,8 +2,10 @@ package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -16,7 +18,7 @@ import retrofit2.Retrofit;
 
 public class SubredditSubscription {
     public static void subscribeToSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                            Retrofit retrofit, String accessToken, String subredditName,
+                                            Retrofit retrofit, @Nullable String accessToken, String subredditName,
                                             String accountName, RedditDataRoomDatabase redditDataRoomDatabase,
                                             SubredditSubscriptionListener subredditSubscriptionListener) {
         subredditSubscription(executor, handler, oauthRetrofit, retrofit, accessToken, subredditName,
@@ -65,7 +67,7 @@ public class SubredditSubscription {
     }
 
     private static void subredditSubscription(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                              Retrofit retrofit, String accessToken, String subredditName,
+                                              @Nullable Retrofit retrofit, @Nullable String accessToken, String subredditName,
                                               String accountName, String action,
                                               RedditDataRoomDatabase redditDataRoomDatabase,
                                               SubredditSubscriptionListener subredditSubscriptionListener) {
@@ -81,7 +83,7 @@ public class SubredditSubscription {
             public void onResponse(@NonNull Call<String> call, @NonNull retrofit2.Response<String> response) {
                 if (response.isSuccessful()) {
                     if (action.equals("sub")) {
-                        FetchSubredditData.fetchSubredditData(executor, handler, oauthRetrofit, retrofit,
+                        FetchSubredditData.fetchSubredditData(executor, handler, oauthRetrofit, Objects.requireNonNull(retrofit),
                                 subredditName, accessToken, new FetchSubredditData.FetchSubredditDataListener() {
                                     @Override
                                     public void onFetchSubredditDataSuccess(SubredditData subredditData, int nCurrentOnlineSubscribers) {

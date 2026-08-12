@@ -1,6 +1,8 @@
 package ml.docilealligator.infinityforreddit.settings;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import ml.docilealligator.infinityforreddit.R;
@@ -16,7 +18,7 @@ import org.greenrobot.eventbus.EventBus;
 public class SwipeActionPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.swipe_action_preferences, rootKey);
 
         SwitchPreference enableSwipeActionSwitch = findPreference(SharedPreferencesUtils.ENABLE_SWIPE_ACTION);
@@ -29,8 +31,9 @@ public class SwipeActionPreferenceFragment extends CustomFontPreferenceFragmentC
         if (enableSwipeActionSwitch != null) {
             // Comment swipe actions cannot coexist with Swipe Between Posts (both consume
             // horizontal swipes); Swipe Between Posts wins, so disable this when it is on.
-            boolean swipeBetweenPostsEnabled = getPreferenceManager().getSharedPreferences()
-                    .getBoolean(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS, false);
+            SharedPreferences preferenceManagerSharedPreferences = getPreferenceManager().getSharedPreferences();
+            boolean swipeBetweenPostsEnabled = preferenceManagerSharedPreferences != null
+                    && preferenceManagerSharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS, false);
             if (swipeBetweenPostsEnabled) {
                 enableSwipeActionSwitch.setEnabled(false);
                 enableSwipeActionSwitch.setSummary(R.string.settings_enable_swipe_action_disabled_by_swipe_between_posts_summary);

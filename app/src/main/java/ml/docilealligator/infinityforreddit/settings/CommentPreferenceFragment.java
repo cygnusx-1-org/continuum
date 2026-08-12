@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import javax.inject.Inject;
@@ -19,7 +20,7 @@ public class CommentPreferenceFragment extends CustomFontPreferenceFragmentCompa
     SharedPreferences sharedPreferences;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.comment_preferences, rootKey);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);

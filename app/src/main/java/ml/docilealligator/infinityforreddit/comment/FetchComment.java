@@ -18,7 +18,7 @@ import retrofit2.Retrofit;
 public class FetchComment {
     public static void fetchComments(Executor executor, Handler handler, Retrofit retrofit,
                                      @Nullable String accessToken, @NonNull String accountName, String article,
-                                     String commentId, SortType.Type sortType, String contextNumber,
+                                     @Nullable String commentId, SortType.Type sortType, @Nullable String contextNumber,
                                      boolean expandChildren, CommentFilter commentFilter,
                                      FetchCommentListener fetchCommentListener) {
         RedditAPI api = retrofit.create(RedditAPI.class);
@@ -48,7 +48,7 @@ public class FetchComment {
                                 @Override
                                 public void onParseCommentSuccess(ArrayList<Comment> topLevelComments,
                                                                   ArrayList<Comment> expandedComments,
-                                                                  String parentId, ArrayList<String> moreChildrenIds) {
+                                                                  @Nullable String parentId, ArrayList<String> moreChildrenIds) {
                                     fetchCommentListener.onFetchCommentSuccess(expandedComments, parentId,
                                             moreChildrenIds);
                                 }
@@ -104,7 +104,7 @@ public class FetchComment {
                                 @Override
                                 public void onParseCommentSuccess(ArrayList<Comment> topLevelComments,
                                                                   ArrayList<Comment> expandedComments,
-                                                                  String parentId, ArrayList<String> moreChildrenIds) {
+                                                                  @Nullable String parentId, ArrayList<String> moreChildrenIds) {
                                     fetchMoreCommentListener.onFetchMoreCommentSuccess(
                                             topLevelComments, expandedComments, moreChildrenIds);
                                 }
@@ -127,7 +127,7 @@ public class FetchComment {
     }
 
     public interface FetchCommentListener {
-        void onFetchCommentSuccess(ArrayList<Comment> expandedComments, String parentId, ArrayList<String> children);
+        void onFetchCommentSuccess(ArrayList<Comment> expandedComments, @Nullable String parentId, ArrayList<String> children);
 
         void onFetchCommentFailed();
     }

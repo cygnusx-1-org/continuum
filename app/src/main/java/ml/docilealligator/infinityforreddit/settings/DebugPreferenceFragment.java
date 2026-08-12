@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.settings;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.R;
@@ -14,7 +15,7 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 public class DebugPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.debug_preferences, rootKey);
 
         Preference screenWidthDpPreference = findPreference(SharedPreferencesUtils.SCREEN_WIDTH_DP_KEY);

@@ -14,7 +14,7 @@ public class SpoilerSpan extends ClickableSpan {
     final int backgroundColor;
     private boolean isShowing = false;
 
-    public SpoilerSpan(@NonNull int textColor, @NonNull int backgroundColor) {
+    public SpoilerSpan(int textColor, int backgroundColor) {
         this.textColor = textColor;
         this.backgroundColor = backgroundColor;
     }

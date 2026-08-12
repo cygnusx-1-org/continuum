@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -17,6 +18,7 @@ import com.evernote.android.state.State;
 import com.google.android.material.snackbar.Snackbar;
 import com.livefront.bridge.Bridge;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -63,12 +65,17 @@ public class ViewPrivateMessagesActivity extends BaseActivity implements Activit
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @SuppressWarnings("NullAway.Init")
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
+    @SuppressWarnings("NullAway.Init")
     private PrivateMessagesDetailRecyclerViewAdapter mAdapter;
+    @SuppressWarnings("NullAway.Init")
     @State
     Message privateMessage;
+    @SuppressWarnings("NullAway.Init")
     @State
     Message replyTo;
+    @Nullable
     private String mUserAvatar;
     private ArrayList<ProvideUserAvatarCallback> mProvideUserAvatarCallbacks;
     private boolean isLoadingUserAvatar = false;
@@ -78,7 +85,7 @@ public class ViewPrivateMessagesActivity extends BaseActivity implements Activit
     private ActivityViewPrivateMessagesBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -196,21 +203,23 @@ public class ViewPrivateMessagesActivity extends BaseActivity implements Activit
                         binding.sendImageViewViewPrivateMessagesActivity.setColorFilter(mSecondaryTextColor, android.graphics.PorterDuff.Mode.SRC_IN);
                         ReplyMessage.replyMessage(mExecutor, mHandler, binding.editTextViewPrivateMessagesActivity.getText().toString(),
                                 replyTo.getFullname(), getResources().getConfiguration().locale,
-                                mOauthRetrofit, accessToken, new ReplyMessage.ReplyMessageListener() {
+                                mOauthRetrofit, Objects.requireNonNull(accessToken), new ReplyMessage.ReplyMessageListener() {
                                     @Override
-                                    public void replyMessageSuccess(Message message) {
-                                        if (mAdapter != null) {
+                                    public void replyMessageSuccess(@Nullable Message message) {
+                                        if (message != null && mAdapter != null) {
                                             mAdapter.addReply(message);
                                         }
                                         goToBottom();
                                         binding.editTextViewPrivateMessagesActivity.setText("");
                                         binding.sendImageViewViewPrivateMessagesActivity.setColorFilter(mSendMessageIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
                                         isSendingMessage = false;
-                                        EventBus.getDefault().post(new RepliedToPrivateMessageEvent(message, getIntent().getIntExtra(EXTRA_MESSAGE_POSITION, -1)));
+                                        if (message != null) {
+                                            EventBus.getDefault().post(new RepliedToPrivateMessageEvent(message, getIntent().getIntExtra(EXTRA_MESSAGE_POSITION, -1)));
+                                        }
                                     }
 
                                     @Override
-                                    public void replyMessageFailed(String errorMessage) {
+                                    public void replyMessageFailed(@Nullable String errorMessage) {
                                         if (errorMessage != null && !errorMessage.equals("")) {
                                             Snackbar.make(binding.getRoot(), errorMessage, Snackbar.LENGTH_LONG).show();
                                         } else {
@@ -233,7 +242,7 @@ public class ViewPrivateMessagesActivity extends BaseActivity implements Activit
                         }
                         if (fullnames.length() > 0) {
                             fullnames.deleteCharAt(fullnames.length() - 1);
-                            ReadMessage.readMessage(mOauthRetrofit, accessToken, fullnames.toString(),
+                            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), fullnames.toString(),
                                     new ReadMessage.ReadMessageListener() {
                                         @Override
                                         public void readSuccess() {}
@@ -364,6 +373,6 @@ public class ViewPrivateMessagesActivity extends BaseActivity implements Activit
     }
 
     public interface ProvideUserAvatarCallback {
-        void fetchAvatarSuccess(String userAvatarUrl);
+        void fetchAvatarSuccess(@Nullable String userAvatarUrl);
     }
 }

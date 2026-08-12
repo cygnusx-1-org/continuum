@@ -4,12 +4,14 @@ import android.content.Context;
 import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
+import java.util.Locale;
 import ml.docilealligator.infinityforreddit.R;
 
 public class ColorPickerDialog extends AlertDialog {
@@ -23,7 +25,6 @@ public class ColorPickerDialog extends AlertDialog {
     private final Button okButton;
     private int colorValue;
     private boolean changeColorValueEditText = true;
-    private ColorPickerListener colorPickerListener;
 
     public interface ColorPickerListener {
         void onColorPicked(int color);
@@ -43,7 +44,7 @@ public class ColorPickerDialog extends AlertDialog {
         okButton = rootView.findViewById(R.id.ok_button_color_picker);
 
         colorView.setBackgroundColor(color);
-        colorValueEditText.setText(Integer.toHexString(color).toUpperCase());
+        colorValueEditText.setText(Integer.toHexString(color).toUpperCase(Locale.US));
         colorValueEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -70,6 +71,7 @@ public class ColorPickerDialog extends AlertDialog {
                         changeColorValueEditText = true;
                     } catch (IllegalArgumentException ignored) {
 
+                        Log.d("ColorPickerDialog", "afterTextChanged: ignoring IllegalArgumentException", ignored);
                     }
                 } else if (s.length() == 8) {
                     try {
@@ -83,6 +85,7 @@ public class ColorPickerDialog extends AlertDialog {
                         changeColorValueEditText = true;
                     } catch (IllegalArgumentException ignored) {
 
+                        Log.d("ColorPickerDialog", "afterTextChanged: ignoring IllegalArgumentException", ignored);
                     }
                 }
             }
@@ -130,7 +133,7 @@ public class ColorPickerDialog extends AlertDialog {
                     int rValue = seekBarR.getProgress();
                     int gValue = seekBarG.getProgress();
                     int bValue = seekBarB.getProgress();
-                    String colorHex = String.format("%02x%02x%02x%02x", aValue, rValue, gValue, bValue).toUpperCase();
+                    String colorHex = String.format("%02x%02x%02x%02x", aValue, rValue, gValue, bValue).toUpperCase(Locale.US);
                     colorValue = Color.parseColor("#" + colorHex);
                     colorView.setBackgroundColor(colorValue);
                     colorValueEditText.setText(colorHex);

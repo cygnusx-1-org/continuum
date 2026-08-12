@@ -68,7 +68,7 @@ public class VideoLinkFetcher {
     public static void loadVReddItVideo(Executor executor, Handler handler, Retrofit retrofit, Retrofit mVReddItRetrofit,
                                         Retrofit redgifsRetrofit, Provider<StreamableAPI> streamableApiProvider,
                                         SharedPreferences currentAccountSharedPreferences,
-                                        String vRedditItUrl, FetchVideoLinkListener fetchVideoLinkListener) {
+                                        @Nullable String vRedditItUrl, FetchVideoLinkListener fetchVideoLinkListener) {
         mVReddItRetrofit.create(VReddIt.class).getRedirectUrl(vRedditItUrl).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {

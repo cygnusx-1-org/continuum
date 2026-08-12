@@ -10,4 +10,8 @@
     <dimen name="roundedBottomSheetCornerRadiusRightPadding">0dp</dimen>
     <dimen name="staggeredLayoutManagerItemOffset">16dp</dimen>
     <dimen name="mtrl_slider_track_side_padding">2dp</dimen>
+    <!-- Square thumbnail box in the compact/card-2 post layouts. Read by both the layouts and
+         PostRecyclerViewAdapter so the picked Reddit preview resolution matches the rendered
+         size at the device's density (override per screen-size qualifier if ever needed). -->
+    <dimen name="post_compact_thumbnail_size">112dp</dimen>
 </resources>

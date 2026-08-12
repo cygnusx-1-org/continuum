@@ -1,18 +1,26 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
+import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 
+// Fields are read reflectively by Gson when this model is serialised into the
+// multireddit create/update request body, so they are not dead despite having no reader here.
+@SuppressWarnings("UnusedVariable")
 public class MultiRedditJSONModel {
+    @Nullable
     private String display_name;
+    @Nullable
     private String description_md;
+    @Nullable
     private String visibility;
+    @Nullable
     private SubredditInMultiReddit[] subreddits;
 
     public MultiRedditJSONModel() {}
 
     public MultiRedditJSONModel(String display_name, String description_md, boolean isPrivate,
-                                ArrayList<ExpandedSubredditInMultiReddit> subreddits) {
+                                @Nullable ArrayList<ExpandedSubredditInMultiReddit> subreddits) {
         this.display_name = display_name;
         this.description_md = description_md;
         if (isPrivate) {

@@ -21,6 +21,8 @@ public class SuperscriptOpeningInlineProcessor extends InlineProcessor {
 
     @Nullable
     @Override
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     protected Node parse() {
         index++;
         char c = peek();

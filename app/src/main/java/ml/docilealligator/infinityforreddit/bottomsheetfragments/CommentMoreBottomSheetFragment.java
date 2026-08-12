@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.bottomsheetfragments;
 
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -10,8 +9,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
@@ -28,10 +27,12 @@ import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentCommentMoreBottomSheetBinding;
+import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.ShareScreenshotUtilsKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 
@@ -55,8 +56,8 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentCommentMoreBottomSheetBinding binding = FragmentCommentMoreBottomSheetBinding.inflate(inflater, container, false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
@@ -110,7 +111,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 });
             }
 
-            if (comment.getAuthor().equals(activity.accountName)) {
+            if (java.util.Objects.equals(comment.getAuthor(), activity.accountName)) {
                 binding.notificationViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
                 binding.notificationViewCommentMoreBottomSheetFragment.setText(comment.isSendReplies() ? R.string.disable_reply_notifications : R.string.enable_reply_notifications);
                 binding.notificationViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
@@ -160,19 +161,18 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
 
         binding.shareTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
             dismiss();
-            try {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, comment.getPermalink());
-                activity.startActivity(Intent.createChooser(intent, getString(R.string.share)));
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(activity, R.string.no_activity_found_for_share, Toast.LENGTH_SHORT).show();
+            String permalink = comment.getPermalink();
+            if (permalink != null) {
+                activity.shareLink(permalink);
             }
         });
 
         binding.shareTextViewCommentMoreBottomSheetFragment.setOnLongClickListener(view -> {
             dismiss();
-            activity.copyLink(comment.getPermalink());
+            String permalink = comment.getPermalink();
+            if (permalink != null) {
+                activity.copyLink(permalink);
+            }
             return true;
         });
 
@@ -190,8 +190,8 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 ShareScreenshotUtilsKt.sharePostWithCommentsAsScreenshot(
                         activity, post, threadComments, activity.customThemeWrapper,
                         activity.getResources().getConfiguration().locale,
-                        activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
-                                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE),
+                        java.util.Objects.requireNonNull(activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
+                                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
                         new SaveMemoryCenterInisdeDownsampleStrategy(
                                 Integer.parseInt(activity.getDefaultSharedPreferences()
                                         .getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))
@@ -203,6 +203,33 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
             dismiss();
             CopyTextBottomSheetFragment.show(activity.getSupportFragmentManager(),
                     comment.getCommentRawText(), comment.getCommentMarkdown());
+        });
+
+        if (activity instanceof ViewPostDetailActivity) {
+            binding.readAloudTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
+            TextToSpeechHelper helper = ((ViewPostDetailActivity) activity).getTextToSpeechHelper();
+            if (helper.isSpeaking()) {
+                binding.readAloudTextViewCommentMoreBottomSheetFragment.setText(R.string.stop_reading);
+            }
+            binding.readAloudTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+                if (helper.isSpeaking()) {
+                    helper.stop();
+                } else {
+                    String rawText = comment.getCommentRawText();
+                    if (rawText != null) {
+                        helper.speak(rawText);
+                    }
+                }
+                dismiss();
+            });
+        }
+
+        binding.translateTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+            String rawText = comment.getCommentRawText();
+            if (rawText != null) {
+                Utils.translateText(activity, rawText);
+            }
+            dismiss();
         });
 
         binding.reportViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
@@ -243,6 +270,18 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                 } else {
                     commentModerationActionBottomSheetFragment.show(activity.getSupportFragmentManager(), commentModerationActionBottomSheetFragment.getTag());
                 }
+                dismiss();
+            });
+        }
+
+        boolean canRecoverComment = activity instanceof ViewPostDetailActivity
+                && (comment.isRemoved() || comment.isAuthorDeleted()
+                    || FetchRemovedPost.isRemovalPlaceholder(comment.getCommentRawText())
+                    || FetchRemovedPost.isRemovalPlaceholder(comment.getCommentMarkdown()));
+        if (canRecoverComment) {
+            binding.recoverCommentTextViewCommentMoreBottomSheetFragment.setVisibility(View.VISIBLE);
+            binding.recoverCommentTextViewCommentMoreBottomSheetFragment.setOnClickListener(view -> {
+                ((ViewPostDetailActivity) activity).recoverComment(comment, bundle.getInt(EXTRA_POSITION));
                 dismiss();
             });
         }

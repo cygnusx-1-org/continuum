@@ -16,6 +16,7 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     private final Executor executor;
     private final Retrofit retrofit;
     private final Retrofit oauthRetrofit;
+    @Nullable
     private final String query;
     private final SortType sortType;
     @Nullable
@@ -29,11 +30,13 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     private final MutableLiveData<NetworkState> initialLoadStateLiveData;
     private final MutableLiveData<Boolean> hasSubredditLiveData;
 
+    @Nullable
     private LoadParams<String> params;
+    @Nullable
     private LoadCallback<String, SubredditData> callback;
 
     SubredditListingDataSource(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
-                               String query, SortType sortType,
+                               @Nullable String query, SortType sortType,
                                @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
         this.executor = executor;
         this.retrofit = retrofit;
@@ -113,6 +116,8 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     }
 
     void retryLoadingMore() {
-        loadAfter(params, callback);
+        if (params != null && callback != null) {
+            loadAfter(params, callback);
+        }
     }
 }

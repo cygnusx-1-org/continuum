@@ -15,6 +15,14 @@ import kotlin.math.roundToInt
 /** One time window's average response time and call count. avgMs is null when the window is empty. */
 data class WindowValue(val label: String, val count: Int, val avgMs: Double?)
 
+/**
+ * The rightmost window's average, used as the comparison baseline for bar colouring. Windows with
+ * no calls are skipped rather than treated as a baseline of null, so a quiet trailing period can't
+ * silently drop the colour comparison for every other bar.
+ */
+private fun List<WindowValue>.baselineAvgMs(): Double? =
+    lastOrNull { it.count > 0 }?.avgMs
+
 sealed class ApiStatListItem {
     /** [scaleMax] is the value mapped to full bar height; shared across a section so its rows are comparable. */
     data class Header(
@@ -121,7 +129,7 @@ class ApiStatisticsRecyclerViewAdapter(
     }
 
     private fun windowsContain(windows: List<WindowValue>, color: Int): Boolean {
-        val baseline = windows.lastOrNull()?.avgMs
+        val baseline = windows.baselineAvgMs()
         return windows.any { w ->
             w.count > 0 && w.avgMs != null && qualityColor(w.avgMs, baseline) == color
         }
@@ -156,15 +164,17 @@ class ApiStatisticsRecyclerViewAdapter(
      * per period, whether things are good, marginally worse, or much worse than usual.
      */
     private fun buildBars(windows: List<WindowValue>): List<BarChartView.Bar> {
-        val baseline = windows.lastOrNull()?.avgMs
+        val baseline = windows.baselineAvgMs()
         return windows.map { w ->
-            val available = w.count > 0 && w.avgMs != null
+            // Null unless the window has both calls and a recorded average; every field below
+            // keys off this one value so they can never disagree about availability.
+            val avgMs = if (w.count > 0) w.avgMs else null
             BarChartView.Bar(
                 label = w.label,
-                value = w.avgMs ?: 0.0,
-                valueText = if (available) formatMs(w.avgMs!!) else "",
-                available = available,
-                color = if (available) qualityColor(w.avgMs!!, baseline) else customThemeWrapper.dividerColor
+                value = avgMs ?: 0.0,
+                valueText = if (avgMs != null) formatMs(avgMs) else "",
+                available = avgMs != null,
+                color = if (avgMs != null) qualityColor(avgMs, baseline) else customThemeWrapper.dividerColor
             )
         }
     }

@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -30,7 +29,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.JsonParseException;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -50,7 +52,6 @@ import ml.docilealligator.infinityforreddit.customtheme.OnlineCustomThemeMetadat
 import ml.docilealligator.infinityforreddit.databinding.ActivityCustomThemeListingBinding;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.fragments.CustomThemeListingFragment;
-import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -77,7 +78,7 @@ public class CustomThemeListingActivity extends BaseActivity implements
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     @Named("light_theme")
     SharedPreferences lightThemeSharedPreferences;
@@ -92,10 +93,9 @@ public class CustomThemeListingActivity extends BaseActivity implements
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ActivityCustomThemeListingBinding binding;
-    private ActivityResultLauncher<Intent> customizeThemeActivityResultLauncher;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -145,7 +145,7 @@ public class CustomThemeListingActivity extends BaseActivity implements
         }
 
         setSupportActionBar(binding.toolbarCustomizeThemeListingActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         binding.fabCustomThemeListingActivity.setOnClickListener(view -> {
             CreateThemeBottomSheetFragment createThemeBottomSheetFragment = new CreateThemeBottomSheetFragment();
@@ -208,12 +208,12 @@ public class CustomThemeListingActivity extends BaseActivity implements
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
     protected void applyCustomTheme() {
-        binding.coordinatorLayoutCustomThemeListingActivity.setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.coordinatorLayoutCustomThemeListingActivity.setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
         applyAppBarLayoutAndCollapsingToolbarLayoutAndToolbarTheme(binding.appbarLayoutCustomizeThemeListingActivity,
                 binding.collapsingToolbarLayoutCustomizeThemeListingActivity, binding.toolbarCustomizeThemeListingActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCustomizeThemeListingActivity);
@@ -288,23 +288,60 @@ public class CustomThemeListingActivity extends BaseActivity implements
                 .setTitle(R.string.delete_theme)
                 .setMessage(getString(R.string.delete_theme_dialog_message, themeName))
                 .setPositiveButton(R.string.yes, (dialogInterface, i)
-                        -> DeleteTheme.deleteTheme(executor, new Handler(), redditDataRoomDatabase, themeName, (isLightTheme, isDarkTheme, isAmoledTheme) -> {
-                            if (isLightTheme) {
-                                CustomThemeSharedPreferencesUtils.insertThemeToSharedPreferences(
-                                        CustomThemeWrapper.getIndigo(CustomThemeListingActivity.this), lightThemeSharedPreferences);
-                            }
-                            if (isDarkTheme) {
-                                CustomThemeSharedPreferencesUtils.insertThemeToSharedPreferences(
-                                        CustomThemeWrapper.getIndigoDark(CustomThemeListingActivity.this), darkThemeSharedPreferences);
-                            }
-                            if (isAmoledTheme) {
-                                CustomThemeSharedPreferencesUtils.insertThemeToSharedPreferences(
-                                        CustomThemeWrapper.getIndigoAmoled(CustomThemeListingActivity.this), amoledThemeSharedPreferences);
-                            }
-                            EventBus.getDefault().post(new RecreateActivityEvent());
-                        }))
+                        -> DeleteTheme.deleteTheme(executor, new Handler(), redditDataRoomDatabase, themeName,
+                                this::revertSlotsToDefaultThemes))
                 .setNegativeButton(R.string.no, null)
                 .show();
+    }
+
+    /**
+     * Hands every slot the deleted theme held back to the theme named as the default for it, applied
+     * rather than merely written to the preferences: a slot whose colours are set but whose row is gone
+     * has no name to show in Settings and hides its Customize entry. The row of that name is applied as
+     * the user left it — replacing it with the shipped palette would throw away their edits to it.
+     */
+    private void revertSlotsToDefaultThemes(boolean isLightTheme, boolean isDarkTheme, boolean isAmoledTheme) {
+        ArrayList<CustomTheme> defaultThemes = new ArrayList<>(3);
+        if (isLightTheme) {
+            defaultThemes.add(CustomThemeWrapper.getIndigo(this));
+        }
+        if (isDarkTheme) {
+            defaultThemes.add(CustomThemeWrapper.getIndigoDark(this));
+        }
+        if (isAmoledTheme) {
+            defaultThemes.add(CustomThemeWrapper.getSolarizedAmoled(this));
+        }
+        if (defaultThemes.isEmpty()) {
+            EventBus.getDefault().post(new RecreateActivityEvent());
+            return;
+        }
+
+        AtomicInteger pendingThemes = new AtomicInteger(defaultThemes.size());
+        Handler handler = new Handler();
+        executor.execute(() -> {
+            for (CustomTheme defaultTheme : defaultThemes) {
+                CustomTheme storedTheme =
+                        redditDataRoomDatabase.customThemeDao().getCustomTheme(defaultTheme.name);
+                // Its name has to match exactly: the lookup is case-insensitive, and a theme the user
+                // called "indigo" is their own, not the one shipped as the default.
+                CustomTheme themeToApply =
+                        storedTheme != null && storedTheme.name.equals(defaultTheme.name)
+                                ? storedTheme : defaultTheme;
+                // Added to the slots it already holds, not put in their place: this reverts one slot,
+                // and assigning would quietly take the others off whichever theme holds them.
+                themeToApply.isLightTheme |= defaultTheme.isLightTheme;
+                themeToApply.isDarkTheme |= defaultTheme.isDarkTheme;
+                themeToApply.isAmoledTheme |= defaultTheme.isAmoledTheme;
+                InsertCustomTheme.insertCustomTheme(executor, handler, redditDataRoomDatabase,
+                        lightThemeSharedPreferences, darkThemeSharedPreferences,
+                        amoledThemeSharedPreferences, themeToApply, false, () -> {
+                            // Once, after the last one: each recreates every activity.
+                            if (pendingThemes.decrementAndGet() == 0) {
+                                EventBus.getDefault().post(new RecreateActivityEvent());
+                            }
+                        });
+            }
+        });
     }
 
     @Override

@@ -7,11 +7,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.snackbar.Snackbar;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,12 +42,13 @@ public class SendPrivateMessageActivity extends BaseActivity {
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private String mAccessToken;
     private boolean isSubmitting = false;
     private ActivitySendPrivateMessageBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -129,28 +132,28 @@ public class SendPrivateMessageActivity extends BaseActivity {
                 }
 
                 item.setEnabled(false);
-                item.getIcon().setAlpha(130);
+                Objects.requireNonNull(item.getIcon()).setAlpha(130);
                 Snackbar sendingSnackbar = Snackbar.make(binding.getRoot(), R.string.sending_message, Snackbar.LENGTH_INDEFINITE);
                 sendingSnackbar.show();
 
-                ComposeMessage.composeMessage(mExecutor, mHandler, mOauthRetrofit, mAccessToken, getResources().getConfiguration().locale,
+                ComposeMessage.composeMessage(mExecutor, mHandler, mOauthRetrofit, Objects.requireNonNull(mAccessToken), getResources().getConfiguration().locale,
                         binding.usernameEditTextSendPrivateMessageActivity.getText().toString(), binding.subjetEditTextSendPrivateMessageActivity.getText().toString(),
                         binding.contentEditTextSendPrivateMessageActivity.getText().toString(), new ComposeMessage.ComposeMessageListener() {
                             @Override
                             public void composeMessageSuccess() {
                                 isSubmitting = false;
                                 item.setEnabled(true);
-                                item.getIcon().setAlpha(255);
+                                Objects.requireNonNull(item.getIcon()).setAlpha(255);
                                 Toast.makeText(SendPrivateMessageActivity.this, R.string.send_message_success, Toast.LENGTH_SHORT).show();
                                 finish();
                             }
 
                             @Override
-                            public void composeMessageFailed(String errorMessage) {
+                            public void composeMessageFailed(@Nullable String errorMessage) {
                                 isSubmitting = false;
                                 sendingSnackbar.dismiss();
                                 item.setEnabled(true);
-                                item.getIcon().setAlpha(255);
+                                Objects.requireNonNull(item.getIcon()).setAlpha(255);
 
                                 if (errorMessage == null || errorMessage.equals("")) {
                                     Snackbar.make(binding.getRoot(), R.string.send_message_failed, Snackbar.LENGTH_LONG).show();

@@ -13,6 +13,7 @@ import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 
 public class UploadedImagesRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    @SuppressWarnings("NullAway.Init")
     private BaseActivity activity;
     private final ArrayList<UploadedImage> uploadedImages;
     private final ItemClickListener itemClickListener;

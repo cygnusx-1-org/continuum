@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -20,6 +21,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -87,8 +90,8 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentSubredditListingBinding.inflate(inflater, container, false);
 
@@ -123,8 +126,8 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
         String query = getArguments().getString(EXTRA_QUERY);
         boolean isGettingSubredditInfo = getArguments().getBoolean(EXTRA_IS_GETTING_SUBREDDIT_INFO);
 
-        String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_SUBREDDIT, SortType.Type.RELEVANCE.value);
-        sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase()));
+        String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_SUBREDDIT, SortType.Type.RELEVANCE.value));
+        sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)));
         boolean nsfw = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE, false);
 
         mAdapter = new SubredditListingRecyclerViewAdapter(mActivity, mExecutor, mOauthRetrofit, mRetrofit,
@@ -250,6 +253,7 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
         return sortType;
     }
 
+    @Nullable
     public ArrayList<SubredditData> getSelectedSubredditNames() {
         if (mSubredditListingViewModel != null) {
             List<SubredditData> allSubreddits = mSubredditListingViewModel.getSubreddits().getValue();

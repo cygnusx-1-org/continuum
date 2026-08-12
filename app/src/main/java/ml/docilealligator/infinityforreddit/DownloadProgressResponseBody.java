@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit;
 
+import androidx.annotation.Nullable;
 import java.io.IOException;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -13,6 +14,7 @@ public class DownloadProgressResponseBody extends ResponseBody {
 
     private final ResponseBody responseBody;
     private final ProgressListener progressListener;
+    @Nullable
     private BufferedSource bufferedSource;
 
     public DownloadProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener) {
@@ -20,7 +22,7 @@ public class DownloadProgressResponseBody extends ResponseBody {
         this.progressListener = progressListener;
     }
 
-    @Override public MediaType contentType() {
+    @Override @Nullable public MediaType contentType() {
         return responseBody.contentType();
     }
 

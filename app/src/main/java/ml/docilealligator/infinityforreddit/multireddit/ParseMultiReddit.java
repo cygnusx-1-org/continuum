@@ -1,6 +1,8 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Handler;
+import android.util.Log;
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -20,7 +22,7 @@ public class ParseMultiReddit {
         void failed();
     }
 
-    public static void parseMultiRedditsList(Executor executor, Handler handler, String response,
+    public static void parseMultiRedditsList(Executor executor, Handler handler, @Nullable String response,
                                              ParseMultiRedditsListListener parseMultiRedditsListListener) {
         executor.execute(() -> {
             if (response == null) {
@@ -34,7 +36,7 @@ public class ParseMultiReddit {
                     try {
                         multiReddits.add(parseMultiReddit(arrayResponse.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY)));
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("ParseMultiReddit", "parseMultiRedditsList failed", e);
                     }
                 }
 
@@ -46,7 +48,7 @@ public class ParseMultiReddit {
         });
     }
 
-    public static void parseAndSaveMultiReddit(Executor executor, Handler handler, String response, RedditDataRoomDatabase redditDataRoomDatabase,
+    public static void parseAndSaveMultiReddit(Executor executor, Handler handler, @Nullable String response, RedditDataRoomDatabase redditDataRoomDatabase,
                                                ParseMultiRedditListener parseMultiRedditListener) {
         executor.execute(() -> {
             if (response == null) {

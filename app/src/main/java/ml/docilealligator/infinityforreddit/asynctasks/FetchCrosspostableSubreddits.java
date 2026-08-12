@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.asynctasks;
 
 import androidx.annotation.NonNull;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -28,7 +29,7 @@ public class FetchCrosspostableSubreddits {
                             JSONArray arr = new JSONArray(response.body());
                             Set<String> result = new HashSet<>(arr.length());
                             for (int i = 0; i < arr.length(); i++) {
-                                result.add(arr.getString(i).toLowerCase());
+                                result.add(arr.getString(i).toLowerCase(Locale.US));
                             }
                             listener.onSuccess(result);
                         } catch (Exception e) {

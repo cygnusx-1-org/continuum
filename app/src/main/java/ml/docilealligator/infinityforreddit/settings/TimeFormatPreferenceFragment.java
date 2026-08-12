@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import ml.docilealligator.infinityforreddit.R;
@@ -12,7 +13,7 @@ import org.greenrobot.eventbus.EventBus;
 
 public class TimeFormatPreferenceFragment extends CustomFontPreferenceFragmentCompat {
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.time_format_preferences, rootKey);
 
         SwitchPreference showElapsedTimeSwitch = findPreference(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY);

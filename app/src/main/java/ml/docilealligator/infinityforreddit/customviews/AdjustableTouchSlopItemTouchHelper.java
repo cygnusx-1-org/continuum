@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import ml.docilealligator.infinityforreddit.R;
 
+// Vendored copy of androidx.recyclerview.widget.ItemTouchHelper (adjustable touch slop); framework
+// mirror, not hand-annotated for NullAway.
+@SuppressWarnings("NullAway")
 public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecoration
         implements RecyclerView.OnChildAttachStateChangeListener {
     /**
@@ -426,6 +429,8 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
      *                     {@code null} if you want to remove ItemTouchHelper from the current
      *                     RecyclerView.
      */
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public void attachToRecyclerView(@Nullable RecyclerView recyclerView, float touchSlopCoefficient) {
         if (mRecyclerView == recyclerView) {
             return; // nothing to do
@@ -538,7 +543,7 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
      *                    current action, but may not be null if actionState is ACTION_STATE_DRAG.
      * @param actionState The type of action
      */
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    @SuppressWarnings({"WeakerAccess", "ReferenceEquality"}) /* synthetic access */
     void select(@Nullable RecyclerView.ViewHolder selected, int actionState) {
         if (selected == mSelected && actionState == mActionState) {
             return;
@@ -603,6 +608,8 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
                         prevActionState, currentTranslateX, currentTranslateY,
                         targetTranslateX, targetTranslateY) {
                     @Override
+                    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+                    @SuppressWarnings("ReferenceEquality")
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         if (this.mOverridden) {
@@ -766,6 +773,8 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
         return false;
     }
 
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     private List<RecyclerView.ViewHolder> findSwapTargets(RecyclerView.ViewHolder viewHolder) {
         if (mSwapTargets == null) {
             mSwapTargets = new ArrayList<>();
@@ -860,6 +869,8 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
     }
 
     @Override
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public void onChildViewDetachedFromWindow(@NonNull View view) {
         removeChildDrawingOrderCallbackIfNecessary(view);
         final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(view);
@@ -879,7 +890,7 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
     /**
      * Returns the animation type or 0 if cannot be found.
      */
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    @SuppressWarnings({"WeakerAccess", "ReferenceEquality"}) /* synthetic access */
     void endRecoverAnimation(RecyclerView.ViewHolder viewHolder, boolean override) {
         final int recoverAnimSize = mRecoverAnimations.size();
         for (int i = recoverAnimSize - 1; i >= 0; i--) {
@@ -1059,6 +1070,8 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
      *                   RecyclerView.
      * @see Callback#isItemViewSwipeEnabled()
      */
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public void startDrag(@NonNull RecyclerView.ViewHolder viewHolder) {
         if (!mCallback.hasDragFlag(mRecyclerView, viewHolder)) {
             Log.e(TAG, "Start drag has been called but dragging is not enabled");
@@ -1106,6 +1119,8 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
      * @param viewHolder The ViewHolder to start swiping. It must be a direct child of
      *                   RecyclerView.
      */
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     public void startSwipe(@NonNull RecyclerView.ViewHolder viewHolder) {
         if (!mCallback.hasSwipeFlag(mRecyclerView, viewHolder)) {
             Log.e(TAG, "Start swipe has been called but swiping is not enabled");
@@ -1121,7 +1136,7 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
         select(viewHolder, ACTION_STATE_SWIPE);
     }
 
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    @SuppressWarnings({"WeakerAccess", "ReferenceEquality"}) /* synthetic access */
     RecoverAnimation findAnimation(MotionEvent event) {
         if (mRecoverAnimations.isEmpty()) {
             return null;
@@ -1283,7 +1298,7 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
         mRecyclerView.setChildDrawingOrderCallback(mChildDrawingOrderCallback);
     }
 
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    @SuppressWarnings({"WeakerAccess", "ReferenceEquality"}) /* synthetic access */
     void removeChildDrawingOrderCallbackIfNecessary(View view) {
         if (view == mOverdrawChild) {
             mOverdrawChild = null;
@@ -2481,6 +2496,8 @@ public class AdjustableTouchSlopItemTouchHelper extends RecyclerView.ItemDecorat
             view.setTranslationY(dY);
         }
 
+        // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+        @SuppressWarnings("ReferenceEquality")
         private static float findMaxElevation(RecyclerView recyclerView, View itemView) {
             final int childCount = recyclerView.getChildCount();
             float max = 0;

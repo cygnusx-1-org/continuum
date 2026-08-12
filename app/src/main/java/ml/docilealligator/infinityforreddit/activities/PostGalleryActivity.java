@@ -26,6 +26,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,6 +38,10 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -61,14 +66,12 @@ import ml.docilealligator.infinityforreddit.post.RedditGalleryPayload;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
-import ml.docilealligator.infinityforreddit.utils.JSONUtils;
-import ml.docilealligator.infinityforreddit.utils.UploadImageUtils;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.PostGalleryViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.UploadOutcome;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParserException;
 import retrofit2.Retrofit;
 
 public class PostGalleryActivity extends BaseActivity implements FlairBottomSheetFragment.FlairSelectionCallback,
@@ -87,6 +90,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     private static final String IS_SPOILER_STATE = "ISS";
     private static final String IS_NSFW_STATE = "INS";
     private static final String REDDIT_GALLERY_IMAGE_INFO_STATE = "RGIIS";
+    private static final String IMAGE_URI_STATE = "IUS";
 
     private static final int SUBREDDIT_SELECTION_REQUEST_CODE = 0;
     private static final int PICK_IMAGE_REQUEST_CODE = 1;
@@ -113,9 +117,16 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Account selectedAccount;
+    /** Set once the current-account read lands, so a null {@link #selectedAccount} can tell
+     * "no account exists" apart from "still loading". */
+    private boolean accountLoadFinished;
+    @Nullable
     private ArrayList<RedditGallerySubmissionRecyclerViewAdapter.RedditGalleryImageInfo> redditGalleryImageInfoList;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
@@ -128,22 +139,28 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMemu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private RedditGallerySubmissionRecyclerViewAdapter adapter;
+    @Nullable
     private Uri imageUri;
     private boolean isUploading;
+    private PostGalleryViewModel postGalleryViewModel;
+    private final Set<String> appliedOutcomeIds = new HashSet<>();
     private ActivityPostGalleryBinding binding;
     private FlairRequirementController flairController;
 
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -151,6 +168,10 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         super.onCreate(savedInstanceState);
         binding = ActivityPostGalleryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::launchCaptureImageIntent,
+                () -> Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -190,7 +211,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         }
 
         setSupportActionBar(binding.toolbarPostGalleryActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mGlide = Glide.with(this);
 
@@ -209,7 +230,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         binding.imagesRecyclerViewPostGalleryActivity.setAdapter(adapter);
         Resources resources = getResources();
         int nColumns = resources.getBoolean(R.bool.isTablet) || resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
-        ((GridLayoutManager) binding.imagesRecyclerViewPostGalleryActivity.getLayoutManager()).setSpanCount(nColumns);
+        ((GridLayoutManager) Objects.requireNonNull(binding.imagesRecyclerViewPostGalleryActivity.getLayoutManager())).setSpanCount(nColumns);
         binding.imagesRecyclerViewPostGalleryActivity.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
@@ -218,6 +239,29 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                 outRect.set(halfOffset, 0, halfOffset, offset);
             }
         });
+
+        postGalleryViewModel = new ViewModelProvider(this,
+                PostGalleryViewModel.Companion.provideFactory(mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
+                        getApplicationContext().getContentResolver()))
+                .get(PostGalleryViewModel.class);
+        // Uploads run in the ViewModel so they survive a rotation; their outcomes accumulate and are
+        // applied (by the image's UUID id, idempotently) to whichever adapter is live, so nothing is
+        // re-uploaded on recreation (CHUNKS deferred item 3).
+        postGalleryViewModel.getUploadOutcomes().observe(this, outcomes -> {
+            for (UploadOutcome outcome : outcomes) {
+                if (!appliedOutcomeIds.add(outcome.getId())) {
+                    continue;
+                }
+                if (outcome instanceof UploadOutcome.Uploaded) {
+                    adapter.setImageAsUploaded(outcome.getId(), ((UploadOutcome.Uploaded) outcome).getMediaId());
+                } else if (outcome instanceof UploadOutcome.Failed) {
+                    adapter.removeFailedToUploadImage(outcome.getId());
+                }
+            }
+        });
+        postGalleryViewModel.isUploading().observe(this, uploading -> isUploading = Boolean.TRUE.equals(uploading));
+        postGalleryViewModel.getUploadFailed().observe(this, ignored ->
+                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.upload_image_failed, Snackbar.LENGTH_LONG).show());
 
         if (savedInstanceState != null) {
             selectedAccount = savedInstanceState.getParcelable(SELECTED_ACCOUNT_STATE);
@@ -231,6 +275,8 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
             isSpoiler = savedInstanceState.getBoolean(IS_SPOILER_STATE);
             isNSFW = savedInstanceState.getBoolean(IS_NSFW_STATE);
             redditGalleryImageInfoList = savedInstanceState.getParcelableArrayList(REDDIT_GALLERY_IMAGE_INFO_STATE);
+            String savedImageUri = savedInstanceState.getString(IMAGE_URI_STATE);
+            imageUri = savedImageUri == null ? null : Uri.parse(savedImageUri);
 
             if (selectedAccount != null) {
                 mGlide.load(selectedAccount.getProfileImageUrl())
@@ -244,13 +290,12 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                 loadCurrentAccount();
             }
 
-            if (redditGalleryImageInfoList != null && !redditGalleryImageInfoList.isEmpty()) {
-                if (redditGalleryImageInfoList.get(redditGalleryImageInfoList.size() - 1).payload == null) {
-                    imageUri = Uri.parse(redditGalleryImageInfoList.get(redditGalleryImageInfoList.size() - 1).imageUrlString);
-                    uploadImage();
-                }
+            if (redditGalleryImageInfoList != null) {
+                // The list (with any already-completed payloads) is restored here; the ViewModel still
+                // holds the in-flight uploads and applies their outcomes to this adapter as they finish,
+                // so there is nothing to re-upload — no more duplicate media asset (CHUNKS deferred item 3).
+                adapter.setRedditGalleryImageInfoList(redditGalleryImageInfoList);
             }
-            adapter.setRedditGalleryImageInfoList(redditGalleryImageInfoList);
 
             if (subredditName != null) {
                 binding.subredditNameTextViewPostGalleryActivity.setTextColor(primaryTextColor);
@@ -405,7 +450,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                     redditGalleryImageInfoList = PostGalleryActivity.this.adapter.getRedditGalleryImageInfoList();
                     if (!binding.postTitleEditTextPostGalleryActivity.getText().toString().isEmpty()
                             || !binding.postContentEditTextPostGalleryActivity.getText().toString().isEmpty()
-                            || redditGalleryImageInfoList != null) {
+                            || !redditGalleryImageInfoList.isEmpty()) {
                         promptAlertDialog(R.string.discard, R.string.discard_detail);
                     } else {
                         finish();
@@ -419,8 +464,13 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         Handler handler = new Handler();
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
-            selectedAccount = account;
             handler.post(() -> {
+                accountLoadFinished = true;
+                if (selectedAccount != null) {
+                    // The user picked an account while this load was in flight; don't stomp it.
+                    return;
+                }
+                selectedAccount = account;
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -498,40 +548,32 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     }
 
     public void captureImage() {
+        cameraCapturePermissionHelper.launch();
+    }
+
+    private void launchCaptureImageIntent() {
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
             imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("temp_img", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (IOException ex) {
+            imageUri = null;
             Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.error_creating_temp_file, Snackbar.LENGTH_SHORT).show();
-        } catch (ActivityNotFoundException e) {
-            Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.no_camera_available, Snackbar.LENGTH_SHORT).show();
+            return;
         }
-    }
-
-    private void uploadImage() {
-        Handler handler = new Handler();
-        isUploading = true;
-        mExecutor.execute(() -> {
-            try {
-                String response = UploadImageUtils.uploadImage(mOauthRetrofit, mUploadMediaRetrofit, getContentResolver(),
-                        accessToken, imageUri, true, false);
-                String mediaId = new JSONObject(response).getJSONObject(JSONUtils.ASSET_KEY).getString(JSONUtils.ASSET_ID_KEY);
-                handler.post(() -> {
-                    adapter.setImageAsUploaded(mediaId);
-                    isUploading = false;
-                });
-            } catch (XmlPullParserException | JSONException | IOException e) {
-                e.printStackTrace();
-                handler.post(() -> {
-                    adapter.removeFailedToUploadImage();
-                    Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.upload_image_failed, Snackbar.LENGTH_LONG).show();
-                    isUploading = false;
-                });
-            }
-        });
+        try {
+            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
+            imageUri = null;
+            Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.no_camera_available, Snackbar.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, imageUri);
+            imageUri = null;
+            Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.camera_permission_required_capture, Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     private void displaySubredditIcon() {
@@ -562,7 +604,14 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     }
 
     private void loadSubredditIcon() {
-        LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
+        String currentSubredditName = subredditName;
+        if (currentSubredditName == null) {
+            // Nothing to look up — keep the default icon and stop asking for it.
+            displaySubredditIcon();
+            loadSubredditIconSuccessful = true;
+            return;
+        }
+        LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, currentSubredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
             iconUrl = iconImageUrl;
             displaySubredditIcon();
@@ -584,7 +633,6 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_gallery_activity, menu);
         applyMenuItemTheme(menu);
-        mMemu = menu;
         flairController.setPosting(isPosting);
         flairController.setMenu(menu);
         return true;
@@ -608,13 +656,27 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
             }
 
             redditGalleryImageInfoList = adapter.getRedditGalleryImageInfoList();
-            if (redditGalleryImageInfoList == null || redditGalleryImageInfoList.isEmpty()) {
+            if (redditGalleryImageInfoList.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.select_an_image, Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
-            if (redditGalleryImageInfoList.get(redditGalleryImageInfoList.size() - 1).payload == null) {
-                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.please_wait_image_is_uploading, Snackbar.LENGTH_LONG).show();
+            // Every entry, not just the last: an image whose upload is still pending can sit
+            // anywhere in the list once the user has removed others, and a null payload here
+            // would serialize as a null gallery item.
+            for (RedditGallerySubmissionRecyclerViewAdapter.RedditGalleryImageInfo imageInfo : redditGalleryImageInfoList) {
+                if (imageInfo.payload == null) {
+                    Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.please_wait_image_is_uploading, Snackbar.LENGTH_LONG).show();
+                    return true;
+                }
+            }
+
+            Account account = selectedAccount;
+            if (account == null) {
+                // A finished read with no account means there is nothing left to wait for.
+                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity,
+                        accountLoadFinished ? R.string.login_first : R.string.account_not_loaded_yet,
+                        Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
@@ -647,7 +709,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
             ContextCompat.startForegroundService(this, intent);*/
 
             PersistableBundle extras = new PersistableBundle();
-            extras.putString(SubmitPostService.EXTRA_ACCOUNT, selectedAccount.getJSONModel());
+            extras.putString(SubmitPostService.EXTRA_ACCOUNT, account.getJSONModel());
             extras.putString(SubmitPostService.EXTRA_SUBREDDIT_NAME, subredditName);
             extras.putInt(SubmitPostService.EXTRA_POST_TYPE, SubmitPostService.EXTRA_POST_TYPE_GALLERY);
             ArrayList<RedditGalleryPayload.Item> items = new ArrayList<>();
@@ -686,13 +748,16 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         outState.putBoolean(IS_NSFW_STATE, isNSFW);
         redditGalleryImageInfoList = adapter.getRedditGalleryImageInfoList();
         outState.putParcelableArrayList(REDDIT_GALLERY_IMAGE_INFO_STATE, redditGalleryImageInfoList);
+        // The camera path leaves this as the only handle on a photo that hasn't reached the
+        // adapter yet, so it has to survive process death while the camera app is foreground.
+        outState.putString(IMAGE_URI_STATE, imageUri == null ? null : imageUri.toString());
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SUBREDDIT_SELECTION_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK && data != null) {
                 subredditName = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME);
                 iconUrl = data.getStringExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_ICON);
                 subredditSelected = true;
@@ -716,14 +781,31 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                     return;
                 }
 
-                imageUri = data.getData();
-                adapter.addImage(imageUri.toString());
-                uploadImage();
+                Uri pickedImageUri = data.getData();
+                if (pickedImageUri == null) {
+                    Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.error_getting_image, Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+
+                imageUri = pickedImageUri;
+                String pickedImageId = adapter.addImage(pickedImageUri.toString());
+                postGalleryViewModel.uploadImage(pickedImageUri, pickedImageId, accessToken);
             }
         } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                adapter.addImage(imageUri.toString());
-                uploadImage();
+                Uri capturedImageUri = imageUri;
+                if (capturedImageUri == null) {
+                    Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.error_getting_image, Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String capturedImageId = adapter.addImage(capturedImageUri.toString());
+                postGalleryViewModel.uploadImage(capturedImageUri, capturedImageId, accessToken);
+            } else {
+                // Camera cancelled/dismissed — drop the unused temp output file (it was never added
+                // to the gallery adapter, so nothing else references it).
+                Utils.deleteContentUriFileQuietly(this, imageUri);
+                imageUri = null;
             }
         }
     }
@@ -746,17 +828,18 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewPostGalleryActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewPostGalleryActivity);
 
-            binding.accountNameTextViewPostGalleryActivity.setText(selectedAccount.getAccountName());
-        }
+        binding.accountNameTextViewPostGalleryActivity.setText(account.getAccountName());
+
+        // Flair requirements are per-account: re-fetch with the newly selected account's token.
+        notifyControllerOfSubreddit();
     }
 
     public void setCaptionAndUrl(int position, String caption, String url) {
@@ -776,6 +859,12 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
         flairController.setPosting(false);
         mPostingSnackbar.dismiss();
         if (submitGalleryPostEvent.postSuccess) {
+            // Each image was uploaded to Reddit's media host and the post accepted, so reclaim any
+            // capture temp files this app created; picked images are under other authorities and are
+            // left untouched (deferred item 2).
+            for (RedditGallerySubmissionRecyclerViewAdapter.RedditGalleryImageInfo info : adapter.getRedditGalleryImageInfoList()) {
+                Utils.deleteCapturedImageFileQuietly(this, Uri.parse(info.imageUrlString));
+            }
             Intent intent = new Intent(this, LinkResolverActivity.class);
             intent.setData(Uri.parse(submitGalleryPostEvent.postUrl));
             startActivity(intent);
@@ -784,7 +873,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
             if (submitGalleryPostEvent.errorMessage == null || submitGalleryPostEvent.errorMessage.isEmpty()) {
                 Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, submitGalleryPostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.coordinatorLayoutPostGalleryActivity, submitGalleryPostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitGalleryPostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

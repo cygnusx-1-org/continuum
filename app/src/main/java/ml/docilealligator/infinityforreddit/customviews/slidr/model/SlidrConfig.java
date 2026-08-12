@@ -26,6 +26,7 @@ public class SlidrConfig {
     private float edgeSize = 0.18f;
 
     private SlidrPosition position = SlidrPosition.LEFT;
+    @androidx.annotation.Nullable
     private SlidrListener listener;
 
 
@@ -154,6 +155,7 @@ public class SlidrConfig {
      *
      * @return      the slidr listener
      */
+    @androidx.annotation.Nullable
     public SlidrListener getListener(){
         return listener;
     }

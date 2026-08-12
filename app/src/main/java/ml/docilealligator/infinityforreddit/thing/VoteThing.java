@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.thing;
 import android.content.Context;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -17,7 +18,7 @@ import retrofit2.Retrofit;
 
 public class VoteThing {
 
-    public static void voteThing(Context context, final Retrofit retrofit, String accessToken,
+    public static void voteThing(Context context, final Retrofit retrofit, @Nullable String accessToken,
                                  final VoteThingListener voteThingListener, final String fullName,
                                  final String point, final int position) {
         RedditAPI api = retrofit.create(RedditAPI.class);
@@ -47,7 +48,7 @@ public class VoteThing {
         });
     }
 
-    public static void voteThing(Context context, final Retrofit retrofit, String accessToken,
+    public static void voteThing(Context context, final Retrofit retrofit, @Nullable String accessToken,
                                  final VoteThingWithoutPositionListener voteThingWithoutPositionListener,
                                  final String fullName, final String point) {
         RedditAPI api = retrofit.create(RedditAPI.class);

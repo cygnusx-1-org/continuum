@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
+import java.util.Objects;
 
 public class OnlineCustomThemeMetadata implements Parcelable {
     public int id;
@@ -16,9 +17,9 @@ public class OnlineCustomThemeMetadata implements Parcelable {
 
     protected OnlineCustomThemeMetadata(Parcel in) {
         id = in.readInt();
-        name = in.readString();
-        username = in.readString();
-        colorPrimary = in.readString();
+        name = Objects.requireNonNull(in.readString());
+        username = Objects.requireNonNull(in.readString());
+        colorPrimary = Objects.requireNonNull(in.readString());
     }
 
     public static final Creator<OnlineCustomThemeMetadata> CREATOR = new Creator<>() {

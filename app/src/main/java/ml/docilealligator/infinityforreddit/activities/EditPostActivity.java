@@ -20,34 +20,32 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.adapters.MarkdownBottomBarRecyclerViewAdapter;
-import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UploadedImagesBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.ActivityEditPostBinding;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
-import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.EditPostActivityViewModel;
+import ml.docilealligator.infinityforreddit.viewmodels.EditPostResult;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class EditPostActivity extends BaseActivity implements UploadImageEnabledActivity {
@@ -61,6 +59,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     private static final int MARKDOWN_PREVIEW_REQUEST_CODE = 300;
 
     private static final String UPLOADED_IMAGES_STATE = "UIS";
+    private static final String CAPTURED_IMAGE_URI_STATE = "CIUS";
 
     @Inject
     @Named("oauth")
@@ -79,15 +78,21 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     @Inject
     Executor mExecutor;
     private String mFullName;
+    @Nullable
     private String mAccessToken;
+    @Nullable
     private String mPostContent;
     private boolean isSubmitting = false;
+    @Nullable
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
     private ActivityEditPostBinding binding;
+    private EditPostActivityViewModel editPostViewModel;
+
+    private CameraCapturePermissionHelper cameraCapturePermissionHelper;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -96,6 +101,10 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
 
         binding = ActivityEditPostBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        cameraCapturePermissionHelper = new CameraCapturePermissionHelper(this,
+                this::launchCaptureImageIntent,
+                () -> Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show());
 
         EventBus.getDefault().register(this);
 
@@ -131,17 +140,39 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
         }
 
         setSupportActionBar(binding.toolbarEditPostActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mFullName = getIntent().getStringExtra(EXTRA_FULLNAME);
+        mFullName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_FULLNAME));
         mAccessToken = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCESS_TOKEN, null);
         binding.postTitleTextViewEditPostActivity.setText(getIntent().getStringExtra(EXTRA_TITLE));
         mPostContent = getIntent().getStringExtra(EXTRA_CONTENT);
         binding.postContentEditTextEditPostActivity.setText(mPostContent);
 
         if (savedInstanceState != null) {
-            uploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            ArrayList<UploadedImage> restoredUploadedImages = savedInstanceState.getParcelableArrayList(UPLOADED_IMAGES_STATE);
+            if (restoredUploadedImages != null) {
+                uploadedImages = restoredUploadedImages;
+            }
+            capturedImageUri = savedInstanceState.getParcelable(CAPTURED_IMAGE_URI_STATE);
         }
+
+        editPostViewModel = new ViewModelProvider(this,
+                EditPostActivityViewModel.Companion.provideFactory(mOauthRetrofit))
+                .get(EditPostActivityViewModel.class);
+        // The edit runs in the ViewModel so its result survives a rotation and reaches whichever
+        // instance is live; a stale Activity no longer eats the outcome (CHUNKS deferred item 4).
+        editPostViewModel.isSubmitting().observe(this, submitting -> isSubmitting = Boolean.TRUE.equals(submitting));
+        editPostViewModel.getEditResult().observe(this, result -> {
+            if (result instanceof EditPostResult.Success) {
+                Toast.makeText(EditPostActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK, new Intent());
+                finish();
+            } else if (result instanceof EditPostResult.Failure) {
+                String message = ((EditPostResult.Failure) result).getMessage();
+                Snackbar.make(binding.coordinatorLayoutEditPostActivity,
+                        message != null ? message : getString(R.string.post_failed), Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         MarkdownBottomBarRecyclerViewAdapter adapter = new MarkdownBottomBarRecyclerViewAdapter(
                 mCustomThemeWrapper, new MarkdownBottomBarRecyclerViewAdapter.ItemClickListener() {
@@ -249,35 +280,12 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     }
 
     private void editPost() {
-        if (!isSubmitting) {
-            isSubmitting = true;
-
-            Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
-
-            Map<String, String> params = new HashMap<>();
-            params.put(APIUtils.THING_ID_KEY, mFullName);
-            params.put(APIUtils.TEXT_KEY, binding.postContentEditTextEditPostActivity.getText().toString());
-
-            mOauthRetrofit.create(RedditAPI.class)
-                    .editPostOrComment(APIUtils.getOAuthHeader(mAccessToken), params)
-                    .enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                            isSubmitting = false;
-                            Toast.makeText(EditPostActivity.this, R.string.edit_success, Toast.LENGTH_SHORT).show();
-                            Intent returnIntent = new Intent();
-                            setResult(RESULT_OK, returnIntent);
-                            finish();
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                            isSubmitting = false;
-                            Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.post_failed, Snackbar.LENGTH_SHORT).show();
-                        }
-                    });
-
+        if (isSubmitting) {
+            return;
         }
+        Snackbar.make(binding.coordinatorLayoutEditPostActivity, R.string.posting, Snackbar.LENGTH_SHORT).show();
+        editPostViewModel.editPost(mAccessToken, mFullName,
+                binding.postContentEditTextEditPostActivity.getText().toString());
     }
 
     @Override
@@ -285,20 +293,33 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST_CODE) {
-                if (data == null) {
+                Uri imageUri = data == null ? null : data.getData();
+                if (imageUri == null) {
                     Toast.makeText(EditPostActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
                     return;
                 }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, data.getData(), uploadedImages);
+                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages, false);
             } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+                Uri imageUri = capturedImageUri;
+                if (imageUri == null) {
+                    Toast.makeText(EditPostActivity.this, R.string.error_getting_image, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Utils.uploadImageToReddit(this, mExecutor, mOauthRetrofit, mUploadMediaRetrofit,
                         mAccessToken, binding.postContentEditTextEditPostActivity,
-                        binding.coordinatorLayoutEditPostActivity, capturedImageUri, uploadedImages);
+                        binding.coordinatorLayoutEditPostActivity, imageUri, uploadedImages, true);
+                // Ownership of the temp file passed to the uploader (which deletes it); don't keep a
+                // field pointing at a URI that is about to be removed.
+                capturedImageUri = null;
             } else if (requestCode == MARKDOWN_PREVIEW_REQUEST_CODE) {
                 editPost();
             }
+        } else if (requestCode == CAPTURE_IMAGE_REQUEST_CODE) {
+            // Camera cancelled/dismissed — the temp output file was created but never used.
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
         }
     }
 
@@ -306,6 +327,7 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(UPLOADED_IMAGES_STATE, uploadedImages);
+        outState.putParcelable(CAPTURED_IMAGE_URI_STATE, capturedImageUri);
     }
 
     private void promptAlertDialog(int titleResId, int messageResId) {
@@ -340,16 +362,31 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
 
     @Override
     public void captureImage() {
+        cameraCapturePermissionHelper.launch();
+    }
+
+    private void launchCaptureImageIntent() {
         Intent pictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
             capturedImageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider",
                     File.createTempFile("captured_image", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
             pictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
-            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
+            pictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (IOException ex) {
+            capturedImageUri = null;
             Toast.makeText(this, R.string.error_creating_temp_file, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            startActivityForResult(pictureIntent, CAPTURE_IMAGE_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
             Toast.makeText(this, R.string.no_camera_available, Toast.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            Utils.deleteContentUriFileQuietly(this, capturedImageUri);
+            capturedImageUri = null;
+            Toast.makeText(this, R.string.camera_permission_required_capture, Toast.LENGTH_SHORT).show();
         }
     }
 

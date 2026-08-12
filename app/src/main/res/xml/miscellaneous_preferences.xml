@@ -28,6 +28,13 @@
         app:title="@string/settings_specific_browser_title"
         app:useSimpleSummaryProvider="true" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:icon="@drawable/ic_link_day_night_24dp"
+        app:key="use_old_reddit_domain"
+        app:summary="@string/settings_use_old_reddit_domain_summary"
+        app:title="@string/settings_use_old_reddit_domain_title" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"
         app:entries="@array/main_page_back_button_action"

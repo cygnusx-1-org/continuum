@@ -23,7 +23,6 @@ public class RedditSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     private final int secondaryTextColor;
     private final int primaryIconColor;
     private boolean collapseRedditSection;
-    private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
 
     public RedditSectionRecyclerViewAdapter(BaseActivity baseActivity, CustomThemeWrapper customThemeWrapper,
                                             SharedPreferences navigationDrawerSharedPreferences,
@@ -33,7 +32,6 @@ public class RedditSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         secondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         collapseRedditSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_REDDIT_SECTION, false);
-        this.itemClickListener = itemClickListener;
     }
 
     public void setCollapseRedditSection(boolean collapseRedditSection) {

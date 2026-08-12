@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -55,13 +56,17 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
     SharedPreferences mCurrentAccountSharedPreferences;
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
+    @Nullable
     private String mUserWhere;
+    // Assigned along every onCreate path (restored fragment or initializeFragment()), but NullAway
+    // can't see the assignment inside the initializeFragment() helper.
+    @SuppressWarnings("NullAway.Init")
     private Fragment mFragment;
     private PostLayoutBottomSheetFragment postLayoutBottomSheetFragment;
     private ActivityAccountPostsBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -120,16 +125,21 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
         }
 
         setSupportActionBar(binding.accountPostsToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.accountPostsToolbar);
 
         postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
 
         if (savedInstanceState != null) {
-            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(binding.accountPostsFrameLayout.getId(), mFragment)
-                    .commit();
+            Fragment restoredFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+            if (restoredFragment != null) {
+                mFragment = restoredFragment;
+                getSupportFragmentManager().beginTransaction()
+                        .replace(binding.accountPostsFrameLayout.getId(), mFragment)
+                        .commit();
+            } else {
+                initializeFragment();
+            }
         } else {
             initializeFragment();
         }

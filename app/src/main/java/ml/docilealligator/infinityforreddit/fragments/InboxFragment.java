@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -16,8 +17,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,6 +43,7 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
 
     public static final String EXTRA_MESSAGE_WHERE = "EMT";
 
+    @SuppressWarnings("NullAway.Init")
     MessageViewModel mMessageViewModel;
     @Inject
     @Named("oauth")
@@ -57,9 +57,11 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @SuppressWarnings("NullAway.Init")
     private String mWhere;
+    @SuppressWarnings("NullAway.Init")
     private MessageRecyclerViewAdapter mAdapter;
-    private RequestManager mGlide;
+    @SuppressWarnings("NullAway.Init")
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
     private BaseActivity mActivity;
     private FragmentInboxBinding binding;
@@ -69,8 +71,8 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         binding = FragmentInboxBinding.inflate(inflater, container, false);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
@@ -83,7 +85,6 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
         if (arguments == null) {
             return binding.getRoot();
         }
-        mGlide = Glide.with(this);
 
         if (mActivity.isImmersiveInterfaceRespectForcedEdgeToEdge()) {
             ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), new OnApplyWindowInsetsListener() {
@@ -210,6 +211,7 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
         mAdapter.setNetworkState(null);
     }
 
+    @Nullable
     public Message getMessageByIndex(int index) {
         if (mMessageViewModel == null || index < 0) {
             return null;

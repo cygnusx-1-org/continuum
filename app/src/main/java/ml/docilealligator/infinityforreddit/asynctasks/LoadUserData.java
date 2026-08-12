@@ -12,7 +12,7 @@ import retrofit2.Retrofit;
 public class LoadUserData {
 
     public static void loadUserData(Executor executor, Handler handler, RedditDataRoomDatabase redditDataRoomDatabase,
-                                    String accessToken, String userName, @Nullable Retrofit oauthRetrofit,
+                                    @Nullable String accessToken, String userName, @Nullable Retrofit oauthRetrofit,
                                     Retrofit retrofit, LoadUserDataAsyncTaskListener loadUserDataAsyncTaskListener) {
         executor.execute(() -> {
             UserDao userDao = redditDataRoomDatabase.userDao();
@@ -39,6 +39,6 @@ public class LoadUserData {
     }
 
     public interface LoadUserDataAsyncTaskListener {
-        void loadUserDataSuccess(String iconImageUrl);
+        void loadUserDataSuccess(@Nullable String iconImageUrl);
     }
 }

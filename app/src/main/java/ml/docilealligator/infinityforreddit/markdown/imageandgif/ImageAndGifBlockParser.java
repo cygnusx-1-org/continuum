@@ -27,6 +27,7 @@ public class ImageAndGifBlockParser extends AbstractBlockParser {
     }
 
     @Override
+    @Nullable
     public BlockContinue tryContinue(ParserState parserState) {
         return null;
     }

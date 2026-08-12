@@ -5,13 +5,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import ml.docilealligator.infinityforreddit.R;
 
 public class ShareDataResolverActivity extends AppCompatActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent receivedIntent = getIntent();

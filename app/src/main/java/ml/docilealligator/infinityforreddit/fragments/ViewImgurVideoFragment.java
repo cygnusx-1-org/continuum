@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -46,6 +47,7 @@ import androidx.media3.exoplayer.trackselection.TrackSelector;
 import androidx.media3.ui.PlayerView;
 import com.google.android.material.button.MaterialButton;
 import com.google.common.collect.ImmutableList;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -92,7 +94,7 @@ public class ViewImgurVideoFragment extends Fragment {
     SimpleCache mSimpleCache;
     private ViewImgurVideoFragmentBindingAdapter binding;
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
-    private View rotatableVideoView; // The video surface to rotate (excludes playback controls)
+    private @Nullable View rotatableVideoView; // The video surface to rotate (excludes playback controls)
     ViewGalleryViewModel viewGalleryViewModel;
 
     public ViewImgurVideoFragment() {
@@ -102,7 +104,7 @@ public class ViewImgurVideoFragment extends Fragment {
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = new ViewImgurVideoFragmentBindingAdapter(FragmentViewImgurVideoBinding.inflate(inflater, container, false));
 
         ((Infinity) activity.getApplication()).getAppComponent().inject(this);
@@ -115,7 +117,7 @@ public class ViewImgurVideoFragment extends Fragment {
 
         activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        imgurMedia = getArguments().getParcelable(EXTRA_IMGUR_VIDEO);
+        imgurMedia = Objects.requireNonNull(getArguments().getParcelable(EXTRA_IMGUR_VIDEO));
 
         binding.getRoot().setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
             switch (visibility) {
@@ -360,7 +362,7 @@ public class ViewImgurVideoFragment extends Fragment {
         Toast.makeText(activity, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
-    private void preparePlayer(Bundle savedInstanceState) {
+    private void preparePlayer(@Nullable Bundle savedInstanceState) {
         if (mSharedPreferences.getBoolean(SharedPreferencesUtils.LOOP_VIDEO, true)) {
             player.setRepeatMode(Player.REPEAT_MODE_ALL);
         } else {

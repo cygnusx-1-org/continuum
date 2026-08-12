@@ -323,6 +323,10 @@
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.Slidable" />
         <activity
+            android:name=".activities.CustomizeTabsOrderActivity"
+            android:label="@string/settings_edit_tabs_title"
+            android:theme="@style/AppTheme.Slidable" />
+        <activity
             android:name=".activities.EditMultiRedditActivity"
             android:label="@string/edit_multi_reddit_activity_label"
             android:parentActivityName=".activities.MainActivity"

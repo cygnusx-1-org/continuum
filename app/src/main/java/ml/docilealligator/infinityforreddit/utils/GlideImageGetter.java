@@ -17,11 +17,13 @@ import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 public class GlideImageGetter implements Html.ImageGetter {
 
     private final WeakReference<TextView> container;
     private boolean enlargeImage;
+    @Nullable
     private final HtmlImagesHandler imagesHandler;
     private float density = 1.0f;
     private final float textSize;
@@ -36,9 +38,9 @@ public class GlideImageGetter implements Html.ImageGetter {
         this.container = new WeakReference<>(textView);
         this.imagesHandler = imagesHandler;
         if (densityAware) {
-            density = container.get().getResources().getDisplayMetrics().density;
+            density = textView.getResources().getDisplayMetrics().density;
         }
-        textSize = container.get().getTextSize();
+        textSize = textView.getTextSize();
     }
 
     @Override
@@ -47,31 +49,44 @@ public class GlideImageGetter implements Html.ImageGetter {
             imagesHandler.addImage(source);
         }
 
-        BitmapDrawablePlaceholder drawable = new BitmapDrawablePlaceholder(textSize);
+        BitmapDrawablePlaceholder drawable = new BitmapDrawablePlaceholder();
 
-        container.get().post(() -> {
-            TextView textView = container.get();
-            if (textView != null) {
-                Context context = textView.getContext();
-                if (!(context instanceof Activity && (((Activity) context).isFinishing() || ((Activity) context).isDestroyed()))) {
-                    Glide.with(context)
-                            .asBitmap()
-                            .load(source)
-                            .into(drawable);
+        TextView containerView = container.get();
+        if (containerView != null) {
+            containerView.post(() -> {
+                TextView textView = container.get();
+                if (textView != null) {
+                    Context context = textView.getContext();
+                    if (!(context instanceof Activity && (((Activity) context).isFinishing() || ((Activity) context).isDestroyed()))) {
+                        Glide.with(context)
+                                .asBitmap()
+                                .load(source)
+                                .into(drawable);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         return drawable;
     }
 
     private class BitmapDrawablePlaceholder extends BitmapDrawable implements Target<Bitmap> {
 
+        @Nullable
         protected Drawable drawable;
 
-        BitmapDrawablePlaceholder(float textSize) {
-            super(container.get().getResources(),
+        BitmapDrawablePlaceholder() {
+            super(Objects.requireNonNull(container.get()).getResources(),
                     Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
+            // Reserve the line box before the bitmap arrives. Until setBounds runs the drawable is
+            // empty, and ImageSpan takes the span's width and line ascent straight from its bounds,
+            // so a flair icon occupies nothing until it loads and then snaps to full size, growing
+            // the line, the header and the row, and shifting everything below it. The height
+            // setDrawable() settles on comes from the text size and never from the bitmap, so it is
+            // already known here and reserving it is exact. Only the width depends on the bitmap's
+            // aspect ratio, and correcting that moves text along the line instead of moving rows.
+            int reservedSize = (int) (enlargeImage ? textSize * 1.5 : textSize);
+            setBounds(0, 0, reservedSize, reservedSize);
         }
 
         @Override
@@ -91,7 +106,10 @@ public class GlideImageGetter implements Html.ImageGetter {
             drawable.setBounds(0, 0, drawableWidth, drawableHeight);
             setBounds(0, 0, drawableWidth, drawableHeight);
 
-            container.get().setText(container.get().getText());
+            TextView textView = container.get();
+            if (textView != null) {
+                textView.setText(textView.getText());
+            }
         }
 
         @Override

@@ -28,8 +28,8 @@ import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -37,7 +37,6 @@ import ml.docilealligator.infinityforreddit.FetchPostFilterAndConcatenatedSubred
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
-import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.adapters.Paging3LoadingStateAdapter;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
@@ -74,20 +73,13 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     private static final String POST_FILTER_STATE = "PFS";
     private static final String POST_FRAGMENT_ID_STATE = "PFIS";
 
+    @SuppressWarnings("NullAway.Init")
     HistoryPostViewModel mHistoryPostViewModel;
-    @Inject
-    @Named("no_oauth")
-    Retrofit mRetrofit;
-    @Inject
-    @Named("oauth")
-    Retrofit mOauthRetrofit;
     @Inject
     @Named("redgifs")
     Retrofit mRedgifsRetrofit;
     @Inject
     Provider<StreamableAPI> mStreamableApiProvider;
-    @Inject
-    RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
     @Named("current_account")
     SharedPreferences mCurrentAccountSharedPreferences;
@@ -105,10 +97,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     SharedPreferences mPostFeedScrolledPositionSharedPreferences;
     @Inject
     ExoCreator mExoCreator;
-    @Inject
-    Executor mExecutor;
     private PostRecyclerViewAdapter mAdapter;
     private int maxPosition = -1;
+    @Nullable
     private PostFilter postFilter;
     @ReadPostType
     private int readPostType;
@@ -126,8 +117,8 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentHistoryPostBinding.inflate(inflater, container, false);
 
@@ -340,7 +331,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     private void initializeAndBindPostViewModel() {
         mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                 mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
-                mActivity.accountName, mSharedPreferences, readPostType, postFilter)).get(HistoryPostViewModel.class);
+                mActivity.accountName, mSharedPreferences, readPostType, Objects.requireNonNull(postFilter))).get(HistoryPostViewModel.class);
 
         bindPostViewModel();
     }
@@ -434,6 +425,10 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         hasPost = false;
         if (isInLazyMode) {
             stopLazyMode();
+        }
+        // Drop any cached Saved-search listing so a refresh while a search is active refetches.
+        if (mHistoryPostViewModel != null) {
+            mHistoryPostViewModel.invalidateSavedSearchCache();
         }
         mAdapter.refresh();
         goBackToTop();
@@ -540,6 +535,21 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         binding.recyclerViewHistoryPostFragment.setLayoutManager(layoutManager);
         if (previousPosition > 0) {
             binding.recyclerViewHistoryPostFragment.scrollToPosition(previousPosition);
+        }
+    }
+
+    // Client-side search used by the Saved screen's Local Posts tab.
+    public void filterSaved(String query) {
+        if (mHistoryPostViewModel != null) {
+            mHistoryPostViewModel.searchSaved(query);
+        }
+    }
+
+    // A post was saved/unsaved in-app: drop the in-memory Saved search cache so a search in progress
+    // on the Local Posts tab refetches rather than re-surfacing the just-changed post.
+    public void onSavedThingChanged() {
+        if (mHistoryPostViewModel != null) {
+            mHistoryPostViewModel.invalidateSavedSearchCache();
         }
     }
 

@@ -4,12 +4,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 
 @Entity(tableName = "comment_filter")
@@ -24,8 +27,10 @@ public class CommentFilter implements Parcelable {
     public int maxVote = -1;
     @ColumnInfo(name = "min_vote")
     public int minVote = -1;
+    @Nullable
     @ColumnInfo(name = "exclude_strings")
     public String excludeStrings;
+    @Nullable
     @ColumnInfo(name = "exclude_users")
     public String excludeUsers;
 
@@ -34,7 +39,7 @@ public class CommentFilter implements Parcelable {
     }
 
     protected CommentFilter(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         displayMode = in.readInt();
         maxVote = in.readInt();
         minVote = in.readInt();
@@ -64,7 +69,7 @@ public class CommentFilter implements Parcelable {
         if (commentFilter.excludeStrings != null && !commentFilter.excludeStrings.equals("")) {
             String[] titles = commentFilter.excludeStrings.split(",", 0);
             for (String t : titles) {
-                if (!t.trim().equals("") && comment.getCommentRawText().toLowerCase().contains(t.toLowerCase().trim())) {
+                if (!t.trim().equals("") && comment.getCommentRawText() != null && comment.getCommentRawText().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
                     return false;
                 }
             }
@@ -72,7 +77,7 @@ public class CommentFilter implements Parcelable {
         if (commentFilter.excludeUsers != null && !commentFilter.excludeUsers.equals("")) {
             String[] users = commentFilter.excludeUsers.split(",", 0);
             for (String u : users) {
-                if (!u.trim().equals("") && comment.getAuthor().equalsIgnoreCase(u.trim())) {
+                if (!u.trim().equals("") && u.trim().equalsIgnoreCase(comment.getAuthor())) {
                     return false;
                 }
             }

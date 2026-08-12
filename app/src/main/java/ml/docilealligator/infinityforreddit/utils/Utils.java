@@ -1,8 +1,10 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -21,6 +23,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.TypefaceSpan;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,13 +48,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.markdown.RedditAutolink;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
@@ -71,62 +74,19 @@ public final class Utils {
     private static final long YEAR_MILLIS = 12 * MONTH_MILLIS;
 
     public static String HOSTNAME_REGEX = "^(?=^.{1,253}$)(([a-z\\d]([a-z\\d-]{0,62}[a-z\\d])*[\\.]){1,3}[a-z]{1,61})$";
-    private static final Pattern[] REGEX_PATTERNS = {
-            Pattern.compile("((?<=[\\s])|^)/[rRuU]/[\\w-]+/{0,1}"),
-            Pattern.compile("((?<=[\\s])|^)[rRuU]/[\\w-]+/{0,1}"),
-            Pattern.compile("\\^{2,}"),
-            //Sometimes the reddit preview images and gifs have a caption and the markdown will become [caption](image_link)
-            //Matches preview.redd.it and i.redd.it media
-            //For i.redd.it media, it only matches [caption](image-link. Notice there is no ) at the end.
-            //i.redd.it: (\\[(?:(?!((?<!\\\\)\\[)).)*?]\\()?https://i.redd.it/\\w+.(jpg|png|jpeg|gif)"
-            Pattern.compile("((?:\\[(.*?)]\\()?(https://preview.redd.it/(\\w+).(?:jpg|png|jpeg)(?:\\?+[-a-zA-Z0-9()@:%_+.~#?&/=]*|)))|((?:\\[(.*?)]\\()?(https://i.redd.it/(\\w+).(?:jpg|png|jpeg|gif)))"),
-            Pattern.compile("(?:\\[(.*?)]\\()?(https://reddit\\.com/link/([^/]+)/video/([^/]+)/player)")
-    };
+    private static final Pattern SUPERSCRIPT_CARETS_PATTERN = Pattern.compile("\\^{2,}");
+    //Sometimes the reddit preview images and gifs have a caption and the markdown will become [caption](image_link)
+    //Matches preview.redd.it and i.redd.it media
+    //For i.redd.it media, it only matches [caption](image-link. Notice there is no ) at the end.
+    //i.redd.it: (\\[(?:(?!((?<!\\\\)\\[)).)*?]\\()?https://i.redd.it/\\w+.(jpg|png|jpeg|gif)"
+    private static final Pattern REDDIT_IMAGE_PATTERN = Pattern.compile("((?:\\[(.*?)]\\()?(https://preview.redd.it/(\\w+).(?:jpg|png|jpeg)(?:\\?+[-a-zA-Z0-9()@:%_+.~#?&/=]*|)))|((?:\\[(.*?)]\\()?(https://i.redd.it/(\\w+).(?:jpg|png|jpeg|gif)))");
+    private static final Pattern REDDIT_VIDEO_PATTERN = Pattern.compile("(?:\\[(.*?)]\\()?(https://reddit\\.com/link/([^/]+)/video/([^/]+)/player)");
 
     public static String modifyMarkdown(String markdown) {
-        String regexed = replaceOutsideMarkdownLinks(markdown, REGEX_PATTERNS[0], "[$0](https://www.reddit.com$0)");
-        regexed = replaceOutsideMarkdownLinks(regexed, REGEX_PATTERNS[1], "[$0](https://www.reddit.com/$0)");
-        regexed = REGEX_PATTERNS[2].matcher(regexed).replaceAll("^");
+        String regexed = RedditAutolink.linkify(markdown);
+        regexed = SUPERSCRIPT_CARETS_PATTERN.matcher(regexed).replaceAll("^");
 
         return regexed;
-    }
-
-    /**
-     * Performs regex replacement only on text that is not inside the text portion of a markdown
-     * link (i.e., not inside the [...] of [...](url)). This prevents corrupting existing
-     * markdown links by nesting link syntax inside them.
-     */
-    private static String replaceOutsideMarkdownLinks(String text, Pattern pattern, String replacement) {
-        Pattern markdownLinkPattern = Pattern.compile("\\[(?:[^\\[\\]]|\\\\\\[|\\\\\\])*]\\([^)]*\\)");
-        Matcher linkMatcher = markdownLinkPattern.matcher(text);
-
-        List<int[]> linkRanges = new ArrayList<>();
-        while (linkMatcher.find()) {
-            linkRanges.add(new int[]{linkMatcher.start(), linkMatcher.end()});
-        }
-
-        if (linkRanges.isEmpty()) {
-            return pattern.matcher(text).replaceAll(replacement);
-        }
-
-        Matcher matcher = pattern.matcher(text);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            boolean insideLink = false;
-            for (int[] range : linkRanges) {
-                if (matcher.start() >= range[0] && matcher.end() <= range[1]) {
-                    insideLink = true;
-                    break;
-                }
-            }
-            if (insideLink) {
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group()));
-            } else {
-                matcher.appendReplacement(sb, replacement);
-            }
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
     }
 
     private static final Pattern PROCESSING_IMG_PATTERN = Pattern.compile("\\*?Processing img (\\w+)\\.{3}\\*?");
@@ -136,7 +96,7 @@ public final class Utils {
             StringBuilder markdownStringBuilder = new StringBuilder(markdown);
             int start = 0;
             while (true) {
-                Matcher videoMatcher = REGEX_PATTERNS[4].matcher(markdownStringBuilder);
+                Matcher videoMatcher = REDDIT_VIDEO_PATTERN.matcher(markdownStringBuilder);
 
                 if (videoMatcher.find(start)) {
                     String id = videoMatcher.group(4);
@@ -187,8 +147,8 @@ public final class Utils {
         StringBuilder markdownStringBuilder = new StringBuilder(markdown);
         int start = 0;
         while (true) {
-            Matcher previewReddItAndIReddItImageMatcher = REGEX_PATTERNS[3].matcher(markdownStringBuilder);
-            Matcher videoMatcher = REGEX_PATTERNS[4].matcher(markdownStringBuilder);
+            Matcher previewReddItAndIReddItImageMatcher = REDDIT_IMAGE_PATTERN.matcher(markdownStringBuilder);
+            Matcher videoMatcher = REDDIT_VIDEO_PATTERN.matcher(markdownStringBuilder);
 
             if (previewReddItAndIReddItImageMatcher.find(start)) {
                 if (previewReddItAndIReddItImageMatcher.group(1) != null) {
@@ -269,12 +229,43 @@ public final class Utils {
 
     public final static class ParseRedditMediaBlockResult {
         public String parsedMarkdown;
+        @Nullable
         public Map<String, MediaMetadata> mediaMetadataMap;
 
-        public ParseRedditMediaBlockResult(String parsedMarkdown, Map<String, MediaMetadata> mediaMetadataMap) {
+        public ParseRedditMediaBlockResult(String parsedMarkdown, @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
             this.parsedMarkdown = parsedMarkdown;
             this.mediaMetadataMap = mediaMetadataMap;
         }
+    }
+
+    /**
+     * Returns the bare id of a Reddit fullname, e.g. "t3_abc123" -> "abc123". Reddit intermittently
+     * sends an empty or unprefixed value for fullname fields such as {@code link_id}, so anything
+     * that is not shaped like a fullname is passed through untouched instead of being chopped at a
+     * fixed offset (which threw StringIndexOutOfBoundsException on an empty value).
+     */
+    public static String idFromFullname(@Nullable String fullname) {
+        if (fullname == null) {
+            return "";
+        }
+        if (fullname.length() > 3 && fullname.charAt(0) == 't' && Character.isDigit(fullname.charAt(1))
+                && fullname.charAt(2) == '_') {
+            return fullname.substring(3);
+        }
+        return fullname;
+    }
+
+    /**
+     * Upper-cases the first character of {@code text}. Returns null for a null or empty value so
+     * callers fall back to a generic message rather than crashing on the empty strings the API
+     * sometimes returns.
+     */
+    @Nullable
+    public static String capitalizeFirstLetter(@Nullable String text) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+        return text.substring(0, 1).toUpperCase(Locale.getDefault()) + text.substring(1);
     }
 
     public static String trimTrailingWhitespace(String source) {
@@ -380,6 +371,7 @@ public final class Utils {
                         }
                     }
                 } catch (SecurityException ignore) {
+                    Log.d("Utils", "getConnectedNetwork: ignoring SecurityException", ignore);
                 }
             } else {
                 boolean isWifi = false;
@@ -509,67 +501,131 @@ public final class Utils {
     }
 
     public static void uploadImageToReddit(Context context, Executor executor, Retrofit oauthRetrofit,
-                                           Retrofit uploadMediaRetrofit, String accessToken, EditText editText,
+                                           Retrofit uploadMediaRetrofit, @Nullable String accessToken, EditText editText,
                                            CoordinatorLayout coordinatorLayout, Uri imageUri,
-                                           ArrayList<UploadedImage> uploadedImages) {
+                                           ArrayList<UploadedImage> uploadedImages, boolean deleteSourceAfterUpload) {
         Toast.makeText(context, R.string.uploading_image, Toast.LENGTH_SHORT).show();
         Handler handler = new Handler();
         executor.execute(() -> {
             try {
                 String imageKeyOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
                         context.getContentResolver(), accessToken, imageUri, true);
-                handler.post(() -> {
-                    if (imageKeyOrError != null && !imageKeyOrError.startsWith("Error: ")) {
-                        String fileName = Utils.getFileName(context, imageUri);
-                        if (fileName == null) {
-                            fileName = imageKeyOrError;
-                        }
-                        uploadedImages.add(new UploadedImage(fileName, imageKeyOrError));
+                if (imageKeyOrError != null && !imageKeyOrError.startsWith("Error: ")) {
+                    // Uploaded — resolve the display name and drop the scratch file here, on the executor
+                    // thread, while the upload has just read the Uri. Both are I/O; only the editText and
+                    // snackbar work in the post() below needs the UI thread. getFileName() runs before the
+                    // delete so it still sees the file.
+                    String fileName = Utils.getFileName(context, imageUri);
+                    String resolvedName = fileName != null ? fileName : imageKeyOrError;
+                    if (deleteSourceAfterUpload) {
+                        deleteContentUriFileQuietly(context, imageUri);
+                    }
+
+                    String imageKey = imageKeyOrError;
+                    handler.post(() -> {
+                        uploadedImages.add(new UploadedImage(resolvedName, imageKey));
 
                         int start = Math.max(editText.getSelectionStart(), 0);
                         int end = Math.max(editText.getSelectionEnd(), 0);
                         int realStart = Math.min(start, end);
                         if (realStart > 0 && editText.getText().toString().charAt(realStart - 1) != '\n') {
                             editText.getText().replace(realStart, Math.max(start, end),
-                                    "\n![](" + imageKeyOrError + ")\n",
-                                    0, "\n![]()\n".length() + imageKeyOrError.length());
+                                    "\n![](" + imageKey + ")\n",
+                                    0, "\n![]()\n".length() + imageKey.length());
                         } else {
                             editText.getText().replace(realStart, Math.max(start, end),
-                                    "![](" + imageKeyOrError + ")\n",
-                                    0, "![]()\n".length() + imageKeyOrError.length());
+                                    "![](" + imageKey + ")\n",
+                                    0, "![]()\n".length() + imageKey.length());
                         }
                         Snackbar.make(coordinatorLayout, R.string.upload_image_success, Snackbar.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show();
+                    });
+                } else {
+                    if (deleteSourceAfterUpload) {
+                        deleteContentUriFileQuietly(context, imageUri);
                     }
-                });
+                    handler.post(() -> Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show());
+                }
             } catch (XmlPullParserException | JSONException | IOException e) {
                 e.printStackTrace();
+                if (deleteSourceAfterUpload) {
+                    deleteContentUriFileQuietly(context, imageUri);
+                }
                 handler.post(() -> Toast.makeText(context, R.string.error_processing_image, Toast.LENGTH_LONG).show());
             }
         });
     }
 
+    /**
+     * Deletes the file backing a content Uri, swallowing any failure. Used to clean up the temporary
+     * camera-capture files that {@code captureImage()} writes to {@code getExternalFilesDir(...)} and
+     * hands to the camera via FileProvider — they are pure capture/upload scratch and nothing else
+     * deletes them. Only call this for app-owned FileProvider Uris, never for a user-picked
+     * {@code content://} gallery image.
+     */
+    public static void deleteContentUriFileQuietly(Context context, @Nullable Uri uri) {
+        if (uri == null) {
+            return;
+        }
+        try {
+            context.getContentResolver().delete(uri, null, null);
+        } catch (Exception e) {
+            // Best effort — a leftover scratch file is not worth crashing over.
+        }
+    }
+
+    /**
+     * True iff [uri] is a camera-capture temp file this app created — a FileProvider content URI
+     * served by this app's own {@code <applicationId>.provider} authority. A user's picked or shared
+     * image comes through a different authority (MediaStore, the photo picker, another app), so this
+     * cleanly separates "our scratch file we may delete" from "the user's file we must never touch".
+     */
+    public static boolean isOwnCaptureUri(Context context, @Nullable Uri uri) {
+        return uri != null && (context.getPackageName() + ".provider").equals(uri.getAuthority());
+    }
+
+    /**
+     * Deletes a camera-capture temp file this app created once a post submit has consumed it, and
+     * only such a file (see {@link #isOwnCaptureUri}) — never a picked/shared image. Resolves
+     * deferred item 2's PostImage/PostGallery carry-over: those two keep the captured file as post
+     * content until {@code SubmitPostService} submits, so it can only be reclaimed on submit success.
+     */
+    public static void deleteCapturedImageFileQuietly(Context context, @Nullable Uri uri) {
+        if (isOwnCaptureUri(context, uri)) {
+            deleteContentUriFileQuietly(context, uri);
+        }
+    }
+
     @Nullable
     public static String getFileName(Context context, Uri uri) {
         ContentResolver contentResolver = context.getContentResolver();
-        if (contentResolver != null) {
-            Cursor cursor = contentResolver.query(uri, null, null, null, null);
-            if (cursor != null) {
-                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                cursor.moveToFirst();
-                String fileName = cursor.getString(nameIndex);
-                if (fileName != null && fileName.contains(".")) {
-                    fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-                }
-                return fileName;
-            }
+        if (contentResolver == null) {
+            return null;
         }
-
-        return null;
+        try (Cursor cursor = contentResolver.query(uri, null, null, null, null)) {
+            if (cursor == null) {
+                return null;
+            }
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            // Guard the missing-column and empty-cursor cases: getString(-1) and getString() on an
+            // unpositioned cursor both throw. A provider need not expose DISPLAY_NAME; return null and
+            // let the caller fall back rather than crash.
+            if (nameIndex < 0 || !cursor.moveToFirst()) {
+                return null;
+            }
+            String fileName = cursor.getString(nameIndex);
+            if (fileName != null && fileName.contains(".")) {
+                fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+            }
+            return fileName;
+        } catch (RuntimeException e) {
+            // A misbehaving provider can throw from query() (e.g. SecurityException); treat it as
+            // "name unknown" and let the caller fall back rather than crash. RuntimeException is the
+            // precise type here — nothing in this block declares a checked exception.
+            return null;
+        }
     }
 
-    public static void setTitleWithCustomFontToMenuItem(Typeface typeface, MenuItem item, String desiredTitle) {
+    public static void setTitleWithCustomFontToMenuItem(@Nullable Typeface typeface, MenuItem item, @Nullable String desiredTitle) {
         if (typeface != null) {
             CharSequence title = desiredTitle == null ? item.getTitle() : desiredTitle;
             if (title != null) {
@@ -582,7 +638,7 @@ public final class Utils {
         }
     }
 
-    public static void setTitleWithCustomFontToTab(Typeface typeface, TabLayout.Tab tab, String title) {
+    public static void setTitleWithCustomFontToTab(@Nullable Typeface typeface, TabLayout.Tab tab, String title) {
         if (typeface != null) {
             if (title != null) {
                 SpannableStringBuilder spannableTitle = new SpannableStringBuilder(title);
@@ -594,7 +650,7 @@ public final class Utils {
         }
     }
 
-    public static CharSequence getTabTextWithCustomFont(Typeface typeface, CharSequence title) {
+    public static CharSequence getTabTextWithCustomFont(@Nullable Typeface typeface, CharSequence title) {
         if (typeface != null && title != null) {
             SpannableStringBuilder spannableTitle = new SpannableStringBuilder(title);
             spannableTitle.setSpan(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ? new TypefaceSpan(typeface) : new CustomTypefaceSpan(typeface), 0, spannableTitle.length(), 0);
@@ -683,6 +739,38 @@ public final class Utils {
             }
         }
         return transparentCount >= 3;
+    }
+
+    public static void translateText(Context context, String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return;
+        }
+        // Preferred: hand the text to Google Translate via PROCESS_TEXT (read-only), which shows
+        // its floating translation panel over the current screen instead of switching to the app.
+        Intent intent = new Intent(Intent.ACTION_PROCESS_TEXT);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_PROCESS_TEXT, text);
+        intent.putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true);
+        intent.setPackage("com.google.android.apps.translate");
+        try {
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Google Translate's web UI caps input at ~5000 characters; trim to avoid
+            // building an oversized URL that the browser may reject. Back off one char
+            // if the cut lands between a surrogate pair so we don't split it.
+            int webLimit = Math.min(5000, text.length());
+            if (webLimit > 0 && Character.isHighSurrogate(text.charAt(webLimit - 1))) {
+                webLimit--;
+            }
+            String webText = text.substring(0, webLimit);
+            Uri uri = Uri.parse("https://translate.google.com/?sl=auto&tl="
+                    + Locale.getDefault().getLanguage() + "&op=translate&text=" + Uri.encode(webText));
+            try {
+                context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            } catch (ActivityNotFoundException e2) {
+                Toast.makeText(context, R.string.no_app, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     public static Insets getInsets(WindowInsetsCompat insets, boolean includeIME, boolean forcedImmersiveMode) {

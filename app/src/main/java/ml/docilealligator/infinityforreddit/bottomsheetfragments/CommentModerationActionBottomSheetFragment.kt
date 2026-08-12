@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.os.BundleCompat
 import ml.docilealligator.infinityforreddit.CommentModerationActionHandler
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.comment.Comment
@@ -27,7 +28,7 @@ class CommentModerationActionBottomSheetFragment : LandscapeExpandedRoundedBotto
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            comment = it.getParcelable(EXTRA_COMMENT)
+            comment = BundleCompat.getParcelable(it, EXTRA_COMMENT, Comment::class.java)
             position = it.getInt(EXTRA_POSITION)
         }
     }

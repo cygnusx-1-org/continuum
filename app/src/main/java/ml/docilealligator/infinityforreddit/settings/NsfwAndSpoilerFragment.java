@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -55,8 +56,8 @@ public class NsfwAndSpoilerFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentNsfwAndSpoilerBinding.inflate(inflater, container, false);
 
@@ -119,6 +120,7 @@ public class NsfwAndSpoilerFragment extends Fragment {
 
         binding.blurNsfwLinearLayoutNsfwAndSpoilerFragment.setOnClickListener(view -> binding.blurNsfwSwitchNsfwAndSpoilerFragment.performClick());
         binding.blurNsfwSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            blurNsfw = b;
             nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.BLUR_NSFW_BASE, b).apply();
             EventBus.getDefault().post(new ChangeNSFWBlurEvent(b, doNotBlurNsfwInNsfwSubreddits));
         });
@@ -127,6 +129,7 @@ public class NsfwAndSpoilerFragment extends Fragment {
             binding.doNotBlurNsfwInNsfwSubredditsSwitchNsfwAndSpoilerFragment.performClick();
         });
         binding.doNotBlurNsfwInNsfwSubredditsSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
+            doNotBlurNsfwInNsfwSubreddits = b;
             nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS, b).apply();
             EventBus.getDefault().post(new ChangeNSFWBlurEvent(blurNsfw, b));
         });

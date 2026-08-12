@@ -26,8 +26,10 @@ import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStra
 import ml.docilealligator.infinityforreddit.databinding.ItemGalleryImageInPostFeedBinding;
 import ml.docilealligator.infinityforreddit.post.Post;
 
+@SuppressWarnings("NullAway.Init")
 public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapter<PostGalleryTypeImageRecyclerViewAdapter.ImageViewHolder> {
     private final RequestManager glide;
+    @Nullable
     private final Typeface typeface;
     private Markwon mPostDetailMarkwon;
     private final SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy;
@@ -41,7 +43,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     private float ratio;
     private final boolean showCaption;
 
-    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, Typeface typeface,
+    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
                                                    int mColorAccent, int mPrimaryTextColor, float scale) {
         this.glide = glide;
@@ -53,7 +55,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         showCaption = false;
     }
 
-    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, Typeface typeface, Markwon postDetailMarkwon,
+    public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface, Markwon postDetailMarkwon,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
                                                    int mColorAccent, int mPrimaryTextColor, int mCardViewColor,
                                                    int mCommentColor, float scale) {
@@ -223,13 +225,13 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         }
         if (!previewCaptionUrlIsEmpty) {
             String domain = Uri.parse(previewCaptionUrl).getHost();
-            domain = domain.startsWith("www.") ? domain.substring(4) : domain;
+            domain = (domain != null && domain.startsWith("www.")) ? domain.substring(4) : domain;
             mPostDetailMarkwon.setMarkdown(holder.binding.captionUrlTextViewItemGalleryImageInPostFeed, String.format("[%s](%s)", domain, previewCaptionUrl));
         }
     }
 
-    public void setGalleryImages(ArrayList<Post.Gallery> galleryImages) {
-        this.galleryImages = galleryImages;
+    public void setGalleryImages(@Nullable ArrayList<Post.Gallery> galleryImages) {
+        this.galleryImages = galleryImages != null ? galleryImages : new java.util.ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -246,6 +248,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         ItemGalleryImageInPostFeedBinding binding;
         // The deferred-load layout listener for this holder, if it hasn't fired yet. Tracked so a
         // stale one can be removed on rebind/recycle.
+        @Nullable
         View.OnLayoutChangeListener pendingLayoutListener;
 
         public ImageViewHolder(ItemGalleryImageInPostFeedBinding binding) {

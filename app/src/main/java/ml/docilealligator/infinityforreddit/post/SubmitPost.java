@@ -4,12 +4,12 @@ import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
@@ -29,18 +29,18 @@ import retrofit2.Retrofit;
 
 public class SubmitPost {
     public static void submitTextOrLinkPost(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                            String accessToken, String subredditName, String title,
+                                            @Nullable String accessToken, @Nullable String subredditName, @Nullable String title,
                                             String content, @Nullable String url, Flair flair,
                                             boolean isSpoiler, boolean isNSFW,
                                             boolean receivePostReplyNotifications, boolean isRichTextJSON,
-                                            String kind, SubmitPostListener submitPostListener) {
+                                            @Nullable String kind, SubmitPostListener submitPostListener) {
         submitPost(executor, handler, oauthRetrofit, accessToken, subredditName, title, content, url,
                 flair, isSpoiler, isNSFW, receivePostReplyNotifications, isRichTextJSON, kind, null, submitPostListener);
     }
 
     public static void submitImagePost(Executor executor, Handler handler, Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit,
-                                       ContentResolver contentResolver, String accessToken, String subredditName,
-                                       String title, String content, Uri imageUri, Flair flair, boolean isSpoiler,
+                                       ContentResolver contentResolver, @Nullable String accessToken, @Nullable String subredditName,
+                                       @Nullable String title, String content, Uri imageUri, Flair flair, boolean isSpoiler,
                                        boolean isNSFW, boolean receivePostReplyNotifications,
                                        SubmitPostListener submitPostListener) {
         try {
@@ -60,8 +60,8 @@ public class SubmitPost {
     }
 
     public static void submitVideoPost(Executor executor, Handler handler, Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit,
-                                       Retrofit uploadVideoRetrofit, String accessToken,
-                                       String subredditName, String title, String content, File buffer, String mimeType,
+                                       Retrofit uploadVideoRetrofit, @Nullable String accessToken,
+                                       @Nullable String subredditName, @Nullable String title, String content, File buffer, String mimeType,
                                        Bitmap posterBitmap, Flair flair, boolean isSpoiler, boolean isNSFW,
                                        boolean receivePostReplyNotifications, SubmitPostListener submitPostListener) {
         RedditAPI api = oauthRetrofit.create(RedditAPI.class);
@@ -123,8 +123,8 @@ public class SubmitPost {
         }
     }
 
-    public static void submitCrosspost(Executor executor, Handler handler, Retrofit oauthRetrofit, String accessToken,
-                                       String subredditName, String title, String crosspostFullname,
+    public static void submitCrosspost(Executor executor, Handler handler, Retrofit oauthRetrofit, @Nullable String accessToken,
+                                       @Nullable String subredditName, @Nullable String title, String crosspostFullname,
                                        Flair flair, boolean isSpoiler, boolean isNSFW,
                                        boolean receivePostReplyNotifications, String kind,
                                        SubmitPostListener submitPostListener) {
@@ -132,12 +132,19 @@ public class SubmitPost {
                 flair, isSpoiler, isNSFW, receivePostReplyNotifications, false, kind, null, submitPostListener);
     }
 
-    private static void submitPost(Executor executor, Handler handler, Retrofit oauthRetrofit, String accessToken,
-                                   String subredditName, String title, @Nullable String content,
+    private static void submitPost(Executor executor, Handler handler, Retrofit oauthRetrofit, @Nullable String accessToken,
+                                   @Nullable String subredditName, @Nullable String title, @Nullable String content,
                                    @Nullable String url, Flair flair, boolean isSpoiler, boolean isNSFW,
                                    boolean receivePostReplyNotifications, boolean isRichTextJSON,
-                                   @NonNull String kind, @Nullable String posterUrl,
+                                   @Nullable String kind, @Nullable String posterUrl,
                                    SubmitPostListener submitPostListener) {
+        if (kind == null) {
+            // Without a post kind the request can only be rejected by Reddit; fail fast instead
+            // of sending a doomed submit.
+            submitPostListener.submitFailed(null);
+            return;
+        }
+
         RedditAPI api = oauthRetrofit.create(RedditAPI.class);
 
         Map<String, String> params = new HashMap<>();
@@ -198,9 +205,13 @@ public class SubmitPost {
         }
     }
 
-    private static void getSubmittedPost(Executor executor, Handler handler, String response, String kind,
-                                         Retrofit oauthRetrofit, String accessToken,
+    private static void getSubmittedPost(Executor executor, Handler handler, @Nullable String response, @Nullable String kind,
+                                         Retrofit oauthRetrofit, @Nullable String accessToken,
                                          SubmitPostListener submitPostListener) throws JSONException, IOException {
+        if (response == null) {
+            submitPostListener.submitFailed(null);
+            return;
+        }
         JSONObject responseObject = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY);
         if (responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() != 0) {
             JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY)
@@ -220,7 +231,7 @@ public class SubmitPost {
             return;
         }
 
-        if (!kind.equals(APIUtils.KIND_IMAGE) && !kind.equals(APIUtils.KIND_VIDEO) && !kind.equals(APIUtils.KIND_VIDEOGIF)) {
+        if (!APIUtils.KIND_IMAGE.equals(kind) && !APIUtils.KIND_VIDEO.equals(kind) && !APIUtils.KIND_VIDEOGIF.equals(kind)) {
             String postId = responseObject.getJSONObject(JSONUtils.DATA_KEY).getString(JSONUtils.ID_KEY);
 
             RedditAPI api = oauthRetrofit.create(RedditAPI.class);
@@ -228,7 +239,7 @@ public class SubmitPost {
             Call<String> getPostCall = api.getPostOauth(postId, APIUtils.getOAuthHeader(accessToken));
             Response<String> getPostCallResponse = getPostCall.execute();
             if (getPostCallResponse.isSuccessful()) {
-                ParsePost.parsePost(executor, handler, getPostCallResponse.body(), new ParsePost.ParsePostListener() {
+                ParsePost.parsePost(executor, handler, Objects.requireNonNull(getPostCallResponse.body()), new ParsePost.ParsePostListener() {
                     @Override
                     public void onParsePostSuccess(Post post) {
                         submitPostListener.submitSuccessful(post);
@@ -248,7 +259,7 @@ public class SubmitPost {
     }
 
     public interface SubmitPostListener {
-        void submitSuccessful(Post post);
+        void submitSuccessful(@Nullable Post post);
 
         void submitFailed(@Nullable String errorMessage);
     }

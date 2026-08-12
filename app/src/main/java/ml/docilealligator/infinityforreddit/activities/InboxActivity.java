@@ -27,6 +27,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,6 +49,7 @@ import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -81,11 +83,12 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
     Executor mExecutor;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private FragmentManager fragmentManager;
+    @Nullable
     private String mNewAccountName;
     private ActivityInboxBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -191,7 +194,7 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
                 if (i == EditorInfo.IME_ACTION_DONE) {
                     Utils.hideKeyboard(this);
                     Intent pmIntent = new Intent(this, SendPrivateMessageActivity.class);
-                    pmIntent.putExtra(SendPrivateMessageActivity.EXTRA_RECIPIENT_USERNAME, thingEditText.getText().toString());
+                    pmIntent.putExtra(SendPrivateMessageActivity.EXTRA_RECIPIENT_USERNAME, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(pmIntent);
                     return true;
                 }
@@ -204,7 +207,7 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
                             -> {
                         Utils.hideKeyboard(this);
                         Intent pmIntent = new Intent(this, SendPrivateMessageActivity.class);
-                        pmIntent.putExtra(SendPrivateMessageActivity.EXTRA_RECIPIENT_USERNAME, thingEditText.getText().toString());
+                        pmIntent.putExtra(SendPrivateMessageActivity.EXTRA_RECIPIENT_USERNAME, Objects.requireNonNull(thingEditText.getText()).toString());
                         startActivity(pmIntent);
                     })
                     .setNegativeButton(R.string.cancel, null)
@@ -246,7 +249,7 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
         applyFABTheme(binding.fabInboxActivity);
     }
 
-    private void getCurrentAccountAndFetchMessage(Bundle savedInstanceState) {
+    private void getCurrentAccountAndFetchMessage(@Nullable Bundle savedInstanceState) {
         if (mNewAccountName != null) {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT) || !accountName.equals(mNewAccountName)) {
                 AccountManagement.switchAccount(mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
@@ -270,7 +273,7 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
         }
     }
 
-    private void bindView(Bundle savedInstanceState) {
+    private void bindView(@Nullable Bundle savedInstanceState) {
         binding.viewPagerInboxActivity.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -297,6 +300,8 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
         }
 
         fixViewPager2Sensitivity(binding.viewPagerInboxActivity);
+        binding.viewPagerInboxActivity.setUserInputEnabled(
+                !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false));
     }
 
     @Override
@@ -381,7 +386,10 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
     @Subscribe
     public void onPassPrivateMessageIndexEvent(PassPrivateMessageIndexEvent event) {
         if (sectionsPagerAdapter != null) {
-            EventBus.getDefault().post(new PassPrivateMessageEvent(sectionsPagerAdapter.getPrivateMessage(event.privateMessageIndex)));
+            Message privateMessage = sectionsPagerAdapter.getPrivateMessage(event.privateMessageIndex);
+            if (privateMessage != null) {
+                EventBus.getDefault().post(new PassPrivateMessageEvent(privateMessage));
+            }
         }
     }
 
@@ -451,6 +459,7 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
             }
         }
 
+        @Nullable
         Message getPrivateMessage(int index) {
             if (fragmentManager == null) {
                 return null;

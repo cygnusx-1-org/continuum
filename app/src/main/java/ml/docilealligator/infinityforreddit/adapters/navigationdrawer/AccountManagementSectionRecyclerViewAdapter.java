@@ -16,6 +16,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerAccountBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemNavDrawerMenuItemBinding;
 
+@SuppressWarnings("NullAway.Init")
 public class AccountManagementSectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int VIEW_TYPE_ACCOUNT = 1;

@@ -3,9 +3,11 @@ package ml.docilealligator.infinityforreddit.customtheme;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,13 +22,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 @Entity(tableName = "custom_themes")
 public class CustomTheme implements Parcelable {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "name")
-    public String name;
+    public String name = "";
     @ColumnInfo(name = "is_light_theme")
     public boolean isLightTheme;
     @ColumnInfo(name = "is_dark_theme")
@@ -220,12 +223,17 @@ public class CustomTheme implements Parcelable {
 
     public CustomTheme() {}
 
+    // @Ignore keeps Room from considering the convenience and Parcelable constructors. Room already
+    // picks the no-arg one and populates fields directly; marking the others makes that explicit
+    // rather than leaving it to Room's "multiple good constructors" fallback.
+    @Ignore
     public CustomTheme(@NonNull String name) {
         this.name = name;
     }
 
+    @Ignore
     protected CustomTheme(Parcel in) {
-        name = in.readString();
+        name = Objects.requireNonNull(in.readString());
         isLightTheme = in.readByte() != 0;
         isDarkTheme = in.readByte() != 0;
         isAmoledTheme = in.readByte() != 0;
@@ -576,6 +584,7 @@ public class CustomTheme implements Parcelable {
                         obj.add(field.getName(), context.serialize(field.get(src)));
                     }
                 } catch (IllegalAccessException ignored) {
+                    Log.d("CustomTheme", "serialize: ignoring IllegalAccessException", ignored);
                 }
             }
             return obj;

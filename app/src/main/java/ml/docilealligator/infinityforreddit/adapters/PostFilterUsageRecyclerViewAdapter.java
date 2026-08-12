@@ -13,7 +13,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 
 public class PostFilterUsageRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<PostFilterUsage> postFilterUsages;
+    private List<PostFilterUsage> postFilterUsages = List.of();
     private final BaseActivity activity;
     private final CustomThemeWrapper customThemeWrapper;
     private final OnItemClickListener onItemClickListener;

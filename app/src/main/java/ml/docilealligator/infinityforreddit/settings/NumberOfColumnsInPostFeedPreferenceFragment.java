@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import ml.docilealligator.infinityforreddit.R;
@@ -28,7 +29,7 @@ public class NumberOfColumnsInPostFeedPreferenceFragment extends CustomFontPrefe
     };
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.number_of_columns_in_post_feed_preferences, rootKey);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());

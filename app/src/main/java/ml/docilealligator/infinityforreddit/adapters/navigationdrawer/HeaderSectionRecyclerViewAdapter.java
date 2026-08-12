@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
@@ -26,13 +27,16 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.NavHeaderMainBinding;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
+@SuppressWarnings("NullAway.Init")
 public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final BaseActivity baseActivity;
     private final CustomThemeWrapper customThemeWrapper;
     private final Resources resources;
     private final RequestManager glide;
     private final String accountName;
+    @Nullable
     private String profileImageUrl;
+    @Nullable
     private String bannerImageUrl;
     private int karma;
     private boolean requireAuthToAccountSection;
@@ -82,7 +86,7 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
                 if (hideKarma) {
                     int karmaTextHeight = ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.getHeight();
                     ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.setVisibility(View.GONE);
-                    ((NavHeaderViewHolder) holder).binding.nameTextViewNavHeaderMain.setTranslationY(karmaTextHeight / 2);
+                    ((NavHeaderViewHolder) holder).binding.nameTextViewNavHeaderMain.setTranslationY(karmaTextHeight / 2f);
                 } else {
                     ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.setVisibility(View.VISIBLE);
                     ((NavHeaderViewHolder) holder).binding.karmaTextViewNavHeaderMain.setText(baseActivity.getString(R.string.karma_info, karma));
@@ -182,7 +186,7 @@ public class HeaderSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         }
     }
 
-    public void updateAccountInfo(String profileImageUrl, String bannerImageUrl, int karma) {
+    public void updateAccountInfo(@Nullable String profileImageUrl, @Nullable String bannerImageUrl, int karma) {
         this.profileImageUrl = profileImageUrl;
         this.bannerImageUrl = bannerImageUrl;
         this.karma = karma;

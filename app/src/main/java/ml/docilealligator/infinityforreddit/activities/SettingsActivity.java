@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -22,6 +23,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -38,8 +40,8 @@ import ml.docilealligator.infinityforreddit.settings.GesturesAndButtonsPreferenc
 import ml.docilealligator.infinityforreddit.settings.InterfacePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MainPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.PostPreferenceFragment;
+import ml.docilealligator.infinityforreddit.settings.SettingsScreenArgs;
 import ml.docilealligator.infinityforreddit.settings.SettingsSearchFragment;
-import ml.docilealligator.infinityforreddit.settings.SettingsSearchRegistry;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -64,7 +66,7 @@ public class SettingsActivity extends BaseActivity implements
     CustomThemeWrapper mCustomThemeWrapper;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -104,8 +106,6 @@ public class SettingsActivity extends BaseActivity implements
 
         setSupportActionBar(binding.toolbarSettingsActivity);
 
-        SettingsSearchRegistry.getInstance().buildRegistry(getApplicationContext());
-
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                 .beginTransaction()
@@ -130,7 +130,12 @@ public class SettingsActivity extends BaseActivity implements
                 setToolbarScrollLocked(true);
             } else {
                 setToolbarScrollLocked(mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_TOOLBAR, false));
-                if (fragment instanceof AboutPreferenceFragment) {
+                CharSequence screenTitle = SettingsScreenArgs.screenTitle(fragment);
+                if (screenTitle != null) {
+                    // The screen recorded its own title when it was opened; trust that over
+                    // guessing from the fragment type, which cannot represent a literal title.
+                    setTitle(screenTitle);
+                } else if (fragment instanceof AboutPreferenceFragment) {
                     setTitle(R.string.settings_about_master_title);
                 } else if (fragment instanceof InterfacePreferenceFragment) {
                     setTitle(R.string.settings_interface_title);
@@ -220,7 +225,14 @@ public class SettingsActivity extends BaseActivity implements
         return false;
     }
 
-    public void navigateToSettingsFragment(Fragment fragment, int titleResId) {
+    public void navigateToSettingsFragment(Fragment fragment, CharSequence title) {
+        Bundle args = fragment.getArguments();
+        if (args == null) {
+            args = new Bundle();
+            fragment.setArguments(args);
+        }
+        SettingsScreenArgs.putScreenTitle(args, title);
+
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left,
                         R.anim.enter_from_left, R.anim.exit_to_right)
@@ -229,7 +241,7 @@ public class SettingsActivity extends BaseActivity implements
                 .commit();
         binding.appbarLayoutSettingsActivity.setExpanded(true);
         setToolbarScrollLocked(mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_TOOLBAR, false));
-        setTitle(titleResId);
+        setTitle(title);
     }
 
     private void setToolbarScrollLocked(boolean locked) {
@@ -257,8 +269,11 @@ public class SettingsActivity extends BaseActivity implements
     @Override
     public boolean onPreferenceStartFragment(@NonNull PreferenceFragmentCompat caller, Preference pref) {
         // Instantiate the new Fragment
-        final Bundle args = pref.getExtras();
-        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), pref.getFragment());
+        // Copy, not the live bundle: getExtras() is owned by the Preference, and handing it over
+        // as fragment arguments would let the destination's edits write back into the preference.
+        final Bundle args = new Bundle(pref.getExtras());
+        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), Objects.requireNonNull(pref.getFragment()));
+        SettingsScreenArgs.putScreenTitle(args, pref.getTitle());
         fragment.setArguments(args);
         fragment.setTargetFragment(caller, 0);
 

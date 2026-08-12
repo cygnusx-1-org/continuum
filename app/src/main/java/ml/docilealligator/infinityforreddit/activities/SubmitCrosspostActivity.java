@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,8 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -102,9 +105,15 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     private Account selectedAccount;
+    /** Set once the current-account read lands, so a null {@link #selectedAccount} can tell
+     * "no account exists" apart from "still loading". */
+    private boolean accountLoadFinished;
     private Post post;
+    @Nullable
     private String iconUrl;
+    @Nullable
     private String subredditName;
     private boolean subredditSelected = false;
     private boolean subredditIsUser;
@@ -117,21 +126,23 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     private int spoilerTextColor;
     private int nsfwBackgroundColor;
     private int nsfwTextColor;
+    @Nullable
     private Flair flair;
     private boolean isSpoiler = false;
     private boolean isNSFW = false;
     private Resources resources;
-    private Menu mMenu;
     private RequestManager mGlide;
+    @Nullable
     private FlairBottomSheetFragment flairSelectionBottomSheetFragment;
     private Snackbar mPostingSnackbar;
     private ActivitySubmitCrosspostBinding binding;
+    @Nullable
     private Set<String> crosspostableSubreddits;
     private boolean crosspostableLoadFailed = false;
     private FlairRequirementController flairController;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -174,7 +185,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         }
 
         setSupportActionBar(binding.toolbarSubmitCrosspostActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mGlide = Glide.with(this);
 
@@ -182,7 +193,9 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
 
         resources = getResources();
 
-        post = getIntent().getParcelableExtra(EXTRA_POST);
+        // Both launch sites always supply the post being crossposted; without it there is
+        // nothing for this screen to do.
+        post = Objects.requireNonNull(getIntent().getParcelableExtra(EXTRA_POST));
 
         flairController = new FlairRequirementController(mOauthRetrofit,
                 R.id.action_send_submit_crosspost_activity,
@@ -402,8 +415,13 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         Handler handler = new Handler();
         mExecutor.execute(() -> {
             Account account = mRedditDataRoomDatabase.accountDao().getCurrentAccount();
-            selectedAccount = account;
             handler.post(() -> {
+                accountLoadFinished = true;
+                if (selectedAccount != null) {
+                    // The user picked an account while this load was in flight; don't stomp it.
+                    return;
+                }
+                selectedAccount = account;
                 if (!isFinishing() && !isDestroyed() && account != null) {
                     mGlide.load(account.getProfileImageUrl())
                             .transform(new RoundedCornersTransformation(72, 0))
@@ -503,7 +521,14 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     }
 
     private void loadSubredditIcon() {
-        LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, subredditName,
+        String currentSubredditName = subredditName;
+        if (currentSubredditName == null) {
+            // Nothing to look up — keep the default icon and stop asking for it.
+            displaySubredditIcon();
+            loadSubredditIconSuccessful = true;
+            return;
+        }
+        LoadSubredditIcon.loadSubredditIcon(mExecutor, new Handler(), mRedditDataRoomDatabase, currentSubredditName,
                 accessToken, accountName, mOauthRetrofit, mRetrofit, iconImageUrl -> {
             iconUrl = iconImageUrl;
             displaySubredditIcon();
@@ -518,7 +543,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
     }
 
-    private void onSubredditChangedNotifyController(String targetSub, boolean targetIsUser) {
+    private void onSubredditChangedNotifyController(@Nullable String targetSub, boolean targetIsUser) {
         String token = selectedAccount != null && selectedAccount.getAccessToken() != null
                 ? selectedAccount.getAccessToken() : accessToken;
         flairController.onSubredditChanged(targetSub, targetIsUser, token);
@@ -529,12 +554,11 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         crosspostableLoadFailed = false;
         String token = selectedAccount != null && selectedAccount.getAccessToken() != null
                 ? selectedAccount.getAccessToken() : accessToken;
-        String sourceSub = post != null ? post.getSubredditName() : null;
         if (token == null) {
             crosspostableLoadFailed = true;
             return;
         }
-        FetchCrosspostableSubreddits.fetch(mOauthRetrofit, token, sourceSub,
+        FetchCrosspostableSubreddits.fetch(mOauthRetrofit, token, post.getSubredditName(),
                 new FetchCrosspostableSubreddits.FetchCrosspostableSubredditsListener() {
                     @Override
                     public void onSuccess(Set<String> allowed) {
@@ -560,7 +584,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             showCouldNotVerifyDialog();
             return false;
         }
-        String key = (targetIsUser ? "u_" + targetSubName : targetSubName).toLowerCase();
+        String key = (targetIsUser ? "u_" + targetSubName : targetSubName).toLowerCase(Locale.US);
         if (crosspostableSubreddits.contains(key)) {
             return true;
         }
@@ -594,6 +618,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                                     subscribed = data.getBoolean("user_is_subscriber");
                                 }
                             } catch (Exception ignored) {
+                                Log.d("SubmitCrosspostActivity", "onResponse: ignoring Exception", ignored);
                             }
                         }
                         showBlockDialog(targetSubName, subscribed);
@@ -606,7 +631,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 });
     }
 
-    private void showBlockDialog(String targetSubName, Boolean subscribed) {
+    private void showBlockDialog(String targetSubName, @Nullable Boolean subscribed) {
         if (isFinishing() || isDestroyed()) return;
         int titleRes;
         String message;
@@ -652,7 +677,6 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.submit_crosspost_activity, menu);
         applyMenuItemTheme(menu);
-        mMenu = menu;
         flairController.setMenu(menu);
         return true;
     }
@@ -671,6 +695,16 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
 
             if (binding.postTitleEditTextSubmitCrosspostActivity.getText() == null || binding.postTitleEditTextSubmitCrosspostActivity.getText().toString().equals("")) {
                 Snackbar.make(binding.getRoot(), R.string.title_required, Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+
+            Account account = selectedAccount;
+            if (account == null) {
+                // A finished read with no account means there is nothing left to wait for.
+                // Checked before the eligibility test, which can fire a network request.
+                Snackbar.make(binding.getRoot(),
+                        accountLoadFinished ? R.string.login_first : R.string.account_not_loaded_yet,
+                        Snackbar.LENGTH_SHORT).show();
                 return true;
             }
 
@@ -711,7 +745,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
 
 
             PersistableBundle extras = new PersistableBundle();
-            extras.putString(SubmitPostService.EXTRA_ACCOUNT, selectedAccount.getJSONModel());
+            extras.putString(SubmitPostService.EXTRA_ACCOUNT, account.getJSONModel());
             extras.putString(SubmitPostService.EXTRA_SUBREDDIT_NAME, subredditName);
             String title = binding.postTitleEditTextSubmitCrosspostActivity.getText().toString();
             extras.putString(SubmitPostService.EXTRA_TITLE, title);
@@ -764,7 +798,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 boolean pickedIsUser = data.getIntExtra(SelectThingReturnKey.RETURN_EXTRA_THING_TYPE, SelectThingReturnKey.THING_TYPE.SUBREDDIT) == SelectThingReturnKey.THING_TYPE.USER;
 
                 if (crosspostableSubreddits != null && pickedName != null) {
-                    String key = (pickedIsUser ? "u_" + pickedName : pickedName).toLowerCase();
+                    String key = (pickedIsUser ? "u_" + pickedName : pickedName).toLowerCase(Locale.US);
                     if (!crosspostableSubreddits.contains(key)) {
                         explainCrosspostBlock(pickedName, pickedIsUser);
                         return;
@@ -809,19 +843,20 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
 
     @Override
     public void onAccountSelected(Account account) {
-        if (account != null) {
-            selectedAccount = account;
+        selectedAccount = account;
 
-            mGlide.load(selectedAccount.getProfileImageUrl())
-                    .transform(new RoundedCornersTransformation(72, 0))
-                    .error(mGlide.load(R.drawable.subreddit_default_icon)
-                            .transform(new RoundedCornersTransformation(72, 0)))
-                    .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
+        mGlide.load(account.getProfileImageUrl())
+                .transform(new RoundedCornersTransformation(72, 0))
+                .error(mGlide.load(R.drawable.subreddit_default_icon)
+                        .transform(new RoundedCornersTransformation(72, 0)))
+                .into(binding.accountIconGifImageViewSubmitCrosspostActivity);
 
-            binding.accountNameTextViewSubmitCrosspostActivity.setText(selectedAccount.getAccountName());
+        binding.accountNameTextViewSubmitCrosspostActivity.setText(account.getAccountName());
 
-            fetchCrosspostableSubreddits();
-        }
+        fetchCrosspostableSubreddits();
+
+        // Flair requirements are per-account: re-fetch for the selected target sub with the new token.
+        onSubredditChangedNotifyController(subredditName, subredditIsUser);
     }
 
     @Subscribe
@@ -843,7 +878,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             if (submitCrosspostEvent.errorMessage == null || submitCrosspostEvent.errorMessage.equals("")) {
                 Snackbar.make(binding.getRoot(), R.string.post_failed, Snackbar.LENGTH_SHORT).show();
             } else {
-                Snackbar.make(binding.getRoot(), submitCrosspostEvent.errorMessage.substring(0, 1).toUpperCase()
+                Snackbar.make(binding.getRoot(), submitCrosspostEvent.errorMessage.substring(0, 1).toUpperCase(Locale.getDefault())
                         + submitCrosspostEvent.errorMessage.substring(1), Snackbar.LENGTH_SHORT).show();
             }
         }

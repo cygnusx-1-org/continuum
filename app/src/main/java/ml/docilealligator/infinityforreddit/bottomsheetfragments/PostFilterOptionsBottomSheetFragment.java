@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostFilterOptionsBottomSheetBinding;
@@ -22,12 +23,17 @@ public class PostFilterOptionsBottomSheetFragment extends LandscapeExpandedRound
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         FragmentPostFilterOptionsBottomSheetBinding binding = FragmentPostFilterOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        PostFilter postFilter = getArguments().getParcelable(EXTRA_POST_FILTER);
+        Bundle args = getArguments();
+        PostFilter postFilter = args == null ? null : args.getParcelable(EXTRA_POST_FILTER);
+        if (postFilter == null) {
+            binding.getRoot().post(this::dismiss);
+            return binding.getRoot();
+        }
 
         binding.editTextViewPostFilterOptionsBottomSheetFragment.setOnClickListener(view -> {
             activity.editPostFilter(postFilter);

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -27,7 +28,7 @@ public class SuicidePreventionActivity extends BaseActivity {
     private ActivitySuicidePreventionBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplicationContext()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);

@@ -39,6 +39,8 @@ import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData
 import ml.docilealligator.infinityforreddit.thing.SortType
 import ml.docilealligator.infinityforreddit.thing.deleteThing
+import ml.docilealligator.infinityforreddit.localsaved.LocalSaved
+import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier
 import ml.docilealligator.infinityforreddit.thing.saveThing
 import ml.docilealligator.infinityforreddit.thing.unsaveThing
 import ml.docilealligator.infinityforreddit.utils.APIUtils
@@ -58,7 +60,7 @@ class ViewPostDetailFragmentViewModelNew(
     private val oauthRetrofit: Retrofit,
     private val redditDataRoomDatabase: RedditDataRoomDatabase,
     private val accessToken: String?,
-    private val accountName: String?,
+    private val accountName: String,
     private var post: Post?,
     private var postId: String?,
     private var singleCommentId: String?,
@@ -68,6 +70,8 @@ class ViewPostDetailFragmentViewModelNew(
     private val sortTypeSharedPreferences: SharedPreferences,
     private val postHistorySharedPreferences: SharedPreferences,
     private var respectSubredditRecommendedSortType: Boolean,
+    private val saveCommentSort: Boolean,
+    private val commentDefaultSortType: SortType.Type,
     private val markPostsAsRead: Boolean,
     private val expandChildren: Boolean,
     private val contextNumber: String
@@ -181,7 +185,8 @@ class ViewPostDetailFragmentViewModelNew(
      * Called when the user explicitly picks a comment sort type. The chosen sort
      * must always be honored, so stop respecting the subreddit's recommended sort
      * for this view; otherwise the recommended sort would immediately override the
-     * user's choice (and again on every refresh).
+     * user's choice (and again on every refresh). When "Save Comment Sort" is on,
+     * the pick is remembered for this subreddit and takes precedence on future visits.
      */
     fun fetchCommentsWithSortType(
         sortType: SortType.Type,
@@ -189,6 +194,13 @@ class ViewPostDetailFragmentViewModelNew(
     ) {
         respectSubredditRecommendedSortType = false
         updateSortType(sortType)
+        if (saveCommentSort) {
+            _dataState.value.post?.subredditName?.let { subredditName ->
+                sortTypeSharedPreferences.edit {
+                    putString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_COMMENT_BASE + subredditName, sortType.name)
+                }
+            }
+        }
         viewModelScope.launch {
             fetchComments(sortType, changeRefreshState)
         }
@@ -203,62 +215,100 @@ class ViewPostDetailFragmentViewModelNew(
     }
 
     /***
-     * @param sortType this is only used when failed to get the recommended sort
+     * Resolves the comment sort with this precedence:
+     *   1. the per-subreddit saved comment sort (if "Save Comment Sort" is on and one exists),
+     *   2. the recommended sort (post-level, then subreddit-level) when "Respect Recommended"
+     *      is on — used live, never auto-saved,
+     *   3. the "Comment Default Sort Type" setting.
+     *
+     * @param sortType fallback used only when there is no post to resolve a subreddit from.
      */
     suspend fun fetchCommentsRespectRecommendedSortSync(
         sortType: SortType.Type,
         changeRefreshState: Boolean,
     ) {
-        if (respectSubredditRecommendedSortType) {
-            _dataState.value.post?.let {
-                if (it.suggestedSort != null && it.suggestedSort.equals("null")) {
-                    try {
-                        val sortType = SortType.Type.valueOf(it.suggestedSort.uppercase())
-                        updateSortType(sortType)
-                        fetchComments(sortType, changeRefreshState)
-                        return
-                    } catch (e: IllegalArgumentException) {
-                        e.printStackTrace()
-                    }
-                }
+        val post = _dataState.value.post
+        val subredditName = post?.subredditName
 
-                when (val subredditResult = fetchSubredditData(it.subredditName)) {
-                    is AppResult.Success<*> -> {
-                        when (subredditResult.data) {
-                            is SubredditData -> {
-                                val suggestedCommentSort: String? = subredditResult.data.suggestedCommentSort
-                                if (suggestedCommentSort == null || suggestedCommentSort == "null" || suggestedCommentSort.isEmpty()) {
-                                    respectSubredditRecommendedSortType = false
-                                    updateSortType(loadSortType())
-                                } else {
-                                    try {
-                                        updateSortType(SortType.Type.valueOf(suggestedCommentSort.uppercase()))
-                                    } catch (e: IllegalArgumentException) {
-                                        e.printStackTrace()
-                                        updateSortType(loadSortType())
-                                    }
-                                }
+        // Tier 1: a sort the user explicitly saved for this subreddit wins over everything.
+        val savedSubredditSort = subredditName?.let { loadSubredditCommentSort(it) }
+        if (savedSubredditSort != null) {
+            updateSortType(savedSubredditSort)
+            fetchComments(savedSubredditSort, changeRefreshState)
+            return
+        }
 
-                                fetchComments(changeRefreshState)
-                            }
-                            else -> {
-                                // Null SubredditData!
-                                respectSubredditRecommendedSortType = false
-                                updateSortType(loadSortType())
-                                fetchComments(changeRefreshState)
-                            }
-                        }
-                    }
-
-                    is AppResult.Error<*> -> {
-                        respectSubredditRecommendedSortType = false
-                        updateSortType(loadSortType())
-                        fetchComments(changeRefreshState)
-                    }
+        // Tier 2: the recommended sort, used live and never auto-saved.
+        if (respectSubredditRecommendedSortType && post != null) {
+            val suggestedSort = post.suggestedSort
+            if (suggestedSort != null && !suggestedSort.equals("null") && suggestedSort.isNotEmpty()) {
+                try {
+                    val recommendedSort = SortType.Type.valueOf(suggestedSort.uppercase())
+                    updateSortType(recommendedSort)
+                    fetchComments(recommendedSort, changeRefreshState)
+                    return
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
                 }
             }
-        } else {
-            fetchComments(sortType, changeRefreshState)
+
+            when (val subredditResult = fetchSubredditData(post.subredditName)) {
+                is AppResult.Success<*> -> {
+                    when (subredditResult.data) {
+                        is SubredditData -> {
+                            val suggestedCommentSort: String? = subredditResult.data.suggestedCommentSort
+                            if (suggestedCommentSort == null || suggestedCommentSort == "null" || suggestedCommentSort.isEmpty()) {
+                                // No recommendation for this subreddit; stop rechecking on refresh.
+                                respectSubredditRecommendedSortType = false
+                                updateSortType(commentDefaultSortType)
+                            } else {
+                                try {
+                                    updateSortType(SortType.Type.valueOf(suggestedCommentSort.uppercase()))
+                                } catch (e: IllegalArgumentException) {
+                                    e.printStackTrace()
+                                    updateSortType(commentDefaultSortType)
+                                }
+                            }
+
+                            fetchComments(changeRefreshState)
+                        }
+                        else -> {
+                            // Null SubredditData!
+                            respectSubredditRecommendedSortType = false
+                            updateSortType(commentDefaultSortType)
+                            fetchComments(changeRefreshState)
+                        }
+                    }
+                }
+
+                is AppResult.Error<*> -> {
+                    respectSubredditRecommendedSortType = false
+                    updateSortType(commentDefaultSortType)
+                    fetchComments(changeRefreshState)
+                }
+            }
+            return
+        }
+
+        // Tier 3: the sort already in effect. Callers pass `_uiState.sortType ?: commentDefaultSortType`,
+        // so this is the "Comment Default Sort Type" on first load and the user's current pick on a
+        // later refresh (preserving a manual pick that tier 1 didn't persist).
+        updateSortType(sortType)
+        fetchComments(sortType, changeRefreshState)
+    }
+
+    private fun loadSubredditCommentSort(subredditName: String): SortType.Type? {
+        if (!saveCommentSort) {
+            return null
+        }
+        val sortTypeName = sortTypeSharedPreferences.getString(
+            SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_COMMENT_BASE + subredditName, null
+        ) ?: return null
+        return try {
+            SortType.Type.valueOf(sortTypeName)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+            null
         }
     }
 
@@ -435,9 +485,12 @@ class ViewPostDetailFragmentViewModelNew(
 
                             commentFilter = fetchCommentFilter(post.subredditName)
 
-                            if (respectSubredditRecommendedSortType) {
-                                fetchCommentsRespectRecommendedSortSync(false)
-                            } else {
+                            // The combined call above already fetched the comments in the default
+                            // sort (getSortType()). If neither a per-subreddit saved sort nor the
+                            // recommended sort would change that, reuse them instead of re-fetching;
+                            // otherwise resolve the sort through the full precedence and re-fetch.
+                            if (loadSubredditCommentSort(post.subredditName) == null
+                                && !respectSubredditRecommendedSortType) {
                                 val parseCommentsResult = parseComments(response.body(), commentFilter!!, expandChildren)
                                 when (parseCommentsResult) {
                                     is AppResult.Success<ParseCommentsResult> -> {
@@ -454,10 +507,13 @@ class ViewPostDetailFragmentViewModelNew(
                                     is AppResult.Error<*> -> {
                                         _uiState.value = _uiState.value.copy(
                                             isInitialLoading = false,
-                                            isInitialLoadingFailed = true
+                                            isInitialLoadingFailed = true,
+                                            isFetchingComments = false
                                         )
                                     }
                                 }
+                            } else {
+                                fetchCommentsRespectRecommendedSortSync(false)
                             }
                         } ?: run {
                             _uiState.value = _uiState.value.copy(
@@ -835,7 +891,7 @@ class ViewPostDetailFragmentViewModelNew(
 
                             if (response.isSuccessful) {
                                 val post = withContext(Dispatchers.Default) {
-                                    ParsePost.parsePostSync(response.body())
+                                    response.body()?.let { ParsePost.parsePostSync(it) }
                                 }
                                 post?.let { post ->
                                     if (fetchComments) {
@@ -995,8 +1051,9 @@ class ViewPostDetailFragmentViewModelNew(
                             val comment = ParseComment.parseSingleComment(childData, 0)
                             val parentFullName = comment.getParentId()
 
-                            val parentComment =
-                                ParseComment.findCommentByFullName(newComments, parentFullName)
+                            val parentComment = parentFullName?.let {
+                                ParseComment.findCommentByFullName(newComments, it)
+                            }
                             if (parentComment != null) {
                                 parentComment.setHasReply(true)
                                 parentComment.addChild(comment, parentComment.getChildCount())
@@ -1007,6 +1064,8 @@ class ViewPostDetailFragmentViewModelNew(
                             }
                         } catch (e: JSONException) {
                             // Well we need to catch and ignore the exception to not show "error loading comments" to users
+                            e.printStackTrace()
+                        } catch (e: RuntimeException) {
                             e.printStackTrace()
                         }
                     }
@@ -1045,24 +1104,10 @@ class ViewPostDetailFragmentViewModelNew(
         }
     }
 
-    private fun loadSortType(): SortType.Type {
-        val sortTypeName: String = sortTypeSharedPreferences.getString(
-            SharedPreferencesUtils.SORT_TYPE_POST_COMMENT,
-            SortType.Type.CONFIDENCE.name
-        )!!
-        if (SortType.Type.BEST.name == sortTypeName) {
-            // migrate from BEST to CONFIDENCE
-            // key guaranteed to exist because got non-default value
-            sortTypeSharedPreferences.edit {
-                putString(
-                    SharedPreferencesUtils.SORT_TYPE_POST_COMMENT,
-                    SortType.Type.CONFIDENCE.name
-                )
-            }
-            return SortType.Type.CONFIDENCE
-        }
-        return SortType.Type.valueOf(sortTypeName)
-    }
+    // The comment sort fallback is the "Comment Default Sort Type" setting, resolved in the
+    // fragment and passed in. Per-subreddit saved sorts and recommendations are layered on top
+    // of this in fetchCommentsRespectRecommendedSortSync.
+    private fun loadSortType(): SortType.Type = commentDefaultSortType
 
     fun updateSortType(sortType: SortType.Type): SortType.Type {
         _uiState.value = _uiState.value.copy(
@@ -1322,6 +1367,10 @@ class ViewPostDetailFragmentViewModelNew(
                             if (unsaveThing(
                                 oauthRetrofit, accessToken, post.fullName
                             )) {
+                                LocalSaved.onUnsaved(
+                                    redditDataRoomDatabase, accountName, post.fullName
+                                )
+                                SavedPostCacheNotifier.onSavedPostChanged()
                                 _dataState.value = _dataState.value.copy(
                                     post = Post(post).apply {
                                         isSaved = !isSaved
@@ -1346,6 +1395,11 @@ class ViewPostDetailFragmentViewModelNew(
                             if (saveThing(
                                     oauthRetrofit, accessToken, post.fullName
                             )) {
+                                LocalSaved.onSaved(
+                                    redditDataRoomDatabase, oauthRetrofit, accessToken,
+                                    accountName, post.fullName
+                                )
+                                SavedPostCacheNotifier.onSavedPostChanged()
                                 _dataState.value = _dataState.value.copy(
                                     post = Post(post).apply {
                                         isSaved = !isSaved
@@ -1531,6 +1585,37 @@ class ViewPostDetailFragmentViewModelNew(
                             comments = updatedComments
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun recoverComment(comment: Comment, recoveredMarkdown: String, recoveredAuthor: String?,
+                       recoveredAuthorFlair: String?, recoveredAuthorFlairHTML: String?, position: Int) {
+        _dataState.value.comments?.let {
+            val updatedComments = ArrayList(it)
+
+            if (position < it.size && position >= 0) {
+                val targetPosition = if (it[position].id.equals(comment.id)) {
+                    position
+                } else {
+                    findCommentPosition(comment.fullName, position)
+                }
+                if (targetPosition in it.indices) {
+                    val updatedComment = Comment(it[targetPosition])
+                    updatedComment.commentMarkdown = recoveredMarkdown
+                    updatedComment.commentRawText = recoveredMarkdown
+                    if (recoveredAuthor != null) {
+                        updatedComment.setAuthor(recoveredAuthor)
+                        updatedComment.setAuthorFlair(recoveredAuthorFlair)
+                        updatedComment.setAuthorFlairHTML(recoveredAuthorFlairHTML)
+                    }
+
+                    updatedComments[targetPosition] = updatedComment
+
+                    _dataState.value = _dataState.value.copy(
+                        comments = updatedComments
+                    )
                 }
             }
         }
@@ -2260,12 +2345,14 @@ class ViewPostDetailFragmentViewModelNew(
     companion object {
         fun provideFactory(retrofit: Retrofit, oauthRetrofit: Retrofit,
                            redditDataRoomDatabase: RedditDataRoomDatabase,
-                           accessToken: String?, accountName: String?,
+                           accessToken: String?, accountName: String,
                            post: Post?, postId: String?, commentId: String?,
                            comments: ArrayList<Comment>?, children: ArrayList<String>?,
                            sortType: SortType.Type?, sortTypeSharedPreferences: SharedPreferences,
                            postHistorySharedPreferences: SharedPreferences,
                            respectSubredditRecommendedSortType: Boolean,
+                           saveCommentSort: Boolean,
+                           commentDefaultSortType: SortType.Type,
                            markPostsAsRead: Boolean,
                            expandChildren: Boolean, contextNumber: String) : ViewModelProvider.Factory {
             return object: ViewModelProvider.Factory {
@@ -2279,6 +2366,7 @@ class ViewPostDetailFragmentViewModelNew(
                         post, postId, commentId, comments, children,
                         sortType, sortTypeSharedPreferences,
                         postHistorySharedPreferences, respectSubredditRecommendedSortType,
+                        saveCommentSort, commentDefaultSortType,
                         markPostsAsRead, expandChildren, contextNumber
                     ) as T
                 }

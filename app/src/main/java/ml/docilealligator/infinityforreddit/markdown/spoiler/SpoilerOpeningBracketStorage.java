@@ -7,6 +7,7 @@ import org.commonmark.node.Node;
 public class SpoilerOpeningBracketStorage {
     @Nullable
     private SpoilerOpeningBracket lastBracket;
+    @Nullable
     private Node currentBlock;
 
     public void clear() {
@@ -28,6 +29,8 @@ public class SpoilerOpeningBracketStorage {
         return bracket;
     }
 
+    // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+    @SuppressWarnings("ReferenceEquality")
     private void updateBlock(Node block) {
         if (block != currentBlock) {
             clear();

@@ -6,13 +6,18 @@ import android.os.SystemClock;
 import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by alex on 2/23/18.
@@ -29,6 +34,7 @@ public class APIUtils {
     public static final String IMGUR_API_BASE_URI = "https://api.imgur.com/3/";
     public static final String STREAMABLE_API_BASE_URI = "https://api.streamable.com";
     public static final String SERVER_API_BASE_URI = "http://127.0.0.1";
+    public static final String ARCTIC_SHIFT_API_BASE_URI = "https://arctic-shift.photon-reddit.com/";
 
     public static final String CLIENT_ID_KEY = "client_id";
     public static final String CLIENT_SECRET_KEY = "client_secret";
@@ -46,7 +52,7 @@ public class APIUtils {
     public static final String DURATION = "permanent";
     public static final String SCOPE_KEY = "scope";
 
-    public static final String[] SCOPE_LIST = {
+    private static final String[] SCOPE_LIST = {
         "account", "creddits", "edit", "flair", "history", "identity", "livemanage", "modconfig", "modcontributors",
         "modflair", "modlog", "modmail", "modothers", "modposts", "modwiki", "modself", "mysubreddits", "privatemessages",
         "read", "report", "save", "submit", "subscribe", "vote", "wikiedit", "wikiread"
@@ -154,7 +160,7 @@ public class APIUtils {
         if (!areOverridesEnabled(sharedPreferences)) {
             return defaultClientId;
         }
-        return sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, defaultClientId);
+        return Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.CLIENT_ID_PREF_KEY, defaultClientId));
     }
 
     // Method to retrieve User Agent from SharedPreferences
@@ -218,13 +224,13 @@ public class APIUtils {
         Map<String, String> params = new HashMap<>();
         String clientId = getClientId(appContext);
         String credentials = String.format("%s:%s", clientId, "");
-        String auth = "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+        String auth = "Basic " + Base64.encodeToString(credentials.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
         params.put(APIUtils.AUTHORIZATION_KEY, auth);
 
         return params;
     }
 
-    public static Map<String, String> getOAuthHeader(String accessToken) {
+    public static Map<String, String> getOAuthHeader(@Nullable String accessToken) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.AUTHORIZATION_KEY, APIUtils.AUTHORIZATION_BASE + accessToken);
         params.put(APIUtils.USER_AGENT_KEY, APIUtils.USER_AGENT);
@@ -244,7 +250,7 @@ public class APIUtils {
         return params;
     }
 
-    public static Map<String, String> getRedgifsOAuthHeader(String redgifsAccessToken) {
+    public static Map<String, String> getRedgifsOAuthHeader(@Nullable String redgifsAccessToken) {
         Map<String, String> params = new HashMap<>();
         params.put(APIUtils.AUTHORIZATION_KEY, APIUtils.AUTHORIZATION_BASE + redgifsAccessToken);
 
@@ -267,6 +273,36 @@ public class APIUtils {
     // Concatenated subreddit name works too
     public static int subredditAPICallLimit(@Nullable String subredditName) {
         return 100;
+    }
+
+    /**
+     * Extracts the human-readable error from a Reddit {@code api_type=json} response envelope
+     * ({@code {"json":{"errors":[[code,message,field],...]}}}). Returns the last error's message
+     * (falling back to its code) with the first letter capitalized, or {@code null} when the body
+     * carries no error — an empty {@code errors} array, no {@code json} envelope, or an unparseable
+     * body. Reddit reports API-level failures (archived thing, rate limit, …) inside an otherwise
+     * HTTP-200 body, so callers of endpoints sent with {@code api_type=json} must consult this even
+     * when {@code response.isSuccessful()} is true.
+     */
+    @Nullable
+    public static String parseApiErrorMessage(@Nullable String responseBody) {
+        if (responseBody == null) {
+            return null;
+        }
+        try {
+            JSONArray errors = new JSONObject(responseBody).getJSONObject(JSONUtils.JSON_KEY)
+                    .getJSONArray(JSONUtils.ERRORS_KEY);
+            if (errors.length() == 0) {
+                return null;
+            }
+            JSONArray error = errors.getJSONArray(errors.length() - 1);
+            if (error.length() == 0) {
+                return null;
+            }
+            return Utils.capitalizeFirstLetter(error.length() >= 2 ? error.getString(1) : error.getString(0));
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
     // Application-only (anonymous/userless) Reddit OAuth token management

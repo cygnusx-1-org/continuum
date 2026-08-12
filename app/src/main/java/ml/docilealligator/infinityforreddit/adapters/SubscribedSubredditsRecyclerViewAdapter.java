@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import me.zhanghai.android.fastscroll.PopupTextProvider;
@@ -26,6 +27,7 @@ import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubred
 import ml.docilealligator.infinityforreddit.thing.FavoriteThing;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements PopupTextProvider {
     private static final int VIEW_TYPE_FAVORITE_SUBREDDIT_DIVIDER = 0;
     private static final int VIEW_TYPE_FAVORITE_SUBREDDIT = 1;
@@ -41,9 +43,11 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
     private final RequestManager glide;
     private ItemClickListener itemClickListener;
 
+    @Nullable
     private final String accessToken;
     private final String accountName;
     private String username;
+    @Nullable
     private String userIconUrl;
     private boolean hasClearSelectionRow;
 
@@ -417,7 +421,7 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
         notifyDataSetChanged();
     }
 
-    public void addUser(String username, String userIconUrl) {
+    public void addUser(String username, @androidx.annotation.Nullable String userIconUrl) {
         this.username = username;
         this.userIconUrl = userIconUrl;
     }
@@ -448,7 +452,7 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
                                 mFavoriteSubscribedSubredditData.size() + 2 : 0;
                     }
 
-                    return mSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase();
+                    return mSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase(Locale.getDefault());
                 }
             case VIEW_TYPE_FAVORITE_SUBREDDIT:
                 int offset;
@@ -461,14 +465,14 @@ public class SubscribedSubredditsRecyclerViewAdapter extends RecyclerView.Adapte
                 } else {
                     offset = 1;
                 }
-                return mFavoriteSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase();
+                return mFavoriteSubscribedSubredditData.get(position - offset).getName().substring(0, 1).toUpperCase(Locale.getDefault());
             default:
                 return "";
         }
     }
 
     public interface ItemClickListener {
-        void onClick(String name, String iconUrl, boolean subredditIsUser);
+        void onClick(@Nullable String name, @Nullable String iconUrl, boolean subredditIsUser);
     }
 
     class SubredditViewHolder extends RecyclerView.ViewHolder {

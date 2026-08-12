@@ -7,6 +7,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,6 @@ public class SetRedditGalleryItemCaptionAndUrlBottomSheetFragment extends Landsc
 
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FragmentSetRedditGalleryItemCaptionAndUrlBottomSheetBinding binding = FragmentSetRedditGalleryItemCaptionAndUrlBottomSheetBinding.inflate(inflater, container, false);
@@ -56,7 +56,7 @@ public class SetRedditGalleryItemCaptionAndUrlBottomSheetFragment extends Landsc
         binding.urlTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.setText(url);
 
         binding.okButtonSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.setOnClickListener(view -> {
-            mActivity.setCaptionAndUrl(position, binding.captionTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText().toString(), binding.urlTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText().toString());
+            mActivity.setCaptionAndUrl(position, java.util.Objects.requireNonNull(binding.captionTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText()).toString(), java.util.Objects.requireNonNull(binding.urlTextInputEditTextSetRedditGalleryItemCaptionAndUrlBottomSheetFragment.getText()).toString());
             dismiss();
         });
 
@@ -84,7 +84,9 @@ public class SetRedditGalleryItemCaptionAndUrlBottomSheetFragment extends Landsc
             drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             fCursorDrawable.set(editor, drawables);
-        } catch (Throwable ignored) { }
+        } catch (Throwable ignored) {
+            Log.d("SetRedditGalleryItemCaptionAndUrlBottomSheetFragment", "setCursorDrawableColor: ignoring Throwable", ignored);
+        }
     }
 
     @Override

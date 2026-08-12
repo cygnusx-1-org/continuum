@@ -4,11 +4,12 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.MarkwonReducer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import ml.docilealligator.infinityforreddit.markdown.giphygif.GiphyGifBlock;
 import ml.docilealligator.infinityforreddit.markdown.giphygif.GiphyGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerNode;
@@ -93,7 +94,7 @@ public class RichTextJSONConverter implements Visitor {
     private final JSONArray document;
     private StringBuilder textSB;
     private List<JSONArray> formats;
-    private Stack<JSONArray> contentArrayStack;
+    private Deque<JSONArray> contentArrayStack;
 
     public RichTextJSONConverter() {
         formatMap = new HashMap<>();
@@ -106,7 +107,7 @@ public class RichTextJSONConverter implements Visitor {
         document = new JSONArray();
         textSB = new StringBuilder();
         formats = new ArrayList<>();
-        contentArrayStack = new Stack<>();
+        contentArrayStack = new ArrayDeque<>();
 
         contentArrayStack.push(document);
     }
@@ -306,6 +307,7 @@ public class RichTextJSONConverter implements Visitor {
             JSONArray cArray = new JSONArray();
             String codeLiteral = fencedCodeBlock.getLiteral();
 
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] codeLines = codeLiteral.split("\n");
             for (String c : codeLines) {
                 JSONObject contentJSONObject = new JSONObject();
@@ -391,6 +393,7 @@ public class RichTextJSONConverter implements Visitor {
             JSONArray cArray = new JSONArray();
             String codeLiteral = indentedCodeBlock.getLiteral();
 
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] codeLines = codeLiteral.split("\n");
             for (String c : codeLines) {
                 JSONObject contentJSONObject = new JSONObject();

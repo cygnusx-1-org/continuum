@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.thing;
 import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.ArrayList;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.post.Post;
 
 public class TrendingSearch implements Parcelable {
@@ -19,10 +20,10 @@ public class TrendingSearch implements Parcelable {
     }
 
     protected TrendingSearch(Parcel in) {
-        queryString = in.readString();
-        displayString = in.readString();
-        title = in.readString();
-        previews = in.createTypedArrayList(Post.Preview.CREATOR);
+        queryString = Objects.requireNonNull(in.readString());
+        displayString = Objects.requireNonNull(in.readString());
+        title = Objects.requireNonNull(in.readString());
+        previews = Objects.requireNonNull(in.createTypedArrayList(Post.Preview.CREATOR));
     }
 
     public static final Creator<TrendingSearch> CREATOR = new Creator<TrendingSearch>() {

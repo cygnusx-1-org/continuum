@@ -54,6 +54,7 @@ import io.noties.markwon.core.MarkwonTheme;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -110,6 +111,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.user.UserFollowing;
 import ml.docilealligator.infinityforreddit.user.UserViewModel;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -127,6 +129,12 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     public static final String EXTRA_USER_NAME_KEY = "EUNK";
     public static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     public static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
+    // Sort (?sort=/?t=) and initial tab carried by an opening deep link, for the submitted tab.
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
+    public static final String EXTRA_INITIAL_TAB = "EIT";
+    public static final int TAB_POSTS = 0;
+    public static final int TAB_COMMENTS = 1;
     public static final int EDIT_COMMENT_REQUEST_CODE = 300;
 
     private static final String FETCH_USER_INFO_STATE = "FSIS";
@@ -171,9 +179,23 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private SectionsPagerAdapter sectionsPagerAdapter;
     private RequestManager glide;
     private NavigationWrapper navigationWrapper;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private Call<String> subredditAutocompleteCall;
     private String username;
+    @Nullable
+    private String initialSortType;
+    @Nullable
+    private String initialSortTime;
+    private int initialTab = TAB_POSTS;
+    // The tab whose selection side effects were last applied. Guards applyUserTabSelected against
+    // running twice for the initial deep-link tab (explicit call + a possible page-change callback
+    // for that same pending page); genuine tab changes always report a different position.
+    private int lastAppliedTabPosition = -1;
+    // True when this instance is being recreated from saved state (config change / process death).
+    private boolean restoredFromInstanceState;
+    @Nullable
     private String description;
     private boolean subscriptionReady = false;
     private boolean mFetchUserInfoSuccess = false;
@@ -191,14 +213,16 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private boolean hideFab;
     private boolean showBottomAppBar;
     private boolean lockBottomAppBar;
+    @Nullable
     private String mMessageFullname;
+    @Nullable
     private String mNewAccountName;
     //private MaterialAlertDialogBuilder nsfwWarningBuilder;
     private ActivityViewUserDetailBinding binding;
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
         setTransparentStatusBarAfterToolbarCollapsed();
 
@@ -224,7 +248,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
         mViewPager2 = binding.viewPagerViewUserDetailActivity;
 
-        username = getIntent().getStringExtra(EXTRA_USER_NAME_KEY);
+        username = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_USER_NAME_KEY));
 
         fragmentManager = getSupportFragmentManager();
 
@@ -234,9 +258,14 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             username = accountName;
         }
 
+        initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
+        initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
+        restoredFromInstanceState = savedInstanceState != null;
+
         if (savedInstanceState == null) {
             mMessageFullname = getIntent().getStringExtra(EXTRA_MESSAGE_FULLNAME);
             mNewAccountName = getIntent().getStringExtra(EXTRA_NEW_ACCOUNT_NAME);
+            initialTab = getIntent().getIntExtra(EXTRA_INITIAL_TAB, TAB_POSTS);
         } else {
             mFetchUserInfoSuccess = savedInstanceState.getBoolean(FETCH_USER_INFO_STATE);
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
@@ -593,7 +622,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 String userFullName = "u/" + userData.getName();
                 binding.userNameTextViewViewUserDetailActivity.setText(userFullName);
                 if (!title.equals(userFullName)) {
-                    getSupportActionBar().setTitle(userFullName);
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(userFullName);
                 }
                 String karma = getString(R.string.karma_info_user_detail, userData.getTotalKarma(), userData.getLinkKarma(), userData.getCommentKarma());
                 binding.karmaTextViewViewUserDetailActivity.setText(karma);
@@ -641,7 +670,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 MultiReddit multiReddit = data.getParcelableExtra(SelectThingReturnKey.RETRUN_EXTRA_MULTIREDDIT);
                 if (multiReddit != null) {
                     AddSubredditOrUserToMultiReddit.addSubredditOrUserToMultiReddit(mOauthRetrofit,
-                            accessToken, multiReddit.getPath(), "u_" + username,
+                            Objects.requireNonNull(accessToken), multiReddit.getPath(), "u_" + username,
                             new AddSubredditOrUserToMultiReddit.AddSubredditOrUserToMultiRedditListener() {
                                 @Override
                                 public void success() {
@@ -750,6 +779,32 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         }
     }
 
+    // Side effects of selecting a tab: swipe-back lock (Comments tab pages back to Posts instead of
+    // exiting), bottom bar / FAB visibility, and the toolbar sort subtitle. Invoked from
+    // onPageSelected and, for a deep-link initial tab, explicitly (that programmatic selection is done
+    // before the callback is registered).
+    private void applyUserTabSelected(int position) {
+        if (position == lastAppliedTabPosition) {
+            return;
+        }
+        lastAppliedTabPosition = position;
+
+        if (position == 0) {
+            unlockSwipeRightToGoBack();
+        } else {
+            lockSwipeRightToGoBack();
+        }
+
+        if (showBottomAppBar) {
+            navigationWrapper.showNavigation();
+        }
+        if (!hideFab) {
+            navigationWrapper.showFab();
+        }
+
+        sectionsPagerAdapter.displaySortTypeInToolbar();
+    }
+
     @ExperimentalBadgeUtils
     private void initializeViewPager() {
         binding.viewPagerViewUserDetailActivity.setAdapter(sectionsPagerAdapter);
@@ -765,30 +820,42 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             }
         }).attach();
 
+        // Land on the deep-link tab synchronously so the Posts tab is never briefly rendered first,
+        // and before registering the page-change callback so it doesn't fire for this programmatic
+        // selection. The initial tab's side effects are applied explicitly below. Guarded to fresh
+        // launches via initialTab (only set when savedInstanceState == null), so rotation keeps the tab.
+        if (initialTab != TAB_POSTS) {
+            binding.viewPagerViewUserDetailActivity.setCurrentItem(initialTab, false);
+        }
+
         binding.viewPagerViewUserDetailActivity.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
-                if (position == 0) {
-                    unlockSwipeRightToGoBack();
-                } else {
-                    lockSwipeRightToGoBack();
-                }
-
-                if (showBottomAppBar) {
-                    navigationWrapper.showNavigation();
-                }
-                if (!hideFab) {
-                    navigationWrapper.showFab();
-                }
-
-                sectionsPagerAdapter.displaySortTypeInToolbar();
+                applyUserTabSelected(position);
             }
         });
+
+        if (initialTab != TAB_POSTS) {
+            applyUserTabSelected(initialTab);
+        }
+
+        if (restoredFromInstanceState) {
+            // After a config-change/process restore, mSliderPanel is freshly unlocked and ViewPager2
+            // may restore a non-Posts tab without firing onPageSelected. Re-apply the current tab's
+            // lock once the restored position is available. getCurrentItem() reports ViewPager2's own
+            // restored position here — on a restore this code sets no initial tab (initialTab stays
+            // TAB_POSTS), so nothing overrides that restored value.
+            binding.viewPagerViewUserDetailActivity.post(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    applyUserTabSelected(binding.viewPagerViewUserDetailActivity.getCurrentItem());
+                }
+            });
+        }
 
         fixViewPager2Sensitivity(binding.viewPagerViewUserDetailActivity);
 
         if (mMessageFullname != null) {
-            ReadMessage.readMessage(mOauthRetrofit, accessToken, mMessageFullname, new ReadMessage.ReadMessageListener() {
+            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
                 public void readSuccess() {
                     mMessageFullname = null;
@@ -1203,7 +1270,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 .setTitle(R.string.delete_this_comment)
                 .setMessage(R.string.are_you_sure)
                 .setPositiveButton(R.string.delete, (dialogInterface, i)
-                        -> DeleteThing.delete(mOauthRetrofit, fullName, accessToken, new DeleteThing.DeleteThingListener() {
+                        -> DeleteThing.delete(mOauthRetrofit, fullName, Objects.requireNonNull(accessToken), new DeleteThing.DeleteThingListener() {
                     @Override
                     public void deleteSuccess() {
                         Toast.makeText(ViewUserDetailActivity.this, R.string.delete_post_success, Toast.LENGTH_SHORT).show();
@@ -1268,7 +1335,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         } else if (itemId == R.id.action_share_view_user_detail_activity) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, "https://www.reddit.com/user/" + username);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyLinkDomain(
+                    getDefaultSharedPreferences(), APIUtils.API_BASE_URI + "/user/" + username));
             if (shareIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
             } else {
@@ -1315,7 +1383,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     .setTitle(R.string.block_user)
                     .setMessage(R.string.are_you_sure)
                     .setPositiveButton(R.string.yes, (dialogInterface, i)
-                            -> BlockUser.blockUser(mOauthRetrofit, accessToken, username, new BlockUser.BlockUserListener() {
+                            -> BlockUser.blockUser(mOauthRetrofit, Objects.requireNonNull(accessToken), username, new BlockUser.BlockUserListener() {
                         @Override
                         public void success() {
                             Toast.makeText(ViewUserDetailActivity.this, R.string.block_user_success, Toast.LENGTH_SHORT).show();
@@ -1345,11 +1413,11 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     if (sectionsPagerAdapter != null) {
                         if (data.hasExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)) {
                             sectionsPagerAdapter.editComment(
-                                    (Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT),
+                                    Objects.requireNonNull((Comment) data.getParcelableExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT)),
                                     data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                         } else {
                             sectionsPagerAdapter.editComment(
-                                    data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT),
+                                    Objects.requireNonNull(data.getStringExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_CONTENT)),
                                     data.getIntExtra(EditCommentActivity.RETURN_EXTRA_EDITED_COMMENT_POSITION, -1));
                         }
                     }
@@ -1476,7 +1544,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(subredditIntent);
                 return true;
             }
@@ -1550,7 +1618,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                         -> {
                     Utils.hideKeyboard(this);
                     Intent subredditIntent = new Intent(this, ViewSubredditDetailActivity.class);
-                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, thingEditText.getText().toString());
+                    subredditIntent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(subredditIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -1571,7 +1639,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
                 Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                 startActivity(userIntent);
                 return true;
             }
@@ -1584,7 +1652,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                         -> {
                     Utils.hideKeyboard(this);
                     Intent userIntent = new Intent(this, ViewUserDetailActivity.class);
-                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, thingEditText.getText().toString());
+                    userIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, Objects.requireNonNull(thingEditText.getText()).toString());
                     startActivity(userIntent);
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
@@ -1704,6 +1772,12 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 bundle.putInt(PostFragment.EXTRA_POST_TYPE, PostType.USER);
                 bundle.putString(PostFragment.EXTRA_USER_NAME, username);
                 bundle.putString(PostFragment.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_SUBMITTED);
+                if (initialSortType != null && initialTab != TAB_COMMENTS) {
+                    bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+                    if (initialSortTime != null) {
+                        bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+                    }
+                }
                 fragment.setArguments(bundle);
                 return fragment;
             }
@@ -1711,6 +1785,12 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             Bundle bundle = new Bundle();
             bundle.putString(CommentsListingFragment.EXTRA_USERNAME, username);
             bundle.putBoolean(CommentsListingFragment.EXTRA_ARE_SAVED_COMMENTS, false);
+            if (initialSortType != null && initialTab == TAB_COMMENTS) {
+                bundle.putString(CommentsListingFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+                if (initialSortTime != null) {
+                    bundle.putString(CommentsListingFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+                }
+            }
             fragment.setArguments(bundle);
             return fragment;
         }

@@ -17,7 +17,7 @@ import retrofit2.Response;
 
 public class FetchStreamableVideo {
     public static void fetchStreamableVideo(Executor executor, Handler handler, Provider<StreamableAPI> streamableApiProvider,
-                                            String videoUrl, FetchVideoLinkListener fetchVideoLinkListener) {
+                                            @Nullable String videoUrl, FetchVideoLinkListener fetchVideoLinkListener) {
         executor.execute(() -> {
             try {
                 Response<String> response = streamableApiProvider.get().getStreamableData(videoUrl).execute();
@@ -49,7 +49,7 @@ public class FetchStreamableVideo {
     @WorkerThread
     @Nullable
     public static StreamableVideo fetchStreamableVideoSync(Provider<StreamableAPI> streamableApiProvider,
-                                            String videoUrl) {
+                                            @Nullable String videoUrl) {
         try {
             Response<String> response = streamableApiProvider.get().getStreamableData(videoUrl).execute();
             if (response.isSuccessful() && response.body() != null) {

@@ -7,12 +7,14 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -48,8 +50,8 @@ public class PostHistoryFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentPostHistoryBinding.inflate(inflater, container, false);
 
@@ -112,17 +114,21 @@ public class PostHistoryFragment extends Fragment {
         });
         binding.readPostsLimitTextInputEditTextPostHistoryFragment.setOnFocusChangeListener((view, b) -> {
             if (!b) {
-                String readPostsLimitString = binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText().toString();
+                CharSequence readPostsLimitText = binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText();
+                String readPostsLimitString = readPostsLimitText == null ? "" : readPostsLimitText.toString();
+                int readPostsLimit;
                 if (readPostsLimitString.isEmpty()) {
+                    readPostsLimit = 500;
                     binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText("500");
                 } else {
-                    int readPostsLimit = Integer.parseInt(readPostsLimitString);
+                    readPostsLimit = Integer.parseInt(readPostsLimitString);
                     if (readPostsLimit < 100) {
+                        readPostsLimit = 100;
                         binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText("100");
                     }
                 }
                 postHistorySharedPreferences.edit().putInt(mActivity.accountName + SharedPreferencesUtils.READ_POSTS_LIMIT,
-                        Integer.parseInt(binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText().toString())).apply();
+                        readPostsLimit).apply();
             }
         });
 
@@ -224,7 +230,9 @@ public class PostHistoryFragment extends Fragment {
             drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             fCursorDrawable.set(editor, drawables);
-        } catch (Throwable ignored) { }
+        } catch (Throwable ignored) {
+            Log.d("PostHistoryFragment", "setCursorDrawableColor: ignoring Throwable", ignored);
+        }
     }
 
     @Override

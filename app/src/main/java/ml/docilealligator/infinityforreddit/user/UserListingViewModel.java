@@ -41,7 +41,7 @@ public class UserListingViewModel extends ViewModel {
                         .build();
 
         users = Transformations.switchMap(sortTypeLiveData, sort -> {
-            userListingDataSourceFactory.changeSortType(sortTypeLiveData.getValue());
+            userListingDataSourceFactory.changeSortType(sort);
             return (new LivePagedListBuilder(userListingDataSourceFactory, pagedListConfig)).build();
         });
     }
@@ -63,11 +63,17 @@ public class UserListingViewModel extends ViewModel {
     }
 
     public void refresh() {
-        userListingDataSourceFactory.getUserListingDataSource().invalidate();
+        UserListingDataSource dataSource = userListingDataSourceFactory.getUserListingDataSource();
+        if (dataSource != null) {
+            dataSource.invalidate();
+        }
     }
 
     public void retryLoadingMore() {
-        userListingDataSourceFactory.getUserListingDataSource().retryLoadingMore();
+        UserListingDataSource dataSource = userListingDataSourceFactory.getUserListingDataSource();
+        if (dataSource != null) {
+            dataSource.retryLoadingMore();
+        }
     }
 
     public void changeSortType(SortType sortType) {

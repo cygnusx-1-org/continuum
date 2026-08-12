@@ -11,12 +11,14 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -49,7 +51,7 @@ public class SearchUsersResultActivity extends BaseActivity implements ActivityT
     private ActivitySearchUsersResultBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -99,23 +101,26 @@ public class SearchUsersResultActivity extends BaseActivity implements ActivityT
         }
 
         setSupportActionBar(binding.toolbarSearchUsersResultActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSearchUsersResultActivity);
 
         String query = getIntent().getStringExtra(EXTRA_QUERY);
 
-        if (savedInstanceState == null) {
-            mFragment = new UserListingFragment();
+        Fragment fragment = savedInstanceState == null
+                ? null
+                : getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+        if (fragment == null) {
+            UserListingFragment userListingFragment = new UserListingFragment();
             Bundle bundle = new Bundle();
             bundle.putString(UserListingFragment.EXTRA_QUERY, query);
             bundle.putBoolean(UserListingFragment.EXTRA_IS_GETTING_USER_INFO, true);
             bundle.putBoolean(UserListingFragment.EXTRA_IS_MULTI_SELECTION, getIntent().getBooleanExtra(EXTRA_IS_MULTI_SELECTION, false));
-            mFragment.setArguments(bundle);
-        } else {
-            mFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+            userListingFragment.setArguments(bundle);
+            fragment = userListingFragment;
         }
+        mFragment = fragment;
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_layout_search_users_result_activity, mFragment)
+                .replace(R.id.frame_layout_search_users_result_activity, fragment)
                 .commit();
     }
 

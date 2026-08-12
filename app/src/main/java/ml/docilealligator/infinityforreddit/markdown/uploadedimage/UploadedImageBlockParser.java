@@ -28,6 +28,7 @@ public class UploadedImageBlockParser extends AbstractBlockParser {
     }
 
     @Override
+    @Nullable
     public BlockContinue tryContinue(ParserState parserState) {
         return null;
     }

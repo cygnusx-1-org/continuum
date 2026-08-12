@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,6 +40,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
@@ -120,7 +122,9 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     @Inject
     @Named("nsfw_and_spoiler")
     SharedPreferences mNsfwAndSpoilerSharedPreferences;
+    @Nullable
     private Runnable autoCompleteRunnable;
+    @Nullable
     private retrofit2.Call<String> subredditAutocompleteCall;
     private boolean mInsertSuccess;
     private boolean mInsertMultiredditSuccess;
@@ -128,14 +132,18 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     private boolean isThingSelectionMode;
     private boolean searchPrefixOnly;
     private int thingSelectionType;
+    @Nullable
     private String mAccountProfileImageUrl;
     private SectionsPagerAdapter sectionsPagerAdapter;
+    // Set in onCreateOptionsMenu; @Nullable + guarded at its reads so an early back-press before the
+    // menu is created can't NPE.
+    @Nullable
     private Menu mMenu;
     private ActivityResultLauncher<Intent> requestSearchThingLauncher;
     private ActivitySubscribedThingListingBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -201,7 +209,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         }
 
         setSupportActionBar(binding.toolbarSubscribedThingListingActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarSubscribedThingListingActivity);
 
         if (getIntent().hasExtra(EXTRA_SPECIFIED_ACCOUNT)) {
@@ -238,9 +246,9 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
 
         if (isThingSelectionMode) {
             if (thingSelectionType == EXTRA_THING_SELECTION_TYPE_SUBREDDIT) {
-                getSupportActionBar().setTitle(R.string.subreddit_selection_activity_label);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.subreddit_selection_activity_label);
             } else if (thingSelectionType == EXTRA_THING_SELECTION_TYPE_MULTIREDDIT) {
-                getSupportActionBar().setTitle(R.string.multireddit_selection_activity_label);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.multireddit_selection_activity_label);
             }
         }
 
@@ -284,7 +292,9 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                     Utils.hideKeyboard(SubscribedThingListingActivity.this);
                     binding.searchContainerSubscribedThingListingActivity.setVisibility(View.GONE);
                     binding.searchEditTextSubscribedThingListingActivity.setText("");
-                    mMenu.findItem(R.id.action_search_subscribed_thing_listing_activity).setVisible(true);
+                    if (mMenu != null) {
+                        mMenu.findItem(R.id.action_search_subscribed_thing_listing_activity).setVisible(true);
+                    }
                     applySearchQuery("");
                 } else {
                     setEnabled(false);
@@ -581,7 +591,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         thingEditText.setOnEditorActionListener((textView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_DONE) {
                 Utils.hideKeyboard(this);
-                goToSubreddit(thingEditText.getText().toString());
+                goToSubreddit(Objects.requireNonNull(thingEditText.getText()).toString());
                 return true;
             }
             return false;
@@ -647,7 +657,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                 .setView(rootView)
                 .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
                     Utils.hideKeyboard(this);
-                    goToSubreddit(thingEditText.getText().toString());
+                    goToSubreddit(Objects.requireNonNull(thingEditText.getText()).toString());
                 })
                 .setNegativeButton(R.string.cancel, (dialogInterface, i) -> Utils.hideKeyboard(this))
                 .setOnDismissListener(dialogInterface -> {
@@ -727,6 +737,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
             Set<String> usernames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
             for (String path : mRedditDataRoomDatabase.multiRedditDao().getFollowedMultiRedditPaths(accountName)) {
                 if (path != null) {
+                    @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
                     String[] segments = path.split("/");
                     if (segments.length > 2 && "user".equals(segments[1])) {
                         usernames.add(segments[2]);
@@ -829,7 +840,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("SubscribedThingListingActivity", "showFollowFailureReason failed", e);
             }
             int finalMessageRes = messageRes;
             mHandler.post(() -> {
@@ -987,6 +998,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
             return 4;
         }
 
+        @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
             if (isThingSelectionMode) {
@@ -1000,6 +1012,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                             case 2:
                                 return Utils.getTabTextWithCustomFont(typeface, getString(R.string.multi_reddits));
                         }
+                    // fall through
                     case EXTRA_THING_SELECTION_TYPE_SUBREDDIT:
                         return Utils.getTabTextWithCustomFont(typeface, getString(R.string.subreddits));
                     case EXTRA_THING_SELECTION_TYPE_USER:

@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.recentsearchquery;
 
 import android.os.Handler;
+import androidx.annotation.Nullable;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
@@ -14,8 +15,8 @@ public class InsertRecentSearchQuery {
                                                        RedditDataRoomDatabase redditDataRoomDatabase,
                                                        String username,
                                                        String recentSearchQuery,
-                                                       String searchInSubredditOrUserName,
-                                                       MultiReddit searchInMultiReddit,
+                                                       @Nullable String searchInSubredditOrUserName,
+                                                       @Nullable MultiReddit searchInMultiReddit,
                                                        int searchInThingType,
                                                        InsertRecentSearchQueryListener insertRecentSearchQueryListener) {
         executor.execute(() -> {

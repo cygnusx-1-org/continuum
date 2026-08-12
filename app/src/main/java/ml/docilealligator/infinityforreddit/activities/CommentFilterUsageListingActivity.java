@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -16,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -46,7 +48,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
     private ActivityCommentFilterUsageListingBinding binding;
@@ -55,7 +57,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
     private CommentFilter commentFilter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -102,9 +104,9 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarCommentFilterUsageListingActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        commentFilter = getIntent().getParcelableExtra(EXTRA_COMMENT_FILTER);
+        commentFilter = Objects.requireNonNull(getIntent().getParcelableExtra(EXTRA_COMMENT_FILTER));
 
         setTitle(commentFilter.name);
 
@@ -113,7 +115,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
             newCommentFilterUsageBottomSheetFragment.show(getSupportFragmentManager(), newCommentFilterUsageBottomSheetFragment.getTag());
         });
 
-        adapter = new CommentFilterUsageRecyclerViewAdapter(this, customThemeWrapper, commentFilterUsage -> {
+        adapter = new CommentFilterUsageRecyclerViewAdapter(this, mCustomThemeWrapper, commentFilterUsage -> {
             CommentFilterUsageOptionsBottomSheetFragment commentFilterUsageOptionsBottomSheetFragment = new CommentFilterUsageOptionsBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable(CommentFilterUsageOptionsBottomSheetFragment.EXTRA_COMMENT_FILTER_USAGE, commentFilterUsage);
@@ -134,13 +136,13 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
         }
     }
 
-    private void editAndCommentFilterUsageNameOfUsage(int type, String nameOfUsage) {
+    private void editAndCommentFilterUsageNameOfUsage(int type, @Nullable String nameOfUsage) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_post_or_comment_filter_name_of_usage, null);
         TextView messageTextView = dialogView.findViewById(R.id.message_text_view_edit_post_or_comment_filter_name_of_usage_dialog);
         messageTextView.setVisibility(View.GONE);
         TextInputLayout textInputLayout = dialogView.findViewById(R.id.text_input_layout_edit_post_or_comment_filter_name_of_usage_dialog);
         TextInputEditText textInputEditText = dialogView.findViewById(R.id.text_input_edit_text_edit_post_or_comment_filter_name_of_usage_dialog);
-        int primaryTextColor = customThemeWrapper.getPrimaryTextColor();
+        int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
         textInputLayout.setBoxStrokeColor(primaryTextColor);
         textInputLayout.setDefaultHintTextColor(ColorStateList.valueOf(primaryTextColor));
         textInputEditText.setTextColor(primaryTextColor);
@@ -162,8 +164,8 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
                     Utils.hideKeyboard(this);
 
                     CommentFilterUsage commentFilterUsage;
-                    if (!textInputEditText.getText().toString().equals("")) {
-                        commentFilterUsage = new CommentFilterUsage(commentFilter.name, type, textInputEditText.getText().toString());
+                    if (!Objects.requireNonNull(textInputEditText.getText()).toString().equals("")) {
+                        commentFilterUsage = new CommentFilterUsage(commentFilter.name, type, Objects.requireNonNull(textInputEditText.getText()).toString());
                         SaveCommentFilterUsage.saveCommentFilterUsage(redditDataRoomDatabase, executor, commentFilterUsage);
                     }
                 })
@@ -204,7 +206,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -213,6 +215,6 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
                 binding.collapsingToolbarLayoutCommentFilterUsageListingActivity, binding.toolbarCommentFilterUsageListingActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutCommentFilterUsageListingActivity);
         applyFABTheme(binding.fabCommentFilterUsageListingActivity);
-        binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
     }
 }

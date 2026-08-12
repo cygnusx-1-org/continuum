@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.account.Account;
 
 @Entity(tableName = "read_posts", primaryKeys = {"username", "id", "read_post_type"},
@@ -33,8 +34,8 @@ public class ReadPost implements Parcelable {
     }
 
     protected ReadPost(Parcel in) {
-        username = in.readString();
-        id = in.readString();
+        username = Objects.requireNonNull(in.readString());
+        id = Objects.requireNonNull(in.readString());
         time = in.readLong();
         readPostType = in.readInt();
     }

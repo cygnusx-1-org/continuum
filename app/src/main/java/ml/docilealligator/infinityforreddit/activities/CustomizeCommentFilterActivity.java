@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -26,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.regex.PatternSyntaxException;
 import javax.inject.Inject;
@@ -69,7 +72,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
     private ActivityCustomizeCommentFilterBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -117,7 +120,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarCustomizeCommentFilterActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarCustomizeCommentFilterActivity);
 
         ActivityResultLauncher<Intent> requestAddUsersLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -127,7 +130,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
             }
 
             ArrayList<String> usernames = data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES);
-            String currentUsers = binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.getText().toString().trim();
+            String currentUsers = Objects.requireNonNull(binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.getText()).toString().trim();
             if (usernames != null && !usernames.isEmpty()) {
                 if (!currentUsers.isEmpty() && currentUsers.charAt(currentUsers.length() - 1) != ',') {
                     String newString = currentUsers + ",";
@@ -152,15 +155,16 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
         fromSettings = getIntent().getBooleanExtra(EXTRA_FROM_SETTINGS, false);
 
         if (savedInstanceState != null) {
-            commentFilter = savedInstanceState.getParcelable(COMMENT_FILTER_STATE);
-            originalName = savedInstanceState.getString(ORIGINAL_NAME_STATE);
+            commentFilter = Objects.requireNonNull(savedInstanceState.getParcelable(COMMENT_FILTER_STATE));
+            originalName = Objects.requireNonNull(savedInstanceState.getString(ORIGINAL_NAME_STATE));
             binding.displayModeSpinnerCustomizeCommentFilterActivity.setSelection(savedInstanceState.getInt(DISPLAY_MODE_SELECTED_ITEM_INDEX_STATE), false);
         } else {
-            commentFilter = getIntent().getParcelableExtra(EXTRA_COMMENT_FILTER);
-            if (commentFilter == null) {
+            CommentFilter commentFilterExtra = getIntent().getParcelableExtra(EXTRA_COMMENT_FILTER);
+            if (commentFilterExtra == null) {
                 commentFilter = new CommentFilter();
                 originalName = "";
             } else {
+                commentFilter = commentFilterExtra;
                 if (!fromSettings) {
                     originalName = "";
                 } else {
@@ -183,7 +187,7 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
         String excludeUser = intent.getStringExtra(EXTRA_EXCLUDE_USER);
 
         if (excludeUser != null && !excludeUser.equals("")) {
-            if (!binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.getText().toString().equals("")) {
+            if (!Objects.requireNonNull(binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.getText()).toString().equals("")) {
                 binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.append(",");
             }
             binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.append(excludeUser);
@@ -298,7 +302,9 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
             drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
             fCursorDrawable.set(editor, drawables);
-        } catch (Throwable ignored) { }
+        } catch (Throwable ignored) {
+            Log.d("CustomizeCommentFilterActivity", "setCursorDrawableColor: ignoring Throwable", ignored);
+        }
     }
 
     @Override
@@ -368,11 +374,11 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
     }
 
     private void constructCommentFilter() throws PatternSyntaxException {
-        commentFilter.name = binding.nameTextInputEditTextCustomizeCommentFilterActivity.getText().toString();
+        commentFilter.name = Objects.requireNonNull(binding.nameTextInputEditTextCustomizeCommentFilterActivity.getText()).toString();
         commentFilter.displayMode = binding.displayModeSpinnerCustomizeCommentFilterActivity.getSelectedItemPosition() == 0 ?
                 CommentFilter.DisplayMode.REMOVE_COMMENT : CommentFilter.DisplayMode.COLLAPSE_COMMENT;
-        commentFilter.excludeStrings = binding.excludeStringsTextInputEditTextCustomizeCommentFilterActivity.getText().toString();
-        commentFilter.excludeUsers = binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.getText().toString();
+        commentFilter.excludeStrings = Objects.requireNonNull(binding.excludeStringsTextInputEditTextCustomizeCommentFilterActivity.getText()).toString();
+        commentFilter.excludeUsers = Objects.requireNonNull(binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity.getText()).toString();
         commentFilter.maxVote = binding.maxVoteTextInputEditTextCustomizeCommentFilterActivity.getText() == null || binding.maxVoteTextInputEditTextCustomizeCommentFilterActivity.getText().toString().equals("") ? -1 : Integer.parseInt(binding.maxVoteTextInputEditTextCustomizeCommentFilterActivity.getText().toString());
         commentFilter.minVote = binding.minVoteTextInputEditTextCustomizeCommentFilterActivity.getText() == null || binding.minVoteTextInputEditTextCustomizeCommentFilterActivity.getText().toString().equals("") ? -1 : Integer.parseInt(binding.minVoteTextInputEditTextCustomizeCommentFilterActivity.getText().toString());
     }

@@ -43,6 +43,8 @@ import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.ImageLoader;
 import com.github.piasy.biv.loader.glide.GlideImageLoader;
 import java.io.File;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -95,42 +97,46 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     private boolean isActionBarHidden = false;
     private boolean isDownloading = false;
     private RequestManager glide;
+    @Nullable
     private String mImageUrl;
+    @Nullable
     private String mImageFileName;
+    @Nullable
     private String mSubredditName;
     private boolean isGif = true;
     private boolean isApng = false;
     private boolean isNsfw;
+    @Nullable
     private Typeface typeface;
     private Handler handler;
     private ActivityViewImageOrGifBinding binding;
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         getTheme().applyStyle(R.style.Theme_Normal, true);
 
-        getTheme().applyStyle(FontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(FontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(FontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontFamily.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
         BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext()));
 
@@ -169,12 +175,12 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         // Detect APNG/avatar images - check URL extension or if it's an icon/avatar
         // Use animated-capable view for avatars since they may be APNG
-        if (mImageUrl != null && (mImageUrl.toLowerCase().endsWith(".apng") ||
-            mImageUrl.toLowerCase().contains(".apng?") ||
-            mImageUrl.toLowerCase().contains(".apng&"))) {
+        if (mImageUrl != null && (mImageUrl.toLowerCase(Locale.US).endsWith(".apng") ||
+            mImageUrl.toLowerCase(Locale.US).contains(".apng?") ||
+            mImageUrl.toLowerCase(Locale.US).contains(".apng&"))) {
             isApng = true;
-        } else if (mImageFileName != null && (mImageFileName.toLowerCase().contains("-icon.") ||
-                   mImageFileName.toLowerCase().contains("avatar"))) {
+        } else if (mImageFileName != null && (mImageFileName.toLowerCase(Locale.US).contains("-icon.") ||
+                   mImageFileName.toLowerCase(Locale.US).contains("avatar"))) {
             // Avatar/icon images - treat as potentially animated
             isApng = true;
         }
@@ -184,7 +190,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             binding.titleTextViewViewImageOrGifActivity.setText(title);
         }
 
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
         binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.VISIBLE);
         binding.downloadImageViewViewImageOrGifActivity.setOnClickListener(view -> {
             if (isDownloading) {
@@ -340,8 +346,11 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
                     binding.bottomNavigationViewImageOrGifActivity.setVisibility(View.GONE);
                 }
             });
-        } else {
+        } else if (mImageUrl != null) {
             binding.imageViewViewImageOrGifActivity.showImage(Uri.parse(mImageUrl));
+        } else {
+            binding.progressBarViewImageOrGifActivity.setVisibility(View.GONE);
+            binding.loadImageErrorLinearLayoutViewImageOrGifActivity.setVisibility(View.VISIBLE);
         }
     }
 
@@ -496,7 +505,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         if (mImageUrl != null) {
             String urlExt = org.apache.commons.io.FilenameUtils.getExtension(mImageUrl);
             if (urlExt != null && !urlExt.isEmpty() && urlExt.matches("(?i)(jpg|jpeg|png|apng|gif|mp4|webm|mov|avi)")) {
-                extension = "." + urlExt.toLowerCase().substring(0, Math.min(urlExt.length(), 5));
+                extension = "." + urlExt.toLowerCase(Locale.US).substring(0, Math.min(urlExt.length(), 5));
             } else if (isApng) {
                 extension = ".apng";
             } else if (isGif) {
@@ -557,6 +566,8 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
         });
     }
 
+    // Glide's FutureTarget is intentionally not retained: the RequestListener below does the work, and the request is bound to this screen's lifecycle.
+    @SuppressWarnings("FutureReturnValueIgnored")
     private void shareGif() {
         Toast.makeText(ViewImageOrGifActivity.this, R.string.save_gif_first, Toast.LENGTH_SHORT).show();
         glide.asGif().load(mImageUrl).listener(new RequestListener<>() {
@@ -689,7 +700,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface, @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
     }
 

@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.subreddit;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -19,7 +20,7 @@ import retrofit2.Retrofit;
 
 public class FetchFlairs {
     public static void fetchFlairsInSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                              String accessToken, String subredditName,
+                                              @Nullable String accessToken, String subredditName,
                                               FetchFlairsInSubredditListener fetchFlairsInSubredditListener) {
         oauthRetrofit.create(RedditAPI.class).getFlairs(APIUtils.getOAuthHeader(accessToken), subredditName)
                 .enqueue(new Callback<>() {
@@ -51,7 +52,7 @@ public class FetchFlairs {
 
     @WorkerThread
     @Nullable
-    private static List<Flair> parseFlairs(String response) {
+    private static List<Flair> parseFlairs(@Nullable String response) {
         try {
             JSONArray jsonArray = new JSONArray(response);
             List<Flair> flairs = new ArrayList<>();
@@ -63,18 +64,18 @@ public class FetchFlairs {
 
                     flairs.add(new Flair(id, text, editable));
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("FetchFlairs", "parseFlairs failed", e);
                 }
             }
             return flairs;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("FetchFlairs", "parseFlairs failed", e);
         }
         return null;
     }
 
     public interface FetchFlairsInSubredditListener {
-        void fetchSuccessful(List<Flair> flairs);
+        void fetchSuccessful(@Nullable List<Flair> flairs);
 
         void fetchFailed();
     }

@@ -9,19 +9,23 @@ import org.gradle.api.provider.Property
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
+import org.gradle.process.ExecOperations
 import javax.inject.Inject
+import java.io.ByteArrayOutputStream
 import java.io.Serializable
+import net.ltgt.gradle.errorprone.CheckSeverity
 
 plugins {
     id 'com.android.application'
-    id 'com.gladed.androidgitversion' version '0.4.14'
     id 'com.github.ben-manes.versions' version '0.42.0'
     id 'com.github.breadmoirai.github-release' version '2.5.2'
-    id 'com.diffplug.spotless' version '7.0.2'
+    id 'com.diffplug.spotless' version '8.8.0'
     id("io.qameta.allure") version "4.1.0"
     id 'com.android.legacy-kapt'
     id 'kotlin-parcelize'
-    id("org.jetbrains.kotlin.plugin.compose") version '2.2.10'
+    id("org.jetbrains.kotlin.plugin.compose") version '2.3.21'
+    id 'io.github.takahirom.roborazzi'
+    id 'net.ltgt.errorprone' version '5.1.0'
 }
 
 def allureVersion = "2.35.2"
@@ -30,21 +34,6 @@ def aspectJVersion = '1.9.25.1'
 configurations {
     all {
         exclude module: 'httpclient'
-    }
-}
-
-// Append "-dirty" to the version name when building from a working tree that has uncommitted
-// changes to tracked files, mirroring Slide's androidGitVersion behaviour. This marks builds
-// that don't correspond to a clean commit. Untracked files are ignored (matching the plugin
-// default) so stray local files don't flag an otherwise-clean build.
-def gitVersionSuffix = {
-    try {
-        def status = providers.exec {
-            commandLine 'git', 'status', '--porcelain', '--untracked-files=no'
-        }.standardOutput.asText.get().trim()
-        return status.isEmpty() ? "" : "-dirty"
-    } catch (Exception ignored) {
-        return ""
     }
 }
 
@@ -93,7 +82,7 @@ android {
         minSdk 24
         targetSdk 35
         versionCode 223
-        versionName "8.2.5.9.9.2" + gitVersionSuffix()
+        versionName "8.2.5.9.9.9.1"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
     }
@@ -121,6 +110,13 @@ android {
             shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        beta {
+            initWith buildTypes.release
+            applicationIdSuffix '.beta'
+            // On-screen app name is overridden via the src/beta/res/values/strings.xml
+            // application_name string (mirroring src/debug), which is what the launcher label
+            // and toolbar actually use.
+        }
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
@@ -135,8 +131,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_21
-        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility JavaVersion.VERSION_24
+        targetCompatibility JavaVersion.VERSION_24
     }
 
     testOptions {
@@ -147,6 +143,13 @@ android {
         unitTests.includeAndroidResources = true
         unitTests.all {
             useJUnitPlatform()
+            // JDK 21+ warns (and a future JDK will refuse) when Mockito's inline maker self-attaches
+            // its agent at runtime; allow it explicitly. byte-buddy 1.18.11 already reads Java 25.
+            jvmArgs "-XX:+EnableDynamicAgentLoading"
+            // Gradle's 512m default is not enough for the Robolectric/Roborazzi screenshot tests:
+            // the executor dies with an OutOfMemoryError partway through a full-suite run, which
+            // surfaces as unrelated-looking test failures rather than as an obvious memory problem.
+            maxHeapSize = "1g"
         }
     }
 
@@ -175,10 +178,128 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
+}
 
+// NullAway compile-time null checking, run via Error Prone. Scope is intentionally
+// tight: every other Error Prone check is disabled, and NullAway only analyzes code
+// under an @NullMarked scope (OnlyNullMarked), so the build stays green until a
+// package opts in with a @NullMarked package-info.java. Roll out one package at a
+// time. Dagger @Inject fields are treated as initialized without a constructor
+// assignment: NullAway's default ExcludedFieldAnnotations set already includes
+// javax.inject.Inject and jakarta.inject.Inject, so injected fields won't trip the
+// initialization check. We extend that set (additively — NullAway seeds it from its
+// DEFAULT_EXCLUDED_FIELD_ANNOT, so @Inject stays covered) with androidx.room.Embedded
+// and androidx.room.Relation (Room fills those relation POJO fields via generated code)
+// plus com.google.gson.annotations.SerializedName (Gson fills @SerializedName fields via
+// reflection) — all initialized-by-framework the same way @Inject fields are. Genuinely
+// nullable framework fields are still marked @Nullable individually (e.g. a Gson field the
+// API may omit), exactly as before; the exclusion only suppresses the initialization check.
+//
+// Room's generated DAO _Impl classes are emitted into the SAME package as the @Dao
+// interface, so a @NullMarked package-info.java also covers them, and NullAway would
+// then flag their cursor-reading code (nullable column reads assigned to @NonNull entity
+// fields). TreatGeneratedAsUnannotated makes NullAway skip any class annotated @Generated
+// (Room, Dagger, etc. all carry it), which is exactly what we want: generated code is not
+// ours to null-annotate. Hand-written code is unaffected.
+//
+// The net.ltgt.errorprone plugin does NOT auto-wire Error Prone into Android Gradle
+// Plugin builds (it only supplies the `errorprone` extension and leaves the checker
+// disabled). So we enable it by hand here; the Error Prone/NullAway jars reach javac's
+// plugin path via the debugAnnotationProcessor dependencies above, and the JDK-internal
+// exports the checker needs are in gradle.properties.
+//
+// Enforcement is scoped to exactly one task: the main debug variant compile. All
+// production Java lives in src/main (there are no variant-specific Java source sets), so
+// every variant compiles identical sources — checking one is enough, and NullAway is a
+// pure compile-time check that never alters output, so release/beta/minifiedRelease
+// artifacts are byte-for-byte identical whether or not it also runs there. Matching a
+// single explicit task name (rather than "every non-test compile") is also a safe
+// allowlist: any other JavaCompile task — the release/beta/minifiedRelease main compiles,
+// the unit/android test compiles (whose *AnnotationProcessor configs don't carry Error
+// Prone), or anything AGP/a plugin adds later — stays OFF and can never hard-fail with
+// "plug-in not found". To also enforce on another variant, add its compile task to this
+// check AND add the error_prone_core + nullaway deps to that variant's *AnnotationProcessor
+// config (they are on debugAnnotationProcessor here).
+tasks.withType(JavaCompile).configureEach { compileTask ->
+    if (compileTask.name == 'compileDebugJavaWithJavac') {
+        options.compilerArgs += ['-Xmaxerrs', '100000', '-Xmaxwarns', '100000']
+    }
+    options.errorprone {
+        enabled = compileTask.name == 'compileDebugJavaWithJavac'
+        check('NullAway', CheckSeverity.ERROR)
+
+        // Error Prone's own bug patterns run alongside NullAway. Two categories are excluded
+        // wholesale by path, because a finding there is never ours to act on:
+        //
+        //  - build/generated: annotation-processor and data-binding output. Every *Binding.java
+        //    emits a labelled `missingId:` block, which alone accounted for 231 ERROR-severity
+        //    LabelledBreakTarget hits. NullAway already ignores this code via
+        //    TreatGeneratedAsUnannotated; excludedPaths does the same for the other checks.
+        //  - customviews/slidr and videoautoplay: vendored third-party sources (Slidr by
+        //    Gabriele Guerrisi; Toro by Nam Nguyen, Apache-2.0) copied into the tree. Their
+        //    `==` comparisons on Views are deliberate identity checks, and rewriting them to
+        //    .equals() would change library semantics and complicate future upstream re-syncs.
+        //    Neither package carries a @NullMarked package-info.java (JSpecify's @NullMarked is
+        //    per-package, not recursive, so customviews/package-info.java does NOT cover
+        //    customviews/slidr), so excluding them costs NullAway coverage nothing.
+        excludedPaths = '.*/(build/generated|customviews/slidr|videoautoplay)/.*'
+
+        // Style, modernization, and Javadoc checks are off: they flag idiom rather than defects,
+        // and on a fork of an upstream Java codebase they produce churn that makes merges harder
+        // without making the app more correct. The remaining checks are the ones where a finding
+        // indicates something actually wrong. Counts are from the 2026-08 baseline scan.
+        check('PatternMatchingInstanceof', CheckSeverity.OFF)        // 322 - `instanceof Foo f` rewrite
+        check('StatementSwitchToExpressionSwitch', CheckSeverity.OFF) // 154 - arrow-switch rewrite
+        check('NonApiType', CheckSeverity.OFF)                       // 144 - ArrayList vs List in signatures
+        check('EffectivelyPrivate', CheckSeverity.OFF)               // 51  - narrow visibility
+        check('UnnecessaryParentheses', CheckSeverity.OFF)           // 23
+        check('MissingSummary', CheckSeverity.OFF)                   // 22  - Javadoc
+        check('EmptyBlockTag', CheckSeverity.OFF)                    // 21  - Javadoc
+        check('UnnecessaryAssignment', CheckSeverity.OFF)            // 3
+        check('InlineMeSuggester', CheckSeverity.OFF)                // 3   - for library authors
+        check('VariableNameSameAsType', CheckSeverity.OFF)           // 5
+        check('InconsistentCapitalization', CheckSeverity.OFF)       // 2
+        check('NotJavadoc', CheckSeverity.OFF)                       // 2   - Javadoc
+        check('MixedMutabilityReturnType', CheckSeverity.OFF)        // 1
+        check('ProtectedMembersInFinalClass', CheckSeverity.OFF)     // 1
+        check('ExposedPrivateType', CheckSeverity.OFF)               // 1
+        check('InvalidParam', CheckSeverity.OFF)                     // 1   - Javadoc
+        check('InvalidLink', CheckSeverity.OFF)                      // 1   - Javadoc
+
+        option('NullAway:OnlyNullMarked', 'true')
+        option('NullAway:JSpecifyMode', 'true')
+        option('NullAway:ExcludedFieldAnnotations', 'androidx.room.Embedded,androidx.room.Relation,com.google.gson.annotations.SerializedName')
+        option('NullAway:TreatGeneratedAsUnannotated', 'true')
+        // A handful of annotation processors emit their generated classes into the root
+        // ml.docilealligator.infinityforreddit package WITHOUT a @Generated annotation, so
+        // TreatGeneratedAsUnannotated cannot see they are generated. Once that package is
+        // @NullMarked, NullAway would check these machine-written files (e.g. EventBusIndex's
+        // getSubscriberInfo returns null; the Glide-generated request builders). List them here so
+        // they are treated as unannotated, exactly like the @Generated Dagger/Room output — they are
+        // not ours to null-annotate. EventBusIndex is from greenrobot EventBus's annotation
+        // processor; GlideApp/GlideOptions/GlideRequest/GlideRequests are from Glide's.
+        option('NullAway:UnannotatedClasses',
+                'ml.docilealligator.infinityforreddit.EventBusIndex,' +
+                'ml.docilealligator.infinityforreddit.GlideApp,' +
+                'ml.docilealligator.infinityforreddit.GlideOptions,' +
+                'ml.docilealligator.infinityforreddit.GlideRequest,' +
+                'ml.docilealligator.infinityforreddit.GlideRequests')
+        // Android UI classes initialize their @NonNull fields in lifecycle callbacks (onCreate/
+        // onCreateView/onViewCreated), not the constructor. Tell NullAway to treat those as
+        // initializer methods so such fields don't trip the "not initialized" check.
+        // NOTE: This is now active for the marked Fragment-holding packages (fragments,
+        // bottomsheetfragments, settings, etc.). Only `activities` remains un-@NullMarked, so this
+        // option does nothing for that package yet; it is wired up ahead of time so it checks cleanly
+        // once it is re-marked. (PreferenceFragmentCompat.onCreatePreferences is deliberately NOT a
+        // known initializer — the settings rollout kept @NonNull fields set there either constructor-
+        // initialized or scoped to locals, and made genuinely-optional fields @Nullable instead.)
+        option('NullAway:KnownInitializers',
+                'android.app.Activity.onCreate,' +
+                'androidx.fragment.app.Fragment.onCreateView,' +
+                'androidx.fragment.app.Fragment.onViewCreated,' +
+                'androidx.fragment.app.Fragment.onCreate,' +
+                'androidx.fragment.app.Fragment.onActivityCreated')
+    }
 }
 
 def githubPropertiesFile = rootProject.file("github.properties")
@@ -188,11 +309,23 @@ if (githubPropertiesFile.exists()) {
     githubProperties.load(new FileInputStream(githubPropertiesFile))
 
     githubRelease {
-        def releaseNotes = System.getenv("RELEASE_NOTES") ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
+        // Read the release notes from the -PreleaseNotes Gradle property first, falling back to the
+        // RELEASE_NOTES environment variable, then to a generic note when neither is set. The -P
+        // property is preferred because it travels on the command line, so it survives any build
+        // invocation that does not inherit this shell's environment.
+        def releaseNotes = (providers.gradleProperty("releaseNotes")
+                .orElse(providers.environmentVariable("RELEASE_NOTES"))
+                .getOrElse("")).trim() ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
+
+        // RELEASE_VARIANT (set by scripts/release-github.sh) selects where the release is
+        // published: "beta" targets the separate continuum-beta repo with the beta APKs;
+        // anything else is a normal release to the continuum repo.
+        def isBeta = (System.getenv("RELEASE_VARIANT") ?: "release") == "beta"
+        def apkDirName = isBeta ? "beta" : "release"
 
         token = githubProperties["githubToken"]
         owner = "cygnusx-1-org"
-        repo = "continuum"
+        repo = isBeta ? "continuum-beta" : "continuum"
         tagName = android.defaultConfig.versionName ?: "default-version"
         targetCommitish = "master"
         releaseName = "Release ${android.defaultConfig.versionName ?: "default-version"}"
@@ -201,10 +334,10 @@ if (githubPropertiesFile.exists()) {
         prerelease = false
         overwrite = false
 
-        // Dynamically set releaseAssets by searching the APK path
-        def apkFiles = fileTree(dir: "build/outputs/apk/release/", include: "*.apk").files.toList()
+        // Dynamically set releaseAssets by searching the APK path for the selected variant
+        def apkFiles = fileTree(dir: "build/outputs/apk/${apkDirName}/", include: "*.apk").files.toList()
         if (apkFiles.isEmpty()) {
-            println("Warning: No APK files found in the directory 'build/outputs/apk/release/'.")
+            println("Warning: No APK files found in the directory 'build/outputs/apk/${apkDirName}/'.")
         } else {
             releaseAssets = apkFiles
         }
@@ -270,6 +403,20 @@ dependencies {
 
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    // Compile-time null checking (Error Prone + NullAway). See the JavaCompile
+    // options block below; enforcement is opt-in per package via @NullMarked.
+    // Under AGP, javac's -Xplugin/processor path is built from the annotationProcessor
+    // configuration. Scoped to debugAnnotationProcessor because the checker only runs on
+    // the debug compile (see the options block) — the unprefixed annotationProcessor would
+    // attach these jars to every variant's compile for no benefit. (The net.ltgt plugin's
+    // own `errorprone` config is never wired into AGP compile tasks.)
+    debugAnnotationProcessor 'com.google.errorprone:error_prone_core:2.50.0'
+    debugAnnotationProcessor 'com.uber.nullaway:nullaway:0.13.7'
+    // jspecify stays compileOnly on ALL variants: package-info.java's @NullMarked lives in
+    // src/main and is compiled by every variant, so each needs the annotation on its
+    // classpath (debug-scoping this would break release/beta/minifiedRelease compilation).
+    compileOnly 'org.jspecify:jspecify:1.0.0'
 
     // HTTP clients
     def retrofitVersion = '3.0.0'
@@ -398,6 +545,23 @@ dependencies {
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
     testImplementation "org.robolectric:robolectric:4.16.1"
 
+    // Roborazzi: render View layouts at arbitrary smallest-width-dp configs (no emulator) and
+    // diff them against committed golden PNGs. Driven by the recordRoborazziDebug /
+    // verifyRoborazziDebug / compareRoborazziDebug Gradle tasks. See RoborazziLayoutTest.
+    testImplementation "io.github.takahirom.roborazzi:roborazzi:1.71.0"
+    testImplementation "io.github.takahirom.roborazzi:roborazzi-junit-rule:1.71.0"
+
+    // ViewModel unit tests. Mockito's inline maker provides mockStatic() for the Java network/DB
+    // helpers the ViewModels delegate to (UploadImageUtils/SendComment); core-testing supplies
+    // InstantTaskExecutorRule for synchronous LiveData. byte-buddy/byte-buddy-agent are pinned to
+    // 1.18.11 so the inline maker reads Java 25 (class file v69) bytecode natively on this JDK-25
+    // toolchain — force-upgrading the older byte-buddy Mockito 5.23.0 would otherwise pull in.
+    testImplementation "org.mockito:mockito-core:5.23.0"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:5.4.0"
+    testImplementation "net.bytebuddy:byte-buddy:1.18.11"
+    testImplementation "net.bytebuddy:byte-buddy-agent:1.18.11"
+    testImplementation "androidx.arch.core:core-testing:2.2.0"
+
     androidTestImplementation "androidx.test.ext:junit:1.0.0"
     androidTestImplementation "androidx.test:rules:1.5.0"
     androidTestImplementation "androidx.test:runner:1.5.0"
@@ -430,10 +594,18 @@ spotless {
 
 // Replaces the legacy applicationVariants APK-renaming (removed by AGP 9's new DSL). For each
 // variant, transforms the APK artifact so each per-ABI output becomes
-// "continuum-<abi>-<versionName>.apk" (versionName already carries the git/build-type suffixes).
+// "continuum-<abi>-<versionName><-dirty?>.apk". versionName carries only the build-type suffix
+// (e.g. "-debug"); the "-dirty" marker is appended at execution time in RenameApksTask.taskAction.
 androidComponents {
     onVariants(selector().all()) { variant ->
-        def renameProvider = tasks.register("rename${variant.name.capitalize()}Apks", RenameApksTask)
+        def renameProvider = tasks.register("rename${variant.name.capitalize()}Apks", RenameApksTask) {
+            // Pin the git dirty check to the repo root so it's independent of the process CWD.
+            it.repoRoot.set(rootProject.layout.projectDirectory)
+            // Always re-run so the git dirty check reflects the current tree. The task's other
+            // inputs (base name, packaged APK) don't change when only the commit state does, so
+            // without this a "-dirty" name could linger after committing (or vice versa).
+            it.outputs.upToDateWhen { false }
+        }
         def request = variant.artifacts.use(renameProvider)
             .wiredWithDirectories(
                 { it.getApkFolder() } as kotlin.jvm.functions.Function1,
@@ -467,11 +639,39 @@ abstract class RenameApksTask extends DefaultTask {
     @Internal
     abstract Property<ArtifactTransformationRequest<RenameApksTask>> getTransformationRequest()
 
+    // Git repo root, captured at configuration time and used as the git command's working directory
+    // so the dirty check runs inside the repo regardless of the Gradle process CWD (a CWD outside the
+    // repo would make git exit non-zero and silently report a dirty build as clean). @Internal — not
+    // @Input — so Gradle doesn't snapshot the whole tree; upToDateWhen { false } already forces re-run.
+    @Internal
+    abstract DirectoryProperty getRepoRoot()
+
     private final WorkerExecutor workerExecutor
+    private final ExecOperations execOps
 
     @Inject
-    RenameApksTask(WorkerExecutor workerExecutor) {
+    RenameApksTask(WorkerExecutor workerExecutor, ExecOperations execOps) {
         this.workerExecutor = workerExecutor
+        this.execOps = execOps
+    }
+
+    // "-dirty" when tracked files have uncommitted changes, else "". Untracked files are
+    // ignored so stray local files don't flag an otherwise-clean build. A missing git binary
+    // or non-repo checkout yields "" quietly instead of failing the build.
+    private String gitDirtySuffix() {
+        try {
+            def stdout = new ByteArrayOutputStream()
+            def result = execOps.exec { spec ->
+                spec.workingDir = repoRoot.get().asFile
+                spec.commandLine 'git', 'status', '--porcelain', '--untracked-files=no'
+                spec.standardOutput = stdout
+                spec.errorOutput = new ByteArrayOutputStream() // keep git stderr out of the build log
+                spec.ignoreExitValue = true
+            }
+            return (result.exitValue == 0 && stdout.toString().trim()) ? "-dirty" : ""
+        } catch (Exception ignored) {
+            return ""
+        }
     }
 
     @TaskAction
@@ -486,6 +686,10 @@ abstract class RenameApksTask extends DefaultTask {
             }
         }
 
+        // Computed here (execution time) so it reflects the working tree on every build and is
+        // correct under the configuration cache. Captured by the work-action closure below.
+        def dirty = gitDirtySuffix()
+
         transformationRequest.get().submit(
             this,
             workerExecutor.noIsolation(),
@@ -495,7 +699,7 @@ abstract class RenameApksTask extends DefaultTask {
                     it.filterType == FilterConfiguration.FilterType.ABI
                 }?.identifier
                 def abiPart = abi ? "-${abi}" : ""
-                def newName = "continuum${abiPart}-${builtArtifact.versionName}.apk"
+                def newName = "continuum${abiPart}-${builtArtifact.versionName}${dirty}.apk"
                 params.inputApkFile.set(new File(builtArtifact.outputFile))
                 params.outputApkFile.set(new File(outputLocation.asFile, newName as String))
                 return params.outputApkFile.get().asFile

@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -20,9 +21,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -55,17 +56,18 @@ public class PostFilterUsageListingActivity extends BaseActivity {
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
-    CustomThemeWrapper customThemeWrapper;
+    CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor executor;
     public PostFilterUsageViewModel postFilterUsageViewModel;
     private PostFilterUsageRecyclerViewAdapter adapter;
     private PostFilter postFilter;
     private ActivityPostFilterApplicationBinding binding;
-        private TextInputEditText textInputEditText;
+    @SuppressWarnings("NullAway.Init")
+    private TextInputEditText textInputEditText;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         setImmersiveModeNotApplicableBelowAndroid16();
@@ -113,9 +115,9 @@ public class PostFilterUsageListingActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarPostFilterApplicationActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        postFilter = getIntent().getParcelableExtra(EXTRA_POST_FILTER);
+        postFilter = Objects.requireNonNull(getIntent().getParcelableExtra(EXTRA_POST_FILTER));
 
         setTitle(postFilter.name);
 
@@ -124,7 +126,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
             newPostFilterUsageBottomSheetFragment.show(getSupportFragmentManager(), newPostFilterUsageBottomSheetFragment.getTag());
         });
 
-        adapter = new PostFilterUsageRecyclerViewAdapter(this, customThemeWrapper, postFilterUsage -> {
+        adapter = new PostFilterUsageRecyclerViewAdapter(this, mCustomThemeWrapper, postFilterUsage -> {
             PostFilterUsageOptionsBottomSheetFragment postFilterUsageOptionsBottomSheetFragment = new PostFilterUsageOptionsBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable(PostFilterUsageOptionsBottomSheetFragment.EXTRA_POST_FILTER_USAGE, postFilterUsage);
@@ -159,16 +161,16 @@ public class PostFilterUsageListingActivity extends BaseActivity {
         }
     }
 
-    private void editAndPostFilterUsageNameOfUsage(int type, String nameOfUsage) {
+    private void editAndPostFilterUsageNameOfUsage(int type, @Nullable String nameOfUsage) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_post_or_comment_filter_name_of_usage, null);
         TextInputLayout textInputLayout = dialogView.findViewById(R.id.text_input_layout_edit_post_or_comment_filter_name_of_usage_dialog);
         textInputEditText = dialogView.findViewById(R.id.text_input_edit_text_edit_post_or_comment_filter_name_of_usage_dialog);
         ImageView excludeIv = dialogView.findViewById(R.id.add_subreddits_users_image_view_customize_post_filter_activity);
 
-        int primaryIconColor = customThemeWrapper.getPrimaryIconColor();
+        int primaryIconColor = mCustomThemeWrapper.getPrimaryIconColor();
         excludeIv.setImageDrawable(
                 Utils.getTintedDrawable(this, R.drawable.ic_add_24dp, primaryIconColor));
-        int primaryTextColor = customThemeWrapper.getPrimaryTextColor();
+        int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
         textInputLayout.setBoxStrokeColor(primaryTextColor);
         textInputLayout.setDefaultHintTextColor(ColorStateList.valueOf(primaryTextColor));
         textInputEditText.setTextColor(primaryTextColor);
@@ -182,7 +184,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                 textInputEditText.setHint(R.string.settings_tab_subreddit_name);
                 excludeIv.setOnClickListener(v -> {
                     Intent intent = new Intent(this, SubredditMultiselectionActivity.class);
-                    intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS, textInputEditText.getText().toString().trim());
+                    intent.putExtra(SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS, Objects.requireNonNull(textInputEditText.getText()).toString().trim());
                     startActivityForResult(intent, ADD_SUBREDDITS_REQUEST_CODE);
                 });
                 break;
@@ -191,7 +193,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                 titleStringId = R.string.user;
                 excludeIv.setOnClickListener(view -> {
                     Intent intent = new Intent(this, UserMultiselectionActivity.class);
-                    intent.putExtra(UserMultiselectionActivity.EXTRA_GET_SELECTED_USERS, textInputEditText.getText().toString().trim());
+                    intent.putExtra(UserMultiselectionActivity.EXTRA_GET_SELECTED_USERS, Objects.requireNonNull(textInputEditText.getText()).toString().trim());
                     startActivityForResult(intent, ADD_USERS_REQUEST_CODE);
                 });
                 break;
@@ -211,10 +213,10 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                     Utils.hideKeyboard(this);
 
                     PostFilterUsage postFilterUsage;
-                    if (textInputEditText.getText().toString().equals("")) {
+                    if (Objects.requireNonNull(textInputEditText.getText()).toString().equals("")) {
                         postFilterUsage = new PostFilterUsage(postFilter.name, type, PostFilterUsage.NO_USAGE);
                     } else {
-                        postFilterUsage = new PostFilterUsage(postFilter.name, type, textInputEditText.getText().toString());
+                        postFilterUsage = new PostFilterUsage(postFilter.name, type, Objects.requireNonNull(textInputEditText.getText()).toString());
                     }
 
                     SavePostFilterUsage.savePostFilterUsage(redditDataRoomDatabase, executor, postFilterUsage);
@@ -256,7 +258,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
 
     @Override
     public CustomThemeWrapper getCustomThemeWrapper() {
-        return customThemeWrapper;
+        return mCustomThemeWrapper;
     }
 
     @Override
@@ -265,7 +267,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                 binding.collapsingToolbarLayoutPostFilterApplicationActivity, binding.toolbarPostFilterApplicationActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutPostFilterApplicationActivity);
         applyFABTheme(binding.fabPostFilterApplicationActivity);
-        binding.getRoot().setBackgroundColor(customThemeWrapper.getBackgroundColor());
+        binding.getRoot().setBackgroundColor(mCustomThemeWrapper.getBackgroundColor());
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -285,7 +287,7 @@ public class PostFilterUsageListingActivity extends BaseActivity {
                                         @Nullable ArrayList<String> newItems) {
         if (newItems == null || newItems.isEmpty()) return;
 
-        String currentCsv = field.getText().toString().trim();
+        String currentCsv = Objects.requireNonNull(field.getText()).toString().trim();
         List<String> toAdd = getToAdd(currentCsv, newItems);
         if (toAdd.isEmpty()) return;
 
@@ -297,7 +299,9 @@ public class PostFilterUsageListingActivity extends BaseActivity {
     private static List<String> getToAdd(String currentCsv, List<String> candidates) {
         Set<String> existing = new HashSet<>();
         if (!currentCsv.isEmpty()) {
-            for (String u : currentCsv.split(",")) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
+            String[] existingCsvParts = currentCsv.split(",");
+            for (String u : existingCsvParts) {
                 String t = u.trim();
                 if (!t.isEmpty()) existing.add(t);
             }

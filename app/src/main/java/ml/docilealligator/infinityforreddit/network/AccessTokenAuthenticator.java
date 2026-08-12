@@ -1,9 +1,11 @@
 package ml.docilealligator.infinityforreddit.network;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -37,7 +39,7 @@ public class AccessTokenAuthenticator implements Authenticator {
 
     @Nullable
     @Override
-    public Request authenticate(Route route, @NonNull Response response) {
+    public Request authenticate(@Nullable Route route, @NonNull Response response) {
         if (response.code() == 401) {
             String accessTokenHeader = response.request().header(APIUtils.AUTHORIZATION_KEY);
 
@@ -83,7 +85,7 @@ public class AccessTokenAuthenticator implements Authenticator {
         // Construct header directly using the stored clientId
         Map<String, String> authHeader = new HashMap<>();
         String credentials = String.format("%s:%s", mClientId, "");
-        String auth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(), android.util.Base64.NO_WRAP);
+        String auth = "Basic " + android.util.Base64.encodeToString(credentials.getBytes(StandardCharsets.UTF_8), android.util.Base64.NO_WRAP);
         authHeader.put(APIUtils.AUTHORIZATION_KEY, auth);
 
         Call<String> accessTokenCall = api.getAccessToken(authHeader, params);
@@ -102,7 +104,7 @@ public class AccessTokenAuthenticator implements Authenticator {
                     mRedditDataRoomDatabase.accountDao().updateAccessTokenAndRefreshToken(account.getAccountName(), newAccessToken, newRefreshToken);
                 }
 
-                if (mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT).equals(account.getAccountName())) {
+                if (account.getAccountName().equals(mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT))) {
                     mCurrentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.ACCESS_TOKEN, newAccessToken).apply();
                 }
 
@@ -110,7 +112,7 @@ public class AccessTokenAuthenticator implements Authenticator {
             }
             return "";
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            Log.e("AccessTokenAuthenticator", "refreshAccessToken failed", e);
         }
 
         return "";

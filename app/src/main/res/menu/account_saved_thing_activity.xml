@@ -3,6 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:application="ml.docilealligator.infinityforreddit.activities.AccountSavedThingActivity">
     <item
+        android:id="@+id/action_search_account_saved_thing_activity"
+        android:orderInCategory="0"
+        android:icon="@drawable/ic_search_toolbar_24dp"
+        android:title="@string/action_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+
+    <!-- Off-by-default "fetch fresh" toggle for the Saved posts tab's hard-TTL cache. In the overflow
+         (shown only on the Posts tab via onPrepareOptionsMenu) so it never fights the SearchView's
+         collapse. -->
+    <item
+        android:id="@+id/action_bypass_cache_account_saved_thing_activity"
+        android:orderInCategory="1"
+        android:title="@string/action_bypass_saved_cache"
+        android:checkable="true"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_refresh_account_saved_thing_activity"
         android:orderInCategory="1"
         android:title="@string/action_refresh"

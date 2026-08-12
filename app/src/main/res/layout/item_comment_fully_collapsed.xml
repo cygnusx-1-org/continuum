@@ -14,6 +14,7 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/header_linear_layout_item_comment_fully_collapsed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -41,24 +42,34 @@
                 android:paddingBottom="0dp"
                 android:textSize="?attr/font_default" />
 
-            <!-- Padding and pill background are applied in code via styleChildCountBadge(). -->
+            <!-- Padding and pill background are applied in code via styleChildCountBadge().
+                 The 4dp end margin and the score's lack of horizontal padding mirror
+                 topChildCountTextViewItemPostComment and top_score_text_view_item_post_comment in
+                 item_comment.xml, so that collapsing a comment into this row leaves the badge and
+                 the score on exactly the pixels they occupied in the full row. That holds in all
+                 three states the pair can be in: a score, no score at all with vote counts hidden,
+                 and "Hidden" for a comment whose score Reddit withholds. -->
             <TextView
                 android:id="@+id/child_count_text_view_item_comment_fully_collapsed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
                 android:fontFamily="?attr/font_family"
                 android:textSize="?attr/font_default" />
 
+            <!-- The gap in front of the timestamp belongs to the score, not to the timestamp: a
+                 GONE child drops its margins with it, so when the score is hidden the badge closes
+                 up to the same place the full row's does. As the timestamp's paddingStart it
+                 survived the score and left the badge 24px adrift. -->
             <TextView
                 android:id="@+id/score_text_view_item_comment_fully_collapsed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
                 android:fontFamily="?attr/font_family"
-                android:paddingStart="8dp"
                 android:paddingTop="0dp"
-                android:paddingEnd="8dp"
                 android:paddingBottom="0dp"
                 android:textSize="?attr/font_default" />
 
@@ -68,7 +79,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|end"
                 android:fontFamily="?attr/font_family"
-                android:paddingStart="8dp"
                 android:paddingTop="0dp"
                 android:paddingEnd="16dp"
                 android:paddingBottom="0dp"

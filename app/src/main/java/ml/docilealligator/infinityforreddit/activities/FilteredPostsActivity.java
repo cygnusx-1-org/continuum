@@ -17,6 +17,8 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -90,18 +92,23 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @Nullable
     public SubredditViewModel mSubredditViewModel;
+    @Nullable
     private String name;
+    @Nullable
     private String userWhere;
     @PostType
     private int postType;
+    @SuppressWarnings("NullAway.Init")
     private PostFragment mFragment;
+    @Nullable
     private Menu mMenu;
     private boolean isNsfwSubreddit = false;
     private ActivityFilteredThingBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -170,7 +177,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         }
 
         setSupportActionBar(binding.toolbarFilteredPostsActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarFilteredPostsActivity);
 
         name = getIntent().getStringExtra(EXTRA_NAME);
@@ -250,9 +257,14 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         }
 
         if (savedInstanceState != null) {
-            mFragment = (PostFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_filtered_posts_activity, mFragment).commit();
-            bindView(postFilter, false);
+            PostFragment restoredFragment = (PostFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
+            if (restoredFragment != null) {
+                mFragment = restoredFragment;
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_filtered_posts_activity, restoredFragment).commit();
+                bindView(postFilter, false);
+            } else {
+                bindView(postFilter, true);
+            }
         } else {
             bindView(postFilter, true);
         }
@@ -295,17 +307,22 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         switch (postType) {
             case PostType.FRONT_PAGE:
             case PostType.ANONYMOUS_FRONT_PAGE:
-                getSupportActionBar().setTitle(R.string.home);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.home);
                 break;
             case PostType.SEARCH:
-                getSupportActionBar().setTitle(R.string.search);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.search);
                 break;
-            case PostType.SUBREDDIT:
+            case PostType.SUBREDDIT: {
+                String name = this.name;
+                if (name == null) {
+                    finish();
+                    return;
+                }
                 if (name.equals("popular") || name.equals("all")) {
-                    getSupportActionBar().setTitle(name.substring(0, 1).toUpperCase() + name.substring(1));
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1));
                 } else {
                     String subredditNamePrefixed = "r/" + name;
-                    getSupportActionBar().setTitle(subredditNamePrefixed);
+                    Objects.requireNonNull(getSupportActionBar()).setTitle(subredditNamePrefixed);
 
                     mSubredditViewModel = new ViewModelProvider(this,
                             new SubredditViewModel.Factory(mRedditDataRoomDatabase, name))
@@ -317,8 +334,14 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                     });
                 }
                 break;
+            }
             case PostType.MULTIREDDIT:
-            case PostType.ANONYMOUS_MULTIREDDIT:
+            case PostType.ANONYMOUS_MULTIREDDIT: {
+                String name = this.name;
+                if (name == null) {
+                    finish();
+                    return;
+                }
                 String multiRedditName;
                 if (name.endsWith("/")) {
                     multiRedditName = name.substring(0, name.length() - 1);
@@ -326,14 +349,15 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 } else {
                     multiRedditName = name.substring(name.lastIndexOf("/") + 1);
                 }
-                getSupportActionBar().setTitle(multiRedditName);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(multiRedditName);
                 break;
+            }
             case PostType.USER:
                 String usernamePrefixed = "u/" + name;
-                getSupportActionBar().setTitle(usernamePrefixed);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(usernamePrefixed);
                 break;
             case PostType.DUPLICATES:
-                getSupportActionBar().setTitle(R.string.other_discussions);
+                Objects.requireNonNull(getSupportActionBar()).setTitle(R.string.other_discussions);
                 break;
         }
 
@@ -431,9 +455,9 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CUSTOMIZE_POST_FILTER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == CUSTOMIZE_POST_FILTER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             if (mFragment != null) {
-                mFragment.changePostFilter(data.getParcelableExtra(CustomizePostFilterActivity.RETURN_EXTRA_POST_FILTER));
+                mFragment.changePostFilter(Objects.requireNonNull(data.getParcelableExtra(CustomizePostFilterActivity.RETURN_EXTRA_POST_FILTER)));
             }
         }
     }

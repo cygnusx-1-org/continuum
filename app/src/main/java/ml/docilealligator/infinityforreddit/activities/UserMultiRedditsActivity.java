@@ -10,12 +10,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -57,13 +59,19 @@ public class UserMultiRedditsActivity extends BaseActivity {
     Executor mExecutor;
 
     private ActivityUserMultiRedditsBinding binding;
+    // Guarded in onCreate (finish() on a missing/blank extra), so it is effectively @NonNull for the
+    // rest of the lifecycle even though the early-return path leaves it unset.
+    @SuppressWarnings("NullAway.Init")
     private String username;
+    @Nullable
     private UserMultiRedditsRecyclerViewAdapter mAdapter;
+    @Nullable
     private ArrayList<MultiReddit> mMultiReddits;
+    @Nullable
     private Set<String> mOriginalSavedPaths;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -110,16 +118,17 @@ public class UserMultiRedditsActivity extends BaseActivity {
         }
 
         setSupportActionBar(binding.toolbarUserMultiRedditsActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.toolbarUserMultiRedditsActivity);
 
-        username = getIntent().getStringExtra(EXTRA_USERNAME);
-        if (username == null || username.isEmpty()) {
+        String usernameExtra = getIntent().getStringExtra(EXTRA_USERNAME);
+        if (usernameExtra == null || usernameExtra.isEmpty()) {
             Toast.makeText(this, R.string.error_getting_multi_reddit_data, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        getSupportActionBar().setTitle(getString(R.string.user_multireddits_activity_label, username));
+        username = usernameExtra;
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getString(R.string.user_multireddits_activity_label, username));
 
         binding.recyclerViewUserMultiRedditsActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
 
@@ -220,6 +229,7 @@ public class UserMultiRedditsActivity extends BaseActivity {
     private String ownerOf(MultiReddit multiReddit) {
         String path = multiReddit.getPath();
         if (path != null) {
+            @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] segments = path.split("/");
             if (segments.length > 2 && "user".equals(segments[1])) {
                 return segments[2];

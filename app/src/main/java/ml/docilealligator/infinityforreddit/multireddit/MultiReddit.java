@@ -10,6 +10,7 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import ml.docilealligator.infinityforreddit.account.Account;
 
@@ -28,12 +29,16 @@ public class MultiReddit implements Parcelable {
     @ColumnInfo(name = "name")
     private String name;
     @ColumnInfo(name = "description")
+    @Nullable
     private String description;
     @ColumnInfo(name = "copied_from")
+    @Nullable
     private String copiedFrom;
     @ColumnInfo(name = "icon_url")
+    @Nullable
     private String iconUrl;
     @ColumnInfo(name = "visibility")
+    @Nullable
     private String visibility;
     @NonNull
     @ColumnInfo(name = "username")
@@ -51,10 +56,11 @@ public class MultiReddit implements Parcelable {
     @ColumnInfo(name = "is_followed", defaultValue = "0")
     private boolean isFollowed;
     @Ignore
+    @Nullable
     private ArrayList<ExpandedSubredditInMultiReddit> subreddits;
 
     public MultiReddit(@NonNull String path, @NonNull String displayName, @NonNull String name,
-                       String description, String copiedFrom, String iconUrl, String visibility,
+                       @Nullable String description, @Nullable String copiedFrom, @Nullable String iconUrl, @Nullable String visibility,
                        @NonNull String owner, int nSubscribers, long createdUTC, boolean over18,
                        boolean isSubscriber, boolean isFavorite) {
         this.displayName = displayName;
@@ -73,9 +79,9 @@ public class MultiReddit implements Parcelable {
     }
 
     public MultiReddit(@NonNull String path, @NonNull String displayName, @NonNull String name,
-                       String description, String copiedFrom, String iconUrl, String visibility,
+                       @Nullable String description, @Nullable String copiedFrom, @Nullable String iconUrl, @Nullable String visibility,
                        @NonNull String owner, int nSubscribers, long createdUTC, boolean over18,
-                       boolean isSubscriber, boolean isFavorite, ArrayList<ExpandedSubredditInMultiReddit> subreddits) {
+                       boolean isSubscriber, boolean isFavorite, @Nullable ArrayList<ExpandedSubredditInMultiReddit> subreddits) {
         this.displayName = displayName;
         this.name = name;
         this.description = description;
@@ -93,14 +99,14 @@ public class MultiReddit implements Parcelable {
     }
 
     protected MultiReddit(Parcel in) {
-        path = in.readString();
-        displayName = in.readString();
-        name = in.readString();
+        path = Objects.requireNonNull(in.readString());
+        displayName = Objects.requireNonNull(in.readString());
+        name = Objects.requireNonNull(in.readString());
         description = in.readString();
         copiedFrom = in.readString();
         iconUrl = in.readString();
         visibility = in.readString();
-        owner = in.readString();
+        owner = Objects.requireNonNull(in.readString());
         nSubscribers = in.readInt();
         createdUTC = in.readLong();
         over18 = in.readByte() != 0;
@@ -149,6 +155,7 @@ public class MultiReddit implements Parcelable {
         this.name = name;
     }
 
+    @Nullable
     public String getDescription() {
         return description;
     }
@@ -157,6 +164,7 @@ public class MultiReddit implements Parcelable {
         this.description = description;
     }
 
+    @Nullable
     public String getCopiedFrom() {
         return copiedFrom;
     }
@@ -165,6 +173,7 @@ public class MultiReddit implements Parcelable {
         this.copiedFrom = copiedFrom;
     }
 
+    @Nullable
     public String getIconUrl() {
         return iconUrl;
     }
@@ -173,6 +182,7 @@ public class MultiReddit implements Parcelable {
         this.iconUrl = iconUrl;
     }
 
+    @Nullable
     public String getVisibility() {
         return visibility;
     }
@@ -237,6 +247,7 @@ public class MultiReddit implements Parcelable {
         isFollowed = followed;
     }
 
+    @Nullable
     public ArrayList<ExpandedSubredditInMultiReddit> getSubreddits() {
         return subreddits;
     }

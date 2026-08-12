@@ -1,14 +1,16 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -53,14 +55,20 @@ public class UserProfileImagesBatchLoader {
         mRetrofit = retrofit;
         mOauthRetrofit = oauthRetrofit;
         mAuthorFullNameToImageMap = new HashMap<>();
-        mCommentQueue = new LinkedList<>();
+        mCommentQueue = new ArrayDeque<>();
         mAuthorFullNameToListenerMap = new HashMap<>();
-        mCallingComments = new LinkedList<>();
+        mCallingComments = new ArrayList<>();
         mLoadingAuthorFullNames = new HashSet<>();
     }
 
     public void loadAuthorImages(@Nullable String accessToken, List<Comment> comments,
                                  @NonNull ViewPostDetailActivityViewModel.LoadIconListener loadIconListener) {
+        if (comments.isEmpty()) {
+            // No comments means no author to resolve an icon for, so there is nothing to report:
+            // LoadIconListener only has a success callback keyed on an author full name, and we
+            // have none. Returning here keeps the comments.get(0) calls below in bounds.
+            return;
+        }
         String authorFullName = comments.get(0).getAuthorFullName();
         synchronized (mImageMapLock) {
             if (mAuthorFullNameToImageMap.containsKey(authorFullName)) {
@@ -86,7 +94,7 @@ public class UserProfileImagesBatchLoader {
         }
     }
 
-    private void loadNextBatch(String accessToken) {
+    private void loadNextBatch(@Nullable String accessToken) {
         synchronized (mCommentQueueLock) {
             if (mCommentQueue.isEmpty()) {
                 return;
@@ -116,7 +124,8 @@ public class UserProfileImagesBatchLoader {
                             }
                         }
 
-                        UserData userData = mRedditDataRoomDatabase.userDao().getUserData(c.getAuthor());
+                        String author = c.getAuthor();
+                        UserData userData = author != null ? mRedditDataRoomDatabase.userDao().getUserData(author) : null;
                         if (userData != null) {
                             String iconImageUrl = userData.getIconUrl();
                             synchronized (mImageMapLock) {
@@ -207,7 +216,7 @@ public class UserProfileImagesBatchLoader {
     }
 
     @WorkerThread
-    private void parseUserProfileImages(String response) {
+    private void parseUserProfileImages(@Nullable String response) {
         try {
             JSONObject jsonResponse = new JSONObject(response);
             synchronized (mLoadingSetLock) {
@@ -218,16 +227,16 @@ public class UserProfileImagesBatchLoader {
                             mAuthorFullNameToImageMap.put(s, imageUrl);
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e("UserProfileImagesBatchLoader", "parseUserProfileImages failed", e);
                     }
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("UserProfileImagesBatchLoader", "parseUserProfileImages failed", e);
         }
     }
 
-    private void callListenerAndLoadNextBatch(String accessToken, boolean loadSuccessful) {
+    private void callListenerAndLoadNextBatch(@Nullable String accessToken, boolean loadSuccessful) {
         synchronized (mLoadingSetLock) {
             for (String s : mLoadingAuthorFullNames) {
                 ViewPostDetailActivityViewModel.LoadIconListener loadIconListener;

@@ -24,6 +24,7 @@ public class CustomThemeOptionsBottomSheetFragment extends LandscapeExpandedRoun
     public static final String EXTRA_INDEX_IN_THEME_LIST = "EIITL";
 
     private String themeName;
+    @Nullable
     private OnlineCustomThemeMetadata onlineCustomThemeMetadata;
     private BaseActivity activity;
 
@@ -40,11 +41,11 @@ public class CustomThemeOptionsBottomSheetFragment extends LandscapeExpandedRoun
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         FragmentCustomThemeOptionsBottomSheetBinding binding = FragmentCustomThemeOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        themeName = getArguments().getString(EXTRA_THEME_NAME);
+        themeName = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_THEME_NAME));
         onlineCustomThemeMetadata = getArguments().getParcelable(EXTRA_ONLINE_CUSTOM_THEME_METADATA);
 
         if (onlineCustomThemeMetadata != null && !onlineCustomThemeMetadata.username.equals(activity.accountName)) {

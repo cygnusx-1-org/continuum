@@ -163,7 +163,7 @@ public class EditProfileActivity extends BaseActivity {
                                         }
 
                                         @Override
-                                        public void failed(String message) {
+                                        public void failed(@Nullable String message) {
                                             Toast.makeText(EditProfileActivity.this,
                                                     getString(R.string.message_remove_banner_failed, message),
                                                     Toast.LENGTH_SHORT).show();
@@ -179,7 +179,6 @@ public class EditProfileActivity extends BaseActivity {
             glide.load(userAvatar)
                     .transform(new RoundedCornersTransformation(216, 0))
                     .into(binding.imageViewAvatarEditProfileActivity);
-            LayoutParams cAvatarLp = (LayoutParams) binding.imageViewChangeAvatarEditProfileActivity.getLayoutParams();
             if (userAvatar.contains("avatar_default_")) {
                 binding.imageViewChangeAvatarEditProfileActivity.setLongClickable(false);
                 binding.imageViewChangeAvatarEditProfileActivity.setOnLongClickListener(v -> false);
@@ -205,7 +204,7 @@ public class EditProfileActivity extends BaseActivity {
                                         }
 
                                         @Override
-                                        public void failed(String message) {
+                                        public void failed(@Nullable String message) {
                                             Toast.makeText(EditProfileActivity.this,
                                                     getString(R.string.message_remove_avatar_failed, message),
                                                     Toast.LENGTH_SHORT).show();
@@ -251,7 +250,6 @@ public class EditProfileActivity extends BaseActivity {
             return;
         }
 
-        int contentEstimatedBytes = 0;
         PersistableBundle extras = new PersistableBundle();
         extras.putString(EditProfileService.EXTRA_MEDIA_URI, mediaUri.toString());
         extras.putString(EditProfileService.EXTRA_ACCOUNT_NAME, accountName);

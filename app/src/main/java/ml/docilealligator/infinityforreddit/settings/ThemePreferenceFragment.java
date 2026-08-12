@@ -12,9 +12,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -27,6 +29,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.CustomThemeListingActivity;
 import ml.docilealligator.infinityforreddit.activities.CustomizeThemeActivity;
+import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeViewModel;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
@@ -62,10 +65,9 @@ public class ThemePreferenceFragment extends CustomFontPreferenceFragmentCompat 
     CustomThemeWrapper customThemeWrapper;
     @Inject
     Executor executor;
-    public CustomThemeViewModel customThemeViewModel;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.theme_preferences, rootKey);
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
@@ -194,7 +196,7 @@ public class ThemePreferenceFragment extends CustomFontPreferenceFragmentCompat 
             });
         }
 
-        customThemeViewModel = new ViewModelProvider(this,
+        CustomThemeViewModel customThemeViewModel = new ViewModelProvider(this,
                 new CustomThemeViewModel.Factory(redditDataRoomDatabase))
                 .get(CustomThemeViewModel.class);
         customThemeViewModel.getCurrentLightThemeLiveData().observe(this, customTheme -> {
@@ -217,15 +219,18 @@ public class ThemePreferenceFragment extends CustomFontPreferenceFragmentCompat 
                 }
             }
         });
-        customThemeViewModel.getCurrentAmoledThemeLiveData().observe(this, customTheme -> {
-            if (customizeAmoledThemePreference != null) {
-                if (customTheme != null) {
-                    customizeAmoledThemePreference.setVisible(true);
-                    customizeAmoledThemePreference.setSummary(customTheme.name);
-                } else {
-                    customizeAmoledThemePreference.setVisible(false);
+        LiveData<CustomTheme> currentAmoledThemeLiveData = customThemeViewModel.getCurrentAmoledThemeLiveData();
+        if (currentAmoledThemeLiveData != null) {
+            currentAmoledThemeLiveData.observe(this, customTheme -> {
+                if (customizeAmoledThemePreference != null) {
+                    if (customTheme != null) {
+                        customizeAmoledThemePreference.setVisible(true);
+                        customizeAmoledThemePreference.setSummary(customTheme.name);
+                    } else {
+                        customizeAmoledThemePreference.setVisible(false);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 }

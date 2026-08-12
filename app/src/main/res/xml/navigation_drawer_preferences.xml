@@ -51,5 +51,23 @@
         app:key="hide_account_karma"
         app:title="@string/settings_navigation_drawer_enable_hide_karma_title" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
+        app:title="@string/settings_quick_toggles_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="show_theme_toggle_in_navigation_drawer"
+        app:title="@string/settings_show_theme_toggle_in_navigation_drawer_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="show_nsfw_toggle_in_navigation_drawer"
+        app:title="@string/settings_show_nsfw_toggle_in_navigation_drawer_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="show_thumbnail_on_the_left_toggle_in_navigation_drawer"
+        app:title="@string/settings_show_thumbnail_on_the_left_toggle_in_navigation_drawer_title" />
+
 
 </PreferenceScreen>

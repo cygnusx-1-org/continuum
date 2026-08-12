@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.util.ArrayList;
@@ -28,13 +29,28 @@ import org.json.JSONObject;
 
 public class ParsePost {
     @WorkerThread
-    public static LinkedHashSet<Post> parsePostsSync(String response, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+    @Nullable
+    public static LinkedHashSet<Post> parsePostsSync(@Nullable String response, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
         if (response == null) {
+            return null;
+        }
+        try {
+            return parsePostsSync(new JSONObject(response), nPosts, postFilter, readPostsList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // Overload taking an already-parsed listing so a caller that also needs the raw JSON (e.g. the
+    // Saved cache) doesn't have to parse the response body a second time.
+    @Nullable
+    public static LinkedHashSet<Post> parsePostsSync(@Nullable JSONObject jsonResponse, int nPosts, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+        if (jsonResponse == null) {
             return null;
         }
         LinkedHashSet<Post> newPosts = new LinkedHashSet<>();
         try {
-            JSONObject jsonResponse = new JSONObject(response);
             JSONArray allPostsData = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
 
             //Posts listing
@@ -54,7 +70,7 @@ public class ParsePost {
                         newPostsIds.add(post.getId());
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("ParsePost", "parsePostsSync failed", e);
                 }
             }
 
@@ -74,12 +90,26 @@ public class ParsePost {
         }
     }
 
-    public static String getLastItem(String response) {
+    @Nullable
+    public static String getLastItem(@Nullable String response) {
         if (response == null) {
             return null;
         }
         try {
-            JSONObject object = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
+            return getLastItem(new JSONObject(response));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Nullable
+    public static String getLastItem(@Nullable JSONObject response) {
+        if (response == null) {
+            return null;
+        }
+        try {
+            JSONObject object = response.getJSONObject(JSONUtils.DATA_KEY);
             return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -90,7 +120,8 @@ public class ParsePost {
     // The /duplicates/{id} endpoint returns a two-element array: index 0 is the original post and
     // index 1 is the listing of other submissions of the same URL. Pull element 1 and parse it as a
     // normal posts listing.
-    public static LinkedHashSet<Post> parseDuplicatePostsSync(String response, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
+    @Nullable
+    public static LinkedHashSet<Post> parseDuplicatePostsSync(@Nullable String response, PostFilter postFilter, @Nullable ReadPostsListInterface readPostsList) {
         try {
             String duplicatesListing = new JSONArray(response).getJSONObject(1).toString();
             return parsePostsSync(duplicatesListing, -1, postFilter, readPostsList);
@@ -100,7 +131,8 @@ public class ParsePost {
         }
     }
 
-    public static String getDuplicatesLastItem(String response) {
+    @Nullable
+    public static String getDuplicatesLastItem(@Nullable String response) {
         try {
             JSONObject object = new JSONArray(response).getJSONObject(1).getJSONObject(JSONUtils.DATA_KEY);
             return object.isNull(JSONUtils.AFTER_KEY) ? null : object.getString(JSONUtils.AFTER_KEY);
@@ -158,11 +190,15 @@ public class ParsePost {
                     if (isNSFW) {
                         postId = post.getString(JSONUtils.ID_KEY);
                     } else {
-                        postId = post.getString(JSONUtils.LINK_ID_KEY).substring("t3_".length());
+                        postId = Utils.idFromFullname(post.getString(JSONUtils.LINK_ID_KEY));
                     }
-                    handler.post(() -> parseRandomPostListener.onParseRandomPostSuccess(postId, subredditName));
+                    if (postId.isEmpty()) {
+                        handler.post(parseRandomPostListener::onParseRandomPostFailed);
+                    } else {
+                        handler.post(() -> parseRandomPostListener.onParseRandomPostSuccess(postId, subredditName));
+                    }
                 }
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
                 handler.post(parseRandomPostListener::onParseRandomPostFailed);
             }
@@ -187,7 +223,7 @@ public class ParsePost {
                 subredditIconUrl = srDetail.getString(JSONUtils.ICON_IMG_KEY);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("ParsePost", "parseBasicData failed", e);
         }
         String author = data.getString(JSONUtils.AUTHOR_KEY);
         StringBuilder authorFlairHTMLBuilder = new StringBuilder();
@@ -197,7 +233,7 @@ public class ParsePost {
                 JSONObject flairObject = flairArray.getJSONObject(i);
                 String e = flairObject.getString(JSONUtils.E_KEY);
                 if (e.equals("text")) {
-                    authorFlairHTMLBuilder.append(flairObject.getString(JSONUtils.T_KEY));
+                    authorFlairHTMLBuilder.append(Html.escapeHtml(flairObject.getString(JSONUtils.T_KEY)));
                 } else if (e.equals("emoji")) {
                     authorFlairHTMLBuilder.append("<img src=\"").append(Html.escapeHtml(flairObject.getString(JSONUtils.U_KEY))).append("\">");
                 }
@@ -372,17 +408,21 @@ public class ParsePost {
         return url;
     }
 
+    // `locked` is unread here but is one of ~30 positional boolean parameters mirroring the
+    // Post constructor; dropping it from this signature and its 7 call sites risks silently
+    // misaligning the neighbouring booleans, so it stays.
+    @SuppressWarnings("UnusedVariable")
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,
-                                  String subredditName, String subredditNamePrefixed, String subredditIconUrl,
+                                  String subredditName, String subredditNamePrefixed, @Nullable String subredditIconUrl,
                                   String author, String authorFlair, String authorFlairHTML,
                                   long postTimeMillis, String title, ArrayList<Post.Preview> previews,
-                                  Map<String, MediaMetadata> mediaMetadataMap, int score, int voteType,
+                                  @Nullable Map<String, MediaMetadata> mediaMetadataMap, int score, int voteType,
                                   int nComments, int upvoteRatio, String flair, boolean hidden,
                                   boolean spoiler, boolean nsfw, boolean stickied, boolean archived,
                                   boolean locked, boolean saved, boolean sendReplies, boolean deleted,
                                   boolean removed, boolean isCrosspost, boolean canModPost, boolean approved,
-                                  long approvedAtUTC, String approvedBy, boolean spam,
-                                  String distinguished, String suggestedSort, String thumbnailUrl) throws JSONException {
+                                  long approvedAtUTC, @Nullable String approvedBy, boolean spam,
+                                  String distinguished, @Nullable String suggestedSort, String thumbnailUrl) throws JSONException {
         Post post;
 
         boolean isVideo = data.getBoolean(JSONUtils.IS_VIDEO_KEY);
@@ -631,7 +671,9 @@ public class ParsePost {
                             if (!mp4Variant.isEmpty()) {
                                 post.setMp4Variant(mp4Variant);
                             }
-                        } catch (Exception ignore) {}
+                        } catch (Exception ignore) {
+                            Log.d("ParsePost", "parseData: ignoring Exception", ignore);
+                        }
                     } else if (uri.getAuthority() != null && uri.getAuthority().contains("imgur.com") && (path.endsWith(".gifv") || path.endsWith(".mp4"))) {
                         // Imgur gifv/mp4
                         int postType = Post.VIDEO_TYPE;
@@ -853,7 +895,9 @@ public class ParsePost {
                         post.setStreamableShortCode(shortCode);
                     }
                 }
-            } catch (IllegalArgumentException ignore) { }
+            } catch (IllegalArgumentException ignore) {
+                Log.d("ParsePost", "parseData: ignoring IllegalArgumentException", ignore);
+            }
         } else if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
             if (!data.isNull(JSONUtils.GALLERY_DATA_KEY)) {
                 try {
@@ -951,7 +995,7 @@ public class ParsePost {
 ]
 }
                      */
-                    e.printStackTrace();
+                    Log.e("ParsePost", "parseData failed", e);
                 }
             } else if (post.getPostType() == Post.LINK_TYPE) {
                 String authority = uri.getAuthority();
@@ -1031,8 +1075,10 @@ public class ParsePost {
         return post;
     }
 
+    // Package-private so FetchRemovedPost can rebuild a recovered redgifs post the same way a live
+    // one is parsed (VIDEO_TYPE + isRedgifs, media.redgifs.com/<id>.mp4).
     @Nullable
-    private static String getRedgifsId(JSONObject data) {
+    static String getRedgifsId(JSONObject data) {
         try {
             String redgifsId = data.getJSONObject(JSONUtils.MEDIA_KEY).getJSONObject(JSONUtils.O_EMBED_KEY).getString(JSONUtils.THUMBNAIL_URL_KEY);
             redgifsId = redgifsId.substring(redgifsId.lastIndexOf("/") + 1);
@@ -1048,7 +1094,7 @@ public class ParsePost {
         }
     }
 
-    private static String getRedgifsVideoUrl(String redgifsId) {
+    static String getRedgifsVideoUrl(String redgifsId) {
         return "https://media.redgifs.com/" + redgifsId + ".mp4";
     }
 

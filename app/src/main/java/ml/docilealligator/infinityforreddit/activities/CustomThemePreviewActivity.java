@@ -19,6 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
@@ -35,6 +36,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
@@ -56,14 +58,16 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 public class CustomThemePreviewActivity extends AppCompatActivity implements CustomFontReceiver {
 
     public static final String EXTRA_CUSTOM_THEME_SETTINGS_ITEMS = "ECTSI";
+    @Nullable
     public Typeface typeface;
+    @Nullable
     public Typeface titleTypeface;
+    @Nullable
     public Typeface contentTypeface;
 
     @Inject
     @Named("default")
     SharedPreferences mSharedPreferences;
-    private ArrayList<CustomThemeSettingsItem> customThemeSettingsItems;
     private CustomTheme customTheme;
     private int expandedTabTextColor;
     private int expandedTabBackgroundColor;
@@ -76,20 +80,23 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
     private int systemVisibilityToolbarExpanded = 0;
     private int systemVisibilityToolbarCollapsed = 0;
     private int topSystemBarHeight;
+    @Nullable
     private SliderPanel mSliderPanel;
     private ActivityThemePreviewBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
-        customThemeSettingsItems = getIntent().getParcelableArrayListExtra(EXTRA_CUSTOM_THEME_SETTINGS_ITEMS);
-        customTheme = CustomTheme.convertSettingsItemsToCustomTheme(customThemeSettingsItems, "ThemePreview");
+        ArrayList<CustomThemeSettingsItem> customThemeSettingsItems =
+                getIntent().getParcelableArrayListExtra(EXTRA_CUSTOM_THEME_SETTINGS_ITEMS);
+        customTheme = CustomTheme.convertSettingsItemsToCustomTheme(
+                Objects.requireNonNull(customThemeSettingsItems), "ThemePreview");
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
-        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, "2"));
+        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM));
         switch (systemThemeType) {
             case 0:
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
@@ -168,14 +175,14 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
             }
         }
 
-        getTheme().applyStyle(FontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(FontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.FONT_SIZE_KEY, FontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(TitleFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(TitleFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.TITLE_FONT_SIZE_KEY, TitleFontStyle.Normal.name()))).getResId(), true);
 
-        getTheme().applyStyle(ContentFontStyle.valueOf(mSharedPreferences
-                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name())).getResId(), true);
+        getTheme().applyStyle(ContentFontStyle.valueOf(Objects.requireNonNull(mSharedPreferences
+                .getString(SharedPreferencesUtils.CONTENT_FONT_SIZE_KEY, ContentFontStyle.Normal.name()))).getResId(), true);
 
         binding = ActivityThemePreviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -319,7 +326,7 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
         setSupportActionBar(binding.toolbar);
 
         binding.subscribeSubredditChipThemePreviewActivity.setOnClickListener(view -> {
-            if (binding.subscribeSubredditChipThemePreviewActivity.getText().equals(getResources().getString(R.string.subscribe))) {
+            if (binding.subscribeSubredditChipThemePreviewActivity.getText().toString().equals(getResources().getString(R.string.subscribe))) {
                 binding.subscribeSubredditChipThemePreviewActivity.setText(R.string.unsubscribe);
                 binding.subscribeSubredditChipThemePreviewActivity.setChipBackgroundColor(ColorStateList.valueOf(subscribedColor));
             } else {
@@ -494,16 +501,14 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
     }
 
     @Override
-    public void setCustomFont(Typeface typeface, Typeface titleTypeface, Typeface contentTypeface) {
+    public void setCustomFont(@Nullable Typeface typeface, @Nullable Typeface titleTypeface,
+                              @Nullable Typeface contentTypeface) {
         this.typeface = typeface;
         this.titleTypeface = titleTypeface;
         this.contentTypeface = contentTypeface;
     }
 
     private class SectionsPagerAdapter extends FragmentPagerAdapter {
-        private ThemePreviewPostsFragment themePreviewPostsFragment;
-        private ThemePreviewCommentsFragment themePreviewCommentsFragment;
-
         SectionsPagerAdapter(FragmentManager fm) {
             super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
@@ -522,6 +527,7 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
             return 2;
         }
 
+        @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
@@ -531,20 +537,6 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
                     return Utils.getTabTextWithCustomFont(typeface, "Comments");
             }
             return null;
-        }
-
-        @NonNull
-        @Override
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            Fragment fragment = (Fragment) super.instantiateItem(container, position);
-            switch (position) {
-                case 0:
-                    themePreviewPostsFragment = (ThemePreviewPostsFragment) fragment;
-                    break;
-                case 1:
-                    themePreviewCommentsFragment = (ThemePreviewCommentsFragment) fragment;
-            }
-            return fragment;
         }
     }
 }

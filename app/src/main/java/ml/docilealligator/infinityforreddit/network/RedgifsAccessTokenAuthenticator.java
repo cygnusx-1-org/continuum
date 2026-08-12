@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.network;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import java.io.IOException;
 import ml.docilealligator.infinityforreddit.apis.RedgifsAPI;
@@ -51,7 +52,7 @@ public class RedgifsAccessTokenAuthenticator implements Interceptor {
             }
             return "";
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            Log.e("RedgifsAccessTokenAuthenticator", "refreshAccessToken failed", e);
         }
 
         return "";

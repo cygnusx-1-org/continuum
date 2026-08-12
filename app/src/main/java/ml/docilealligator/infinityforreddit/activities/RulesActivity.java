@@ -9,11 +9,13 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -58,7 +60,7 @@ public class RulesActivity extends BaseActivity {
     private ActivityRulesBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
         super.onCreate(savedInstanceState);
@@ -119,9 +121,9 @@ public class RulesActivity extends BaseActivity {
 
         binding.appbarLayoutRulesActivity.setBackgroundColor(mCustomThemeWrapper.getColorPrimary());
         setSupportActionBar(binding.toolbarRulesActivity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        mSubredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
+        mSubredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
 
         mAdapter = new RulesRecyclerViewAdapter(this, mCustomThemeWrapper, mSliderPanel, mSubredditName);
         binding.recyclerViewRulesActivity.setAdapter(mAdapter);
@@ -229,7 +231,7 @@ public class RulesActivity extends BaseActivity {
 
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
-        String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
+        String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (mAdapter != null && dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
             mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
         }

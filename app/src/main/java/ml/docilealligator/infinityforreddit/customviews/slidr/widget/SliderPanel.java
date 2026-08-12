@@ -15,6 +15,8 @@ import ml.docilealligator.infinityforreddit.customviews.slidr.model.SlidrInterfa
 import ml.docilealligator.infinityforreddit.customviews.slidr.util.ViewDragHelper;
 
 
+// Vendored from the Slidr library; NullAway is suppressed for this third-party widget.
+@SuppressWarnings("NullAway")
 public class SliderPanel extends FrameLayout {
 
     private static final int MIN_FLING_VELOCITY = 400; // dips per second

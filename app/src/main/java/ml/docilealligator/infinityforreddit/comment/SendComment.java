@@ -75,6 +75,6 @@ public class SendComment {
     public interface SendCommentListener {
         void sendCommentSuccess(Comment comment);
 
-        void sendCommentFailed(String errorMessage);
+        void sendCommentFailed(@Nullable String errorMessage);
     }
 }

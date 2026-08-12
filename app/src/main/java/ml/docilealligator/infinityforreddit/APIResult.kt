@@ -9,5 +9,5 @@ sealed class APIResult<out T> {
 
 sealed class APIError {
     data class Message(val message: String) : APIError()
-    data class MessageRes(@StringRes val resId: Int) : APIError()
+    data class MessageRes(@param:StringRes @get:StringRes val resId: Int) : APIError()
 }

@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
 import android.text.Html;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -19,7 +20,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class FetchUserFlairs {
-    public static void fetchUserFlairsInSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit, String accessToken, String subredditName, FetchUserFlairsInSubredditListener fetchUserFlairsInSubredditListener) {
+    public static void fetchUserFlairsInSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit, @Nullable String accessToken, String subredditName, FetchUserFlairsInSubredditListener fetchUserFlairsInSubredditListener) {
         oauthRetrofit.create(RedditAPI.class).getUserFlairs(APIUtils.getOAuthHeader(accessToken), subredditName)
                 .enqueue(new Callback<>() {
                     @Override
@@ -49,7 +50,8 @@ public class FetchUserFlairs {
     }
 
     @WorkerThread
-    private static ArrayList<UserFlair> parseUserFlairs(String response) {
+    @Nullable
+    private static ArrayList<UserFlair> parseUserFlairs(@Nullable String response) {
         try {
             JSONArray jsonArray = new JSONArray(response);
             ArrayList<UserFlair> userFlairs = new ArrayList<>();
@@ -77,12 +79,12 @@ public class FetchUserFlairs {
 
                     userFlairs.add(new UserFlair(id, text, authorFlairHTMLBuilder.toString(), editable, maxEmojis));
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("FetchUserFlairs", "parseUserFlairs failed", e);
                 }
             }
             return userFlairs;
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("FetchUserFlairs", "parseUserFlairs failed", e);
         }
         return null;
     }

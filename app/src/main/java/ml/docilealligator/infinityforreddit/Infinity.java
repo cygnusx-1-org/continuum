@@ -31,12 +31,14 @@ import ml.docilealligator.infinityforreddit.activities.LockScreenActivity;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.NetworkWifiStatusReceiver;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.WallpaperChangeReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.customtheme.DefaultTheme;
 import ml.docilealligator.infinityforreddit.events.ChangeAppLockEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ToggleSecureModeEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.FontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MaterialYouUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -45,8 +47,21 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 public class Infinity extends Application implements LifecycleObserver {
+    // Application-context accessor for static helpers that have no Context of their own (e.g.
+    // SavedPostCache). Set as early as possible in onCreate().
+    @Nullable
+    private static Infinity instance;
+
+    @Nullable
+    public static android.content.Context getAppContext() {
+        return instance == null ? null : instance.getApplicationContext();
+    }
+
+    @Nullable
     public Typeface typeface;
+    @Nullable
     public Typeface titleTypeface;
+    @Nullable
     public Typeface contentTypeface;
     private AppComponent mAppComponent;
     private NetworkWifiStatusReceiver mNetworkWifiStatusReceiver;
@@ -85,6 +100,8 @@ public class Infinity extends Application implements LifecycleObserver {
     public void onCreate() {
         super.onCreate();
 
+        instance = this;
+
         mAppComponent = DaggerAppComponent.factory()
                 .create(this);
 
@@ -92,18 +109,37 @@ public class Infinity extends Application implements LifecycleObserver {
 
         APIUtils.initConfigurableFields(this);
 
+        // Writes the theme preferences before the first activity reads them; the theme row follows
+        // on the executor.
+        DefaultTheme.applyOnFirstLaunch(this, mSharedPreferences, amoledThemeSharedPreferences,
+                mInternalSharedPreferences, executor, redditDataRoomDatabase);
+
         appLock = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.APP_LOCK, false);
         appLockTimeout = Long.parseLong(mSecuritySharedPreferences.getString(SharedPreferencesUtils.APP_LOCK_TIMEOUT, "600000"));
         isSecureMode = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.SECURE_MODE, false);
 
+        PostFilter.subredditFilterPrefixMatching = mSharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_PREFIX_MATCHING, false);
+        PostFilter.subredditFilterSuffixMatching = mSharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_SUFFIX_MATCHING, false);
+
+        // One-time migration: the combined "Save Sort Type" toggle was split into separate
+        // post-feed and comment toggles. Preserve a user's old choice (e.g. off) for both.
+        if (!mSharedPreferences.contains(SharedPreferencesUtils.SAVE_POST_SORT)
+                && mSharedPreferences.contains(SharedPreferencesUtils.SAVE_SORT_TYPE)) {
+            boolean savedSortType = mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_SORT_TYPE, true);
+            mSharedPreferences.edit()
+                    .putBoolean(SharedPreferencesUtils.SAVE_POST_SORT, savedSortType)
+                    .putBoolean(SharedPreferencesUtils.SAVE_COMMENT_SORT, savedSortType)
+                    .apply();
+        }
+
         try {
-            if (mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()).equals(FontFamily.Custom.name())) {
+            if (FontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))) {
                 typeface = Typeface.createFromFile(getExternalFilesDir("fonts") + "/font_family.ttf");
             }
-            if (mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()).equals(TitleFontFamily.Custom.name())) {
+            if (TitleFontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))) {
                 titleTypeface = Typeface.createFromFile(getExternalFilesDir("fonts") + "/title_font_family.ttf");
             }
-            if (mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()).equals(ContentFontFamily.Custom.name())) {
+            if (ContentFontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))) {
                 contentTypeface = Typeface.createFromFile(getExternalFilesDir("fonts") + "/content_font_family.ttf");
             }
         } catch (RuntimeException e) {

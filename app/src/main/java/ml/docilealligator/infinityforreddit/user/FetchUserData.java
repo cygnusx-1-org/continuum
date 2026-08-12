@@ -1,12 +1,14 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -27,7 +29,7 @@ public class FetchUserData {
     }
 
     public static void fetchUserData(Executor executor, Handler handler, @Nullable RedditDataRoomDatabase redditDataRoomDatabase,
-                                     @Nullable Retrofit oauthRetrofit, @Nullable Retrofit retrofit, String accessToken,
+                                     @Nullable Retrofit oauthRetrofit, @Nullable Retrofit retrofit, @Nullable String accessToken,
                                      String username, FetchUserDataListener fetchUserDataListener) {
         executor.execute(() -> {
             Call<String> userInfo;
@@ -87,7 +89,7 @@ public class FetchUserData {
 
     @WorkerThread
     private static void forceOauthFetchUserData(Handler handler, @Nullable RedditDataRoomDatabase redditDataRoomDatabase,
-                                                Retrofit oauthRetrofit, String accessToken, String username,
+                                                Retrofit oauthRetrofit, @Nullable String accessToken, String username,
                                                 FetchUserDataListener fetchUserDataListener) {
         try {
             Response<String> response = oauthRetrofit.create(RedditAPI.class).getUserDataOauth(
@@ -104,7 +106,7 @@ public class FetchUserData {
         }
     }
 
-    public static void fetchUserListingData(Executor executor, Handler handler, Retrofit retrofit, String query, String after, SortType.Type sortType, boolean nsfw,
+    public static void fetchUserListingData(Executor executor, Handler handler, Retrofit retrofit, String query, @Nullable String after, SortType.Type sortType, boolean nsfw,
                                             FetchUserListingDataListener fetchUserListingDataListener) {
         RedditAPI api = retrofit.create(RedditAPI.class);
 
@@ -116,7 +118,7 @@ public class FetchUserData {
                 if (response.isSuccessful() && response.body() != null) {
                     executor.execute(() -> {
                         try {
-                            responseString[0] = response.body();
+                            responseString[0] = Objects.requireNonNull(response.body());
                             JSONObject jsonResponse = new JSONObject(responseString[0]);
                             String newAfter = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getString(JSONUtils.AFTER_KEY);
                             JSONArray children = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
@@ -126,7 +128,7 @@ public class FetchUserData {
                                     UserData userData = parseUserDataBase(children.getJSONObject(i), false);
                                     userDataList.add(userData);
                                 } catch (JSONException e) {
-                                    e.printStackTrace();
+                                    Log.e("FetchUserData", "onResponse failed", e);
                                 }
                             }
 
@@ -165,7 +167,7 @@ public class FetchUserData {
     }
 
     private static void fetchAndPrependExactUser(Executor executor, Handler handler, Retrofit retrofit,
-                                                  String query, List<UserData> searchResults, String after,
+                                                  String query, List<UserData> searchResults, @Nullable String after,
                                                   FetchUserListingDataListener fetchUserListingDataListener) {
         executor.execute(() -> {
             try {
@@ -187,10 +189,6 @@ public class FetchUserData {
 
     @WorkerThread
     private static UserData parseUserDataBase(JSONObject userDataJson, boolean parseFullKarma) throws JSONException {
-        if (userDataJson == null) {
-            return null;
-        }
-
         userDataJson = userDataJson.getJSONObject(JSONUtils.DATA_KEY);
         String userName = userDataJson.getString(JSONUtils.NAME_KEY);
         String iconImageUrl = userDataJson.getString(JSONUtils.ICON_IMG_KEY);
@@ -237,7 +235,7 @@ public class FetchUserData {
     }
 
     public interface FetchUserListingDataListener {
-        void onFetchUserListingDataSuccess(List<UserData> userData, String after);
+        void onFetchUserListingDataSuccess(List<UserData> userData, @Nullable String after);
 
         void onFetchUserListingDataFailed();
     }

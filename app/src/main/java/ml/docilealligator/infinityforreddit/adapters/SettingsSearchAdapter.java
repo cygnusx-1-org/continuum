@@ -5,9 +5,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.settings.SettingsSearchItem;
 import ml.docilealligator.infinityforreddit.settings.SettingsSearchRegistry;
@@ -26,26 +29,37 @@ public class SettingsSearchAdapter extends RecyclerView.Adapter<SettingsSearchAd
     }
 
     public void filter(String query) {
-        String q = query == null ? "" : query.trim().toLowerCase();
+        // Locale.ROOT to match how SettingsSearchItem folded its haystack -- the default locale
+        // would make matching depend on the in-app language.
+        String q = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
         List<SettingsSearchItem> all = SettingsSearchRegistry.getInstance().getItems();
         if (q.isEmpty()) {
             mFilteredItems = new ArrayList<>(all);
         } else {
-            List<SettingsSearchItem> result = new ArrayList<>();
+            // Breadcrumbs name screens and section headings, so a query like "post" matches a
+            // great many rows through their breadcrumb alone. Put the rows whose own title matches
+            // first, and keep the rest below rather than dropping them.
+            List<SettingsSearchItem> titleMatches = new ArrayList<>();
+            List<SettingsSearchItem> otherMatches = new ArrayList<>();
             for (SettingsSearchItem item : all) {
-                if (item.title.toLowerCase().contains(q)
-                        || (item.summary != null && item.summary.toLowerCase().contains(q))
-                        || item.breadcrumb.toLowerCase().contains(q)) {
-                    result.add(item);
+                if (!item.searchHaystack.contains(q)) {
+                    continue;
                 }
+                (item.titleLower.contains(q) ? titleMatches : otherMatches).add(item);
             }
-            mFilteredItems = result;
+            titleMatches.addAll(otherMatches);
+            mFilteredItems = titleMatches;
         }
         notifyDataSetChanged();
     }
 
     public boolean isEmpty() {
         return mFilteredItems.isEmpty();
+    }
+
+    @VisibleForTesting
+    List<SettingsSearchItem> getFilteredItems() {
+        return Collections.unmodifiableList(mFilteredItems);
     }
 
     @NonNull

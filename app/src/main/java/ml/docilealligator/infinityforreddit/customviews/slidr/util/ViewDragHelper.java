@@ -23,6 +23,9 @@ import java.util.Arrays;
  * of useful operations and state tracking for allowing a user to drag and reposition
  * views within their parent ViewGroup.
  */
+// Verbatim vendored copy of AndroidX ViewDragHelper; NullAway-annotating third-party code
+// wholesale is low value, so the null-safety check is suppressed for this file.
+@SuppressWarnings("NullAway")
 public class ViewDragHelper {
     private static final String TAG = "ViewDragHelper";
     /**

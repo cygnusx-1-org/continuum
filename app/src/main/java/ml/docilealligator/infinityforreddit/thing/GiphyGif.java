@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.thing;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import java.util.Objects;
 
 public class GiphyGif implements Parcelable {
     public final String id;
@@ -15,7 +16,7 @@ public class GiphyGif implements Parcelable {
     }
 
     protected GiphyGif(Parcel in) {
-        id = in.readString();
+        id = Objects.requireNonNull(in.readString());
     }
 
     public static final Creator<GiphyGif> CREATOR = new Creator<GiphyGif>() {

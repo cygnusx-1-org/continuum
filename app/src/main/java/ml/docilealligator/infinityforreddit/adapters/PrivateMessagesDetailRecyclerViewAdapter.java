@@ -46,6 +46,7 @@ import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
+@SuppressWarnings("NullAway.Init")
 public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_MESSAGE_SENT = 0;
     private static final int VIEW_TYPE_MESSAGE_RECEIVED = 1;
@@ -111,7 +112,7 @@ public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapt
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
                 .build();
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
-        mTimeFormatPattern = sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE);
+        mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         mReceivedMessageTextColor = customThemeWrapper.getReceivedMessageTextColor();
         mSentMessageTextColor = customThemeWrapper.getSentMessageTextColor();
@@ -124,7 +125,7 @@ public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapt
         if (position == 0) {
             return mMessage.getAuthor().equals(mAccountName) ? VIEW_TYPE_MESSAGE_SENT : VIEW_TYPE_MESSAGE_RECEIVED;
         } else {
-            return mMessage.getReplies().get(position - 1).getAuthor().equals(mAccountName) ? VIEW_TYPE_MESSAGE_SENT : VIEW_TYPE_MESSAGE_RECEIVED;
+            return java.util.Objects.requireNonNull(mMessage.getReplies()).get(position - 1).getAuthor().equals(mAccountName) ? VIEW_TYPE_MESSAGE_SENT : VIEW_TYPE_MESSAGE_RECEIVED;
         }
     }
 
@@ -144,7 +145,7 @@ public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapt
         if (holder.getBindingAdapterPosition() == 0) {
             message = mMessage;
         } else {
-            message = mMessage.getReplies().get(holder.getBindingAdapterPosition() - 1);
+            message = java.util.Objects.requireNonNull(mMessage.getReplies()).get(holder.getBindingAdapterPosition() - 1);
         }
         if (message != null) {
             if (holder instanceof MessageViewHolder) {
@@ -272,7 +273,7 @@ public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapt
                 if (getBindingAdapterPosition() == 0) {
                     message = mMessage;
                 } else {
-                    message = mMessage.getReplies().get(getBindingAdapterPosition() - 1);
+                    message = java.util.Objects.requireNonNull(mMessage.getReplies()).get(getBindingAdapterPosition() - 1);
                 }
                 if (message != null) {
                     ClipboardManager clipboard = (ClipboardManager) mViewPrivateMessagesActivity.getSystemService(Context.CLIPBOARD_SERVICE);

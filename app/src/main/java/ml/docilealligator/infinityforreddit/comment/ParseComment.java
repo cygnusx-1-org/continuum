@@ -6,6 +6,7 @@ import static ml.docilealligator.infinityforreddit.comment.Comment.VOTE_TYPE_UPV
 
 import android.os.Handler;
 import android.text.Html;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
@@ -21,7 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ParseComment {
-    public static void parseComment(Executor executor, Handler handler, String response,
+    public static void parseComment(Executor executor, Handler handler, @Nullable String response,
                                     boolean expandChildren, CommentFilter commentFilter,
                                     ParseCommentListener parseCommentListener) {
         executor.execute(() -> {
@@ -50,14 +52,14 @@ public class ParseComment {
                 }
 
                 handler.post(() -> parseCommentListener.onParseCommentSuccess(newComments, commentData, parentId, moreChildrenIds));
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
                 handler.post(parseCommentListener::onParseCommentFailed);
             }
         });
     }
 
-    static void parseMoreComment(Executor executor, Handler handler, String response, boolean expandChildren, ParseCommentListener parseCommentListener) {
+    static void parseMoreComment(Executor executor, Handler handler, @Nullable String response, boolean expandChildren, ParseCommentListener parseCommentListener) {
         executor.execute(() -> {
             if (response == null) {
                 handler.post(parseCommentListener::onParseCommentFailed);
@@ -117,7 +119,7 @@ public class ParseComment {
                             Comment comment = parseSingleComment(childData, 0);
                             String parentFullName = comment.getParentId();
 
-                            Comment parentComment = findCommentByFullName(newComments, parentFullName);
+                            Comment parentComment = parentFullName != null ? findCommentByFullName(newComments, parentFullName) : null;
                             if (parentComment != null) {
                                 parentComment.setHasReply(true);
                                 parentComment.addChild(comment, parentComment.getChildCount());
@@ -126,9 +128,9 @@ public class ParseComment {
                                 // assume that it is parent of this call
                                 newComments.add(comment);
                             }
-                        } catch (JSONException e) {
+                        } catch (JSONException | RuntimeException e) {
                             // Well we need to catch and ignore the exception to not show "error loading comments" to users
-                            e.printStackTrace();
+                            Log.e("ParseComment", "parseMoreComment failed", e);
                         }
                     }
                 }
@@ -144,14 +146,14 @@ public class ParseComment {
                 }
 
                 handler.post(() -> parseCommentListener.onParseCommentSuccess(newComments, commentData, null, moreChildrenIds));
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
                 handler.post(parseCommentListener::onParseCommentFailed);
             }
         });
     }
 
-    static void parseSentComment(Executor executor, Handler handler, String response, int depth, ParseSentCommentListener parseSentCommentListener) {
+    static void parseSentComment(Executor executor, Handler handler, @Nullable String response, int depth, ParseSentCommentListener parseSentCommentListener) {
         executor.execute(() -> {
             try {
                 JSONObject sentCommentData = new JSONObject(response);
@@ -165,9 +167,11 @@ public class ParseComment {
                 Comment comment = parseSingleComment(sentCommentData, depth);
 
                 handler.post(() -> parseSentCommentListener.onParseSentCommentSuccess(comment));
-            } catch (JSONException e) {
+            } catch (JSONException | RuntimeException e) {
+                // RuntimeException too: this runs on a bare executor thread, so an unexpected field in
+                // the response must surface as a failed send instead of killing the process.
                 e.printStackTrace();
-                String errorMessage = parseSentCommentErrorMessage(response);
+                String errorMessage = APIUtils.parseApiErrorMessage(response);
                 handler.post(() -> parseSentCommentListener.onParseSentCommentFailed(errorMessage));
             }
         });
@@ -256,7 +260,7 @@ public class ParseComment {
                     c.setExpanded(true);
                 }
             }
-            if (c.hasMoreChildrenIds() && !c.getMoreChildrenIds().isEmpty()) {
+            if (c.getMoreChildrenIds() != null && !c.getMoreChildrenIds().isEmpty()) {
                 //Add a load more placeholder
                 Comment placeholder = new Comment(c.getFullName(), c.getDepth() + 1, Comment.PLACEHOLDER_LOAD_MORE_COMMENTS);
                 if (!c.isFilteredOut()) {
@@ -293,7 +297,10 @@ public class ParseComment {
         }
         String authorFlair = singleCommentData.isNull(JSONUtils.AUTHOR_FLAIR_TEXT_KEY) ? "" : singleCommentData.getString(JSONUtils.AUTHOR_FLAIR_TEXT_KEY);
         String linkAuthor = singleCommentData.has(JSONUtils.LINK_AUTHOR_KEY) ? singleCommentData.getString(JSONUtils.LINK_AUTHOR_KEY) : null;
-        String linkId = singleCommentData.getString(JSONUtils.LINK_ID_KEY).substring(3);
+        // Reddit sometimes returns an empty link_id in the response to a freshly sent comment, so this
+        // must not assume a "t3_" prefix is there to strip.
+        String linkId = singleCommentData.isNull(JSONUtils.LINK_ID_KEY)
+                ? "" : Utils.idFromFullname(singleCommentData.getString(JSONUtils.LINK_ID_KEY));
         String subredditName = singleCommentData.getString(JSONUtils.SUBREDDIT_KEY);
         String parentId = singleCommentData.getString(JSONUtils.PARENT_ID_KEY);
         boolean isSubmitter = singleCommentData.getBoolean(JSONUtils.IS_SUBMITTER_KEY);
@@ -348,35 +355,6 @@ public class ParseComment {
     }
 
     @Nullable
-    private static String parseSentCommentErrorMessage(String response) {
-        try {
-            JSONObject responseObject = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY);
-
-            if (responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() != 0) {
-                JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY)
-                        .getJSONArray(responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() - 1);
-                if (error.length() != 0) {
-                    String errorString;
-                    if (error.length() >= 2) {
-                        errorString = error.getString(1);
-                    } else {
-                        errorString = error.getString(0);
-                    }
-                    return errorString.substring(0, 1).toUpperCase() + errorString.substring(1);
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    @Nullable
     public static Comment findCommentByFullName(@NonNull List<Comment> comments, @NonNull String fullName) {
         for (Comment comment: comments) {
             if (comment.getFullName().equals(fullName) &&
@@ -403,7 +381,7 @@ public class ParseComment {
     }
 
     public interface ParseCommentListener {
-        void onParseCommentSuccess(ArrayList<Comment> topLevelComments, ArrayList<Comment> expandedComments, String parentId, ArrayList<String> moreChildrenIds);
+        void onParseCommentSuccess(ArrayList<Comment> topLevelComments, ArrayList<Comment> expandedComments, @Nullable String parentId, ArrayList<String> moreChildrenIds);
 
         void onParseCommentFailed();
     }

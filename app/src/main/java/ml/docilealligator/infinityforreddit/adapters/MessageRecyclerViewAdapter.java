@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,8 @@ import io.noties.markwon.inlineparser.HtmlInlineProcessor;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
 import io.noties.markwon.movement.MovementMethodPlugin;
+import java.util.Locale;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -44,6 +47,7 @@ import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
 
+@SuppressWarnings("NullAway.Init")
 public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_DATA = 0;
     private static final int VIEW_TYPE_ERROR = 1;
@@ -62,9 +66,11 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     private final BaseActivity mActivity;
     private final Retrofit mOauthRetrofit;
     private final Markwon mMarkwon;
+    @Nullable
     private final String mAccessToken;
     private final String mAccountName;
     private final int mMessageType;
+    @Nullable
     private NetworkState networkState;
     private final RetryLoadingMoreCallback mRetryLoadingMoreCallback;
     private final int mColorAccent;
@@ -80,7 +86,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
 
     public MessageRecyclerViewAdapter(BaseActivity activity, Retrofit oauthRetrofit,
                                       CustomThemeWrapper customThemeWrapper,
-                                      String accessToken, String accountName, String where,
+                                      @Nullable String accessToken, String accountName, String where,
                                       RetryLoadingMoreCallback retryLoadingMoreCallback) {
         super(DIFF_CALLBACK);
         mActivity = activity;
@@ -159,13 +165,18 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
 
                 ((DataViewHolder) holder).binding.authorTextViewItemMessage.setTextColor(message.isRecipientASubreddit() ? mSubredditColor : mUsernameColor);
 
-                if (message.isNew()) {
+                // Highlight if any message in the thread is unread (the root or any reply), so a
+                // thread is highlighted whether it is the latest reply or an earlier message that
+                // is unread. See issue #334.
+                if (!markAllMessagesAsRead && hasUnreadMessage(message)) {
+                    holder.itemView.setBackgroundColor(mUnreadMessageBackgroundColor);
+                } else {
+                    // Reset read rows (a recycled holder may still carry a previous unread
+                    // highlight); on "mark all as read" clear the whole thread's unread flags.
                     if (markAllMessagesAsRead) {
-                        message.setNew(false);
-                    } else {
-                        holder.itemView.setBackgroundColor(
-                                mUnreadMessageBackgroundColor);
+                        markThreadAsRead(message);
                     }
+                    holder.itemView.setBackgroundColor(mMessageBackgroundColor);
                 }
 
                 if (message.wasComment()) {
@@ -177,7 +188,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 ((DataViewHolder) holder).binding.authorTextViewItemMessage.setText(recipientUsername);
                 String subjectRaw = displayedMessage.getSubject();
                 String subject = (subjectRaw == null || subjectRaw.isEmpty()) ? "" :
-                        subjectRaw.substring(0, 1).toUpperCase() + subjectRaw.substring(1);
+                        subjectRaw.substring(0, 1).toUpperCase(Locale.getDefault()) + subjectRaw.substring(1);
                 ((DataViewHolder) holder).binding.subjectTextViewItemMessage.setText(subject);
                 mMarkwon.setMarkdown(((DataViewHolder) holder).binding.contentCustomMarkwonViewItemMessage, displayedMessage.getBody());
             }
@@ -188,7 +199,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     public int getItemViewType(int position) {
         // Reached at the end
         if (hasExtraRow() && position == getItemCount() - 1) {
-            if (networkState.getStatus() == NetworkState.Status.LOADING) {
+            if (Objects.requireNonNull(networkState).getStatus() == NetworkState.Status.LOADING) {
                 return VIEW_TYPE_LOADING;
             } else {
                 return VIEW_TYPE_ERROR;
@@ -219,7 +230,32 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
         return networkState != null && networkState.getStatus() != NetworkState.Status.SUCCESS;
     }
 
-    public void setNetworkState(NetworkState newNetworkState) {
+    private static boolean hasUnreadMessage(Message message) {
+        if (message.isNew()) {
+            return true;
+        }
+        if (message.getReplies() != null) {
+            for (Message reply : message.getReplies()) {
+                if (reply != null && hasUnreadMessage(reply)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void markThreadAsRead(Message message) {
+        message.setNew(false);
+        if (message.getReplies() != null) {
+            for (Message reply : message.getReplies()) {
+                if (reply != null) {
+                    markThreadAsRead(reply);
+                }
+            }
+        }
+    }
+
+    public void setNetworkState(@Nullable NetworkState newNetworkState) {
         NetworkState previousState = this.networkState;
         boolean previousExtraRow = hasExtraRow();
         this.networkState = newNetworkState;
@@ -230,7 +266,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
             } else {
                 notifyItemInserted(super.getItemCount());
             }
-        } else if (newExtraRow && !previousState.equals(newNetworkState)) {
+        } else if (newExtraRow && !Objects.equals(previousState, newNetworkState)) {
             notifyItemChanged(getItemCount() - 1);
         }
     }
@@ -290,11 +326,12 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                     mActivity.startActivity(intent);
                 }
 
-                if (message.getDisplayedMessage().isNew()) {
+                Message displayedMessage = message.getDisplayedMessage();
+                if (displayedMessage.isNew()) {
                     itemView.setBackgroundColor(mMessageBackgroundColor);
-                    message.setNew(false);
+                    displayedMessage.setNew(false);
 
-                    ReadMessage.readMessage(mOauthRetrofit, mAccessToken, message.getFullname(),
+                    ReadMessage.readMessage(mOauthRetrofit, mAccessToken, displayedMessage.getFullname(),
                             new ReadMessage.ReadMessageListener() {
                                 @Override
                                 public void readSuccess() {
@@ -302,9 +339,17 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                                 }
 
                                 @Override
+                                // Compares object identity deliberately (View/ViewHolder/Fragment/Node identity); these types do not override equals().
+                                @SuppressWarnings("ReferenceEquality")
                                 public void readFailed() {
-                                    message.setNew(true);
-                                    itemView.setBackgroundColor(mUnreadMessageBackgroundColor);
+                                    displayedMessage.setNew(true);
+                                    // The holder may have been recycled onto another row while the
+                                    // request was in flight; only restore the highlight if it still
+                                    // shows this message.
+                                    int position = getBindingAdapterPosition();
+                                    if (position != RecyclerView.NO_POSITION && getItem(position) == message) {
+                                        itemView.setBackgroundColor(mUnreadMessageBackgroundColor);
+                                    }
                                 }
                             });
                 }

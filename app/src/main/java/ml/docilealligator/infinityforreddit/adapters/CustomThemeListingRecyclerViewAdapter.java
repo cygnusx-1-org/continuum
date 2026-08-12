@@ -114,8 +114,26 @@ public class CustomThemeListingRecyclerViewAdapter extends RecyclerView.Adapter<
     }
 
     public void setUserThemes(List<CustomTheme> userThemes) {
-        userCustomThemes = (ArrayList<CustomTheme>) userThemes;
+        // Applying a predefined theme stores it verbatim, so it would otherwise be listed twice:
+        // once above as the theme it came from, once here. Hide the copy only while it is still
+        // identical — once edited it is the user's own theme and belongs in this section.
+        userCustomThemes = new ArrayList<>(userThemes.size());
+        for (CustomTheme userTheme : userThemes) {
+            if (!isUnmodifiedCopyOfPredefinedTheme(userTheme)) {
+                userCustomThemes.add(userTheme);
+            }
+        }
         notifyDataSetChanged();
+    }
+
+    private boolean isUnmodifiedCopyOfPredefinedTheme(CustomTheme userTheme) {
+        for (CustomTheme predefinedTheme : predefinedCustomThemes) {
+            if (predefinedTheme.name.equals(userTheme.name)) {
+                // Serializing reflects over every field, so only compare the one theme that can match.
+                return predefinedTheme.getJSONModel().equals(userTheme.getJSONModel());
+            }
+        }
+        return false;
     }
 
     class PredefinedCustomThemeViewHolder extends RecyclerView.ViewHolder {

@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.settings;
 
 import android.os.Bundle;
+import androidx.annotation.Nullable;
 import androidx.preference.SwitchPreference;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
@@ -11,7 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 public class ImmersiveInterfacePreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.immersive_interface_preferences, rootKey);
 
         SwitchPreference immersiveInterfaceSwitch = findPreference(SharedPreferencesUtils.IMMERSIVE_INTERFACE_KEY);
