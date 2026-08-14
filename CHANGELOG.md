@@ -9,6 +9,13 @@ Note v8a is the 64-bit build, and should be considered the default choice.
 * Updated to upstream's 8.3.0-beta6
 * Implemented Missing "Respond to comment" feature in Beta version #357
 
+8.3.0.1-beta6 / 2026-8-14
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Updated to upstream's 8.3.0-beta6
+* Implemented Missing "Respond to comment" feature in Beta version #357
+
 8.3.0.1-beta5 / 2026-8-3
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
