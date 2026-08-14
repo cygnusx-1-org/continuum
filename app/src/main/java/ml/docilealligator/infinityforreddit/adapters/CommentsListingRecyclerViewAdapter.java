@@ -43,6 +43,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSh
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.CommentIndentationView;
+import ml.docilealligator.infinityforreddit.customviews.CommentToolbar;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
@@ -331,15 +332,13 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                     ((CommentBaseViewHolder) holder).saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                 }
 
-                if (itemWidth > 350) {
-                    if (((CommentBaseViewHolder) holder).saveButton != null) {
-                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    if (((CommentBaseViewHolder) holder).saveButton != null) {
-                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
-                    }
-                }
+                // Save visibility belongs to CommentToolbar, which measures the row instead of
+                // guessing from a dp threshold. Declaring the intent here rather than writing the
+                // visibility directly is also what tells the toolbar its content has been rebound,
+                // so it re-runs the fit search for this row instead of reusing the level it worked
+                // out for whichever row this holder showed last. There is never an expand chevron
+                // in a comments listing.
+                ((CommentBaseViewHolder) holder).bottomConstraintLayout.setOptionalVisibility(true, false);
             }
         }
     }
@@ -477,9 +476,13 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         this.canStartActivity = canStartActivity;
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        mEmotePlugin.setDataSavingMode(dataSavingMode);
-        mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        // Both have to be told, so neither call may sit on the right of a short-circuiting ||:
+        // the two start in step, so the emote plugin reports a change first and the entry would
+        // never be updated at all.
+        boolean emoteChanged = mEmotePlugin.setDataSavingMode(dataSavingMode);
+        boolean imageAndGifChanged = mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+        return emoteChanged || imageAndGifChanged;
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
@@ -500,7 +503,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         TextView authorFlairTextView;
         TextView commentTimeTextView;
         RecyclerView commentMarkdownView;
-        ConstraintLayout bottomConstraintLayout;
+        CommentToolbar bottomConstraintLayout;
         MaterialButton upvoteButton;
         TextView scoreTextView;
         MaterialButton downvoteButton;
@@ -520,7 +523,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                          TextView authorFlairTextView,
                          TextView commentTimeTextView,
                          RecyclerView commentMarkdownView,
-                         ConstraintLayout bottomConstraintLayout,
+                         CommentToolbar bottomConstraintLayout,
                          MaterialButton upvoteButton,
                          TextView scoreTextView,
                          MaterialButton downvoteButton,
@@ -582,15 +585,17 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 constraintSet.connect(scoreTextView.getId(), ConstraintSet.START, upvoteButton.getId(), ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.START, scoreTextView.getId(), ConstraintSet.END);
+                // Mirror of the XML chain, so the overflow button keeps the outer edge here too:
+                // more, reply, save, expand, then the spacer.
                 constraintSet.connect(placeholder.getId(), ConstraintSet.END, upvoteButton.getId(), ConstraintSet.START);
-                constraintSet.connect(placeholder.getId(), ConstraintSet.START, moreButton.getId(), ConstraintSet.END);
-                constraintSet.connect(moreButton.getId(), ConstraintSet.START, expandButton.getId(), ConstraintSet.END);
-                constraintSet.connect(moreButton.getId(), ConstraintSet.END, placeholder.getId(), ConstraintSet.START);
+                constraintSet.connect(placeholder.getId(), ConstraintSet.START, expandButton.getId(), ConstraintSet.END);
+                constraintSet.connect(moreButton.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+                constraintSet.connect(moreButton.getId(), ConstraintSet.END, replyButton.getId(), ConstraintSet.START);
                 constraintSet.connect(expandButton.getId(), ConstraintSet.START, saveButton.getId(), ConstraintSet.END);
-                constraintSet.connect(expandButton.getId(), ConstraintSet.END, moreButton.getId(), ConstraintSet.START);
+                constraintSet.connect(expandButton.getId(), ConstraintSet.END, placeholder.getId(), ConstraintSet.START);
                 constraintSet.connect(saveButton.getId(), ConstraintSet.START, replyButton.getId(), ConstraintSet.END);
                 constraintSet.connect(saveButton.getId(), ConstraintSet.END, expandButton.getId(), ConstraintSet.START);
-                constraintSet.connect(replyButton.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+                constraintSet.connect(replyButton.getId(), ConstraintSet.START, moreButton.getId(), ConstraintSet.END);
                 constraintSet.connect(replyButton.getId(), ConstraintSet.END, saveButton.getId(), ConstraintSet.START);
                 constraintSet.applyTo(bottomConstraintLayout);
             }

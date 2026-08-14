@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <LinearLayout
+        <ml.docilealligator.infinityforreddit.customviews.CollapsedCommentHeader
             android:id="@+id/header_linear_layout_item_comment_fully_collapsed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
                 android:paddingBottom="0dp"
                 android:textSize="?attr/font_default" />
 
-        </LinearLayout>
+        </ml.docilealligator.infinityforreddit.customviews.CollapsedCommentHeader>
 
         <View
             android:id="@+id/divider_item_comment_fully_collapsed"

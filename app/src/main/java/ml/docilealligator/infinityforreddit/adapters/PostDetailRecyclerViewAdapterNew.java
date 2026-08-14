@@ -43,6 +43,7 @@ import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.TimeBar;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -70,6 +71,7 @@ import javax.inject.Provider;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
+import ml.docilealligator.infinityforreddit.PostGalleryGridLayoutItemDecoration;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
@@ -199,6 +201,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final boolean mHideSubredditAndUserPrefix;
     private final boolean mHideTheNumberOfVotes;
     private final boolean mHideTheNumberOfComments;
+    private final boolean mShowGalleryMediaAsGrid;
     private final boolean mSeparatePostAndComments;
     private final boolean mLegacyAutoplayVideoControllerUI;
     private final boolean mEasierToWatchInFullScreen;
@@ -336,6 +339,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mHideSubredditAndUserPrefix = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
         mHideTheNumberOfVotes = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES, false);
         mHideTheNumberOfComments = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_COMMENTS, false);
+        mShowGalleryMediaAsGrid = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false);
 
         mPostHistorySharedPreferences = postHistorySharedPreferences;
 
@@ -983,12 +987,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     }
                 }
             } else if (holder instanceof PostDetailGalleryViewHolder) {
+                int gallerySize = mPost.getGallery().size();
                 if (mDataSavingMode && mDisableImagePreview) {
                     ((PostDetailGalleryViewHolder) holder).binding.noPreviewPostTypeImageViewItemPostDetailGallery.setVisibility(View.VISIBLE);
                     ((PostDetailGalleryViewHolder) holder).binding.noPreviewPostTypeImageViewItemPostDetailGallery.setImageResource(R.drawable.ic_gallery_day_night_24dp);
                 } else {
                     ((PostDetailGalleryViewHolder) holder).binding.galleryFrameLayoutItemPostDetailGallery.setVisibility(View.VISIBLE);
-                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, 1, mPost.getGallery().size()));
+                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, 1, gallerySize));
                     Post.Preview preview = getSuitablePreview(mPost.getPreviews());
                     if (preview != null) {
                         if (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0) {
@@ -1016,6 +1021,28 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery)
                         );
                     }
+                }
+
+                RecyclerView.LayoutManager layoutManager = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager();
+                if (layoutManager instanceof GridLayoutManager) {
+                    int spanCount = gallerySize == 2 || gallerySize == 4 ? 2 : 3;
+                    ((GridLayoutManager) layoutManager).setSpanCount(spanCount);
+                    if (((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getItemDecorationCount() > 0) {
+                        RecyclerView.ItemDecoration itemDecoration = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getItemDecorationAt(0);
+                        if (itemDecoration instanceof PostGalleryGridLayoutItemDecoration) {
+                            ((PostGalleryGridLayoutItemDecoration) itemDecoration).setSpanCount(spanCount);
+                        }
+                    }
+
+                    int padding = (int) (8 * mScale);
+                    ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.setPadding(
+                            0, 0, padding, 0
+                    );
+                    ((PostDetailGalleryViewHolder) holder).adapter.setIsGridLayout(true);
+                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setVisibility(View.GONE);
+                } else if (layoutManager instanceof LinearLayoutManagerBugFixed) {
+                    ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.setPadding(0, 0, 0, 0);
+                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -1231,14 +1258,25 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mNeedBlurSpoiler = needBlurSpoiler;
     }
 
-    public void setAutoplay(boolean autoplay) {
-        mAutoplay = autoplay;
+    public boolean setAutoplay(boolean autoplay) {
+        if (mAutoplay != autoplay) {
+            mAutoplay = autoplay;
+            return true;
+        }
+
+        return false;
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        mDataSavingMode = dataSavingMode;
-        mEmotePlugin.setDataSavingMode(dataSavingMode);
-        mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        if (mDataSavingMode != dataSavingMode) {
+            mDataSavingMode = dataSavingMode;
+            mEmotePlugin.setDataSavingMode(dataSavingMode);
+            mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+
+            return true;
+        }
+
+        return false;
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
@@ -1548,11 +1586,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 }
                 PostOptionsBottomSheetFragment postOptionsBottomSheetFragment;
                 if (mPost.getPostType() == Post.GALLERY_TYPE && this instanceof PostDetailGalleryViewHolder) {
-                    postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost,
-                            mFragment.getPostListPosition(),
-                            ((LinearLayoutManagerBugFixed) ((PostDetailGalleryViewHolder) this).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager()).findFirstVisibleItemPosition());
+                    RecyclerView.LayoutManager layoutManager = ((PostDetailGalleryViewHolder) this).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager();
+                    if (layoutManager instanceof LinearLayoutManagerBugFixed) {
+                        postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost,
+                                mFragment.getPostListPosition(),
+                                ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition(),
+                                false);
+                    } else {
+                        postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost, mFragment.getPostListPosition(), false);
+                    }
                 } else {
-                    postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost, mFragment.getPostListPosition());
+                    postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost, mFragment.getPostListPosition(), false);
                 }
                 postOptionsBottomSheetFragment.show(mFragment.getChildFragmentManager(), postOptionsBottomSheetFragment.getTag());
                 return true;
@@ -2796,7 +2840,16 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     mCardViewColor, mCommentColor, mScale);
             binding.galleryRecyclerViewItemPostDetailGallery.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(binding.galleryRecyclerViewItemPostDetailGallery);
-            LinearLayoutManagerBugFixed layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
+            RecyclerView.LayoutManager layoutManager;
+            if (mShowGalleryMediaAsGrid) {
+                adapter.setIsGridLayout(true);
+                layoutManager = new GridLayoutManager(mActivity, 3);
+                PostGalleryGridLayoutItemDecoration itemDecoration =
+                        new PostGalleryGridLayoutItemDecoration(mActivity, R.dimen.staggeredLayoutManagerItemOffset, 2);
+                binding.galleryRecyclerViewItemPostDetailGallery.addItemDecoration(itemDecoration);
+            } else {
+                layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
+            }
             binding.galleryRecyclerViewItemPostDetailGallery.setLayoutManager(layoutManager);
             binding.galleryRecyclerViewItemPostDetailGallery.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -2810,7 +2863,9 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     if (mPost == null) {
                         return;
                     }
-                    binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, layoutManager.findFirstVisibleItemPosition() + 1, mPost.getGallery().size()));
+                    if (layoutManager instanceof LinearLayoutManagerBugFixed) {
+                        binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition() + 1, mPost.getGallery().size()));
+                    }
                 }
             });
             binding.galleryRecyclerViewItemPostDetailGallery.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
@@ -2865,7 +2920,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                     int position = getBindingAdapterPosition();
                                     if (position >= 0) {
                                         if (mPost != null) {
-                                            openMedia(mPost, layoutManager.findFirstVisibleItemPosition());
+                                            View itemView = binding.galleryRecyclerViewItemPostDetailGallery.findChildViewUnder(e.getX(), e.getY());
+                                            int currentItemPosition = -1;
+                                            if (itemView != null) {
+                                                currentItemPosition = binding.galleryRecyclerViewItemPostDetailGallery.getChildAdapterPosition(itemView);
+                                            }
+                                            openMedia(mPost, Math.max(0, currentItemPosition));
                                         }
                                     }
                                 }
@@ -2901,7 +2961,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             });
 
             binding.noPreviewPostTypeImageViewItemPostDetailGallery.setOnClickListener(view -> {
-                openMedia(mPost, layoutManager.findFirstVisibleItemPosition());
+                openMedia(mPost);
             });
         }
     }

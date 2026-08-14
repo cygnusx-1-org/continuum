@@ -269,8 +269,13 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         this.currentPostId = postId;
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        this.dataSavingMode = dataSavingMode;
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        if (this.dataSavingMode != dataSavingMode) {
+            this.dataSavingMode = dataSavingMode;
+            return true;
+        }
+
+        return false;
     }
 
     public void setBlurImage(boolean blurImage) {

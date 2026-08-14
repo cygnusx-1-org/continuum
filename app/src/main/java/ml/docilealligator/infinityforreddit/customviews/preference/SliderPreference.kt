@@ -66,10 +66,18 @@ class SliderPreference @JvmOverloads constructor(
 
         val slider = holder.findViewById(R.id.slider_preference_slider) as? Slider
         slider?.apply {
+            // onBindViewHolder runs again on every notifyChanged(), including the one the listener
+            // below fires, so without clearing first the listeners pile up on the recycled view and
+            // each drag step persists once per accumulated listener. Clear before assigning value,
+            // since Slider dispatches its change listeners for programmatic sets too.
+            clearOnChangeListeners()
             valueFrom = min.toFloat()
             valueTo = max.toFloat()
             stepSize = this@SliderPreference.stepSize.toFloat()
-            value = getPersistedInt(defaultValue).toFloat()
+            // Slider throws if the value falls outside [valueFrom, valueTo], so never hand it a
+            // stored value straight through — an install predating a change to sliderMin/sliderMax
+            // still carries the old range.
+            value = getPersistedInt(defaultValue).coerceIn(min, max).toFloat()
 
             addOnChangeListener { _, newValue, _ ->
                 persistInt(newValue.toInt())
@@ -120,14 +128,25 @@ class SliderPreference @JvmOverloads constructor(
     override fun onSetInitialValue(defaultValue: Any?) {
         if (defaultValue is Int) {
             this.defaultValue = defaultValue
-        } else {
-            this.defaultValue = 0
         }
+        // Write the value through on first initialisation, the way the stock AndroidX preferences
+        // do. Without this the key stays absent from SharedPreferences until the slider is dragged,
+        // so "fresh install" and "explicitly set to the default" are different states on disk, and
+        // any reader whose getInt() fallback differs from app:defaultValue sees a different value in
+        // each. A value outside the slider's range was never chosen by the user, so heal it back to
+        // the declared default rather than clamping to an edge.
+        val stored = getPersistedInt(this.defaultValue)
+        persistInt(if (stored in min..max) stored else this.defaultValue)
         notifyChanged()
     }
 
     override fun onGetDefaultValue(a: TypedArray, index: Int): Any? {
-        return a.getInt(index, 0)
+        // Capture app:defaultValue here rather than only in onSetInitialValue: this runs whenever
+        // the preference is inflated, whereas onSetInitialValue is handed the default only when the
+        // key is absent and is handed null once it exists. Relying on the latter left defaultValue
+        // at 0 for every install that had already stored a value.
+        defaultValue = a.getInt(index, 0)
+        return defaultValue
     }
 
     fun setSummaryTemplate(stringResId: Int) {

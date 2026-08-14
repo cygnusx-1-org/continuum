@@ -52,6 +52,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSh
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.CommentIndentationView;
+import ml.docilealligator.infinityforreddit.customviews.CommentToolbar;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
@@ -575,13 +576,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                 ((CommentBaseViewHolder) holder).commentIndentationView.setShowOnlyOneDivider(mShowOnlyOneCommentLevelIndicator);
                 ((CommentBaseViewHolder) holder).commentIndentationView.setLevelAndColors(comment.getDepth(), verticalBlockColors);
-                /*if (comment.getDepth() >= mDepthThreshold) {
-                    ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
-                    ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
-                } else {
-                    ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
-                    ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.VISIBLE);
-                }*/
+                // The reply button is never hidden. When the row runs out of room CommentToolbar
+                // drops the options that are also reachable from the overflow sheet and then shrinks
+                // the icons, so there is nothing left for a depth threshold to decide.
+                ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.VISIBLE);
 
                 if (comment.hasReply()) {
                     if (comment.isExpanded()) {
@@ -589,8 +587,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     } else {
                         ((CommentBaseViewHolder) holder).expandButton.setCompoundDrawablesWithIntrinsicBounds(expandDrawable, null, null, null);
                     }
-                    ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
                 }
+                ((CommentBaseViewHolder) holder).bottomConstraintLayout.setOptionalVisibility(
+                        true, comment.hasReply());
 
                 switch (comment.getVoteType()) {
                     case Comment.VOTE_TYPE_UPVOTE:
@@ -635,48 +634,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     }
                 }
 
-                int bottomToolbarWidth = itemWidth - comment.getDepth() * 12;
-                if (bottomToolbarWidth > 420) {
-                    if (((CommentBaseViewHolder) holder).saveButton != null) {
-                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
-                    }
-                    if (((CommentBaseViewHolder) holder).replyButton != null) {
-                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.VISIBLE);
-                    }
-                    if (((CommentBaseViewHolder) holder).expandButton != null && comment.hasReply()) {
-                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
-                    }
-                } else if (bottomToolbarWidth > 350) {
-                    if (((CommentBaseViewHolder) holder).saveButton != null) {
-                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
-                    }
-                    if (((CommentBaseViewHolder) holder).replyButton != null) {
-                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
-                    }
-                    if (((CommentBaseViewHolder) holder).expandButton != null && comment.hasReply()) {
-                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
-                    }
-                } else if (bottomToolbarWidth > 300) {
-                    if (((CommentBaseViewHolder) holder).saveButton != null) {
-                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
-                    }
-                    if (((CommentBaseViewHolder) holder).replyButton != null) {
-                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
-                    }
-                    if (((CommentBaseViewHolder) holder).expandButton != null && comment.hasReply()) {
-                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    if (((CommentBaseViewHolder) holder).saveButton != null) {
-                        ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
-                    }
-                    if (((CommentBaseViewHolder) holder).replyButton != null) {
-                        ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
-                    }
-                    if (((CommentBaseViewHolder) holder).expandButton != null) {
-                        ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.GONE);
-                    }
-                }
             }
         } else if (holder instanceof CommentFullyCollapsedViewHolder) {
             Comment comment = getItem(position);
@@ -737,11 +694,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 }
 
                 if (comment.getChildCount() > 0) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
                     ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setText("+" + comment.getChildCount());
-                } else {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
                 }
+                ((CommentFullyCollapsedViewHolder) holder).binding.headerLinearLayoutItemCommentFullyCollapsed
+                        .setOptionalVisibility(comment.getChildCount() > 0);
                 if (mShowElapsedTime) {
                     ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setText(Utils.getElapsedTime(mActivity, comment.getCommentTimeMillis()));
                 } else {
@@ -765,24 +721,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     }
                 }
 
-                int bottomToolbarWidth = itemWidth - comment.getDepth() * 12;
-                if (bottomToolbarWidth > 400) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
-                } else if (bottomToolbarWidth > 350) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
-                } else if (bottomToolbarWidth > 300) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
-                } else {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
-                    ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
-                }
             }
         } else if (holder instanceof LoadMoreChildCommentsViewHolder) {
             Comment placeholder = getItem(position);
@@ -897,9 +835,13 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         }
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        mEmotePlugin.setDataSavingMode(dataSavingMode);
-        mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        // Both have to be told, so neither call may sit on the right of a short-circuiting ||:
+        // the two start in step, so the emote plugin reports a change first and the entry would
+        // never be updated at all.
+        boolean emoteChanged = mEmotePlugin.setDataSavingMode(dataSavingMode);
+        boolean imageAndGifChanged = mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+        return emoteChanged || imageAndGifChanged;
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
@@ -936,7 +878,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         TextView childCountTextView;
         RecyclerView commentMarkdownView;
         TextView editedTextView;
-        ConstraintLayout bottomConstraintLayout;
+        CommentToolbar bottomConstraintLayout;
         MaterialButton upvoteButton;
         TextView scoreTextView;
         MaterialButton downvoteButton;
@@ -963,7 +905,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                          TextView childCountTextView,
                          RecyclerView commentMarkdownView,
                          TextView editedTextView,
-                         ConstraintLayout bottomConstraintLayout,
+                         CommentToolbar bottomConstraintLayout,
                          MaterialButton upvoteButton,
                          TextView scoreTextView,
                          MaterialButton downvoteButton,
@@ -1031,15 +973,17 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 constraintSet.connect(scoreTextView.getId(), ConstraintSet.START, childCountTextView.getId(), ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.START, scoreTextView.getId(), ConstraintSet.END);
+                // Mirror of the XML chain, so the overflow button keeps the outer edge here too:
+                // more, reply, save, expand, then the spacer.
                 constraintSet.connect(placeholder.getId(), ConstraintSet.END, upvoteButton.getId(), ConstraintSet.START);
-                constraintSet.connect(placeholder.getId(), ConstraintSet.START, moreButton.getId(), ConstraintSet.END);
-                constraintSet.connect(moreButton.getId(), ConstraintSet.START, expandButton.getId(), ConstraintSet.END);
-                constraintSet.connect(moreButton.getId(), ConstraintSet.END, placeholder.getId(), ConstraintSet.START);
+                constraintSet.connect(placeholder.getId(), ConstraintSet.START, expandButton.getId(), ConstraintSet.END);
+                constraintSet.connect(moreButton.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+                constraintSet.connect(moreButton.getId(), ConstraintSet.END, replyButton.getId(), ConstraintSet.START);
                 constraintSet.connect(expandButton.getId(), ConstraintSet.START, saveButton.getId(), ConstraintSet.END);
-                constraintSet.connect(expandButton.getId(), ConstraintSet.END, moreButton.getId(), ConstraintSet.START);
+                constraintSet.connect(expandButton.getId(), ConstraintSet.END, placeholder.getId(), ConstraintSet.START);
                 constraintSet.connect(saveButton.getId(), ConstraintSet.START, replyButton.getId(), ConstraintSet.END);
                 constraintSet.connect(saveButton.getId(), ConstraintSet.END, expandButton.getId(), ConstraintSet.START);
-                constraintSet.connect(replyButton.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+                constraintSet.connect(replyButton.getId(), ConstraintSet.START, moreButton.getId(), ConstraintSet.END);
                 constraintSet.connect(replyButton.getId(), ConstraintSet.END, saveButton.getId(), ConstraintSet.START);
                 constraintSet.applyTo(bottomConstraintLayout);
             }
@@ -1130,6 +1074,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_COMMENT, comment);
                     bundle.putInt(CommentMoreBottomSheetFragment.EXTRA_POSITION, getBindingAdapterPosition());
                     bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_IS_NSFW, mPost.isNSFW());
+                    bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_OPTION, !mPost.isArchived() && !mPost.isLocked() && !comment.isLocked());
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_POST, mPost);
                     int commentPos = getBindingAdapterPosition();
                     List<Comment> currentList = getCurrentList();

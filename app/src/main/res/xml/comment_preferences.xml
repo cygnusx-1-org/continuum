@@ -64,6 +64,7 @@
 
     <!--<ml.docilealligator.infinityforreddit.customviews.preference.SliderPreference
         app:defaultValue="5"
+        app:sliderMin="1"
         app:sliderMax="10"
         app:key="show_fewer_toolbar_options_threshold"
         app:title="@string/settings_show_fewer_toolbar_options_threshold_title"

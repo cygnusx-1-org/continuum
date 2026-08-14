@@ -146,7 +146,7 @@
             android:layout_marginEnd="8dp"
             android:nestedScrollingEnabled="false" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <ml.docilealligator.infinityforreddit.customviews.CommentToolbar
             android:id="@+id/bottom_constraint_layout_item_post_comment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -227,7 +227,7 @@
                 app:layout_constraintWidth_min="1dp"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/more_button_item_post_comment"
+                app:layout_constraintEnd_toStartOf="@+id/expand_button_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/downvote_button_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -240,9 +240,9 @@
                 app:icon="@drawable/ic_more_vert_grey_24dp"
                 app:iconSize="24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/expand_button_item_post_comment"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/placeholder_item_post_comment"
+                app:layout_constraintStart_toEndOf="@+id/reply_button_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent"
                 style="?attr/materialIconButtonOutlinedStyle" />
 
@@ -262,7 +262,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/save_button_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/more_button_item_post_comment"
+                app:layout_constraintStart_toEndOf="@+id/placeholder_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton
@@ -286,13 +286,13 @@
                 app:icon="@drawable/ic_reply_grey_24dp"
                 app:iconSize="24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/more_button_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/save_button_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent"
                 style="?attr/materialIconButtonOutlinedStyle" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </ml.docilealligator.infinityforreddit.customviews.CommentToolbar>
 
         <View
             android:id="@+id/divider_item_comment"

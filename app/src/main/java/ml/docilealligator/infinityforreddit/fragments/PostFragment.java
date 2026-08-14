@@ -55,6 +55,7 @@ import ml.docilealligator.infinityforreddit.adapters.Paging3LoadingStateAdapter;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.FABMoreOptionsBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.bottomsheetfragments.FlairBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentPostBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
@@ -62,9 +63,9 @@ import ml.docilealligator.infinityforreddit.events.ChangeAutoplayVideoController
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfoldedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
-import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePostHistorySettingsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
+import ml.docilealligator.infinityforreddit.events.FlairSelectedEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
@@ -976,6 +977,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             }
         });
 
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false).observe(getViewLifecycleOwner(), showGalleryMediaAsGrid -> {
+            if (getPostAdapter() != null) {
+                if (getPostAdapter().setShowGalleryMediaAsGrid(showGalleryMediaAsGrid)) {
+                    refreshAdapter();
+                }
+            }
+        });
+
         return binding.getRoot();
     }
 
@@ -1738,27 +1747,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Subscribe
-    public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
-        if (mAdapter != null) {
-            String autoplay = mSharedPreferences.getString(SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
-            String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
-            boolean stateChanged = false;
-            if (autoplay.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI)) {
-                mAdapter.setAutoplay(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_WIFI);
-                stateChanged = true;
-            }
-            if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
-                mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
-                stateChanged = true;
-            }
-
-            if (stateChanged) {
-                refreshAdapter();
-            }
-        }
-    }
-
-    @Subscribe
     public void onChangeSavePostFeedScrolledPositionEvent(ChangeSavePostFeedScrolledPositionEvent changeSavePostFeedScrolledPositionEvent) {
         savePostFeedScrolledPosition = changeSavePostFeedScrolledPositionEvent.savePostFeedScrolledPosition;
     }
@@ -1771,6 +1759,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     concatenatedSubredditNames, username, where, multiRedditPath, query, trendingSource,
                     ReadPostType.INVALID, postFilter, sortType, readPostsList));
         }
+    }
+
+    @Subscribe
+    public void onFlairSelectedEvent(FlairSelectedEvent event) {
+
     }
 
     @Override
@@ -1867,6 +1860,17 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Override
     public void toggleSpoiler(@NonNull Post post, int position) {
         mPostViewModel.toggleSpoiler(post, position);
+    }
+
+    @Override
+    public void changeFlair(@NonNull Post post, int position) {
+        FlairBottomSheetFragment flairBottomSheetFragment = new FlairBottomSheetFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(FlairBottomSheetFragment.EXTRA_SUBREDDIT_NAME, post.getSubredditName());
+        bundle.putLong(FlairBottomSheetFragment.EXTRA_CALLING_FRAGMENT_ID, postFragmentId);
+        bundle.putBoolean(FlairBottomSheetFragment.EXTRA_SHOW_REMOVE_FLAIR_OPTION, true);
+        flairBottomSheetFragment.setArguments(bundle);
+        flairBottomSheetFragment.show(mActivity.getSupportFragmentManager(), flairBottomSheetFragment.getTag());
     }
 
     @Override

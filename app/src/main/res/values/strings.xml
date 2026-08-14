@@ -427,6 +427,7 @@
     <string name="update_flair_failed">Update flair failed</string>
 
     <string name="edit_flair">Edit Flair</string>
+    <string name="remove_flair">Remove Flair</string>
     <string name="only_allow_64_chars">Only allow less than 64 characters</string>
 
     <string name="view_all_comments">Click here to browse all comments</string>
@@ -849,6 +850,7 @@
     <string name="default_swipe_area">Default</string>
     <string name="larger_swipe_area">Large</string>
     <string name="very_larger_swipe_area">Very Large</string>
+    <string name="settings_show_gallery_media_as_grid">Show Gallery Media as a Grid When Available</string>
 
     <string name="no_link_available">Cannot get the link</string>
 

@@ -1048,7 +1048,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             FlairBottomSheetFragment flairBottomSheetFragment = new FlairBottomSheetFragment();
             Bundle bundle = new Bundle();
             bundle.putString(FlairBottomSheetFragment.EXTRA_SUBREDDIT_NAME, mPost.getSubredditName());
-            bundle.putLong(FlairBottomSheetFragment.EXTRA_VIEW_POST_DETAIL_FRAGMENT_ID, viewPostDetailFragmentId);
+            bundle.putLong(FlairBottomSheetFragment.EXTRA_CALLING_FRAGMENT_ID, viewPostDetailFragmentId);
             flairBottomSheetFragment.setArguments(bundle);
             flairBottomSheetFragment.show(mActivity.getSupportFragmentManager(), flairBottomSheetFragment.getTag());
             return true;
@@ -1498,19 +1498,17 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         String dataSavingMode = mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF);
         boolean stateChanged = false;
         if (autoplay.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI)) {
-            if (mPostAdapter != null) {
-                mPostAdapter.setAutoplay(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_WIFI);
+            if (mPostAdapter != null && mPostAdapter.setAutoplay(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_WIFI)) {
+                stateChanged = true;
             }
-            stateChanged = true;
         }
         if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
-            if (mPostAdapter != null) {
-                mPostAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
+            if (mPostAdapter != null && mPostAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR)) {
+                stateChanged = true;
             }
-            if (mCommentsAdapter != null) {
-                mCommentsAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
+            if (mCommentsAdapter != null && mCommentsAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR)) {
+                stateChanged = true;
             }
-            stateChanged = true;
         }
 
         if (stateChanged) {
@@ -1592,6 +1590,17 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     }
 
     @Override
+    public void changeFlair(@NonNull Post post, int position) {
+        FlairBottomSheetFragment flairBottomSheetFragment = new FlairBottomSheetFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(FlairBottomSheetFragment.EXTRA_SUBREDDIT_NAME, mPost.getSubredditName());
+        bundle.putLong(FlairBottomSheetFragment.EXTRA_CALLING_FRAGMENT_ID, viewPostDetailFragmentId);
+        bundle.putBoolean(FlairBottomSheetFragment.EXTRA_SHOW_REMOVE_FLAIR_OPTION, true);
+        flairBottomSheetFragment.setArguments(bundle);
+        flairBottomSheetFragment.show(mActivity.getSupportFragmentManager(), flairBottomSheetFragment.getTag());
+    }
+
+    @Override
     public void toggleMod(@NonNull Post post, int position) {
         viewPostDetailFragmentViewModel.toggleMod(post, position);
     }
@@ -1614,5 +1623,10 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     @Override
     public void toggleLock(@NonNull Comment comment, int position) {
         viewPostDetailFragmentViewModel.toggleLock(comment, position);
+    }
+
+    @Override
+    public void toggleMod(@NonNull Comment comment, int position) {
+        viewPostDetailFragmentViewModel.toggleMod(comment, position);
     }
 }
