@@ -132,6 +132,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_24
         targetCompatibility JavaVersion.VERSION_24
+        // minSdk is 24, but BackupSettings formats its filename with java.time (API 26+). The
+        // desugar_jdk_libs dependency below was already declared without this flag, so the backport
+        // was never actually applied: settings backup would have thrown NoClassDefFoundError on API
+        // 24-25, and lint failed the build with NewApi. Enabling it keeps minSdk at 24.
+        coreLibraryDesugaringEnabled true
     }
 
     testOptions {
@@ -148,7 +153,9 @@ android {
             // Gradle's 512m default is not enough for the Robolectric/Roborazzi screenshot tests:
             // the executor dies with an OutOfMemoryError partway through a full-suite run, which
             // surfaces as unrelated-looking test failures rather than as an obvious memory problem.
-            maxHeapSize = "1g"
+            // The tiered RoborazziLayoutTest matrix renders ~1000 cases, some of them 2802px wide at
+            // xxhdpi, so 1g no longer clears it either — the run died with "Java heap space".
+            maxHeapSize = "4g"
         }
     }
 
@@ -612,6 +619,14 @@ androidComponents {
             .toTransformMany(SingleArtifact.APK.INSTANCE)
         renameProvider.configure { it.transformationRequest.set(request) }
     }
+}
+
+// GitHub CI is intentionally disabled for this fork, so the layout goldens are enforced locally:
+// `check` fails on any pixel drift against src/test/screenshots. scripts/verify-goldens.sh is the
+// one-command form with a readable failure summary. installDebug is deliberately left alone so the
+// normal build/install loop keeps its speed.
+tasks.named('check') {
+    dependsOn 'verifyRoborazziDebug'
 }
 
 interface CopyApkParameters extends WorkParameters, Serializable {
