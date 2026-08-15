@@ -2,6 +2,14 @@
 
 ---
 
+8.2.5.9.9.9.2 / 2026-8-14
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Stopped comment rows rebinding and shifting on every collapse and update
+* Implemented Links to subs without reddit.com aren't clickable #356
+* Padded the compact thumbnail block and widened layout snapshot coverage
+
 8.2.5.9.9.9.1 / 2026-8-4
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
