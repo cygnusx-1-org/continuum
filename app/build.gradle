@@ -83,7 +83,10 @@ android {
         versionCode 223
         versionName "8.2.5.9.9.9.2"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
-        testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
+        // The fallback must be 22 characters (APIKeysPreferenceFragment.CLIENT_ID_LENGTH) and must
+        // not be R.string.default_client_id, or the API Keys dialog leaves its OK button disabled
+        // and APIKeysTest cannot save anything. The old 'test_reddit_client_id_default' was 29.
+        testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'TestClientId0000000000')
     }
 
     buildFeatures {
@@ -568,7 +571,10 @@ dependencies {
     testImplementation "net.bytebuddy:byte-buddy-agent:1.18.11"
     testImplementation "androidx.arch.core:core-testing:2.2.0"
 
-    androidTestImplementation "androidx.test.ext:junit:1.0.0"
+    // 1.0.0 predates ActivityScenarioRule, so BaseTest did not compile against it. Kaspresso already
+    // forces 1.1.4 onto the runtime classpath, so declaring it here only fixes compilation — it does
+    // not change which version the tests actually run against.
+    androidTestImplementation "androidx.test.ext:junit:1.1.4"
     androidTestImplementation "androidx.test:rules:1.5.0"
     androidTestImplementation "androidx.test:runner:1.5.0"
 

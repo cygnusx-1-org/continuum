@@ -10,8 +10,17 @@ import ru.otus.pandina.utils.NotificationDialogHelper
 
 class MainTest : BaseTest() {
 
+    /**
+     * Requires a logged-out install. The FAB tapped below only opens CustomizePostFilterActivity for
+     * the anonymous account: MainActivity defaults fabOption to SUBMIT_POSTS and rewrites it to
+     * FILTER_POSTS only when the account is anonymous (MainActivity.java:888 and the `default`
+     * branch that follows). Signed in, the same tap starts a post submission and this test fails
+     * several steps later on a missing post-filter toolbar.
+     */
     @Test
     fun popularPostFilterTest() {
+        requireAnonymousInstall()
+
         // Handle notification dialog immediately after app starts
         NotificationDialogHelper.handleNotificationDialog()
 
@@ -76,12 +85,9 @@ class MainTest : BaseTest() {
 
                         lastChild<FilteredPostsScreen.PostFragmentItem> {
                             isVisible()
-                            // Try different title types since posts can have different layouts
-                            try {
-                                title.hasAnyText()
-                            } catch (e: Exception) {
-                                titleGallery.hasAnyText()
-                            }
+                            // `title` matches whichever card layout this post uses, so this asserts
+                            // unconditionally -- a blank title now fails instead of being swallowed.
+                            title.hasAnyText()
                         }
 
                         children<FilteredPostsScreen.PostFragmentItem> {

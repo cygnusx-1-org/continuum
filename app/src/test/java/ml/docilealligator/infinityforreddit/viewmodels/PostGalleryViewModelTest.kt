@@ -7,8 +7,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import ml.docilealligator.infinityforreddit.TestInfinity
 import ml.docilealligator.infinityforreddit.utils.UploadImageUtils
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,7 +59,9 @@ class PostGalleryViewModelTest {
 
             val vm = newViewModel()
             vm.uploadImage(uri, "img-1", "token")
-            assertTrue("isUploading must be true while the upload is in flight", vm.isUploading.value == true)
+            // assertEquals, not assertTrue(value == true): the latter cannot tell false from an
+            // unset LiveData, so it would pass for a flag that is never published at all.
+            assertEquals("isUploading must be true while the upload is in flight", true, vm.isUploading.value)
             idle()
 
             val outcomes = vm.uploadOutcomes.value.orEmpty()
@@ -69,7 +69,7 @@ class PostGalleryViewModelTest {
             val uploaded = outcomes.single() as UploadOutcome.Uploaded
             assertEquals("img-1", uploaded.id)
             assertEquals("MEDIA123", uploaded.mediaId)
-            assertFalse("isUploading must clear once the only upload finished", vm.isUploading.value == true)
+            assertEquals("isUploading must clear once the only upload finished", false, vm.isUploading.value)
 
             // The crux of item 3: re-observing the accumulated outcomes must not kick off another
             // upload — otherwise a rotation (which re-subscribes) would duplicate the media asset.
@@ -101,7 +101,7 @@ class PostGalleryViewModelTest {
             assertEquals(1, outcomes.size)
             assertEquals("img-2", (outcomes.single() as UploadOutcome.Failed).id)
             assertEquals("uploadFailed must fire exactly once", 1, uploadFailedCount)
-            assertFalse(vm.isUploading.value == true)
+            assertEquals("isUploading must clear after a failed upload", false, vm.isUploading.value)
         }
     }
 }
