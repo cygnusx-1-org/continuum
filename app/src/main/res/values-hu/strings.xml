@@ -871,18 +871,9 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="hide_read_posts">"Olvasott posztok elrejtése"</string>
     <string name="filter_posts">"Posztok szűrése"</string>
     <string name="only_spoiler">"Csak Spoiler"</string>
-    <string name="title_excludes_strings_hint">"Cím: kulcsszavak (kulcs1,kulcs2) kizárása"</string>
-    <string name="title_excludes_regex_hint">"Cím: regex kizárása"</string>
-    <string name="exclude_subreddits_hint">"Subredditek (pl. funny,AskReddit) kizárása"</string>
     <string name="exclude_users_hint">"Felhasználók (pl. edgan,random) kizárása"</string>
-    <string name="exclude_flairs_hint">"Flairek (pl. flair1,flair2) kizárása"</string>
-    <string name="contain_flairs_hint">"Tartalmazzon flaireket (pl. flair1,flair2)"</string>
     <string name="min_vote_hint">"Min szavazás (-1: nincsen korlátozás)"</string>
     <string name="max_vote_hint">"Max szavazás (-1: nincsen korlátozás)"</string>
-    <string name="min_comments_hint">"Min kommentek (-1: nincsen korlátozás)"</string>
-    <string name="max_comments_hint">"Max kommentek (-1: nincsen korlátozás)"</string>
-    <string name="min_awards_hint">"Min díjak (-1: nincsen korlátozás)"</string>
-    <string name="max_awards_hint">"Max díjak (-1: nincsen korlátozás)"</string>
     <string name="post_filter_name_hint">"Poszt szűrő neve"</string>
     <string name="post_filter_requires_a_name">"Mi a neve ennek a poszt szűrőnek?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' már létezik"</string>
@@ -936,7 +927,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="set_by_battery_saver">"Akkumulátorkímélés bekapcsolása"</string>
     <string name="theme_item_upvote_ratio_icon_tint">"A pozitív szavazás arány ikon színe"</string>
     <string name="theme_item_current_user_color">"Jelenlegi felhasználó"</string>
-    <string name="exclude_domains_hint">"Domainek kizárása"</string>
     <string name="anonymous_front_page_no_subscriptions">"Csatlakozz egy subreddithez!"</string>
 
     <!-- Fuzzy -->

@@ -893,18 +893,9 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="hide_read_posts">"Skrýt přečtené příspěvky"</string>
     <string name="filter_posts">"Filtrovat příspěvky"</string>
     <string name="only_spoiler">"Pouze spoilery"</string>
-    <string name="title_excludes_strings_hint">"Název: vyloučení klíčových slov (slovo1,slovo2)"</string>
-    <string name="title_excludes_regex_hint">"Název: vyloučení regexu"</string>
-    <string name="exclude_subreddits_hint">"Vyloučit subreddity (např. funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Vyloučit uživatele (např. edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Vyloučit štítky (např. štítek1,štítek2)"</string>
-    <string name="contain_flairs_hint">"Obsahuje štítky (např. štítek1,štítek2)"</string>
     <string name="min_vote_hint">"Min. počet hlasů (-1: žádné omezení)"</string>
     <string name="max_vote_hint">"Max. počet hlasů (-1: žádné omezení)"</string>
-    <string name="min_comments_hint">"Min. počet komentářů (-1: žádné omezení)"</string>
-    <string name="max_comments_hint">"Max. počet komentářů (-1: žádné omezení)"</string>
-    <string name="min_awards_hint">"Min. počet ocenění (-1: žádné omezení)"</string>
-    <string name="max_awards_hint">"Max. počet ocenění (-1: žádné omezení)"</string>
     <string name="post_filter_name_hint">"Název filtru příspěvků"</string>
     <string name="post_filter_requires_a_name">"Jak se jmenuje tento filtr příspěvků?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' již existuje"</string>
@@ -958,7 +949,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Použito na: ikonu poměru hlasů pro"</string>
     <string name="theme_item_current_user_color">"Aktuální uživatel"</string>
     <string name="theme_item_current_user_color_detail">"Použito na: aktuálního uživatele v komentářích"</string>
-    <string name="exclude_domains_hint">"Vyloučit domény"</string>
     <string name="anonymous_front_page_no_subscriptions">"Začněte připojením se do subredditu!"</string>
 
     <!-- Fuzzy -->
@@ -1089,9 +1079,6 @@ Pokud ano, přejmenujte je, než povolíte Material You."</string>
     <string name="theme_item_media_indicator_background_color">"Barva pozadí indikátoru médií"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Použito na: pozadí ikony videa nebo galerie na náhledu příspěvku"</string>
     <string name="go_to_top">"Zpět nahoru"</string>
-    <string name="title_contains_strings_hint">"Název: obsahuje klíčová slova (slovo1,slovo2)"</string>
-    <string name="title_contains_regex_hint">"Název: obsahuje regex"</string>
-    <string name="contain_domains_hint">"Obsahuje domény"</string>
     <string name="anonymous_multireddit_no_subreddit">"Tento multireddit nemá subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Chyba při získávání v.redd.it videa: nelze získat URL videa"</string>
     <string name="contain_domain">"Obsahovat tuto doménu"</string>

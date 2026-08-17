@@ -898,12 +898,7 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="hide_read_posts">"Ukryj przeczytane posty"</string>
     <string name="filter_posts">"Filtruj posty"</string>
     <string name="only_spoiler">"Tylko spoilery"</string>
-    <string name="title_excludes_strings_hint">"Tytuł: wyklucza słowa kluczowe (słowo1,słowo2)"</string>
-    <string name="title_excludes_regex_hint">"Tytuł: wyklucza regex"</string>
-    <string name="exclude_subreddits_hint">"Bez subredditów (np. funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Bez użytkowników"</string>
-    <string name="exclude_flairs_hint">"Wyklucz flagi (np. flaga1,flaga2)"</string>
-    <string name="contain_flairs_hint">"Zawiera flagi (np. flaga1,flaga2)"</string>
     <string name="post_filter_name_hint">"Nazwa filtru posta"</string>
     <string name="post_filter_requires_a_name">"Jaka jest nazwa filtru tego posta?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' już istnieje"</string>
@@ -953,7 +948,6 @@ użytkownika / multireddita"</string>
     <string name="device_default">"Ustawienie urządzenia"</string>
     <string name="theme_item_current_user_color">"Aktualny Użytkownik"</string>
     <string name="theme_item_current_user_color_detail">"Przypisane do: Aktywnego użytkownika w komentarzach"</string>
-    <string name="exclude_domains_hint">"Wyklucz domeny"</string>
     <string name="anonymous_front_page_no_subscriptions">"Zacznij dołączając do subreddita!"</string>
 
     <!-- Fuzzy -->
@@ -1065,9 +1059,6 @@ Brak podglądu w Ostatnich aplikacjach."</string>
     <string name="settings_link_handler_value_internal_browser">"Wewnętrzna przeglądarka"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Stary kontroler Video UI"</string>
     <string name="go_to_top">"Przejdź do góry"</string>
-    <string name="title_contains_strings_hint">"Tytuł: zawiera słowa kluczowe (słowo1,słowo2)"</string>
-    <string name="title_contains_regex_hint">"Tytuł: zawiera regex"</string>
-    <string name="contain_domains_hint">"Własne domeny"</string>
     <string name="anonymous_multireddit_no_subreddit">"Ten multireddit nie ma subreddita!"</string>
     <string name="contain_domain">"Zawiera tą domenę"</string>
     <string name="app_lock_timeout_immediately">"Natychmiast"</string>

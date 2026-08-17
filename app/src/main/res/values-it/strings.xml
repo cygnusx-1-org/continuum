@@ -842,18 +842,9 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="hide_read_posts">"Nascondi post letti"</string>
     <string name="filter_posts">"Filtra post"</string>
     <string name="only_spoiler">"Solo spoiler"</string>
-    <string name="title_excludes_strings_hint">"Titolo: escludi parole chiave (key1,key2)"</string>
-    <string name="title_excludes_regex_hint">"Escludi regex"</string>
-    <string name="exclude_subreddits_hint">"Escludi subreddit (es. funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Escludi utenti (es. edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Escludi flair (es. flair1,flair2)"</string>
-    <string name="contain_flairs_hint">"Contiene flair (es. flair1,flair2)"</string>
     <string name="min_vote_hint">"Voto minimo (-1: nessuna restrizione)"</string>
     <string name="max_vote_hint">"Voto massimo (-1: nessuna restrizione)"</string>
-    <string name="min_comments_hint">"Commenti minimi (-1: nessuna restrizione)"</string>
-    <string name="max_comments_hint">"Commenti massimi (-1: nessuna restrizione)"</string>
-    <string name="min_awards_hint">"Premi minimi (-1: nessuna restrizione)"</string>
-    <string name="max_awards_hint">"Premi massimi (-1: nessuna restrizione)"</string>
     <string name="post_filter_name_hint">"Nome filtro post"</string>
     <string name="post_filter_requires_a_name">"Come vuoi chiamare questo filtro post?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' esiste già"</string>
@@ -909,7 +900,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Applicato a: icona percentuale upvoti"</string>
     <string name="theme_item_current_user_color">"Utente corrente"</string>
     <string name="theme_item_current_user_color_detail">"Applicato a: Utente corrente nei commenti"</string>
-    <string name="exclude_domains_hint">"Escludi domini"</string>
     <string name="anonymous_front_page_no_subscriptions">"Inizia unendoti a un subreddit!"</string>
     <string name="backup_settings_success">"Impostazioni esportate con successo nella directory di destinazione."</string>
     <string name="create_zip_in_destination_directory_failed">"Non è stato possibile creare un backup zip nella directory destinazione"</string>
@@ -1030,9 +1020,6 @@ Premi per riprovare."</string>
     <string name="theme_item_media_indicator_background_color">"Colore di sfondo dell'indicatore media"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Applicato a: Sfondo video o icona galleria nell'anteprima del post"</string>
     <string name="go_to_top">"Vai all'inizio"</string>
-    <string name="title_contains_strings_hint">"Titolo: contiene parole chiave (key1,key2)"</string>
-    <string name="title_contains_regex_hint">"Titolo: contiene regex"</string>
-    <string name="contain_domains_hint">"Contiene domini"</string>
     <string name="anonymous_multireddit_no_subreddit">"Questo multireddit non ha un subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Errore durante il recupero del video da v.redd.it: impossibile ottenere l'URL del video"</string>
     <string name="contain_domain">"Contiene questo dominio"</string>

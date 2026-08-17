@@ -886,18 +886,9 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="hide_read_posts">"Ascunde Postările Citite"</string>
     <string name="filter_posts">"Filtrează Postările"</string>
     <string name="only_spoiler">"Doar Spoiler"</string>
-    <string name="title_excludes_strings_hint">"Titlu: exclude cuvintele cheie (cheie1,cheie2)"</string>
-    <string name="title_excludes_regex_hint">"Titlu: exclude regex"</string>
-    <string name="exclude_subreddits_hint">"Exclude subreddit-uri (de ex. funny, AskReddit)"</string>
     <string name="exclude_users_hint">"Exclude utilizatori (de ex. edgan, random)"</string>
-    <string name="exclude_flairs_hint">"Exclude insigne (de ex. insigna1, insigna2)"</string>
-    <string name="contain_flairs_hint">"Să conțină insignele (de ex. insigna1, insigna2)"</string>
     <string name="min_vote_hint">"Votul minim (-1: fără restricții)"</string>
     <string name="max_vote_hint">"Votul maxim (-1: nicio restricție)"</string>
-    <string name="min_comments_hint">"Comentarii minime (-1: nicio restricție)"</string>
-    <string name="max_comments_hint">"Comentarii maxime (-1: nicio restricție)"</string>
-    <string name="min_awards_hint">"Premii minime (-1: nicio restricție)"</string>
-    <string name="max_awards_hint">"Premii maxime (-1: fără restricții)"</string>
     <string name="post_filter_name_hint">"Numele Filtrului de Postări"</string>
     <string name="post_filter_requires_a_name">"Care este numele acestui filtru de post?"</string>
     <string name="duplicate_post_filter_dialog_title">"%1$s' Există Deja"</string>
@@ -951,7 +942,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Aplicat pe: Pictograma rației de susvot"</string>
     <string name="theme_item_current_user_color">"Utilizator Curent"</string>
     <string name="theme_item_current_user_color_detail">"Aplicat pe: Utilizatorul curent în comentarii"</string>
-    <string name="exclude_domains_hint">"Exclude domeniile"</string>
     <string name="anonymous_front_page_no_subscriptions">"Începe prin a te alătura unui subreddit!"</string>
 
     <!-- Fuzzy -->
@@ -1080,9 +1070,6 @@ Apasă pentru a reîncerca."</string>
     <string name="theme_item_media_indicator_background_color">"Culoarea de Fundal a Indicatorului Media"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Aplicat pe: Fundalului pictogramei videoclipului sau galeriei la previzualizarea postării"</string>
     <string name="go_to_top">"Mergi la Început"</string>
-    <string name="title_contains_strings_hint">"Titlu: conține cuvinte cheie (cheie1,cheie2)"</string>
-    <string name="title_contains_regex_hint">"Titlu: conține regex"</string>
-    <string name="contain_domains_hint">"Conține domeniile"</string>
     <string name="anonymous_multireddit_no_subreddit">"Acest multireddit nu are un subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Eroare la obținerea videoclipului v.redd.it: Nu s-a putut obține adresa videoclipului"</string>
     <string name="contain_domain">"Conține acest domeniu"</string>

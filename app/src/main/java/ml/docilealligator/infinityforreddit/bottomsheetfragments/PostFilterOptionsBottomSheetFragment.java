@@ -40,10 +40,6 @@ public class PostFilterOptionsBottomSheetFragment extends LandscapeExpandedRound
             dismiss();
         });
 
-        binding.applyToTextViewPostFilterOptionsBottomSheetFragment.setOnClickListener(view -> {
-            activity.applyPostFilterTo(postFilter);
-            dismiss();
-        });
 
         binding.deleteTextViewPostFilterOptionsBottomSheetFragment.setOnClickListener(view -> {
             activity.deletePostFilter(postFilter);

@@ -890,18 +890,9 @@ https://play.google.com/store/"</string>
     <string name="hide_read_posts">"Сховати прочитані дописи"</string>
     <string name="filter_posts">"Фільтр дописів"</string>
     <string name="only_spoiler">"Лише спойлер"</string>
-    <string name="title_excludes_strings_hint">"Заголовок: виключати ключові слова (слово1,слово2)"</string>
-    <string name="title_excludes_regex_hint">"Заголовок: не враховувати рег.вир."</string>
-    <string name="exclude_subreddits_hint">"Не враховувати сабредити (напр., funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Не враховувати користувачів (напр., edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Не враховувати лички (напр., личка1,личка2)"</string>
-    <string name="contain_flairs_hint">"Містить лички (напр., личка1,личка2)"</string>
     <string name="min_vote_hint">"Найменше голосів (-1: без обмежень)"</string>
     <string name="max_vote_hint">"Найбільше голосів (-1: без обмежень)"</string>
-    <string name="min_comments_hint">"Найменше коментарів (-1: без обмежень)"</string>
-    <string name="max_comments_hint">"Найбільше коментарів (-1: без обмежень)"</string>
-    <string name="min_awards_hint">"Найменше нагород (-1: необмежено)"</string>
-    <string name="max_awards_hint">"Найбільше нагород (-1: необмежено)"</string>
     <string name="post_filter_name_hint">"Назва фільтру дописів"</string>
     <string name="post_filter_requires_a_name">"Яка назва для цього фільтру дописів?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' вже існує"</string>
@@ -955,7 +946,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Задіяти до: значок оцінки вверх"</string>
     <string name="theme_item_current_user_color">"Поточний користувач"</string>
     <string name="theme_item_current_user_color_detail">"Задіяно для: Поточний користувач у коментарях"</string>
-    <string name="exclude_domains_hint">"Не враховувати домени"</string>
     <string name="anonymous_front_page_no_subscriptions">"Розпочніть долучившись до сабредиту!"</string>
 
     <!-- Fuzzy -->
@@ -1084,9 +1074,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_media_indicator_background_color">"Колір тла індикатора медія"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Задіяно для: тло значка відеозапису або галереї на передперегляді допису"</string>
     <string name="go_to_top">"Перейти на верх"</string>
-    <string name="title_contains_strings_hint">"Заголовок: містить ключові слова (слово1,слово2)"</string>
-    <string name="title_contains_regex_hint">"Заголовок: містить рег.вир."</string>
-    <string name="contain_domains_hint">"Містить домени"</string>
     <string name="anonymous_multireddit_no_subreddit">"Цей мультиредит немає сабредиту!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Помилка отримання відеозапису із v.redd.it: Не можливо отримати url відеозапису"</string>
     <string name="contain_domain">"Містить цей домен"</string>

@@ -251,11 +251,6 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void applyPostFilterTo(PostFilter postFilter) {
-        Intent intent = new Intent(this, PostFilterUsageListingActivity.class);
-        intent.putExtra(PostFilterUsageListingActivity.EXTRA_POST_FILTER, postFilter);
-        startActivity(intent);
-    }
 
     public void deletePostFilter(PostFilter postFilter) {
         DeletePostFilter.deletePostFilter(redditDataRoomDatabase, executor, postFilter);

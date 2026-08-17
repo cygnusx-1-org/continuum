@@ -889,18 +889,9 @@ Reprodução automática de vídeos desativada."</string>
     <string name="hide_read_posts">"Esconder Publicações Lidas"</string>
     <string name="filter_posts">"Filtrar Publicações"</string>
     <string name="only_spoiler">"Apenas Spoiler"</string>
-    <string name="title_excludes_strings_hint">"Título: excluir palavras-chave (palavra1,palavra2)"</string>
-    <string name="title_excludes_regex_hint">"Título: excluir expressões regulares"</string>
-    <string name="exclude_subreddits_hint">"Excluir comunidades (ex.: funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Excluir utilizadores (ex.: edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Excluir flairs (ex.: flair1, flair2)"</string>
-    <string name="contain_flairs_hint">"Contém flairs (ex.: flair1, flair2)"</string>
     <string name="min_vote_hint">"Mínimo de votos (-1: sem restrição)"</string>
     <string name="max_vote_hint">"Máximo de votos (-1: sem restrição)"</string>
-    <string name="min_comments_hint">"Mínimo de comentários (-1: sem restrição)"</string>
-    <string name="max_comments_hint">"Máximo de comentários (-1: sem restrição)"</string>
-    <string name="min_awards_hint">"Mínimo de prémios (-1: sem restrição)"</string>
-    <string name="max_awards_hint">"Máximo de prémios (-1: sem restrição)"</string>
     <string name="post_filter_name_hint">"Nome do Filtro de Publicação"</string>
     <string name="post_filter_requires_a_name">"Qual é o nome deste Filtro de Publicações?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' já existe"</string>
@@ -956,7 +947,6 @@ Reprodução automática de vídeos desativada."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Aplicado ao: Ícone do rácio de votos positivos"</string>
     <string name="theme_item_current_user_color">"Utilizador Atual"</string>
     <string name="theme_item_current_user_color_detail">"Aplicado a: Utilizador atual nos comentários"</string>
-    <string name="exclude_domains_hint">"Excluir Domínios"</string>
     <string name="anonymous_front_page_no_subscriptions">"Comece por se juntar a uma comunidade!"</string>
 
     <!-- Fuzzy -->
@@ -1064,8 +1054,6 @@ Toque para tentar novamente."</string>
     <string name="settings_link_handler_value_external_browser">"Browser Externo"</string>
     <string name="settings_link_handler_value_internal_browser">"Browser interno"</string>
     <string name="go_to_top">"Ir para Cima"</string>
-    <string name="title_contains_regex_hint">"Título: contém regex"</string>
-    <string name="contain_domains_hint">"Contém domínios"</string>
     <string name="anonymous_multireddit_no_subreddit">"Este multireddit não tem nenhum subreddit!"</string>
     <string name="contain_domain">"Contém este domínio"</string>
     <string name="app_lock_timeout_immediately">"Imediatamente"</string>

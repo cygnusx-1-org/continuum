@@ -909,11 +909,8 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="hide_read_posts">"Verberg Gelezen Posts"</string>
     <string name="filter_posts">"Filter Posts"</string>
     <string name="only_spoiler">"Alleen Spoiler"</string>
-    <string name="contain_flairs_hint">"Bevat flair (vb. flair1, flair2)"</string>
     <string name="min_vote_hint">"Min stem (-1: geen restrictie)"</string>
     <string name="max_vote_hint">"Max stem (-1: geen restrictie)"</string>
-    <string name="min_comments_hint">"Min reacties (-1: geen restrictie)"</string>
-    <string name="max_comments_hint">"Max reacties (-1: geen restrictie)"</string>
     <string name="post_filter_name_hint">"Post Filter Naam"</string>
     <string name="post_filter_requires_a_name">"Wat is de naam van deze post filter?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' Bestaat Al"</string>
@@ -958,7 +955,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="set_by_battery_saver">"Ingesteld door batterijbesparing"</string>
     <string name="theme_item_current_user_color">"Huidige Gebruiker"</string>
     <string name="theme_item_current_user_color_detail">"Toegepast op: Huidige gebruiker in reacties"</string>
-    <string name="exclude_domains_hint">"Domeinen Uitsluiten"</string>
     <string name="anonymous_front_page_no_subscriptions">"Begin door deel te nemen aan een subreddit!"</string>
     <string name="restore_settings_success">"Instellingen succesvol hersteld. Herstart de app om de wijzigingen te zien."</string>
     <string name="restore_settings_partially_failed">"Sommige instellingen zijn mogelijk niet succesvol hersteld. Herstart de app om de wijzigingen te zien."</string>

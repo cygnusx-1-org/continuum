@@ -27,4 +27,7 @@ public interface PostFilterUsageDao {
 
     @Delete
     void deletePostFilterUsage(PostFilterUsage postFilterUsage);
+
+    @Query("DELETE FROM post_filter_usage WHERE name = :name")
+    void deleteAllPostFilterUsage(String name);
 }

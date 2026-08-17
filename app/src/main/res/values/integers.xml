@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Columns the Customize Post Filter rule list is laid out in. The section headers always span
+         all of them; only the rule rows sit side by side. See values-land / values-sw600dp. -->
+    <integer name="post_filter_rule_columns">1</integer>
+</resources>

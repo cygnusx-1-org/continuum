@@ -936,17 +936,9 @@ Reddit videi su niže rezolucije."</string>
     <string name="hide_read_posts">"Sakrij pročitane objave"</string>
     <string name="filter_posts">"Filtriraj objave"</string>
     <string name="only_spoiler">"Samo Spojleri"</string>
-    <string name="title_excludes_strings_hint">"Naslov: isključuje ključne riječi (key1,key2)"</string>
-    <string name="title_excludes_regex_hint">"Naslov: isključuje regex"</string>
-    <string name="exclude_subreddits_hint">"Isključi podreddite (npr. funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Iskjuči korisnike (npr. edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Isključi flairove (npr. flair1,flair2)"</string>
     <string name="min_vote_hint">"Min. glas (-1: bez zabrane)"</string>
     <string name="max_vote_hint">"Max. glas (-1: bez zabrane)"</string>
-    <string name="min_comments_hint">"Min. komentara (-1: bez zabrane)"</string>
-    <string name="max_comments_hint">"Max. komentara (-1: bez zabrane)"</string>
-    <string name="min_awards_hint">"Min. nagrada (-1: bez zabrane)"</string>
-    <string name="max_awards_hint">"Max. nagrada (-1: bez zabrane)"</string>
     <string name="post_filter_requires_a_name">"Koje je ime filtera objave"</string>
     <string name="duplicate_post_filter_dialog_message">"Poništi?"</string>
     <string name="post_filter_usage_home">"Home"</string>

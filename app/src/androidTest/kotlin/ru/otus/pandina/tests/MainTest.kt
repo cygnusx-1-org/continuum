@@ -47,29 +47,24 @@ class MainTest : BaseTest() {
                         isEnabled()
                         hasText("New Filter")
                     }
-                    textFilterTextView {
+                    textFilterChip {
                         isVisible()
                         hasText("Text")
-                    }
-                    textFilterCheckBox {
-                        isVisible()
                         isChecked()
                         click()
                         isNotChecked()
                     }
-                    linkFilterTextView {
+                    linkFilterChip {
                         isVisible()
                         hasText("Link")
-                    }
-                    linkFilterCheckBox {
-                        isVisible()
                         isChecked()
                         click()
                         isNotChecked()
                     }
-                    onlyNsfwTextView {
+                    onlyNsfwChip {
                         isVisible()
                         hasText("Only NSFW Content")
+                        isNotChecked()
                     }
                     saveButton.click()
                 }

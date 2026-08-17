@@ -902,18 +902,9 @@ https://play.google.com/store/"</string>
     <string name="hide_read_posts">"Скрыть прочтённые посты"</string>
     <string name="filter_posts">"Фильтр постов"</string>
     <string name="only_spoiler">"Только спойлер"</string>
-    <string name="title_excludes_strings_hint">"Заголовок: исключая ключевые слова (key1,key2)"</string>
-    <string name="title_excludes_regex_hint">"Заголовок: исключая регулярное выражение"</string>
-    <string name="exclude_subreddits_hint">"Исключить сабреддиты (например: funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Исключить пользователей (например: edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Исключить флейры (например: flair1,flair2)"</string>
-    <string name="contain_flairs_hint">"Содержит флейры (например: flair1,flair2)"</string>
     <string name="min_vote_hint">"Минимум голосов (-1: без ограничений)"</string>
     <string name="max_vote_hint">"Максимум голосов (-1: без ограничений)"</string>
-    <string name="min_comments_hint">"Минимум комментариев (-1: без ограничений)"</string>
-    <string name="max_comments_hint">"Максимум комментариев (-1: без ограничений)"</string>
-    <string name="min_awards_hint">"Минимум наград (-1: без ограничений)"</string>
-    <string name="max_awards_hint">"Максимум наград (-1: без ограничений)"</string>
     <string name="post_filter_name_hint">"Название фильтра постов"</string>
     <string name="post_filter_requires_a_name">"Как называется этот фильтр постов?"</string>
     <string name="duplicate_post_filter_dialog_title">"«%1$s» уже существует"</string>
@@ -967,7 +958,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Применяется к: значок соотношения голосов"</string>
     <string name="theme_item_current_user_color">"Текущий пользователь"</string>
     <string name="theme_item_current_user_color_detail">"Применяется к: текущий пользователь в комментариях"</string>
-    <string name="exclude_domains_hint">"Исключить домены"</string>
     <string name="anonymous_front_page_no_subscriptions">"Начните с присоединения к сабреддиту!"</string>
 
     <!-- Fuzzy -->
@@ -1100,9 +1090,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_media_indicator_background_color">"Цвет фона индикатора мультимедиа"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Применяется к: фону значка видео или галереи при предпросмотре публикации"</string>
     <string name="go_to_top">"Наверх"</string>
-    <string name="title_contains_strings_hint">"Название: содержит ключевые слова (ключ1,ключ2)"</string>
-    <string name="title_contains_regex_hint">"Название: содержит регулярное выражение"</string>
-    <string name="contain_domains_hint">"Содержат домены"</string>
     <string name="anonymous_multireddit_no_subreddit">"У этого мультиреддита нет сабреддита!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Ошибка извлечения видео v.redd.it: невозможно получить URL видео"</string>
     <string name="contain_domain">"Содержат этот домен"</string>

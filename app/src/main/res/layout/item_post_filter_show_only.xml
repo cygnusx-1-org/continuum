@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view_item_post_filter_show_only"
+    style="?attr/materialCardViewFilledStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/title_text_view_item_post_filter_show_only"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/post_filter_section_show_only"
+            android:textSize="?attr/font_default"
+            android:textStyle="bold"
+            android:textColor="?attr/primaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+        <TextView
+            android:id="@+id/summary_text_view_item_post_filter_show_only"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/post_filter_show_only_summary"
+            android:textSize="?attr/font_12"
+            android:textColor="?attr/secondaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/show_only_chip_group_item_post_filter_show_only"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:chipSpacingHorizontal="8dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/only_nsfw_chip_item_post_filter_show_only"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/only_nsfw_content"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/only_spoiler_chip_item_post_filter_show_only"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/only_spoiler"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

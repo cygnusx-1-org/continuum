@@ -33,23 +33,6 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackground" />
 
-        <TextView
-            android:id="@+id/apply_to_text_view_post_filter_options_bottom_sheet_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/apply_to"
-            android:textColor="?attr/primaryTextColor"
-            android:textSize="?attr/font_default"
-            android:fontFamily="?attr/font_family"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
-            app:drawableStartCompat="@drawable/ic_apply_to_day_night_24dp"
-            android:drawablePadding="48dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground" />
 
         <TextView
             android:id="@+id/delete_text_view_post_filter_options_bottom_sheet_fragment"

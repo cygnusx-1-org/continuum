@@ -32,7 +32,7 @@ public class CommentFilterUsageRecyclerViewAdapter extends RecyclerView.Adapter<
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new CommentFilterUsageRecyclerViewAdapter.CommentFilterUsageViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post_filter_usage, parent, false));
+        return new CommentFilterUsageRecyclerViewAdapter.CommentFilterUsageViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comment_filter_usage, parent, false));
     }
 
     @Override

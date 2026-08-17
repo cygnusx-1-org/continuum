@@ -32,7 +32,6 @@ import ml.docilealligator.infinityforreddit.activities.LoginActivity;
 import ml.docilealligator.infinityforreddit.activities.LoginChromeCustomTabActivity;
 import ml.docilealligator.infinityforreddit.activities.MainActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
-import ml.docilealligator.infinityforreddit.activities.PostFilterUsageListingActivity;
 import ml.docilealligator.infinityforreddit.activities.PostGalleryActivity;
 import ml.docilealligator.infinityforreddit.activities.PostImageActivity;
 import ml.docilealligator.infinityforreddit.activities.PostLinkActivity;
@@ -273,7 +272,6 @@ public interface AppComponent {
 
     void inject(PostFilterPreferenceActivity postFilterPreferenceActivity);
 
-    void inject(PostFilterUsageListingActivity postFilterUsageListingActivity);
 
     void inject(SearchUsersResultActivity searchUsersResultActivity);
 
