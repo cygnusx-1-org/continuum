@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.viewmodels
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import ml.docilealligator.infinityforreddit.TestInfinity
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +56,8 @@ class EditPostActivityViewModelTest {
         vm.editResult.observeForever { result = it }
         vm.editPost("token", "t3_post", "new text")
         awaitMainUntil { result != null }
-        assertFalse("isSubmitting must clear once the edit finished", vm.isSubmitting.value == true)
+        // assertEquals, not assertFalse(value == true): the latter cannot tell false from an unset
+        // LiveData, so it would pass for a flag that is never published at all.
+        assertEquals("isSubmitting must clear once the edit finished", false, vm.isSubmitting.value)
     }
 }

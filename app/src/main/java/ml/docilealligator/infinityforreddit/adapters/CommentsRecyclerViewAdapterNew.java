@@ -492,9 +492,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                 if (mCommentToolbarHidden) {
                     ((CommentBaseViewHolder) holder).bottomConstraintLayout.getLayoutParams().height = 0;
-                    if (!mHideTheNumberOfVotes) {
-                        ((CommentBaseViewHolder) holder).topScoreTextView.setVisibility(View.VISIBLE);
-                    }
+                    // Assigned in both directions: leaving it untouched when votes are hidden left
+                    // the recycled row's visibility and score text in place, so a comment could
+                    // show the previous occupant's score.
+                    ((CommentBaseViewHolder) holder).topScoreTextView.setVisibility(
+                            mHideTheNumberOfVotes ? View.GONE : View.VISIBLE);
                 } else {
                     ((CommentBaseViewHolder) holder).bottomConstraintLayout.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
                     ((CommentBaseViewHolder) holder).topScoreTextView.setVisibility(View.GONE);
@@ -511,9 +513,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                 if (!mHideTheNumberOfVotes) {
                     String commentText = "";
-                    String topScoreText = "";
+                    // The header carries the same string as the fully-collapsed row, which a
+                    // comment switches to when collapsed. Leaving this empty for a score-hidden
+                    // comment dropped the word the collapsed row shows, and the badge next to it
+                    // then anchored somewhere else, so the pair jumped on collapse.
+                    String topScoreText;
                     if (comment.isScoreHidden()) {
                         commentText = mActivity.getString(R.string.hidden);
+                        topScoreText = mActivity.getString(R.string.hidden);
                     } else {
                         commentText = Utils.getNVotes(mShowAbsoluteNumberOfVotes,
                                 comment.getScore() + comment.getVoteType());
@@ -531,12 +538,19 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 // Kept independent of mHideTheNumberOfVotes so hiding votes does not hide the
                 // child count (issue #219). The top badge belongs to the collapsed top row
                 // (toolbar hidden), the bottom badge to the comment toolbar.
-                if (comment.hasReply() && comment.getChildCount() > 0 && !comment.isExpanded()) {
+                // A comment that has children holds the badge's slot for its whole life and only
+                // toggles INVISIBLE, never GONE. The badge sits between the upvote button and the
+                // score inside a spread_inside chain, so taking it out of the layout re-spreads the
+                // chain and drags the score across on every expand and collapse. childCount does
+                // not change when a comment expands, so the reserved width is the width the badge
+                // comes back at.
+                if (comment.hasReply() && comment.getChildCount() > 0) {
                     String childCountString = "+" + comment.getChildCount();
                     ((CommentBaseViewHolder) holder).topChildCountTextView.setText(childCountString);
                     ((CommentBaseViewHolder) holder).childCountTextView.setText(childCountString);
-                    ((CommentBaseViewHolder) holder).topChildCountTextView.setVisibility(mCommentToolbarHidden ? View.VISIBLE : View.GONE);
-                    ((CommentBaseViewHolder) holder).childCountTextView.setVisibility(mCommentToolbarHidden ? View.GONE : View.VISIBLE);
+                    int slotVisibility = comment.isExpanded() ? View.INVISIBLE : View.VISIBLE;
+                    ((CommentBaseViewHolder) holder).topChildCountTextView.setVisibility(mCommentToolbarHidden ? slotVisibility : View.GONE);
+                    ((CommentBaseViewHolder) holder).childCountTextView.setVisibility(mCommentToolbarHidden ? View.GONE : slotVisibility);
                 } else {
                     ((CommentBaseViewHolder) holder).topChildCountTextView.setVisibility(View.GONE);
                     ((CommentBaseViewHolder) holder).childCountTextView.setVisibility(View.GONE);
@@ -603,12 +617,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     holder.itemView.setBackgroundColor(Color.parseColor("#03A9F4"));
                 }
 
-                if (mShowCommentDivider) {
-                    if (mDividerType == DIVIDER_PARENT && comment.getDepth() == 0) {
-                        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
-                        params.setMargins(0, (int) Utils.convertDpToPixel(16, mActivity), 0, 0);
-                    }
-                }
+                applyParentDividerTopMargin(holder.itemView, comment);
             }
         } else if (holder instanceof CommentFullyCollapsedViewHolder) {
             Comment comment = getItem(position);
@@ -679,23 +688,23 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 } else {
                     ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setText(Utils.getFormattedTime(mLocale, comment.getCommentTimeMillis(), mTimeFormatPattern));
                 }
-                if (!comment.isScoreHidden() && !mHideTheNumberOfVotes) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setText(mActivity.getString(R.string.top_score,
-                            Utils.getNVotes(mShowAbsoluteNumberOfVotes, comment.getScore() + comment.getVoteType())));
-                } else if (mHideTheNumberOfVotes) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setText(mActivity.getString(R.string.vote));
+                // Mirrors the full row's header, which a comment switches away from when it
+                // collapses into this one. That row shows no score at all once vote counts are
+                // hidden, so "Vote" here - a call to action with no vote buttons beside it - both
+                // says nothing and moves the child count badge, which anchors to the score.
+                if (mHideTheNumberOfVotes) {
+                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
                 } else {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setText(mActivity.getString(R.string.hidden));
+                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
+                    ((CommentFullyCollapsedViewHolder) holder).binding.scoreTextViewItemCommentFullyCollapsed.setText(comment.isScoreHidden()
+                            ? mActivity.getString(R.string.hidden)
+                            : mActivity.getString(R.string.top_score,
+                                    Utils.getNVotes(mShowAbsoluteNumberOfVotes, comment.getScore() + comment.getVoteType())));
                 }
                 ((CommentFullyCollapsedViewHolder) holder).binding.verticalBlockIndentationItemCommentFullyCollapsed.setShowOnlyOneDivider(mShowOnlyOneCommentLevelIndicator);
                 ((CommentFullyCollapsedViewHolder) holder).binding.verticalBlockIndentationItemCommentFullyCollapsed.setLevelAndColors(comment.getDepth(), verticalBlockColors);
 
-                if (mShowCommentDivider) {
-                    if (mDividerType == DIVIDER_PARENT && comment.getDepth() == 0) {
-                        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
-                        params.setMargins(0, (int) Utils.convertDpToPixel(16, mActivity), 0, 0);
-                    }
-                }
+                applyParentDividerTopMargin(holder.itemView, comment);
             }
         } else if (holder instanceof LoadMoreChildCommentsViewHolder) {
             Comment placeholder = getItem(position);
@@ -823,8 +832,22 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     }
 
     public void updatePost(@NonNull Post post) {
+        Post previousPost = mPost;
         mPost = post;
         applyImageBlur();
+
+        // Bound rows read isArchived()/isLocked() for the vote and reply tint, and applyImageBlur()
+        // decides the blur used while rendering comment images, so those four have to reach the
+        // rows that are already on screen. Nothing else notifies for them: the caller runs this on
+        // every data emission, and the full ConcatAdapter invalidation that used to cover it is
+        // gone now that the status adapter only notifies when its own state moves.
+        if (previousPost == null
+                || previousPost.isArchived() != post.isArchived()
+                || previousPost.isLocked() != post.isLocked()
+                || previousPost.isNSFW() != post.isNSFW()
+                || previousPost.isSpoiler() != post.isSpoiler()) {
+            notifyItemRangeChanged(0, getItemCount());
+        }
     }
 
     public void setBlurNsfwAndDoNotBlurNsfwInNsfwSubreddits(boolean needBlurNsfw, boolean doNotBlurNsfwInNsfwSubreddits) {
@@ -1036,7 +1059,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
             // Style the child comment count badges as rounded bubbles.
             for (TextView childCountBadge : new TextView[]{topChildCountTextView, childCountTextView}) {
-                styleChildCountBadge(childCountBadge, 2);
+                styleChildCountBadge(childCountBadge);
             }
 
             authorFlairTextView.setOnClickListener(view -> authorTextView.performClick());
@@ -1444,15 +1467,28 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             if (bottomConstraintLayout.getLayoutParams().height == 0) {
                 bottomConstraintLayout.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
                 topScoreTextView.setVisibility(View.GONE);
+                moveChildCountBadge(topChildCountTextView, childCountTextView);
                 mFragment.delayTransition();
             } else {
                 mFragment.delayTransition();
                 bottomConstraintLayout.getLayoutParams().height = 0;
+                moveChildCountBadge(childCountTextView, topChildCountTextView);
                 if (!mHideTheNumberOfVotes) {
                     topScoreTextView.setVisibility(View.VISIBLE);
                 }
             }
             return true;
+        }
+
+        // The score moves between the header and the toolbar when this row's toolbar is toggled,
+        // so the child count badge has to travel with it: it belongs beside the score, and the
+        // score's own position depends on it holding the slot. Only the bind knows which state the
+        // slot is in - VISIBLE collapsed, INVISIBLE expanded, GONE with no children - so carry that
+        // across rather than recomputing it from mCommentToolbarHidden, which is the global setting
+        // and no longer describes a row the user has toggled by hand.
+        private void moveChildCountBadge(TextView from, TextView to) {
+            to.setVisibility(from.getVisibility());
+            from.setVisibility(View.GONE);
         }
     }
 
@@ -1486,30 +1522,46 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         }
     }
 
-    // Styles a child-comment-count badge ("+N") as a rounded pill. Shared by the normal comment
-    // row and the fully-collapsed row so the badge looks the same in every collapsed state: a
-    // comment re-collapsed after being expanded switches to the fully-collapsed row, which would
-    // otherwise lose the pill. Each badge needs its own drawable instance since a shared Drawable
-    // would share bounds between views.
-    // verticalPaddingDp is per-caller: the normal row uses 2dp for breathing room, but the
-    // fully-collapsed row passes 0 so the badge never grows taller than the 24dp avatar and
-    // re-inflates the row (which would reintroduce the username jump on collapse).
     private void applyCommentTopMargin(View view) {
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
         layoutParams.topMargin = mShowCommentTopPadding ? mCommentTopPaddingPx : 0;
         view.setLayoutParams(layoutParams);
     }
 
-    private void styleChildCountBadge(TextView childCountBadge, int verticalPaddingDp) {
+    // Spaces top-level comments apart when the divider is drawn per parent instead of per comment.
+    // Written on every bind rather than only on the depth-0 branch, since the margin lives on a
+    // recycled item view and a nested comment would otherwise inherit the previous row's gap.
+    private void applyParentDividerTopMargin(View itemView, Comment comment) {
+        int topMargin = mShowCommentDivider && mDividerType == DIVIDER_PARENT && comment.getDepth() == 0
+                ? (int) Utils.convertDpToPixel(16, mActivity)
+                : 0;
+        RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) itemView.getLayoutParams();
+        if (params.topMargin != topMargin) {
+            params.setMargins(0, topMargin, 0, 0);
+            itemView.setLayoutParams(params);
+        }
+    }
+
+    // Styles a child-comment-count badge ("+N") as a rounded pill. Shared by the normal comment
+    // row and the fully-collapsed row so the badge looks the same in every collapsed state: a
+    // comment re-collapsed after being expanded switches to the fully-collapsed row, which would
+    // otherwise lose the pill. Each badge needs its own drawable instance since a shared Drawable
+    // would share bounds between views.
+    // The badge carries no vertical padding, and both rows must keep it that way. Its height is
+    // what the header measures to: 2dp of padding here made the badge 12px taller than the text
+    // beside it, which grew the normal row's header and re-centred the username, score and
+    // timestamp 6px lower than the fully-collapsed row put them, so all four slid on every
+    // collapse. Padding it out again also makes it exceed the 24dp avatar in the fully-collapsed
+    // row and grows that header instead. Style the two rows identically or they cannot line up.
+    private void styleChildCountBadge(TextView childCountBadge) {
         int badgeHorizontalPadding = (int) Utils.convertDpToPixel(4, mActivity);
-        int badgeVerticalPadding = (int) Utils.convertDpToPixel(verticalPaddingDp, mActivity);
         int badgeInset = (int) Utils.convertDpToPixel(1, mActivity);
         GradientDrawable badgeBackground = new GradientDrawable();
         badgeBackground.setShape(GradientDrawable.RECTANGLE);
         badgeBackground.setCornerRadius(Utils.convertDpToPixel(8, mActivity));
         badgeBackground.setColor(mUsernameColor);
         childCountBadge.setBackground(new InsetDrawable(badgeBackground, badgeInset));
-        childCountBadge.setPadding(badgeHorizontalPadding, badgeVerticalPadding, badgeHorizontalPadding, badgeVerticalPadding);
+        childCountBadge.setPadding(badgeHorizontalPadding, 0, badgeHorizontalPadding, 0);
         childCountBadge.setTextColor(mCommentBackgroundColor);
         if (mActivity.typeface != null) {
             childCountBadge.setTypeface(mActivity.typeface);
@@ -1532,7 +1584,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             }
             itemView.setBackgroundColor(mFullyCollapsedCommentBackgroundColor);
             binding.userNameTextViewItemCommentFullyCollapsed.setTextColor(mUsernameColor);
-            styleChildCountBadge(binding.childCountTextViewItemCommentFullyCollapsed, 0);
+            styleChildCountBadge(binding.childCountTextViewItemCommentFullyCollapsed);
             binding.scoreTextViewItemCommentFullyCollapsed.setTextColor(mSecondaryTextColor);
             binding.timeTextViewItemCommentFullyCollapsed.setTextColor(mSecondaryTextColor);
 

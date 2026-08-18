@@ -82,6 +82,7 @@ import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.comment.FetchRemovedComment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AdjustableTouchSlopItemTouchHelper;
+import ml.docilealligator.infinityforreddit.customviews.CommentsItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewPostDetailBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
@@ -552,16 +553,21 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             mConcatAdapter = new ConcatAdapter(mPostAdapter, mCommentsStatusAdapter, mCommentsAdapter, mCommentsFooterAdapter);
         }
 
+        // Collapsing a comment emits a change plus a range removal at once, which the stock
+        // DefaultItemAnimator plays as four staged phases. See CommentsItemAnimator.
+        (mCommentsRecyclerView != null ? mCommentsRecyclerView : binding.postDetailRecyclerViewViewPostDetailFragment)
+                .setItemAnimator(new CommentsItemAnimator());
+
         viewPostDetailFragmentViewModel.getUiState().observe(getViewLifecycleOwner(), uiState -> {
             RecyclerView recyclerView = mCommentsRecyclerView != null ? mCommentsRecyclerView : binding.postDetailRecyclerViewViewPostDetailFragment;
             mCommentsStatusAdapter.setSingleCommentThreadMode(uiState.getSingleCommentId() != null && !uiState.getSingleCommentId().isEmpty());
             mCommentsStatusAdapter.setInitiallyLoading(uiState.isInitialLoading());
             mCommentsStatusAdapter.setInitiallyLoadingFailed(uiState.isInitialLoadingFailed());
-            recyclerView.post(() -> mCommentsStatusAdapter.notifyDataSetChanged());
+            recyclerView.post(() -> mCommentsStatusAdapter.notifyIfStateChanged());
 
             mCommentsFooterAdapter.setLoadingMoreChildren(uiState.isLoadingMoreChildren());
             mCommentsFooterAdapter.setLoadMoreChildrenSuccess(uiState.getLoadMoreChildrenSuccess());
-            recyclerView.post(() -> mCommentsFooterAdapter.notifyDataSetChanged());
+            recyclerView.post(() -> mCommentsFooterAdapter.notifyIfStateChanged());
 
             if (uiState.isInitialLoading()) {
                 binding.fetchPostInfoLinearLayoutViewPostDetailFragment.setVisibility(View.GONE);
@@ -620,10 +626,10 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             children = dataState.getChildren();
             mCommentsAdapter.submitList(comments);
             mCommentsStatusAdapter.setEmptyComments(comments == null || comments.isEmpty());
-            mCommentsStatusAdapter.notifyDataSetChanged();
+            mCommentsStatusAdapter.notifyIfStateChanged();
 
             mCommentsFooterAdapter.setHasMoreChildren(dataState.getHasMoreChildren());
-            mCommentsFooterAdapter.notifyDataSetChanged();
+            mCommentsFooterAdapter.notifyIfStateChanged();
         });
 
         bindView(savedInstanceState);

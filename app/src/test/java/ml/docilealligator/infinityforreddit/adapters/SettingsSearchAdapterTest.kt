@@ -45,16 +45,19 @@ class SettingsSearchAdapterTest {
         adapter.filter("post")
 
         val results = adapter.filteredItems
-        assertTrue("expected both kinds of match", results.size > 1)
+        val (titleMatches, otherMatches) = results.partition { it.titleLower.contains("post") }
+        // Both kinds must actually be present: a partition with nothing on one side is trivially
+        // ordered, so without these the ranking assertion below would hold for free -- including in
+        // the case it exists to catch, where title matches are dropped from the results entirely.
+        assertTrue("no title matches for \"post\"", titleMatches.isNotEmpty())
+        assertTrue("no breadcrumb-only matches for \"post\"", otherMatches.isNotEmpty())
 
         val lastTitleMatch = results.indexOfLast { it.titleLower.contains("post") }
         val firstOtherMatch = results.indexOfFirst { !it.titleLower.contains("post") }
-        if (firstOtherMatch != -1) {
-            assertTrue(
-                "title matches must come first, got ${results.map { it.title }}",
-                lastTitleMatch < firstOtherMatch,
-            )
-        }
+        assertTrue(
+            "title matches must come first, got ${results.map { it.title }}",
+            lastTitleMatch < firstOtherMatch,
+        )
     }
 
     @Test
@@ -95,6 +98,8 @@ class SettingsSearchAdapterTest {
     fun trimsTheQuery() {
         adapter.filter("  lock  ")
         val padded = adapter.itemCount
+        // Otherwise a filter that matched nothing at all would satisfy the equality below with 0 == 0.
+        assertTrue("padded query matched nothing", padded > 0)
 
         adapter.filter("lock")
         assertEquals(padded, adapter.itemCount)

@@ -12,9 +12,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 /**
  * Serves [code]/[body] without a network via an OkHttp interceptor, so a Retrofit `Call<String>`
- * completes normally at the HTTP layer (same technique as EditPostOrCommentErrorRoutingTest). The
- * ViewModel-under-test calls `.create(RedditAPI)` on this instance, so its real request-building and
- * response-routing run unchanged against a canned response.
+ * completes normally at the HTTP layer. The ViewModel-under-test calls `.create(RedditAPI)` on this
+ * instance, so its real request-building and response-routing run unchanged against a canned
+ * response -- including the HTTP-error path, which Retrofit delivers to `onResponse` rather than
+ * `onFailure`.
  */
 fun retrofitRespondingWith(code: Int, body: String): Retrofit {
     val client = OkHttpClient.Builder()

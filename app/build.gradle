@@ -81,9 +81,12 @@ android {
         minSdk 24
         targetSdk 35
         versionCode 223
-        versionName "8.2.5.9.9.9.1"
+        versionName "8.2.5.9.9.9.2"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
-        testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'test_reddit_client_id_default')
+        // The fallback must be 22 characters (APIKeysPreferenceFragment.CLIENT_ID_LENGTH) and must
+        // not be R.string.default_client_id, or the API Keys dialog leaves its OK button disabled
+        // and APIKeysTest cannot save anything. The old 'test_reddit_client_id_default' was 29.
+        testInstrumentationRunnerArguments.put("REDDIT_CLIENT_ID", testProperties['REDDIT_CLIENT_ID'] ?: 'TestClientId0000000000')
     }
 
     buildFeatures {
@@ -132,6 +135,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_24
         targetCompatibility JavaVersion.VERSION_24
+        // minSdk is 24, but BackupSettings formats its filename with java.time (API 26+). The
+        // desugar_jdk_libs dependency below was already declared without this flag, so the backport
+        // was never actually applied: settings backup would have thrown NoClassDefFoundError on API
+        // 24-25, and lint failed the build with NewApi. Enabling it keeps minSdk at 24.
+        coreLibraryDesugaringEnabled true
     }
 
     testOptions {
@@ -148,7 +156,9 @@ android {
             // Gradle's 512m default is not enough for the Robolectric/Roborazzi screenshot tests:
             // the executor dies with an OutOfMemoryError partway through a full-suite run, which
             // surfaces as unrelated-looking test failures rather than as an obvious memory problem.
-            maxHeapSize = "1g"
+            // The tiered RoborazziLayoutTest matrix renders ~1000 cases, some of them 2802px wide at
+            // xxhdpi, so 1g no longer clears it either — the run died with "Java heap space".
+            maxHeapSize = "4g"
         }
     }
 
@@ -547,8 +557,8 @@ dependencies {
     // Roborazzi: render View layouts at arbitrary smallest-width-dp configs (no emulator) and
     // diff them against committed golden PNGs. Driven by the recordRoborazziDebug /
     // verifyRoborazziDebug / compareRoborazziDebug Gradle tasks. See RoborazziLayoutTest.
-    testImplementation "io.github.takahirom.roborazzi:roborazzi:1.64.0"
-    testImplementation "io.github.takahirom.roborazzi:roborazzi-junit-rule:1.64.0"
+    testImplementation "io.github.takahirom.roborazzi:roborazzi:1.71.0"
+    testImplementation "io.github.takahirom.roborazzi:roborazzi-junit-rule:1.71.0"
 
     // ViewModel unit tests. Mockito's inline maker provides mockStatic() for the Java network/DB
     // helpers the ViewModels delegate to (UploadImageUtils/SendComment); core-testing supplies
@@ -561,7 +571,10 @@ dependencies {
     testImplementation "net.bytebuddy:byte-buddy-agent:1.18.11"
     testImplementation "androidx.arch.core:core-testing:2.2.0"
 
-    androidTestImplementation "androidx.test.ext:junit:1.0.0"
+    // 1.0.0 predates ActivityScenarioRule, so BaseTest did not compile against it. Kaspresso already
+    // forces 1.1.4 onto the runtime classpath, so declaring it here only fixes compilation — it does
+    // not change which version the tests actually run against.
+    androidTestImplementation "androidx.test.ext:junit:1.1.4"
     androidTestImplementation "androidx.test:rules:1.5.0"
     androidTestImplementation "androidx.test:runner:1.5.0"
 
@@ -612,6 +625,14 @@ androidComponents {
             .toTransformMany(SingleArtifact.APK.INSTANCE)
         renameProvider.configure { it.transformationRequest.set(request) }
     }
+}
+
+// GitHub CI is intentionally disabled for this fork, so the layout goldens are enforced locally:
+// `check` fails on any pixel drift against src/test/screenshots. scripts/verify-goldens.sh is the
+// one-command form with a readable failure summary. installDebug is deliberately left alone so the
+// normal build/install loop keeps its speed.
+tasks.named('check') {
+    dependsOn 'verifyRoborazziDebug'
 }
 
 interface CopyApkParameters extends WorkParameters, Serializable {

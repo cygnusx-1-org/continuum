@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.adapters
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.view.LayoutInflater
@@ -21,9 +22,37 @@ class CommentsFooterRecyclerViewAdapter(
         const val VIEW_TYPE_LOAD_MORE_COMMENTS_FAILED: Int = 16
     }
 
+    // See CommentsStatusRecyclerViewAdapter: notifying unconditionally would invalidate the whole
+    // ConcatAdapter on every view model emission, collapse and vote included.
+    private var stateChanged = false
+
     var hasMoreChildren: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                stateChanged = true
+            }
+        }
+    // Deliberately not tracked: nothing here renders from it. getItemCount() reads hasMoreChildren
+    // and getItemViewType() reads loadMoreChildrenSuccess. It flips on every fetch-more round trip,
+    // and the fetch starts from onScrolled, so marking it dirty would rebind every visible comment
+    // mid-scroll for a footer that has not changed.
     var isLoadingMoreChildren: Boolean = true
     var loadMoreChildrenSuccess: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                stateChanged = true
+            }
+        }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun notifyIfStateChanged() {
+        if (stateChanged) {
+            stateChanged = false
+            notifyDataSetChanged()
+        }
+    }
 
     override fun getItemViewType(position: Int): Int {
         if (!loadMoreChildrenSuccess) {

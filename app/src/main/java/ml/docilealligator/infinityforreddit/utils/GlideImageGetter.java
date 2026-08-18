@@ -78,6 +78,15 @@ public class GlideImageGetter implements Html.ImageGetter {
         BitmapDrawablePlaceholder() {
             super(Objects.requireNonNull(container.get()).getResources(),
                     Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
+            // Reserve the line box before the bitmap arrives. Until setBounds runs the drawable is
+            // empty, and ImageSpan takes the span's width and line ascent straight from its bounds,
+            // so a flair icon occupies nothing until it loads and then snaps to full size, growing
+            // the line, the header and the row, and shifting everything below it. The height
+            // setDrawable() settles on comes from the text size and never from the bitmap, so it is
+            // already known here and reserving it is exact. Only the width depends on the bitmap's
+            // aspect ratio, and correcting that moves text along the line instead of moving rows.
+            int reservedSize = (int) (enlargeImage ? textSize * 1.5 : textSize);
+            setBounds(0, 0, reservedSize, reservedSize);
         }
 
         @Override
