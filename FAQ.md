@@ -12,9 +12,11 @@ Things to try:
 
 ## Why can't I view `NSFW` content?
 
-1. Lack of `show mature (18+) content` blocks it in search. So enable it per account.
-2. Lack of being a `moderator` gets you the `Go to Reddit to view mature content` message when you visit a `NSFW` subreddit. So create a subreddit to become a `moderator`. Either one subreddit per `Reddit` account or one subreddit and make all your accounts `moderators` of it.
-3. The app settings block it in search, as in `Go to Subreddit`.
+1. Need to check `show mature (18+) content` and save. This needs to be done per account.
+2. Need to check `include mature content in search results` and save. This needs to be done per account.
+3. Need to uncheck `Hide images for NSFW/18+ content` and save. This needs to be done per account.
+3. Lack of being a `moderator` gets you the `Go to Reddit to view mature content` message when you visit a `NSFW` subreddit. So create a subreddit to become a `moderator`. Either one subreddit per `Reddit` account or one subreddit and make all your accounts `moderators` of it.
+4. The app settings block it in search, as in `Go to Subreddit`.
 
 ### Website
 <p align="center">
@@ -48,11 +50,11 @@ Things to try:
     <source
       width="1024x"
       media="(prefers-color-scheme: dark)"
-      srcset="assets/screenshots/nsfw-show-mature-content.png"
+      srcset="assets/screenshots/old-reddit-com-prefs-content-options.png"
     >
     <img
       width="1024px"
-      src="assets/screenshots/nsfw-show-mature-content.png"
+      src="assets/screenshots/old-reddit-com-prefs-content-options.png"
     >
   </picture>
 </p>
