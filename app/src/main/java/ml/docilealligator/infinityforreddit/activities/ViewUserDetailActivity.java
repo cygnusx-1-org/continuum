@@ -81,7 +81,6 @@ import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewUserDetailBinding;
-import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
@@ -90,6 +89,7 @@ import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
@@ -855,10 +855,15 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         fixViewPager2Sensitivity(binding.viewPagerViewUserDetailActivity);
 
         if (mMessageFullname != null) {
-            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
+            // Consumed before the request goes out: it is kept in the instance state, so a
+            // configuration change while the request is in flight would otherwise read the same
+            // message a second time and take the badge down twice.
+            String messageFullname = mMessageFullname;
+            mMessageFullname = null;
+            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), messageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
                 public void readSuccess() {
-                    mMessageFullname = null;
+                    InboxCount.decrement(mCurrentAccountSharedPreferences);
                 }
 
                 @Override
@@ -1066,13 +1071,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             return true;
         });
 
-        navigationWrapper.bottomAppBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                navigationWrapper.bottomAppBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                setInboxCount(mCurrentAccountSharedPreferences.getInt(SharedPreferencesUtils.INBOX_COUNT, 0));
-            }
-        });
+        InboxCount.liveData(mCurrentAccountSharedPreferences).observe(this, this::setInboxCount);
     }
 
     private void bottomAppBarOptionAction(int option) {
@@ -1247,7 +1246,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             FetchUserData.fetchUserData(mExecutor, mHandler, null, mOauthRetrofit, mRetrofit,
                     accessToken, username, new FetchUserData.FetchUserDataListener() {
                         @Override
-                        public void onFetchUserDataSuccess(UserData userData, int inboxCount) {
+                        public void onFetchUserDataSuccess(UserData userData) {
                             mExecutor.execute(() -> {
                                 mRedditDataRoomDatabase.userDao().insert(userData);
                                 mHandler.post(() -> {
@@ -1291,7 +1290,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
     @ExperimentalBadgeUtils
     private void setInboxCount(int inboxCount) {
-        mHandler.post(() -> navigationWrapper.setInboxCount(this, inboxCount));
+        navigationWrapper.setInboxCount(this, inboxCount);
     }
 
     @Override
@@ -1699,12 +1698,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Subscribe
     public void goBackToMainPageEvent(GoBackToMainPageEvent event) {
         finish();
-    }
-
-    @ExperimentalBadgeUtils
-    @Subscribe
-    public void onChangeInboxCountEvent(ChangeInboxCountEvent event) {
-        setInboxCount(event.inboxCount);
     }
 
     @Override

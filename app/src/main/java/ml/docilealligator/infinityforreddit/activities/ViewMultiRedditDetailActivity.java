@@ -12,7 +12,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -50,7 +49,6 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.SortTypeBottomS
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewMultiRedditDetailBinding;
-import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.RefreshMultiRedditsEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
@@ -58,6 +56,7 @@ import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.FragmentCommunicator;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
+import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.multireddit.DeleteMultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.ExpandedSubredditInMultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.FetchMultiRedditInfo;
@@ -503,13 +502,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
             return true;
         });
 
-        navigationWrapper.bottomAppBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                navigationWrapper.bottomAppBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                setInboxCount(mCurrentAccountSharedPreferences.getInt(SharedPreferencesUtils.INBOX_COUNT, 0));
-            }
-        });
+        InboxCount.liveData(mCurrentAccountSharedPreferences).observe(this, this::setInboxCount);
     }
 
     private void initializeFragment() {
@@ -1233,7 +1226,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
     @ExperimentalBadgeUtils
     private void setInboxCount(int inboxCount) {
-        mHandler.post(() -> navigationWrapper.setInboxCount(this, inboxCount));
+        navigationWrapper.setInboxCount(this, inboxCount);
     }
 
     @Subscribe
@@ -1246,11 +1239,5 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         if (!getClass().getName().equals(event.excludeActivityClassName)) {
             finish();
         }
-    }
-
-    @ExperimentalBadgeUtils
-    @Subscribe
-    public void onChangeInboxCountEvent(ChangeInboxCountEvent event) {
-        setInboxCount(event.inboxCount);
     }
 }

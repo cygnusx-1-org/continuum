@@ -33,6 +33,7 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityViewPrivateMessa
 import ml.docilealligator.infinityforreddit.events.PassPrivateMessageEvent;
 import ml.docilealligator.infinityforreddit.events.PassPrivateMessageIndexEvent;
 import ml.docilealligator.infinityforreddit.events.RepliedToPrivateMessageEvent;
+import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.message.ReplyMessage;
@@ -229,26 +230,40 @@ public class ViewPrivateMessagesActivity extends BaseActivity implements Activit
                                         isSendingMessage = false;
                                     }
                                 });
-                        StringBuilder fullnames = new StringBuilder();
+                        ArrayList<Message> unreadMessages = new ArrayList<>();
                         if (privateMessage.isNew()) {
-                            fullnames.append(privateMessage.getFullname()).append(",");
+                            unreadMessages.add(privateMessage);
                         }
-                        if (replies != null && !replies.isEmpty()) {
+                        if (replies != null) {
                             for (Message m : replies) {
                                 if (m.isNew()) {
-                                    fullnames.append(m).append(",");
+                                    unreadMessages.add(m);
                                 }
                             }
                         }
-                        if (fullnames.length() > 0) {
+                        if (!unreadMessages.isEmpty()) {
+                            StringBuilder fullnames = new StringBuilder();
+                            for (Message m : unreadMessages) {
+                                fullnames.append(m.getFullname()).append(",");
+                                // Flagged read before the request goes out, so a second reply sent
+                                // while it is in flight doesn't collect the same messages again and
+                                // take the badge down twice.
+                                m.setNew(false);
+                            }
                             fullnames.deleteCharAt(fullnames.length() - 1);
                             ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), fullnames.toString(),
                                     new ReadMessage.ReadMessageListener() {
                                         @Override
-                                        public void readSuccess() {}
+                                        public void readSuccess() {
+                                            InboxCount.decrement(mCurrentAccountSharedPreferences, unreadMessages.size());
+                                        }
 
                                         @Override
-                                        public void readFailed() {}
+                                        public void readFailed() {
+                                            for (Message m : unreadMessages) {
+                                                m.setNew(true);
+                                            }
+                                        }
                                     });
                         }
                     }

@@ -94,6 +94,7 @@ import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFr
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.extensions.ConcatAdapterKt;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
+import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent;
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
@@ -643,6 +644,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 @Override
                 public void readSuccess() {
                     mMessageFullname = null;
+                    InboxCount.decrement(mActivity.getCurrentAccountSharedPreferences());
                 }
 
                 @Override

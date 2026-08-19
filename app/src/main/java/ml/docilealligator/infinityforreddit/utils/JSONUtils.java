@@ -149,7 +149,6 @@ public class JSONUtils {
     public static final String WEBM_KEY = "webm";
     public static final String WEBM_URL_KEY = "webmUrl";
     public static final String UPVOTE_RATIO_KEY = "upvote_ratio";
-    public static final String INBOX_COUNT_KEY = "inbox_count";
     public static final String NEXT_CURSOR_KEY = "next_cursor";
     public static final String POST_KEY = "post";
     public static final String STYLES_KEY = "styles";

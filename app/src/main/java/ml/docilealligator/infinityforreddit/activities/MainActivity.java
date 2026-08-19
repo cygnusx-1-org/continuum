@@ -93,7 +93,6 @@ import ml.docilealligator.infinityforreddit.events.ChangeBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeDisableSwipingBetweenTabsEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHideFabInPostFeedEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeHideKarmaEvent;
-import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeLockBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNavigationDrawerSectionsEvent;
@@ -106,6 +105,7 @@ import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.message.FetchMessage;
+import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.multireddit.FetchMyMultiReddits;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
@@ -158,7 +158,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private static final String DRAWER_ON_ACCOUNT_SWITCH_STATE = "DOASS";
     private static final String MESSAGE_FULLNAME_STATE = "MFS";
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
-    private static final String INBOX_COUNT_STATE = "ICS";
     private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
     private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
 
@@ -254,7 +253,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private boolean mShowFavoriteSubscribedSubreddits;
     private boolean mShowSubscribedSubreddits;
     private int fabOption;
-    private int inboxCount;
     private ActivityMainBinding binding;
 
     @ExperimentalBadgeUtils
@@ -458,7 +456,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             mDrawerOnAccountSwitch = savedInstanceState.getBoolean(DRAWER_ON_ACCOUNT_SWITCH_STATE);
             mMessageFullname = savedInstanceState.getString(MESSAGE_FULLNAME_STATE);
             mNewAccountName = savedInstanceState.getString(NEW_ACCOUNT_NAME_STATE);
-            inboxCount = savedInstanceState.getInt(INBOX_COUNT_STATE);
             mAppBarCollapsed = savedInstanceState.getBoolean(APP_BAR_COLLAPSED_STATE, false);
             mBottomBarHidden = savedInstanceState.getBoolean(BOTTOM_APP_BAR_HIDDEN_STATE, false);
             if (mAppBarCollapsed) {
@@ -999,6 +996,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return true;
         });
         navigationWrapper.floatingActionButton.setVisibility(hideFab ? View.GONE : View.VISIBLE);
+
+        // Rebinding the options moves which icon the inbox badge belongs to, so re-apply it.
+        navigationWrapper.setInboxCount(this, InboxCount.get(mCurrentAccountSharedPreferences));
     }
 
     @ExperimentalBadgeUtils
@@ -1150,7 +1150,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 }
             }
         });
-        setInboxCount();
+        InboxCount.liveData(mCurrentAccountSharedPreferences).observe(this, this::setInboxCount);
         binding.navDrawerRecyclerViewMainActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
         binding.navDrawerRecyclerViewMainActivity.setAdapter(adapter.getConcatAdapter());
 
@@ -1297,10 +1297,15 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         if (!accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             if (mMessageFullname != null) {
-                ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
+                // Consumed before the request goes out: it is kept in the instance state, so a
+                // configuration change while the request is in flight would otherwise read the same
+                // message a second time and take the badge down twice.
+                String messageFullname = mMessageFullname;
+                mMessageFullname = null;
+                ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), messageFullname, new ReadMessage.ReadMessageListener() {
                     @Override
                     public void readSuccess() {
-                        mMessageFullname = null;
+                        InboxCount.decrement(mCurrentAccountSharedPreferences);
                     }
 
                     @Override
@@ -1451,30 +1456,25 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         if (!mFetchUserInfoSuccess) {
             FetchUserData.fetchUserData(mExecutor, mHandler, mRedditDataRoomDatabase, mOauthRetrofit, null,
                     accessToken, accountName, new FetchUserData.FetchUserDataListener() {
-                        @ExperimentalBadgeUtils
                         @Override
-                        public void onFetchUserDataSuccess(UserData userData, int inboxCount) {
+                        public void onFetchUserDataSuccess(UserData userData) {
                             accountName = userData.getName();
                             mFetchUserInfoSuccess = true;
-                            if (inboxCount > 0) {
-                                // Reddit's inbox_count can stay stuck on items that can't be cleared
-                                // in-app (archived PMs, chat, ...). Reconcile against the real unread
-                                // listing so a genuinely-empty inbox drops to no badge. See issue #334.
-                                FetchMessage.fetchUnreadMessagesCount(mExecutor, mHandler, mOauthRetrofit, Objects.requireNonNull(accessToken),
-                                        new FetchMessage.FetchUnreadMessagesCountListener() {
-                                            @Override
-                                            public void fetchSuccess(int unreadCount, boolean hasMore) {
-                                                applyInboxCount(hasMore ? inboxCount : unreadCount);
-                                            }
+                            // The badge counts the unread listing itself. Reddit's inbox_count is not
+                            // usable: it reports 0 for genuinely unread messages, and gets stuck on
+                            // items that can't be cleared in-app. See issues #334 and #361.
+                            FetchMessage.fetchUnreadMessagesCount(mExecutor, mHandler, mOauthRetrofit, Objects.requireNonNull(accessToken),
+                                    new FetchMessage.FetchUnreadMessagesCountListener() {
+                                        @Override
+                                        public void fetchSuccess(int unreadCount) {
+                                            InboxCount.set(mCurrentAccountSharedPreferences, unreadCount);
+                                        }
 
-                                            @Override
-                                            public void fetchFailed() {
-                                                applyInboxCount(inboxCount);
-                                            }
-                                        });
-                            } else {
-                                applyInboxCount(Math.max(0, inboxCount));
-                            }
+                                        @Override
+                                        public void fetchFailed() {
+                                            // Keep the stored count rather than guessing at zero.
+                                        }
+                                    });
                         }
 
                         @Override
@@ -1498,18 +1498,12 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
     }
 
-    private void applyInboxCount(int count) {
-        inboxCount = count;
-        mCurrentAccountSharedPreferences.edit().putInt(SharedPreferencesUtils.INBOX_COUNT, count).apply();
-        EventBus.getDefault().post(new ChangeInboxCountEvent(count));
-    }
-
     @ExperimentalBadgeUtils
-    private void setInboxCount() {
+    private void setInboxCount(int inboxCount) {
         if (adapter != null) {
             adapter.setInboxCount(inboxCount);
         }
-        mHandler.post(() -> navigationWrapper.setInboxCount(this, inboxCount));
+        navigationWrapper.setInboxCount(this, inboxCount);
     }
 
     @Override
@@ -1613,7 +1607,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         outState.putBoolean(DRAWER_ON_ACCOUNT_SWITCH_STATE, mDrawerOnAccountSwitch);
         outState.putString(MESSAGE_FULLNAME_STATE, mMessageFullname);
         outState.putString(NEW_ACCOUNT_NAME_STATE, mNewAccountName);
-        outState.putInt(INBOX_COUNT_STATE, inboxCount);
         outState.putBoolean(APP_BAR_COLLAPSED_STATE, mAppBarCollapsed);
         // When the bottom app bar exists (portrait), read its real state. When it's null
         // (landscape navigation-rail mode) keep the sticky value so the portrait hidden-state
@@ -1776,19 +1769,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 binding.navDrawerRecyclerViewMainActivity.scrollToPosition(previousPosition);
             }
         }
-    }
-
-    @ExperimentalBadgeUtils
-    @Subscribe
-    public void onChangeInboxCountEvent(ChangeInboxCountEvent event) {
-        // A negative value is a delta (e.g. -1 when a single message is read), a non-negative
-        // value is an absolute count. Mirror the semantics NavigationWrapper#setInboxCount uses.
-        if (event.inboxCount < 0) {
-            this.inboxCount = Math.max(0, this.inboxCount + event.inboxCount);
-        } else {
-            this.inboxCount = event.inboxCount;
-        }
-        setInboxCount();
     }
 
     @Subscribe

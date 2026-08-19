@@ -60,10 +60,13 @@ public class FetchMessage {
     }
 
     /**
-     * Fetches the actual unread inbox listing and reports how many items it contains. Reddit's
-     * {@code inbox_count} field can get stuck on items that cannot be cleared from within the app
-     * (archived private messages, chat, ...), so this is used to reconcile the badge against what
-     * the user can really act on. See issue #334.
+     * Fetches the unread inbox listing and reports how many items it contains. This is the count
+     * the inbox badge shows: Reddit's own {@code inbox_count} field is not usable, reporting 0 for
+     * genuinely unread messages and getting stuck on items that cannot be cleared from within the
+     * app (archived private messages, chat, ...). See issues #334 and #361.
+     *
+     * <p>The listing is one page of up to 100 items, so an inbox with more unread than that counts
+     * as 100.
      */
     public static void fetchUnreadMessagesCount(Executor executor, Handler handler, Retrofit oauthRetrofit,
                                                 String accessToken, FetchUnreadMessagesCountListener listener) {
@@ -75,10 +78,7 @@ public class FetchMessage {
                         try {
                             JSONObject data = new JSONObject(response.body()).getJSONObject(JSONUtils.DATA_KEY);
                             int count = data.getJSONArray(JSONUtils.CHILDREN_KEY).length();
-                            // A non-empty "after" means there are more than one page of unread items.
-                            boolean hasMore = !data.isNull(JSONUtils.AFTER_KEY)
-                                    && !data.getString(JSONUtils.AFTER_KEY).isEmpty();
-                            handler.post(() -> listener.fetchSuccess(count, hasMore));
+                            handler.post(() -> listener.fetchSuccess(count));
                         } catch (JSONException e) {
                             e.printStackTrace();
                             handler.post(listener::fetchFailed);
@@ -103,7 +103,7 @@ public class FetchMessage {
     }
 
     public interface FetchUnreadMessagesCountListener {
-        void fetchSuccess(int unreadCount, boolean hasMore);
+        void fetchSuccess(int unreadCount);
 
         void fetchFailed();
     }

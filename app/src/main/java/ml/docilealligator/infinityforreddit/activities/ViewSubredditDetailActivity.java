@@ -87,7 +87,6 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.NavigationWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewSubredditDetailBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAnonymousSubredditSubscriptionEvent;
-import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
@@ -96,6 +95,7 @@ import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.fragments.SidebarFragment;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
@@ -876,10 +876,15 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @ExperimentalBadgeUtils
     private void bindView() {
         if (mMessageFullname != null) {
-            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), mMessageFullname, new ReadMessage.ReadMessageListener() {
+            // Consumed before the request goes out: it is kept in the instance state, so a
+            // configuration change while the request is in flight would otherwise read the same
+            // message a second time and take the badge down twice.
+            String messageFullname = mMessageFullname;
+            mMessageFullname = null;
+            ReadMessage.readMessage(mOauthRetrofit, Objects.requireNonNull(accessToken), messageFullname, new ReadMessage.ReadMessageListener() {
                 @Override
                 public void readSuccess() {
-                    mMessageFullname = null;
+                    InboxCount.decrement(mCurrentAccountSharedPreferences);
                 }
 
                 @Override
@@ -1267,13 +1272,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         if (viewSidebar) {
             binding.viewPagerViewSubredditDetailActivity.setCurrentItem(1, false);
         }
-        navigationWrapper.bottomAppBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                navigationWrapper.bottomAppBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                setInboxCount(mCurrentAccountSharedPreferences.getInt(SharedPreferencesUtils.INBOX_COUNT, 0));
-            }
-        });
+        InboxCount.liveData(mCurrentAccountSharedPreferences).observe(this, this::setInboxCount);
     }
 
     private void displaySortTypeBottomSheetFragment() {
@@ -1286,7 +1285,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
     @ExperimentalBadgeUtils
     private void setInboxCount(int inboxCount) {
-        mHandler.post(() -> navigationWrapper.setInboxCount(this, inboxCount));
+        navigationWrapper.setInboxCount(this, inboxCount);
     }
 
     @Override
@@ -1517,12 +1516,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Subscribe
     public void goBackToMainPageEvent(GoBackToMainPageEvent event) {
         finish();
-    }
-
-    @ExperimentalBadgeUtils
-    @Subscribe
-    public void onChangeInboxCountEvent(ChangeInboxCountEvent event) {
-        setInboxCount(event.inboxCount);
     }
 
     @Override

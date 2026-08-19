@@ -79,12 +79,7 @@ public class FetchUserData {
         if (redditDataRoomDatabase != null) {
             redditDataRoomDatabase.accountDao().updateAccountInfo(userData.getName(), userData.getIconUrl(), userData.getBanner(), userData.getTotalKarma(), userData.isMod());
         }
-        if (jsonResponse.getJSONObject(JSONUtils.DATA_KEY).has(JSONUtils.INBOX_COUNT_KEY)) {
-            int inboxCount = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getInt(JSONUtils.INBOX_COUNT_KEY);
-            handler.post(() -> fetchUserDataListener.onFetchUserDataSuccess(userData, inboxCount));
-        } else {
-            handler.post(() -> fetchUserDataListener.onFetchUserDataSuccess(userData, -1));
-        }
+        handler.post(() -> fetchUserDataListener.onFetchUserDataSuccess(userData));
     }
 
     @WorkerThread
@@ -229,7 +224,7 @@ public class FetchUserData {
     }
 
     public interface FetchUserDataListener {
-        void onFetchUserDataSuccess(UserData userData, int inboxCount);
+        void onFetchUserDataSuccess(UserData userData);
 
         void onFetchUserDataFailed();
     }

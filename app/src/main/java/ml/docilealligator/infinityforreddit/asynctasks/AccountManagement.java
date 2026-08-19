@@ -22,7 +22,10 @@ public class AccountManagement {
                     .putString(SharedPreferencesUtils.ACCESS_TOKEN, account.getAccessToken())
                     .putString(SharedPreferencesUtils.ACCOUNT_NAME, account.getAccountName())
                     .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, account.getProfileImageUrl()).apply();
-            currentAccountSharedPreferences.edit().remove(SharedPreferencesUtils.SUBSCRIBED_THINGS_SYNC_TIME).apply();
+            currentAccountSharedPreferences.edit()
+                    .remove(SharedPreferencesUtils.SUBSCRIBED_THINGS_SYNC_TIME)
+                    .remove(SharedPreferencesUtils.INBOX_COUNT)
+                    .apply();
             handler.post(() -> switchAccountListener.switched(account));
         });
 
@@ -41,7 +44,12 @@ public class AccountManagement {
             String redgifsAccessToken = currentAccountSharedPreferences.getString(SharedPreferencesUtils.REDGIFS_ACCESS_TOKEN, "");
 
             currentAccountSharedPreferences.edit().clear().apply();
-            currentAccountSharedPreferences.edit().putString(SharedPreferencesUtils.REDGIFS_ACCESS_TOKEN, redgifsAccessToken).apply();
+            // clear() is only reported to preference listeners on API 30+, so write the emptied
+            // inbox count out explicitly to bring the badge down on every version.
+            currentAccountSharedPreferences.edit()
+                    .putString(SharedPreferencesUtils.REDGIFS_ACCESS_TOKEN, redgifsAccessToken)
+                    .putInt(SharedPreferencesUtils.INBOX_COUNT, 0)
+                    .apply();
 
             handler.post(switchToAnonymousAccountAsyncTaskListener::logoutSuccess);
         });

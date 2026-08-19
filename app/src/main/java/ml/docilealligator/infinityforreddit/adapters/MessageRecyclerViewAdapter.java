@@ -36,15 +36,14 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterErrorBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterLoadingBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemMessageBinding;
-import ml.docilealligator.infinityforreddit.events.ChangeInboxCountEvent;
 import ml.docilealligator.infinityforreddit.markdown.redditheading.RedditHeadingPlugin;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerAwareMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerParserPlugin;
 import ml.docilealligator.infinityforreddit.markdown.superscript.SuperscriptPlugin;
 import ml.docilealligator.infinityforreddit.message.FetchMessage;
+import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
-import org.greenrobot.eventbus.EventBus;
 import retrofit2.Retrofit;
 
 @SuppressWarnings("NullAway.Init")
@@ -335,7 +334,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                             new ReadMessage.ReadMessageListener() {
                                 @Override
                                 public void readSuccess() {
-                                    EventBus.getDefault().post(new ChangeInboxCountEvent(-1));
+                                    InboxCount.decrement(mActivity.getCurrentAccountSharedPreferences());
                                 }
 
                                 @Override

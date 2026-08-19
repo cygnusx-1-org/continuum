@@ -30,7 +30,7 @@ public class UserFollowing {
                                            UserFollowingListener userFollowingListener) {
         FetchUserData.fetchUserData(executor, handler, retrofit, username, new FetchUserData.FetchUserDataListener() {
             @Override
-            public void onFetchUserDataSuccess(UserData userData, int inboxCount) {
+            public void onFetchUserDataSuccess(UserData userData) {
                 executor.execute(() -> {
                     if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
                         redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount());
@@ -85,7 +85,7 @@ public class UserFollowing {
                         FetchUserData.fetchUserData(executor, handler, null, oauthRetrofit, retrofit, accessToken,
                                 username, new FetchUserData.FetchUserDataListener() {
                                     @Override
-                                    public void onFetchUserDataSuccess(UserData userData, int inboxCount) {
+                                    public void onFetchUserDataSuccess(UserData userData) {
                                         executor.execute(() -> {
                                             SubscribedUserData subscribedUserData = new SubscribedUserData(userData.getName(), userData.getIconUrl(),
                                                     accountName, false);

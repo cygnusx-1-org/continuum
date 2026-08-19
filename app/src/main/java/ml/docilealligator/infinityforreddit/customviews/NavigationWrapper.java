@@ -42,6 +42,10 @@ public class NavigationWrapper {
     private int inboxCount;
     @Nullable
     private BadgeDrawable badgeDrawable;
+    @Nullable
+    private View badgedView;
+    @Nullable
+    private View.OnLayoutChangeListener badgeLayoutListener;
 
     public NavigationWrapper(BottomAppBar bottomAppBar, LinearLayout linearLayoutBottomAppBar,
                              ImageView option1BottomAppBar, ImageView option2BottomAppBar,
@@ -116,6 +120,12 @@ public class NavigationWrapper {
             }
         } else {
             if (navigationRailView == null) {
+                // Undo what the two-option layout hides, so rebinding back to four options restores
+                // the full bar instead of leaving two icons gone and the weights short.
+                linearLayoutBottomAppBar.setWeightSum(5);
+                option1BottomAppBar.setVisibility(View.VISIBLE);
+                option3BottomAppBar.setVisibility(View.VISIBLE);
+
                 option1BottomAppBar.setImageResource(imageResources[0]);
                 option2BottomAppBar.setImageResource(imageResources[1]);
                 option3BottomAppBar.setImageResource(imageResources[2]);
@@ -126,11 +136,19 @@ public class NavigationWrapper {
                 menu.findItem(R.id.navigation_rail_option_2).setIcon(imageResources[1]);
                 menu.findItem(R.id.navigation_rail_option_3).setIcon(imageResources[2]);
                 menu.findItem(R.id.navigation_rail_option_4).setIcon(imageResources[3]);
+                menu.findItem(R.id.navigation_rail_option_3).setVisible(true);
+                menu.findItem(R.id.navigation_rail_option_4).setVisible(true);
             }
         }
     }
 
     public void bindOptions(int... options) {
+        // Clear every slot first: rebinding to a smaller bar must not leave the previous layout's
+        // options behind in the slots it no longer fills.
+        option1 = -1;
+        option2 = -1;
+        option3 = -1;
+        option4 = -1;
         if (options.length == 2) {
             if (navigationRailView == null) {
                 option2 = options[0];
@@ -236,59 +254,98 @@ public class NavigationWrapper {
 
     @ExperimentalBadgeUtils
     public void setInboxCount(Context context, int inboxCount) {
-        if (inboxCount < 0) {
-            this.inboxCount = Math.max(0, this.inboxCount + inboxCount);
-        } else {
-            this.inboxCount = inboxCount;
+        this.inboxCount = Math.max(0, inboxCount);
+
+        if (navigationRailView != null) {
+            return;
         }
 
-        if (option1 == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX || option1 == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX) {
-            if (navigationRailView == null) {
-                if (this.inboxCount == 0) {
-                    BadgeUtils.detachBadgeDrawable(badgeDrawable, option1BottomAppBar);
-                    badgeDrawable = null;
-                } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option1BottomAppBar), option1BottomAppBar);
-                }
-            }
-        } else if (option2 == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX || option2 == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX) {
-            if (navigationRailView == null) {
-                if (this.inboxCount == 0) {
-                    BadgeUtils.detachBadgeDrawable(badgeDrawable, option2BottomAppBar);
-                    badgeDrawable = null;
-                } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option2BottomAppBar), option2BottomAppBar);
-                }
-            }
-        } else if (option3 == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX || option3 == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX) {
-            if (navigationRailView == null) {
-                if (this.inboxCount == 0) {
-                    BadgeUtils.detachBadgeDrawable(badgeDrawable, option3BottomAppBar);
-                    badgeDrawable = null;
-                } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option3BottomAppBar), option3BottomAppBar);
-                }
-            }
-        } else if (option4 == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX || option4 == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX) {
-            if (navigationRailView == null) {
-                if (this.inboxCount == 0) {
-                    BadgeUtils.detachBadgeDrawable(badgeDrawable, option4BottomAppBar);
-                    badgeDrawable = null;
-                } else {
-                    BadgeUtils.attachBadgeDrawable(getBadgeDrawable(context, this.inboxCount, option4BottomAppBar), option4BottomAppBar);
-                }
-            }
+        // The anchor changes when the bottom app bar options are rebound, so start from a clean
+        // slate: the badge is a separate drawable in the anchor's overlay and would otherwise stack.
+        detachBadge();
+
+        if (this.inboxCount == 0) {
+            return;
         }
+
+        ImageView anchorView = getInboxOptionView();
+        if (anchorView == null) {
+            return;
+        }
+
+        badgedView = anchorView;
+        // The badge is offset by half the icon width, so it has to be positioned from the anchor's
+        // laid-out width and repositioned whenever that width changes: it is zero before the first
+        // layout, and it changes again when the bar is rebound to a different number of options.
+        badgeLayoutListener = new View.OnLayoutChangeListener() {
+            @ExperimentalBadgeUtils
+            @Override
+            public void onLayoutChange(View view, int left, int top, int right, int bottom,
+                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                if (right - left != oldRight - oldLeft) {
+                    applyBadge(context);
+                }
+            }
+        };
+        anchorView.addOnLayoutChangeListener(badgeLayoutListener);
+        applyBadge(context);
     }
 
-    private BadgeDrawable getBadgeDrawable(Context context, int inboxCount, View anchorView) {
+    /** Draws the badge on the current anchor, once that anchor has a width to position it against. */
+    @ExperimentalBadgeUtils
+    private void applyBadge(Context context) {
+        View anchorView = badgedView;
+        if (anchorView == null || inboxCount == 0 || anchorView.getWidth() == 0) {
+            return;
+        }
+
+        if (badgeDrawable != null) {
+            BadgeUtils.detachBadgeDrawable(badgeDrawable, anchorView);
+        }
+        badgeDrawable = createBadgeDrawable(context, inboxCount, anchorView);
+        BadgeUtils.attachBadgeDrawable(badgeDrawable, anchorView);
+    }
+
+    @ExperimentalBadgeUtils
+    private void detachBadge() {
+        if (badgedView != null) {
+            if (badgeDrawable != null) {
+                BadgeUtils.detachBadgeDrawable(badgeDrawable, badgedView);
+            }
+            if (badgeLayoutListener != null) {
+                badgedView.removeOnLayoutChangeListener(badgeLayoutListener);
+            }
+        }
+        badgeDrawable = null;
+        badgeLayoutListener = null;
+        badgedView = null;
+    }
+
+    @Nullable
+    private ImageView getInboxOptionView() {
+        if (isInboxOption(option1)) {
+            return option1BottomAppBar;
+        } else if (isInboxOption(option2)) {
+            return option2BottomAppBar;
+        } else if (isInboxOption(option3)) {
+            return option3BottomAppBar;
+        } else if (isInboxOption(option4)) {
+            return option4BottomAppBar;
+        }
+        return null;
+    }
+
+    private static boolean isInboxOption(int option) {
+        return option == SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX
+                || option == SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_INBOX;
+    }
+
+    private BadgeDrawable createBadgeDrawable(Context context, int inboxCount, View anchorView) {
         BadgeDrawable badgeDrawable = BadgeDrawable.create(context);
         badgeDrawable.setNumber(inboxCount);
         badgeDrawable.setBackgroundColor(customThemeWrapper.getColorAccent());
         badgeDrawable.setBadgeTextColor(customThemeWrapper.getButtonTextColor());
         badgeDrawable.setHorizontalOffset(anchorView.getWidth() / 2);
-
-        this.badgeDrawable = badgeDrawable;
 
         return badgeDrawable;
     }

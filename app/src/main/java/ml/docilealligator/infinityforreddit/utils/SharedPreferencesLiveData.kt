@@ -10,8 +10,10 @@ abstract class SharedPreferenceLiveData<T>(
 ) : LiveData<T>() {
 
     private val preferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            if (key == this.key) {
+        SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            // The whole file having been cleared (logging out of an account) is reported as a null
+            // key, so re-read on that too instead of holding on to the previous account's value.
+            if (changedKey == null || changedKey == key) {
                 value = getValueFromPreferences(key, defValue)
             }
         }

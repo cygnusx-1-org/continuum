@@ -24,7 +24,7 @@ public class LoadUserData {
                 handler.post(() -> FetchUserData.fetchUserData(executor, handler, redditDataRoomDatabase,
                         oauthRetrofit, retrofit, accessToken, userName, new FetchUserData.FetchUserDataListener() {
                             @Override
-                            public void onFetchUserDataSuccess(UserData userData, int inboxCount) {
+                            public void onFetchUserDataSuccess(UserData userData) {
                                 InsertUserData.insertUserData(executor, handler, redditDataRoomDatabase, userData,
                                         () -> loadUserDataAsyncTaskListener.loadUserDataSuccess(userData.getIconUrl()));
                             }
