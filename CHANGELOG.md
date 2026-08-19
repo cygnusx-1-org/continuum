@@ -2,6 +2,27 @@
 
 ---
 
+8.2.5.9.9.9.3 / 2026-8-18
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Replaced the subreddit filter prefix/suffix toggles with per-rule keyword matching on r/ContinuumAll
+* Rebuilt the Post Filter screen around one include/exclude rule list, and merged in Applies to
+* Simplified steps of "Add to Post Filter"
+* Stopped naming new post and comment filters "New Filter"
+* Added a feature where the apps records and lists the subreddits each wildcard rule actually hides
+
+Note the under the hood Post Filters functionality is exactly the same. The changes either extend existing functionality or change the UI/UX. The exception is the removal of the prefix/suffix toggles, which are superceded by the new wildcard feature.
+
+What is r/ContinuumAll? It is an alias of r/all. The reason is to avoid accidental filtering r/all. It is an opt-in, and you have to set it up. I did create r/ContinuumAll on Reddit as a private subreddit as a placeholder.
+
+Steps:
+1. Add wildcard filters which are automatcally limited to r/ContinuumAll
+2. Remove r/all, titled All by default, from Settings | Interface | Customize Tabs in Main Page | Tabs
+3. Add r/ContinuumAll to Settings | Interface | Customize Tabs in Main Page | Tabs, and title it All if you want
+
+See GitHub issue [#358](https://github.com/cygnusx-1-org/continuum/issues/358) for more background.
+
 8.2.5.9.9.9.2 / 2026-8-14
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
