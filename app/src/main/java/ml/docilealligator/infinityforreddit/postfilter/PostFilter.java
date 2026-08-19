@@ -11,8 +11,10 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -25,7 +27,10 @@ public class PostFilter implements Parcelable {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "name")
-    public String name = "New Filter";
+    // Empty, not a placeholder: a filter has to be named by whoever makes it, and a default name
+    // that looks filled in is one the user saves without reading. The Customize screen refuses to
+    // write an unnamed filter, and its name field shows its hint instead.
+    public String name = "";
     @ColumnInfo(name = "max_vote")
     public int maxVote = -1;
     @ColumnInfo(name = "min_vote")
@@ -98,32 +103,51 @@ public class PostFilter implements Parcelable {
     public ArrayList<String> postTitleContainsRegexes = new ArrayList<>();
 
     /**
-     * Global setting (mirrored from SharedPreferences, initialised in Infinity and updated live
-     * from the Post Filter screen). When enabled, an "Exclude subreddits" entry of at least
-     * {@link #SUBREDDIT_FILTER_PREFIX_MIN_LENGTH} characters matches any subreddit whose name
-     * starts with it (e.g. "android" hides r/androiddev). Shorter entries keep exact matching.
-     */
-    public static volatile boolean subredditFilterPrefixMatching = false;
-    public static final int SUBREDDIT_FILTER_PREFIX_MIN_LENGTH = 6;
-
-    /**
-     * Global setting (mirrored from SharedPreferences, initialised in Infinity and updated live
-     * from the Post Filter screen). When enabled, an "Exclude subreddits" entry of at least
-     * {@link #SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH} characters matches any subreddit whose name
-     * ends with it (e.g. "memes" hides r/dankmemes). Shorter entries keep exact matching.
-     */
-    public static volatile boolean subredditFilterSuffixMatching = false;
-    public static final int SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH = 5;
-
-    /**
-     * Lower-cased subreddit names that prefix/suffix matching must never hide: the current
-     * account's subscribed subreddits plus the {@code u_username} profile subreddits of the users
-     * it follows. Refreshed from the database whenever a feed loads its post filter (so an
-     * "Exclude subreddits" entry like "story" cannot accidentally hide r/history when you are
-     * subscribed to it). Exact-name entries are still honoured. Reassigned wholesale, never mutated
-     * in place, so readers on the paging thread always see a complete set.
+     * Lower-cased subreddit names that wildcard matching must never hide: the current account's
+     * subscribed subreddits plus the {@code u_username} profile subreddits of the users it follows.
+     * Refreshed from the database whenever a feed loads its post filter (so an "Exclude subreddits"
+     * entry like {@code *story*} cannot accidentally hide r/history when you are subscribed to it).
+     * Exact-name entries are still honoured, since those are a deliberate block of one named
+     * subreddit. Reassigned wholesale, never mutated in place, so readers on the paging thread
+     * always see a complete set.
      */
     public static volatile Set<String> neverHideSubredditsLowerCase = Collections.emptySet();
+
+    /**
+     * Per-rule exceptions, as {@code filterName\u0000term\u0000subredditName} keys, all lower-cased.
+     * A user who sees r/EarthPorn in the blocked list of a {@code *porn*} rule and marks it an
+     * exception lands here, so that one subreddit comes back while the rule keeps hiding the rest.
+     * Refreshed alongside {@link #neverHideSubredditsLowerCase} and reassigned wholesale for the
+     * same reason.
+     */
+    public static volatile Set<String> wildcardExceptionKeys = Collections.emptySet();
+
+    /**
+     * Whether this filter's wildcard "Exclude subreddits" terms are live.
+     *
+     * <p>Set when the filter is resolved for a feed (see {@code
+     * FetchPostFilterAndConcatenatedSubredditNames}), true only for
+     * {@link ml.docilealligator.infinityforreddit.Constants#CONTINUUM_ALL_SUBREDDIT}. Everywhere
+     * else a wildcard term is inert and only exact names filter, which is what keeps a broad term
+     * from silently emptying Home, Search or a subreddit page.
+     *
+     * <p>{@code transient} so it stays out of the Gson backup written to {@code post_filters.json};
+     * it is a property of the feed a filter was fetched for, not of the stored filter.
+     */
+    @Ignore
+    public transient boolean wildcardSubredditMatchingEnabled = false;
+
+    /**
+     * Lower-cased "Exclude subreddits" term to the name of the filter that contributed it, so a
+     * blocked subreddit can be attributed back to the rule the user actually wrote.
+     *
+     * <p>{@link #mergePostFilter} concatenates every applicable filter's terms into one object named
+     * "Merged", which would otherwise lose that provenance entirely. Populated by the merge (and by
+     * its single-filter fast path) rather than derived later, because by match time the only thing
+     * left is the concatenated column.
+     */
+    @Ignore
+    public transient Map<String, String> subredditTermOwners = Collections.emptyMap();
 
     public PostFilter() {
 
@@ -162,6 +186,23 @@ public class PostFilter implements Parcelable {
         in.readStringList(postTitleExcludesRegexes);
         postTitleContainsRegexes = new ArrayList<>();
         in.readStringList(postTitleContainsRegexes);
+        // Both of these describe the feed this filter was resolved for, not the stored filter, but
+        // they still have to survive a Parcel: PostFragment keeps its resolved filter in saved
+        // instance state and reuses it verbatim on restore instead of refetching. Dropping them
+        // there would leave every wildcard term silently inert after the process is recreated.
+        wildcardSubredditMatchingEnabled = in.readByte() != 0;
+        int termOwnerCount = in.readInt();
+        if (termOwnerCount > 0) {
+            Map<String, String> owners = new HashMap<>(termOwnerCount);
+            for (int i = 0; i < termOwnerCount; i++) {
+                String term = in.readString();
+                String owner = in.readString();
+                if (term != null && owner != null) {
+                    owners.put(term, owner);
+                }
+            }
+            subredditTermOwners = owners;
+        }
     }
 
     public static final Creator<PostFilter> CREATOR = new Creator<PostFilter>() {
@@ -300,40 +341,57 @@ public class PostFilter implements Parcelable {
                 if (filter.isEmpty()) {
                     continue;
                 }
-                boolean matched = false;
-                boolean fuzzyMatch = false;
-                if (subredditFilterPrefixMatching && filter.length() >= SUBREDDIT_FILTER_PREFIX_MIN_LENGTH) {
-                    matched = subredditName.regionMatches(true, 0, filter, 0, filter.length());
-                    fuzzyMatch = matched;
+                boolean wildcard = SubredditMatcher.isWildcard(filter);
+                // A wildcard term is scoped to one feed; everywhere else only exact names filter,
+                // so a broad term cannot quietly empty Home, Search or a subreddit page.
+                if (wildcard && !postFilter.wildcardSubredditMatchingEnabled) {
+                    continue;
                 }
-                if (!matched && subredditFilterSuffixMatching && filter.length() >= SUBREDDIT_FILTER_SUFFIX_MIN_LENGTH) {
-                    matched = subredditName.regionMatches(true, subredditName.length() - filter.length(), filter, 0, filter.length());
-                    fuzzyMatch = matched;
+                if (!SubredditMatcher.matches(subredditName, filter)) {
+                    continue;
                 }
-                // Never let prefix/suffix matching hide a subreddit the user is subscribed to;
-                // an exact-name entry below is still honoured as a deliberate block.
-                if (fuzzyMatch && neverHideSubredditsLowerCase.contains(subredditName.toLowerCase(Locale.ENGLISH))) {
-                    matched = false;
+                if (wildcard) {
+                    // Lower-cased only once a wildcard term has actually matched: a list of plain
+                    // names is the common case and must not allocate a copy of every post's
+                    // subreddit name to answer it.
+                    if (neverHideSubredditsLowerCase.contains(subredditName.toLowerCase(Locale.ENGLISH))) {
+                        continue;
+                    }
+                    String owner = postFilter.subredditTermOwners.get(filter.toLowerCase(Locale.ENGLISH));
+                    if (owner == null) {
+                        owner = postFilter.name;
+                    }
+                    if (wildcardExceptionKeys.contains(exceptionKey(owner, filter, subredditName))) {
+                        continue;
+                    }
+                    PostFilterBlockRecorder.record(owner, filter, subredditName);
                 }
-                if (!matched) {
-                    matched = subredditName.equalsIgnoreCase(filter);
-                }
-                if (matched) {
-                    return false;
-                }
+                return false;
             }
         }
         if (postFilter.containSubreddits != null && !postFilter.containSubreddits.equals("")) {
             String[] subreddits = postFilter.containSubreddits.split(",", 0);
             boolean hasRequiredSubreddit = false;
+            // An "only show these subreddits" term hides every post that does not match it, so a
+            // term that cannot match on this feed must not count as a requirement at all -- treating
+            // an inert wildcard as unsatisfied would empty the feed instead of ignoring the term.
+            boolean hasUsableTerm = false;
             String subreddit = post.getSubredditName();
             for (String s : subreddits) {
-                if (!s.trim().equals("") && subreddit.equalsIgnoreCase(s.trim())) {
+                String filter = s.trim();
+                if (filter.isEmpty()) {
+                    continue;
+                }
+                if (SubredditMatcher.isWildcard(filter) && !postFilter.wildcardSubredditMatchingEnabled) {
+                    continue;
+                }
+                hasUsableTerm = true;
+                if (SubredditMatcher.matches(subreddit, filter)) {
                     hasRequiredSubreddit = true;
                     break;
                 }
             }
-            if (!hasRequiredSubreddit) {
+            if (hasUsableTerm && !hasRequiredSubreddit) {
                 return false;
             }
         }
@@ -414,10 +472,13 @@ public class PostFilter implements Parcelable {
 
     public static PostFilter mergePostFilter(List<PostFilter> postFilterList) {
         if (postFilterList.size() == 1) {
-            return postFilterList.get(0);
+            PostFilter only = postFilterList.get(0);
+            only.subredditTermOwners = subredditTermOwnersOf(only);
+            return only;
         }
         PostFilter postFilter = new PostFilter();
         StringBuilder stringBuilder;
+        Map<String, String> termOwners = new HashMap<>();
         postFilter.name = "Merged";
         for (PostFilter p : postFilterList) {
             postFilter.maxVote = Math.min(p.maxVote, postFilter.maxVote);
@@ -456,6 +517,12 @@ public class PostFilter implements Parcelable {
                 stringBuilder = new StringBuilder(postFilter.excludeSubreddits == null ? "" : postFilter.excludeSubreddits);
                 stringBuilder.append(",").append(p.excludeSubreddits);
                 postFilter.excludeSubreddits = stringBuilder.toString();
+                // Remember which filter each term came from before the concatenation makes it
+                // impossible to tell. First writer wins, so a term two filters share is attributed
+                // to the one the user sees first in the list -- putAll would hand it to the last.
+                for (Map.Entry<String, String> owned : subredditTermOwnersOf(p).entrySet()) {
+                    termOwners.putIfAbsent(owned.getKey(), owned.getValue());
+                }
             }
 
             if (p.containSubreddits != null && !p.containSubreddits.equals("")) {
@@ -508,7 +575,37 @@ public class PostFilter implements Parcelable {
             postFilter.containGalleryType = p.containGalleryType && postFilter.containGalleryType;
         }
 
+        postFilter.subredditTermOwners = termOwners;
         return postFilter;
+    }
+
+    /**
+     * Maps each of {@code postFilter}'s wildcard "Exclude subreddits" terms, lower-cased, to the
+     * filter's own name. Exact terms are left out: nothing records or excepts them, so carrying
+     * them would only grow the map.
+     */
+    private static Map<String, String> subredditTermOwnersOf(PostFilter postFilter) {
+        if (postFilter.excludeSubreddits == null || postFilter.excludeSubreddits.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> owners = new HashMap<>();
+        for (String s : postFilter.excludeSubreddits.split(",", 0)) {
+            String term = s.trim();
+            if (!term.isEmpty() && SubredditMatcher.isWildcard(term)) {
+                owners.putIfAbsent(term.toLowerCase(Locale.ENGLISH), postFilter.name);
+            }
+        }
+        return owners;
+    }
+
+    /**
+     * Key into {@link #wildcardExceptionKeys}. Uses NUL as the separator because a filter name is
+     * free text and could otherwise collide with a more ordinary delimiter.
+     */
+    public static String exceptionKey(String filterName, String term, String subredditName) {
+        return filterName.toLowerCase(Locale.ENGLISH) + '\u0000'
+                + term.toLowerCase(Locale.ENGLISH) + '\u0000'
+                + subredditName.toLowerCase(Locale.ENGLISH);
     }
 
     @Override
@@ -548,5 +645,11 @@ public class PostFilter implements Parcelable {
         parcel.writeByte((byte) (containGalleryType ? 1 : 0));
         parcel.writeStringList(postTitleExcludesRegexes);
         parcel.writeStringList(postTitleContainsRegexes);
+        parcel.writeByte((byte) (wildcardSubredditMatchingEnabled ? 1 : 0));
+        parcel.writeInt(subredditTermOwners.size());
+        for (Map.Entry<String, String> entry : subredditTermOwners.entrySet()) {
+            parcel.writeString(entry.getKey());
+            parcel.writeString(entry.getValue());
+        }
     }
 }

@@ -28,6 +28,8 @@
             android:id="@+id/value_text_view_item_post_filter_rule"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textSize="?attr/font_default"
             android:textColor="?attr/primaryTextColor"
             android:fontFamily="?attr/font_family" />
@@ -37,6 +39,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textSize="?attr/font_12"
             android:textColor="?attr/secondaryTextColor"
             android:fontFamily="?attr/font_family" />

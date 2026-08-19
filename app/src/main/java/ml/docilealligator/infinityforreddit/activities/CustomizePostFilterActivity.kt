@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,6 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.os.BundleCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -24,15 +24,19 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import ml.docilealligator.infinityforreddit.Infinity
+import ml.docilealligator.infinityforreddit.Constants
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.adapters.PostFilterRulesRecyclerViewAdapter
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AddPostFilterRuleBottomSheetFragment
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.NewPostFilterUsageBottomSheetFragment
+import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostFilterBlockedSubredditsBottomSheetFragment
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
 import ml.docilealligator.infinityforreddit.databinding.ActivityCustomizePostFilterBinding
 import ml.docilealligator.infinityforreddit.postfilter.FilterRule
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockedSubreddit
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterRules
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage
 import ml.docilealligator.infinityforreddit.postfilter.RuleField
@@ -41,6 +45,7 @@ import ml.docilealligator.infinityforreddit.utils.Utils
 import ml.docilealligator.infinityforreddit.viewmodels.CustomizePostFilterViewModel
 import ml.docilealligator.infinityforreddit.viewmodels.SavePostFilterResult
 import java.util.concurrent.Executor
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -60,19 +65,13 @@ class CustomizePostFilterActivity :
     BaseActivity(),
     PostFilterRulesRecyclerViewAdapter.Callback,
     AddPostFilterRuleBottomSheetFragment.Host,
+    PostFilterBlockedSubredditsBottomSheetFragment.Host,
     NewPostFilterUsageBottomSheetFragment.Host {
 
     companion object {
         const val EXTRA_POST_FILTER = "EPF"
         const val EXTRA_FROM_SETTINGS = "EFS"
-        const val EXTRA_EXCLUDE_SUBREDDIT = "EES"
-        const val EXTRA_CONTAIN_SUBREDDIT = "ECS"
-        const val EXTRA_EXCLUDE_USER = "EEU"
-        const val EXTRA_CONTAIN_USER = "ECU"
-        const val EXTRA_EXCLUDE_FLAIR = "EEF"
-        const val EXTRA_CONTAIN_FLAIR = "ECF"
-        const val EXTRA_EXCLUDE_DOMAIN = "EED"
-        const val EXTRA_CONTAIN_DOMAIN = "ECD"
+        const val EXTRA_SEED_RULES = "ESR"
         const val EXTRA_START_FILTERED_POSTS_WHEN_FINISH = "ESFPWF"
         const val RETURN_EXTRA_POST_FILTER = "REPF"
 
@@ -217,7 +216,54 @@ class CustomizePostFilterActivity :
         binding.recyclerViewCustomizePostFilterActivity.adapter = adapter
         adapter.setRules(rules)
         adapter.setUsages(usages)
+        observeBlockedCounts()
     }
+
+    /**
+     * Keep the "blocked N subreddits" counts on the rule rows current. Observed rather than read
+     * once, because the recorder writes in batches while the user browses and may land rows while
+     * this screen is open.
+     */
+    private fun observeBlockedCounts() {
+        mRedditDataRoomDatabase.postFilterBlockedSubredditDao()
+            .getBlockedCountsLiveData(originalName)
+            .observe(this) { counts ->
+                adapter.setBlockedCounts(
+                    counts.associate { it.ruleValue.lowercase(Locale.ENGLISH) to it.blockedCount }
+                )
+            }
+    }
+
+    override fun onRuleBlockedListClicked(rule: FilterRule) {
+        // Write out whatever the recorder is still holding first, or a rule the user just watched
+        // hide posts opens showing stale numbers.
+        PostFilterBlockRecorder.flushNow()
+        val fragment = PostFilterBlockedSubredditsBottomSheetFragment.newInstance(rule)
+        fragment.show(supportFragmentManager, fragment.tag)
+    }
+
+    override fun observeBlockedSubreddits(
+        owner: LifecycleOwner,
+        rule: FilterRule,
+        observer: (List<PostFilterBlockedSubreddit>) -> Unit,
+    ) {
+        mRedditDataRoomDatabase.postFilterBlockedSubredditDao()
+            .getBlockedSubredditsLiveData(originalName, rule.value)
+            .observe(owner) { observer(it) }
+    }
+
+    override fun setBlockedSubredditExcepted(
+        rule: FilterRule,
+        subredditName: String,
+        excepted: Boolean,
+    ) {
+        mExecutor.execute {
+            mRedditDataRoomDatabase.postFilterBlockedSubredditDao()
+                .setExcepted(originalName, rule.value, subredditName, excepted)
+        }
+    }
+
+    override fun onEditRuleRequested(rule: FilterRule) = showRuleSheet(rule)
 
     private fun setUpInsets() {
         if (!isImmersiveInterfaceRespectForcedEdgeToEdge()) {
@@ -255,45 +301,16 @@ class CustomizePostFilterActivity :
     }
 
     /**
-     * "Add to post filter" from a post, subreddit or user arrives as one-off extras; they become
-     * rules like any other.
+     * "Add to post filter" from a post, subreddit or user arrives as ready-made rules (built by
+     * `PostFilterSeeds`); they join the list like any other.
      */
     private fun seedRulesFromIntent() {
-        addSeededRule(RuleField.SUBREDDIT, true, intent.getStringExtra(EXTRA_EXCLUDE_SUBREDDIT))
-        addSeededRule(RuleField.SUBREDDIT, false, intent.getStringExtra(EXTRA_CONTAIN_SUBREDDIT))
-        addSeededRule(RuleField.USER, true, intent.getStringExtra(EXTRA_EXCLUDE_USER))
-        addSeededRule(RuleField.USER, false, intent.getStringExtra(EXTRA_CONTAIN_USER))
-        addSeededRule(RuleField.FLAIR, true, intent.getStringExtra(EXTRA_EXCLUDE_FLAIR))
-        addSeededRule(RuleField.FLAIR, false, intent.getStringExtra(EXTRA_CONTAIN_FLAIR))
-        addSeededRule(RuleField.DOMAIN, true, domainOf(intent.getStringExtra(EXTRA_EXCLUDE_DOMAIN)))
-        addSeededRule(RuleField.DOMAIN, false, domainOf(intent.getStringExtra(EXTRA_CONTAIN_DOMAIN)))
-    }
-
-    private fun addSeededRule(field: RuleField, exclude: Boolean, value: String?) {
-        val trimmed = value?.trim().orEmpty()
-        if (trimmed.isEmpty()) {
-            return
+        val seeded = BundleCompat.getParcelableArrayList(
+            intent.extras ?: Bundle(), EXTRA_SEED_RULES, FilterRule::class.java
+        ) ?: return
+        for (rule in seeded) {
+            PostFilterRules.addRule(rules, rule)
         }
-        PostFilterRules.addRule(rules, FilterRule(field, exclude, trimmed))
-    }
-
-    /**
-     * Reduces a post URL to the domain this filter stores, or null when there is no domain to store.
-     *
-     * [Uri.getHost] is null for anything without a scheme — a bare "example.com" parses as a relative
-     * path — and in that case the value already is the domain. It is also null for a scheme with no
-     * authority ("https://"), which is neither a URL nor a domain, and returning null lets the caller
-     * skip it rather than seeding an empty rule.
-     */
-    private fun domainOf(urlOrDomain: String?): String? {
-        if (urlOrDomain.isNullOrEmpty()) {
-            return null
-        }
-        val host = Uri.parse(urlOrDomain).host
-        if (host != null) {
-            return host
-        }
-        return if (urlOrDomain.contains("://")) null else urlOrDomain
     }
 
     private fun loadUsages() {
@@ -390,6 +407,38 @@ class CustomizePostFilterActivity :
         PostFilterRules.addRule(rules, rule)
         adapter.setRules(rules)
     }
+
+    /**
+     * Scope the filter to r/ContinuumAll, the only feed wildcard subreddit terms run on. Adding it
+     * for the user is what makes picking a match type the whole interaction — the alternative was
+     * refusing the rule until they went and found the "Applies to" section themselves.
+     */
+    override fun onWildcardMatchChosen() {
+        // Pin the filter to r/ContinuumAll and drop everything else: a wildcard term is inert on any
+        // other feed, so leaving Home or a subreddit attached would leave the filter doing only part
+        // of what it says on the feeds it lists.
+        val alreadyScoped = usages.size == 1 && isContinuumAllUsage(usages[0])
+        if (alreadyScoped) {
+            return
+        }
+        usages.retainAll { isContinuumAllUsage(it) }
+        addUsage(
+            PostFilterUsage(
+                postFilter.name, PostFilterUsage.SUBREDDIT_TYPE, Constants.CONTINUUM_ALL_SUBREDDIT
+            )
+        )
+        adapter.setUsages(usages)
+        Snackbar.make(
+            binding.coordinatorLayoutCustomizePostFilterActivity,
+            getString(
+                R.string.post_filter_wildcard_scoped_to_continuum_all, Constants.CONTINUUM_ALL_SUBREDDIT
+            ),
+            Snackbar.LENGTH_LONG
+        ).show()
+    }
+
+    private fun isContinuumAllUsage(usage: PostFilterUsage): Boolean =
+        usage.usage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(usage.nameOfUsage)
 
     override fun onRuleValuePickerRequested(field: RuleField, exclude: Boolean) {
         pendingRuleExclude = exclude

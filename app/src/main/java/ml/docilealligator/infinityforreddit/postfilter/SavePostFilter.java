@@ -2,7 +2,11 @@ package ml.docilealligator.infinityforreddit.postfilter;
 
 import android.os.Handler;
 import androidx.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 
@@ -11,6 +15,40 @@ public class SavePostFilter {
         void success();
         void duplicate();
         void failed();
+    }
+
+    /**
+     * Re-key a filter's blocked-subreddit rows onto its saved name, dropping the ones whose rule the
+     * user has since edited or deleted.
+     *
+     * <p>An edited term is a different standing query — {@code *irl*} and {@code irl*} match
+     * different subreddits — so keeping the old list under the new term would attribute one rule's
+     * damage to another.
+     */
+    private static void saveBlockedSubreddits(RedditDataRoomDatabase redditDataRoomDatabase,
+                                              PostFilter postFilter,
+                                              List<PostFilterBlockedSubreddit> blocked) {
+        if (blocked.isEmpty()) {
+            return;
+        }
+        Set<String> keptTerms = new HashSet<>();
+        if (postFilter.excludeSubreddits != null) {
+            for (String term : postFilter.excludeSubreddits.split(",", 0)) {
+                String trimmed = term.trim();
+                if (!trimmed.isEmpty()) {
+                    keptTerms.add(trimmed.toLowerCase(Locale.ENGLISH));
+                }
+            }
+        }
+        List<PostFilterBlockedSubreddit> kept = new ArrayList<>(blocked.size());
+        for (PostFilterBlockedSubreddit b : blocked) {
+            if (keptTerms.contains(b.getRuleValue().toLowerCase(Locale.ENGLISH))) {
+                kept.add(new PostFilterBlockedSubreddit(postFilter.name, b.getRuleValue(),
+                        b.getSubredditName(), b.getFirstBlocked(), b.getBlockCount(), b.getExcepted()));
+            }
+        }
+        redditDataRoomDatabase.postFilterBlockedSubredditDao().deleteAllForFilter(postFilter.name);
+        redditDataRoomDatabase.postFilterBlockedSubredditDao().insertAll(kept);
     }
 
     public static void savePostFilter(Executor executor, Handler handler, RedditDataRoomDatabase redditDataRoomDatabase,
@@ -41,6 +79,10 @@ public class SavePostFilter {
                         List<PostFilterUsage> postFilterUsages = usages != null
                                 ? usages
                                 : redditDataRoomDatabase.postFilterUsageDao().getAllPostFilterUsage(originalName);
+                        // Read before the delete: the blocked-subreddit rows cascade off the filter
+                        // row, and they are discovered data a rename must not throw away.
+                        List<PostFilterBlockedSubreddit> blocked = redditDataRoomDatabase
+                                .postFilterBlockedSubredditDao().getAllForFilter(originalName);
                         if (!originalName.equals(postFilter.name)) {
                             redditDataRoomDatabase.postFilterDao().deletePostFilter(originalName);
                         } else if (usages != null) {
@@ -53,6 +95,7 @@ public class SavePostFilter {
                             postFilterUsage.name = postFilter.name;
                             redditDataRoomDatabase.postFilterUsageDao().insert(postFilterUsage);
                         }
+                        saveBlockedSubreddits(redditDataRoomDatabase, postFilter, blocked);
                     });
                     handler.post(savePostFilterListener::success);
                 }

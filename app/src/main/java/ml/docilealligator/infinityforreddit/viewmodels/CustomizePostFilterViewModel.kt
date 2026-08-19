@@ -70,6 +70,7 @@ class CustomizePostFilterViewModel(
     }
 
     companion object {
+        @JvmStatic
         fun provideFactory(executor: Executor, roomDatabase: RedditDataRoomDatabase): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")

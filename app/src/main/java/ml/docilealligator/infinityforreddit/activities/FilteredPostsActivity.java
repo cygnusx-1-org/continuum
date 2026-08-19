@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
+import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
@@ -318,7 +319,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                     finish();
                     return;
                 }
-                if (name.equals("popular") || name.equals("all")) {
+                if (Constants.isFirehoseSubreddit(name)) {
                     Objects.requireNonNull(getSupportActionBar()).setTitle(name.substring(0, 1).toUpperCase(Locale.getDefault()) + name.substring(1));
                 } else {
                     String subredditNamePrefixed = "r/" + name;

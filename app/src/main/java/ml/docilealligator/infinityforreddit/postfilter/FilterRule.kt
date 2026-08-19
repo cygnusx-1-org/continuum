@@ -35,6 +35,25 @@ data class FilterRule(
     val value: String,
 ) : Parcelable {
 
+    /**
+     * How this rule's [value] matches, for display and for the Add Rule sheet's chips.
+     *
+     * Only [RuleField.SUBREDDIT] honours the wildcard forms; every other field treats an asterisk as
+     * ordinary text, so they always read as [SubredditMatchMode.EXACT].
+     */
+    // `this.` is load-bearing: inside a property accessor a bare `field` is Kotlin's backing-field
+    // keyword, not this class's `field` property.
+    val matchMode: SubredditMatchMode
+        get() = if (this.field == RuleField.SUBREDDIT) {
+            SubredditMatcher.modeOf(value)
+        } else {
+            SubredditMatchMode.EXACT
+        }
+
+    /** The rule's text without its wildcard markers, for display and for editing. */
+    val bareValue: String
+        get() = if (this.field == RuleField.SUBREDDIT) SubredditMatcher.parse(value).bare else value
+
     /** Rules are equal by term regardless of case, which is how [PostFilter] matches them. */
     fun isSameTermAs(other: FilterRule): Boolean =
         field == other.field && exclude == other.exclude && value.equals(other.value, ignoreCase = true)

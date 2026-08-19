@@ -104,6 +104,42 @@
             app:singleSelection="true"
             app:selectionRequired="true" />
 
+        <!-- Subreddit rules only: how the term matches a name. Hidden for every other field, which
+             has no wildcard forms, so its label and chips move together as one block. -->
+        <TextView
+            android:id="@+id/match_label_text_view_add_post_filter_rule_bottom_sheet_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="16dp"
+            android:text="@string/post_filter_rule_match_label"
+            android:textSize="?attr/font_12"
+            android:textColor="?attr/secondaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/match_chip_group_add_post_filter_rule_bottom_sheet_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="8dp"
+            app:chipSpacingHorizontal="8dp"
+            app:singleSelection="true"
+            app:selectionRequired="true" />
+
+        <TextView
+            android:id="@+id/match_summary_text_view_add_post_filter_rule_bottom_sheet_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="8dp"
+            android:textSize="?attr/font_12"
+            android:textColor="?attr/secondaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

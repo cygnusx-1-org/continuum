@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit;
 
 import android.os.Handler;
 import androidx.annotation.Nullable;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -11,43 +10,81 @@ import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.multireddit.AnonymousMultiredditSubreddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockedSubreddit;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 
 public class FetchPostFilterAndConcatenatedSubredditNames {
     /**
-     * Refresh {@link PostFilter#neverHideSubredditsLowerCase} with the current account's subscribed
-     * subreddits and the {@code u_username} profile subreddits of the users it follows, so that
-     * prefix/suffix matching never hides them. When neither toggle is on it just clears the set and
-     * skips the database queries, so the common case pays nothing. Runs on the caller's worker
-     * thread (this class is always invoked from an executor).
+     * Resolve the filters that apply to a feed and prepare the static state
+     * {@link PostFilter#isPostAllowed} reads for them.
+     *
+     * <p>Wildcard "Exclude subreddits" terms only run on
+     * {@link Constants#CONTINUUM_ALL_SUBREDDIT}, so the flag that enables them is set here, where
+     * the feed is still known — {@code isPostAllowed} itself is static and sees only a post and a
+     * filter. When the resolved filter has no wildcard term (the overwhelmingly common case) the
+     * supporting lookups are skipped entirely, so nothing pays for a feature it is not using.
+     *
+     * <p>The two static sets are left alone on that path rather than cleared. They are read only
+     * while a wildcard term is matching — which happens on that one feed, which refreshes them as it
+     * loads — and every feed resolves its filter on a shared executor: clearing them here would
+     * strip a ContinuumAll feed that is still paging of its subscribed-subreddit protection the
+     * moment any other feed loaded.
      */
-    private static void refreshNeverHideSubreddits(RedditDataRoomDatabase redditDataRoomDatabase) {
-        if (neverHideMatchingDisabled()) {
-            PostFilter.neverHideSubredditsLowerCase = Collections.emptySet();
-            return;
+    private static PostFilter resolvePostFilter(RedditDataRoomDatabase redditDataRoomDatabase,
+                                                int postFilterUsage, @Nullable String nameOfUsage) {
+        List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
+        PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
+        mergedPostFilter.wildcardSubredditMatchingEnabled =
+                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(nameOfUsage);
+        if (!mergedPostFilter.wildcardSubredditMatchingEnabled || mergedPostFilter.subredditTermOwners.isEmpty()) {
+            return mergedPostFilter;
         }
         Account currentAccount = redditDataRoomDatabase.accountDao().getCurrentAccount();
         String accountName = currentAccount != null ? currentAccount.getAccountName() : Account.ANONYMOUS_ACCOUNT;
         List<SubscribedSubredditData> subscribedSubreddits = redditDataRoomDatabase.subscribedSubredditDao().getAllSubscribedSubredditsList(accountName);
         updateNeverHideSubreddits(redditDataRoomDatabase, accountName, subscribedSubreddits);
+        refreshWildcardExceptions(redditDataRoomDatabase);
+        return mergedPostFilter;
     }
 
     /**
-     * Variant that reuses an already-fetched subscribed-subreddit list, so callers that have it in
-     * hand (e.g. the anonymous front page) don't query it a second time.
+     * Variant for callers that already hold the subscribed-subreddit list (the anonymous front page)
+     * so it isn't queried a second time.
      */
-    private static void refreshNeverHideSubreddits(RedditDataRoomDatabase redditDataRoomDatabase, String accountName,
-                                                   List<SubscribedSubredditData> subscribedSubreddits) {
-        if (neverHideMatchingDisabled()) {
-            PostFilter.neverHideSubredditsLowerCase = Collections.emptySet();
-            return;
+    private static PostFilter resolvePostFilter(RedditDataRoomDatabase redditDataRoomDatabase,
+                                                int postFilterUsage, @Nullable String nameOfUsage,
+                                                String accountName,
+                                                @Nullable List<SubscribedSubredditData> subscribedSubreddits) {
+        List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
+        PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
+        mergedPostFilter.wildcardSubredditMatchingEnabled =
+                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(nameOfUsage);
+        if (!mergedPostFilter.wildcardSubredditMatchingEnabled || mergedPostFilter.subredditTermOwners.isEmpty()) {
+            return mergedPostFilter;
         }
         updateNeverHideSubreddits(redditDataRoomDatabase, accountName, subscribedSubreddits);
+        refreshWildcardExceptions(redditDataRoomDatabase);
+        return mergedPostFilter;
+    }
+
+    /**
+     * Refresh {@link PostFilter#wildcardExceptionKeys} from the subreddits the user has marked as
+     * exceptions in a rule's blocked list.
+     */
+    private static void refreshWildcardExceptions(RedditDataRoomDatabase redditDataRoomDatabase) {
+        List<PostFilterBlockedSubreddit> exceptions =
+                redditDataRoomDatabase.postFilterBlockedSubredditDao().getAllExceptions();
+        Set<String> keys = new HashSet<>();
+        for (PostFilterBlockedSubreddit e : exceptions) {
+            keys.add(PostFilter.exceptionKey(e.getFilterName(), e.getRuleValue(), e.getSubredditName()));
+        }
+        PostFilter.wildcardExceptionKeys = keys;
     }
 
     private static void updateNeverHideSubreddits(RedditDataRoomDatabase redditDataRoomDatabase, String accountName,
-                                                  List<SubscribedSubredditData> subscribedSubreddits) {
+                                                  @Nullable List<SubscribedSubredditData> subscribedSubreddits) {
         Set<String> names = new HashSet<>();
         if (subscribedSubreddits != null) {
             for (SubscribedSubredditData s : subscribedSubreddits) {
@@ -68,17 +105,11 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
         PostFilter.neverHideSubredditsLowerCase = names;
     }
 
-    private static boolean neverHideMatchingDisabled() {
-        return !PostFilter.subredditFilterPrefixMatching && !PostFilter.subredditFilterSuffixMatching;
-    }
-
     public static void fetchPostFilter(RedditDataRoomDatabase redditDataRoomDatabase, Executor executor,
                                                    Handler handler, int postFilterUsage,
                                                    @Nullable String nameOfUsage, FetchPostFilterListerner fetchPostFilterListerner) {
         executor.execute(() -> {
-            refreshNeverHideSubreddits(redditDataRoomDatabase);
-            List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
-            PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
+            PostFilter mergedPostFilter = resolvePostFilter(redditDataRoomDatabase, postFilterUsage, nameOfUsage);
             handler.post(() -> fetchPostFilterListerner.success(mergedPostFilter));
         });
     }
@@ -87,10 +118,9 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
                                                    Handler handler, int postFilterUsage, @Nullable String nameOfUsage,
                                                    FetchPostFilterAndConcatenatecSubredditNamesListener fetchPostFilterAndConcatenatecSubredditNamesListener) {
         executor.execute(() -> {
-            List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
-            PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
             List<SubscribedSubredditData> anonymousSubscribedSubreddits = redditDataRoomDatabase.subscribedSubredditDao().getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT);
-            refreshNeverHideSubreddits(redditDataRoomDatabase, Account.ANONYMOUS_ACCOUNT, anonymousSubscribedSubreddits);
+            PostFilter mergedPostFilter = resolvePostFilter(redditDataRoomDatabase, postFilterUsage, nameOfUsage,
+                    Account.ANONYMOUS_ACCOUNT, anonymousSubscribedSubreddits);
             if (anonymousSubscribedSubreddits != null && !anonymousSubscribedSubreddits.isEmpty()) {
                 StringBuilder stringBuilder = new StringBuilder();
                 for (SubscribedSubredditData s : anonymousSubscribedSubreddits) {
@@ -110,9 +140,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
                                                                     Handler handler, @Nullable String multipath, int postFilterUsage, @Nullable String nameOfUsage,
                                                                     FetchPostFilterAndConcatenatecSubredditNamesListener fetchPostFilterAndConcatenatecSubredditNamesListener) {
         executor.execute(() -> {
-            refreshNeverHideSubreddits(redditDataRoomDatabase);
-            List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
-            PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
+            PostFilter mergedPostFilter = resolvePostFilter(redditDataRoomDatabase, postFilterUsage, nameOfUsage);
             List<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits = redditDataRoomDatabase.anonymousMultiredditSubredditDao().getAllAnonymousMultiRedditSubreddits(multipath);
             if (anonymousMultiredditSubreddits != null && !anonymousMultiredditSubreddits.isEmpty()) {
                 StringBuilder stringBuilder = new StringBuilder();

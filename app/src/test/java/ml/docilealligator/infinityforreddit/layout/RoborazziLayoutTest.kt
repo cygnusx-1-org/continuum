@@ -215,6 +215,9 @@ class RoborazziLayoutTest(private val case: Case) {
             LayoutSpec("postFilterLimits", R.layout.item_post_filter_limits, Family.NONE),
             LayoutSpec("postFilterRulesHeader", R.layout.item_post_filter_rules_header, Family.NONE),
             LayoutSpec("postFilterRule", R.layout.item_post_filter_rule, Family.NONE),
+            LayoutSpec(
+                "postFilterBlockedSubreddit", R.layout.item_post_filter_blocked_subreddit, Family.NONE
+            ),
         )
 
         /** Common phones (320/360/411/443/448), this dev's phone (527), tablets (600/934). */

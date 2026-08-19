@@ -30,6 +30,8 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilter
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterRange
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage
 import ml.docilealligator.infinityforreddit.postfilter.RuleField
+import ml.docilealligator.infinityforreddit.postfilter.SubredditMatchMode
+import java.util.Locale
 
 /**
  * The whole Customize Post Filter screen: the name and the rule list, then the sections that narrow
@@ -58,6 +60,13 @@ class PostFilterRulesRecyclerViewAdapter(
         fun onUsageRemoved(usage: PostFilterUsage)
 
         fun onRuleClicked(rule: FilterRule)
+
+        /**
+         * A wildcard rule that has hidden something was tapped; show what it actually blocked.
+         * Rules with nothing to show go to [onRuleClicked] instead, so the tap never opens an
+         * empty list.
+         */
+        fun onRuleBlockedListClicked(rule: FilterRule)
 
         fun onRuleRemoved(rule: FilterRule)
     }
@@ -95,6 +104,17 @@ class PostFilterRulesRecyclerViewAdapter(
     private var usages: List<PostFilterUsage> = emptyList()
     private var visibleRules: List<FilterRule> = emptyList()
 
+    /** Lower-cased rule term to how many subreddits it has hidden. Empty until the query returns. */
+    private var blockedCounts: Map<String, Int> = emptyMap()
+
+    /**
+     * A wildcard subreddit rule only ever runs on r/ContinuumAll, so a filter that has one is pinned
+     * to that feed alone. Letting it also apply to Home would produce a filter that is half inert
+     * there, with nothing on screen to say which half.
+     */
+    private val hasWildcardRule: Boolean
+        get() = rules.any { it.field == RuleField.SUBREDDIT && it.matchMode.isWildcard }
+
     /** Display-only: which header chips the user has checked. Never affects what gets saved. */
     private val checkedPolarities = LinkedHashSet<Boolean>()
     private val checkedFields = LinkedHashSet<RuleField>()
@@ -124,6 +144,17 @@ class PostFilterRulesRecyclerViewAdapter(
         checkedFields.retainAll { field -> rules.any { it.field == field } }
         refreshTail()
         rulesHeaderBinding?.let { bindRulesHeaderChips(it) }
+        // Adding or removing a wildcard rule locks or unlocks "Applies to", so it rebinds too.
+        appliesToBinding?.let { bindUsageChips(it) }
+    }
+
+    /**
+     * How many subreddits each wildcard rule has actually hidden. Rebinds only the rule rows, so a
+     * count arriving while a section row is being edited cannot disturb the cursor.
+     */
+    fun setBlockedCounts(newCounts: Map<String, Int>) {
+        blockedCounts = newCounts
+        notifyItemRangeChanged(headerSections.size, tailSize)
     }
 
     fun setUsages(newUsages: List<PostFilterUsage>) {
@@ -224,18 +255,28 @@ class PostFilterRulesRecyclerViewAdapter(
     // region Applies to
 
     private fun bindUsageChips(binding: ItemPostFilterAppliesToBinding) {
+        val locked = hasWildcardRule
+        binding.summaryTextViewItemPostFilterAppliesTo.setText(
+            if (locked) R.string.post_filter_applies_to_summary_locked else R.string.post_filter_applies_to_summary
+        )
         val chipGroup = binding.chipGroupItemPostFilterAppliesTo
         chipGroup.removeAllViews()
         for (usage in usages) {
             val label = usageLabel(usage)
             val chip = chipStyler.inflate(chipGroup, R.layout.chip_post_filter_usage)
             chip.text = label
+            // While locked the feed cannot be removed either: with "Add feed" gone there would be no
+            // way to put it back short of deleting the rule that caused the lock.
+            chip.isCloseIconVisible = !locked
             chip.setCloseIconContentDescription(
                 activity.getString(R.string.content_description_remove_post_filter_rule, label)
             )
             chip.setOnClickListener { callback.onUsageClicked(usage) }
             chip.setOnCloseIconClickListener { callback.onUsageRemoved(usage) }
             chipGroup.addView(chip)
+        }
+        if (locked) {
+            return
         }
         val addChip = chipStyler.inflate(chipGroup, R.layout.chip_post_filter_add)
         addChip.setText(R.string.post_filter_add_usage)
@@ -288,6 +329,13 @@ class PostFilterRulesRecyclerViewAdapter(
             RuleField.TITLE_REGEX -> R.string.post_filter_field_title_regex
         }
     )
+
+    private fun matchLabelRes(mode: SubredditMatchMode): Int = when (mode) {
+        SubredditMatchMode.EXACT -> R.string.post_filter_match_exact
+        SubredditMatchMode.PREFIX -> R.string.post_filter_match_prefix
+        SubredditMatchMode.SUFFIX -> R.string.post_filter_match_suffix
+        SubredditMatchMode.CONTAINS -> R.string.post_filter_match_contains
+    }
 
     private fun applyCardTheme(cardView: MaterialCardView) {
         cardView.setCardBackgroundColor(filledCardViewBackgroundColor)
@@ -500,18 +548,42 @@ class PostFilterRulesRecyclerViewAdapter(
 
         fun bind(rule: FilterRule) {
             binding.valueTextViewItemPostFilterRule.text = rule.value
-            binding.summaryTextViewItemPostFilterRule.text = activity.getString(
-                R.string.post_filter_rule_summary,
-                activity.getString(
-                    if (rule.exclude) R.string.post_filter_rule_exclude else R.string.post_filter_rule_include
-                ),
-                fieldLabel(rule.field)
-            )
+            binding.summaryTextViewItemPostFilterRule.text = ruleSummary(rule)
             binding.deleteImageViewItemPostFilterRule.contentDescription =
                 activity.getString(R.string.content_description_remove_post_filter_rule, rule.value)
-            binding.root.setOnClickListener { callback.onRuleClicked(rule) }
+            // A wildcard rule's real reach is the interesting thing about it, so the row goes there
+            // once there is something to show; everything else goes straight to the editor.
+            val blocked = blockedCount(rule)
+            binding.root.setOnClickListener {
+                if (blocked > 0) callback.onRuleBlockedListClicked(rule) else callback.onRuleClicked(rule)
+            }
             binding.deleteImageViewItemPostFilterRule.setOnClickListener { callback.onRuleRemoved(rule) }
         }
+
+        private fun ruleSummary(rule: FilterRule): String {
+            val polarity = activity.getString(
+                if (rule.exclude) R.string.post_filter_rule_exclude else R.string.post_filter_rule_include
+            )
+            val field = fieldLabel(rule.field)
+            if (!rule.matchMode.isWildcard) {
+                return activity.getString(R.string.post_filter_rule_summary, polarity, field)
+            }
+            val match = activity.getString(matchLabelRes(rule.matchMode))
+            val blocked = blockedCount(rule)
+            return if (blocked == 0) {
+                activity.getString(R.string.post_filter_rule_summary_with_match, polarity, field, match)
+            } else {
+                activity.getString(
+                    R.string.post_filter_rule_summary_with_blocked, polarity, field, match,
+                    activity.resources.getQuantityString(
+                        R.plurals.post_filter_rule_blocked_count, blocked, blocked
+                    )
+                )
+            }
+        }
+
+        private fun blockedCount(rule: FilterRule): Int =
+            blockedCounts[rule.value.lowercase(Locale.ENGLISH)] ?: 0
     }
 
     private inner class EmptyViewHolder(private val binding: ItemPostFilterRulesEmptyBinding) :

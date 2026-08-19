@@ -192,8 +192,6 @@ public class SharedPreferencesUtils {
     public static final String LANGUAGE_DEFAULT_VALUE = "auto";
     public static final String ENABLE_SEARCH_HISTORY = "enable_search_history";
     public static final String POST_FILTER = "post_filter";
-    public static final String SUBREDDIT_FILTER_PREFIX_MATCHING = "subreddit_filter_prefix_matching";
-    public static final String SUBREDDIT_FILTER_SUFFIX_MATCHING = "subreddit_filter_suffix_matching";
     public static final String ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS = "only_disable_preview_in_video_and_gif_posts";
     // Legacy combined toggle, kept only so the split can be migrated. Superseded by
     // SAVE_POST_SORT + SAVE_COMMENT_SORT.

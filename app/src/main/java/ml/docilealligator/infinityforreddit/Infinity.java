@@ -38,7 +38,7 @@ import ml.docilealligator.infinityforreddit.events.ToggleSecureModeEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.FontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
-import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MaterialYouUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -118,8 +118,10 @@ public class Infinity extends Application implements LifecycleObserver {
         appLockTimeout = Long.parseLong(mSecuritySharedPreferences.getString(SharedPreferencesUtils.APP_LOCK_TIMEOUT, "600000"));
         isSecureMode = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.SECURE_MODE, false);
 
-        PostFilter.subredditFilterPrefixMatching = mSharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_PREFIX_MATCHING, false);
-        PostFilter.subredditFilterSuffixMatching = mSharedPreferences.getBoolean(SharedPreferencesUtils.SUBREDDIT_FILTER_SUFFIX_MATCHING, false);
+        // Give the block recorder somewhere to write. Until this runs it silently drops what it is
+        // told, which is what keeps PostFilter.isPostAllowed callable from unit tests with no setup.
+        PostFilterBlockRecorder.install(executor,
+                blocks -> redditDataRoomDatabase.postFilterBlockedSubredditDao().upsertAll(blocks));
 
         // One-time migration: the combined "Save Sort Type" toggle was split into separate
         // post-feed and comment toggles. Preserve a user's old choice (e.g. off) for both.

@@ -45,7 +45,8 @@ class MainTest : BaseTest() {
                     }
                     customizeFilterEditText {
                         isEnabled()
-                        hasText("New Filter")
+                        // A new filter starts unnamed — naming it is the user's job.
+                        hasEmptyText()
                     }
                     textFilterChip {
                         isVisible()

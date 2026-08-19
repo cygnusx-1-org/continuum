@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.BundleCompat
+import com.google.android.material.chip.Chip
+import ml.docilealligator.infinityforreddit.Constants
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.activities.BaseActivity
 import ml.docilealligator.infinityforreddit.customviews.FilterChipStyler
@@ -17,6 +19,8 @@ import ml.docilealligator.infinityforreddit.databinding.FragmentAddPostFilterRul
 import ml.docilealligator.infinityforreddit.postfilter.FilterRule
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterRules
 import ml.docilealligator.infinityforreddit.postfilter.RuleField
+import ml.docilealligator.infinityforreddit.postfilter.SubredditMatchMode
+import ml.docilealligator.infinityforreddit.postfilter.SubredditMatcher
 import ml.docilealligator.infinityforreddit.utils.Utils
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
@@ -43,6 +47,13 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
          * The host takes over: the sheet is already dismissed by the time this is called.
          */
         fun onRuleValuePickerRequested(field: RuleField, exclude: Boolean)
+
+        /**
+         * A wildcard match type was picked, so the filter needs to apply to r/ContinuumAll — the
+         * only feed those run on. The host adds it to "Applies to" rather than the sheet refusing
+         * the rule, so choosing the match type is the whole interaction.
+         */
+        fun onWildcardMatchChosen()
     }
 
     companion object {
@@ -53,6 +64,7 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
 
         private const val SELECTED_FIELD_STATE = "SFS"
         private const val EXCLUDE_STATE = "ES"
+        private const val MATCH_MODE_STATE = "MMS"
     }
 
     private lateinit var host: Host
@@ -61,6 +73,10 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
     private var existingRules: List<FilterRule> = emptyList()
     private var selectedField = RuleField.SUBREDDIT
     private var exclude = true
+    private var matchMode = SubredditMatchMode.EXACT
+
+    /** The match chips' listener fires while they are being re-synced; ignore those. */
+    private var bindingMatchChips = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,6 +102,12 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         exclude = savedInstanceState?.getBoolean(EXCLUDE_STATE)
             ?: editedRule?.exclude
             ?: arguments.getBoolean(EXTRA_INITIAL_EXCLUDE, true)
+        // Same reasoning as the field above: the chips are rebuilt on every onCreateView, so without
+        // this a rotation would drop a half-written "Contains" rule back to "Exact" while the typed
+        // term survived in the restored EditText.
+        matchMode = savedInstanceState?.let { SubredditMatchMode.entries[it.getInt(MATCH_MODE_STATE)] }
+            ?: editedRule?.matchMode
+            ?: SubredditMatchMode.EXACT
 
         val primaryTextColor = customThemeWrapper.primaryTextColor
         val secondaryTextColor = customThemeWrapper.secondaryTextColor
@@ -96,6 +118,10 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         binding.polarityLabelTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
         binding.polaritySummaryTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
         binding.fieldLabelTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
+        binding.matchLabelTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
+        binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
+        binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment.text =
+            getString(R.string.post_filter_match_explanation, Constants.CONTINUUM_ALL_SUBREDDIT)
         binding.valueTextInputLayoutAddPostFilterRuleBottomSheetFragment.boxStrokeColor = primaryTextColor
         binding.valueTextInputLayoutAddPostFilterRuleBottomSheetFragment.defaultHintTextColor =
             ColorStateList.valueOf(primaryTextColor)
@@ -129,7 +155,24 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
             onSelectionChanged()
         }
 
-        binding.valueTextInputEditTextAddPostFilterRuleBottomSheetFragment.setText(editedRule?.value)
+        val matchChipGroup = binding.matchChipGroupAddPostFilterRuleBottomSheetFragment
+        for (mode in SubredditMatchMode.entries) {
+            val chip = chipStyler.inflate(matchChipGroup, R.layout.chip_post_filter_match)
+            chip.id = View.generateViewId()
+            chip.text = getString(matchLabelRes(mode))
+            chip.tag = mode
+            chip.isChecked = mode == matchMode
+            matchChipGroup.addView(chip)
+        }
+        matchChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+            if (bindingMatchChips) return@setOnCheckedStateChangeListener
+            val checked = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
+            matchMode = group.findViewById<View>(checked).tag as SubredditMatchMode
+            onSelectionChanged()
+        }
+
+        // The stored term carries the asterisks; the box shows and edits only the word.
+        binding.valueTextInputEditTextAddPostFilterRuleBottomSheetFragment.setText(editedRule?.bareValue)
         binding.valueTextInputEditTextAddPostFilterRuleBottomSheetFragment.addTextChangedListener(
             object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
@@ -150,10 +193,14 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         }
         binding.cancelTextViewAddPostFilterRuleBottomSheetFragment.setOnClickListener { dismiss() }
         binding.saveTextViewAddPostFilterRuleBottomSheetFragment.setOnClickListener {
-            val value = currentValue()
             if (validate()) {
+                val rule = FilterRule(selectedField, exclude, storedValue())
+                val scopeNeeded = rule.matchMode.isWildcard
                 dismiss()
-                host.onRuleSubmitted(editedRule, FilterRule(selectedField, exclude, value))
+                if (scopeNeeded) {
+                    host.onWildcardMatchChosen()
+                }
+                host.onRuleSubmitted(editedRule, rule)
             }
         }
 
@@ -171,12 +218,37 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         super.onSaveInstanceState(outState)
         outState.putInt(SELECTED_FIELD_STATE, selectedField.ordinal)
         outState.putBoolean(EXCLUDE_STATE, exclude)
+        outState.putInt(MATCH_MODE_STATE, matchMode.ordinal)
     }
 
+    /** What the user typed: the bare word, with no wildcard markers. */
     private fun currentValue(): String =
         binding.valueTextInputEditTextAddPostFilterRuleBottomSheetFragment.text?.toString()?.trim().orEmpty()
 
+    /** What gets stored: the typed word with the chosen match type's asterisks applied. */
+    private fun storedValue(): String {
+        val value = currentValue()
+        return if (selectedField == RuleField.SUBREDDIT) {
+            SubredditMatcher.format(matchMode, value)
+        } else {
+            value
+        }
+    }
+
     private fun onSelectionChanged() {
+        val subredditRule = selectedField == RuleField.SUBREDDIT
+        if (!subredditRule && matchMode != SubredditMatchMode.EXACT) {
+            // Only subreddit names have wildcard forms. Reset the mode *and* the chips: resetting
+            // only the field left the group still showing "Contains" after Subreddit -> Flair ->
+            // Subreddit, so the sheet said Contains and stored an exact term.
+            matchMode = SubredditMatchMode.EXACT
+            syncMatchChips()
+        }
+        val matchVisibility = if (subredditRule) View.VISIBLE else View.GONE
+        binding.matchLabelTextViewAddPostFilterRuleBottomSheetFragment.visibility = matchVisibility
+        binding.matchChipGroupAddPostFilterRuleBottomSheetFragment.visibility = matchVisibility
+        binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment.visibility =
+            if (subredditRule && matchMode.isWildcard) View.VISIBLE else View.GONE
         binding.valueTextInputEditTextAddPostFilterRuleBottomSheetFragment.hint = getString(hintRes(selectedField))
         binding.polaritySummaryTextViewAddPostFilterRuleBottomSheetFragment.setText(
             if (exclude) R.string.post_filter_rule_exclude_summary else R.string.post_filter_rule_include_summary
@@ -194,6 +266,11 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
             value.isEmpty() -> null
             PostFilterRules.isCommaSeparated(selectedField) && value.contains(',') ->
                 getString(R.string.post_filter_rule_error_comma)
+            selectedField == RuleField.SUBREDDIT && value.contains('*') ->
+                getString(R.string.post_filter_rule_error_asterisk)
+            !SubredditMatcher.isLongEnough(matchMode, value) -> getString(
+                R.string.post_filter_rule_error_wildcard_too_short, SubredditMatcher.MIN_WILDCARD_LENGTH
+            )
             selectedField == RuleField.TITLE_REGEX && !isValidRegex(value) -> getString(R.string.invalid_regex)
             isDuplicate(value) -> getString(R.string.post_filter_rule_error_duplicate)
             else -> null
@@ -206,7 +283,7 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
     }
 
     private fun isDuplicate(value: String): Boolean {
-        val candidate = FilterRule(selectedField, exclude, value)
+        val candidate = FilterRule(selectedField, exclude, storedValue())
         val original = editedRule
         return existingRules.any { it.isSameTermAs(candidate) && (original == null || !it.isSameTermAs(original)) }
     }
@@ -225,6 +302,24 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         RuleField.DOMAIN -> R.string.post_filter_field_domain
         RuleField.TITLE_KEYWORD -> R.string.post_filter_field_title_keyword
         RuleField.TITLE_REGEX -> R.string.post_filter_field_title_regex
+    }
+
+    /** Point the match chips at [matchMode] without the listener treating it as a user choice. */
+    private fun syncMatchChips() {
+        bindingMatchChips = true
+        val group = binding.matchChipGroupAddPostFilterRuleBottomSheetFragment
+        for (i in 0 until group.childCount) {
+            val chip = group.getChildAt(i) as Chip
+            chip.isChecked = chip.tag == matchMode
+        }
+        bindingMatchChips = false
+    }
+
+    private fun matchLabelRes(mode: SubredditMatchMode): Int = when (mode) {
+        SubredditMatchMode.EXACT -> R.string.post_filter_match_exact
+        SubredditMatchMode.PREFIX -> R.string.post_filter_match_prefix
+        SubredditMatchMode.SUFFIX -> R.string.post_filter_match_suffix
+        SubredditMatchMode.CONTAINS -> R.string.post_filter_match_contains
     }
 
     private fun hintRes(field: RuleField): Int = when (field) {
