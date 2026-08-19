@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same 16dp horizontal padding as the other bottom-sheet rows, so the list lines up with the
+     sheet's title and summary above it. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_linear_layout_item_post_filter_blocked_subreddit"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="32dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/name_text_view_item_post_filter_blocked_subreddit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="?attr/font_default"
+            android:textColor="?attr/primaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+        <TextView
+            android:id="@+id/summary_text_view_item_post_filter_blocked_subreddit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="?attr/font_12"
+            android:textColor="?attr/secondaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/allow_image_view_item_post_filter_blocked_subreddit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="4dp"
+        android:src="@drawable/ic_check_circle_day_night_24dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground" />
+
+</LinearLayout>

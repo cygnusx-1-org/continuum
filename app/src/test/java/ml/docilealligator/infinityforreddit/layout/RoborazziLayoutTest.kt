@@ -206,6 +206,18 @@ class RoborazziLayoutTest(private val case: Case) {
             LayoutSpec("flair", R.layout.item_flair, Family.NONE),
             LayoutSpec("viewAllComments", R.layout.item_view_all_comments, Family.NONE),
             LayoutSpec("loadMoreComments", R.layout.item_load_more_comments_placeholder, Family.NONE),
+            // Customize Post Filter sections. This screen used to carry hand-maintained -land and
+            // -sw600dp copies of one 1200-line layout, which is how their paddings drifted apart;
+            // there is one layout per section now, and these goldens are what keeps it that way.
+            LayoutSpec("postFilterAppliesTo", R.layout.item_post_filter_applies_to, Family.NONE),
+            LayoutSpec("postFilterPostTypes", R.layout.item_post_filter_post_types, Family.NONE),
+            LayoutSpec("postFilterShowOnly", R.layout.item_post_filter_show_only, Family.NONE),
+            LayoutSpec("postFilterLimits", R.layout.item_post_filter_limits, Family.NONE),
+            LayoutSpec("postFilterRulesHeader", R.layout.item_post_filter_rules_header, Family.NONE),
+            LayoutSpec("postFilterRule", R.layout.item_post_filter_rule, Family.NONE),
+            LayoutSpec(
+                "postFilterBlockedSubreddit", R.layout.item_post_filter_blocked_subreddit, Family.NONE
+            ),
         )
 
         /** Common phones (320/360/411/443/448), this dev's phone (527), tablets (600/934). */

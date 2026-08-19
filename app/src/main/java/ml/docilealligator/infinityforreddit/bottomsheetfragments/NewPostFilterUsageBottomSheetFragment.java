@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import ml.docilealligator.infinityforreddit.activities.PostFilterUsageListingActivity;
+import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentNewPostFilterUsageBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
@@ -15,7 +15,19 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class NewPostFilterUsageBottomSheetFragment extends LandscapeExpandedRoundedBottomSheetDialogFragment {
 
-    private PostFilterUsageListingActivity activity;
+    /**
+     * Implemented by whichever screen is editing the filter's feeds. An interface rather than a cast
+     * to a concrete activity, so this sheet is not tied to the standalone "Apply to" screen it was
+     * originally written for.
+     */
+    public interface Host {
+        void newPostFilterUsage(int type);
+    }
+
+    @SuppressWarnings("NullAway.Init")
+    private Host host;
+    @SuppressWarnings("NullAway.Init")
+    private BaseActivity activity;
 
     public NewPostFilterUsageBottomSheetFragment() {
         // Required empty public constructor
@@ -28,52 +40,52 @@ public class NewPostFilterUsageBottomSheetFragment extends LandscapeExpandedRoun
         FragmentNewPostFilterUsageBottomSheetBinding binding = FragmentNewPostFilterUsageBottomSheetBinding.inflate(inflater, container, false);
 
         binding.homeTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.HOME_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.HOME_TYPE);
             dismiss();
         });
 
         binding.subredditTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.SUBREDDIT_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.SUBREDDIT_TYPE);
             dismiss();
         });
 
         binding.userTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.USER_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.USER_TYPE);
             dismiss();
         });
 
         binding.multiredditTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.MULTIREDDIT_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.MULTIREDDIT_TYPE);
             dismiss();
         });
 
         binding.searchTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.SEARCH_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.SEARCH_TYPE);
             dismiss();
         });
 
         binding.historyTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.HISTORY_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.HISTORY_TYPE);
             dismiss();
         });
 
         binding.upvotedTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.UPVOTED_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.UPVOTED_TYPE);
             dismiss();
         });
 
         binding.downvotedTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.DOWNVOTED_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.DOWNVOTED_TYPE);
             dismiss();
         });
 
         binding.hiddenTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.HIDDEN_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.HIDDEN_TYPE);
             dismiss();
         });
 
         binding.savedTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
-            activity.newPostFilterUsage(PostFilterUsage.SAVED_TYPE);
+            host.newPostFilterUsage(PostFilterUsage.SAVED_TYPE);
             dismiss();
         });
         if (activity.typeface != null) {
@@ -86,6 +98,7 @@ public class NewPostFilterUsageBottomSheetFragment extends LandscapeExpandedRoun
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        activity = (PostFilterUsageListingActivity) context;
+        host = (Host) context;
+        activity = (BaseActivity) context;
     }
 }

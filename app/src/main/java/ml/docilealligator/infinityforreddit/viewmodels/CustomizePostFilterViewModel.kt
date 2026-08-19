@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.SingleLiveEvent
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage
 import ml.docilealligator.infinityforreddit.postfilter.SavePostFilter
 import java.util.concurrent.Executor
 
@@ -33,12 +34,23 @@ class CustomizePostFilterViewModel(
     // Reset on both outcomes so the duplicate-dialog "Override" re-save can still proceed.
     private var isSaving = false
 
-    fun savePostFilter(postFilter: PostFilter, originalName: String) {
+    /**
+     * @param usages the complete set of feeds the filter applies to, or null to leave the stored
+     *               usages alone. The Customize Post Filter screen edits them in-memory — a usage
+     *               row cannot exist before the filter it keys off — so they are handed over here
+     *               to be written in the same transaction, under the same in-flight guard.
+     */
+    @JvmOverloads
+    fun savePostFilter(
+        postFilter: PostFilter,
+        originalName: String,
+        usages: List<PostFilterUsage>? = null
+    ) {
         if (isSaving) {
             return
         }
         isSaving = true
-        SavePostFilter.savePostFilter(executor, handler, roomDatabase, postFilter, originalName,
+        SavePostFilter.savePostFilter(executor, handler, roomDatabase, postFilter, originalName, usages,
             object : SavePostFilter.SavePostFilterListener {
                 override fun success() {
                     isSaving = false
@@ -58,6 +70,7 @@ class CustomizePostFilterViewModel(
     }
 
     companion object {
+        @JvmStatic
         fun provideFactory(executor: Executor, roomDatabase: RedditDataRoomDatabase): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")

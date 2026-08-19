@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view_item_post_filter_post_types"
+    style="?attr/materialCardViewFilledStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/title_text_view_item_post_filter_post_types"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/post_filter_section_post_types"
+            android:textSize="?attr/font_default"
+            android:textStyle="bold"
+            android:textColor="?attr/primaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+        <TextView
+            android:id="@+id/summary_text_view_item_post_filter_post_types"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/post_filter_post_types_summary"
+            android:textSize="?attr/font_12"
+            android:textColor="?attr/secondaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/post_types_chip_group_item_post_filter_post_types"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:chipSpacingHorizontal="8dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/post_type_text_chip_item_post_filter_post_types"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bottom_sheet_post_text"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/post_type_link_chip_item_post_filter_post_types"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bottom_sheet_post_link"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/post_type_image_chip_item_post_filter_post_types"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bottom_sheet_post_image"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/post_type_gif_chip_item_post_filter_post_types"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/post_type_gif"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/post_type_video_chip_item_post_filter_post_types"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bottom_sheet_post_video"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/post_type_gallery_chip_item_post_filter_post_types"
+                style="@style/Widget.Continuum.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/post_type_gallery"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -19,7 +19,10 @@ import ml.docilealligator.infinityforreddit.comment.Comment;
 public class CommentFilter implements Parcelable {
     @PrimaryKey
     @NonNull
-    public String name = "New Filter";
+    // Empty, not a placeholder: a filter has to be named by whoever makes it, and a default name
+    // that looks filled in is one the user saves without reading. The Customize screen refuses to
+    // write an unnamed filter, and its name field shows its hint instead.
+    public String name = "";
     @DisplayMode
     @ColumnInfo(name = "display_mode")
     public int displayMode;

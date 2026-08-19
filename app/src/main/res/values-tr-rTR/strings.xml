@@ -910,18 +910,9 @@ Otomatik video oynatma kapatılır."</string>
     <string name="only_spoiler">"Sadece Spoiler"</string>
 
     <!-- What is it? -->
-    <string name="title_excludes_strings_hint">"Başlık: anahtar kelimeleri hariç tut (anahtar1,anahtar2)"</string>
-    <string name="title_excludes_regex_hint">"Başlık: ifadeyi hariç tut"</string>
-    <string name="exclude_subreddits_hint">"Subredditleri hariç tut (örn: Burdurland,SorReddite)"</string>
     <string name="exclude_users_hint">"Kullanıcıları hariç tut (örn: KerimDemirkaynak, rastgele)"</string>
-    <string name="exclude_flairs_hint">"Etiketleri hariç tut (örn: etiket 1, etiket 2)"</string>
-    <string name="contain_flairs_hint">"Etiketleri kapsa (örn: etiket 1, etiket 2)"</string>
     <string name="min_vote_hint">"Minimum oy (-1: kısıtlama yok)"</string>
     <string name="max_vote_hint">"Maksimum oy (-1: kısıtlama yok)"</string>
-    <string name="min_comments_hint">"Minimum yorum (-1: kısıtlama yok)"</string>
-    <string name="max_comments_hint">"Maksimum yorum (-1: kısıtlama yok)"</string>
-    <string name="min_awards_hint">"Minimum ödül (-1: kısıtlama yok)"</string>
-    <string name="max_awards_hint">"Maksimum ödül (-1: kısıtlama yok)"</string>
     <string name="post_filter_name_hint">"Gönderi Filtresi Adı"</string>
     <string name="post_filter_requires_a_name">"Bu gönderi filtresinin adı nedir?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' Zaten Var"</string>
@@ -977,7 +968,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Uygulandığı yer: Ek oy oranı simgesi"</string>
     <string name="theme_item_current_user_color">"Geçerli Kullanıcı"</string>
     <string name="theme_item_current_user_color_detail">"Uygulandığı yer: Yorumlardaki geçerli kullanıcı"</string>
-    <string name="exclude_domains_hint">"Alan adlarını hariç tut"</string>
     <string name="anonymous_front_page_no_subscriptions">"Bir subreddit'e katılarak başla!"</string>
 
     <!-- Fuzzy -->
@@ -1110,9 +1100,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="theme_item_media_indicator_background_color">"Medya Göstergesi Arka Plan Rengi"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Uygulandığı yer: Yayın önizlemesindeki videonun arka planı veya galeri simgesi"</string>
     <string name="go_to_top">"Başa Dön"</string>
-    <string name="title_contains_strings_hint">"Başlık: anahtar kelimeleri içer (key1,key2)"</string>
-    <string name="title_contains_regex_hint">"Başlık: normal ifade içer"</string>
-    <string name="contain_domains_hint">"Alan adlarını içer"</string>
     <string name="anonymous_multireddit_no_subreddit">"Bu multireddit'in bir subreddit'i yok!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"v.redd.it videosu alınırken hata oluştu: video bağlantısı alınamıyor"</string>
     <string name="contain_domain">"Bu alan adını içer"</string>

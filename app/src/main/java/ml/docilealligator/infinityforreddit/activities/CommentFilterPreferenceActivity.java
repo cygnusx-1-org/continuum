@@ -3,8 +3,11 @@ package ml.docilealligator.infinityforreddit.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
@@ -24,8 +27,10 @@ import ml.docilealligator.infinityforreddit.adapters.CommentFilterWithUsageRecyc
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.CommentFilterOptionsBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
+import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterSeeds;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterWithUsageViewModel;
 import ml.docilealligator.infinityforreddit.commentfilter.DeleteCommentFilter;
+import ml.docilealligator.infinityforreddit.commentfilter.SaveCommentFilter;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityCommentFilterPreferenceBinding;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -153,26 +158,79 @@ public class CommentFilterPreferenceActivity extends BaseActivity {
 
     public void showCommentFilterOptions(Comment comment, @Nullable CommentFilter commentFilter) {
         String[] options = getResources().getStringArray(R.array.add_to_comment_filter_options);
-        boolean[] selectedOptions = new boolean[]{false};
+        boolean[] selectedOptions = new boolean[options.length];
         new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
                 .setTitle(R.string.select)
                 .setMultiChoiceItems(options, selectedOptions, (dialogInterface, i, b) -> selectedOptions[i] = b)
                 .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                    Intent intent = new Intent(CommentFilterPreferenceActivity.this, CustomizeCommentFilterActivity.class);
-                    if (commentFilter != null) {
-                        intent.putExtra(CustomizeCommentFilterActivity.EXTRA_COMMENT_FILTER, commentFilter);
+                    if (selectedOptions.length > 0 && selectedOptions[0]) {
+                        excludeUserInFilter(comment.getAuthor(), commentFilter);
                     }
-                    intent.putExtra(CustomizeCommentFilterActivity.EXTRA_FROM_SETTINGS, true);
-                    for (int j = 0; j < selectedOptions.length; j++) {
-                        if (selectedOptions[j]) {
-                            if (j == 0) {
-                                intent.putExtra(CustomizeCommentFilterActivity.EXTRA_EXCLUDE_USER, comment.getAuthor());
-                            }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * Excludes {@code username} in {@code commentFilter} and leaves, or opens the Customize screen
+     * when there is no filter to add to yet.
+     *
+     * A filter that already exists needs nothing else decided: it has a name, its feeds are stored,
+     * and the excluded users only grow. Writing it here is what lets "add to comment filter" end
+     * where it started — on the comment — instead of on a screen the user has to save and back out
+     * of.
+     */
+    private void excludeUserInFilter(@Nullable String username, @Nullable CommentFilter commentFilter) {
+        if (username == null || username.trim().isEmpty()) {
+            // A comment whose author is gone has nothing to exclude.
+            return;
+        }
+
+        if (commentFilter == null) {
+            Intent intent = new Intent(this, CustomizeCommentFilterActivity.class);
+            intent.putExtra(CustomizeCommentFilterActivity.EXTRA_EXCLUDE_USER, username);
+            // A new filter still has to be named, so the Customize screen is unavoidable — but this
+            // screen finishes, so saving there returns to the comment rather than to the filter list.
+            intent.putExtra(CustomizeCommentFilterActivity.EXTRA_FROM_SETTINGS, true);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        if (!CommentFilterSeeds.addExcludedUser(commentFilter, username)) {
+            // This filter already excludes them, so there is nothing to write — but the user asked
+            // for a state that already holds, so say so and leave rather than stranding them here.
+            confirmAndFinish(commentFilter.name);
+            return;
+        }
+
+        // Saved under its own name, so the feeds it is applied to are left alone.
+        SaveCommentFilter.saveCommentFilter(executor, new Handler(Looper.getMainLooper()), redditDataRoomDatabase,
+                commentFilter, commentFilter.name, new SaveCommentFilter.SaveCommentFilterListener() {
+                    @Override
+                    public void success() {
+                        confirmAndFinish(commentFilter.name);
+                    }
+
+                    @Override
+                    public void duplicate() {
+                        // Unreachable: the filter is written back under the name it already has, so
+                        // the name check cannot trip. Reported rather than swallowed all the same.
+                        if (!isFinishing() && !isDestroyed()) {
+                            Toast.makeText(CommentFilterPreferenceActivity.this, R.string.something_went_wrong,
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
-                    startActivity(intent);
-                })
-                .show();
+                });
+    }
+
+    private void confirmAndFinish(String filterName) {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        Toast.makeText(this, getString(R.string.added_to_filter, filterName), Toast.LENGTH_SHORT).show();
+        // Straight back to the comment: this screen only ever opened to pick a filter.
+        finish();
     }
 
     @Override

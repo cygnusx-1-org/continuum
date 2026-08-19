@@ -34,6 +34,8 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiRedditDao;
 import ml.docilealligator.infinityforreddit.multireddit.MultiRedditDaoKt;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockedSubreddit;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockedSubredditDao;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterDao;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsageDao;
@@ -55,7 +57,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         SubscribedUserData.class, MultiReddit.class, CustomTheme.class, RecentSearchQuery.class,
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
-        LocalSavedThing.class}, version = 36, exportSchema = false)
+        LocalSavedThing.class, PostFilterBlockedSubreddit.class}, version = 37, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -72,7 +74,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25,
                         MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29,
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
-                        MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36)
+                        MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
+                        MIGRATION_36_37)
                 .build();
     }
 
@@ -105,6 +108,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     public abstract PostFilterDao postFilterDao();
 
     public abstract PostFilterUsageDao postFilterUsageDao();
+
+    public abstract PostFilterBlockedSubredditDao postFilterBlockedSubredditDao();
 
     public abstract AnonymousMultiredditSubredditDao anonymousMultiredditSubredditDao();
 
@@ -566,6 +571,22 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                     + "ON UPDATE NO ACTION ON DELETE CASCADE)");
             database.execSQL("CREATE INDEX IF NOT EXISTS `index_local_saved_username` "
                     + "ON `local_saved` (`username`)");
+        }
+    };
+
+    private static final Migration MIGRATION_36_37 = new Migration(36, 37) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `post_filter_blocked_subreddit` "
+                    + "(`filter_name` TEXT NOT NULL, `rule_value` TEXT NOT NULL, "
+                    + "`subreddit_name` TEXT NOT NULL, `first_blocked` INTEGER NOT NULL, "
+                    + "`block_count` INTEGER NOT NULL, `excepted` INTEGER NOT NULL, "
+                    + "PRIMARY KEY(`filter_name`, `rule_value`, `subreddit_name`), "
+                    + "FOREIGN KEY(`filter_name`) REFERENCES `post_filter`(`name`) "
+                    + "ON UPDATE NO ACTION ON DELETE CASCADE)");
+            // No separate index on filter_name: it is the leftmost column of the primary key, so
+            // SQLite's implicit index already serves the lookups, and an extra one would not match
+            // the entity Room validates the migrated schema against.
         }
     };
 }

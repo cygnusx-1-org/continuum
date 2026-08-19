@@ -39,6 +39,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
+import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.FetchPostFilterAndConcatenatedSubredditNames;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.PostModerationActionHandler;
@@ -393,7 +394,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
                 }
             }
-            boolean displaySubredditName = subredditName != null && (subredditName.equals("popular") || subredditName.equals("all"));
+            boolean displaySubredditName = Constants.isFirehoseSubreddit(subredditName);
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,

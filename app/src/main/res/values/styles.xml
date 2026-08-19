@@ -543,4 +543,15 @@
         <item name="android:contentDescription">@string/exo_controls_volume_off_description</item>
     </style>
 
+    <!--
+      Filter chip without the checked checkmark. The checkmark occupies the icon slot only while
+      checked, so a stock filter chip is wider when selected than when not — and in a wrapping
+      ChipGroup that re-flows the whole row, moving its neighbours onto another line as the user
+      toggles. Dropping the icon makes a chip measure the same in both states; the accent fill,
+      stroke and text colour already carry the selected state on their own.
+    -->
+    <style name="Widget.Continuum.Chip.Filter" parent="Widget.Material3.Chip.Filter">
+        <item name="checkedIconVisible">false</item>
+    </style>
+
 </resources>

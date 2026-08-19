@@ -899,18 +899,9 @@ Tự động phát video bị tắt."</string>
     <string name="hide_read_posts">"Ẩn bài đăng đã đọc"</string>
     <string name="filter_posts">"Lọc bài đăng"</string>
     <string name="only_spoiler">"Chỉ Spoiler"</string>
-    <string name="title_excludes_strings_hint">"Tiêu đề: loại trừ từ khoá (key1,key2)"</string>
-    <string name="title_excludes_regex_hint">"Tiêu đề: loại trừ biểu thức tìm kiếm"</string>
-    <string name="exclude_subreddits_hint">"Loại trừ subreddit (vd: funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Loại trừ người dùng (vd: edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Loại trừ tư cách (vd: flair1,flair2)"</string>
-    <string name="contain_flairs_hint">"Chứa tư cách (vd: flair1,flair2)"</string>
     <string name="min_vote_hint">"Vote tối thiểu (-1: không hạn chế)"</string>
     <string name="max_vote_hint">"Vote tối đa (-1: không hạn chế)"</string>
-    <string name="min_comments_hint">"Bình luận tối thiểu (-1: không hạn chế)"</string>
-    <string name="max_comments_hint">"Bình luận tối đa (-1: không hạn chế)"</string>
-    <string name="min_awards_hint">"Giải thưởng tối thiểu (-1: không hạn chế)"</string>
-    <string name="max_awards_hint">"Giải thưởng tối đa (-1: không hạn chế)"</string>
     <string name="post_filter_name_hint">"Tên bộ lọc bài đăng"</string>
     <string name="post_filter_requires_a_name">"Bộ lọc bài đăng này tên là gì?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' đã tồn tại"</string>
@@ -966,7 +957,6 @@ Tự động phát video bị tắt."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Đã áp dụng cho: Biểu tượng tỉ lệ upvote"</string>
     <string name="theme_item_current_user_color">"Người dùng hiện tại"</string>
     <string name="theme_item_current_user_color_detail">"Đã áp dụng vào: Người dùng hiện tại trong bình luận"</string>
-    <string name="exclude_domains_hint">"Loại trừ các miền"</string>
     <string name="anonymous_front_page_no_subscriptions">"Hãy bắt đầu bằng cách tham gia một subreddit!"</string>
 
     <!-- Fuzzy -->
@@ -1099,9 +1089,6 @@ Nhấn để thử lại."</string>
     <string name="theme_item_media_indicator_background_color">"Màu nền chỉ phương tiện"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Áp dụng cho: Nền của biểu tượng video hoặc thư viện ở mục xem trước bài đăng"</string>
     <string name="go_to_top">"Lên trên cùng"</string>
-    <string name="title_contains_strings_hint">"Tiêu đề: chứa từ khoá (từ 1, từ 2)"</string>
-    <string name="title_contains_regex_hint">"Tiêu đề: chứa biểu thức thường"</string>
-    <string name="contain_domains_hint">"Chứa đường dẫn"</string>
     <string name="anonymous_multireddit_no_subreddit">"Không có subreddit nào cho trình multireddit này!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Lỗi xử lý video v.redd.it: Không thể lấy đường dẫn video"</string>
     <string name="contain_domain">"Chứa đường dẫn"</string>

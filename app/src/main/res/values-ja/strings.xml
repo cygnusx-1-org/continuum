@@ -970,15 +970,7 @@ https://play.google.com/store/"</string>
     <string name="hide_read_posts">"既読の投稿を非表示にする"</string>
     <string name="filter_posts">"投稿をフィルタリング"</string>
     <string name="only_spoiler">"ネタバレのみ"</string>
-    <string name="title_excludes_strings_hint">"タイトル: 除外するキーワード (key1,key2)"</string>
-    <string name="title_excludes_regex_hint">"タイトル: 除外する正規表現"</string>
-    <string name="exclude_subreddits_hint">"除外するSubreddit (例: funny,AskReddit)"</string>
     <string name="exclude_users_hint">"除外するユーザー（例: edgan,random)"</string>
-    <string name="exclude_flairs_hint">"除外するFlair (例: flair1,flair2)"</string>
-    <string name="contain_flairs_hint">"含めるFlair (例: flair1,flair2)"</string>
-    <string name="min_comments_hint">"最小のコメント数 (-1: 制限なし)"</string>
-    <string name="max_comments_hint">"最大のコメント数 (-1: 制限なし)"</string>
-    <string name="min_awards_hint">"最小のアワード数 (-1: 制限なし)"</string>
     <string name="duplicate_post_filter_dialog_title">"「%1$s 」は既に存在します"</string>
     <string name="duplicate_post_filter_dialog_message">"上書きしますか？"</string>
     <string name="apply_to">"適用"</string>
@@ -1019,7 +1011,6 @@ https://play.google.com/store/"</string>
     <string name="device_default">"デバイスの設定に従う"</string>
     <string name="set_by_battery_saver">"バッテリーセーバーが設定されました"</string>
     <string name="theme_item_current_user_color">"現在のユーザー"</string>
-    <string name="exclude_domains_hint">"除外するドメイン"</string>
     <string name="anonymous_front_page_no_subscriptions">"Subredditに参加して始めましょう！"</string>
 
     <!-- Fuzzy -->

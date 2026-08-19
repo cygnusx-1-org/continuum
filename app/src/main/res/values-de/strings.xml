@@ -928,18 +928,9 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="hide_read_posts">"Gelesene Beiträge verstecken"</string>
     <string name="filter_posts">"Beiträge filtern"</string>
     <string name="only_spoiler">"Nur Spoiler"</string>
-    <string name="title_excludes_strings_hint">"Titel: schließt Schlüsselwörter aus (Wort 1, Wort 2)"</string>
-    <string name="title_excludes_regex_hint">"Titel: Schließt RegEx aus"</string>
-    <string name="exclude_subreddits_hint">"Schließt Subreddits aus (z. B. funny, AskReddit)"</string>
     <string name="exclude_users_hint">"Schließt Benutzer aus (z. B. edgan, random)"</string>
-    <string name="exclude_flairs_hint">"Schließt Flairs aus (z. B. Flair 1, Flair 2)"</string>
-    <string name="contain_flairs_hint">"Beinhaltet Flairs (z. B. Flair 1, Flair 2)"</string>
     <string name="min_vote_hint">"Minimale Abstimmungen (-1: Keine Einschränkung)"</string>
     <string name="max_vote_hint">"Maximale Abstimmungen (-1: Keine Einschränkung)"</string>
-    <string name="min_comments_hint">"Minimale Kommentare (-1: Keine Einschränkung)"</string>
-    <string name="max_comments_hint">"Maximale Kommentare (-1: Keine Einschränkung)"</string>
-    <string name="min_awards_hint">"Minimale Auszeichnungen (-1: Keine Einschränkung)"</string>
-    <string name="max_awards_hint">"Maximale Auszeichnungen (-1: Keine Einschränkung)"</string>
     <string name="post_filter_name_hint">"Name des Beitragsfilters"</string>
     <string name="post_filter_requires_a_name">"Wie lautet der Name des Beitragsfilters?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' existiert bereits"</string>
@@ -999,7 +990,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Angewendet auf: Symbolfarbe für das Abstimmungsverhältnis"</string>
     <string name="theme_item_current_user_color">"Aktueller Benutzer"</string>
     <string name="theme_item_current_user_color_detail">"Angewendet auf: Aktueller Benutzer in den Kommentaren"</string>
-    <string name="exclude_domains_hint">"Domains ausschließen"</string>
     <string name="anonymous_front_page_no_subscriptions">"Beginne, indem du einem Subreddit beitrittst!"</string>
 
     <!-- Fuzzy -->
@@ -1136,9 +1126,6 @@ Antippen zum Wiederholen."</string>
     <string name="theme_item_media_indicator_background_color">"Medien-Indikator Hintergrundfarbe"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Angewendet auf: Hintergrund- oder Galleriesymbol in Beitrag-Vorschau"</string>
     <string name="go_to_top">"Nach oben"</string>
-    <string name="title_contains_strings_hint">"Titel: enthält Schlüsselwörter (key1,key2)"</string>
-    <string name="title_contains_regex_hint">"Titel: enthält Regex"</string>
-    <string name="contain_domains_hint">"Domains cont"</string>
     <string name="anonymous_multireddit_no_subreddit">"Dieses Multireddit hat kein Subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Fehler beim Abrufen von v.redd.it video: Kann Video URL nicht finden"</string>
     <string name="contain_domain">"Diese Domain containen"</string>

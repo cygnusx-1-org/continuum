@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
+import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -141,7 +142,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
         this.postType = postType;
         if (sortType == null) {
-            if ("popular".equals(name) || "all".equals(name)) {
+            if (Constants.isFirehoseSubreddit(name)) {
                 this.sortType = new SortType(SortType.Type.HOT);
             } else {
                 this.sortType = new SortType(SortType.Type.BEST);
@@ -366,11 +367,14 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private ListenableFuture<Response<String>> fetchSubredditPosts(LoadParams<String> loadParams, RedditAPI api, int limit) {
+        // r/ContinuumAll is a name the app gives r/all's listing so a post filter can target it on
+        // its own. Only the API path is rewritten; everything else keeps the ContinuumAll identity.
+        String apiName = Constants.apiSubredditName(subredditOrUserName);
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            return api.getSubredditBestPostsListenableFuture(subredditOrUserName, sortType.getType(),
+            return api.getSubredditBestPostsListenableFuture(apiName, sortType.getType(),
                     sortType.getTime(), loadParams.getKey(), limit);
         } else {
-            return api.getSubredditBestPostsOauthListenableFuture(subredditOrUserName, sortType.getType(),
+            return api.getSubredditBestPostsOauthListenableFuture(apiName, sortType.getType(),
                     sortType.getTime(), loadParams.getKey(), limit,
                     APIUtils.getOAuthHeader(accessToken));
         }

@@ -988,22 +988,13 @@ Les onglets pourraient perdre tout leur contenu quand vous passez d'un onglet à
     <string name="hide_read_posts">"Cacher les posts lus"</string>
     <string name="filter_posts">"Filtrer les posts"</string>
     <string name="only_spoiler">"Seulement Spoiler"</string>
-    <string name="title_excludes_strings_hint">"Titre: exclure les mots clés (mot1, mot2)"</string>
 
     <!-- Fuzzy -->
-    <string name="title_excludes_regex_hint">"Titre: exclure regex"</string>
-    <string name="exclude_subreddits_hint">"Exclure des subreddits (e.g. funny, AskReddit)"</string>
     <string name="exclude_users_hint">"Exclure des utilisateurs (e.g. edgan, random)"</string>
 
     <!-- Fuzzy -->
-    <string name="exclude_flairs_hint">"Exclure flairs (ex: flair1, flair2)"</string>
-    <string name="contain_flairs_hint">"Contient flairs (e.x. flair1,flair2)"</string>
     <string name="min_vote_hint">"Vote Min (-1: aucune réstriction)"</string>
     <string name="max_vote_hint">"Vote Max (-1: aucune restriction)"</string>
-    <string name="min_comments_hint">"Commentaires Min (-1: aucune restriction)"</string>
-    <string name="max_comments_hint">"Commentaires Max (-1: aucune réstriction)"</string>
-    <string name="min_awards_hint">"Récompenses Min (-1: aucune réstriction)"</string>
-    <string name="max_awards_hint">"Récompenses Max (-1: aucune réstriction)"</string>
     <string name="post_filter_name_hint">"Nom du filtre de publication"</string>
     <string name="post_filter_requires_a_name">"Quel est le nom de ce filtre de publication ?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' Existe déjà"</string>
@@ -1067,7 +1058,6 @@ Les onglets pourraient perdre tout leur contenu quand vous passez d'un onglet à
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Appliqué à : icône du ratio d'Upvote"</string>
     <string name="theme_item_current_user_color">"Utilisateur actuel"</string>
     <string name="theme_item_current_user_color_detail">"Appliqué à : Utilisateurs en commentaires"</string>
-    <string name="exclude_domains_hint">"Exclure des domaines"</string>
     <string name="anonymous_front_page_no_subscriptions">"Commence en rejoignant un subreddit !"</string>
 
     <!-- Fuzzy -->
@@ -1202,9 +1192,6 @@ Cliquer pour réessayer."</string>
     <string name="theme_item_media_indicator_background_color">"Couleur d'Arrière-Plan de l'Indicateur Média"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Appliqué à : Arrière plan de la vidéo ou  icône de galerie dans l'aperçu de l'article"</string>
     <string name="go_to_top">"Aller tout en haut"</string>
-    <string name="title_contains_strings_hint">"Titre: contient les mots clés (mot1, mos2)"</string>
-    <string name="title_contains_regex_hint">"Titre: contient regex"</string>
-    <string name="contain_domains_hint">"Contient un domaine"</string>
     <string name="anonymous_multireddit_no_subreddit">"Ce multireddit ne contient aucun subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Erreur lors de la récupération de la vidéo v.redd.it : Impossible d'obtenir l'url de la vidéo"</string>
 

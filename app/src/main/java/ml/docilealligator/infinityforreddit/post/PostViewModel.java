@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SingleLiveEvent;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -169,7 +170,7 @@ public class PostViewModel extends ViewModel {
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && ((postType != PostType.SUBREDDIT || "all".equals(subredditName) || "popular".equals(subredditName)) || postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE, false)));
+                && ((postType != PostType.SUBREDDIT || Constants.isFirehoseSubreddit(subredditName)) || postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE, false)));
     }
 
     // PostType.MULTIREDDIT

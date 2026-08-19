@@ -939,18 +939,9 @@ https://s3.eu-west-1.amazonaws.com/po-pub/i/hJAe7sMhrfJzqjhp9VkDQOVC.PNG -->
     <string name="hide_read_posts">"Ocultar posts leídos"</string>
     <string name="filter_posts">"Filtrar posts"</string>
     <string name="only_spoiler">"Sólo spoilers"</string>
-    <string name="title_excludes_strings_hint">"Título: Excluir palabras clave (palabra1, palabra2)"</string>
-    <string name="title_excludes_regex_hint">"Título: Excluye Regex"</string>
-    <string name="exclude_subreddits_hint">"Excluir subreddits (p.ej. funny, AskReddit)"</string>
     <string name="exclude_users_hint">"Excluir usuarios (p.ej. edgan, random)"</string>
-    <string name="exclude_flairs_hint">"Excluir etiquetas de usuario (p.ej. etiqueta1, etiqueta2)"</string>
-    <string name="contain_flairs_hint">"Contiene etiquetas (p.ej. etiqueta1, etiqueta2)"</string>
     <string name="min_vote_hint">"Votos mínimos (-1: sin restricción)"</string>
     <string name="max_vote_hint">"Votos máximos (-1: sin restricción)"</string>
-    <string name="min_comments_hint">"Comentarios mínimos (-1: sin restricción)"</string>
-    <string name="max_comments_hint">"Comentarios máximos (-1: sin restricción)"</string>
-    <string name="min_awards_hint">"Premios mínimos (-1: sin restricción)"</string>
-    <string name="max_awards_hint">"Premios máximos (-1: sin restricción)"</string>
     <string name="post_filter_name_hint">"Nombre de filtro de publicación"</string>
     <string name="post_filter_requires_a_name">"¿Cuál es el nombre de este filtro de publicaciones?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' Ya Existe"</string>
@@ -1004,7 +995,6 @@ https://s3.eu-west-1.amazonaws.com/po-pub/i/hJAe7sMhrfJzqjhp9VkDQOVC.PNG -->
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Aplicado a: Ícono de la proporción de upvotes"</string>
     <string name="theme_item_current_user_color">"Color del usuario actual"</string>
     <string name="theme_item_current_user_color_detail">"Aplicado a: Usuario actual en los comentarios"</string>
-    <string name="exclude_domains_hint">"Excluir dominios"</string>
     <string name="anonymous_front_page_no_subscriptions">"¡Comienza uniéndote a un subreddit!"</string>
 
     <!-- Fuzzy -->
@@ -1137,9 +1127,6 @@ Toque para volver a intentarlo."</string>
     <string name="theme_item_media_indicator_background_color">"Color de fondo del indicador de medios"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Aplicado a: Fondo del vídeo o ícono de la galería en la vista previa de la publicación"</string>
     <string name="go_to_top">"Ir al principio"</string>
-    <string name="title_contains_strings_hint">"Título: contiene palabras clave (clave1, clave2)"</string>
-    <string name="title_contains_regex_hint">"Título: contiene expresiones regulares"</string>
-    <string name="contain_domains_hint">"Contener dominios"</string>
     <string name="anonymous_multireddit_no_subreddit">"¡Este multireddit no tiene subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Error al obtener el vídeo de v.redd.it: no se puede obtener la URL del vídeo"</string>
     <string name="contain_domain">"Contener este dominio"</string>

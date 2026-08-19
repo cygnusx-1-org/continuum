@@ -880,18 +880,9 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="hide_read_posts">"Ocultar postagens lidas"</string>
     <string name="filter_posts">"Filtrar postagens"</string>
     <string name="only_spoiler">"Só spoiler"</string>
-    <string name="title_excludes_strings_hint">"Título: retirar palavras-chave (chave1,chave2)"</string>
-    <string name="title_excludes_regex_hint">"Título: retirar expressão regular"</string>
-    <string name="exclude_subreddits_hint">"Retirar subreddits (e.g., funny,AskReddit)"</string>
     <string name="exclude_users_hint">"Retirar usuários (e.g., edgan,random)"</string>
-    <string name="exclude_flairs_hint">"Retirar etiquetas (e.g., etiqueta1,etiqueta2)"</string>
-    <string name="contain_flairs_hint">"Conter etiquetas (e.g., etiqueta1,etiqueta2)"</string>
     <string name="min_vote_hint">"Voto mínimo (-1: sem restrição)"</string>
     <string name="max_vote_hint">"Voto máximo (-1: sem restrição)"</string>
-    <string name="min_comments_hint">"Comentários mínimos (-1: sem restrição)"</string>
-    <string name="max_comments_hint">"Comentários máximos (-1: sem restrição)"</string>
-    <string name="min_awards_hint">"Prêmios mínimos (-1: sem restrição)"</string>
-    <string name="max_awards_hint">"Prêmios máximos (-1: sem restrição)"</string>
     <string name="post_filter_name_hint">"Nome do filtro de postagem"</string>
     <string name="post_filter_requires_a_name">"Qual é o nome deste filtro de postagem?"</string>
     <string name="duplicate_post_filter_dialog_title">"'%1$s' já existe"</string>
@@ -945,7 +936,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Aplicado a: Ícone de taxa de votos a favor"</string>
     <string name="theme_item_current_user_color">"Usuário Atual"</string>
     <string name="theme_item_current_user_color_detail">"Aplicado a: Usuário atual nos comentários"</string>
-    <string name="exclude_domains_hint">"Retirar domínios"</string>
     <string name="anonymous_front_page_no_subscriptions">"Comece se unindo a um subreddit!"</string>
 
     <!-- Fuzzy -->
@@ -1070,9 +1060,6 @@ Toque para tentar de novo."</string>
     <!-- Pré-visualização é muito longo -->
     <string name="theme_item_media_indicator_background_color_detail">"Aplicado a: Fundo do vídeo ou ícone da galeria na prévia da postagem"</string>
     <string name="go_to_top">"Ir ao topo"</string>
-    <string name="title_contains_strings_hint">"Título: contém palavras-chave (key1, key2)"</string>
-    <string name="title_contains_regex_hint">"Título: contém regex"</string>
-    <string name="contain_domains_hint">"Conter domínios"</string>
     <string name="anonymous_multireddit_no_subreddit">"Este Multireddit não tem um subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Erro ao buscar vídeo do v.redd.it: Não pode obter o URL do vídeo"</string>
     <string name="contain_domain">"Conter este domínio"</string>

@@ -837,18 +837,9 @@
     <string name="hide_read_posts">"Απόκρυψη Αναγνωσμένων Αναρτήσεων"</string>
     <string name="filter_posts">"Φίλτρο Αναρτήσεων"</string>
     <string name="only_spoiler">"Μόνο Spoiler"</string>
-    <string name="title_excludes_strings_hint">"Τίτλος: εκτός λέξεις-κλειδιά(κλειδι1,κλειδι2)"</string>
-    <string name="title_excludes_regex_hint">"Τίτλος: εκτός regex"</string>
-    <string name="exclude_subreddits_hint">"Εξαίρεση subreddits (πχ. funny, AskReddit)"</string>
     <string name="exclude_users_hint">"Εξαίρεση χρηστών (πχ. edgan, random)"</string>
-    <string name="exclude_flairs_hint">"Εξαίρεση σημάνσεων (πχ. Σήμανση1, Σήμανση2)"</string>
-    <string name="contain_flairs_hint">"Συμπερίληψη σημάνσεων (πχ σήμανση1, σήμανση2)"</string>
     <string name="min_vote_hint">"Ελάχιστη ψήφος (-1: χωρίς περιορισμούς)"</string>
     <string name="max_vote_hint">"Μέγιστοι ψήφοι (-1: χωρίς περιορισμούς)"</string>
-    <string name="min_comments_hint">"Ελάχιστα σχόλια (-1: χωρίς περιορισμούς)"</string>
-    <string name="max_comments_hint">"Μέγιστα σχόλια (-1: χωρίς περιορισμούς)"</string>
-    <string name="min_awards_hint">"Ελάχιστα βραβεία (-1: χωρίς περιορισμούς)"</string>
-    <string name="max_awards_hint">"Μέγιστα βραβεία (-1: χωρίς περιορισμούς)"</string>
     <string name="post_filter_name_hint">"Όνομα Φίλτρου Ανάρτησης"</string>
     <string name="post_filter_requires_a_name">"Ποιο είναι το όνομα αυτού του φίλτρου ανάρτησης;"</string>
     <string name="duplicate_post_filter_dialog_title">"%1$s Υπάρχουν Ήδη"</string>
@@ -902,7 +893,6 @@
     <string name="theme_item_upvote_ratio_icon_tint_detail">"Εφαρμόστηκε σε: Εικονίδιο αναλογίας ψήφων"</string>
     <string name="theme_item_current_user_color">"Τρέχων χρήστης"</string>
     <string name="theme_item_current_user_color_detail">"Εφαρμόστηκε σε: Τρέχων χρήστης στα σχόλια"</string>
-    <string name="exclude_domains_hint">"Εξαίρεση τομέων"</string>
     <string name="anonymous_front_page_no_subscriptions">"Ξεκινήστε με το να γίνετε μέλος σε ένα subreddit!"</string>
 
     <!-- Fuzzy -->
@@ -1025,9 +1015,6 @@
     <string name="theme_item_media_indicator_background_color">"Χρώμα Παρασκηνίου Ένδειξης Πολυμέσων"</string>
     <string name="theme_item_media_indicator_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο εικονιδίου βίντεο ή συλλογής στην προεπισκόπηση ανάρτησης"</string>
     <string name="go_to_top">"Άλμα προς τα Πάνω"</string>
-    <string name="title_contains_strings_hint">"Τίτλος: περιέχει λέξεις κλειδιά (κλειδι1,κλειδι2)"</string>
-    <string name="title_contains_regex_hint">"Τίτλος: περιέχει regex"</string>
-    <string name="contain_domains_hint">"Συμπερίληψη τομέων"</string>
     <string name="anonymous_multireddit_no_subreddit">"Αυτό το multireddit δεν έχει subreddit!"</string>
     <string name="error_fetching_v_redd_it_video_cannot_get_video_url">"Αδυναμία ανάκτησης βίντεο v.redd.it: Αδυναμία εύρεσης συνδέσμου βίντεο"</string>
     <string name="contain_domain">"Συμπερίληψη αυτού του τομεα"</string>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Content sits 32dp from the screen edge, the same inset as the section cards (16dp card margin +
+     16dp card padding), so the whole screen shares one text edge. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/title_text_view_item_post_filter_rules_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/post_filter_section_rules"
+            android:textSize="?attr/font_default"
+            android:textStyle="bold"
+            android:textColor="?attr/primaryTextColor"
+            android:fontFamily="?attr/font_family" />
+
+        <TextView
+            android:id="@+id/clear_text_view_item_post_filter_rules_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/post_filter_clear_display_filters"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/summary_text_view_item_post_filter_rules_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/post_filter_rules_summary"
+        android:textSize="?attr/font_12"
+        android:textColor="?attr/secondaryTextColor"
+        android:fontFamily="?attr/font_family" />
+
+    <!-- Two stacked groups that wrap, like the Post types chips: OR inside a group, AND across the
+         two. Wrapping rather than scrolling sideways, so every chip is visible at once. -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/polarity_chip_group_item_post_filter_rules_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:chipSpacingHorizontal="8dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/exclude_chip_item_post_filter_rules_header"
+            style="@style/Widget.Continuum.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/post_filter_rule_exclude"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/include_chip_item_post_filter_rules_header"
+            style="@style/Widget.Continuum.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/post_filter_rule_include"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/field_chip_group_item_post_filter_rules_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:chipSpacingHorizontal="8dp" />
+
+</LinearLayout>

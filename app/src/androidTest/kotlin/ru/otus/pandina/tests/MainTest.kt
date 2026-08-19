@@ -45,31 +45,27 @@ class MainTest : BaseTest() {
                     }
                     customizeFilterEditText {
                         isEnabled()
-                        hasText("New Filter")
+                        // A new filter starts unnamed — naming it is the user's job.
+                        hasEmptyText()
                     }
-                    textFilterTextView {
+                    textFilterChip {
                         isVisible()
                         hasText("Text")
-                    }
-                    textFilterCheckBox {
-                        isVisible()
                         isChecked()
                         click()
                         isNotChecked()
                     }
-                    linkFilterTextView {
+                    linkFilterChip {
                         isVisible()
                         hasText("Link")
-                    }
-                    linkFilterCheckBox {
-                        isVisible()
                         isChecked()
                         click()
                         isNotChecked()
                     }
-                    onlyNsfwTextView {
+                    onlyNsfwChip {
                         isVisible()
                         hasText("Only NSFW Content")
+                        isNotChecked()
                     }
                     saveButton.click()
                 }
