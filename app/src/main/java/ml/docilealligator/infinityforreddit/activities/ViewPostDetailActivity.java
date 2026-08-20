@@ -55,6 +55,7 @@ import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewPostDetailBinding;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
+import ml.docilealligator.infinityforreddit.events.PostPositionUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.MorePostsInfoFragment;
@@ -169,6 +170,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private long mPostFragmentId;
     private int mPostListPosition;
+    private boolean mSwipedToAnotherPost;
+    private int mPagerScrollState = ViewPager2.SCROLL_STATE_IDLE;
     private boolean mVolumeKeysNavigateComments;
     private boolean mIsNsfwSubreddit;
     private boolean mHideFab;
@@ -499,6 +502,11 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         }
         binding.viewPager2ViewPostDetailActivity.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
+            public void onPageScrollStateChanged(int state) {
+                mPagerScrollState = state;
+            }
+
+            @Override
             public void onPageSelected(int position) {
                 List<Post> posts = viewPostDetailActivityViewModel.getPosts();
                 if (posts != null && position > posts.size() - 5) {
@@ -517,6 +525,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                     binding.toolbarViewPostDetailActivity.setTitle("");
                     binding.toolbarViewPostDetailActivity.setSubtitle(null);
                 }
+                notifyPostListOfCurrentPost(posts, position);
             }
         });
 
@@ -544,6 +553,58 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
 
             binding.searchPanelMaterialCardViewViewPostDetailActivity.setVisibility(View.GONE);
         });
+    }
+
+    /**
+     * Keeps the post list in step with the swipe-between-posts pager, so backing out of a post the
+     * user swiped to lands the feed on that post instead of on the one they originally tapped.
+     *
+     * Stays quiet until the pager actually leaves the post that was tapped: with Swipe Between Posts
+     * off the pager cannot move at all, so the feed keeps its own scroll position exactly as before.
+     * Once the user has swiped, every page change is reported, including a swipe back to the post
+     * they started on.
+     */
+    private void notifyPostListOfCurrentPost(@Nullable List<Post> posts, int position) {
+        if (mPostFragmentId <= 0 || posts == null || posts.isEmpty()) {
+            return;
+        }
+        // ViewPager2 reports NO_POSITION when a drag ends with no visible page to report on
+        // (ScrollEventValues#reset leaves the position at -1 and the offset at 0, which is what the
+        // end-of-drag branch of ScrollEventAdapter#onScrollStateChanged dispatches). That is not a
+        // page, and indexing posts with it throws.
+        if (position < 0) {
+            return;
+        }
+        // ViewPager2 also reports a page when a layout or data set change scrolls it while it is
+        // idle, and then substitutes page 0 if it cannot find a visible one (ScrollEventAdapter's
+        // onScrolled). Following that would scroll the feed to the top of the list. Every page
+        // change that is really a page change - a drag, or our own setCurrentItem - is dispatched
+        // while the pager is dragging or settling, so an idle one is never worth reporting.
+        if (mPagerScrollState == ViewPager2.SCROLL_STATE_IDLE) {
+            return;
+        }
+        // The trailing page (position == posts.size()) is the "more posts" placeholder, not a post.
+        int postPosition = Math.min(position, posts.size() - 1);
+        // The launch site reads the tapped position from getBindingAdapterPosition(), which hands us
+        // NO_POSITION when the holder was already detached. ViewPager2 clamps a negative start page
+        // to 0, so 0 is the page the user actually landed on; comparing against the raw -1 would read
+        // that first page as a swipe and scroll the feed to the top of the list.
+        int launchPosition = Math.max(mPostListPosition, 0);
+        if (postPosition != launchPosition) {
+            mSwipedToAnotherPost = true;
+        }
+        if (!mSwipedToAnotherPost) {
+            return;
+        }
+        Post post = posts.get(postPosition);
+        if (post != null) {
+            // Sticky, so a feed that gets recreated while we are on top of it - a configuration
+            // change, say - can still pick up where the pager ended up: the events we posted went to
+            // the fragment instance it replaced, and the new one asks EventBus for the last of them
+            // when it resumes (PostFragmentBase#scrollToPostSwipedToInPostDetail).
+            EventBus.getDefault().postSticky(new PostPositionUpdateEventToPostList(
+                    mPostFragmentId, postPosition, post.getFullName()));
+        }
     }
 
     public boolean isNsfwSubreddit() {

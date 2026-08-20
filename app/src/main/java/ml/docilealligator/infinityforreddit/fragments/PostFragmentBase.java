@@ -88,6 +88,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeTimeFormatEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeVibrateWhenActionTriggeredEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeVideoAutoplayEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeVoteButtonsPositionEvent;
+import ml.docilealligator.infinityforreddit.events.PostPositionUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.events.ShowDividerInCompactLayoutPreferenceEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
@@ -152,6 +153,8 @@ public abstract class PostFragmentBase extends Fragment {
     protected AdjustableTouchSlopItemTouchHelper touchHelper;
     private boolean shouldSwipeBack;
     protected final Map<String, String> subredditOrUserIcons = new HashMap<>();
+    @Nullable
+    private PostPositionUpdateEventToPostList pendingScrollToPostEvent;
 
     public PostFragmentBase() {
         // Required empty public constructor
@@ -351,6 +354,12 @@ public abstract class PostFragmentBase extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ViewCompat.requestApplyInsets(view);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        scrollToPostSwipedToInPostDetail();
     }
 
     @Override
@@ -596,6 +605,98 @@ public abstract class PostFragmentBase extends Fragment {
 
     @Nullable
     protected abstract PostRecyclerViewAdapter getPostAdapter();
+
+    /**
+     * Remembers which post the swipe-between-posts pager moved to, and scrolls there on the way back
+     * (see {@link #scrollToPostSwipedToInPostDetail()}). These normally arrive while the post detail
+     * activity is still on top of us, so the scroll is held until onResume; it only runs here in the
+     * case where we are somehow already resumed.
+     *
+     * A feed recreated while the post detail activity was on top of it - a configuration change, say -
+     * never sees these, because they went to the fragment instance it replaced. That case is covered
+     * by the events being posted sticky and picked up in {@link #scrollToPostSwipedToInPostDetail()};
+     * it cannot be covered by subscribing sticky here, since we register in onCreateView before the
+     * subclass has restored postFragmentId and the check below would reject the event.
+     */
+    @Subscribe
+    public void onPostPositionUpdateEvent(PostPositionUpdateEventToPostList event) {
+        if (event.postFragmentId != postFragmentId) {
+            return;
+        }
+        pendingScrollToPostEvent = event;
+        if (isResumed()) {
+            scrollToPostSwipedToInPostDetail();
+        }
+    }
+
+    /**
+     * Puts the post the user swiped to in the post detail pager at the top of the feed, so backing
+     * out of it continues where they were reading instead of where they first tapped.
+     *
+     * The pager can fetch pages of its own that this feed has not loaded (its list started as a
+     * snapshot of ours and grows independently), so the post may be past the end of the adapter. It
+     * is left alone in that case: the feed keeps the position it already had.
+     */
+    private void scrollToPostSwipedToInPostDetail() {
+        PostPositionUpdateEventToPostList event = pendingScrollToPostEvent;
+        if (event == null) {
+            // Nothing was delivered to this instance, which is what a feed recreated while the post
+            // detail activity was on top of it sees. The pager posts sticky, so ask for the last one
+            // now that postFragmentId is restored and the check is meaningful.
+            event = EventBus.getDefault().getStickyEvent(PostPositionUpdateEventToPostList.class);
+            if (event == null || event.postFragmentId != postFragmentId) {
+                return;
+            }
+        }
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        ItemSnapshotList<Post> posts = adapter == null ? null : adapter.snapshot();
+        if (posts == null || posts.isEmpty()) {
+            // A feed that was recreated resumes before its paging data is back. Hold the target for
+            // the next resume rather than spending it on an adapter that cannot answer yet.
+            pendingScrollToPostEvent = event;
+            return;
+        }
+
+        pendingScrollToPostEvent = null;
+        // The target was for the moment this feed came back, which is now, so drop it whether or not
+        // the post below turns out to be reachable. Leaving it sticky would scroll the feed again at
+        // some unrelated later resume.
+        EventBus.getDefault().removeStickyEvent(event);
+
+        int position = event.positionInList;
+        String fullName = event.postFullName;
+        int target = RecyclerView.NO_POSITION;
+        if (position >= 0 && position < posts.size()) {
+            Post post = posts.get(position);
+            if (post != null && fullName.equals(post.getFullName())) {
+                target = position;
+            }
+        }
+        if (target == RecyclerView.NO_POSITION) {
+            // The feed shifted under the pager (a post was hidden, say), so go by identity instead.
+            for (int i = 0; i < posts.size(); i++) {
+                Post post = posts.get(i);
+                if (post != null && fullName.equals(post.getFullName())) {
+                    target = i;
+                    break;
+                }
+            }
+        }
+        if (target == RecyclerView.NO_POSITION) {
+            return;
+        }
+
+        if (mLinearLayoutManager != null) {
+            mLinearLayoutManager.scrollToPositionWithOffset(target, 0);
+        } else if (mStaggeredGridLayoutManager != null) {
+            mStaggeredGridLayoutManager.scrollToPositionWithOffset(target, 0);
+        } else {
+            return;
+        }
+        if (isInLazyMode) {
+            lazyModeRunnable.resetOldPosition();
+        }
+    }
 
     @Subscribe
     public void onPostUpdateEvent(PostUpdateEventToPostList event) {
