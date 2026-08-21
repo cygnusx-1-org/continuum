@@ -52,7 +52,7 @@ public class SubredditSubscription {
     }
 
     public static void unsubscribeToSubreddit(Executor executor, Handler handler, Retrofit oauthRetrofit,
-                                              String accessToken, String subredditName, String accountName,
+                                              @Nullable String accessToken, String subredditName, String accountName,
                                               RedditDataRoomDatabase redditDataRoomDatabase,
                                               SubredditSubscriptionListener subredditSubscriptionListener) {
         subredditSubscription(executor, handler, oauthRetrofit, null, accessToken, subredditName,

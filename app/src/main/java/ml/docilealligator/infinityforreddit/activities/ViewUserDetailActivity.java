@@ -99,6 +99,7 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.thing.DeleteThing;
@@ -109,6 +110,7 @@ import ml.docilealligator.infinityforreddit.user.BlockUser;
 import ml.docilealligator.infinityforreddit.user.FetchUserData;
 import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.user.UserFollowing;
+import ml.docilealligator.infinityforreddit.user.UserSaving;
 import ml.docilealligator.infinityforreddit.user.UserViewModel;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
@@ -159,6 +161,9 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Named("post_history")
     SharedPreferences mPostHistorySharedPreferences;
     @Inject
+    @Named("recently_visited")
+    SharedPreferences mRecentlyVisitedSharedPreferences;
+    @Inject
     @Named("post_layout")
     SharedPreferences mPostLayoutSharedPreferences;
     @Inject
@@ -198,6 +203,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Nullable
     private String description;
     private boolean subscriptionReady = false;
+    private boolean mRecordedVisit;
+    private boolean mUserSaved;
     private boolean mFetchUserInfoSuccess = false;
     private int expandedTabTextColor;
     private int expandedTabBackgroundColor;
@@ -472,8 +479,19 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
         userViewModel = new ViewModelProvider(this, new UserViewModel.Factory(mRedditDataRoomDatabase, username))
                 .get(UserViewModel.class);
+
+        bindSaveUser();
         userViewModel.getUserLiveData().observe(this, userData -> {
             if (userData != null) {
+                if (!mRecordedVisit) {
+                    // Recorded once the data is in hand, so the name and icon are stored together
+                    // and a profile that never loaded is never listed as visited.
+                    mRecordedVisit = true;
+                    RecordRecentlyVisited.recordUser(mExecutor, mRedditDataRoomDatabase,
+                            mRecentlyVisitedSharedPreferences, accountName, userData.getName(),
+                            userData.getIconUrl());
+                }
+
                 if (userData.getBanner().equals("")) {
                     binding.bannerImageViewViewUserDetailActivity.setOnClickListener(null);
                 } else {
@@ -616,7 +634,9 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                         }
                     });
                 } else {
-                    binding.subscribeUserChipViewUserDetailActivity.setVisibility(View.GONE);
+                    // INVISIBLE, not GONE: the save ribbon sits on this line, and collapsing the
+                    // chip would move it for users who cannot be followed.
+                    binding.subscribeUserChipViewUserDetailActivity.setVisibility(View.INVISIBLE);
                 }
 
                 String userFullName = "u/" + userData.getName();
@@ -744,6 +764,10 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         applyFABTheme(navigationWrapper.floatingActionButton);
         binding.descriptionTextViewViewUserDetailActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
         binding.subscribeUserChipViewUserDetailActivity.setTextColor(mCustomThemeWrapper.getChipTextColor());
+        // Sits on the header background, not the toolbar, so it takes the same colour as the rest
+        // of the header -- the toolbar icon colour is white here and would vanish in light mode.
+        binding.saveUserImageViewViewUserDetailActivity.setColorFilter(
+                mCustomThemeWrapper.getPrimaryIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
         applyTabLayoutTheme(binding.tabLayoutViewUserDetailActivity);
         if (typeface != null) {
             binding.userNameTextViewViewUserDetailActivity.setTypeface(typeface);
@@ -1932,5 +1956,47 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         if (mSliderPanel != null) {
             mSliderPanel.unlock();
         }
+    }
+
+    /**
+     * The save ribbon beside the Follow chip. Saving is local, so it is offered while logged out;
+     * it is hidden on your own profile, where a personal list of yourself means nothing.
+     *
+     * <p>Bound once, and its state read from Room rather than a one-shot query, so a read in
+     * flight when the ribbon is tapped cannot land afterwards and undo the tap.
+     */
+    private void bindSaveUser() {
+        if (username.equalsIgnoreCase(accountName)) {
+            binding.saveUserImageViewViewUserDetailActivity.setVisibility(View.GONE);
+            return;
+        }
+
+        binding.saveUserImageViewViewUserDetailActivity.setVisibility(View.VISIBLE);
+
+        mRedditDataRoomDatabase.subscribedUserDao().isUserSavedLiveData(username, accountName)
+                .observe(this, saved -> {
+                    mUserSaved = saved != null && saved;
+                    applySaveUserIcon();
+                });
+
+        binding.saveUserImageViewViewUserDetailActivity.setOnClickListener(view -> {
+            if (mUserSaved) {
+                UserSaving.unsaveUser(mExecutor, new Handler(), mRedditDataRoomDatabase, accountName,
+                        username, () -> {});
+            } else {
+                UserData userData = userViewModel == null ? null : userViewModel.getUserLiveData().getValue();
+                // Prefer the fetched record: it carries the canonical casing and the avatar.
+                UserSaving.saveUser(mExecutor, new Handler(), mRedditDataRoomDatabase, accountName,
+                        userData == null ? username : userData.getName(),
+                        userData == null ? null : userData.getIconUrl(), () -> {});
+            }
+        });
+    }
+
+    private void applySaveUserIcon() {
+        binding.saveUserImageViewViewUserDetailActivity.setImageResource(mUserSaved
+                ? R.drawable.ic_bookmark_day_night_24dp : R.drawable.ic_bookmark_border_day_night_24dp);
+        binding.saveUserImageViewViewUserDetailActivity.setContentDescription(
+                getString(mUserSaved ? R.string.unsave_user : R.string.save_user));
     }
 }

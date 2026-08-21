@@ -117,6 +117,7 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
 import ml.docilealligator.infinityforreddit.settings.MainPageTabInput;
 import ml.docilealligator.infinityforreddit.settings.MainPageTabsUtils;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
@@ -183,6 +184,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @Inject
     @Named("post_history")
     SharedPreferences mPostHistorySharedPreferences;
+    @Inject
+    @Named("recently_visited")
+    SharedPreferences mRecentlyVisitedSharedPreferences;
     @Inject
     @Named("post_layout")
     SharedPreferences mPostLayoutSharedPreferences;
@@ -1005,7 +1009,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private void bindNavigationDrawerAndTabs() {
         adapter = new NavigationDrawerRecyclerViewMergedAdapter(this, mSharedPreferences,
                 mNsfwAndSpoilerSharedPreferences, mNavigationDrawerSharedPreferences, mSecuritySharedPreferences,
-                mCustomThemeWrapper, accountName, new NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener() {
+                mCustomThemeWrapper, accountName,
+                RecordRecentlyVisited.isEnabled(accountName, mRecentlyVisitedSharedPreferences),
+                new NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener() {
                     @Override
                     public void onMenuClick(int stringId) {
                         Intent intent = null;
@@ -1019,6 +1025,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             intent.putExtra(SubscribedThingListingActivity.EXTRA_SHOW_MULTIREDDITS, true);
                         } else if (stringId == R.string.history) {
                             intent = new Intent(MainActivity.this, HistoryActivity.class);
+                        } else if (stringId == R.string.recently_visited) {
+                            intent = new Intent(MainActivity.this, RecentlyVisitedActivity.class);
                         } else if (stringId == R.string.upvoted) {
                             if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                                 intent = new Intent(MainActivity.this, HistoryActivity.class);
@@ -1151,6 +1159,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             }
         });
         InboxCount.liveData(mCurrentAccountSharedPreferences).observe(this, this::setInboxCount);
+        // MainActivity outlives a trip through Settings, so the drawer row has to follow the
+        // setting live rather than waiting for a restart.
+        SharedPreferencesLiveDataKt.booleanLiveData(mRecentlyVisitedSharedPreferences,
+                        accountName + SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE, false)
+                .observe(this, enabled -> adapter.setShowRecentlyVisited(enabled));
         binding.navDrawerRecyclerViewMainActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
         binding.navDrawerRecyclerViewMainActivity.setAdapter(adapter.getConcatAdapter());
 

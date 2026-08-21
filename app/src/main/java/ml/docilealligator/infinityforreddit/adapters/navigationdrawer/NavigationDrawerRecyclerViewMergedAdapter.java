@@ -30,6 +30,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                                                      SharedPreferences securitySharedPreferences,
                                                      CustomThemeWrapper customThemeWrapper,
                                                      @NonNull String accountName,
+                                                     boolean showRecentlyVisited,
                                                      ItemClickListener itemClickListener) {
         RequestManager glide = Glide.with(baseActivity);
 
@@ -47,7 +48,8 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                     }
                 });
         accountSectionRecyclerViewAdapter = new AccountSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
-                navigationDrawerSharedPreferences, !accountName.equals(Account.ANONYMOUS_ACCOUNT), itemClickListener);
+                navigationDrawerSharedPreferences, !accountName.equals(Account.ANONYMOUS_ACCOUNT),
+                showRecentlyVisited, itemClickListener);
         redditSectionRecyclerViewAdapter = new RedditSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
                 navigationDrawerSharedPreferences, itemClickListener);
         postSectionRecyclerViewAdapter = new PostSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
@@ -127,6 +129,10 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
 
     public void changeAccountsDataset(List<Account> accounts) {
         accountManagementSectionRecyclerViewAdapter.changeAccountsDataset(accounts);
+    }
+
+    public void setShowRecentlyVisited(boolean showRecentlyVisited) {
+        accountSectionRecyclerViewAdapter.setShowRecentlyVisited(showRecentlyVisited);
     }
 
     public void setInboxCount(int inboxCount) {

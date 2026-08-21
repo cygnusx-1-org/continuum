@@ -51,6 +51,9 @@ public class FollowedUsersListingFragment extends Fragment implements FragmentCo
     @Named("oauth")
     Retrofit mOauthRetrofit;
     @Inject
+    @Named("no_oauth")
+    Retrofit mRetrofit;
+    @Inject
     @Named("default")
     SharedPreferences mSharedPreferences;
     @Inject
@@ -109,8 +112,8 @@ public class FollowedUsersListingFragment extends Fragment implements FragmentCo
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
         binding.recyclerViewFollowedUsersListingFragment.setLayoutManager(mLinearLayoutManager);
         FollowedUsersRecyclerViewAdapter adapter = new FollowedUsersRecyclerViewAdapter(mActivity,
-                mExecutor, mOauthRetrofit, mRedditDataRoomDatabase, mCustomThemeWrapper, mActivity.accessToken,
-                mActivity.accountName, subscribedUserData -> {
+                mExecutor, mOauthRetrofit, mRetrofit, mRedditDataRoomDatabase, mCustomThemeWrapper,
+                mActivity.accessToken, mActivity.accountName, subscribedUserData -> {
                     if (getArguments().getBoolean(EXTRA_IS_USER_SELECTION)) {
                         Intent returnIntent = new Intent();
                         returnIntent.putExtra(SelectThingReturnKey.RETURN_EXTRA_SUBREDDIT_OR_USER_NAME, subscribedUserData.getName());

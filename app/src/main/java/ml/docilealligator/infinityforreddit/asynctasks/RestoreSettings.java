@@ -66,6 +66,7 @@ public class RestoreSettings {
                                 SharedPreferences bottomAppBarSharedPreferences,
                                 SharedPreferences postHistorySharedPreferences,
                                 SharedPreferences navigationDrawerSharedPreferences,
+                                SharedPreferences recentlyVisitedSharedPreferences,
                                 RestoreSettingsListener restoreSettingsListener) {
         executor.execute(() -> {
             try {
@@ -171,6 +172,10 @@ public class RestoreSettings {
                                 } else if (f.getName().startsWith(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE)) {
                                     // Not `&&`: the import must run even if an earlier one failed.
                                     boolean imported = importSharedPreferencsFromFile(navigationDrawerSharedPreferences, f.toString());
+                                    result = result && imported;
+                                } else if (f.getName().startsWith(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE)) {
+                                    // Not `&&`: the import must run even if an earlier one failed.
+                                    boolean imported = importSharedPreferencsFromFile(recentlyVisitedSharedPreferences, f.toString());
                                     result = result && imported;
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {

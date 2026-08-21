@@ -38,6 +38,7 @@ import ml.docilealligator.infinityforreddit.activities.PostLinkActivity;
 import ml.docilealligator.infinityforreddit.activities.PostPollActivity;
 import ml.docilealligator.infinityforreddit.activities.PostTextActivity;
 import ml.docilealligator.infinityforreddit.activities.PostVideoActivity;
+import ml.docilealligator.infinityforreddit.activities.RecentlyVisitedActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
 import ml.docilealligator.infinityforreddit.activities.RulesActivity;
 import ml.docilealligator.infinityforreddit.activities.SearchActivity;
@@ -78,6 +79,7 @@ import ml.docilealligator.infinityforreddit.fragments.InboxFragment;
 import ml.docilealligator.infinityforreddit.fragments.MorePostsInfoFragment;
 import ml.docilealligator.infinityforreddit.fragments.MultiRedditListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
+import ml.docilealligator.infinityforreddit.fragments.RecentlyVisitedListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.SidebarFragment;
 import ml.docilealligator.infinityforreddit.fragments.SubredditListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.SubscribedSubredditsListingFragment;
@@ -107,6 +109,7 @@ import ml.docilealligator.infinityforreddit.settings.NsfwAndSpoilerFragment;
 import ml.docilealligator.infinityforreddit.settings.PostDetailsPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.PostHistoryFragment;
 import ml.docilealligator.infinityforreddit.settings.ProxyPreferenceFragment;
+import ml.docilealligator.infinityforreddit.settings.RecentlyVisitedPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.SecurityPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.ThemePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.TranslationFragment;
@@ -164,6 +167,8 @@ public interface AppComponent {
     void inject(SearchSubredditsResultActivity searchSubredditsResultActivity);
 
     void inject(FollowedUsersListingFragment followedUsersListingFragment);
+
+    void inject(RecentlyVisitedListingFragment recentlyVisitedListingFragment);
 
     void inject(EditPostActivity editPostActivity);
 
@@ -270,6 +275,8 @@ public interface AppComponent {
 
     void inject(PostHistoryFragment postHistoryFragment);
 
+    void inject(RecentlyVisitedPreferenceFragment recentlyVisitedPreferenceFragment);
+
     void inject(PostFilterPreferenceActivity postFilterPreferenceActivity);
 
 
@@ -310,6 +317,8 @@ public interface AppComponent {
     void inject(HistoryPostFragment historyPostFragment);
 
     void inject(HistoryActivity historyActivity);
+
+    void inject(RecentlyVisitedActivity recentlyVisitedActivity);
 
     void inject(MorePostsInfoFragment morePostsInfoFragment);
 

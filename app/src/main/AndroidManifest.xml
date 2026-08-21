@@ -199,6 +199,11 @@
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.Slidable" />
         <activity
+            android:name=".activities.RecentlyVisitedActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.Slidable" />
+        <activity
             android:name=".activities.PostPollActivity"
             android:label="@string/post_poll_activity_label"
             android:parentActivityName=".activities.MainActivity"

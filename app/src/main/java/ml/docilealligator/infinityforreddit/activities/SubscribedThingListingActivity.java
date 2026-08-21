@@ -19,12 +19,15 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
@@ -57,6 +60,7 @@ import ml.docilealligator.infinityforreddit.asynctasks.DeleteMultiredditInDataba
 import ml.docilealligator.infinityforreddit.asynctasks.InsertMultireddit;
 import ml.docilealligator.infinityforreddit.asynctasks.InsertSubscribedThings;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySubscribedThingListingBinding;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.RefreshMultiRedditsEvent;
@@ -75,7 +79,10 @@ import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.thing.FetchSubscribedThing;
+import ml.docilealligator.infinityforreddit.user.FetchUserData;
+import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.user.UserFollowing;
+import ml.docilealligator.infinityforreddit.user.UserSaving;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -354,6 +361,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         if (!shouldShowFab(binding.viewPagerSubscribedThingListingActivity.getCurrentItem())) {
             binding.fabSubscribedThingListingActivity.hide();
         }
+        applyFabContentDescription(binding.viewPagerSubscribedThingListingActivity.getCurrentItem());
 
         binding.viewPagerSubscribedThingListingActivity.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -368,6 +376,7 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
                 } else {
                     binding.fabSubscribedThingListingActivity.hide();
                 }
+                applyFabContentDescription(position);
             }
         });
         binding.tabLayoutSubscribedThingListingActivity.setupWithViewPager(binding.viewPagerSubscribedThingListingActivity);
@@ -490,6 +499,25 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         if (!(!forceLoad && mInsertMultiredditSuccess)) {
             loadMultiReddits();
         }
+    }
+
+    /** The one FAB does a different thing per tab, so it has to announce a different thing per tab. */
+    private void applyFabContentDescription(int position) {
+        int descriptionRes;
+        switch (position) {
+            case 0:
+                descriptionRes = R.string.go_to_subreddit;
+                break;
+            case 1:
+                descriptionRes = R.string.add_user_to_list_title;
+                break;
+            case 3:
+                descriptionRes = R.string.add_user_multireddit_title;
+                break;
+            default:
+                descriptionRes = R.string.content_description_create_multireddit;
+        }
+        binding.fabSubscribedThingListingActivity.setContentDescription(getString(descriptionRes));
     }
 
     private boolean shouldShowFab(int position) {
@@ -698,8 +726,86 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         showAddUsernameDialog(R.string.add_user_multireddit_title, this::openUserMultiReddits);
     }
 
+    /**
+     * The Users list holds people you follow and people you have merely saved, so adding one asks
+     * which. Save is local and reversible, so it is the default; Follow changes your Reddit account
+     * and stays a deliberate tick.
+     */
     private void showAddUserDialog() {
-        showAddUsernameDialog(R.string.add_user_title, this::followUser);
+        View rootView = getLayoutInflater().inflate(R.layout.dialog_add_user, (ViewGroup) binding.getRoot(), false);
+        AutoCompleteTextView usernameEditText = rootView.findViewById(R.id.auto_complete_text_view_add_user);
+        ThemedMaterialSwitch followSwitch = rootView.findViewById(R.id.follow_switch_add_user);
+        ThemedMaterialSwitch saveSwitch = rootView.findViewById(R.id.save_switch_add_user);
+        saveSwitch.setChecked(true);
+
+        usernameEditText.requestFocus();
+        Utils.showKeyboard(this, new Handler(), usernameEditText);
+        loadUsernameSuggestions(usernameEditText);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                .setTitle(R.string.add_user_to_list_title)
+                .setView(rootView)
+                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+                    Utils.hideKeyboard(this);
+                    addUser(usernameEditText.getText().toString(), followSwitch.isChecked(), saveSwitch.isChecked());
+                })
+                .setNegativeButton(R.string.cancel, (dialogInterface, i) -> Utils.hideKeyboard(this))
+                .setOnDismissListener(dialogInterface -> Utils.hideKeyboard(this))
+                .create();
+        dialog.show();
+
+        Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        CompoundButton.OnCheckedChangeListener updateOk = (compoundButton, checked) ->
+                okButton.setEnabled(followSwitch.isChecked() || saveSwitch.isChecked());
+        followSwitch.setOnCheckedChangeListener(updateOk);
+        saveSwitch.setOnCheckedChangeListener(updateOk);
+        updateOk.onCheckedChanged(saveSwitch, saveSwitch.isChecked());
+
+        usernameEditText.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if (i == EditorInfo.IME_ACTION_DONE && okButton.isEnabled()) {
+                Utils.hideKeyboard(this);
+                addUser(usernameEditText.getText().toString(), followSwitch.isChecked(), saveSwitch.isChecked());
+                dialog.dismiss();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Follow and save both create the same row, so when both are wanted the save waits for the
+     * follow to land rather than racing it into a conflicting insert.
+     */
+    private void addUser(String input, boolean follow, boolean save) {
+        String username = cleanUsername(input);
+        if (username.isEmpty()) {
+            return;
+        }
+        if (follow) {
+            followUser(username, save ? () -> saveUser(username) : null);
+        } else if (save) {
+            saveUser(username);
+        }
+    }
+
+    /** Resolves the name before saving, so typos and deleted accounts bounce and the avatar comes with it. */
+    private void saveUser(String username) {
+        FetchUserData.fetchUserData(mExecutor, mHandler, mRetrofit, username,
+                new FetchUserData.FetchUserDataListener() {
+                    @Override
+                    public void onFetchUserDataSuccess(UserData userData) {
+                        UserSaving.saveUser(mExecutor, mHandler, mRedditDataRoomDatabase, accountName,
+                                userData.getName(), userData.getIconUrl(),
+                                () -> Toast.makeText(SubscribedThingListingActivity.this,
+                                        R.string.saved_user, Toast.LENGTH_SHORT).show());
+                    }
+
+                    @Override
+                    public void onFetchUserDataFailed() {
+                        Toast.makeText(SubscribedThingListingActivity.this, R.string.save_user_failed,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void showAddUsernameDialog(int titleRes, OnUsernameEnteredListener listener) {
@@ -781,15 +887,14 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
         startActivity(intent);
     }
 
-    private void followUser(String input) {
-        String username = cleanUsername(input);
-        if (username.isEmpty()) {
-            return;
-        }
+    private void followUser(String username, @Nullable Runnable onSuccess) {
         UserFollowing.UserFollowingListener listener = new UserFollowing.UserFollowingListener() {
             @Override
             public void onUserFollowingSuccess() {
                 Toast.makeText(SubscribedThingListingActivity.this, R.string.followed, Toast.LENGTH_SHORT).show();
+                if (onSuccess != null) {
+                    onSuccess.run();
+                }
             }
 
             @Override

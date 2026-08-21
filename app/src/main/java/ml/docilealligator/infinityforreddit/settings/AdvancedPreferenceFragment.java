@@ -91,6 +91,9 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
     @Named("post_history")
     SharedPreferences postHistorySharedPreferences;
     @Inject
+    @Named("recently_visited")
+    SharedPreferences recentlyVisitedSharedPreferences;
+    @Inject
     @Named("navigation_drawer")
     SharedPreferences navigationDrawerSharedPreferences;
     @Inject
@@ -339,7 +342,7 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
                             amoledThemeSharedPreferences, mSortTypeSharedPreferences, mPostLayoutSharedPreferences,
                             mPostDetailsSharedPreferences, postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
                             proxySharedPreferences, nsfwAndBlurringSharedPreferences, bottomAppBarSharedPreferences,
-                            postHistorySharedPreferences, navigationDrawerSharedPreferences,
+                            postHistorySharedPreferences, navigationDrawerSharedPreferences, recentlyVisitedSharedPreferences,
                             new BackupSettings.BackupSettingsListener() {
                                 @Override
                                 public void success() {
@@ -509,7 +512,7 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
                 darkThemeSharedPreferences, amoledThemeSharedPreferences, mSortTypeSharedPreferences, mPostLayoutSharedPreferences,
                 mPostDetailsSharedPreferences, postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
                 proxySharedPreferences, nsfwAndBlurringSharedPreferences, bottomAppBarSharedPreferences,
-                postHistorySharedPreferences, navigationDrawerSharedPreferences,
+                postHistorySharedPreferences, navigationDrawerSharedPreferences, recentlyVisitedSharedPreferences,
                 new RestoreSettings.RestoreSettingsListener() {
                     @Override
                     public void success() {

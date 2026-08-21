@@ -42,6 +42,8 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsageDao;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostDao;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostDaoKt;
+import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisited;
+import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisitedDao;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQueryDao;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditDao;
@@ -57,7 +59,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         SubscribedUserData.class, MultiReddit.class, CustomTheme.class, RecentSearchQuery.class,
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
-        LocalSavedThing.class, PostFilterBlockedSubreddit.class}, version = 37, exportSchema = false)
+        LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class}, version = 38, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -75,7 +77,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29,
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
-                        MIGRATION_36_37)
+                        MIGRATION_36_37, MIGRATION_37_38)
                 .build();
     }
 
@@ -126,6 +128,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     public abstract ApiCallRecordDao apiCallRecordDao();
 
     public abstract LocalSavedThingDao localSavedThingDao();
+
+    public abstract RecentlyVisitedDao recentlyVisitedDao();
 
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -587,6 +591,27 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
             // No separate index on filter_name: it is the leftmost column of the primary key, so
             // SQLite's implicit index already serves the lookups, and an extra one would not match
             // the entity Room validates the migrated schema against.
+        }
+    };
+
+    private static final Migration MIGRATION_37_38 = new Migration(37, 38) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `recently_visited` "
+                    + "(`username` TEXT NOT NULL, `name` TEXT NOT NULL, `type` INTEGER NOT NULL, "
+                    + "`icon_url` TEXT, `last_visited` INTEGER NOT NULL, "
+                    + "PRIMARY KEY(`username`, `name`, `type`), "
+                    + "FOREIGN KEY(`username`) REFERENCES `accounts`(`username`) "
+                    + "ON UPDATE NO ACTION ON DELETE CASCADE)");
+            database.execSQL("CREATE INDEX IF NOT EXISTS "
+                    + "`index_recently_visited_username_type_last_visited` "
+                    + "ON `recently_visited` (`username`, `type`, `last_visited`)");
+            // A subscribed_users row used to mean "followed"; it now means followed or saved, so
+            // the distinction becomes explicit. Every existing row is a follow.
+            database.execSQL("ALTER TABLE subscribed_users"
+                    + " ADD COLUMN is_followed INTEGER DEFAULT 1 NOT NULL");
+            database.execSQL("ALTER TABLE subscribed_users"
+                    + " ADD COLUMN is_saved INTEGER DEFAULT 0 NOT NULL");
         }
     };
 }

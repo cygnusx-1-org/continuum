@@ -86,9 +86,9 @@ public class FavoriteThing {
                                     @Nullable String accessToken, @NonNull String accountName,
                                     SubscribedUserData subscribedUserData,
                                     FavoriteThingListener favoriteThingListener) {
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            InsertSubscribedThings.insertSubscribedThings(executor, handler, redditDataRoomDatabase,
-                    subscribedUserData, favoriteThingListener::success);
+        if (isLocalOnly(accountName, subscribedUserData)) {
+            updateUserFavorite(executor, handler, redditDataRoomDatabase, accountName,
+                    subscribedUserData.getName(), true, favoriteThingListener);
         } else {
             Map<String, String> params = new HashMap<>();
             params.put(APIUtils.SR_NAME_KEY, "u_" + subscribedUserData.getName());
@@ -97,8 +97,8 @@ public class FavoriteThing {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful()) {
-                        InsertSubscribedThings.insertSubscribedThings(executor, handler, redditDataRoomDatabase,
-                                subscribedUserData, favoriteThingListener::success);
+                        updateUserFavorite(executor, handler, redditDataRoomDatabase, accountName,
+                                subscribedUserData.getName(), true, favoriteThingListener);
                     } else {
                         favoriteThingListener.failed();
                     }
@@ -117,9 +117,9 @@ public class FavoriteThing {
                                       @Nullable String accessToken, @NonNull String accountName,
                                       SubscribedUserData subscribedUserData,
                                       FavoriteThingListener favoriteThingListener) {
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            InsertSubscribedThings.insertSubscribedThings(executor, handler, redditDataRoomDatabase, subscribedUserData,
-                    favoriteThingListener::success);
+        if (isLocalOnly(accountName, subscribedUserData)) {
+            updateUserFavorite(executor, handler, redditDataRoomDatabase, accountName,
+                    subscribedUserData.getName(), false, favoriteThingListener);
         } else {
             Map<String, String> params = new HashMap<>();
             params.put(APIUtils.SR_NAME_KEY, "u_" + subscribedUserData.getName());
@@ -128,8 +128,8 @@ public class FavoriteThing {
                 @Override
                 public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                     if (response.isSuccessful()) {
-                        InsertSubscribedThings.insertSubscribedThings(executor, handler, redditDataRoomDatabase,
-                                subscribedUserData, favoriteThingListener::success);
+                        updateUserFavorite(executor, handler, redditDataRoomDatabase, accountName,
+                                subscribedUserData.getName(), false, favoriteThingListener);
                     } else {
                         favoriteThingListener.failed();
                     }
@@ -141,6 +141,30 @@ public class FavoriteThing {
                 }
             });
         }
+    }
+
+    /**
+     * Whether the favourite is ours alone to record. Reddit's favourite flag applies to things the
+     * account follows, so a user who is only saved locally -- like anything under the anonymous
+     * account -- has nothing there to favourite, and asking would just fail.
+     */
+    private static boolean isLocalOnly(@NonNull String accountName, SubscribedUserData subscribedUserData) {
+        return accountName.equals(Account.ANONYMOUS_ACCOUNT) || !subscribedUserData.isFollowed();
+    }
+
+    /**
+     * Writes only the favourite column. Replacing the whole row here would write back the caller's
+     * snapshot of {@code is_saved}, which a tap on the row's save ribbon may have changed while the
+     * favourite request was in flight.
+     */
+    private static void updateUserFavorite(Executor executor, Handler handler,
+                                           RedditDataRoomDatabase redditDataRoomDatabase,
+                                           @NonNull String accountName, String username, boolean favorite,
+                                           FavoriteThingListener favoriteThingListener) {
+        executor.execute(() -> {
+            redditDataRoomDatabase.subscribedUserDao().updateFavorite(username, accountName, favorite);
+            handler.post(favoriteThingListener::success);
+        });
     }
 
     public interface FavoriteThingListener {

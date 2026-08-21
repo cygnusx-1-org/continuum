@@ -34,4 +34,8 @@ public interface SubscribedSubredditDao {
 
     @Query("DELETE FROM subscribed_subreddits WHERE name = :subredditName COLLATE NOCASE AND username = :accountName COLLATE NOCASE")
     void deleteSubscribedSubreddit(String subredditName, String accountName);
+
+    /** Names only: Recently Visited needs the set to decide which rows still offer a subscribe. */
+    @Query("SELECT name FROM subscribed_subreddits WHERE username = :accountName")
+    LiveData<List<String>> getSubscribedSubredditNames(String accountName);
 }

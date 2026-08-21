@@ -105,6 +105,7 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
 import ml.docilealligator.infinityforreddit.subreddit.FetchSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
@@ -149,6 +150,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     // every recreate, pushing the post feed down even when the user was scrolled mid-feed.
     private boolean mAppBarCollapsed = false;
     public SubredditViewModel mSubredditViewModel;
+    private boolean mRecordedVisit;
 
     @Inject
     @Named("no_oauth")
@@ -170,6 +172,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Inject()
     @Named("post_history")
     SharedPreferences mPostHistorySharedPreferences;
+    @Inject
+    @Named("recently_visited")
+    SharedPreferences mRecentlyVisitedSharedPreferences;
     @Inject
     @Named("post_layout")
     SharedPreferences mPostLayoutSharedPreferences;
@@ -495,6 +500,15 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         mSubredditViewModel.getSubredditLiveData().observe(this, subredditData -> {
             if (subredditData != null) {
                 isNsfwSubreddit = subredditData.isNSFW();
+
+                if (!mRecordedVisit) {
+                    // Recorded once the data is in hand, so the name and icon are stored together
+                    // and a subreddit that never loaded is never listed as visited.
+                    mRecordedVisit = true;
+                    RecordRecentlyVisited.recordSubreddit(mExecutor, mRedditDataRoomDatabase,
+                            mRecentlyVisitedSharedPreferences, accountName, subredditData.getName(),
+                            subredditData.getIconUrl());
+                }
 
                 if (subredditData.getBannerUrl().equals("")) {
                     binding.iconGifImageViewViewSubredditDetailActivity.setOnClickListener(view -> {

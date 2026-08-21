@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,14 +18,22 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import me.zhanghai.android.fastscroll.PopupTextProvider;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemFavoriteThingDividerBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemSubscribedThingBinding;
+import ml.docilealligator.infinityforreddit.databinding.ItemSubscribedUserBinding;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.thing.FavoriteThing;
+import ml.docilealligator.infinityforreddit.user.UserFollowing;
+import ml.docilealligator.infinityforreddit.user.UserSaving;
 import retrofit2.Retrofit;
 
+/**
+ * The Subscriptions -&gt; Users list. A row is here because the user is followed, saved, or both;
+ * the three trailing toggles are follow, save and favourite, in that order. Clearing both follow
+ * and save deletes the row, which the list then drops on its own via LiveData.
+ */
 @SuppressWarnings("NullAway.Init")
 public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements PopupTextProvider {
     private static final int VIEW_TYPE_FAVORITE_USER_DIVIDER = 0;
@@ -37,35 +46,70 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     private final BaseActivity mActivity;
     private final Executor mExecutor;
     private final Retrofit mOauthRetrofit;
+    private final Retrofit mRetrofit;
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Nullable
     private final String mAccessToken;
     private final String mAccountName;
+    private final boolean mIsAnonymous;
     private final RequestManager glide;
     private final int mPrimaryTextColor;
     private final int mSecondaryTextColor;
+    private final int mPrimaryIconColor;
     private final ItemOnClickListener itemOnClickListener;
 
     public FollowedUsersRecyclerViewAdapter(BaseActivity activity, Executor executor, Retrofit oauthRetrofit,
-                                            RedditDataRoomDatabase redditDataRoomDatabase,
+                                            Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                                             CustomThemeWrapper customThemeWrapper,
                                             @Nullable String accessToken, @NonNull String accountName,
                                             ItemOnClickListener itemOnClickListener) {
         mActivity = activity;
         mExecutor = executor;
         mOauthRetrofit = oauthRetrofit;
+        mRetrofit = retrofit;
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mAccessToken = accessToken;
         mAccountName = accountName;
+        mIsAnonymous = Account.ANONYMOUS_ACCOUNT.equals(accountName);
         glide = Glide.with(activity);
         mPrimaryTextColor = customThemeWrapper.getPrimaryTextColor();
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
+        mPrimaryIconColor = customThemeWrapper.getPrimaryIconColor();
         this.itemOnClickListener = itemOnClickListener;
+    }
+
+    private boolean hasFavorites() {
+        return mFavoriteSubscribedUserData != null && !mFavoriteSubscribedUserData.isEmpty();
+    }
+
+    /**
+     * Resolves an adapter position to its user, across the favourites group, its divider, and the
+     * full list below. Returns null for divider rows and for positions left stale by a data change.
+     */
+    @Nullable
+    private SubscribedUserData itemAt(int position) {
+        if (position < 0) {
+            return null;
+        }
+        if (hasFavorites()) {
+            if (position >= 1 && position <= mFavoriteSubscribedUserData.size()) {
+                return mFavoriteSubscribedUserData.get(position - 1);
+            }
+            int index = position - (mFavoriteSubscribedUserData.size() + 2);
+            if (mSubscribedUserData != null && index >= 0 && index < mSubscribedUserData.size()) {
+                return mSubscribedUserData.get(index);
+            }
+            return null;
+        }
+        if (mSubscribedUserData != null && position < mSubscribedUserData.size()) {
+            return mSubscribedUserData.get(position);
+        }
+        return null;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mFavoriteSubscribedUserData != null && mFavoriteSubscribedUserData.size() > 0) {
+        if (hasFavorites()) {
             if (position == 0) {
                 return VIEW_TYPE_FAVORITE_USER_DIVIDER;
             } else if (position == mFavoriteSubscribedUserData.size() + 1) {
@@ -87,68 +131,66 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
             case VIEW_TYPE_FAVORITE_USER_DIVIDER:
                 return new FavoriteUsersDividerViewHolder(ItemFavoriteThingDividerBinding
                         .inflate(LayoutInflater.from(viewGroup.getContext()), viewGroup, false));
-            case VIEW_TYPE_FAVORITE_USER:
-                return new FavoriteUserViewHolder(ItemSubscribedThingBinding
-                        .inflate(LayoutInflater.from(viewGroup.getContext()), viewGroup, false));
             case VIEW_TYPE_USER_DIVIDER:
                 return new AllUsersDividerViewHolder(ItemFavoriteThingDividerBinding
                         .inflate(LayoutInflater.from(viewGroup.getContext()), viewGroup, false));
             default:
-                return new UserViewHolder(ItemSubscribedThingBinding
+                return new UserViewHolder(ItemSubscribedUserBinding
                         .inflate(LayoutInflater.from(viewGroup.getContext()), viewGroup, false));
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder viewHolder, int i) {
-        if (viewHolder instanceof UserViewHolder) {
-            int offset = (mFavoriteSubscribedUserData != null && mFavoriteSubscribedUserData.size() > 0) ?
-                    mFavoriteSubscribedUserData.size() + 2 : 0;
-
-            if (!mSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - offset).getIconUrl().equals("")) {
-                glide.load(mSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - offset).getIconUrl())
-                        .transform(new RoundedCornersTransformation(72, 0))
-                        .error(glide.load(R.drawable.subreddit_default_icon)
-                                .transform(new RoundedCornersTransformation(72, 0)))
-                        .into(((UserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
-            } else {
-                glide.load(R.drawable.subreddit_default_icon)
-                        .transform(new RoundedCornersTransformation(72, 0))
-                        .into(((UserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
-            }
-            ((UserViewHolder) viewHolder).binding.thingNameTextViewItemSubscribedThing.setText(mSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - offset).getName());
-
-            if(mSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - offset).isFavorite()) {
-                ((UserViewHolder) viewHolder).binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-            } else {
-                ((UserViewHolder) viewHolder).binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-            }
-        } else if (viewHolder instanceof FavoriteUserViewHolder) {
-            if (!mFavoriteSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - 1).getIconUrl().equals("")) {
-                glide.load(mFavoriteSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - 1).getIconUrl())
-                        .transform(new RoundedCornersTransformation(72, 0))
-                        .error(glide.load(R.drawable.subreddit_default_icon)
-                                .transform(new RoundedCornersTransformation(72, 0)))
-                        .into(((FavoriteUserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
-            } else {
-                glide.load(R.drawable.subreddit_default_icon)
-                        .transform(new RoundedCornersTransformation(72, 0))
-                        .into(((FavoriteUserViewHolder) viewHolder).binding.thingIconGifImageViewItemSubscribedThing);
-            }
-            ((FavoriteUserViewHolder) viewHolder).binding.thingNameTextViewItemSubscribedThing.setText(mFavoriteSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - 1).getName());
-
-            if(mFavoriteSubscribedUserData.get(viewHolder.getBindingAdapterPosition() - 1).isFavorite()) {
-                ((FavoriteUserViewHolder) viewHolder).binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-            } else {
-                ((FavoriteUserViewHolder) viewHolder).binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-            }
+        if (!(viewHolder instanceof UserViewHolder)) {
+            return;
         }
+        SubscribedUserData user = itemAt(i);
+        if (user == null) {
+            return;
+        }
+        ItemSubscribedUserBinding binding = ((UserViewHolder) viewHolder).binding;
+
+        String iconUrl = user.getIconUrl();
+        if (iconUrl != null && !iconUrl.isEmpty()) {
+            glide.load(iconUrl)
+                    .transform(new RoundedCornersTransformation(72, 0))
+                    .error(glide.load(R.drawable.subreddit_default_icon)
+                            .transform(new RoundedCornersTransformation(72, 0)))
+                    .into(binding.thingIconGifImageViewItemSubscribedUser);
+        } else {
+            glide.load(R.drawable.subreddit_default_icon)
+                    .transform(new RoundedCornersTransformation(72, 0))
+                    .into(binding.thingIconGifImageViewItemSubscribedUser);
+        }
+        binding.thingNameTextViewItemSubscribedUser.setText(user.getName());
+
+        bindFollow(binding.followImageViewItemSubscribedUser, user.isFollowed());
+        bindSave(binding.saveImageViewItemSubscribedUser, user.isSaved());
+        bindFavorite(binding.favoriteImageViewItemSubscribedUser, user.isFavorite());
+    }
+
+    private void bindFollow(ImageView imageView, boolean followed) {
+        imageView.setImageResource(followed ? R.drawable.ic_follow_24dp : R.drawable.ic_follow_border_24dp);
+        imageView.setColorFilter(mPrimaryIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
+        imageView.setContentDescription(mActivity.getString(followed ? R.string.unfollow_user : R.string.follow_user));
+    }
+
+    private void bindSave(ImageView imageView, boolean saved) {
+        imageView.setImageResource(saved
+                ? R.drawable.ic_bookmark_day_night_24dp : R.drawable.ic_bookmark_border_day_night_24dp);
+        imageView.setColorFilter(mPrimaryIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
+        imageView.setContentDescription(mActivity.getString(saved ? R.string.unsave_user : R.string.save_user));
+    }
+
+    private void bindFavorite(ImageView imageView, boolean favorite) {
+        imageView.setImageResource(favorite ? R.drawable.ic_favorite_24dp : R.drawable.ic_favorite_border_24dp);
     }
 
     @Override
     public int getItemCount() {
-        if (mSubscribedUserData != null && mSubscribedUserData.size() > 0) {
-            if(mFavoriteSubscribedUserData != null && mFavoriteSubscribedUserData.size() > 0) {
+        if (mSubscribedUserData != null && !mSubscribedUserData.isEmpty()) {
+            if (hasFavorites()) {
                 return mSubscribedUserData.size() + mFavoriteSubscribedUserData.size() + 2;
             }
             return mSubscribedUserData.size();
@@ -158,10 +200,8 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
 
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
-        if(holder instanceof UserViewHolder) {
-            glide.clear(((UserViewHolder) holder).binding.thingIconGifImageViewItemSubscribedThing);
-        } else if (holder instanceof FavoriteUserViewHolder) {
-            glide.clear(((FavoriteUserViewHolder) holder).binding.thingIconGifImageViewItemSubscribedThing);
+        if (holder instanceof UserViewHolder) {
+            glide.clear(((UserViewHolder) holder).binding.thingIconGifImageViewItemSubscribedUser);
         }
     }
 
@@ -178,178 +218,129 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     @NonNull
     @Override
     public CharSequence getPopupText(@NonNull View view, int position) {
-        switch (getItemViewType(position)) {
-            case VIEW_TYPE_USER:
-                int offset = (mFavoriteSubscribedUserData != null && !mFavoriteSubscribedUserData.isEmpty()) ?
-                        mFavoriteSubscribedUserData.size() + 2 : 0;
-                return mSubscribedUserData.get(position - offset).getName().substring(0, 1).toUpperCase(Locale.getDefault());
-            case VIEW_TYPE_FAVORITE_USER:
-                return mFavoriteSubscribedUserData.get(position - 1).getName().substring(0, 1).toUpperCase(Locale.getDefault());
-            default:
-                return "";
+        SubscribedUserData user = itemAt(position);
+        if (user == null || user.getName().isEmpty()) {
+            return "";
         }
-    }
-
-    class FavoriteUserViewHolder extends RecyclerView.ViewHolder {
-        ItemSubscribedThingBinding binding;
-
-        FavoriteUserViewHolder(ItemSubscribedThingBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-            if (mActivity.typeface != null) {
-                binding.thingNameTextViewItemSubscribedThing.setTypeface(mActivity.typeface);
-            }
-            binding.thingNameTextViewItemSubscribedThing.setTextColor(mPrimaryTextColor);
-
-            itemView.setOnClickListener(view -> {
-                int position = getBindingAdapterPosition() - 1;
-                if(position >= 0 && mFavoriteSubscribedUserData.size() > position) {
-                    itemOnClickListener.onClick(mFavoriteSubscribedUserData.get(position));
-                }
-            });
-
-            binding.favoriteImageViewItemSubscribedThing.setOnClickListener(view -> {
-                int position = getBindingAdapterPosition() - 1;
-                if(position >= 0 && mFavoriteSubscribedUserData.size() > position) {
-                    if(mFavoriteSubscribedUserData.get(position).isFavorite()) {
-                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-                        mFavoriteSubscribedUserData.get(position).setFavorite(false);
-                        FavoriteThing.unfavoriteUser(mExecutor, new Handler(), mOauthRetrofit,
-                                mRedditDataRoomDatabase, mAccessToken, mAccountName,
-                                mFavoriteSubscribedUserData.get(position),
-                                new FavoriteThing.FavoriteThingListener() {
-                                    @Override
-                                    public void success() {
-                                        int position = getBindingAdapterPosition() - 1;
-                                        if(position >= 0 && mFavoriteSubscribedUserData.size() > position) {
-                                            mFavoriteSubscribedUserData.get(position).setFavorite(false);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-                                    }
-
-                                    @Override
-                                    public void failed() {
-                                        Toast.makeText(mActivity, R.string.thing_unfavorite_failed, Toast.LENGTH_SHORT).show();
-                                        int position = getBindingAdapterPosition() - 1;
-                                        if(position >= 0 && mFavoriteSubscribedUserData.size() > position) {
-                                            mFavoriteSubscribedUserData.get(position).setFavorite(true);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-                                    }
-                                });
-                    } else {
-                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-                        mFavoriteSubscribedUserData.get(position).setFavorite(true);
-                        FavoriteThing.favoriteUser(mExecutor, new Handler(), mOauthRetrofit,
-                                mRedditDataRoomDatabase, mAccessToken, mAccountName,
-                                mFavoriteSubscribedUserData.get(position),
-                                new FavoriteThing.FavoriteThingListener() {
-                                    @Override
-                                    public void success() {
-                                        int position = getBindingAdapterPosition() - 1;
-                                        if(position >= 0 && mFavoriteSubscribedUserData.size() > position) {
-                                            mFavoriteSubscribedUserData.get(position).setFavorite(true);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-                                    }
-
-                                    @Override
-                                    public void failed() {
-                                        Toast.makeText(mActivity, R.string.thing_favorite_failed, Toast.LENGTH_SHORT).show();
-                                        int position = getBindingAdapterPosition() - 1;
-                                        if(position >= 0 && mFavoriteSubscribedUserData.size() > position) {
-                                            mFavoriteSubscribedUserData.get(position).setFavorite(false);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-                                    }
-                                });
-                    }
-                }
-            });
-        }
+        return user.getName().substring(0, 1).toUpperCase(Locale.getDefault());
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder {
-        ItemSubscribedThingBinding binding;
+        ItemSubscribedUserBinding binding;
 
-        UserViewHolder(@NonNull ItemSubscribedThingBinding binding) {
+        UserViewHolder(@NonNull ItemSubscribedUserBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
             if (mActivity.typeface != null) {
-                binding.thingNameTextViewItemSubscribedThing.setTypeface(mActivity.typeface);
+                binding.thingNameTextViewItemSubscribedUser.setTypeface(mActivity.typeface);
             }
-            binding.thingNameTextViewItemSubscribedThing.setTextColor(mPrimaryTextColor);
+            binding.thingNameTextViewItemSubscribedUser.setTextColor(mPrimaryTextColor);
 
             itemView.setOnClickListener(view -> {
-                int offset = (mFavoriteSubscribedUserData != null && mFavoriteSubscribedUserData.size() > 0) ?
-                        mFavoriteSubscribedUserData.size() + 2 : 0;
-                int position = getBindingAdapterPosition() - offset;
-                if(position >= 0 && mSubscribedUserData.size() > position) {
-                    itemOnClickListener.onClick(mSubscribedUserData.get(position));
+                SubscribedUserData user = itemAt(getBindingAdapterPosition());
+                if (user != null) {
+                    itemOnClickListener.onClick(user);
                 }
             });
 
-            binding.favoriteImageViewItemSubscribedThing.setOnClickListener(view -> {
-                int offset = (mFavoriteSubscribedUserData != null && mFavoriteSubscribedUserData.size() > 0) ?
-                        mFavoriteSubscribedUserData.size() + 2 : 0;
-                int position = getBindingAdapterPosition() - offset;
-
-                if(position >= 0 && mSubscribedUserData.size() > position) {
-                    if(mSubscribedUserData.get(position).isFavorite()) {
-                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-                        mSubscribedUserData.get(position).setFavorite(false);
-                        FavoriteThing.unfavoriteUser(mExecutor, new Handler(), mOauthRetrofit,
-                                mRedditDataRoomDatabase, mAccessToken, mAccountName,
-                                mSubscribedUserData.get(position),
-                                new FavoriteThing.FavoriteThingListener() {
-                                    @Override
-                                    public void success() {
-                                        int position = getBindingAdapterPosition() - offset;
-                                        if(position >= 0 && mSubscribedUserData.size() > position) {
-                                            mSubscribedUserData.get(position).setFavorite(false);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-                                    }
-
-                                    @Override
-                                    public void failed() {
-                                        Toast.makeText(mActivity, R.string.thing_unfavorite_failed, Toast.LENGTH_SHORT).show();
-                                        int position = getBindingAdapterPosition() - offset;
-                                        if(position >= 0 && mSubscribedUserData.size() > position) {
-                                            mSubscribedUserData.get(position).setFavorite(true);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-                                    }
-                                });
-                    } else {
-                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-                        mSubscribedUserData.get(position).setFavorite(true);
-                        FavoriteThing.favoriteUser(mExecutor, new Handler(), mOauthRetrofit,
-                                mRedditDataRoomDatabase, mAccessToken, mAccountName,
-                                mSubscribedUserData.get(position),
-                                new FavoriteThing.FavoriteThingListener() {
-                                    @Override
-                                    public void success() {
-                                        int position = getBindingAdapterPosition() - offset;
-                                        if(position >= 0 && mSubscribedUserData.size() > position) {
-                                            mSubscribedUserData.get(position).setFavorite(true);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_24dp);
-                                    }
-
-                                    @Override
-                                    public void failed() {
-                                        Toast.makeText(mActivity, R.string.thing_favorite_failed, Toast.LENGTH_SHORT).show();
-                                        int position = getBindingAdapterPosition() - offset;
-                                        if(position >= 0 && mSubscribedUserData.size() > position) {
-                                            mSubscribedUserData.get(position).setFavorite(false);
-                                        }
-                                        binding.favoriteImageViewItemSubscribedThing.setImageResource(R.drawable.ic_favorite_border_24dp);
-                                    }
-                                });
-                    }
+            binding.followImageViewItemSubscribedUser.setOnClickListener(view -> {
+                SubscribedUserData user = itemAt(getBindingAdapterPosition());
+                if (user != null) {
+                    toggleFollow(user);
                 }
             });
+
+            binding.saveImageViewItemSubscribedUser.setOnClickListener(view -> {
+                SubscribedUserData user = itemAt(getBindingAdapterPosition());
+                if (user != null) {
+                    toggleSave(user);
+                }
+            });
+
+            binding.favoriteImageViewItemSubscribedUser.setOnClickListener(view -> {
+                SubscribedUserData user = itemAt(getBindingAdapterPosition());
+                if (user != null) {
+                    toggleFavorite(user);
+                }
+            });
+        }
+    }
+
+    private void toggleFollow(SubscribedUserData user) {
+        boolean wasFollowed = user.isFollowed();
+        UserFollowing.UserFollowingListener listener = new UserFollowing.UserFollowingListener() {
+            @Override
+            public void onUserFollowingSuccess() {
+                // The row is backed by LiveData, so a follow change -- including the delete when
+                // the user is no longer followed or saved -- redraws the list on its own.
+            }
+
+            @Override
+            public void onUserFollowingFail() {
+                Toast.makeText(mActivity,
+                        wasFollowed ? R.string.unfollow_failed : R.string.follow_failed,
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        if (wasFollowed) {
+            if (mIsAnonymous) {
+                UserFollowing.anonymousUnfollowUser(mExecutor, new Handler(), user.getName(),
+                        mRedditDataRoomDatabase, listener);
+            } else {
+                UserFollowing.unfollowUser(mExecutor, new Handler(), mOauthRetrofit, mRetrofit, mAccessToken,
+                        user.getName(), mAccountName, mRedditDataRoomDatabase, listener);
+            }
+        } else {
+            if (mIsAnonymous) {
+                UserFollowing.anonymousFollowUser(mExecutor, new Handler(), mRetrofit, user.getName(),
+                        mRedditDataRoomDatabase, listener);
+            } else {
+                UserFollowing.followUser(mExecutor, new Handler(), mOauthRetrofit, mRetrofit, mAccessToken,
+                        user.getName(), mAccountName, mRedditDataRoomDatabase, listener);
+            }
+        }
+    }
+
+    private void toggleSave(SubscribedUserData user) {
+        if (user.isSaved()) {
+            UserSaving.unsaveUser(mExecutor, new Handler(), mRedditDataRoomDatabase, mAccountName,
+                    user.getName(), () -> {});
+        } else {
+            UserSaving.saveUser(mExecutor, new Handler(), mRedditDataRoomDatabase, mAccountName,
+                    user.getName(), user.getIconUrl(), () -> {});
+        }
+    }
+
+    private void toggleFavorite(SubscribedUserData user) {
+        boolean wasFavorite = user.isFavorite();
+        // Drawn optimistically and reverted on failure: the favourite call is remote and the local
+        // row is only rewritten once it succeeds. The repaint goes through the adapter rather than
+        // a captured ImageView, which by then may have been recycled onto a different user.
+        user.setFavorite(!wasFavorite);
+        notifyDataSetChanged();
+
+        FavoriteThing.FavoriteThingListener listener = new FavoriteThing.FavoriteThingListener() {
+            @Override
+            public void success() {
+            }
+
+            @Override
+            public void failed() {
+                Toast.makeText(mActivity,
+                        wasFavorite ? R.string.thing_unfavorite_failed : R.string.thing_favorite_failed,
+                        Toast.LENGTH_SHORT).show();
+                user.setFavorite(wasFavorite);
+                notifyDataSetChanged();
+            }
+        };
+
+        if (wasFavorite) {
+            FavoriteThing.unfavoriteUser(mExecutor, new Handler(), mOauthRetrofit, mRedditDataRoomDatabase,
+                    mAccessToken, mAccountName, user, listener);
+        } else {
+            FavoriteThing.favoriteUser(mExecutor, new Handler(), mOauthRetrofit, mRedditDataRoomDatabase,
+                    mAccessToken, mAccountName, user, listener);
         }
     }
 

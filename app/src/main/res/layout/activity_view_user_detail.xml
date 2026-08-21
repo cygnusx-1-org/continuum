@@ -64,11 +64,29 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:visibility="gone"
+                        android:visibility="invisible"
                         app:chipStrokeColor="#00000000"
                         app:layout_constraintStart_toEndOf="@id/icon_gif_image_view_view_user_detail_activity"
                         app:layout_constraintTop_toBottomOf="@id/user_name_text_view_view_user_detail_activity"
                         app:layout_constraintBottom_toBottomOf="@id/icon_gif_image_view_view_user_detail_activity"
+                        tools:visibility="visible" />
+
+                    <!--
+                      Saving a user is local-only, so it sits apart from the Follow chip: hard right,
+                      on the chip's line. Hidden on your own profile.
+
+                      Centred on the chip, which reserves its space in every state, so this never
+                      shifts between "profile loading", "followable" and "cannot be followed".
+                    -->
+                    <ImageView
+                        android:id="@+id/save_user_image_view_view_user_detail_activity"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/subscribe_user_chip_view_user_detail_activity"
+                        app:layout_constraintBottom_toBottomOf="@id/subscribe_user_chip_view_user_detail_activity"
                         tools:visibility="visible" />
 
                     <TextView

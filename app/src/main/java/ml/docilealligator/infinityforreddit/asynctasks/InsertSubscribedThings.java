@@ -60,11 +60,17 @@ public class InsertSubscribedThings {
                         unsubscribedUsers);
 
                 for (String unsubscribed : unsubscribedUsers) {
-                    subscribedUserDao.deleteSubscribedUser(unsubscribed, accountName);
+                    // A row can also exist because the user was saved locally, so a Reddit-side
+                    // unfollow clears the follow flag and only then drops the row.
+                    subscribedUserDao.updateFollowed(unsubscribed, accountName, false);
+                    subscribedUserDao.deleteIfNeitherFollowedNorSaved(unsubscribed, accountName);
                 }
 
                 for (SubscribedUserData s : subscribedUserDataList) {
-                    subscribedUserDao.insert(s);
+                    // Create-then-update rather than REPLACE: the synced record carries no
+                    // is_saved, and replacing the row would wipe a locally saved user.
+                    subscribedUserDao.insertIfAbsent(s.getName(), s.getIconUrl(), accountName);
+                    subscribedUserDao.updateFromSync(s.getName(), accountName, s.getIconUrl(), s.isFavorite());
                 }
             }
 

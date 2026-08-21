@@ -10,12 +10,18 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserDao;
-import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 
+/**
+ * Follows and unfollows users on Reddit, keeping the local `subscribed_users` row in step.
+ *
+ * <p>A row there means followed <em>or</em> saved, so following flips {@code is_followed} rather
+ * than assuming it owns the row, and unfollowing only deletes the row once the user is not saved
+ * either.
+ */
 public class UserFollowing {
     public static void followUser(Executor executor, Handler handler, Retrofit oauthRetrofit, Retrofit retrofit,
                                   @Nullable String accessToken, String username, @NonNull String accountName,
@@ -35,8 +41,8 @@ public class UserFollowing {
                     if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
                         redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount());
                     }
-                    redditDataRoomDatabase.subscribedUserDao().insert(new SubscribedUserData(userData.getName(), userData.getIconUrl(),
-                            Account.ANONYMOUS_ACCOUNT, false));
+                    setFollowed(redditDataRoomDatabase.subscribedUserDao(), userData.getName(),
+                            userData.getIconUrl(), Account.ANONYMOUS_ACCOUNT);
 
                     handler.post(userFollowingListener::onUserFollowingSuccess);
                 });
@@ -61,10 +67,27 @@ public class UserFollowing {
                                              RedditDataRoomDatabase redditDataRoomDatabase,
                                              UserFollowingListener userFollowingListener) {
         executor.execute(() -> {
-            redditDataRoomDatabase.subscribedUserDao().deleteSubscribedUser(username, Account.ANONYMOUS_ACCOUNT);
+            clearFollowed(redditDataRoomDatabase.subscribedUserDao(), username, Account.ANONYMOUS_ACCOUNT);
 
             handler.post(userFollowingListener::onUserFollowingSuccess);
         });
+    }
+
+    /**
+     * Marks the user followed, creating the row if this is the first reason to have one and
+     * otherwise leaving the saved and favourite flags alone.
+     */
+    private static void setFollowed(SubscribedUserDao subscribedUserDao, String username, String iconUrl,
+                                    @NonNull String accountName) {
+        subscribedUserDao.insertIfAbsent(username, iconUrl, accountName);
+        subscribedUserDao.updateFollowed(username, accountName, true);
+    }
+
+    /** Clears the followed flag, dropping the row only if the user is not saved either. */
+    private static void clearFollowed(SubscribedUserDao subscribedUserDao, String username,
+                                      @NonNull String accountName) {
+        subscribedUserDao.updateFollowed(username, accountName, false);
+        subscribedUserDao.deleteIfNeitherFollowedNorSaved(username, accountName);
     }
 
     private static void userFollowing(Executor executor, Handler handler, Retrofit oauthRetrofit, Retrofit retrofit, @Nullable String accessToken,
@@ -86,11 +109,8 @@ public class UserFollowing {
                                 username, new FetchUserData.FetchUserDataListener() {
                                     @Override
                                     public void onFetchUserDataSuccess(UserData userData) {
-                                        executor.execute(() -> {
-                                            SubscribedUserData subscribedUserData = new SubscribedUserData(userData.getName(), userData.getIconUrl(),
-                                                    accountName, false);
-                                            subscribedUserDao.insert(subscribedUserData);
-                                        });
+                                        executor.execute(() -> setFollowed(subscribedUserDao, userData.getName(),
+                                                userData.getIconUrl(), accountName));
                                     }
 
                                     @Override
@@ -101,7 +121,7 @@ public class UserFollowing {
                         userFollowingListener.onUserFollowingSuccess();
                     } else {
                         executor.execute(() -> {
-                            subscribedUserDao.deleteSubscribedUser(username, accountName);
+                            clearFollowed(subscribedUserDao, username, accountName);
                             handler.post(userFollowingListener::onUserFollowingSuccess);
                         });
                     }

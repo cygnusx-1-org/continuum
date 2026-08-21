@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adding a user to the Users list: follow them on Reddit, save them locally, or both. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp">
+
+    <AutoCompleteTextView
+        android:id="@+id/auto_complete_text_view_add_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:fontFamily="?attr/font_family"
+        android:hint="@string/add_user_multireddit_username_hint"
+        android:textColor="?attr/primaryTextColor"
+        android:textColorHint="?attr/secondaryTextColor"
+        android:textSize="?attr/font_default"
+        android:singleLine="true"
+        android:inputType="text"
+        android:imeOptions="actionDone"
+        android:autofillHints=""
+        android:completionThreshold="1" />
+
+    <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
+        android:id="@+id/follow_switch_add_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/add_user_follow"
+        android:textColor="?attr/primaryTextColor"
+        android:fontFamily="?attr/font_family" />
+
+    <ml.docilealligator.infinityforreddit.customviews.ThemedMaterialSwitch
+        android:id="@+id/save_switch_add_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/add_user_save"
+        android:textColor="?attr/primaryTextColor"
+        android:fontFamily="?attr/font_family" />
+
+</LinearLayout>

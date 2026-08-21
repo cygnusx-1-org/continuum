@@ -28,11 +28,14 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
     private final int secondaryTextColor;
     private final int primaryIconColor;
     private boolean collapseAccountSection;
+    /** The Recently Visited row is only offered while that setting is on for this account. */
+    private boolean showRecentlyVisited;
     private final boolean isLoggedIn;
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
 
     public AccountSectionRecyclerViewAdapter(BaseActivity baseActivity, CustomThemeWrapper customThemeWrapper,
                                              SharedPreferences navigationDrawerSharedPreferences, boolean isLoggedIn,
+                                             boolean showRecentlyVisited,
                                              NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener) {
         this.baseActivity = baseActivity;
         primaryTextColor = customThemeWrapper.getPrimaryTextColor();
@@ -40,12 +43,26 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
         primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         collapseAccountSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_ACCOUNT_SECTION, false);
         this.isLoggedIn = isLoggedIn;
+        this.showRecentlyVisited = showRecentlyVisited;
         this.itemClickListener = itemClickListener;
     }
 
     public void setCollapseAccountSection(boolean collapseAccountSection) {
         this.collapseAccountSection = collapseAccountSection;
         notifyDataSetChanged();
+    }
+
+    public void setShowRecentlyVisited(boolean showRecentlyVisited) {
+        if (this.showRecentlyVisited == showRecentlyVisited) {
+            return;
+        }
+        this.showRecentlyVisited = showRecentlyVisited;
+        notifyDataSetChanged();
+    }
+
+    /** Menu rows below the group title, which varies with login state and the Recently Visited setting. */
+    private int menuItemCount() {
+        return (isLoggedIn ? ACCOUNT_SECTION_ITEMS : ANONYMOUS_ACCOUNT_SECTION_ITEMS) + (showRecentlyVisited ? 1 : 0);
     }
 
     @Override
@@ -78,10 +95,10 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
             holder.itemView.setOnClickListener(view -> {
                 if (collapseAccountSection) {
                     collapseAccountSection = !collapseAccountSection;
-                    notifyItemRangeInserted(holder.getBindingAdapterPosition() + 1, isLoggedIn ? ACCOUNT_SECTION_ITEMS : ANONYMOUS_ACCOUNT_SECTION_ITEMS);
+                    notifyItemRangeInserted(holder.getBindingAdapterPosition() + 1, menuItemCount());
                 } else {
                     collapseAccountSection = !collapseAccountSection;
-                    notifyItemRangeRemoved(holder.getBindingAdapterPosition() + 1, isLoggedIn ? ACCOUNT_SECTION_ITEMS : ANONYMOUS_ACCOUNT_SECTION_ITEMS);
+                    notifyItemRangeRemoved(holder.getBindingAdapterPosition() + 1, menuItemCount());
                 }
                 notifyItemChanged(holder.getBindingAdapterPosition());
             });
@@ -117,10 +134,13 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
                             baseActivity.startActivity(intent);
                         });
                         break;
-                    default:
+                    case 5:
                         stringId = R.string.history;
                         drawableId = R.drawable.ic_history_day_night_24dp;
-
+                        break;
+                    default:
+                        stringId = R.string.recently_visited;
+                        drawableId = R.drawable.ic_access_time_day_night_24dp;
                 }
             } else {
                 switch (position) {
@@ -132,9 +152,13 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
                         stringId = R.string.multi_reddit;
                         drawableId = R.drawable.ic_multi_reddit_day_night_24dp;
                         break;
-                    default:
+                    case 3:
                         stringId = R.string.history;
                         drawableId = R.drawable.ic_history_day_night_24dp;
+                        break;
+                    default:
+                        stringId = R.string.recently_visited;
+                        drawableId = R.drawable.ic_access_time_day_night_24dp;
                 }
             }
 
@@ -153,7 +177,7 @@ public class AccountSectionRecyclerViewAdapter extends RecyclerView.Adapter<Recy
 
     @Override
     public int getItemCount() {
-        return collapseAccountSection ? 1 : (isLoggedIn ? ACCOUNT_SECTION_ITEMS + 1 : ANONYMOUS_ACCOUNT_SECTION_ITEMS + 1);
+        return collapseAccountSection ? 1 : menuItemCount() + 1;
     }
 
     public void setInboxCount(int inboxCount) {
