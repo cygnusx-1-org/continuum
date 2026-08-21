@@ -2,6 +2,15 @@
 
 ---
 
+8.2.5.9.9.9.4 / 2026-8-21
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Feature to Show and Keep Track of Visited Subreddits and Users. #363
+* Added the ability to save users to Subscriptions | Users
+* Fixed Follow swipe between post on posts page #126
+* Fixed Inbox unread count unsynced between *main page* and *other pages* #361
+
 8.2.5.9.9.9.3 / 2026-8-18
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
