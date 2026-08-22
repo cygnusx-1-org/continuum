@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -185,6 +186,8 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
 
         super.onCreate(savedInstanceState);
 
+        makeOpaqueIfOwnWindow();
+
         BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext()));
 
         binding = ActivityViewPostDetailBinding.inflate(getLayoutInflater());
@@ -355,6 +358,37 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         });
 
         checkNewAccountAndBindView(savedInstanceState);
+    }
+
+    /**
+     * Drops the translucency this activity's theme carries when it is opened as its own window.
+     *
+     * <p>{@code AppTheme.Slidable} is translucent so the Slidr swipe-to-dismiss can show the
+     * activity behind it while the user drags. In its own task there is nothing behind it, so the
+     * transparency buys nothing — and it costs: Android keeps the task underneath marked visible
+     * while a translucent activity sits on top of it, so that task is never snapshotted and its
+     * Recents card draws blank until the user visits it again. Material Files avoids this by
+     * opening its New Window on a plainly opaque activity; this is the same thing decided at
+     * runtime, because both entry points funnel into this one activity and only one of them knows
+     * at launch time that it wants a window.
+     *
+     * <p>The window also gets a real background, since the theme's is transparent and there is now
+     * nothing behind to show through it.
+     *
+     * <p>API 30 and up. Below that no public API changes an activity's occlusion, so those devices
+     * keep the blank-until-revisited card.
+     */
+    private void makeOpaqueIfOwnWindow() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || !isTaskRoot()) {
+            return;
+        }
+
+        setTranslucent(false);
+        // Forced opaque: the background colour is user-editable and its picker has an alpha
+        // slider, and a see-through drawable on a window just declared opaque shows black rather
+        // than whatever is behind it.
+        int backgroundColor = mCustomThemeWrapper.getBackgroundColor() | 0xFF000000;
+        getWindow().setBackgroundDrawable(new ColorDrawable(backgroundColor));
     }
 
     private void setNavigationIconLongClickToHome() {

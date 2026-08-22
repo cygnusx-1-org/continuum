@@ -46,6 +46,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
+import ml.docilealligator.infinityforreddit.utils.NewWindowUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -134,6 +135,22 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
         FragmentPostOptionsBottomSheetBinding binding = FragmentPostOptionsBottomSheetBinding.inflate(inflater, container, false);
 
         if (mPost != null) {
+            // Only offered from a post list. Inside the post's own comments this would open a
+            // second window on the post already on screen, which is never what anyone wants.
+            if (!(mBaseActivity instanceof ViewPostDetailActivity)) {
+                binding.openInNewWindowTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                binding.openInNewWindowTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    Intent intent = new Intent(mBaseActivity, ViewPostDetailActivity.class);
+                    intent.putExtra(ViewPostDetailActivity.EXTRA_POST_DATA, mPost);
+                    // Deliberately no EXTRA_POST_FRAGMENT_ID: the window is standalone, so it does
+                    // not swipe through the feed it came from and does not push its position back
+                    // to that feed while the user carries on scrolling it.
+                    startActivity(NewWindowUtils.addNewWindowFlags(intent));
+
+                    dismiss();
+                });
+            }
+
             switch (mPost.getPostType()) {
                 case Post.IMAGE_TYPE:
                 case Post.GALLERY_TYPE:

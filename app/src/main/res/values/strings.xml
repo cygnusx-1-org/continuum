@@ -945,6 +945,7 @@
     <string name="copy_video_link">Copy Video Link</string>
     <string name="copy_link">Copy Link</string>
     <string name="open_link">Open Link</string>
+    <string name="open_in_new_window">Open in New Window</string>
     <string name="share_as_image">Share as Image</string>
     <string name="share_with_comments">Share as Image with Comments</string>
     <string name="share_as_image_with_thread">Share as Image with this Comment Thread</string>

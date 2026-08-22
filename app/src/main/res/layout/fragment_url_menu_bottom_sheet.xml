@@ -46,6 +46,25 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackground" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/open_in_new_window_text_view_url_menu_bottom_sheet_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/open_in_new_window"
+            android:textColor="?attr/primaryTextColor"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:drawableStart="@drawable/ic_open_in_new_window_day_night_24dp"
+            android:drawablePadding="48dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            android:background="?attr/selectableItemBackground" />
+
         <TextView
             android:id="@+id/copy_link_text_view_url_menu_bottom_sheet_fragment"
             android:layout_width="match_parent"

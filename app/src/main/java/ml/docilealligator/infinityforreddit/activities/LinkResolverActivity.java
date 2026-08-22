@@ -91,6 +91,68 @@ public class LinkResolverActivity extends AppCompatActivity {
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
 
+    /**
+     * Whether {@link #handleUri} would send this link to {@link ViewPostDetailActivity}, i.e.
+     * whether opening it produces a comments screen. Mirrors the dispatch below — including the
+     * checks that win ahead of the post patterns — rather than approximating it, so a caller
+     * offering "Open in New Window" offers it exactly when a comments window would appear.
+     *
+     * <p>Share links ({@code /r/<sub>/s/<id>}) count: they resolve to either a post or a comment
+     * and both open the post detail, and the redirect that decides which is a network call this
+     * has no business making.
+     */
+    public static boolean opensPostDetail(@Nullable String url) {
+        if (url == null) {
+            return false;
+        }
+
+        Uri uri = Uri.parse(url);
+        String authority = uri.getAuthority();
+        String path = uri.getPath();
+        if (authority == null || path == null) {
+            return false;
+        }
+
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        // Media extensions are dispatched to the image/video viewers before any host is examined.
+        if (path.endsWith(".jpg") || path.endsWith(".png") || path.endsWith(".jpeg")
+                || path.endsWith(".gif") || path.endsWith(".mp4")) {
+            return false;
+        }
+
+        if (authority.equals("redd.it")) {
+            return path.matches(REDD_IT_POST_PATTERN);
+        }
+
+        // v.redd.it is a video and sh.reddit.com is rejected outright, both ahead of the post
+        // patterns. reddit.app.link needs its $og_redirect followed to know what it points at.
+        if (authority.equals("v.redd.it") || authority.equals("sh.reddit.com")
+                || !authority.contains("reddit.com")) {
+            return false;
+        }
+
+        // Also matched ahead of the post patterns: the report form opens in a WebView and /media is
+        // Reddit's image proxy. Both are single path segments, so POST_PATTERN_3 would claim them.
+        if (path.equals("/report") || path.matches(REDDIT_IMAGE_PATTERN)) {
+            return false;
+        }
+
+        // Multireddit paths are matched before the post patterns and would win there too.
+        if (path.matches(MULTIREDDIT_USER_PATTERN) || path.matches(MULTIREDDIT_ME_PATTERN)) {
+            return false;
+        }
+
+        return path.matches(POST_PATTERN) || path.matches(POST_PATTERN_2)
+                || path.matches(POST_PATTERN_3) || path.matches(COMMENT_PATTERN)
+                || path.matches(POST_WITHOUT_SUBREDDIT_PATTERN)
+                || path.matches(REDDIT_GALLERY_PATTERN)
+                || path.matches(SHARELINK_SUBREDDIT_PATTERN)
+                || path.matches(SHARELINK_USER_PATTERN);
+    }
+
     private Uri getRedditUriByPath(String path) {
         if (path.charAt(0) != '/') {
             return Uri.parse("https://www.reddit.com/" + path);

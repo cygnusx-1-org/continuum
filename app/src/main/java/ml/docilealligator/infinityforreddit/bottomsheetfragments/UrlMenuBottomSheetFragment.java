@@ -21,6 +21,7 @@ import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentUrlMenuBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.NewWindowUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
@@ -65,6 +66,23 @@ public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSh
             activity.startActivity(intent);
             dismiss();
         });
+
+        // Only for links that open a comments screen — the point is to read the linked post
+        // without losing the one being read now. Everything else (a subreddit, a user, an outside
+        // site) either has no such "keep both" story or leaves an empty task behind when the
+        // browser takes over, so those links keep just the three original actions.
+        if (LinkResolverActivity.opensPostDetail(url)) {
+            binding.openInNewWindowTextViewUrlMenuBottomSheetFragment.setVisibility(View.VISIBLE);
+            binding.openInNewWindowTextViewUrlMenuBottomSheetFragment.setOnClickListener(view -> {
+                Intent intent = new Intent(activity, LinkResolverActivity.class);
+                intent.setData(Uri.parse(url));
+                // The flags land on LinkResolverActivity, which starts the post detail into the
+                // new task it just created and finishes, leaving the comments screen as that
+                // task's root.
+                activity.startActivity(NewWindowUtils.addNewWindowFlags(intent));
+                dismiss();
+            });
+        }
 
         binding.copyLinkTextViewUrlMenuBottomSheetFragment.setOnClickListener(view -> {
             ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
