@@ -111,7 +111,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        media = Objects.requireNonNull(getArguments().getParcelable(EXTRA_REDDIT_GALLERY_MEDIA));
+        media = Objects.requireNonNull(requireArguments().getParcelable(EXTRA_REDDIT_GALLERY_MEDIA));
         glide = Glide.with(activity);
         handler = new Handler(Looper.getMainLooper());
 

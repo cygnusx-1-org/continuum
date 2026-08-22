@@ -508,43 +508,42 @@ public final class Utils {
         Handler handler = new Handler();
         executor.execute(() -> {
             try {
-                String imageKeyOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
+                String imageKey = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
                         context.getContentResolver(), accessToken, imageUri, true);
-                if (imageKeyOrError != null && !imageKeyOrError.startsWith("Error: ")) {
-                    // Uploaded — resolve the display name and drop the scratch file here, on the executor
-                    // thread, while the upload has just read the Uri. Both are I/O; only the editText and
-                    // snackbar work in the post() below needs the UI thread. getFileName() runs before the
-                    // delete so it still sees the file.
-                    String fileName = Utils.getFileName(context, imageUri);
-                    String resolvedName = fileName != null ? fileName : imageKeyOrError;
-                    if (deleteSourceAfterUpload) {
-                        deleteContentUriFileQuietly(context, imageUri);
-                    }
-
-                    String imageKey = imageKeyOrError;
-                    handler.post(() -> {
-                        uploadedImages.add(new UploadedImage(resolvedName, imageKey));
-
-                        int start = Math.max(editText.getSelectionStart(), 0);
-                        int end = Math.max(editText.getSelectionEnd(), 0);
-                        int realStart = Math.min(start, end);
-                        if (realStart > 0 && editText.getText().toString().charAt(realStart - 1) != '\n') {
-                            editText.getText().replace(realStart, Math.max(start, end),
-                                    "\n![](" + imageKey + ")\n",
-                                    0, "\n![]()\n".length() + imageKey.length());
-                        } else {
-                            editText.getText().replace(realStart, Math.max(start, end),
-                                    "![](" + imageKey + ")\n",
-                                    0, "![]()\n".length() + imageKey.length());
-                        }
-                        Snackbar.make(coordinatorLayout, R.string.upload_image_success, Snackbar.LENGTH_LONG).show();
-                    });
-                } else {
-                    if (deleteSourceAfterUpload) {
-                        deleteContentUriFileQuietly(context, imageUri);
-                    }
-                    handler.post(() -> Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show());
+                // Uploaded — resolve the display name and drop the scratch file here, on the executor
+                // thread, while the upload has just read the Uri. Both are I/O; only the editText and
+                // snackbar work in the post() below needs the UI thread. getFileName() runs before the
+                // delete so it still sees the file.
+                String fileName = Utils.getFileName(context, imageUri);
+                String resolvedName = fileName != null ? fileName : imageKey;
+                if (deleteSourceAfterUpload) {
+                    deleteContentUriFileQuietly(context, imageUri);
                 }
+
+                handler.post(() -> {
+                    uploadedImages.add(new UploadedImage(resolvedName, imageKey));
+
+                    int start = Math.max(editText.getSelectionStart(), 0);
+                    int end = Math.max(editText.getSelectionEnd(), 0);
+                    int realStart = Math.min(start, end);
+                    if (realStart > 0 && editText.getText().toString().charAt(realStart - 1) != '\n') {
+                        editText.getText().replace(realStart, Math.max(start, end),
+                                "\n![](" + imageKey + ")\n",
+                                0, "\n![]()\n".length() + imageKey.length());
+                    } else {
+                        editText.getText().replace(realStart, Math.max(start, end),
+                                "![](" + imageKey + ")\n",
+                                0, "![]()\n".length() + imageKey.length());
+                    }
+                    Snackbar.make(coordinatorLayout, R.string.upload_image_success, Snackbar.LENGTH_LONG).show();
+                });
+            } catch (MediaUploadException e) {
+                // Reddit refused the upload: distinct from the image itself being unreadable below.
+                e.printStackTrace();
+                if (deleteSourceAfterUpload) {
+                    deleteContentUriFileQuietly(context, imageUri);
+                }
+                handler.post(() -> Toast.makeText(context, R.string.upload_image_failed, Toast.LENGTH_LONG).show());
             } catch (XmlPullParserException | JSONException | IOException e) {
                 e.printStackTrace();
                 if (deleteSourceAfterUpload) {

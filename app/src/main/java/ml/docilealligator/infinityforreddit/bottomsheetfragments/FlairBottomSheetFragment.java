@@ -75,7 +75,7 @@ public class FlairBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
 
         binding.recyclerViewBottomSheetFragment.setAdapter(mAdapter);
 
-        mSubredditName = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_SUBREDDIT_NAME));
+        mSubredditName = java.util.Objects.requireNonNull(requireArguments().getString(EXTRA_SUBREDDIT_NAME));
 
         mHandler = new Handler(Looper.getMainLooper());
 

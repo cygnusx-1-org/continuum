@@ -12,7 +12,10 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -80,11 +83,12 @@ class CustomizePostFilterActivity :
         private const val RULES_STATE = "RS"
         private const val USAGES_STATE = "US"
         private const val PENDING_RULE_EXCLUDE_STATE = "PRES"
+        private const val USAGE_DIALOG_TYPE_STATE = "UDTS"
+        private const val USAGE_DIALOG_REPLACING_STATE = "UDRS"
+        private const val USAGE_DIALOG_TEXT_STATE = "UDTXS"
 
-        private const val ADD_RULE_SUBREDDITS_REQUEST_CODE = 1
-        private const val ADD_RULE_USERS_REQUEST_CODE = 3
-        private const val ADD_USAGE_SUBREDDITS_REQUEST_CODE = 5
-        private const val ADD_USAGE_USERS_REQUEST_CODE = 7
+        /** [usageDialogType] when no name-of-usage dialog is on screen. */
+        private const val NO_USAGE_DIALOG = -1
     }
 
     @Inject
@@ -117,6 +121,50 @@ class CustomizePostFilterActivity :
     private var pendingRuleExclude = true
     private var activeDialog: AlertDialog? = null
     private var usageDialogEditText: TextInputEditText? = null
+
+    /**
+     * What the name-of-usage dialog is editing, mirrored here so [onSaveInstanceState] can write it
+     * out. The pickers below are whole activities, so the user can rotate — or be evicted — while one
+     * is in front; without this the dialog would not come back and the names it returns would land on
+     * a null [usageDialogEditText] and be dropped in silence.
+     */
+    private var usageDialogType = NO_USAGE_DIALOG
+    private var usageDialogReplacing: PostFilterUsage? = null
+
+    private val addRuleSubredditsLauncher = pickerLauncher { data ->
+        addRules(RuleField.SUBREDDIT, pendingRuleExclude, selectedSubredditNames(data))
+    }
+
+    private val addRuleUsersLauncher = pickerLauncher { data ->
+        addRules(
+            RuleField.USER,
+            pendingRuleExclude,
+            data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES).orEmpty()
+        )
+    }
+
+    private val addUsageSubredditsLauncher = pickerLauncher { data ->
+        appendToUsageDialog(selectedSubredditNames(data))
+    }
+
+    private val addUsageUsersLauncher = pickerLauncher { data ->
+        appendToUsageDialog(
+            data.getStringArrayListExtra(UserMultiselectionActivity.EXTRA_RETURN_SELECTED_USERNAMES)
+                .orEmpty()
+        )
+    }
+
+    /**
+     * Registers a launcher for one of the multi-selection pickers. Registration happens here, as a
+     * property initializer, because [registerForActivityResult] must be called before the activity
+     * reaches STARTED — a result that arrives for a recreated instance is then delivered to it.
+     */
+    private fun pickerLauncher(onPicked: (Intent) -> Unit): ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.let(onPicked)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         (application as Infinity).appComponent.inject(this)
@@ -152,6 +200,18 @@ class CustomizePostFilterActivity :
                 ) ?: emptyList()
             )
             pendingRuleExclude = savedInstanceState.getBoolean(PENDING_RULE_EXCLUDE_STATE, true)
+            usageDialogType = savedInstanceState.getInt(USAGE_DIALOG_TYPE_STATE, NO_USAGE_DIALOG)
+            // Resolved back to the element held in [usages] rather than kept as the parcelled copy:
+            // the dialog's OK handler drops the row it replaces with `usages.remove`, and
+            // PostFilterUsage has no equals, so a copy removes nothing and a rename made across a
+            // process death would leave the old feed behind next to the new one.
+            usageDialogReplacing = BundleCompat.getParcelable(
+                savedInstanceState, USAGE_DIALOG_REPLACING_STATE, PostFilterUsage::class.java
+            )?.let { restored ->
+                usages.firstOrNull {
+                    it.usage == restored.usage && it.nameOfUsage.equals(restored.nameOfUsage, true)
+                }
+            }
         } else {
             val postFilterExtra: PostFilter? =
                 BundleCompat.getParcelable(intent.extras ?: Bundle(), EXTRA_POST_FILTER, PostFilter::class.java)
@@ -200,6 +260,17 @@ class CustomizePostFilterActivity :
                     Snackbar.LENGTH_SHORT
                 ).show()
             }
+        }
+
+        // Nothing else puts this dialog back: it is only ever opened by a tap. Rebuild it before the
+        // pending picker result is delivered (that happens after onStart) so the names the user chose
+        // are merged into the field they were choosing them for, rather than dropped.
+        if (usageDialogType != NO_USAGE_DIALOG) {
+            editUsageNameOfUsage(
+                usageDialogType,
+                savedInstanceState?.getString(USAGE_DIALOG_TEXT_STATE),
+                usageDialogReplacing
+            )
         }
     }
 
@@ -443,19 +514,17 @@ class CustomizePostFilterActivity :
     override fun onRuleValuePickerRequested(field: RuleField, exclude: Boolean) {
         pendingRuleExclude = exclude
         when (field) {
-            RuleField.SUBREDDIT -> startActivityForResult(
+            RuleField.SUBREDDIT -> addRuleSubredditsLauncher.launch(
                 Intent(this, SubredditMultiselectionActivity::class.java).putExtra(
                     SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS,
                     rules.filter { it.field == RuleField.SUBREDDIT && it.exclude == exclude }
                         .joinToString(",") { it.value }
-                ),
-                ADD_RULE_SUBREDDITS_REQUEST_CODE
+                )
             )
-            RuleField.USER -> startActivityForResult(
+            RuleField.USER -> addRuleUsersLauncher.launch(
                 Intent(this, SearchActivity::class.java)
                     .putExtra(SearchActivity.EXTRA_SEARCH_ONLY_USERS, true)
-                    .putExtra(SearchActivity.EXTRA_IS_MULTI_SELECTION, true),
-                ADD_RULE_USERS_REQUEST_CODE
+                    .putExtra(SearchActivity.EXTRA_IS_MULTI_SELECTION, true)
             )
             else -> Unit
         }
@@ -555,6 +624,8 @@ class CustomizePostFilterActivity :
         val pickImageView: ImageView =
             dialogView.findViewById(R.id.add_subreddits_users_image_view_customize_post_filter_activity)
         usageDialogEditText = editText
+        usageDialogType = type
+        usageDialogReplacing = replacing
 
         val primaryTextColor = mCustomThemeWrapper.primaryTextColor
         pickImageView.setImageDrawable(
@@ -572,12 +643,11 @@ class CustomizePostFilterActivity :
             PostFilterUsage.USER_TYPE -> {
                 editText.setHint(R.string.settings_tab_username)
                 pickImageView.setOnClickListener {
-                    startActivityForResult(
+                    addUsageUsersLauncher.launch(
                         Intent(this, UserMultiselectionActivity::class.java).putExtra(
                             UserMultiselectionActivity.EXTRA_GET_SELECTED_USERS,
                             editText.text?.toString()?.trim().orEmpty()
-                        ),
-                        ADD_USAGE_USERS_REQUEST_CODE
+                        )
                     )
                 }
                 R.string.user
@@ -590,12 +660,11 @@ class CustomizePostFilterActivity :
             else -> {
                 editText.setHint(R.string.settings_tab_subreddit_name)
                 pickImageView.setOnClickListener {
-                    startActivityForResult(
+                    addUsageSubredditsLauncher.launch(
                         Intent(this, SubredditMultiselectionActivity::class.java).putExtra(
                             SubredditMultiselectionActivity.EXTRA_GET_SELECTED_SUBREDDITS,
                             editText.text?.toString()?.trim().orEmpty()
-                        ),
-                        ADD_USAGE_SUBREDDITS_REQUEST_CODE
+                        )
                     )
                 }
                 R.string.subreddit
@@ -623,6 +692,8 @@ class CustomizePostFilterActivity :
                 .setOnDismissListener {
                     Utils.hideKeyboard(this)
                     usageDialogEditText = null
+                    usageDialogType = NO_USAGE_DIALOG
+                    usageDialogReplacing = null
                 }
                 .create()
         )
@@ -708,37 +779,16 @@ class CustomizePostFilterActivity :
         PostFilterRules.applyRules(postFilter, rules)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        @Suppress("DEPRECATION")
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != RESULT_OK || data == null) {
-            return
-        }
-        when (requestCode) {
-            ADD_RULE_SUBREDDITS_REQUEST_CODE ->
-                addRules(RuleField.SUBREDDIT, pendingRuleExclude, selectedSubredditNames(data))
-            ADD_RULE_USERS_REQUEST_CODE -> addRules(
-                RuleField.USER,
-                pendingRuleExclude,
-                data.getStringArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_USERNAMES).orEmpty()
-            )
-            ADD_USAGE_SUBREDDITS_REQUEST_CODE -> appendToUsageDialog(selectedSubredditNames(data))
-            ADD_USAGE_USERS_REQUEST_CODE -> appendToUsageDialog(
-                data.getStringArrayListExtra(UserMultiselectionActivity.EXTRA_RETURN_SELECTED_USERNAMES)
-                    .orEmpty()
-            )
-        }
-    }
-
     /**
      * [SubredditMultiselectionActivity] returns parcelled selections, not plain strings — reading it
      * as a string list silently yields nothing, which is what used to make the picker on the old
      * "Apply to" screen do nothing at all.
      */
     private fun selectedSubredditNames(data: Intent): List<String> =
-        data.getParcelableArrayListExtra<SubredditWithSelection>(
-            SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS
+        IntentCompat.getParcelableArrayListExtra(
+            data,
+            SubredditMultiselectionActivity.EXTRA_RETURN_SELECTED_SUBREDDITS,
+            SubredditWithSelection::class.java
         ).orEmpty().map { it.name }
 
     override fun onDestroy() {
@@ -758,6 +808,11 @@ class CustomizePostFilterActivity :
         outState.putParcelableArrayList(RULES_STATE, rules)
         outState.putParcelableArrayList(USAGES_STATE, usages)
         outState.putBoolean(PENDING_RULE_EXCLUDE_STATE, pendingRuleExclude)
+        outState.putInt(USAGE_DIALOG_TYPE_STATE, usageDialogType)
+        outState.putParcelable(USAGE_DIALOG_REPLACING_STATE, usageDialogReplacing)
+        // Read live rather than tracked as it changes: onSaveInstanceState runs before onDestroy
+        // dismisses the dialog, so the field is still there to read from.
+        outState.putString(USAGE_DIALOG_TEXT_STATE, usageDialogEditText?.text?.toString())
     }
 
     override fun getDefaultSharedPreferences(): SharedPreferences = mSharedPreferences

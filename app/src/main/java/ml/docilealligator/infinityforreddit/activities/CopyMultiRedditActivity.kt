@@ -42,7 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -135,7 +135,11 @@ class CopyMultiRedditActivity : BaseActivity() {
 
         setContent {
             AppTheme(customThemeWrapper.themeType) {
-                val context = LocalContext.current
+                // LocalResources, not LocalContext: a Context read is not invalidated by a
+                // Configuration change, so getString() off it can hand back a stale-locale
+                // string. The resId here only becomes known inside the effect below, so it
+                // cannot be hoisted into a stringResource() call the way the one below it is.
+                val resources = LocalResources.current
                 val scrollBehavior = enterAlwaysScrollBehavior()
                 val multiRedditState by copyMultiRedditActivityViewModel.multiRedditState.collectAsStateWithLifecycle()
                 val copyMultiRedditState by copyMultiRedditActivityViewModel.copyMultiRedditState.collectAsStateWithLifecycle()
@@ -153,7 +157,7 @@ class CopyMultiRedditActivity : BaseActivity() {
                             scope.launch {
                                 when (error) {
                                     is ActionStateError.Message -> snackbarHostState.showSnackbar(error.message)
-                                    is ActionStateError.MessageRes -> snackbarHostState.showSnackbar(context.getString(error.resId))
+                                    is ActionStateError.MessageRes -> snackbarHostState.showSnackbar(resources.getString(error.resId))
                                 }
                             }
                         }
@@ -319,17 +323,11 @@ class CopyMultiRedditActivity : BaseActivity() {
         }
     }
 
-    override fun getDefaultSharedPreferences(): SharedPreferences? {
-        return mSharedPreferences
-    }
+    override fun getDefaultSharedPreferences(): SharedPreferences = mSharedPreferences
 
-    override fun getCurrentAccountSharedPreferences(): SharedPreferences? {
-        return mCurrentAccountSharedPreferences
-    }
+    override fun getCurrentAccountSharedPreferences(): SharedPreferences = mCurrentAccountSharedPreferences
 
-    override fun getCustomThemeWrapper(): CustomThemeWrapper? {
-        return mCustomThemeWrapper
-    }
+    override fun getCustomThemeWrapper(): CustomThemeWrapper = mCustomThemeWrapper
 
     override fun applyCustomTheme() {
 

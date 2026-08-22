@@ -117,7 +117,7 @@ public class ViewImgurVideoFragment extends Fragment {
 
         activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        imgurMedia = Objects.requireNonNull(getArguments().getParcelable(EXTRA_IMGUR_VIDEO));
+        imgurMedia = Objects.requireNonNull(requireArguments().getParcelable(EXTRA_IMGUR_VIDEO));
 
         binding.getRoot().setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
             switch (visibility) {

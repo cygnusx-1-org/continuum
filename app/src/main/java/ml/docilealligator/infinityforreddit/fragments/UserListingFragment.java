@@ -123,7 +123,7 @@ public class UserListingFragment extends Fragment implements FragmentCommunicato
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
         binding.recyclerViewUserListingFragment.setLayoutManager(mLinearLayoutManager);
 
-        mQuery = Objects.requireNonNull(getArguments().getString(EXTRA_QUERY));
+        mQuery = Objects.requireNonNull(requireArguments().getString(EXTRA_QUERY));
         boolean isGettingUserInfo = getArguments().getBoolean(EXTRA_IS_GETTING_USER_INFO);
         String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_USER, SortType.Type.RELEVANCE.value));
         sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)));

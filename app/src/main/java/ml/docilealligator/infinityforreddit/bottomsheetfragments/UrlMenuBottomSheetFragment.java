@@ -49,7 +49,7 @@ public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSh
                              @Nullable Bundle savedInstanceState) {
         FragmentUrlMenuBottomSheetBinding binding = FragmentUrlMenuBottomSheetBinding.inflate(inflater, container, false);
 
-        url = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_URL));
+        url = java.util.Objects.requireNonNull(requireArguments().getString(EXTRA_URL));
 
         Uri uri = Uri.parse(url);
         if (uri.getScheme() == null && uri.getHost() == null) {

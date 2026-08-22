@@ -118,7 +118,7 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
 
         activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        galleryVideo = Objects.requireNonNull(getArguments().getParcelable(EXTRA_REDDIT_GALLERY_VIDEO));
+        galleryVideo = Objects.requireNonNull(requireArguments().getParcelable(EXTRA_REDDIT_GALLERY_VIDEO));
 
         binding.getPlayerView().setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
             switch (visibility) {

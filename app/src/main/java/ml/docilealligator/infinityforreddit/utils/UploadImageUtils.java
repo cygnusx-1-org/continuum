@@ -27,7 +27,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class UploadImageUtils {
-    @Nullable
     public static String uploadVideoPosterImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit,
                                                 @Nullable String accessToken, Bitmap image) throws IOException, JSONException, XmlPullParserException {
         RedditAPI api = oauthRetrofit.create(RedditAPI.class);
@@ -51,29 +50,25 @@ public class UploadImageUtils {
             RedditAPI uploadMediaToAWSApi = uploadMediaRetrofit.create(RedditAPI.class);
             Call<String> uploadMediaToAWS = uploadMediaToAWSApi.uploadMediaToAWS(nameValuePairsMap, fileToUpload);
             Response<String> uploadMediaToAWSResponse = uploadMediaToAWS.execute();
-            if (uploadMediaToAWSResponse.isSuccessful()) {
-                return parseImageFromXMLResponseFromAWS(uploadMediaToAWSResponse.body(), false);
-            } else {
-                return "Error: " + uploadMediaToAWSResponse.code();
+            if (!uploadMediaToAWSResponse.isSuccessful()) {
+                throw uploadFailed(uploadMediaToAWSResponse);
             }
+            return requireParsed(parseImageFromXMLResponseFromAWS(uploadMediaToAWSResponse.body(), false));
         } else {
-            return "Error: " + uploadImageResponse.message();
+            throw uploadFailed(uploadImageResponse);
         }
     }
 
-    @Nullable
     public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
                                      @Nullable String accessToken, Uri imageUri) throws IOException, JSONException, XmlPullParserException {
         return uploadImage(oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, imageUri, false);
     }
 
-    @Nullable
     public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
                                      @Nullable String accessToken, Uri imageUri, boolean getImageKey) throws IOException, JSONException, XmlPullParserException {
         return uploadImage(oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, imageUri, false, getImageKey);
     }
 
-    @Nullable
     public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
                                      @Nullable String accessToken, Uri imageUri,
                                      boolean returnResponseForGallerySubmission,
@@ -103,19 +98,40 @@ public class UploadImageUtils {
                 RedditAPI uploadMediaToAWSApi = uploadMediaRetrofit.create(RedditAPI.class);
                 Call<String> uploadMediaToAWS = uploadMediaToAWSApi.uploadMediaToAWS(nameValuePairsMap, fileToUpload);
                 Response<String> uploadMediaToAWSResponse = uploadMediaToAWS.execute();
-                if (uploadMediaToAWSResponse.isSuccessful()) {
-                    if (returnResponseForGallerySubmission) {
-                        return uploadImageResponse.body();
-                    }
-                    return parseImageFromXMLResponseFromAWS(uploadMediaToAWSResponse.body(), getImageKey);
-                } else {
-                    return "Error: " + uploadMediaToAWSResponse.code();
+                if (!uploadMediaToAWSResponse.isSuccessful()) {
+                    throw uploadFailed(uploadMediaToAWSResponse);
                 }
+                if (returnResponseForGallerySubmission) {
+                    // The caller parses this as the asset JSON, so an empty body is a failed upload
+                    // rather than something to hand on.
+                    String assetResponse = uploadImageResponse.body();
+                    if (assetResponse == null) {
+                        throw new MediaUploadException("Empty response from Reddit's media asset request");
+                    }
+                    return assetResponse;
+                }
+                return requireParsed(parseImageFromXMLResponseFromAWS(uploadMediaToAWSResponse.body(), getImageKey));
             }
 
         } else {
-            return "Error: " + uploadImageResponse.message();
+            throw uploadFailed(uploadImageResponse);
         }
+    }
+
+    /**
+     * The upload succeeded but its XML reply held no Location (or Key) element, so there is no URL to
+     * post. Nothing downstream can do anything with that but fail.
+     */
+    private static String requireParsed(@Nullable String parsed) throws MediaUploadException {
+        if (parsed == null) {
+            throw new MediaUploadException("Could not read the uploaded media's address from Reddit's reply");
+        }
+        return parsed;
+    }
+
+    /** Turns a failed upload response into the one failure signal, keeping the status for the user. */
+    private static MediaUploadException uploadFailed(Response<String> response) {
+        return MediaUploadException.refused(response.code(), response.message());
     }
 
     @Nullable

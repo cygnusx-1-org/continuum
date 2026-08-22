@@ -121,7 +121,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mPost = java.util.Objects.requireNonNull(getArguments().getParcelable(EXTRA_POST));
+            mPost = java.util.Objects.requireNonNull(requireArguments().getParcelable(EXTRA_POST));
         } else {
             dismiss();
         }

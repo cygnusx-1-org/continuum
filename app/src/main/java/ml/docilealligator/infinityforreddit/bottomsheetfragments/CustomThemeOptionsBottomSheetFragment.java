@@ -45,7 +45,7 @@ public class CustomThemeOptionsBottomSheetFragment extends LandscapeExpandedRoun
                              @Nullable Bundle savedInstanceState) {
         FragmentCustomThemeOptionsBottomSheetBinding binding = FragmentCustomThemeOptionsBottomSheetBinding.inflate(inflater, container, false);
 
-        themeName = java.util.Objects.requireNonNull(getArguments().getString(EXTRA_THEME_NAME));
+        themeName = java.util.Objects.requireNonNull(requireArguments().getString(EXTRA_THEME_NAME));
         onlineCustomThemeMetadata = getArguments().getParcelable(EXTRA_ONLINE_CUSTOM_THEME_METADATA);
 
         if (onlineCustomThemeMetadata != null && !onlineCustomThemeMetadata.username.equals(activity.accountName)) {

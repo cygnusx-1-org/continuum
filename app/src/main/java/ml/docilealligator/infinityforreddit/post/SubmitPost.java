@@ -15,6 +15,7 @@ import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import ml.docilealligator.infinityforreddit.utils.MediaUploadException;
 import ml.docilealligator.infinityforreddit.utils.UploadImageUtils;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -44,15 +45,16 @@ public class SubmitPost {
                                        boolean isNSFW, boolean receivePostReplyNotifications,
                                        SubmitPostListener submitPostListener) {
         try {
-            String imageUrlOrError = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
+            String imageUrl = UploadImageUtils.uploadImage(oauthRetrofit, uploadMediaRetrofit,
                     contentResolver, accessToken, imageUri);
-            if (imageUrlOrError != null && !imageUrlOrError.startsWith("Error: ")) {
-                submitPost(executor, handler, oauthRetrofit, accessToken,
-                        subredditName, title, content, imageUrlOrError, flair, isSpoiler, isNSFW,
-                        receivePostReplyNotifications, false, APIUtils.KIND_IMAGE, null, submitPostListener);
-            } else {
-                submitPostListener.submitFailed(imageUrlOrError);
-            }
+            submitPost(executor, handler, oauthRetrofit, accessToken,
+                    subredditName, title, content, imageUrl, flair, isSpoiler, isNSFW,
+                    receivePostReplyNotifications, false, APIUtils.KIND_IMAGE, null, submitPostListener);
+        } catch (MediaUploadException e) {
+            // Only Reddit's own status line is fit to show; the rest of this exception is an English
+            // log line, and the screen has a translated message for when it is handed nothing.
+            e.printStackTrace();
+            submitPostListener.submitFailed(e.getServerStatus());
         } catch (IOException | JSONException | XmlPullParserException e) {
             e.printStackTrace();
             submitPostListener.submitFailed(e.getMessage());
@@ -95,21 +97,17 @@ public class SubmitPost {
                         submitPostListener.submitFailed(null);
                         return;
                     }
-                    String imageUrlOrError = UploadImageUtils.uploadVideoPosterImage(oauthRetrofit, uploadMediaRetrofit, accessToken, posterBitmap);
-                    if (imageUrlOrError != null && !imageUrlOrError.startsWith("Error: ")) {
-                        if (fileType.equals("gif")) {
-                            submitPost(executor, handler, oauthRetrofit, accessToken,
-                                    subredditName, title, content, url, flair, isSpoiler, isNSFW,
-                                    receivePostReplyNotifications, false, APIUtils.KIND_VIDEOGIF, imageUrlOrError,
-                                    submitPostListener);
-                        } else {
-                            submitPost(executor, handler, oauthRetrofit, accessToken,
-                                    subredditName, title, content, url, flair, isSpoiler, isNSFW,
-                                    receivePostReplyNotifications, false, APIUtils.KIND_VIDEO, imageUrlOrError,
-                                    submitPostListener);
-                        }
+                    String posterUrl = UploadImageUtils.uploadVideoPosterImage(oauthRetrofit, uploadMediaRetrofit, accessToken, posterBitmap);
+                    if (fileType.equals("gif")) {
+                        submitPost(executor, handler, oauthRetrofit, accessToken,
+                                subredditName, title, content, url, flair, isSpoiler, isNSFW,
+                                receivePostReplyNotifications, false, APIUtils.KIND_VIDEOGIF, posterUrl,
+                                submitPostListener);
                     } else {
-                        submitPostListener.submitFailed(imageUrlOrError);
+                        submitPost(executor, handler, oauthRetrofit, accessToken,
+                                subredditName, title, content, url, flair, isSpoiler, isNSFW,
+                                receivePostReplyNotifications, false, APIUtils.KIND_VIDEO, posterUrl,
+                                submitPostListener);
                     }
                 } else {
                     submitPostListener.submitFailed(uploadMediaToAWSResponse.code() + " " + uploadMediaToAWSResponse.message());
@@ -117,6 +115,10 @@ public class SubmitPost {
             } else {
                 submitPostListener.submitFailed(uploadImageResponse.code() + " " + uploadImageResponse.message());
             }
+        } catch (MediaUploadException e) {
+            // As in submitImagePost: the poster upload's own diagnostics are not for the screen.
+            e.printStackTrace();
+            submitPostListener.submitFailed(e.getServerStatus());
         } catch (IOException | XmlPullParserException | JSONException e) {
             e.printStackTrace();
             submitPostListener.submitFailed(e.getMessage());

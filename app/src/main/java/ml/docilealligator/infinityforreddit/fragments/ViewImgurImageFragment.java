@@ -93,7 +93,7 @@ public class ViewImgurImageFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        imgurMedia = Objects.requireNonNull(getArguments().getParcelable(EXTRA_IMGUR_IMAGES));
+        imgurMedia = Objects.requireNonNull(requireArguments().getParcelable(EXTRA_IMGUR_IMAGES));
         glide = Glide.with(activity);
 
         if (savedInstanceState != null) {
