@@ -77,12 +77,19 @@
 
                       Centred on the chip, which reserves its space in every state, so this never
                       shifts between "profile loading", "followable" and "cannot be followed".
+
+                      src is the unsaved bookmark because that is the resting state: bindSaveUser
+                      makes this visible synchronously, but the icon itself only arrives when the
+                      Room query first emits, so without a src the ribbon is briefly a visible
+                      empty box. applySaveUserIcon swaps in the filled bookmark when saved.
                     -->
                     <ImageView
                         android:id="@+id/save_user_image_view_view_user_detail_activity"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/save_user"
+                        android:src="@drawable/ic_bookmark_border_day_night_24dp"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/subscribe_user_chip_view_user_detail_activity"

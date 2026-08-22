@@ -2,3 +2,5 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 include ':app'
+// Custom lint checks, wired into :app via lintChecks. See lint-checks/build.gradle.
+include ':lint-checks'

@@ -427,6 +427,11 @@ dependencies {
     // classpath (debug-scoping this would break release/beta/minifiedRelease compilation).
     compileOnly 'org.jspecify:jspecify:1.0.0'
 
+    // Continuum's own lint checks, loaded into every lint run for this module. Currently just
+    // InconsistentLayoutVariantIds, which covers the ViewBinding-shaped gap in AGP's built-in
+    // InconsistentLayout that let issue #369 ship. See lint-checks/build.gradle.
+    lintChecks project(':lint-checks')
+
     // HTTP clients
     def retrofitVersion = '3.0.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
@@ -633,6 +638,35 @@ androidComponents {
 // normal build/install loop keeps its speed.
 tasks.named('check') {
     dependsOn 'verifyRoborazziDebug'
+}
+
+// The instrumented half of the issue #369 regression net (UserProfileTest), wired into `check` so
+// it is not something anyone has to remember. It is the only layer that inflates
+// activity_view_user_detail for real, in landscape, on a device.
+//
+// A missing device FAILS rather than skipping: a gate that silently does nothing is how the
+// androidTest suite rotted into not compiling once already (see TESTS.md). Opting out is deliberate
+// and visible on the command line:
+//     ./gradlew :app:check -PskipDeviceTests=true
+//
+// Stock connectedAndroidTest is deliberately not used — it runs on every attached device (this
+// machine keeps more than one emulator up) and uninstalls afterwards, wiping the signed-in account.
+// The script installs with `adb install -r` against one serial instead.
+tasks.register('deviceTests', Exec) {
+    group = 'verification'
+    description = 'Runs the instrumented tests that must never be skipped, on one connected device.'
+    dependsOn 'assembleDebug', 'assembleDebugAndroidTest'
+    workingDir rootDir
+    commandLine './scripts/run-device-tests.sh'
+    // Serial resolution order, handled by the script: --serial, then ANDROID_SERIAL, then
+    // deviceSerial in local.properties, then the sole attached device.
+    environment 'ANDROID_SERIAL', System.getenv('ANDROID_SERIAL') ?: ''
+}
+
+if (!project.hasProperty('skipDeviceTests') || project.property('skipDeviceTests') != 'true') {
+    tasks.named('check') {
+        dependsOn 'deviceTests'
+    }
 }
 
 interface CopyApkParameters extends WorkParameters, Serializable {

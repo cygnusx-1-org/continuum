@@ -415,7 +415,14 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         lockBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.LOCK_BOTTOM_APP_BAR, false);
         boolean hideSubredditDescription = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_DESCRIPTION, false);
 
-        subredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY));
+        // Trimmed for the same reason as the username in ViewUserDetailActivity: the Go to Subreddit
+        // dialog passes on whatever the keyboard produced, and autocomplete appends a trailing
+        // space. Reddit accepts the padded name, so the posts load and nothing looks wrong -- but
+        // the fetched record is stored under the canonical display_name while
+        // SubredditDao.getSubredditLiveDataByName matches on `name = :namePrefixed COLLATE NOCASE`,
+        // which ignores case and not whitespace. The row never matches, so the observer never binds
+        // the header. Trimming where the extra is consumed covers every entry point at once.
+        subredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY)).trim();
         initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
         initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
 

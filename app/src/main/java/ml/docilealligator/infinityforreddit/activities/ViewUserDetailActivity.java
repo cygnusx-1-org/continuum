@@ -255,7 +255,16 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
 
         mViewPager2 = binding.viewPagerViewUserDetailActivity;
 
-        username = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_USER_NAME_KEY));
+        // Trimmed because the Go to User dialog hands over whatever the keyboard produced, and
+        // autocomplete appends a trailing space. Reddit tolerates it -- /user/name%20/about returns
+        // 200 -- and the posts and comments tabs load, so the profile looks fine. What breaks is
+        // silent: the fetched record is stored under Reddit's canonical name ("name", unpadded),
+        // while UserDao looks the row up with `name = :userName COLLATE NOCASE`, which ignores case
+        // but not whitespace. The two never match, the observer below never sees a UserData, and the
+        // whole header -- avatar, banner, Follow chip, karma, cakeday -- stays at its XML defaults.
+        // Trimming here rather than in each goToUser() dialog covers every entry point at once
+        // (there are ten of those call sites across five activities).
+        username = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_USER_NAME_KEY)).trim();
 
         fragmentManager = getSupportFragmentManager();
 

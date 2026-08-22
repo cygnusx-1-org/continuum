@@ -112,6 +112,7 @@ class RoborazziLayoutTest(private val case: Case) {
         val themeLabel: String,
         val themeType: Int,
         val fontScale: FontScale,
+        val reveal: List<Int> = emptyList(),
     ) {
         /**
          * `{layout}_{theme}_sw{n}dp[_land][_xlarge]` — the pre-existing scheme with a suffix per new
@@ -127,7 +128,19 @@ class RoborazziLayoutTest(private val case: Case) {
         override fun toString(): String = goldenName
     }
 
-    private data class LayoutSpec(val name: String, @param:LayoutRes val res: Int, val family: Family)
+    /**
+     * [reveal] lists views the XML ships GONE/INVISIBLE for the activity or adapter to show at
+     * runtime, and which the golden should therefore capture in their shown state. Without it a
+     * view that is `android:visibility="gone"` in XML draws nothing, so the golden would be
+     * byte-identical whether the view is in that configuration's layout or missing from it
+     * entirely — which is the drift issue #369 was.
+     */
+    private data class LayoutSpec(
+        val name: String,
+        @param:LayoutRes val res: Int,
+        val family: Family,
+        val reveal: List<Int> = emptyList(),
+    )
 
     companion object {
         /** Long enough to wrap onto multiple lines on narrow widths — the main thing that varies by dp. */
@@ -218,6 +231,56 @@ class RoborazziLayoutTest(private val case: Case) {
             LayoutSpec(
                 "postFilterBlockedSubreddit", R.layout.item_post_filter_blocked_subreddit, Family.NONE
             ),
+            // Every layout that exists in more than one resource configuration — all seven of the
+            // 269 layout files, as of this writing. These are the only files where a hand-edit to
+            // one copy can silently diverge from the others, which is what issue #369 was: the save
+            // ribbon was added to layout/activity_view_user_detail.xml and to neither of its
+            // siblings, and the app crashed on every tablet and every phone in landscape.
+            //
+            // LayoutVariantIdParityTest and the InconsistentLayoutVariantIds lint check already
+            // cover the *ids*. Neither can see an attribute: #369's other half was the Follow chip
+            // reading `gone` in two copies and `invisible` in the third, with the id present in all
+            // three. Only a rendered comparison catches that, which is what these are for.
+            //
+            // Each configuration is diffed against its own golden, so a difference *between*
+            // variants is never a failure here — a variant changing from its own baseline is.
+            LayoutSpec(
+                "userProfileHeader",
+                R.layout.activity_view_user_detail,
+                Family.NONE,
+                // Both ship hidden in XML and are revealed once the activity binds; a golden of the
+                // unbound header cannot tell a missing view from a hidden one.
+                reveal = listOf(
+                    R.id.subscribe_user_chip_view_user_detail_activity,
+                    R.id.save_user_image_view_view_user_detail_activity,
+                ),
+            ),
+            LayoutSpec(
+                "subredditHeader",
+                R.layout.activity_view_subreddit_detail,
+                Family.NONE,
+                // Shipped GONE and revealed by the activity when the subreddit has a description.
+                // The subscribe chip is visible in XML already, so it needs no reveal.
+                reveal = listOf(R.id.description_text_view_view_subreddit_detail_activity),
+            ),
+            LayoutSpec("multiRedditHeader", R.layout.activity_view_multi_reddit_detail, Family.NONE),
+            LayoutSpec("appBarMain", R.layout.app_bar_main, Family.NONE),
+            // fragment_view_post_detail is the one multi-variant layout deliberately NOT here. Its
+            // two panes are adapter-driven lists, and this harness does not bind adapters (see
+            // applyTheme); with no rows they paint nothing, so every golden came out a blank
+            // rectangle at the right size. That looks like coverage and is not -- a blank image
+            // cannot show the two-pane weights that are the only thing differing between its
+            // configurations. Its ids stay covered by LayoutVariantIdParityTest and the
+            // InconsistentLayoutVariantIds lint check.
+            LayoutSpec("customizeCommentFilter", R.layout.activity_customize_comment_filter, Family.NONE),
+            // activity_lock_screen is the other multi-variant layout deliberately absent. Its
+            // LottieAnimationView declares lottie_autoPlay="true", and its captures are not
+            // reproducible: 11 of its 13 goldens differed between a record and the very next
+            // verify, always the same 11, always sparing the two cases that run first — the
+            // signature of animator state carried across cases in the shared JVM. Pausing the
+            // animation and pinning its progress did not settle it. A golden that cannot hold
+            // still fails `check` at random, which is worse than not having it, so its ids are
+            // left to LayoutVariantIdParityTest and the InconsistentLayoutVariantIds lint check.
         )
 
         /** Common phones (320/360/411/443/448), this dev's phone (527), tablets (600/934). */
@@ -271,7 +334,10 @@ class RoborazziLayoutTest(private val case: Case) {
                 themes.flatMap { (themeLabel, themeType) ->
                     widths.map { swDp ->
                         arrayOf<Any>(
-                            Case(spec.name, spec.res, spec.family, swDp, orientation, themeLabel, themeType, fontScale),
+                            Case(
+                                spec.name, spec.res, spec.family, swDp, orientation, themeLabel,
+                                themeType, fontScale, spec.reveal,
+                            ),
                         )
                     }
                 }
@@ -426,6 +492,10 @@ class RoborazziLayoutTest(private val case: Case) {
         val itemWidthPx = activity.resources.displayMetrics.widthPixels / columns
 
         val view = LayoutInflater.from(activity).inflate(case.layoutRes, FrameLayout(activity), false)
+        // Views the activity reveals once it binds. findViewById returns null when this
+        // configuration's layout omits the view, which is deliberate: the golden then loses the
+        // control and the pixel diff is the failure. See LayoutSpec.reveal.
+        case.reveal.forEach { id -> view.findViewById<View>(id)?.visibility = View.VISIBLE }
         activity.setContentView(
             view,
             ViewGroup.LayoutParams(itemWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT),

@@ -64,11 +64,36 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:visibility="gone"
+                        android:visibility="invisible"
                         app:chipStrokeColor="#00000000"
                         app:layout_constraintStart_toEndOf="@id/icon_gif_image_view_view_user_detail_activity"
                         app:layout_constraintTop_toBottomOf="@id/user_name_text_view_view_user_detail_activity"
                         app:layout_constraintBottom_toBottomOf="@id/icon_gif_image_view_view_user_detail_activity"
+                        tools:visibility="visible" />
+
+                    <!--
+                      Saving a user is local-only, so it sits apart from the Follow chip: hard right,
+                      on the chip's line. Hidden on your own profile.
+
+                      Centred on the chip, which reserves its space in every state, so this never
+                      shifts between "profile loading", "followable" and "cannot be followed".
+
+                      src is the unsaved bookmark because that is the resting state: bindSaveUser
+                      makes this visible synchronously, but the icon itself only arrives when the
+                      Room query first emits, so without a src the ribbon is briefly a visible
+                      empty box. applySaveUserIcon swaps in the filled bookmark when saved.
+                    -->
+                    <ImageView
+                        android:id="@+id/save_user_image_view_view_user_detail_activity"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/save_user"
+                        android:src="@drawable/ic_bookmark_border_day_night_24dp"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/subscribe_user_chip_view_user_detail_activity"
+                        app:layout_constraintBottom_toBottomOf="@id/subscribe_user_chip_view_user_detail_activity"
                         tools:visibility="visible" />
 
                     <TextView
@@ -157,8 +182,15 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!--
+          Tablet/landscape only: the bottom app bar takes its place in the other
+          configurations, so this id is deliberately absent from them.
+          NavigationWrapper.navigationRailView is null there and every use of it is
+          null-checked, which is why InconsistentLayoutVariantIds is suppressed here.
+        -->
         <com.google.android.material.navigationrail.NavigationRailView
             android:id="@+id/navigation_rail"
+            tools:ignore="InconsistentLayoutVariantIds"
             android:layout_width="80dp"
             android:layout_height="match_parent"
             app:headerLayout="@layout/floating_action_button"

@@ -1,0 +1,38 @@
+// Custom Android Lint checks for Continuum, packaged as a plain JVM jar and wired into the app's
+// lint run via `lintChecks project(':lint-checks')` in app/build.gradle.
+//
+// The one check here, InconsistentLayoutVariantIds, exists because AGP's built-in
+// InconsistentLayout only considers view ids that are referenced from code as `R.id.something`.
+// After the ViewBinding migration almost nothing references ids that way, which left the built-in
+// check blind to the exact drift that caused issue #369 (a view added to layout/ but not to
+// layout-land/ or layout-sw600dp/, dereferenced unconditionally, crashing on every tablet and every
+// phone in landscape).
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+// Lint loads this jar into its own JVM, so the bytecode level is pinned to what lint requires
+// rather than following the app module's (Java 24).
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+dependencies {
+    // Must match the lint that ships with AGP: lint version = AGP version + 23.
+    // AGP 9.3.0 (root build.gradle) -> lint 32.3.0.
+    compileOnly 'com.android.tools.lint:lint-api:32.3.0'
+}
+
+jar {
+    manifest {
+        attributes('Lint-Registry-v2': 'ml.docilealligator.infinityforreddit.lint.ContinuumIssueRegistry')
+    }
+}

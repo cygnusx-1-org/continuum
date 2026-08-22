@@ -27,8 +27,15 @@
                 android:clipToPadding="false"
                 app:layoutManager="ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed"  />
 
+            <!--
+              Two-pane only: portrait phones render comments in the single post recycler
+              view, so this id is deliberately absent from layout/.
+              ViewPostDetailFragmentNew reads it into a local and null-checks it before use,
+              which is why InconsistentLayoutVariantIds is suppressed here.
+            -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/comments_recycler_view_view_post_detail_fragment"
+                tools:ignore="InconsistentLayoutVariantIds"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
