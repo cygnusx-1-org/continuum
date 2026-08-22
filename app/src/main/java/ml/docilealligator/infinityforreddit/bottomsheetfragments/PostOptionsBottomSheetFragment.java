@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFr
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.HidePost;
+import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
@@ -118,6 +119,31 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
         return fragment;
     }
 
+    /**
+     * Marks the post read on the user's behalf, as tapping it in the feed does — every tap site in
+     * PostRecyclerViewAdapter calls markPostRead immediately before opening the detail screen, so
+     * opening a window instead would otherwise leave the row looking unread forever.
+     *
+     * <p>Honours the same preference the feed does, does nothing for a post already read, and
+     * persists through the host activity exactly as {@code PostRecyclerViewAdapter.markPostRead}
+     * does. Hosts that do not implement {@link MarkPostAsReadInterface} — History and Account
+     * Posts — keep read state in memory only, and this must not write rows on their behalf.
+     *
+     * @return whether the post was marked read, i.e. whether the feed row now needs redrawing.
+     */
+    private boolean markPostReadForNewWindow() {
+        if (mPost.isRead() || !mPostHistorySharedPreferences.getBoolean(
+                mBaseActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false)) {
+            return false;
+        }
+
+        mPost.markAsRead();
+        if (mBaseActivity instanceof MarkPostAsReadInterface) {
+            ((MarkPostAsReadInterface) mBaseActivity).markPostAsRead(mPost);
+        }
+        return true;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,12 +166,27 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
             if (!(mBaseActivity instanceof ViewPostDetailActivity)) {
                 binding.openInNewWindowTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
                 binding.openInNewWindowTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    int postListPosition = requireArguments().getInt(EXTRA_POST_LIST_POSITION, -1);
+
+                    boolean markedRead = markPostReadForNewWindow();
+
                     Intent intent = new Intent(mBaseActivity, ViewPostDetailActivity.class);
                     intent.putExtra(ViewPostDetailActivity.EXTRA_POST_DATA, mPost);
-                    // Deliberately no EXTRA_POST_FRAGMENT_ID: the window is standalone, so it does
-                    // not swipe through the feed it came from and does not push its position back
-                    // to that feed while the user carries on scrolling it.
+                    // The window still needs the list position, or the vote, save, hide and
+                    // moderation updates it reports back are dropped: PostFragmentBase's handler
+                    // is keyed on it and ignores the default -1. This does not tie the window to
+                    // the feed the way EXTRA_POST_FRAGMENT_ID would — that stays unset, so the
+                    // window is standalone, does not swipe through the feed and does not push its
+                    // position back to it.
+                    intent.putExtra(ViewPostDetailActivity.EXTRA_POST_LIST_POSITION, postListPosition);
                     startActivity(NewWindowUtils.addNewWindowFlags(intent));
+
+                    if (markedRead) {
+                        // Recolours the feed row now, the way tapping the post would have. Only
+                        // when something actually changed: this event copies every field of mPost,
+                        // a snapshot parcelled back when the sheet opened, over the live row.
+                        EventBus.getDefault().post(new PostUpdateEventToPostList(mPost, postListPosition));
+                    }
 
                     dismiss();
                 });
