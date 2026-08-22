@@ -2,6 +2,12 @@
 
 ---
 
+8.2.5.9.9.9.5 / 2026-8-22
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed viewing my/other profile autoshutdowns/kills the app #369
+
 8.2.5.9.9.9.4 / 2026-8-21
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
