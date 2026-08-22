@@ -60,7 +60,9 @@ body:
     id: version
     attributes:
       label: Continuum version
-      description: The version number found on the settings screen.
+      description: >-
+        The exact version number found on the settings screen. Do not write "latest" or "current" —
+        state the actual version number.
       placeholder: e.g. 8.2.5.9.1
     validations:
       required: true
