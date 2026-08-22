@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,12 +15,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -40,7 +35,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -529,12 +523,12 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             binding.option5TextInputLayoutPostPollActivity.setCursorColor(ColorStateList.valueOf(primaryTextColor));
             binding.option6TextInputLayoutPostPollActivity.setCursorColor(ColorStateList.valueOf(primaryTextColor));
         } else {
-            setCursorDrawableColor(binding.option1TextInputLayoutEditTextPostPollActivity, primaryTextColor);
-            setCursorDrawableColor(binding.option2TextInputLayoutEditTextPostPollActivity, primaryTextColor);
-            setCursorDrawableColor(binding.option3TextInputLayoutEditTextPostPollActivity, primaryTextColor);
-            setCursorDrawableColor(binding.option4TextInputLayoutEditTextPostPollActivity, primaryTextColor);
-            setCursorDrawableColor(binding.option5TextInputLayoutEditTextPostPollActivity, primaryTextColor);
-            setCursorDrawableColor(binding.option6TextInputLayoutEditTextPostPollActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.option1TextInputLayoutEditTextPostPollActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.option2TextInputLayoutEditTextPostPollActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.option3TextInputLayoutEditTextPostPollActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.option4TextInputLayoutEditTextPostPollActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.option5TextInputLayoutEditTextPostPollActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.option6TextInputLayoutEditTextPostPollActivity, primaryTextColor);
         }
 
         if (typeface != null) {
@@ -554,28 +548,6 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
         }
         if (contentTypeface != null) {
             binding.postContentEditTextPostPollActivity.setTypeface(contentTypeface);
-        }
-    }
-
-    public void setCursorDrawableColor(EditText editText, int color) {
-        try {
-            Field fCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
-            fCursorDrawableRes.setAccessible(true);
-            int mCursorDrawableRes = fCursorDrawableRes.getInt(editText);
-            Field fEditor = TextView.class.getDeclaredField("mEditor");
-            fEditor.setAccessible(true);
-            Object editor = fEditor.get(editText);
-            Class<?> clazz = editor.getClass();
-            Field fCursorDrawable = clazz.getDeclaredField("mCursorDrawable");
-            fCursorDrawable.setAccessible(true);
-            Drawable[] drawables = new Drawable[2];
-            drawables[0] = editText.getContext().getResources().getDrawable(mCursorDrawableRes);
-            drawables[1] = editText.getContext().getResources().getDrawable(mCursorDrawableRes);
-            drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            fCursorDrawable.set(editor, drawables);
-        } catch (Throwable ignored) {
-            Log.d("PostPollActivity", "setCursorDrawableColor: ignoring Throwable", ignored);
         }
     }
 

@@ -15,8 +15,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.media3.common.util.UnstableApi;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -126,6 +128,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private NetworkState networkState;
     private final RetryLoadingMoreCallback mRetryLoadingMoreCallback;
 
+    @OptIn(markerClass = UnstableApi.class)
     public CommentsListingRecyclerViewAdapter(BaseActivity activity, CommentsListingFragment fragment,
                                               Retrofit oauthRetrofit,
                                               CustomThemeWrapper customThemeWrapper, Locale locale,

@@ -563,6 +563,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         }
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private void loadVideo() {
         Uri videoUri = this.videoUri;
         if (videoUri == null) {

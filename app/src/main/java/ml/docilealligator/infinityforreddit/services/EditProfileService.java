@@ -116,7 +116,7 @@ public class EditProfileService extends JobService {
                             createNotification(R.string.submit_change_banner),
                             JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
                 } else {
-                    manager.notify(NotificationUtils.EDIT_PROFILE_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset,
+                    NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.EDIT_PROFILE_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset,
                             createNotification(R.string.submit_change_banner));
                 }
                 break;
@@ -127,7 +127,7 @@ public class EditProfileService extends JobService {
                             createNotification(R.string.submit_change_avatar),
                             JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
                 } else {
-                    manager.notify(NotificationUtils.EDIT_PROFILE_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset,
+                    NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.EDIT_PROFILE_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset,
                             createNotification(R.string.submit_change_avatar));
                 }
                 break;
@@ -138,7 +138,7 @@ public class EditProfileService extends JobService {
                             createNotification(R.string.submit_save_profile),
                             JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
                 } else {
-                    manager.notify(NotificationUtils.EDIT_PROFILE_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset,
+                    NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.EDIT_PROFILE_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset,
                             createNotification(R.string.submit_save_profile));
                 }
                 break;

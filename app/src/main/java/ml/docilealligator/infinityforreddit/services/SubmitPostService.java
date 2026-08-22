@@ -152,37 +152,37 @@ public class SubmitPostService extends JobService {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 setNotification(params, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting), JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
             } else {
-                manager.notify(NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting));
+                NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting));
             }
         } else if (postType == EXTRA_POST_TYPE_CROSSPOST) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 setNotification(params, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting), JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
             } else {
-                manager.notify(NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting));
+                NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting));
             }
         } else if (postType == EXTRA_POST_TYPE_IMAGE) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 setNotification(params, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_image), JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
             } else {
-                manager.notify(NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_image));
+                NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_image));
             }
         } else if (postType == EXTRA_POST_TYPE_VIDEO) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 setNotification(params, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_video), JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
             } else {
-                manager.notify(NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_video));
+                NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_video));
             }
         } else if (postType == EXTRA_POST_TYPE_GALLERY) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 setNotification(params, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_gallery), JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
             } else {
-                manager.notify(NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_gallery));
+                NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_gallery));
             }
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 setNotification(params, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_poll), JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
             } else {
-                manager.notify(NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_poll));
+                NotificationUtils.notifyIfPermitted(this, manager, NotificationUtils.SUBMIT_POST_SERVICE_NOTIFICATION_ID + randomNotificationIdOffset, createNotification(R.string.posting_poll));
             }
         }
 

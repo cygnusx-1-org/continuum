@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.services;
 
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.job.JobInfo;
@@ -163,7 +164,7 @@ public class DownloadRedditVideoService extends JobService {
                     createNotification(builder, notificationTitle), // Use notificationTitle
                     JobService.JOB_END_NOTIFICATION_POLICY_DETACH);
         } else {
-            notificationManager.notify(NotificationUtils.DOWNLOAD_REDDIT_VIDEO_NOTIFICATION_ID + randomNotificationIdOffset,
+            NotificationUtils.notifyIfPermitted(this, notificationManager, NotificationUtils.DOWNLOAD_REDDIT_VIDEO_NOTIFICATION_ID + randomNotificationIdOffset,
                     createNotification(builder, notificationTitle)); // Use notificationTitle
         }
 
@@ -511,6 +512,17 @@ public class DownloadRedditVideoService extends JobService {
         }
     }
 
+    /**
+     * Remuxes the downloaded video and audio tracks into one file.
+     *
+     * <p>{@code @SuppressLint("WrongConstant")}: the buffer flags are copied straight from
+     * MediaExtractor to MediaMuxer, which is the documented remux idiom, but
+     * MediaExtractor.SAMPLE_FLAG_* and MediaCodec.BUFFER_FLAG_* are separate @IntDefs so lint
+     * objects. They agree on the values a remux cares about (SAMPLE_FLAG_SYNC ==
+     * BUFFER_FLAG_KEY_FRAME == 1); remapping them would change muxing behaviour with no test
+     * corpus to show the new mapping is better.
+     */
+    @SuppressLint("WrongConstant")
     private boolean muxVideoAndAudio(String videoFilePath, @Nullable String audioFilePath, String outputFilePath) {
         try {
             File file = new File(outputFilePath);
@@ -821,7 +833,7 @@ public class DownloadRedditVideoService extends JobService {
                 builder.setContentIntent(null);
                 builder.clearActions();
             }
-            notificationManager.notify(NotificationUtils.DOWNLOAD_REDDIT_VIDEO_NOTIFICATION_ID + randomNotificationIdOffset, builder.build());
+            NotificationUtils.notifyIfPermitted(this, notificationManager, NotificationUtils.DOWNLOAD_REDDIT_VIDEO_NOTIFICATION_ID + randomNotificationIdOffset, builder.build());
         }
     }
 }

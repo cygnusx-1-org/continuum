@@ -4,17 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
@@ -26,7 +22,6 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -273,37 +268,15 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
             binding.minVoteTextInputLayoutCustomizeCommentFilterActivity.setCursorColor(ColorStateList.valueOf(primaryTextColor));
             binding.maxVoteTextInputLayoutCustomizeCommentFilterActivity.setCursorColor(ColorStateList.valueOf(primaryTextColor));
         } else {
-            setCursorDrawableColor(binding.nameTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
-            setCursorDrawableColor(binding.excludeStringsTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
-            setCursorDrawableColor(binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
-            setCursorDrawableColor(binding.minVoteTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
-            setCursorDrawableColor(binding.maxVoteTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.nameTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.excludeStringsTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.excludeUsersTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.minVoteTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
+            Utils.setCursorDrawableColor(binding.maxVoteTextInputEditTextCustomizeCommentFilterActivity, primaryTextColor);
         }
 
         if (typeface != null) {
             Utils.setFontToAllTextViews(binding.getRoot(), typeface);
-        }
-    }
-
-    public void setCursorDrawableColor(EditText editText, int color) {
-        try {
-            Field fCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
-            fCursorDrawableRes.setAccessible(true);
-            int mCursorDrawableRes = fCursorDrawableRes.getInt(editText);
-            Field fEditor = TextView.class.getDeclaredField("mEditor");
-            fEditor.setAccessible(true);
-            Object editor = fEditor.get(editText);
-            Class<?> clazz = editor.getClass();
-            Field fCursorDrawable = clazz.getDeclaredField("mCursorDrawable");
-            fCursorDrawable.setAccessible(true);
-            Drawable[] drawables = new Drawable[2];
-            drawables[0] = editText.getContext().getResources().getDrawable(mCursorDrawableRes);
-            drawables[1] = editText.getContext().getResources().getDrawable(mCursorDrawableRes);
-            drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            fCursorDrawable.set(editor, drawables);
-        } catch (Throwable ignored) {
-            Log.d("CustomizeCommentFilterActivity", "setCursorDrawableColor: ignoring Throwable", ignored);
         }
     }
 

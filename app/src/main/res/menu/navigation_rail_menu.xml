@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Titles are placeholders ("Option 1"...) that satisfy lint's MenuTitle. They are never drawn,
+     because every rail sets labelVisibilityMode="unlabeled" - but they ARE what TalkBack reads out,
+     since NavigationWrapper sets each item's icon at runtime and never its title. Announcing the
+     action actually bound to a slot is a separate change: the option to label mapping lives in two
+     places (NavigationWrapper.setOtherActivitiesContentDescription for the detail activities, and
+     MainActivity.setBottomAppBarContentDescription for the home rail). -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_rail_option_1"
-        android:enabled="true"/>
+        android:enabled="true"
+        android:title="@string/settings_bottom_app_bar_option_1"/>
     <item
         android:id="@+id/navigation_rail_option_2"
-        android:enabled="true"/>
+        android:enabled="true"
+        android:title="@string/settings_bottom_app_bar_option_2"/>
     <item
         android:id="@+id/navigation_rail_option_3"
-        android:enabled="true"/>
+        android:enabled="true"
+        android:title="@string/settings_bottom_app_bar_option_3"/>
     <item
         android:id="@+id/navigation_rail_option_4"
-        android:enabled="true"/>
+        android:enabled="true"
+        android:title="@string/settings_bottom_app_bar_option_4"/>
 </menu>

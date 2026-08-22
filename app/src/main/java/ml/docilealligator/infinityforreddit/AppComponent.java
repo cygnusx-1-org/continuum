@@ -1,6 +1,8 @@
 package ml.docilealligator.infinityforreddit;
 
 import android.app.Application;
+import androidx.annotation.OptIn;
+import androidx.media3.common.util.UnstableApi;
 import dagger.BindsInstance;
 import dagger.Component;
 import javax.inject.Singleton;
@@ -200,6 +202,7 @@ public interface AppComponent {
 
     void inject(ViewMultiRedditDetailActivity viewMultiRedditDetailActivity);
 
+    @OptIn(markerClass = UnstableApi.class)
     void inject(ViewVideoActivity viewVideoActivity);
 
     void inject(GesturesAndButtonsPreferenceFragment gesturesAndButtonsPreferenceFragment);

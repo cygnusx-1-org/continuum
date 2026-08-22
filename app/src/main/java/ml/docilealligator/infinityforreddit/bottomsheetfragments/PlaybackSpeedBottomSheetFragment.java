@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.fragment.app.Fragment;
+import androidx.media3.common.util.UnstableApi;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity;
@@ -29,6 +31,7 @@ public class PlaybackSpeedBottomSheetFragment extends LandscapeExpandedRoundedBo
         // Required empty public constructor
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -119,6 +122,7 @@ public class PlaybackSpeedBottomSheetFragment extends LandscapeExpandedRoundedBo
         return binding.getRoot();
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private void setPlaybackSpeed(int playbackSpeed) {
         if (activity instanceof ViewVideoActivity) {
             ((ViewVideoActivity) activity).setPlaybackSpeed(playbackSpeed);

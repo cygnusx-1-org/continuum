@@ -25,10 +25,12 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.media3.common.util.UnstableApi;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -440,7 +442,7 @@ public class DownloadMediaService extends JobService {
                             createNotification(builder, notificationTitle),
                             JobService.JOB_END_NOTIFICATION_POLICY_DETACH);
                 } else {
-                    notificationManager.notify(NotificationUtils.DOWNLOAD_GIF_NOTIFICATION_ID + randomNotificationIdOffset,
+                    NotificationUtils.notifyIfPermitted(this, notificationManager, NotificationUtils.DOWNLOAD_GIF_NOTIFICATION_ID + randomNotificationIdOffset,
                             createNotification(builder, notificationTitle));
                 }
                 break;
@@ -451,7 +453,7 @@ public class DownloadMediaService extends JobService {
                             createNotification(builder, notificationTitle),
                             JobService.JOB_END_NOTIFICATION_POLICY_DETACH);
                 } else {
-                    notificationManager.notify(NotificationUtils.DOWNLOAD_VIDEO_NOTIFICATION_ID + randomNotificationIdOffset,
+                    NotificationUtils.notifyIfPermitted(this, notificationManager, NotificationUtils.DOWNLOAD_VIDEO_NOTIFICATION_ID + randomNotificationIdOffset,
                             createNotification(builder, notificationTitle));
                 }
                 break;
@@ -462,7 +464,7 @@ public class DownloadMediaService extends JobService {
                             createNotification(builder, notificationTitle),
                             JobService.JOB_END_NOTIFICATION_POLICY_DETACH);
                 } else {
-                    notificationManager.notify(NotificationUtils.DOWNLOAD_IMAGE_NOTIFICATION_ID + randomNotificationIdOffset,
+                    NotificationUtils.notifyIfPermitted(this, notificationManager, NotificationUtils.DOWNLOAD_IMAGE_NOTIFICATION_ID + randomNotificationIdOffset,
                             createNotification(builder, notificationTitle));
                 }
         }
@@ -606,6 +608,7 @@ public class DownloadMediaService extends JobService {
      * @param progressListener
      * @return true if download succeeded or false otherwise.
      */
+    @OptIn(markerClass = UnstableApi.class)
     private boolean downloadMedia(JobParameters params, @Nullable String fileUrl, PersistableBundle intent,
                             NotificationCompat.Builder builder, int mediaType, int randomNotificationIdOffset,
                             String fileName, String mimeType, @Nullable String subredditName, boolean isNsfw,
@@ -823,7 +826,7 @@ public class DownloadMediaService extends JobService {
                 builder.addAction(new NotificationCompat.Action(R.drawable.ic_notification, getString(R.string.delete), deleteActionPendingIntent));
             }
 
-            notificationManager.notify(getNotificationId(mediaType, randomNotificationIdOffset), builder.build());
+            NotificationUtils.notifyIfPermitted(this, notificationManager, getNotificationId(mediaType, randomNotificationIdOffset), builder.build());
         }
     }
 

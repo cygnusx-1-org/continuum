@@ -19,6 +19,7 @@ package ml.docilealligator.infinityforreddit.videoautoplay;
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.media3.common.Metadata;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
@@ -133,6 +134,7 @@ public interface Playable {
      *
      * @param listener the EventListener to add, must be not {@code null}.
      */
+    @OptIn(markerClass = UnstableApi.class)
     void addEventListener(@NonNull EventListener listener);
 
     /**
@@ -140,6 +142,7 @@ public interface Playable {
      *
      * @param listener the EventListener to be removed. If null, nothing happens.
      */
+    @OptIn(markerClass = UnstableApi.class)
     void removeEventListener(EventListener listener);
 
     /**

@@ -1,9 +1,14 @@
 package ml.docilealligator.infinityforreddit.utils;
 
+import android.Manifest;
+import android.app.Notification;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import ml.docilealligator.infinityforreddit.R;
 
 public class NotificationUtils {
@@ -89,5 +94,24 @@ public class NotificationUtils {
 
     public static int getNotificationIdUnreadMessage(int accountIndex, int messageIndex) {
         return NOTIFICATION_BASE_ID_UNREAD_MESSAGE + accountIndex * 1000 + messageIndex;
+    }
+
+    /**
+     * Posts a notification only when the app is actually allowed to. With POST_NOTIFICATIONS denied
+     * the system drops the notification anyway; doing the check here makes that explicit and gives
+     * lint's MissingPermission a guard in the same method as the notify() call, instead of one
+     * suppression per caller.
+     *
+     * <p>The SDK_INT half of the condition is load-bearing: POST_NOTIFICATIONS does not exist before
+     * API 33, where checkSelfPermission reports it denied, so testing the permission unconditionally
+     * would silence every service notification on Android 12 and below.
+     */
+    public static void notifyIfPermitted(Context context, NotificationManagerCompat manager, int id,
+                                         Notification notification) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                        == PackageManager.PERMISSION_GRANTED) {
+            manager.notify(id, notification);
+        }
     }
 }

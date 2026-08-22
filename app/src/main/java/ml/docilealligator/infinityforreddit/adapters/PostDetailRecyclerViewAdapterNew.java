@@ -1249,6 +1249,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         openMedia(post, 0, videoProgress);
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private void openMedia(@Nullable Post post, int galleryItemIndex, long videoProgress) {
         if (post == null) {
             return;

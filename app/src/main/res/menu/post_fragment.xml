@@ -4,6 +4,7 @@
     <item
         android:id="@+id/action_lazy_mode_post_fragment"
         android:orderInCategory="100"
+        android:title="@string/action_start_lazy_mode"
         app:showAsAction="never" />
 
     <item

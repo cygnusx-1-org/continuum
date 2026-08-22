@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -755,6 +756,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
+    /**
+     * {@code @SuppressLint("RecyclerView")}: the two places that really did treat the bind-time
+     * position as fixed are gone — {@link #onViewRecycled} now marks the holder's own bound post
+     * read instead of re-reading getItem(staleIndex), and the video fetch callbacks compare the
+     * bound post rather than a captured index. What lint still objects to is the gallery
+     * branches handing {@code post} (and the {@code preview} derived from it) to layout-change
+     * listeners that run later. Those capture the object, not an index, so they act on the right
+     * post however the list shifts; the detector cannot tell the two apart. Verified by bisection:
+     * removing the gallery branches' getItem(position) clears the error, the text branch's does
+     * not.
+     */
+    @SuppressLint("RecyclerView")
     @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
@@ -765,7 +778,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             ((PostViewHolder) holder).post = post;
-            ((PostViewHolder) holder).currentPosition = position;
 
             if (mHandleReadPost && post.isRead()) {
                 ((PostViewHolder) holder).setItemViewBackgroundColor(true);
@@ -1035,7 +1047,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                     }
 
-                    ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.loadVideo(position);
+                    ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.loadVideo();
                     applyTypeColor(((PostBaseVideoAutoplayViewHolder) holder).typeTextView, post.getPostType());
                 } else if (holder instanceof PostWithPreviewTypeViewHolder) {
                     if (post.getPostType() == Post.VIDEO_TYPE) {
@@ -1335,7 +1347,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             Post post = getItem(position);
             if (post != null) {
                 ((PostGalleryViewHolder) holder).post = post;
-                ((PostGalleryViewHolder) holder).currentPosition = position;
                 if (mHandleReadPost && post.isRead()) {
                     holder.itemView.setBackgroundTintList(ColorStateList.valueOf(mReadPostCardViewBackgroundColor));
                     ((PostGalleryViewHolder) holder).binding.titleTextViewItemPostGallery.setTextColor(mReadPostTitleColor);
@@ -1499,7 +1510,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             Post post = getItem(position);
             if (post != null) {
                 ((PostGalleryBaseGalleryTypeViewHolder) holder).post = post;
-                ((PostGalleryBaseGalleryTypeViewHolder) holder).currentPosition = position;
                 if (mHandleReadPost && post.isRead()) {
                     holder.itemView.setBackgroundTintList(ColorStateList.valueOf(mReadPostCardViewBackgroundColor));
                 }
@@ -1937,10 +1947,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
         if (holder instanceof PostViewHolder) {
             if (mHandleReadPost && mMarkPostsAsReadOnScroll) {
-                int position = ((PostViewHolder) holder).currentPosition;
-                if (position < getItemCount() && position >= 0) {
-                    Post post = getItem(position);
-                    if (post != null) { ((PostViewHolder) holder).markPostRead(post, false); }
+                // Read from the holder's own bound post, not from a position captured at bind
+                // time: by the time a holder is recycled the list may have shifted, and
+                // getItem(staleIndex) then marks a different post read. getBindingAdapterPosition()
+                // is not an option here either — it is NO_POSITION once the holder is recycled.
+                Post recycledPost = ((PostViewHolder) holder).post;
+                if (recycledPost != null) {
+                    ((PostViewHolder) holder).markPostRead(recycledPost, false);
                 }
             }
 
@@ -2037,10 +2050,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
         } else if (holder instanceof PostGalleryViewHolder) {
             if (mHandleReadPost && mMarkPostsAsReadOnScroll) {
-                int position = ((PostGalleryViewHolder) holder).currentPosition;
-                if (position < super.getItemCount() && position >= 0) {
-                    Post post = getItem(position);
-                    if (post != null) { ((PostGalleryViewHolder) holder).markPostRead(post, false); }
+                // Read from the holder's own bound post, not from a position captured at bind
+                // time: by the time a holder is recycled the list may have shifted, and
+                // getItem(staleIndex) then marks a different post read. getBindingAdapterPosition()
+                // is not an option here either — it is NO_POSITION once the holder is recycled.
+                Post recycledPost = ((PostGalleryViewHolder) holder).post;
+                if (recycledPost != null) {
+                    ((PostGalleryViewHolder) holder).markPostRead(recycledPost, false);
                 }
             }
             holder.itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
@@ -2055,10 +2071,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             ((PostGalleryViewHolder) holder).binding.imageViewNoPreviewItemPostGallery.setVisibility(View.GONE);
         } else if (holder instanceof PostGalleryBaseGalleryTypeViewHolder) {
             if (mHandleReadPost && mMarkPostsAsReadOnScroll) {
-                int position = ((PostGalleryBaseGalleryTypeViewHolder) holder).currentPosition;
-                if (position < super.getItemCount() && position >= 0) {
-                    Post post = getItem(position);
-                    if (post != null) { ((PostGalleryBaseGalleryTypeViewHolder) holder).markPostRead(post, false); }
+                // Read from the holder's own bound post, not from a position captured at bind
+                // time: by the time a holder is recycled the list may have shifted, and
+                // getItem(staleIndex) then marks a different post read. getBindingAdapterPosition()
+                // is not an option here either — it is NO_POSITION once the holder is recycled.
+                Post recycledPost = ((PostGalleryBaseGalleryTypeViewHolder) holder).post;
+                if (recycledPost != null) {
+                    ((PostGalleryBaseGalleryTypeViewHolder) holder).markPostRead(recycledPost, false);
                 }
             }
             holder.itemView.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
@@ -2158,6 +2177,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         openMedia(post, 0, videoProgress, false);
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private void openMedia(Post post, int galleryItemIndex, long videoProgress, boolean peekMedia) {
         if (canStartActivity) {
             canStartActivity = false;
@@ -2304,7 +2324,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         MaterialButton shareButton;
 
         Post post;
-        int currentPosition;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -3040,7 +3059,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (container != null) container.savePlaybackInfo(order, playbackInfo);
         }
 
-        void loadVideo(int position) {
+        /**
+         * The fetch callbacks below re-check that this holder is still showing the post the
+         * fetch was started for. That used to be a position captured at bind time compared
+         * against getAdapterPosition(); comparing the post itself says what is actually meant
+         * and stays right when the list shifts under a holder that never rebound.
+         */
+        void loadVideo() {
             Post post = getPost();
             /*if (post.isRedgifs() && !post.isLoadedStreamableVideoAlready()) {
                 fetchRedgifsOrStreamableVideoCall =
@@ -3056,14 +3081,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 post.setVideoDownloadUrl(mp4);
                                 post.setVideoUrl(mp4);
                                 post.setLoadedStreamableVideoAlready(true);
-                                if (position == getAdapterPosition()) {
+                                if (post == getPost()) {
                                     bindVideoUri(Uri.parse(post.getVideoUrl()));
                                 }
                             }
 
                             @Override
                             public void failed(@Nullable Integer messageRes) {
-                                if (position == getAdapterPosition()) {
+                                if (post == getPost()) {
                                     loadFallbackDirectVideo();
                                 }
                             }
@@ -3085,14 +3110,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     post.setVideoDownloadUrl(media.url);
                                     post.setVideoUrl(media.url);
                                     post.setLoadedStreamableVideoAlready(true);
-                                    if (position == getAdapterPosition()) {
+                                    if (post == getPost()) {
                                         bindVideoUri(Uri.parse(post.getVideoUrl()));
                                     }
                                 }
 
                                 @Override
                                 public void failed(@Nullable Integer messageRes) {
-                                    if (position == getAdapterPosition()) {
+                                    if (post == getPost()) {
                                         loadFallbackDirectVideo();
                                     }
                                 }
@@ -4918,8 +4943,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Nullable
         Post.Preview preview;
 
-        int currentPosition;
-
         public PostGalleryViewHolder(@NonNull ItemPostGalleryBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
@@ -5028,8 +5051,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         Post post;
         @Nullable
         Post.Preview preview;
-
-        int currentPosition;
 
         public PostGalleryBaseGalleryTypeViewHolder(@NonNull View itemView,
                                                     FrameLayout frameLayout,

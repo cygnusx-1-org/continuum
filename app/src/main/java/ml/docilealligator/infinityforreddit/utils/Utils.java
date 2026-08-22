@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -44,6 +46,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import io.noties.markwon.core.spans.CustomTypefaceSpan;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -784,6 +787,51 @@ public final class Utils {
         } else {
             Insets originalInsets = insets.getInsets(insetTypes);
             return forcedImmersiveMode ? Insets.of(0, 0, 0, originalInsets.bottom) : originalInsets;
+        }
+    }
+
+    /**
+     * Tints an {@link EditText}'s text cursor. In practice this is the API 24-28 path.
+     *
+     * <p>Consolidates four identical copies that each reflected into
+     * {@code TextView.mCursorDrawableRes} and swallowed any failure with {@code catch (Throwable)}.
+     * Every current caller reaches this from the {@code else} of an {@code SDK_INT >= Q} check,
+     * because {@code TextInputLayout.setCursorColor} already covers API 29+ — so the reflection has
+     * never run on a device new enough for targetSdk 35 to block it.
+     *
+     * <p>The {@code setTextCursorDrawable} branch below is therefore unreachable from every call
+     * site as they stand. It is kept so that a caller added later without the SDK guard gets a
+     * working tint instead of a silently swallowed reflection failure.
+     */
+    public static void setCursorDrawableColor(EditText editText, int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Drawable cursor = editText.getTextCursorDrawable();
+            if (cursor != null) {
+                Drawable tinted = cursor.mutate();
+                tinted.setTint(color);
+                editText.setTextCursorDrawable(tinted);
+            }
+            return;
+        }
+        try {
+            @SuppressLint("SoonBlockedPrivateApi") // unreachable above API 28, where it is not blocked
+            Field fCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+            fCursorDrawableRes.setAccessible(true);
+            int mCursorDrawableRes = fCursorDrawableRes.getInt(editText);
+            Field fEditor = TextView.class.getDeclaredField("mEditor");
+            fEditor.setAccessible(true);
+            Object editor = fEditor.get(editText);
+            Class<?> clazz = editor.getClass();
+            Field fCursorDrawable = clazz.getDeclaredField("mCursorDrawable");
+            fCursorDrawable.setAccessible(true);
+            Drawable[] drawables = new Drawable[2];
+            drawables[0] = editText.getContext().getResources().getDrawable(mCursorDrawableRes);
+            drawables[1] = editText.getContext().getResources().getDrawable(mCursorDrawableRes);
+            drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            fCursorDrawable.set(editor, drawables);
+        } catch (Throwable ignored) {
+            Log.d("Utils", "setCursorDrawableColor: ignoring Throwable", ignored);
         }
     }
 }

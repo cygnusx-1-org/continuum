@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- tools:ignore="BottomAppBar": this file is <include>d into layouts that supply the
+     CoordinatorLayout (app_bar_main.xml, activity_view_subreddit_detail.xml and two more).
+     Lint cannot see through the include; wrapping one here would nest a second one. -->
 <com.google.android.material.bottomappbar.BottomAppBar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="BottomAppBar"
     android:id="@+id/bottom_app_bar_bottom_app_bar"
     android:layout_width="match_parent"
     android:layout_height="48dp"
