@@ -205,6 +205,8 @@
                 android:gravity="top"
                 android:hint="@string/post_title_hint"
                 android:inputType="textCapSentences|textMultiLine"
+                android:nextFocusLeft="@id/post_title_edit_text_submit_crosspost_activity"
+                android:nextFocusRight="@id/post_title_edit_text_submit_crosspost_activity"
                 android:padding="16dp"
                 android:textColor="?attr/primaryTextColor"
                 android:textSize="?attr/title_font_18"

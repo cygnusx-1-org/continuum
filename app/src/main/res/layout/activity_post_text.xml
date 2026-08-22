@@ -203,6 +203,8 @@
                     android:gravity="top"
                     android:hint="@string/post_title_hint"
                     android:inputType="textCapSentences|textMultiLine"
+                    android:nextFocusLeft="@id/post_title_edit_text_post_text_activity"
+                    android:nextFocusRight="@id/post_title_edit_text_post_text_activity"
                     android:padding="16dp"
                     android:textSize="?attr/title_font_18"
                     android:textStyle="bold"
@@ -216,6 +218,8 @@
                     android:gravity="top"
                     android:hint="@string/post_text_content_hint"
                     android:inputType="textCapSentences|textMultiLine"
+                    android:nextFocusLeft="@id/post_text_content_edit_text_post_text_activity"
+                    android:nextFocusRight="@id/post_text_content_edit_text_post_text_activity"
                     android:padding="16dp"
                     android:textSize="?attr/content_font_18"
                     android:fontFamily="?attr/content_font_family" />

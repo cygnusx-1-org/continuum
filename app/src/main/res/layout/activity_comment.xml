@@ -100,6 +100,8 @@
                     android:gravity="top"
                     android:hint="@string/write_comment_hint"
                     android:inputType="textCapSentences|textMultiLine"
+                    android:nextFocusLeft="@id/comment_comment_edit_text"
+                    android:nextFocusRight="@id/comment_comment_edit_text"
                     android:padding="16dp"
                     android:textColor="?attr/primaryTextColor"
                     android:textSize="?attr/content_font_18"

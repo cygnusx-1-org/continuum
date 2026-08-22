@@ -63,6 +63,8 @@
                     android:padding="16dp"
                     android:hint="@string/post_text_content_hint"
                     android:inputType="textCapSentences|textMultiLine"
+                    android:nextFocusLeft="@id/post_content_edit_text_edit_post_activity"
+                    android:nextFocusRight="@id/post_content_edit_text_edit_post_activity"
                     android:textSize="?attr/content_font_18"
                     android:background="#00000000"
                     android:textColor="?attr/primaryTextColor"

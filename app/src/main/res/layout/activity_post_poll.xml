@@ -207,6 +207,8 @@
                     android:gravity="top"
                     android:hint="@string/post_title_hint"
                     android:inputType="textCapSentences|textMultiLine"
+                    android:nextFocusLeft="@id/post_title_edit_text_post_poll_activity"
+                    android:nextFocusRight="@id/post_title_edit_text_post_poll_activity"
                     android:padding="16dp"
                     android:textSize="?attr/title_font_18"
                     android:textStyle="bold"
@@ -220,6 +222,8 @@
                     android:gravity="top"
                     android:hint="@string/post_optional_text_content_hint"
                     android:inputType="textCapSentences|textMultiLine"
+                    android:nextFocusLeft="@id/post_content_edit_text_post_poll_activity"
+                    android:nextFocusRight="@id/post_content_edit_text_post_poll_activity"
                     android:padding="16dp"
                     android:textSize="?attr/content_font_18"
                     android:fontFamily="?attr/content_font_family" />
@@ -262,6 +266,8 @@
                         android:id="@+id/option_1_text_input_layout_edit_text_post_poll_activity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:nextFocusLeft="@id/option_1_text_input_layout_edit_text_post_poll_activity"
+                        android:nextFocusRight="@id/option_1_text_input_layout_edit_text_post_poll_activity"
                         android:fontFamily="?attr/font_family"
                         android:textSize="?attr/font_default"
                         android:hint="@string/option_1_hint" />
@@ -282,6 +288,8 @@
                         android:id="@+id/option_2_text_input_layout_edit_text_post_poll_activity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:nextFocusLeft="@id/option_2_text_input_layout_edit_text_post_poll_activity"
+                        android:nextFocusRight="@id/option_2_text_input_layout_edit_text_post_poll_activity"
                         android:fontFamily="?attr/font_family"
                         android:textSize="?attr/font_default"
                         android:hint="@string/option_2_hint" />
@@ -302,6 +310,8 @@
                         android:id="@+id/option_3_text_input_layout_edit_text_post_poll_activity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:nextFocusLeft="@id/option_3_text_input_layout_edit_text_post_poll_activity"
+                        android:nextFocusRight="@id/option_3_text_input_layout_edit_text_post_poll_activity"
                         android:fontFamily="?attr/font_family"
                         android:textSize="?attr/font_default"
                         android:hint="@string/option_3_hint" />
@@ -322,6 +332,8 @@
                         android:id="@+id/option_4_text_input_layout_edit_text_post_poll_activity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:nextFocusLeft="@id/option_4_text_input_layout_edit_text_post_poll_activity"
+                        android:nextFocusRight="@id/option_4_text_input_layout_edit_text_post_poll_activity"
                         android:fontFamily="?attr/font_family"
                         android:textSize="?attr/font_default"
                         android:hint="@string/option_4_hint" />
@@ -342,6 +354,8 @@
                         android:id="@+id/option_5_text_input_layout_edit_text_post_poll_activity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:nextFocusLeft="@id/option_5_text_input_layout_edit_text_post_poll_activity"
+                        android:nextFocusRight="@id/option_5_text_input_layout_edit_text_post_poll_activity"
                         android:fontFamily="?attr/font_family"
                         android:textSize="?attr/font_default"
                         android:hint="@string/option_5_hint" />
@@ -362,6 +376,8 @@
                         android:id="@+id/option_6_text_input_layout_edit_text_post_poll_activity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:nextFocusLeft="@id/option_6_text_input_layout_edit_text_post_poll_activity"
+                        android:nextFocusRight="@id/option_6_text_input_layout_edit_text_post_poll_activity"
                         android:fontFamily="?attr/font_family"
                         android:textSize="?attr/font_default"
                         android:hint="@string/option_6_hint" />

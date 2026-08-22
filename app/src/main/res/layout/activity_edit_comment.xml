@@ -43,6 +43,8 @@
                 android:gravity="top"
                 android:hint="@string/post_text_content_hint"
                 android:inputType="textCapSentences|textMultiLine"
+                android:nextFocusLeft="@id/comment_edit_text_edit_comment_activity"
+                android:nextFocusRight="@id/comment_edit_text_edit_comment_activity"
                 android:padding="16dp"
                 android:textColor="?attr/primaryTextColor"
                 android:textSize="?attr/content_font_18"
