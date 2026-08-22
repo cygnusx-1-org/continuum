@@ -53,6 +53,7 @@ import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
 import java.util.Locale
+import kotlin.random.Random
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class ViewPostDetailFragmentViewModelNew(
@@ -138,6 +139,13 @@ class ViewPostDetailFragmentViewModelNew(
     val commentModerationEventLiveData: SingleLiveEvent<CommentModerationEvent> = SingleLiveEvent()
 
     private var fetchCommentJob: Job? = null
+
+    /**
+     * Selects which comment `limit` — and so which of Reddit's cached comment trees — a fetch
+     * reads. Seeded randomly so that re-opening a post does not return to the slot the previous
+     * visit used, and bumped by every explicit refresh. See [commentLimitFor].
+     */
+    private var commentFetchNonce: Int = Random.nextInt(COMMENT_LIMIT_MAX)
 
     val derivedPostId: String?
         get() = _dataState.value.post?.id ?: postId
@@ -312,6 +320,69 @@ class ViewPostDetailFragmentViewModelNew(
         }
     }
 
+    /**
+     * Picks the `limit` to send with a comment fetch.
+     *
+     * Reddit builds the comment tree per (link, sort, limit) and caches the result, and that
+     * cache can miss an invalidation: a reply lands, the entry is never rebuilt, and the reply
+     * is simply absent from the response — with no "more" node to expand, so the post looks
+     * like it never received the comment. `limit` therefore does two jobs. It caps how many
+     * comments come back, and it selects which cached tree is read; a two-comment thread is
+     * hit by the second job alone, which is why asking for 2 can return more than asking for
+     * 200. Omitting it puts every client on the shared num=200 slot, which is both the most
+     * contended one and the one this app used to read on every fetch *and* every refresh, so
+     * a poisoned slot was unrecoverable from the UI.
+     *
+     * The limit is drawn from the [COMMENT_LIMIT_STEP] band directly above the post's comment
+     * count, capped at [COMMENT_LIMIT_MAX] (Reddit clamps anything larger and returns 499
+     * comments either way). Every value in that band returns the whole thread, so which one is
+     * used is free — but each is a separate cache slot. Staying in the band keeps a small
+     * thread's request sized to the thread instead of always asking for 500.
+     *
+     * [nonce] picks within the band. It is seeded randomly per post view and bumped by every
+     * refresh, so neither re-opening a post nor refreshing it re-reads the slot that just came
+     * back stale — the "I pull down to refresh but it still doesn't show" in the report. The
+     * one thread size with no room to move is exactly [COMMENT_LIMIT_MAX] - 1 comments, where
+     * 500 is the only limit that still returns all of them.
+     */
+    private fun commentLimitFor(numComments: Int, nonce: Int): Int {
+        val bucket = minOf(
+            COMMENT_LIMIT_MAX,
+            (numComments / COMMENT_LIMIT_STEP + 1) * COMMENT_LIMIT_STEP
+        )
+
+        if (bucket < COMMENT_LIMIT_MAX) {
+            // 200 is Reddit's own slot, shared with every client that omits `limit`. Drop it
+            // from the band rather than remapping onto it, which would make two nonces pick
+            // the same slot and cost a refresh its escape.
+            val skipsDefault = bucket == COMMENT_LIMIT_DEFAULT
+            val limit = bucket + nonce.mod(COMMENT_LIMIT_STEP - if (skipsDefault) 1 else 0)
+            return if (skipsDefault) limit + 1 else limit
+        }
+
+        // The band is already at the ceiling, so move down from it instead — but never below
+        // the comment count, or a fetch would push comments that fit before behind a "more"
+        // node. A thread at or over the ceiling is truncated at 499 whatever we ask for, so
+        // the whole last step is fair game; one just under it has less room, and at exactly
+        // 499 comments none at all.
+        val lowest = if (numComments >= COMMENT_LIMIT_MAX) {
+            COMMENT_LIMIT_MAX - COMMENT_LIMIT_STEP + 1
+        } else {
+            maxOf(COMMENT_LIMIT_MAX - COMMENT_LIMIT_STEP + 1, numComments + 1)
+        }
+        return COMMENT_LIMIT_MAX - nonce.mod(COMMENT_LIMIT_MAX - lowest + 1)
+    }
+
+    /**
+     * The limit for the post currently loaded. When the post is not loaded yet the comment
+     * count is unknown, so this falls back to the top band — near as much of the thread as
+     * Reddit will return in one response.
+     */
+    private fun currentCommentLimit(): Int = commentLimitFor(
+        _dataState.value.post?.getNComments() ?: COMMENT_LIMIT_MAX,
+        commentFetchNonce
+    )
+
     suspend fun fetchComments(
         changeRefreshState: Boolean
     ) {
@@ -350,6 +421,7 @@ class ViewPostDetailFragmentViewModelNew(
 
         val retrofit: Retrofit = if (accountName == Account.ANONYMOUS_ACCOUNT) retrofit else oauthRetrofit
         val api: RedditAPIKt = retrofit.create(RedditAPIKt::class.java)
+        val limit = currentCommentLimit()
         val response: Response<String>
         try {
             if (accountName == Account.ANONYMOUS_ACCOUNT) {
@@ -360,7 +432,7 @@ class ViewPostDetailFragmentViewModelNew(
                         sortType,
                         contextNumber
                     )
-                } ?: api.getPostAndCommentsById(derivedPostId, sortType)
+                } ?: api.getPostAndCommentsById(derivedPostId, sortType, limit)
             } else {
                 response = _uiState.value.singleCommentId?.let { commentId ->
                     api.getPostAndCommentsSingleThreadByIdOauth(
@@ -370,6 +442,7 @@ class ViewPostDetailFragmentViewModelNew(
                 } ?: api.getPostAndCommentsByIdOauth(
                     derivedPostId,
                     sortType,
+                    limit,
                     APIUtils.getOAuthHeader(accessToken)
                 )
             }
@@ -431,6 +504,7 @@ class ViewPostDetailFragmentViewModelNew(
                         shouldShowErrorView = false
                     )
 
+                    val limit = currentCommentLimit()
                     val response: Response<String>
                     if (accountName == Account.ANONYMOUS_ACCOUNT) {
                         response = _uiState.value.singleCommentId?.let { singleCommentId ->
@@ -442,13 +516,15 @@ class ViewPostDetailFragmentViewModelNew(
                             } else {
                                 retrofit.create(RedditAPIKt::class.java).getPostAndCommentsById(
                                     postId,
-                                    getSortType()
+                                    getSortType(),
+                                    limit
                                 )
                             }
                         } ?: run {
                             retrofit.create(RedditAPIKt::class.java).getPostAndCommentsById(
                                 postId,
-                                getSortType()
+                                getSortType(),
+                                limit
                             )
                         }
                     } else {
@@ -465,13 +541,13 @@ class ViewPostDetailFragmentViewModelNew(
                             } else {
                                 oauthRetrofit.create(RedditAPIKt::class.java)
                                     .getPostAndCommentsByIdOauth(
-                                        postId, getSortType(), APIUtils.getOAuthHeader(accessToken)
+                                        postId, getSortType(), limit, APIUtils.getOAuthHeader(accessToken)
                                     )
                             }
                         } ?: run {
                             oauthRetrofit.create(RedditAPIKt::class.java)
                                 .getPostAndCommentsByIdOauth(
-                                    postId, getSortType(), APIUtils.getOAuthHeader(accessToken)
+                                    postId, getSortType(), limit, APIUtils.getOAuthHeader(accessToken)
                                 )
                         }
                     }
@@ -865,6 +941,10 @@ class ViewPostDetailFragmentViewModelNew(
     fun refresh(fetchPost: Boolean, fetchComments: Boolean) {
         viewModelScope.launch {
             if (!_uiState.value.isRefreshing) {
+                // Move off the comment `limit` the previous read used, so a refresh cannot be
+                // answered from the same cached comment tree. See [commentLimitFor].
+                commentFetchNonce++
+
                 _uiState.value = _uiState.value.copy(
                     isRefreshing = true,
                     shouldShowErrorView = false
@@ -2343,6 +2423,15 @@ class ViewPostDetailFragmentViewModelNew(
     }
 
     companion object {
+        /** Reddit clamps the comment `limit` here; anything larger returns the same 499 comments. */
+        private const val COMMENT_LIMIT_MAX = 500
+
+        /** What Reddit uses when `limit` is omitted — the shared, most contended cache entry. */
+        private const val COMMENT_LIMIT_DEFAULT = 200
+
+        /** Width of the band of comment `limit` values a thread's fetches rotate through. */
+        private const val COMMENT_LIMIT_STEP = 50
+
         fun provideFactory(retrofit: Retrofit, oauthRetrofit: Retrofit,
                            redditDataRoomDatabase: RedditDataRoomDatabase,
                            accessToken: String?, accountName: String,

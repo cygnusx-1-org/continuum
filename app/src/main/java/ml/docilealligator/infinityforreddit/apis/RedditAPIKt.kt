@@ -63,6 +63,7 @@ interface RedditAPIKt {
     @GET("/comments/{id}.json?raw_json=1")
     suspend fun getPostAndCommentsByIdOauth(
         @Path("id") id: String, @Query("sort") sortType: SortType.Type?,
+        @Query("limit") limit: Int,
         @HeaderMap headers: Map<String, String>
     ): Response<String>
 
@@ -75,7 +76,8 @@ interface RedditAPIKt {
     @GET("/comments/{id}.json?raw_json=1")
     suspend fun getPostAndCommentsById(
         @Path("id") id: String,
-        @Query("sort") sortType: SortType.Type?
+        @Query("sort") sortType: SortType.Type?,
+        @Query("limit") limit: Int
     ): Response<String>
 
     @FormUrlEncoded
