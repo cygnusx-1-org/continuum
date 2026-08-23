@@ -15,6 +15,8 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -80,6 +82,7 @@ public class SearchActivity extends BaseActivity {
     private static final String SEARCH_IN_SUBREDDIT_OR_NAME_STATE = "SNS";
     private static final String SEARCH_IN_THING_TYPE_STATE = "SITTS";
     private static final String SEARCH_IN_MULTIREDDIT_STATE = "SIMS";
+    private static final String INCOGNITO_KEYBOARD_STATE = "IKS";
 
     private static final int SUBREDDIT_SEARCH_REQUEST_CODE = 1;
     private static final int USER_SEARCH_REQUEST_CODE = 2;
@@ -116,6 +119,7 @@ public class SearchActivity extends BaseActivity {
     private boolean searchOnlySubreddits;
     private boolean searchOnlyUsers;
     private boolean searchSubredditsAndUsers;
+    private boolean incognitoKeyboard;
     @SuppressWarnings("NullAway.Init")
     private SearchActivityRecyclerViewAdapter adapter;
     private SubredditAutocompleteRecyclerViewAdapter subredditAutocompleteRecyclerViewAdapter;
@@ -217,8 +221,21 @@ public class SearchActivity extends BaseActivity {
             finish();
         });
 
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            binding.searchEditTextSearchActivity.setImeOptions(binding.searchEditTextSearchActivity.getImeOptions() | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setIncognitoKeyboard(savedInstanceState != null && savedInstanceState.getBoolean(INCOGNITO_KEYBOARD_STATE, false));
+
+            binding.incognitoKeyboardImageViewSearchActivity.setOnClickListener(view -> {
+                setIncognitoKeyboard(!incognitoKeyboard);
+                // A Snackbar would be drawn at the bottom of the root layout, which the keyboard
+                // covers for the whole life of this activity.
+                Toast.makeText(this,
+                        incognitoKeyboard ? R.string.incognito_keyboard_on : R.string.incognito_keyboard_off,
+                        Toast.LENGTH_SHORT).show();
+            });
+        } else {
+            // IME_FLAG_NO_PERSONALIZED_LEARNING does nothing before Android O. Keep the icon's space
+            // reserved so the toolbar measures identically on every API level.
+            binding.incognitoKeyboardImageViewSearchActivity.setVisibility(View.INVISIBLE);
         }
 
         handler = new Handler();
@@ -512,6 +529,32 @@ public class SearchActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Turns the keyboard's incognito mode on or off for the search field. The state is deliberately
+     * not persisted: it lasts no longer than this activity, and starts off every time the screen is
+     * opened, whether the account is anonymous or logged in.
+     */
+    private void setIncognitoKeyboard(boolean incognito) {
+        incognitoKeyboard = incognito;
+
+        int imeOptions = binding.searchEditTextSearchActivity.getImeOptions();
+        binding.searchEditTextSearchActivity.setImeOptions(incognito
+                ? imeOptions | EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
+                : imeOptions & ~EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING);
+
+        // The IME reads EditorInfo once, when the input connection is created, so it has to be told
+        // to pick up the new flag.
+        InputMethodManager inputMethodManager = getSystemService(InputMethodManager.class);
+        if (inputMethodManager != null) {
+            inputMethodManager.restartInput(binding.searchEditTextSearchActivity);
+        }
+
+        binding.incognitoKeyboardImageViewSearchActivity.setAlpha(incognito ? 1f : 0.5f);
+        binding.incognitoKeyboardImageViewSearchActivity.setContentDescription(getString(incognito
+                ? R.string.content_description_incognito_keyboard_on
+                : R.string.content_description_incognito_keyboard_off));
+    }
+
     private void setSearchInThingText() {
         switch (searchInThingType) {
             case SelectThingReturnKey.THING_TYPE.SUBREDDIT:
@@ -552,6 +595,7 @@ public class SearchActivity extends BaseActivity {
         binding.searchEditTextSearchActivity.setHintTextColor(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor());
         binding.clearSearchEditViewSearchActivity.setColorFilter(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
         binding.linkHandlerImageViewSearchActivity.setColorFilter(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+        binding.incognitoKeyboardImageViewSearchActivity.setColorFilter(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
         int colorAccent = mCustomThemeWrapper.getColorAccent();
         binding.searchInTextViewSearchActivity.setTextColor(colorAccent);
         binding.subredditNameTextViewSearchActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
@@ -632,6 +676,7 @@ public class SearchActivity extends BaseActivity {
         outState.putString(SEARCH_IN_SUBREDDIT_OR_NAME_STATE, searchInSubredditOrUserName);
         outState.putInt(SEARCH_IN_THING_TYPE_STATE, searchInThingType);
         outState.putParcelable(SEARCH_IN_MULTIREDDIT_STATE, searchInMultiReddit);
+        outState.putBoolean(INCOGNITO_KEYBOARD_STATE, incognitoKeyboard);
     }
 
     @Override

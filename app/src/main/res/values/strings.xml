@@ -390,6 +390,8 @@
     <string name="gallery">GALLERY</string>
     <string name="best">Best</string>
     <string name="search">Search</string>
+    <string name="incognito_keyboard_on">Incognito keyboard on. The keyboard will not learn what you type here.</string>
+    <string name="incognito_keyboard_off">Incognito keyboard off</string>
 
     <string name="other_discussions">Other Discussions</string>
     <string name="other_discussions_self_post">Text posts have no other discussions</string>
@@ -1822,6 +1824,8 @@
     <string name="content_description_select_video">Select video</string>
     <string name="content_description_delete_texts">Delete texts</string>
     <string name="content_description_handle_link">Handle link</string>
+    <string name="content_description_incognito_keyboard_on">Incognito keyboard on</string>
+    <string name="content_description_incognito_keyboard_off">Incognito keyboard off</string>
     <string name="content_description_submit_post">Submit post</string>
     <string name="content_description_refresh">Refresh</string>
     <string name="content_description_change_sort_type">Change sort type</string>

@@ -60,6 +60,17 @@
                     android:background="?attr/actionBarItemBackground"
                     android:contentDescription="@string/content_description_handle_link" />
 
+                <ImageView
+                    android:id="@+id/incognito_keyboard_image_view_search_activity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_incognito_24dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/actionBarItemBackground"
+                    android:contentDescription="@string/content_description_incognito_keyboard_off" />
+
             </LinearLayout>
 
         </androidx.appcompat.widget.Toolbar>
