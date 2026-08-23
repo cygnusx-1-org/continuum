@@ -7,6 +7,9 @@
 Note v8a is the 64-bit build, and should be considered the default choice.
 
 * Fixed viewing my/other profile autoshutdowns/kills the app #369
+* Implemented New Windows or Tab feature #327
+
+There is a new Open in New Window feature in the long press/Bottom Sheet menu for posts. Though the issue title mentioned tabs it is a new window only feature.
 
 8.2.5.9.9.9.4 / 2026-8-21
 ============
