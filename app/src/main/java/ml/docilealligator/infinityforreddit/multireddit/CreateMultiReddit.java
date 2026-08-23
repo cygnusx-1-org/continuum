@@ -64,9 +64,7 @@ public class CreateMultiReddit {
                                                   List<ExpandedSubredditInMultiReddit> subreddits,
                                                   CreateMultiRedditListener createMultiRedditListener) {
         executor.execute(() -> {
-            if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
-                redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount());
-            }
+            redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
             if (redditDataRoomDatabase.multiRedditDao().getMultiReddit(multipath, Account.ANONYMOUS_ACCOUNT) == null) {
                 redditDataRoomDatabase.multiRedditDao().insert(new MultiReddit(multipath, name, name, description,
                         null, null, "private", Account.ANONYMOUS_ACCOUNT, 0, System.currentTimeMillis(), true, false, false));

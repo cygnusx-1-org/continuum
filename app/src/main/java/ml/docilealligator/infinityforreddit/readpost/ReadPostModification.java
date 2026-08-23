@@ -16,9 +16,7 @@ public class ReadPostModification {
                 readPostDao.deleteOldestReadPosts(username, readPostType);
             }
             if (username != null && !username.isEmpty()) {
-                if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
-                    redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount());
-                }
+                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
 
                 readPostDao.insert(new ReadPost(username, postId, readPostType));
                 if (readPostType == ReadPostType.ANONYMOUS_UPVOTED_POSTS) {

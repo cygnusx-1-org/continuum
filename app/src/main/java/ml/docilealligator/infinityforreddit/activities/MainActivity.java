@@ -62,7 +62,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -173,6 +175,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @Inject
     @Named("oauth")
     Retrofit mOauthRetrofit;
+    @Inject
+    @Named("no_oauth")
+    Retrofit mRetrofit;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -1945,14 +1950,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
-                    return;
-                }
-
                 String currentQuery = editable.toString().trim();
                 if (!currentQuery.isEmpty()) {
                     autoCompleteRunnable = () -> {
-                        subredditAutocompleteCall = mOauthRetrofit.create(RedditAPI.class).subredditAutocomplete(APIUtils.getOAuthHeader(accessToken),
+                        boolean anonymous = accountName.equals(Account.ANONYMOUS_ACCOUNT);
+                        Retrofit autocompleteRetrofit = anonymous ? mRetrofit : mOauthRetrofit;
+                        Map<String, String> autocompleteHeaders = anonymous ? new HashMap<>() : APIUtils.getOAuthHeader(accessToken);
+                        subredditAutocompleteCall = autocompleteRetrofit.create(RedditAPI.class).subredditAutocomplete(autocompleteHeaders,
                                 currentQuery, nsfw);
                         subredditAutocompleteCall.enqueue(new Callback<>() {
                             @Override

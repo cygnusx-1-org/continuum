@@ -179,9 +179,7 @@ public class RestoreSettings {
                                     result = result && imported;
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {
-                                if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
-                                    redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount());
-                                }
+                                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
 
                                 File anonymousSubscribedSubredditsFile = new File(f.getAbsolutePath() + "/anonymous_subscribed_subreddits.json");
                                 File anonymousSubscribedUsersFile = new File(f.getAbsolutePath() + "/anonymous_subscribed_users.json");

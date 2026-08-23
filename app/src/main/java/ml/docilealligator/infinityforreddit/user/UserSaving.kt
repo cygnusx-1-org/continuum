@@ -24,10 +24,8 @@ object UserSaving {
         listener: UserSavingListener
     ) {
         executor.execute {
-            if (accountName == Account.ANONYMOUS_ACCOUNT
-                && !redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()
-            ) {
-                redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount())
+            if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount())
             }
             val dao = redditDataRoomDatabase.subscribedUserDao()
             // The entity treats "no icon" as an empty string, not null.

@@ -19,9 +19,7 @@ suspend fun insertReadPost(
             readPostDaoKt.deleteOldestReadPosts(username, readPostType)
         }
 
-        if (!redditDataRoomDatabase.accountDaoKt().isAnonymousAccountInserted()) {
-            redditDataRoomDatabase.accountDaoKt().insert(Account.getAnonymousAccount())
-        }
+        redditDataRoomDatabase.accountDaoKt().insertIfNotExists(Account.getAnonymousAccount())
 
         readPostDaoKt.insert(ReadPost(username, postId, readPostType))
         if (readPostType == ReadPostType.ANONYMOUS_UPVOTED_POSTS) {

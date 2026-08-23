@@ -13,8 +13,11 @@ public interface AccountDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Account account);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM accounts WHERE username = '-')")
-    boolean isAnonymousAccountInserted();
+    // REPLACE would delete the existing row first, taking every ON DELETE CASCADE child (read posts,
+    // subscriptions, search history) and the stored anonymous access token with it. Use this when the
+    // row is only needed to satisfy a foreign key and an existing one must be left alone.
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insertIfNotExists(Account account);
 
     // Ordered so the account chooser's rows keep a stable, predictable position across re-emissions
     // of this LiveData, and match the order the navigation drawer already uses.

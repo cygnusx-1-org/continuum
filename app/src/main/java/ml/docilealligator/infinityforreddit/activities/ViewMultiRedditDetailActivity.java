@@ -29,6 +29,8 @@ import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -733,14 +735,13 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
-                    return;
-                }
-
                 String currentQuery = editable.toString().trim();
                 if (!currentQuery.isEmpty()) {
                     autoCompleteRunnable = () -> {
-                        subredditAutocompleteCall = mOauthRetrofit.create(RedditAPI.class).subredditAutocomplete(APIUtils.getOAuthHeader(accessToken),
+                        boolean anonymous = accountName.equals(Account.ANONYMOUS_ACCOUNT);
+                        Retrofit autocompleteRetrofit = anonymous ? mRetrofit : mOauthRetrofit;
+                        Map<String, String> autocompleteHeaders = anonymous ? new HashMap<>() : APIUtils.getOAuthHeader(accessToken);
+                        subredditAutocompleteCall = autocompleteRetrofit.create(RedditAPI.class).subredditAutocomplete(autocompleteHeaders,
                                 currentQuery, nsfw);
                         subredditAutocompleteCall.enqueue(new Callback<>() {
                             @Override

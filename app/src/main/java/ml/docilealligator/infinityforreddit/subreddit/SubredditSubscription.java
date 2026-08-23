@@ -133,9 +133,7 @@ public class SubredditSubscription {
             SubscribedSubredditData subscribedSubredditData = new SubscribedSubredditData(subredditData.getId(), subredditData.getName(),
                     subredditData.getIconUrl(), accountName, false);
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
-                    redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount());
-                }
+                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
             }
             redditDataRoomDatabase.subscribedSubredditDao().insert(subscribedSubredditData);
             handler.post(subredditSubscriptionListener::onSubredditSubscriptionSuccess);
@@ -148,9 +146,7 @@ public class SubredditSubscription {
                                            SubredditSubscriptionListener subredditSubscriptionListener) {
         executor.execute(() -> {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                if (!redditDataRoomDatabase.accountDao().isAnonymousAccountInserted()) {
-                    redditDataRoomDatabase.accountDao().insert(Account.getAnonymousAccount());
-                }
+                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
             }
             redditDataRoomDatabase.subscribedSubredditDao().deleteSubscribedSubreddit(subredditName, accountName);
             handler.post(subredditSubscriptionListener::onSubredditSubscriptionSuccess);

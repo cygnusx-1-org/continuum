@@ -10,8 +10,11 @@ interface AccountDaoKt {
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insert(account: Account)
 
-    @Query("SELECT EXISTS (SELECT 1 FROM accounts WHERE username = '-')")
-    suspend fun isAnonymousAccountInserted(): Boolean
+    // REPLACE would delete the existing row first, taking every ON DELETE CASCADE child (read posts,
+    // subscriptions, search history) and the stored anonymous access token with it. Use this when the
+    // row is only needed to satisfy a foreign key and an existing one must be left alone.
+    @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
+    suspend fun insertIfNotExists(account: Account)
 
     @Query("UPDATE accounts SET is_current_user = 0 WHERE is_current_user = 1 AND username != '-'")
     suspend fun markAllAccountsNonCurrent()
