@@ -533,8 +533,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Aplicat pe: Fundalul comentariilor"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Culoarea de Fundal a Comentariilor Restrânse Complet"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Aplicat pe: Fundalul comentariilor restrânse complet"</string>
-    <string name="theme_item_awarded_comment_background_color">"Culoarea de Fundal a Comentariilor Premiate"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Aplicat pe: Fundalul comentariilor premiate"</string>
     <string name="theme_item_received_message_background_color">"Culoarea de Fundal a Mesajelor Primite"</string>
     <string name="theme_item_received_message_background_color_detail">"Aplicat pe: Fundalul mesajelor private primite"</string>
     <string name="theme_item_sent_message_background_color">"Culoarea de Fundal a Mesajelor Trimise"</string>
@@ -587,10 +585,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Aplicat pe: Fundalul insignei"</string>
     <string name="theme_item_flair_text_color">"Culoarea Textului Insignei"</string>
     <string name="theme_item_flair_text_color_detail">"Aplicat pe: Culoarea textului insignei"</string>
-    <string name="theme_item_awards_background_color">"Culoarea de Fundal a Premiilor"</string>
-    <string name="theme_item_awards_background_color_detail">"Aplicat pe: Culoarea de fundal a marcajului cu premii"</string>
-    <string name="theme_item_awards_text_color">"Culoarea Textului Premiat"</string>
-    <string name="theme_item_awards_text_color_detail">"Aplicat pe: Culoarea textului marcat cu premii"</string>
     <string name="theme_item_archived_tint">"Culoarea Pictogramei de Arhivare"</string>
     <string name="theme_item_archived_tint_detail">"Aplicat pe: Pictograma arhivat"</string>
     <string name="theme_item_locked_icon_tint">"Culoarea Pictogramei Închis"</string>
@@ -700,7 +694,6 @@ Bazat pe Tema Indigo Amoled"</string>
     <string name="post_content_preview">"Această glumă despre gravitație puțin a învechit, dar mereu mă face să pic de râs."</string>
     <string name="post_type_preview">"POSTARE"</string>
     <string name="flair_preview">"Insignă"</string>
-    <string name="awards_preview">"4 Premii"</string>
     <string name="author_flair_preview">"Insigna Autorului"</string>
     <string name="comment_content_preview">"I-am dat prietenii mele o felicitare în care am scris “Fă-te bine”.
 Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."</string>

@@ -531,8 +531,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Aplicado a: Fundo dos comentários"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Cor de fundo dos comentários totalmente retraídos"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Aplicado a: Fundo dos comentários totalmente retraídos"</string>
-    <string name="theme_item_awarded_comment_background_color">"Cor de fundo dos comentários premiados"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Aplicado a: Fundo dos comentários premiados"</string>
     <string name="theme_item_received_message_background_color">"Cor de fundo da mensagem recebida"</string>
     <string name="theme_item_received_message_background_color_detail">"Aplicado a: Fundo das mensagens privadas recebidas"</string>
     <string name="theme_item_sent_message_background_color">"Cor de fundo da mensagem enviada"</string>
@@ -585,10 +583,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Aplicado a: Fundo da marcação da etiqueta"</string>
     <string name="theme_item_flair_text_color">"Cor do texto da etiqueta"</string>
     <string name="theme_item_flair_text_color_detail">"Aplicado a: Cor do texto da marcação da etiqueta"</string>
-    <string name="theme_item_awards_background_color">"Cor de fundo dos prêmios"</string>
-    <string name="theme_item_awards_background_color_detail">"Aplicado a: Fundo da marcação de prêmios"</string>
-    <string name="theme_item_awards_text_color">"Cor do Texto dos Prêmios"</string>
-    <string name="theme_item_awards_text_color_detail">"Aplicado a: Cor do texto da marcação de prêmios"</string>
     <string name="theme_item_archived_tint">"Cor do Ícone de Arquivado"</string>
     <string name="theme_item_archived_tint_detail">"Aplicado a: Ícone de arquivado"</string>
     <string name="theme_item_locked_icon_tint">"Cor do Ícone de Bloqueio"</string>
@@ -696,7 +690,6 @@ Baseado no tema Índigo AMOLED"</string>
     <string name="post_content_preview">"Esta piada da gravidade está ficando velha, mas sempre caio nessa."</string>
     <string name="post_type_preview">"POSTAGEM"</string>
     <string name="flair_preview">"Etiqueta"</string>
-    <string name="awards_preview">"4 Prêmios"</string>
     <string name="author_flair_preview">"Etiqueta de autor"</string>
     <string name="comment_content_preview">"Dei um cartão “Melhore logo” à minha namorada.
 Ela não está doente ou algo assim, mas definitivamente poderia melhorar."</string>

@@ -445,8 +445,6 @@
     <string name="theme_item_downvoted_color">"கீழ்வாக்களித்த நிறம்"</string>
     <string name="theme_item_post_type_background_color">"இடுகை வகை பின்புல நிறம்"</string>
     <string name="theme_item_post_type_text_color">"இடுகை வகை உரை நிறம்"</string>
-    <string name="theme_item_awards_background_color">"விருதுகள் பின்புல நிறம்"</string>
-    <string name="theme_item_awards_text_color">"விருதுகள் உரை நிறம்"</string>
     <string name="theme_item_archived_tint">"காப்பகமானவை படவுரு நிறம்"</string>
     <string name="theme_item_locked_icon_tint">"பூட்டப்பட்டது படவுரு நிறம்"</string>
     <string name="theme_item_crosspost_icon_tint">"குறுக்கிடுகை படவுரு நிறம்"</string>
@@ -496,7 +494,6 @@
     <string name="primary_text_preview">"முதன்மை உரை"</string>
     <string name="post_title_preview">"இது ஓர் இடுகை"</string>
     <string name="post_type_preview">"இடுகை"</string>
-    <string name="awards_preview">"4 விருதுகள்"</string>
     <string name="edit_multi_reddit">"பல்ரெட்டிட்டைத் திருத்து"</string>
     <string name="delete_multi_reddit">"பல்ரெட்டிட்டை அழி"</string>
 

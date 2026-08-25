@@ -315,7 +315,10 @@ public class PostFilter implements Parcelable {
         if (postFilter.postTitleExcludesStrings != null && !postFilter.postTitleExcludesStrings.equals("")) {
             String[] titles = postFilter.postTitleExcludesStrings.split(",", 0);
             for (String t : titles) {
-                if (!t.trim().equals("") && post.getTitle().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
+                // Locale.ROOT, like the subreddit/domain matching below: on a Turkish/Azeri device
+                // the device locale lower-cases "I" to dotless "i", so a keyword would stop matching
+                // a title that differs from it only in the case of an I.
+                if (!t.trim().equals("") && post.getTitle().toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT).trim())) {
                     return false;
                 }
             }
@@ -324,7 +327,7 @@ public class PostFilter implements Parcelable {
             String[] titles = postFilter.postTitleContainsStrings.split(",", 0);
             boolean hasRequiredString = false;
             for (String t : titles) {
-                if (post.getTitle().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
+                if (post.getTitle().toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT).trim())) {
                     hasRequiredString = true;
                     break;
                 }

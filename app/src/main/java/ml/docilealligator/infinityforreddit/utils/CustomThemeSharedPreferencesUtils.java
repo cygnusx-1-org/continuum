@@ -64,8 +64,6 @@ public class CustomThemeSharedPreferencesUtils {
     public static final String NSFW_TEXT_COLOR = "nsfwTextColor";
     public static final String FLAIR_BACKGROUND_COLOR = "flairBackgroundColor";
     public static final String FLAIR_TEXT_COLOR = "flairTextColor";
-    private static final String AWARDS_BACKGROUND_COLOR = "awardsBackgroundColor";
-    private static final String AWARDS_TEXT_COLOR = "awardsTextColor";
     public static final String ARCHIVED_ICON_TINT = "archivedIconTint";
     public static final String LOCKED_ICON_TINT = "lockedIconTint";
     public static final String CROSSPOST_ICON_TINT = "crosspostIconTint";
@@ -101,7 +99,6 @@ public class CustomThemeSharedPreferencesUtils {
     public static final String SENT_MESSAGE_BACKGROUND_COLOR = "sentMessageBackgroundColor";
     public static final String SEND_MESSAGE_ICON_COLOR = "sentMessageIconColor";
     public static final String FULLY_COLLAPSED_COMMENT_BACKGROUND_COLOR = "fullyCollapsedCommentBackgroundColor";
-    private static final String AWARDED_COMMENT_BACKGROUND_COLOR = "awardedCommentBackgroundColor";
 
     public static void insertThemeToSharedPreferences(CustomTheme customTheme, SharedPreferences themeSharedPreferences) {
         SharedPreferences.Editor editor = themeSharedPreferences.edit();
@@ -156,8 +153,6 @@ public class CustomThemeSharedPreferencesUtils {
         editor.putInt(NSFW_TEXT_COLOR, customTheme.nsfwTextColor);
         editor.putInt(FLAIR_BACKGROUND_COLOR, customTheme.flairBackgroundColor);
         editor.putInt(FLAIR_TEXT_COLOR, customTheme.flairTextColor);
-        editor.putInt(AWARDS_BACKGROUND_COLOR, customTheme.awardsBackgroundColor);
-        editor.putInt(AWARDS_TEXT_COLOR, customTheme.awardsTextColor);
         editor.putInt(ARCHIVED_ICON_TINT, customTheme.archivedTint);
         editor.putInt(LOCKED_ICON_TINT, customTheme.lockedIconTint);
         editor.putInt(CROSSPOST_ICON_TINT, customTheme.crosspostIconTint);
@@ -193,7 +188,6 @@ public class CustomThemeSharedPreferencesUtils {
         editor.putInt(SENT_MESSAGE_BACKGROUND_COLOR, customTheme.sentMessageBackgroundColor);
         editor.putInt(SEND_MESSAGE_ICON_COLOR, customTheme.sendMessageIconColor);
         editor.putInt(FULLY_COLLAPSED_COMMENT_BACKGROUND_COLOR, customTheme.fullyCollapsedCommentBackgroundColor);
-        editor.putInt(AWARDED_COMMENT_BACKGROUND_COLOR, customTheme.awardedCommentBackgroundColor);
         editor.putBoolean(LIGHT_STATUS_BAR, customTheme.isLightStatusBar);
         editor.putBoolean(LIGHT_NAV_BAR, customTheme.isLightNavBar);
         editor.putBoolean(CHANGE_STATUS_BAR_ICON_COLOR_AFTER_TOOLBAR_COLLAPSED_IN_IMMERSIVE_INTERFACE, customTheme.isChangeStatusBarIconColorAfterToolbarCollapsedInImmersiveInterface);

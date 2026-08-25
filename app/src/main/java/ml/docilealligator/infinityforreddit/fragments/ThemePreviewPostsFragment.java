@@ -59,9 +59,6 @@ public class ThemePreviewPostsFragment extends Fragment {
         binding.flairCustomTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.flairBackgroundColor);
         binding.flairCustomTextViewThemePreviewPostsFragment.setBorderColor(customTheme.flairBackgroundColor);
         binding.flairCustomTextViewThemePreviewPostsFragment.setTextColor(customTheme.flairTextColor);
-        binding.awardsTextViewThemePreviewPostsFragment.setBackgroundColor(customTheme.awardsBackgroundColor);
-        binding.awardsTextViewThemePreviewPostsFragment.setBorderColor(customTheme.awardsBackgroundColor);
-        binding.awardsTextViewThemePreviewPostsFragment.setTextColor(customTheme.awardsTextColor);
         binding.archivedImageViewThemePreviewPostsFragment.setColorFilter(customTheme.archivedTint, PorterDuff.Mode.SRC_IN);
         binding.lockedImageViewThemePreviewPostsFragment.setColorFilter(customTheme.lockedIconTint, PorterDuff.Mode.SRC_IN);
         binding.crosspostImageViewThemePreviewPostsFragment.setColorFilter(customTheme.crosspostIconTint, PorterDuff.Mode.SRC_IN);
@@ -84,7 +81,6 @@ public class ThemePreviewPostsFragment extends Fragment {
             binding.spoilerCustomTextViewThemePreviewPostsFragment.setTypeface(activity.typeface);
             binding.nsfwTextViewThemePreviewPostsFragment.setTypeface(activity.typeface);
             binding.flairCustomTextViewThemePreviewPostsFragment.setTypeface(activity.typeface);
-            binding.awardsTextViewThemePreviewPostsFragment.setTypeface(activity.typeface);
             binding.linkTextViewThemePreviewPostsFragment.setTypeface(activity.typeface);
             binding.upvoteButtonThemePreviewPostsFragment.setTypeface(activity.typeface);
             binding.commentsCountButtonThemePreviewPostsFragment.setTypeface(activity.typeface);

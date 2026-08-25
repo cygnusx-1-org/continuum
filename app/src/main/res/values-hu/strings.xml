@@ -512,8 +512,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Beállítva: Comment hátterére"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Teljesen összecsukott komment háttérszín"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Beállítva: Teljesen összecsukott kommentek hátterére"</string>
-    <string name="theme_item_awarded_comment_background_color">"Kitüntetett komment háttérszín"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Beállítva: Kitüntetett kommetek hátterére"</string>
     <string name="theme_item_received_message_background_color">"Beérkezett üzenet háttérszín"</string>
     <string name="theme_item_received_message_background_color_detail">"Beállítva: Beérkezett privát üzenet hátterére"</string>
     <string name="theme_item_sent_message_background_color">"Elküldött üzenet háttérszín"</string>
@@ -566,10 +564,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Beállítva: Flair címke hátterére"</string>
     <string name="theme_item_flair_text_color">"Flair szöveg szín"</string>
     <string name="theme_item_flair_text_color_detail">"Beállítva: Flair címke szöveg színére"</string>
-    <string name="theme_item_awards_background_color">"Kitüntetések háttérszín"</string>
-    <string name="theme_item_awards_background_color_detail">"Beállítva: Kitüntetés címke hátterére"</string>
-    <string name="theme_item_awards_text_color">"Kitüntetetések szöveg szín"</string>
-    <string name="theme_item_awards_text_color_detail">"Beállítva: Kitüntetés címke szöveg színére"</string>
     <string name="theme_item_archived_tint">"Archívált ikon szín"</string>
     <string name="theme_item_archived_tint_detail">"Beállítva: Archívált ikonra"</string>
     <string name="theme_item_locked_icon_tint">"Zárolt ikon szín"</string>
@@ -681,7 +675,6 @@ Az alap az indigó amoled téma"</string>
     <string name="post_content_preview">"Ez a gravitáció poén kezd egy kicsit öreg lenni, de mindig bedőlök neki."</string>
     <string name="post_type_preview">"POSZT"</string>
     <string name="flair_preview">"Flair"</string>
-    <string name="awards_preview">"4 kitüntetés"</string>
     <string name="author_flair_preview">"Szerző flair"</string>
     <string name="comment_content_preview">"Vettem a barátnőmnek egy \"Gyógyúj meg\" üdvözlőlapot.
 Ő nem beteg vagy valami, de azért jobban lehetne már."</string>

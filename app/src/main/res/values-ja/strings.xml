@@ -591,8 +591,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"適用先: コメントの背景"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"完全に折りたたまれたコメント 背景"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"適用先: 完全に折りたたまれたコメントの背景"</string>
-    <string name="theme_item_awarded_comment_background_color">"アワード付きコメント 背景"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"適用先: アワード付きコメントの背景"</string>
     <string name="theme_item_received_message_background_color">"受信メッセージ 背景"</string>
     <string name="theme_item_received_message_background_color_detail">"適用先: 受信した個人メッセージの背景"</string>
     <string name="theme_item_sent_message_background_color">"送信メッセージ 背景"</string>
@@ -647,10 +645,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"適用先: フレアーの背景"</string>
     <string name="theme_item_flair_text_color">"フレアー テキスト"</string>
     <string name="theme_item_flair_text_color_detail">"適用先: フレアーのテキスト"</string>
-    <string name="theme_item_awards_background_color">"アワード 背景"</string>
-    <string name="theme_item_awards_background_color_detail">"適用先: アワード フレアーの背景"</string>
-    <string name="theme_item_awards_text_color">"アワード テキスト"</string>
-    <string name="theme_item_awards_text_color_detail">"適用先: アワード フレアーのテキスト"</string>
     <string name="theme_item_archived_tint">"アーカイブ アイコン"</string>
     <string name="theme_item_archived_tint_detail">"適用先: アーカイブのアイコン"</string>
     <string name="theme_item_locked_icon_tint">"ロック アイコン"</string>
@@ -784,7 +778,6 @@ https://play.google.com/store/"</string>
     <string name="post_content_preview">"重力ネタには飽き飽きしているかもしれませんが、毎回このオチになってしまうんです。"</string>
     <string name="post_type_preview">"投稿"</string>
     <string name="flair_preview">"フレアー"</string>
-    <string name="awards_preview">"4個のアワード"</string>
     <string name="author_flair_preview">"投稿主フレアー"</string>
     <string name="comment_content_preview">"オチがないのがオチなんですね。"</string>
     <string name="edit_multi_reddit">"カスタムフィードを編集"</string>

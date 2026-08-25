@@ -548,8 +548,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Aplicado a: Fundo de Comentário"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Cor de Fundo de Comentário Totalmente Colapsado"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Aplicado a: Fundo de comentários totalmente colapsados"</string>
-    <string name="theme_item_awarded_comment_background_color">"Cor de Fundo de Comentário Premiado"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Aplicado a: Fundo de comentários premiados"</string>
     <string name="theme_item_received_message_background_color">"Cor de Fundo de Mensagem Recebida"</string>
     <string name="theme_item_received_message_background_color_detail">"Aplicado a: Fundo de mensagens privadas recebidas"</string>
     <string name="theme_item_sent_message_background_color">"Cor de Fundo Mensagem Enviada"</string>
@@ -590,10 +588,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Aplicado a: Fundo da etiqueta flair"</string>
     <string name="theme_item_flair_text_color">"Cor do Texto Flair"</string>
     <string name="theme_item_flair_text_color_detail">"Aplicado a: Cor do texto da etiqueta flair"</string>
-    <string name="theme_item_awards_background_color">"Cor de Fundo de Prémios"</string>
-    <string name="theme_item_awards_background_color_detail">"Aplicado a: Fundo da etiqueta de prémios"</string>
-    <string name="theme_item_awards_text_color">"Cor do Texto Prémios"</string>
-    <string name="theme_item_awards_text_color_detail">"Aplicado a: Cor do texto da etiqueta prémios"</string>
     <string name="theme_item_archived_tint">"Cor do Ícone de Arquivo"</string>
     <string name="theme_item_archived_tint_detail">"Aplicado a: Ícone de Arquivo"</string>
     <string name="theme_item_locked_icon_tint">"Cor do Ícone de Bloqueio"</string>
@@ -705,7 +699,6 @@ com base no Tema Indigo Amoled"</string>
     <string name="post_content_preview">"Esta piada da Lei da Gravida é velha, mas apanha-me sempre."</string>
     <string name="post_type_preview">"PUBLICAÇÃO"</string>
     <string name="flair_preview">"Flair"</string>
-    <string name="awards_preview">"4 Prémios"</string>
     <string name="author_flair_preview">"Flair do Autor"</string>
     <string name="comment_content_preview">"Arranjei um cartão a desejar as \"Melhoras\" à minha namorada.
 Ela não está doente nem nada, mas certamente poderá melhorar."</string>

@@ -537,8 +537,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Задіяно для: Тло коментарів"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Колір тла повністю згорненого коментаря"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Задіяно для: Тло повністю згорнутих коментарів"</string>
-    <string name="theme_item_awarded_comment_background_color">"Колір тла коментаря з нагородою"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Задіяно для: Тло нагороджених коментарів"</string>
     <string name="theme_item_received_message_background_color">"Колір тла отриманого посилання"</string>
     <string name="theme_item_received_message_background_color_detail">"Задіяно для: Тло отриманих приватних повідомлень"</string>
     <string name="theme_item_sent_message_background_color">"Колір тла надісланого посилання"</string>
@@ -591,10 +589,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Задіяно для: Тло лички"</string>
     <string name="theme_item_flair_text_color">"Колір тексту лички"</string>
     <string name="theme_item_flair_text_color_detail">"Задіяно для: Колір тексту лички"</string>
-    <string name="theme_item_awards_background_color">"Колір тла нагороди"</string>
-    <string name="theme_item_awards_background_color_detail">"Задіяно для: Тло позначки нагород"</string>
-    <string name="theme_item_awards_text_color">"Колір тексту нагороди"</string>
-    <string name="theme_item_awards_text_color_detail">"Задіяно для: Колір тексту позначки нагород"</string>
     <string name="theme_item_archived_tint">"Колір тексту заархівованого"</string>
     <string name="theme_item_archived_tint_detail">"Задіяно для: Значок Заархівовано"</string>
     <string name="theme_item_locked_icon_tint">"Колір значка замкненого"</string>
@@ -704,7 +698,6 @@ https://play.google.com/store/"</string>
     <string name="post_content_preview">"Цей жарт про гравітацію трохи застарілий, але я щоразу від нього падаю."</string>
     <string name="post_type_preview">"ДОПИС"</string>
     <string name="flair_preview">"Личка"</string>
-    <string name="awards_preview">"4 нагороди"</string>
     <string name="author_flair_preview">"Авторська личка"</string>
     <string name="comment_content_preview">"Я дав своїй дівчині листівку «Поправляйся швидше».
 Вона не те щоб хвора, але їй точно стане краще."</string>

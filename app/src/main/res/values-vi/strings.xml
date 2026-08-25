@@ -546,8 +546,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Áp dụng cho: Nền bình luận"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Màu nền bình luận được thu gọn hoàn toàn"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Áp dụng cho: Nền của bình luận được thu gọn hoàn toàn"</string>
-    <string name="theme_item_awarded_comment_background_color">"Màu nền bình luận được trao giải thưởng"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Áp dụng cho: Nền của bình luận được trao giải thưởng"</string>
     <string name="theme_item_received_message_background_color">"Màu nền tin nhắn được nhận"</string>
     <string name="theme_item_received_message_background_color_detail">"Áp dụng cho: Nền của tin nhắn riêng tư được nhận"</string>
     <string name="theme_item_sent_message_background_color">"Màu nền tin nhắn đã gửi"</string>
@@ -600,10 +598,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Áp dụng cho: Nền của thẻ tư cách"</string>
     <string name="theme_item_flair_text_color">"Màu văn bản tư cách"</string>
     <string name="theme_item_flair_text_color_detail">"Áp dụng cho: Màu văn bản của thẻ tư cách"</string>
-    <string name="theme_item_awards_background_color">"Màu nền giải thưởng"</string>
-    <string name="theme_item_awards_background_color_detail">"Áp dụng cho: Nền của thẻ giải thưởng"</string>
-    <string name="theme_item_awards_text_color">"Màu văn bản giải thưởng"</string>
-    <string name="theme_item_awards_text_color_detail">"Áp dụng cho: Màu văn bản của thẻ giải thưởng"</string>
     <string name="theme_item_archived_tint">"Màu biểu tượng đã lưu trữ"</string>
     <string name="theme_item_archived_tint_detail">"Áp dụng cho: Biểu tượng đã lưu trữ"</string>
     <string name="theme_item_locked_icon_tint">"Màu biểu tượng đã khoá"</string>
@@ -713,7 +707,6 @@ Dựa trên chủ đề Chàm Amoled"</string>
     <string name="post_content_preview">"Chuyện cười về trọng lực này đang trở nên hơi cũ rồi, nhưng mọi lần tôi đều thấy buồn cười."</string>
     <string name="post_type_preview">"BÀI ĐĂNG"</string>
     <string name="flair_preview">"Tư cách"</string>
-    <string name="awards_preview">"4 giải thưởng"</string>
     <string name="author_flair_preview">"Tư cách tác giả"</string>
     <string name="comment_content_preview">"Tôi đã mua cho bạn gái một tấm thẻ \"Hãy sớm khá hơn\".
 Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá hơn."</string>

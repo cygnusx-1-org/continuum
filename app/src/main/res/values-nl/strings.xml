@@ -549,8 +549,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Wordt toegepast op reactie-achtergronden"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Achtergrondkleur van ingeklapte reacties"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Wordt toegepast op ingeklapte reacties"</string>
-    <string name="theme_item_awarded_comment_background_color">"Achtergrondkleur van bekroonde reacties"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Wordt toegepast op bekroonde reacties"</string>
     <string name="theme_item_received_message_background_color">"Achtergrondkleur van ontvangen berichten"</string>
     <string name="theme_item_received_message_background_color_detail">"Wordt toegepast op ontvangen privéberichten"</string>
     <string name="theme_item_sent_message_background_color">"Achtergrondkleur van verzonden berichten"</string>
@@ -603,10 +601,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Wordt toegepast op de achtergrond van het flair-label"</string>
     <string name="theme_item_flair_text_color">"Flair-tekstkleur"</string>
     <string name="theme_item_flair_text_color_detail">"Wordt toegepast op de tekst van het flair-label"</string>
-    <string name="theme_item_awards_background_color">"Prijs-achtergrondkleur"</string>
-    <string name="theme_item_awards_background_color_detail">"Wordt toegepast op de achtergrond van bekroonde reacties"</string>
-    <string name="theme_item_awards_text_color">"Prijs-tekstkleur"</string>
-    <string name="theme_item_awards_text_color_detail">"Wordt toegepast op de tekst van bekroonde reacties"</string>
     <string name="theme_item_archived_tint">"Pictogramkleur van gearchiveerd bericht"</string>
     <string name="theme_item_archived_tint_detail">"Wordt toegepast op pictogrammen van gearchiveerde berichten"</string>
     <string name="theme_item_locked_icon_tint">"Pictogramkleur van vergrendelde berichten"</string>
@@ -716,7 +710,6 @@ Gebaseerd op een Indigo Amoled Thema"</string>
     <string name="post_content_preview">"Deze zwaartekrachtgrap wordt een beetje oud, maar ik trap er elke keer in."</string>
     <string name="post_type_preview">"Post"</string>
     <string name="flair_preview">"Flair"</string>
-    <string name="awards_preview">"4 Awards"</string>
     <string name="author_flair_preview">"Auteur Flair"</string>
     <string name="comment_content_preview">"Ik heb voor mijn vriendin een beterschapskaartje.
 Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>

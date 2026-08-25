@@ -540,8 +540,6 @@
     <string name="theme_item_comment_background_color_detail">"Použito na: pozadí komentářů"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Barva pozadí plně sbalených komentářů"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Použito na: pozadí plně sbalených komentářů"</string>
-    <string name="theme_item_awarded_comment_background_color">"Barva pozadí oceněného komentáře"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Použito na: pozadí oceněných komentářů"</string>
     <string name="theme_item_received_message_background_color">"Barva pozadí obdržené zprávy"</string>
     <string name="theme_item_received_message_background_color_detail">"Použito na: pozadí obdržených soukromých zpráv"</string>
     <string name="theme_item_sent_message_background_color">"Barva pozadí odeslané zprávy"</string>
@@ -594,10 +592,6 @@
     <string name="theme_item_flair_background_color_detail">"Použito na: pozadí štítku"</string>
     <string name="theme_item_flair_text_color">"Barva textu štítku"</string>
     <string name="theme_item_flair_text_color_detail">"Použito na: barva textu štítku"</string>
-    <string name="theme_item_awards_background_color">"Barva pozadí ocenění"</string>
-    <string name="theme_item_awards_background_color_detail">"Použito na: pozadí štítku ocenění"</string>
-    <string name="theme_item_awards_text_color">"Barva textu ocenění"</string>
-    <string name="theme_item_awards_text_color_detail">"Použito na: barvu textu štítku ocenění"</string>
     <string name="theme_item_archived_tint">"Barva ikony archivování"</string>
     <string name="theme_item_archived_tint_detail">"Použito na: ikonu archivování"</string>
     <string name="theme_item_locked_icon_tint">"Barva ikony uzamčení"</string>
@@ -707,7 +701,6 @@ Založené na amoled indigovém motivu"</string>
     <string name="post_content_preview">"Římský voják přijde s přáteli do baru a zvedne dva prsty: „Pět piv, prosím!“"</string>
     <string name="post_type_preview">"PŘÍSPĚVEK"</string>
     <string name="flair_preview">"Štítek"</string>
-    <string name="awards_preview">"4 ocenění"</string>
     <string name="author_flair_preview">"Štítek autora"</string>
     <string name="comment_content_preview">"Jak poznáte, že je krab opilý?
 Chodí popředu."</string>

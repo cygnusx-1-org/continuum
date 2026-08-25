@@ -555,8 +555,6 @@
     <string name="theme_item_comment_background_color_detail">"Primijenjeno na: Pozadinu komentara"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Boja pozadine potpuno smanjenog komentara"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Primijenjeno na: Pozadinu potpuno smanjenih komentara"</string>
-    <string name="theme_item_awarded_comment_background_color">"Boja pozadine nagrađenog komentara"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Primijenjeno na: Pozadinu nagrađenih komentara"</string>
     <string name="theme_item_received_message_background_color">"Boja pozadine primljene poruke"</string>
     <string name="theme_item_received_message_background_color_detail">"Primijenjeno na: Pozadinu primljene privatne poruke"</string>
     <string name="theme_item_sent_message_background_color">"Boja pozadine poslane poruke"</string>
@@ -609,10 +607,6 @@
     <string name="theme_item_flair_background_color_detail">"Primijenjeno na: Pozadinu Flair znaka"</string>
     <string name="theme_item_flair_text_color">"Boja teksta Flair znaka"</string>
     <string name="theme_item_flair_text_color_detail">"Primijenjeno na: Boju teksta Flair znaka"</string>
-    <string name="theme_item_awards_background_color">"Boja pozadine znaka nagrada"</string>
-    <string name="theme_item_awards_background_color_detail">"Primijenjeno na: Pozadinu znaka nagrada"</string>
-    <string name="theme_item_awards_text_color">"Boja teksta znaka nagrada"</string>
-    <string name="theme_item_awards_text_color_detail">"Primijenjeno na: Boju teksta znaka nagrada"</string>
     <string name="theme_item_archived_tint">"Boja ikone arhiviranog"</string>
     <string name="theme_item_archived_tint_detail">"Primijenjeno na: Ikonu arhiviranog"</string>
     <string name="theme_item_locked_icon_tint">"Boja ikone za zaključano"</string>
@@ -738,7 +732,6 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="post_content_preview">"Ova fora s gravitacijom je prastara, ali svaki but padnem na nju."</string>
     <string name="post_type_preview">"OBJAVA"</string>
     <string name="flair_preview">"Flair"</string>
-    <string name="awards_preview">"4 nagrade"</string>
     <string name="author_flair_preview">"Autorski Flair"</string>
     <string name="comment_content_preview">"Djevojka mi je rekla da ju uopće ne razumijem. Nije mi jasno kako to misli."</string>
     <string name="edit_multi_reddit">"Uredi Multireddit"</string>

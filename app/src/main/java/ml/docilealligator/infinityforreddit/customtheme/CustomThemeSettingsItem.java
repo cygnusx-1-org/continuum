@@ -162,10 +162,6 @@ public class CustomThemeSettingsItem implements Parcelable {
                 context.getString(R.string.theme_item_fully_collapsed_comment_background_color_detail),
                 customTheme.fullyCollapsedCommentBackgroundColor));
         customThemeSettingsItems.add(new CustomThemeSettingsItem(
-                context.getString(R.string.theme_item_awarded_comment_background_color),
-                context.getString(R.string.theme_item_awarded_comment_background_color_detail),
-                customTheme.awardedCommentBackgroundColor));
-        customThemeSettingsItems.add(new CustomThemeSettingsItem(
                 context.getString(R.string.theme_item_received_message_background_color),
                 context.getString(R.string.theme_item_received_message_background_color_detail),
                 customTheme.receivedMessageBackgroundColor));
@@ -285,16 +281,6 @@ public class CustomThemeSettingsItem implements Parcelable {
                 context.getString(R.string.theme_item_flair_text_color),
                 context.getString(R.string.theme_item_flair_text_color_detail),
                 customTheme.flairTextColor));
-        customThemeSettingsItems.add(new CustomThemeSettingsItem(
-                context.getString(R.string.theme_item_awards_background_color),
-                context.getString(R.string.theme_item_awards_background_color_detail),
-                customTheme.awardsBackgroundColor
-        ));
-        customThemeSettingsItems.add(new CustomThemeSettingsItem(
-                context.getString(R.string.theme_item_awards_text_color),
-                context.getString(R.string.theme_item_awards_text_color_detail),
-                customTheme.awardsTextColor
-        ));
         customThemeSettingsItems.add(new CustomThemeSettingsItem(
                 context.getString(R.string.theme_item_archived_tint),
                 context.getString(R.string.theme_item_archived_tint_detail),

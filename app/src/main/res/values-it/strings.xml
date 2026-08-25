@@ -497,8 +497,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Applicato a: Sfondo dei commenti"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Colore di sfondo dei commenti totalmente compressi"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Applicato a: Sfondo dei commenti completamente compressi"</string>
-    <string name="theme_item_awarded_comment_background_color">"Colore di Sfondo del Commento Premiato"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Applicato a: Sfondo del Commento Premiato"</string>
     <string name="theme_item_received_message_background_color">"Colore di Sfondo del Messaggio Ricevuto"</string>
     <string name="theme_item_received_message_background_color_detail">"Applicato a: Sfondo messaggi privati ricevuti"</string>
     <string name="theme_item_sent_message_background_color">"Colore Sfondo Messaggio Inviato"</string>
@@ -551,10 +549,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Applicato a: Sfondo del tag flair"</string>
     <string name="theme_item_flair_text_color">"Colore Testo Flair"</string>
     <string name="theme_item_flair_text_color_detail">"Applicato a: Colore testo del tag flair"</string>
-    <string name="theme_item_awards_background_color">"Colore di Sfondo Premiati"</string>
-    <string name="theme_item_awards_background_color_detail">"Applicato a: Sfondo del tag premiati"</string>
-    <string name="theme_item_awards_text_color">"Colore Testo Premiati"</string>
-    <string name="theme_item_awards_text_color_detail">"Applicato a: Colore testo del tag premiati"</string>
     <string name="theme_item_archived_tint">"Colore Icona Archiviato"</string>
     <string name="theme_item_archived_tint_detail">"Applicato a: Icona Archiviato"</string>
     <string name="theme_item_locked_icon_tint">"Colore Icona Bloccato"</string>
@@ -661,7 +655,6 @@ https://play.google.com/store/"</string>
     <string name="post_content_preview">"Ci sono 10 tipi di persone al mondo: quelli che capiscono il codice binario, e quelli che non lo capiscono."</string>
     <string name="post_type_preview">"POST"</string>
     <string name="flair_preview">"Flair"</string>
-    <string name="awards_preview">"4 Premi"</string>
     <string name="author_flair_preview">"Flair dell'autore"</string>
     <string name="comment_content_preview">"Non mi fido molto delle statistiche, perché un uomo con la testa nel forno acceso e i piedi nel congelatore statisticamente ha una temperatura media."</string>
     <string name="edit_multi_reddit">"Modifica multireddit"</string>

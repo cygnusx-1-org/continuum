@@ -556,8 +556,6 @@
 
     <!-- “Awarded”暂时翻译为“被赞赏的” -->
     <!-- Fuzzy -->
-    <string name="theme_item_awarded_comment_background_color">"获奖评论的背景颜色"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"应用于：获奖评论的背景"</string>
     <string name="theme_item_received_message_background_color">"已接收消息的背景颜色"</string>
     <string name="theme_item_received_message_background_color_detail">"应用于：已接收私人消息的背景"</string>
     <string name="theme_item_sent_message_background_color">"已发送消息的背景色"</string>
@@ -614,10 +612,6 @@
     <string name="theme_item_flair_background_color_detail">"应用于：头衔标签的背景"</string>
     <string name="theme_item_flair_text_color">"头衔文字颜色"</string>
     <string name="theme_item_flair_text_color_detail">"应用于：头衔标签的文字颜色"</string>
-    <string name="theme_item_awards_background_color">"奖励背景色"</string>
-    <string name="theme_item_awards_background_color_detail">"应用于：奖励标签的背景"</string>
-    <string name="theme_item_awards_text_color">"奖励文字颜色"</string>
-    <string name="theme_item_awards_text_color_detail">"应用于：奖励标签的文字颜色"</string>
     <string name="theme_item_archived_tint">"已存档图标的颜色"</string>
     <string name="theme_item_archived_tint_detail">"应用于：已存档图标"</string>
     <string name="theme_item_locked_icon_tint">"已锁定图标的颜色"</string>
@@ -726,7 +720,6 @@
     <string name="post_content_preview">"这个引人入胜的笑话有点老了，但我每次都为之倾倒。"</string>
     <string name="post_type_preview">"帖子"</string>
     <string name="flair_preview">"头衔"</string>
-    <string name="awards_preview">"4 个奖励"</string>
     <string name="author_flair_preview">"作者头衔"</string>
     <string name="comment_content_preview">"我送给我的女朋友一张“早日康复”的贺卡。
 她没有生病或遇到任何问题，但是她肯定会好起来的。"</string>

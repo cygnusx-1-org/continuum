@@ -564,8 +564,6 @@ Premio means prize, so it's better suited the first word instead of the second o
     <string name="theme_item_comment_background_color_detail">"Aplicado a: Fondo de comentarios"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Color del fondo de comentario completamente colapsado"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Aplicado a: Fondo de comentario completamente colapsado"</string>
-    <string name="theme_item_awarded_comment_background_color">"Color del fondo de comentario premiado"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Aplicado a: Fondo de comentarios premiados"</string>
     <string name="theme_item_received_message_background_color">"Color del fondo de mensajes recibidos"</string>
     <string name="theme_item_received_message_background_color_detail">"Aplicado a: Fondo de mensajes privados recibidos"</string>
     <string name="theme_item_sent_message_background_color">"Color del fondo de mensaje enviado"</string>
@@ -620,10 +618,6 @@ Premio means prize, so it's better suited the first word instead of the second o
     <string name="theme_item_flair_background_color_detail">"Aplicado a: Fondo de la etiqueta temática"</string>
     <string name="theme_item_flair_text_color">"Color del texto de la etiqueta temática"</string>
     <string name="theme_item_flair_text_color_detail">"Aplicado a: Texto de la etiqueta temática"</string>
-    <string name="theme_item_awards_background_color">"Color del fondo de premios"</string>
-    <string name="theme_item_awards_background_color_detail">"Aplicado a: Fondo de la etiqueta de premios"</string>
-    <string name="theme_item_awards_text_color">"Color del texto de premios"</string>
-    <string name="theme_item_awards_text_color_detail">"Aplicado a: Texto de la etiqueta de premios"</string>
     <string name="theme_item_archived_tint">"Color del ícono de archivado"</string>
     <string name="theme_item_archived_tint_detail">"Aplicado a: Ícono de archivado"</string>
     <string name="theme_item_locked_icon_tint">"Color del ícono de bloqueado"</string>
@@ -746,7 +740,6 @@ Basado en Tema Índigo AMOLED"</string>
     <string name="post_content_preview">"Esta broma de la gravedad se está haciendo vieja, pero siempre caigo con ella."</string>
     <string name="post_type_preview">"PUBLICACIÓN"</string>
     <string name="flair_preview">"Etiqueta temática"</string>
-    <string name="awards_preview">"4 Premios"</string>
     <string name="author_flair_preview">"Etiqueta de autor temática"</string>
     <string name="comment_content_preview">"Le compré a mi novia una tarjeta de \"Mejora pronto cariño\".
 No está enferma ni nada, pero definitivamente podría mejorar."</string>

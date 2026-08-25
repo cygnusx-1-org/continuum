@@ -53,21 +53,6 @@ public class ThemePreviewCommentsFragment extends Fragment {
         binding.saveButtonThemePreviewCommentsFragment.setIconTint(ColorStateList.valueOf(customTheme.commentIconAndInfoColor));
         binding.replyButtonThemePreviewCommentsFragment.setIconTint(ColorStateList.valueOf(customTheme.commentIconAndInfoColor));
 
-        binding.linearLayoutAwardBackgroundThemePreviewCommentsFragment.setBackgroundColor(customTheme.awardedCommentBackgroundColor);
-        binding.authorTypeImageViewAwardBackgroundThemePreviewCommentsFragment.setColorFilter(customTheme.moderator, android.graphics.PorterDuff.Mode.SRC_IN);
-        binding.authorTextViewAwardBackgroundThemePreviewCommentsFragment.setTextColor(customTheme.moderator);
-        binding.commentTimeTextViewAwardBackgroundThemePreviewCommentsFragment.setTextColor(customTheme.secondaryTextColor);
-        binding.commentMarkdownViewAwardBackgroundThemePreviewCommentsFragment.setTextColor(customTheme.commentColor);
-        binding.authorFlairTextViewAwardBackgroundThemePreviewCommentsFragment.setTextColor(customTheme.authorFlairTextColor);
-        binding.dividerAwardBackgroundThemePreviewCommentsFragment.setBackgroundColor(customTheme.dividerColor);
-        binding.upvoteButtonAwardBackgroundThemePreviewCommentsFragment.setIconTint(ColorStateList.valueOf(customTheme.commentIconAndInfoColor));
-        binding.upvoteButtonAwardBackgroundThemePreviewCommentsFragment.setTextColor(customTheme.commentIconAndInfoColor);
-        binding.downvoteButtonAwardBackgroundThemePreviewCommentsFragment.setIconTint(ColorStateList.valueOf(customTheme.commentIconAndInfoColor));
-        binding.moreButtonAwardBackgroundThemePreviewCommentsFragment.setIconTint(ColorStateList.valueOf(customTheme.commentIconAndInfoColor));
-        binding.expandButtonAwardBackgroundThemePreviewCommentsFragment.setCompoundDrawablesWithIntrinsicBounds(expandDrawable, null, null, null);
-        binding.saveButtonAwardBackgroundThemePreviewCommentsFragment.setIconTint(ColorStateList.valueOf(customTheme.commentIconAndInfoColor));
-        binding.replyButtonAwardBackgroundThemePreviewCommentsFragment.setIconTint(ColorStateList.valueOf(customTheme.commentIconAndInfoColor));
-
         binding.linearLayoutFullyCollapsedThemePreviewCommentsFragment.setBackgroundColor(customTheme.fullyCollapsedCommentBackgroundColor);
         binding.authorTextViewFullyCollapsedThemePreviewCommentsFragment.setTextColor(customTheme.username);
         binding.scoreTextViewFullyCollapsedThemePreviewCommentsFragment.setTextColor(customTheme.secondaryTextColor);
@@ -79,18 +64,12 @@ public class ThemePreviewCommentsFragment extends Fragment {
             binding.authorFlairTextViewThemePreviewCommentsFragment.setTypeface(activity.typeface);
             binding.upvoteButtonThemePreviewCommentsFragment.setTypeface(activity.typeface);
 
-            binding.authorTextViewAwardBackgroundThemePreviewCommentsFragment.setTypeface(activity.typeface);
-            binding.commentTimeTextViewAwardBackgroundThemePreviewCommentsFragment.setTypeface(activity.typeface);
-            binding.authorFlairTextViewAwardBackgroundThemePreviewCommentsFragment.setTypeface(activity.typeface);
-            binding.upvoteButtonAwardBackgroundThemePreviewCommentsFragment.setTypeface(activity.typeface);
-
             binding.authorTextViewFullyCollapsedThemePreviewCommentsFragment.setTypeface(activity.typeface);
             binding.scoreTextViewFullyCollapsedThemePreviewCommentsFragment.setTypeface(activity.typeface);
             binding.timeTextViewFullyCollapsedThemePreviewCommentsFragment.setTypeface(activity.typeface);
         }
         if (activity.contentTypeface != null) {
             binding.commentMarkdownViewThemePreviewCommentsFragment.setTypeface(activity.contentTypeface);
-            binding.commentMarkdownViewAwardBackgroundThemePreviewCommentsFragment.setTypeface(activity.contentTypeface);
         }
         return binding.getRoot();
     }

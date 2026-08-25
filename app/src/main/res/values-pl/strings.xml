@@ -539,8 +539,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="theme_item_comment_background_color_detail">"Zastosowano do: Tło komentarzy"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Kolor tła komentarza zwiniętego"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Zastosowano do: Tło komentarzy w pełni zwiniętych"</string>
-    <string name="theme_item_awarded_comment_background_color">"Kolor tła nagrodzonego komentarza"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Zastosowano do: Tło nagrodzonego komentarza"</string>
     <string name="theme_item_received_message_background_color">"Kolor tła odebranej wiadomości"</string>
     <string name="theme_item_received_message_background_color_detail">"Zastosowano do: Tło odebranej wiadomości prywatnej"</string>
     <string name="theme_item_sent_message_background_color">"Kolor tła wysłanej wiadomości"</string>
@@ -593,10 +591,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="theme_item_flair_background_color_detail">"Zastosowano dla: Tło talentu"</string>
     <string name="theme_item_flair_text_color">"Kolor tekstu flagi"</string>
     <string name="theme_item_flair_text_color_detail">"Zastosowano dla: Kolor tekstu talentu"</string>
-    <string name="theme_item_awards_background_color">"Kolor tła nagród"</string>
-    <string name="theme_item_awards_background_color_detail">"Zastosowano dla: Tło nagród"</string>
-    <string name="theme_item_awards_text_color">"Kolor tekstu nagród"</string>
-    <string name="theme_item_awards_text_color_detail">"Zastosowano dla: Kolor tekstu nagród"</string>
     <string name="theme_item_archived_tint">"Kolor ikony zarchiwizowania"</string>
     <string name="theme_item_archived_tint_detail">"Zastosowano dla: Ikona zarchiwizowania"</string>
     <string name="theme_item_locked_icon_tint">"Kolor ikony zablokowania"</string>
@@ -706,7 +700,6 @@ Bazowany na motywie Indigo Amoled"</string>
     <string name="post_content_preview">"Ten żart o grawitacji trochę się starzeje, ale za każdym razem daję się nabrać."</string>
     <string name="post_type_preview">"POST"</string>
     <string name="flair_preview">"Flaga"</string>
-    <string name="awards_preview">"4 nagrody"</string>
     <string name="author_flair_preview">"Talent autora"</string>
 
     <!-- Fuzzy -->

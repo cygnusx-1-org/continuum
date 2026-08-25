@@ -49,12 +49,15 @@ public final class SavedThingSearchFilter {
         if (query == null) {
             return new String[0];
         }
-        return query.trim().toLowerCase(Locale.getDefault()).split("\\s+");
+        return query.trim().toLowerCase(Locale.ROOT).split("\\s+");
     }
 
+    // Locale.ROOT, not the device locale: the query and the text being searched differ in case by
+    // construction, and a Turkish/Azeri device lower-cases "I" to dotless "i" on one side only, so
+    // "PICS" would stop matching r/pics. This folds Reddit content, never text shown to the user.
     private static boolean matchesTerms(String searchableText, @Nullable String subredditName, String[] terms) {
-        String text = searchableText == null ? "" : searchableText.toLowerCase(Locale.getDefault());
-        String subreddit = subredditName == null ? "" : subredditName.toLowerCase(Locale.getDefault());
+        String text = searchableText == null ? "" : searchableText.toLowerCase(Locale.ROOT);
+        String subreddit = subredditName == null ? "" : subredditName.toLowerCase(Locale.ROOT);
         for (String term : terms) {
             if (term.isEmpty()) {
                 continue;

@@ -59,7 +59,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         SubscribedUserData.class, MultiReddit.class, CustomTheme.class, RecentSearchQuery.class,
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
-        LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class}, version = 38, exportSchema = false)
+        LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class}, version = 39, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -77,7 +77,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29,
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
-                        MIGRATION_36_37, MIGRATION_37_38)
+                        MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39)
                 .build();
     }
 
@@ -591,6 +591,110 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
             // No separate index on filter_name: it is the leftmost column of the primary key, so
             // SQLite's implicit index already serves the lookups, and an extra one would not match
             // the entity Room validates the migrated schema against.
+        }
+    };
+
+    // Reddit retired awards, so the three award colours no longer reach any screen: the theme
+    // editor offered them, the editor's own preview honoured them, and nothing else read them.
+    // Dropping the columns is a table rebuild -- SQLite only learned ALTER TABLE DROP COLUMN in
+    // 3.35, which is newer than the SQLite on most devices this app still supports.
+    private static final Migration MIGRATION_38_39 = new Migration(38, 39) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE `custom_themes_new` (`name` TEXT NOT NULL, `is_light_theme` INTEGER NOT NULL, "
+                    + "`is_dark_theme` INTEGER NOT NULL, `is_amoled_theme` INTEGER NOT NULL, `color_primary` "
+                    + "INTEGER NOT NULL, `color_primary_dark` INTEGER NOT NULL, `color_accent` INTEGER NOT NULL, "
+                    + "`color_primary_light_theme` INTEGER NOT NULL, `primary_text_color` INTEGER NOT NULL, "
+                    + "`secondary_text_color` INTEGER NOT NULL, `post_title_color` INTEGER NOT NULL, "
+                    + "`post_content_color` INTEGER NOT NULL, `read_post_title_color` INTEGER NOT NULL, "
+                    + "`read_post_content_color` INTEGER NOT NULL, `comment_color` INTEGER NOT NULL, "
+                    + "`button_text_color` INTEGER NOT NULL, `background_color` INTEGER NOT NULL, "
+                    + "`card_view_background_color` INTEGER NOT NULL, `read_post_card_view_background_color` "
+                    + "INTEGER NOT NULL, `filled_card_view_background_color` INTEGER NOT NULL, "
+                    + "`read_post_filled_card_view_background_color` INTEGER NOT NULL, `comment_background_color` "
+                    + "INTEGER NOT NULL, `bottom_app_bar_background_color` INTEGER NOT NULL, `primary_icon_color` "
+                    + "INTEGER NOT NULL, `bottom_app_bar_icon_color` INTEGER NOT NULL, `post_icon_and_info_color` "
+                    + "INTEGER NOT NULL, `comment_icon_and_info_color` INTEGER NOT NULL, "
+                    + "`toolbar_primary_text_and_icon_color` INTEGER NOT NULL, `toolbar_secondary_text_color` "
+                    + "INTEGER NOT NULL, `circular_progress_bar_background` INTEGER NOT NULL, "
+                    + "`media_indicator_icon_color` INTEGER NOT NULL, `media_indicator_background_color` INTEGER "
+                    + "NOT NULL, `tab_layout_with_expanded_collapsing_toolbar_tab_background` INTEGER NOT NULL, "
+                    + "`tab_layout_with_expanded_collapsing_toolbar_text_color` INTEGER NOT NULL, "
+                    + "`tab_layout_with_expanded_collapsing_toolbar_tab_indicator` INTEGER NOT NULL, "
+                    + "`tab_layout_with_collapsed_collapsing_toolbar_tab_background` INTEGER NOT NULL, "
+                    + "`tab_layout_with_collapsed_collapsing_toolbar_text_color` INTEGER NOT NULL, "
+                    + "`tab_layout_with_collapsed_collapsing_toolbar_tab_indicator` INTEGER NOT NULL, "
+                    + "`nav_bar_color` INTEGER NOT NULL, `upvoted` INTEGER NOT NULL, `downvoted` INTEGER NOT NULL, "
+                    + "`post_type_background_color` INTEGER NOT NULL, `post_type_text_color` INTEGER NOT NULL, "
+                    + "`text_type_background_color` INTEGER NOT NULL DEFAULT -9800835, "
+                    + "`image_type_background_color` INTEGER NOT NULL DEFAULT -13720497, "
+                    + "`link_type_background_color` INTEGER NOT NULL DEFAULT -16160294, "
+                    + "`video_type_background_color` INTEGER NOT NULL DEFAULT -3202514, `gif_type_background_color` "
+                    + "INTEGER NOT NULL DEFAULT -4245111, `gallery_type_background_color` INTEGER NOT NULL DEFAULT "
+                    + "-8236833, `spoiler_background_color` INTEGER NOT NULL, `spoiler_text_color` INTEGER NOT "
+                    + "NULL, `nsfw_background_color` INTEGER NOT NULL, `nsfw_text_color` INTEGER NOT NULL, "
+                    + "`flair_background_color` INTEGER NOT NULL, `flair_text_color` INTEGER NOT NULL, "
+                    + "`archived_tint` INTEGER NOT NULL, `locked_icon_tint` INTEGER NOT NULL, `crosspost_icon_tint` "
+                    + "INTEGER NOT NULL, `upvote_ratio_icon_tint` INTEGER NOT NULL, `stickied_post_icon_tint` "
+                    + "INTEGER NOT NULL, `no_preview_post_type_icon_tint` INTEGER NOT NULL, `subscribed` INTEGER "
+                    + "NOT NULL, `unsubscribed` INTEGER NOT NULL, `username` INTEGER NOT NULL, `subreddit` INTEGER "
+                    + "NOT NULL, `author_flair_text_color` INTEGER NOT NULL, `submitter` INTEGER NOT NULL, "
+                    + "`moderator` INTEGER NOT NULL, `current_user` INTEGER NOT NULL, "
+                    + "`single_comment_thread_background_color` INTEGER NOT NULL, `unread_message_background_color` "
+                    + "INTEGER NOT NULL, `divider_color` INTEGER NOT NULL, `no_preview_link_background_color` "
+                    + "INTEGER NOT NULL, `vote_and_reply_unavailable_button_color` INTEGER NOT NULL, "
+                    + "`comment_vertical_bar_color_1` INTEGER NOT NULL, `comment_vertical_bar_color_2` INTEGER NOT "
+                    + "NULL, `comment_vertical_bar_color_3` INTEGER NOT NULL, `comment_vertical_bar_color_4` "
+                    + "INTEGER NOT NULL, `comment_vertical_bar_color_5` INTEGER NOT NULL, "
+                    + "`comment_vertical_bar_color_6` INTEGER NOT NULL, `comment_vertical_bar_color_7` INTEGER NOT "
+                    + "NULL, `fab_icon_color` INTEGER NOT NULL, `chip_text_color` INTEGER NOT NULL, `link_color` "
+                    + "INTEGER NOT NULL, `received_message_text_color` INTEGER NOT NULL, `sent_message_text_color` "
+                    + "INTEGER NOT NULL, `received_message_background_color` INTEGER NOT NULL, "
+                    + "`sent_message_background_color` INTEGER NOT NULL, `send_message_icon_color` INTEGER NOT "
+                    + "NULL, `fully_collapsed_comment_background_color` INTEGER NOT NULL, `is_light_status_bar` "
+                    + "INTEGER NOT NULL, `is_light_nav_bar` INTEGER NOT NULL, "
+                    + "`is_change_status_bar_icon_color_after_toolbar_collapsed_in_immersive_interface` INTEGER NOT "
+                    + "NULL, PRIMARY KEY(`name`))");
+            database.execSQL("INSERT INTO custom_themes_new SELECT `name`, `is_light_theme`, `is_dark_theme`, "
+                    + "`is_amoled_theme`, `color_primary`, `color_primary_dark`, `color_accent`, "
+                    + "`color_primary_light_theme`, `primary_text_color`, `secondary_text_color`, "
+                    + "`post_title_color`, `post_content_color`, `read_post_title_color`, "
+                    + "`read_post_content_color`, `comment_color`, `button_text_color`, `background_color`, "
+                    + "`card_view_background_color`, `read_post_card_view_background_color`, "
+                    + "`filled_card_view_background_color`, `read_post_filled_card_view_background_color`, "
+                    + "`comment_background_color`, `bottom_app_bar_background_color`, `primary_icon_color`, "
+                    + "`bottom_app_bar_icon_color`, `post_icon_and_info_color`, `comment_icon_and_info_color`, "
+                    + "`toolbar_primary_text_and_icon_color`, `toolbar_secondary_text_color`, "
+                    + "`circular_progress_bar_background`, `media_indicator_icon_color`, "
+                    + "`media_indicator_background_color`, "
+                    + "`tab_layout_with_expanded_collapsing_toolbar_tab_background`, "
+                    + "`tab_layout_with_expanded_collapsing_toolbar_text_color`, "
+                    + "`tab_layout_with_expanded_collapsing_toolbar_tab_indicator`, "
+                    + "`tab_layout_with_collapsed_collapsing_toolbar_tab_background`, "
+                    + "`tab_layout_with_collapsed_collapsing_toolbar_text_color`, "
+                    + "`tab_layout_with_collapsed_collapsing_toolbar_tab_indicator`, `nav_bar_color`, `upvoted`, "
+                    + "`downvoted`, `post_type_background_color`, `post_type_text_color`, "
+                    + "`text_type_background_color`, `image_type_background_color`, `link_type_background_color`, "
+                    + "`video_type_background_color`, `gif_type_background_color`, `gallery_type_background_color`, "
+                    + "`spoiler_background_color`, `spoiler_text_color`, `nsfw_background_color`, "
+                    + "`nsfw_text_color`, `flair_background_color`, `flair_text_color`, `archived_tint`, "
+                    + "`locked_icon_tint`, `crosspost_icon_tint`, `upvote_ratio_icon_tint`, "
+                    + "`stickied_post_icon_tint`, `no_preview_post_type_icon_tint`, `subscribed`, `unsubscribed`, "
+                    + "`username`, `subreddit`, `author_flair_text_color`, `submitter`, `moderator`, "
+                    + "`current_user`, `single_comment_thread_background_color`, `unread_message_background_color`, "
+                    + "`divider_color`, `no_preview_link_background_color`, "
+                    + "`vote_and_reply_unavailable_button_color`, `comment_vertical_bar_color_1`, "
+                    + "`comment_vertical_bar_color_2`, `comment_vertical_bar_color_3`, "
+                    + "`comment_vertical_bar_color_4`, `comment_vertical_bar_color_5`, "
+                    + "`comment_vertical_bar_color_6`, `comment_vertical_bar_color_7`, `fab_icon_color`, "
+                    + "`chip_text_color`, `link_color`, `received_message_text_color`, `sent_message_text_color`, "
+                    + "`received_message_background_color`, `sent_message_background_color`, "
+                    + "`send_message_icon_color`, `fully_collapsed_comment_background_color`, "
+                    + "`is_light_status_bar`, `is_light_nav_bar`, "
+                    + "`is_change_status_bar_icon_color_after_toolbar_collapsed_in_immersive_interface` FROM "
+                    + "custom_themes");
+            database.execSQL("DROP TABLE custom_themes");
+            database.execSQL("ALTER TABLE custom_themes_new RENAME TO custom_themes");
         }
     };
 

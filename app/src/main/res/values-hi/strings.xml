@@ -585,8 +585,6 @@ Behavior -->
     <string name="theme_item_comment_background_color_detail">"पर लागू होगा: टिप्पणी पृष्टभूमि "</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"पूर्णतः संक्षिप्त टिप्पणियों की पृष्ठभूमि का रंग "</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"पर लागू होगा: पूर्णतः संक्षिप्त टिप्पणियों की पृष्ठभूमि"</string>
-    <string name="theme_item_awarded_comment_background_color">"पदक प्राप्त टिप्पणियों की पृष्टभूमि का रंग "</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"पर लागू होगा: पदक प्राप्त टिप्पणियों की पृष्टभूमि"</string>
     <string name="theme_item_received_message_background_color">"प्राप्त संदेश की पृष्ठभूमि का रंग "</string>
     <string name="theme_item_received_message_background_color_detail">"पर लागू होगा: प्राप्त व्यक्तिगत संदेश की पृष्ठभूमि "</string>
     <string name="theme_item_sent_message_background_color">"भेजे गए संदेश की पृष्टभूमि का रंग "</string>
@@ -639,10 +637,6 @@ Behavior -->
     <string name="theme_item_flair_background_color_detail">"पर लागू होगा: फ्लेयर टैग की पृष्ठभूमि"</string>
     <string name="theme_item_flair_text_color">"फ्लेयर टेक्स्ट रंग "</string>
     <string name="theme_item_flair_text_color_detail">"पर लागू होगा: फ्लेयर टैग के टेक्स्ट का रंग "</string>
-    <string name="theme_item_awards_background_color">"पदक पृष्ठभूमि रंग "</string>
-    <string name="theme_item_awards_background_color_detail">"पर लागू होगा: पदक टैग की पृष्ठभूमि "</string>
-    <string name="theme_item_awards_text_color">"पदक टेक्स्ट रंग "</string>
-    <string name="theme_item_awards_text_color_detail">"पर लागू होगा: पदक टैग के टेक्स्ट का रंग "</string>
     <string name="theme_item_archived_tint">"संग्रहित आइकन का रंग "</string>
     <string name="theme_item_archived_tint_detail">"पर लागू होगा: संग्रहित आइकन "</string>
     <string name="theme_item_locked_icon_tint">"बंद आइकन का रंग "</string>
@@ -768,7 +762,6 @@ Behavior -->
     <string name="post_content_preview">"गुरुत्वाकर्षण वाला चुटकुला थोड़ा पुराना हो रहा है पर मैं हमेशा इसके जाल में गिर जाता हूँ "</string>
     <string name="post_type_preview">"पोस्ट "</string>
     <string name="flair_preview">"फ्लेयर "</string>
-    <string name="awards_preview">"4 पदक "</string>
     <string name="author_flair_preview">"रचयिता फ्लेयर "</string>
     <string name="comment_content_preview">"मैंने अपनी प्रेमिका को एक 'जल्दी से अच्छी हो जाओ' कार्ड दिया।
 वह बीमार नहीं है, लेकिन वह निश्चित रूप से अच्छी हो जाएगी।"</string>

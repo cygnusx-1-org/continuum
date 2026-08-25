@@ -72,7 +72,10 @@ public class CommentFilter implements Parcelable {
         if (commentFilter.excludeStrings != null && !commentFilter.excludeStrings.equals("")) {
             String[] titles = commentFilter.excludeStrings.split(",", 0);
             for (String t : titles) {
-                if (!t.trim().equals("") && comment.getCommentRawText() != null && comment.getCommentRawText().toLowerCase(Locale.getDefault()).contains(t.toLowerCase(Locale.getDefault()).trim())) {
+                // Locale.ROOT: on a Turkish/Azeri device the device locale lower-cases "I" to
+                // dotless "i", so a keyword would stop matching a comment that differs from it only
+                // in the case of an I. This folds Reddit content, never text shown to the user.
+                if (!t.trim().equals("") && comment.getCommentRawText() != null && comment.getCommentRawText().toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT).trim())) {
                     return false;
                 }
             }

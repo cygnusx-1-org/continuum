@@ -549,8 +549,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Применяется к: фон комментария"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Цвет фона полностью свёрнутого комментария"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Применяется к: фон свёрнутых комментариев"</string>
-    <string name="theme_item_awarded_comment_background_color">"Цвет фона награждённого комментария"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Применяется к: фон награждённых комментариев"</string>
     <string name="theme_item_received_message_background_color">"Цвет фона полученного сообщения"</string>
     <string name="theme_item_received_message_background_color_detail">"Применяется к: фон полученного личного сообщения"</string>
     <string name="theme_item_sent_message_background_color">"Цвет фона отправленного сообщения"</string>
@@ -603,10 +601,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Применяется к: фон флейра"</string>
     <string name="theme_item_flair_text_color">"Цвет флейра"</string>
     <string name="theme_item_flair_text_color_detail">"Применяется к: цвет текста флейра"</string>
-    <string name="theme_item_awards_background_color">"Цвет фона наград"</string>
-    <string name="theme_item_awards_background_color_detail">"Применяется к: фон награды"</string>
-    <string name="theme_item_awards_text_color">"Цвет текста награды"</string>
-    <string name="theme_item_awards_text_color_detail">"Применяется к: цвет текста награды"</string>
     <string name="theme_item_archived_tint">"Цвет значка архивного поста"</string>
     <string name="theme_item_archived_tint_detail">"Применяется к: значок архивного поста"</string>
     <string name="theme_item_locked_icon_tint">"Цвет значка блокировки"</string>
@@ -716,7 +710,6 @@ https://play.google.com/store/"</string>
     <string name="post_content_preview">"Эта шутка о гравитации уже устарела, но я каждый раз попадаюсь на неё."</string>
     <string name="post_type_preview">"ПОСТ"</string>
     <string name="flair_preview">"Флейр"</string>
-    <string name="awards_preview">"4 награды"</string>
     <string name="author_flair_preview">"Флейр автора"</string>
     <string name="comment_content_preview">"Я подарил своей девушке карточку «Поправляйся скорее».
 Она не больна или что-то вроде того, но определённо может поправиться."</string>

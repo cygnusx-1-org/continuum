@@ -540,8 +540,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_comment_background_color_detail">"Uygulandığı yer: Yorum arka planı"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Tam Daraltılmış Yorum Arka Plan Rengi"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Uygulandığı yer: Tam daraltılmış yorumların arka planı"</string>
-    <string name="theme_item_awarded_comment_background_color">"Ödüllü Yorum Arka Plan Rengi"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Uygulandığı yer: Ödüllü yorumların arka planı"</string>
     <string name="theme_item_received_message_background_color">"Alınan Mesaj Arka Plan Rengi"</string>
     <string name="theme_item_received_message_background_color_detail">"Uygulandığı yer: Alınan özel mesajların arka planı"</string>
     <string name="theme_item_sent_message_background_color">"Gönderilen Mesaj Arka Plan Rengi"</string>
@@ -596,10 +594,6 @@ https://play.google.com/store/"</string>
     <string name="theme_item_flair_background_color_detail">"Uygulandığı yer: Etiket etiketinin arka planı"</string>
     <string name="theme_item_flair_text_color">"Etiket Metin Rengi"</string>
     <string name="theme_item_flair_text_color_detail">"Uygulandığı yer: Etiket etiketinin metin rengi"</string>
-    <string name="theme_item_awards_background_color">"Ödüller Arka Plan Rengi"</string>
-    <string name="theme_item_awards_background_color_detail">"Uygulandığı yer: Ödül etiketinin arka planı"</string>
-    <string name="theme_item_awards_text_color">"Ödüller Metin Rengi"</string>
-    <string name="theme_item_awards_text_color_detail">"Uygulandığı yer: Ödül etiketinin metin rengi"</string>
     <string name="theme_item_archived_tint">"Arşiv Simgesi Rengi"</string>
     <string name="theme_item_archived_tint_detail">"Uygulandığı yer: Arşivle simgesi"</string>
     <string name="theme_item_locked_icon_tint">"Kilitli Simgesi Rengi"</string>
@@ -709,7 +703,6 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="post_content_preview">"Bu yerçekimi şakası biraz eskimeye başlasada ona her seferinde düşüyorum."</string>
     <string name="post_type_preview">"GÖNDERİ"</string>
     <string name="flair_preview">"Etiket"</string>
-    <string name="awards_preview">"4 Ödül"</string>
     <string name="author_flair_preview">"Yazar Rozeti"</string>
     <string name="comment_content_preview">"Kız arkadaşıma üstünde \"yakında iyileşmen dileğiyle\" yazan bir kart aldım. Hasta falan değildi, ama kesinlikle iyileşmeliydi."</string>
     <string name="edit_multi_reddit">"Multireddit'i Düzenle"</string>

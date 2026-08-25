@@ -490,8 +490,6 @@
     <string name="theme_item_comment_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο σχολίου"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Χρώμα Παρασκηνίου Πλήρως Συμπτυγμένου Σχολίου"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο πλήρως συμπτυγμένων σχολίων"</string>
-    <string name="theme_item_awarded_comment_background_color">"Χρώμα Παρασκηνίου Βραβευμένου Σχολίου"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο βραβευμένων σχολίων"</string>
     <string name="theme_item_received_message_background_color">"Χρώμα Παρασκηνίου Ληφθέντος Σχολίου"</string>
     <string name="theme_item_received_message_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο ληφθέντων προσωπικών μηνυμάτων"</string>
     <string name="theme_item_sent_message_background_color">"Χρώμα Παρασκηνίου Απεσταλμένου Μηνύματος"</string>
@@ -544,10 +542,6 @@
     <string name="theme_item_flair_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο της ετικέτας σήμανσης"</string>
     <string name="theme_item_flair_text_color">"Χρώμα Κειμένου Σήμανσης"</string>
     <string name="theme_item_flair_text_color_detail">"Εφαρμόστηκε σε: Χρώμα κειμένου της ετικέτας σήμανσης"</string>
-    <string name="theme_item_awards_background_color">"Χρώμα Παρασκηνίου Βραβείων"</string>
-    <string name="theme_item_awards_background_color_detail">"Εφαρμόστηκε σε: Παρασκήνιο της ετικέτας βραβείων"</string>
-    <string name="theme_item_awards_text_color">"Χρώμα Κειμένου Βραβείων"</string>
-    <string name="theme_item_awards_text_color_detail">"Εφαρμόστηκε σε: Χρώμα κειμένου ετικέτας βραβείων"</string>
     <string name="theme_item_archived_tint">"Αρχειοθετημένο Χρώμα Εικονιδίου"</string>
     <string name="theme_item_archived_tint_detail">"Εφαρμόστηκε σε: Εικονίδιο αρχειοθέτησης"</string>
     <string name="theme_item_locked_icon_tint">"Χρώμα Εικονιδίου Κλειδωμένου"</string>
@@ -655,7 +649,6 @@
     <string name="post_content_preview">"Αυτό το αστείο με τη βαρύτητα έχει παλιωσει, αλλά ακόμα πέφτω κάτω απ' τα γέλια."</string>
     <string name="post_type_preview">"ΑΝΆΡΤΗΣΗ"</string>
     <string name="flair_preview">"Σήμανση"</string>
-    <string name="awards_preview">"4 Βραβεία"</string>
     <string name="author_flair_preview">"Επισήμανση Συντάκτη"</string>
     <string name="comment_content_preview">"Πήρα στη κοπέλα μου μια κάρτα «Γίνε καλύτερα».
 Δεν είναι άρρωστη ή κάτι, αλλά σίγουρα θα μπορούσε να γίνει καλύτερα."</string>

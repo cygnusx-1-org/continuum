@@ -544,8 +544,6 @@ Tippen für Neuversuch."</string>
     <string name="theme_item_comment_background_color_detail">"Angewandt auf: Kommentar-Hintergrund"</string>
     <string name="theme_item_fully_collapsed_comment_background_color">"Hintergrundfarbe für voll ausgeklappte Kommentare"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"Angewandt auf: Voll ausgeklappte Kommentare"</string>
-    <string name="theme_item_awarded_comment_background_color">"Hintergrundfarbe für ausgezeichnete Kommentare"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Angewandt auf: Ausgezeichnete Kommentare"</string>
     <string name="theme_item_received_message_background_color">"Hintergrundfarbe für empfangene Nachrichten"</string>
     <string name="theme_item_received_message_background_color_detail">"Angewandt auf: Hintergrund von empfangenen private Nachrichten"</string>
     <string name="theme_item_sent_message_background_color">"Hintergrundfarbe für gesendete Nachrichten"</string>
@@ -600,10 +598,6 @@ Tippen für Neuversuch."</string>
     <string name="theme_item_flair_background_color_detail">"Angewandt auf: Hintergrund von Flairs"</string>
     <string name="theme_item_flair_text_color">"Flair-Textfarbe"</string>
     <string name="theme_item_flair_text_color_detail">"Angwandt auf: Textfarbe von Flairs"</string>
-    <string name="theme_item_awards_background_color">"Hintergrundfarbe für Auszeichnungen"</string>
-    <string name="theme_item_awards_background_color_detail">"Angewandt auf: Hintergrund von Auszeichnungen"</string>
-    <string name="theme_item_awards_text_color">"Textfarbe für Auszeichnungen"</string>
-    <string name="theme_item_awards_text_color_detail">"Angewandt auf: Textfarbe von Auszeichnungen"</string>
     <string name="theme_item_archived_tint">"Farbe für Archiv-Symbol"</string>
     <string name="theme_item_archived_tint_detail">"Angewandt auf: Archiv-Symbol"</string>
     <string name="theme_item_locked_icon_tint">"Farbe für Gesperrt-Symbol"</string>
@@ -727,7 +721,6 @@ Basiere auf Indigo-AMOLED-Thema"</string>
     <string name="post_content_preview">"Der Schwerkraft-Witz wird schon langsam alt, aber ich falle jedes Mal auf ihn rein."</string>
     <string name="post_type_preview">"BEITRAG"</string>
     <string name="flair_preview">"Flair"</string>
-    <string name="awards_preview">"4 Auszeichnungen"</string>
     <string name="author_flair_preview">"Autor-Flair"</string>
     <string name="comment_content_preview">"Ich habe für meine Freundin eine “Gute Besserung“-Karte besorgt.
 Sie ist nicht krank oder so, aber sie könnte sich definitiv bessern."</string>

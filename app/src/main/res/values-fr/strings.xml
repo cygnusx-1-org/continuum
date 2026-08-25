@@ -602,8 +602,6 @@ https://s3.eu-west-1.amazonaws.com/po-pub/i/dFZKKms9HbrDGOlcgW9QTcwF.jpg -->
     <!-- Not sure how to translate correctly "Fully-Collapsed Comment". -->
     <string name="theme_item_fully_collapsed_comment_background_color">"Couleur d'arrière-plan des commentaires déroulés"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"S'applique à: Arrière-plan des commentaires déroulés"</string>
-    <string name="theme_item_awarded_comment_background_color">"Couleur de fond des commentaires récompensés"</string>
-    <string name="theme_item_awarded_comment_background_color_detail">"Appliqué à : fond des commentaires récompensés"</string>
     <string name="theme_item_received_message_background_color">"Couleur de fond des messages reçus"</string>
     <string name="theme_item_received_message_background_color_detail">"Appliqué à : Fond des messages privés reçu"</string>
     <string name="theme_item_sent_message_background_color">"Couleur de fond des messages envoyés"</string>
@@ -658,10 +656,6 @@ https://s3.eu-west-1.amazonaws.com/po-pub/i/dFZKKms9HbrDGOlcgW9QTcwF.jpg -->
     <string name="theme_item_flair_background_color_detail">"S'applique à: Arrière-plan du tag flair"</string>
     <string name="theme_item_flair_text_color">"Couleur de texte du flair"</string>
     <string name="theme_item_flair_text_color_detail">"S'applique à: Couleur de texte du tag flair"</string>
-    <string name="theme_item_awards_background_color">"Couleur de fonds des récompenses"</string>
-    <string name="theme_item_awards_background_color_detail">"Appliqué à : Fond des étiquettes de récompenses"</string>
-    <string name="theme_item_awards_text_color">"Couleur du texte des récompenses"</string>
-    <string name="theme_item_awards_text_color_detail">"Appliqué à : couleur du texte de l'étiquette des récompenses"</string>
     <string name="theme_item_archived_tint">"Couleur de l'icône archivé"</string>
     <string name="theme_item_archived_tint_detail">"Appliqué à : icône archivé"</string>
     <string name="theme_item_locked_icon_tint">"Couleur d'icône bloqué"</string>
@@ -786,7 +780,6 @@ Basé sur le thème sombre Indigo"</string>
     <!-- "Publication" is probably the most accurate translation but it seems it's too long... -->
     <string name="post_type_preview">"PUBLI"</string>
     <string name="flair_preview">"Flair"</string>
-    <string name="awards_preview">"4 récompenses"</string>
     <string name="author_flair_preview">"Flair de l'auteur"</string>
 
     <!-- A completely different joke -->

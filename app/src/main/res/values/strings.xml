@@ -1061,8 +1061,6 @@
     <string name="theme_item_comment_background_color_detail">Applied to: Comment background</string>
     <string name="theme_item_fully_collapsed_comment_background_color">Fully-Collapsed Comment Background Color</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">Applied to: Background of fully-collapsed comments</string>
-    <string name="theme_item_awarded_comment_background_color">Awarded Comment Background Color</string>
-    <string name="theme_item_awarded_comment_background_color_detail">Applied to: Background of awarded comments</string>
     <string name="theme_item_received_message_background_color">Received Message Background Color</string>
     <string name="theme_item_received_message_background_color_detail">Applied to: Background of received private messages</string>
     <string name="theme_item_sent_message_background_color">Sent Message Background Color</string>
@@ -1135,10 +1133,6 @@
     <string name="theme_item_flair_background_color_detail">Applied to: Background of the flair tag</string>
     <string name="theme_item_flair_text_color">Flair Text Color</string>
     <string name="theme_item_flair_text_color_detail">Applied to: Text color of the flair tag</string>
-    <string name="theme_item_awards_background_color">Awards Background Color</string>
-    <string name="theme_item_awards_background_color_detail">Applied to: Background of the awards tag</string>
-    <string name="theme_item_awards_text_color">Awards Text Color</string>
-    <string name="theme_item_awards_text_color_detail">Applied to: Text color of the awards tag</string>
     <string name="theme_item_archived_tint">Archived Icon Color</string>
     <string name="theme_item_archived_tint_detail">Applied to: Archived icon</string>
     <string name="theme_item_locked_icon_tint">Locked Icon Color</string>
@@ -1271,7 +1265,6 @@
     <string name="post_content_preview">This gravity joke is getting a bit old, but I fall for it every time.</string>
     <string name="post_type_preview">POST</string>
     <string name="flair_preview">Flair</string>
-    <string name="awards_preview">4 Awards</string>
     <string name="author_flair_preview">Author Flair</string>
     <string name="comment_content_preview">I got my girlfriend a "Get better soon" card.\nShe\'s not ill or anything, but she could definitely get better.</string>
 

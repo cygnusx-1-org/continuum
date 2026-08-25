@@ -1828,18 +1828,21 @@ class ViewPostDetailFragmentViewModelNew(
     fun getNextSearchedPosition(query: String, currentSearchedPosition: Int, searchNextComment: Boolean): Int {
         _dataState.value.comments?.let {
             if (!it.isEmpty()) {
+                // Locale.ROOT: a Turkish/Azeri device lower-cases "I" to dotless "i", so searching
+                // a thread for a word containing an I would find nothing. This folds comment text
+                // for matching, never for display.
                 if (searchNextComment) {
                     for (i in currentSearchedPosition + 1..<it.size) {
-                        if (it[i].commentRawText?.lowercase(Locale.getDefault())
-                                ?.contains(query.lowercase(Locale.getDefault())) == true
+                        if (it[i].commentRawText?.lowercase(Locale.ROOT)
+                                ?.contains(query.lowercase(Locale.ROOT)) == true
                         ) {
                             return i
                         }
                     }
                 } else {
                     for (i in currentSearchedPosition - 1 downTo 0) {
-                        if (it[i].commentRawText?.lowercase(Locale.getDefault())
-                                ?.contains(query.lowercase(Locale.getDefault())) == true
+                        if (it[i].commentRawText?.lowercase(Locale.ROOT)
+                                ?.contains(query.lowercase(Locale.ROOT)) == true
                         ) {
                             return i
                         }
