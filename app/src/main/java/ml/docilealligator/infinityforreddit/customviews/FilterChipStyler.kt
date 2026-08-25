@@ -22,17 +22,27 @@ class FilterChipStyler(customThemeWrapper: CustomThemeWrapper, private val typef
     private val primaryIconColor = customThemeWrapper.primaryIconColor
     private val backgroundColor = customThemeWrapper.backgroundColor
     private val dividerColor = customThemeWrapper.dividerColor
-    private val accentColor = customThemeWrapper.colorAccent
+
+    // A checked chip is filled the way the subscribe button is, because chipTextColor — the label
+    // colour below — is the theme's foreground for exactly that fill and nothing else. Filling with
+    // colorAccent instead left the label invisible on any theme with a light accent, which White
+    // Dark, White Amoled and Dracula all ship.
+    //
+    // Of that pair it is `subscribed`, the colour the button wears once you are subscribed, which
+    // is the state a checked chip is in. Note the pair tracks the action the button offers rather
+    // than the state it is in, so this is the shade a theme picks for undoing something — expect
+    // it to be the louder of the two.
+    private val selectedColor = customThemeWrapper.subscribed
 
     // Chips sit on a filled card, so their unchecked fill is the screen background rather than the
-    // card colour, and their checked fill is the accent the rest of the app uses for selected chips.
+    // card colour.
     private val backgroundColors = ColorStateList(
         arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-        intArrayOf(accentColor, backgroundColor)
+        intArrayOf(selectedColor, backgroundColor)
     )
     private val strokeColors = ColorStateList(
         arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
-        intArrayOf(accentColor, dividerColor)
+        intArrayOf(selectedColor, dividerColor)
     )
     private val textColors = ColorStateList(
         arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
