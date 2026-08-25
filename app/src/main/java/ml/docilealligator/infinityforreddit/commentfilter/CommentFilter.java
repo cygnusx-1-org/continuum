@@ -102,7 +102,12 @@ public class CommentFilter implements Parcelable {
 
         for (CommentFilter c : commentFilterList) {
             commentFilter.displayMode = Math.max(c.displayMode, commentFilter.displayMode);
-            commentFilter.maxVote = Math.min(c.maxVote, commentFilter.maxVote);
+            // Not Math.min: the seed above is a fresh CommentFilter, whose maxVote is the -1 "no
+            // bound" sentinel that isCommentAllowed tests with `> 0`, and Math.min against -1 can
+            // never leave -1 -- so every maximum the user set was dropped by any merge of two or
+            // more filters. Math.max on minVote does accumulate the strictest minimum, which is why
+            // the pair reads as one symmetric block while only half of it worked.
+            commentFilter.maxVote = strictestMaximum(commentFilter.maxVote, c.maxVote);
             commentFilter.minVote = Math.max(c.minVote, commentFilter.minVote);
 
             if (c.excludeStrings != null && !c.excludeStrings.isEmpty()) {
@@ -119,6 +124,19 @@ public class CommentFilter implements Parcelable {
         }
 
         return commentFilter;
+    }
+
+    /**
+     * Folds one filter's maximum score into a running merge, strictest-wins. Only a positive bound
+     * is in force -- {@link #isCommentAllowed} tests it with {@code > 0}, so both -1 (the unset
+     * sentinel) and 0 mean "no maximum" -- and a filter that sets none leaves the running value
+     * alone.
+     */
+    private static int strictestMaximum(int running, int candidate) {
+        if (candidate <= 0) {
+            return running;
+        }
+        return running <= 0 ? candidate : Math.min(running, candidate);
     }
 
     @Override

@@ -484,11 +484,16 @@ public class PostFilter implements Parcelable {
         Map<String, String> termOwners = new HashMap<>();
         postFilter.name = "Merged";
         for (PostFilter p : postFilterList) {
-            postFilter.maxVote = Math.min(p.maxVote, postFilter.maxVote);
+            // The two directions are not symmetric, which is what made the old `Math.min` on the
+            // maxima look right. The seed above is a fresh PostFilter, whose bounds are the -1 "no
+            // bound" sentinel that isPostAllowed tests with `> 0`. Math.max against -1 does
+            // accumulate the strictest minimum, but Math.min against -1 can never leave -1, so every
+            // maximum the user set was dropped by any merge of two or more filters.
+            postFilter.maxVote = strictestMaximum(postFilter.maxVote, p.maxVote);
             postFilter.minVote = Math.max(p.minVote, postFilter.minVote);
-            postFilter.maxComments = Math.min(p.maxComments, postFilter.maxComments);
+            postFilter.maxComments = strictestMaximum(postFilter.maxComments, p.maxComments);
             postFilter.minComments = Math.max(p.minComments, postFilter.minComments);
-            postFilter.maxAwards = Math.min(p.maxAwards, postFilter.maxAwards);
+            postFilter.maxAwards = strictestMaximum(postFilter.maxAwards, p.maxAwards);
             postFilter.minAwards = Math.max(p.minAwards, postFilter.minAwards);
 
             postFilter.onlyNSFW = p.onlyNSFW ? p.onlyNSFW : postFilter.onlyNSFW;
@@ -580,6 +585,19 @@ public class PostFilter implements Parcelable {
 
         postFilter.subredditTermOwners = termOwners;
         return postFilter;
+    }
+
+    /**
+     * Folds one filter's maximum bound into a running merge, strictest-wins. Only a positive bound
+     * is in force -- {@link #isPostAllowed} tests every maximum with {@code > 0}, and both -1 (the
+     * unset sentinel) and 0 mean "no maximum" -- so the strictest of two is the smaller of the ones
+     * actually set, and a filter that sets none leaves the running value alone.
+     */
+    private static int strictestMaximum(int running, int candidate) {
+        if (candidate <= 0) {
+            return running;
+        }
+        return running <= 0 ? candidate : Math.min(running, candidate);
     }
 
     /**
