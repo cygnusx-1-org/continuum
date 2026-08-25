@@ -2,6 +2,14 @@
 
 ---
 
+8.2.5.9.9.9.6 / 2026-8-25
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Post Filter bug #370
+* Implemented Add support for incognito keyboard #134
+* Implemented Search history for users that are not logged in #115
+
 8.2.5.9.9.9.5 / 2026-8-22
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
