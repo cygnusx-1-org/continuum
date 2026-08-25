@@ -17,12 +17,20 @@ public class WallpaperChangeReceiver extends BroadcastReceiver {
         this.sharedPreferences = sharedPreferences;
     }
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
+    /**
+     * Shared with Infinity's WallpaperManager colours-changed listener, which stands in for this
+     * receiver from API 27 on.
+     */
+    public static void enqueueMaterialYouWork(Context context, SharedPreferences sharedPreferences) {
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_MATERIAL_YOU, false)) {
             OneTimeWorkRequest materialYouRequest = OneTimeWorkRequest.from(MaterialYouWorker.class);
             WorkManager.getInstance(context).enqueueUniqueWork(MaterialYouWorker.UNIQUE_WORKER_NAME,
                     ExistingWorkPolicy.REPLACE, materialYouRequest);
         }
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        enqueueMaterialYouWork(context, sharedPreferences);
     }
 }

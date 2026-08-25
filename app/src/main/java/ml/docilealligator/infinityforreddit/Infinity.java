@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,9 +19,8 @@ import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import com.evernote.android.state.StateSaver;
 import com.livefront.bridge.Bridge;
@@ -28,7 +29,6 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.activities.LockScreenActivity;
-import ml.docilealligator.infinityforreddit.broadcastreceivers.NetworkWifiStatusReceiver;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.WallpaperChangeReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customtheme.DefaultTheme;
@@ -46,7 +46,7 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-public class Infinity extends Application implements LifecycleObserver {
+public class Infinity extends Application implements DefaultLifecycleObserver {
     // Application-context accessor for static helpers that have no Context of their own (e.g.
     // SavedPostCache). Set as early as possible in onCreate().
     @Nullable
@@ -64,7 +64,10 @@ public class Infinity extends Application implements LifecycleObserver {
     @Nullable
     public Typeface contentTypeface;
     private AppComponent mAppComponent;
-    private NetworkWifiStatusReceiver mNetworkWifiStatusReceiver;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    // Written only from ConnectivityManager's callback thread, which delivers every callback
+    // serially; volatile so the initial value set here is visible to it.
+    private volatile int lastConnectedNetwork = Utils.NETWORK_TYPE_OTHER;
     private boolean appLock;
     private long appLockTimeout;
     private boolean canStartLockScreenActivity = false;
@@ -219,15 +222,8 @@ public class Infinity extends Application implements LifecycleObserver {
 
         EventBus.getDefault().register(this);
 
-        mNetworkWifiStatusReceiver =
-                new NetworkWifiStatusReceiver(() -> EventBus.getDefault().post(new ChangeNetworkStatusEvent(Utils.getConnectedNetwork(getApplicationContext()))));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(mNetworkWifiStatusReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION), RECEIVER_NOT_EXPORTED);
-            registerReceiver(new WallpaperChangeReceiver(mSharedPreferences), new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED), RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(mNetworkWifiStatusReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-            registerReceiver(new WallpaperChangeReceiver(mSharedPreferences), new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED));
-        }
+        registerNetworkStatusCallback();
+        registerWallpaperChangeListener();
 
         if (mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_MATERIAL_YOU, false)) {
             int sentryColor = mInternalSharedPreferences.getInt(SharedPreferencesUtils.MATERIAL_YOU_SENTRY_COLOR, 0);
@@ -257,13 +253,81 @@ public class Infinity extends Application implements LifecycleObserver {
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    public void appInForeground() {
+    /**
+     * Data saving and autoplay-on-wifi follow whichever network is currently the default one.
+     * ConnectivityManager.CONNECTIVITY_ACTION has been deprecated since API 28 and reports the
+     * same transitions this callback does.
+     */
+    private void registerNetworkStatusCallback() {
+        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
+        if (connectivityManager == null) {
+            return;
+        }
+
+        connectivityManager.registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                postConnectedNetworkIfChanged();
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                postConnectedNetworkIfChanged();
+            }
+
+            @Override
+            public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+                postConnectedNetworkIfChanged();
+            }
+        });
+    }
+
+    /**
+     * onCapabilitiesChanged also fires for changes that leave the transport alone -- validation,
+     * bandwidth estimates during an active transfer -- which the broadcast this replaces never
+     * reported, so the type is read and compared here, on ConnectivityManager's callback thread,
+     * rather than on the main thread. Only a transport that actually changed reaches the main
+     * thread, which it has to: every ChangeNetworkStatusEvent subscriber reaches into an adapter
+     * and refreshes a RecyclerView.
+     */
+    private void postConnectedNetworkIfChanged() {
+        int connectedNetwork = Utils.getConnectedNetwork(getApplicationContext());
+        if (connectedNetwork == lastConnectedNetwork) {
+            return;
+        }
+
+        lastConnectedNetwork = connectedNetwork;
+        mainHandler.post(() -> EventBus.getDefault().post(new ChangeNetworkStatusEvent(connectedNetwork)));
+    }
+
+    /**
+     * Material You recolours from the system wallpaper's colours, and MaterialYouUtils can only
+     * read those from API 27 on -- below that a wallpaper change has nothing to recompute. So the
+     * colours-changed listener covers every level where the work is worth doing, and
+     * Intent.ACTION_WALLPAPER_CHANGED, deprecated since API 16, is left on 24-26 alone, where it
+     * is the only signal available.
+     */
+    @SuppressWarnings("deprecation")
+    private void registerWallpaperChangeListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            WallpaperManager.getInstance(this).addOnColorsChangedListener((colors, which) -> {
+                if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
+                    WallpaperChangeReceiver.enqueueMaterialYouWork(this, mSharedPreferences);
+                }
+            }, mainHandler);
+        } else {
+            registerReceiver(new WallpaperChangeReceiver(mSharedPreferences),
+                    new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED));
+        }
+    }
+
+    @Override
+    public void onStart(@NonNull LifecycleOwner owner) {
         canStartLockScreenActivity = true;
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    public void appInBackground() {
+    @Override
+    public void onStop(@NonNull LifecycleOwner owner) {
         if (appLock) {
             mSecuritySharedPreferences.edit().putLong(SharedPreferencesUtils.LAST_FOREGROUND_TIME, System.currentTimeMillis()).apply();
         }
