@@ -133,3 +133,5 @@ mirakle.gradle
 notes/*
 
 android-button-masher/*
+
+.kotlin
