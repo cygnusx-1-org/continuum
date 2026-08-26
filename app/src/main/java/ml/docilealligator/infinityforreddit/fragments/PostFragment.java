@@ -812,9 +812,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         }
 
         int nColumns = getNColumns(resources);
-        if (mAdapter != null) {
-            mAdapter.setNColumns(nColumns);
-        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             binding.recyclerViewPostFragment.setLayoutManager(mLinearLayoutManager);
@@ -1581,9 +1578,6 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             previousPosition = mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0];
         }
         int nColumns = getNColumns(getResources());
-        if (mAdapter != null) {
-            mAdapter.setNColumns(nColumns);
-        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             if (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {

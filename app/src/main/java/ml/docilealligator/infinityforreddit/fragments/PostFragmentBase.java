@@ -1087,17 +1087,31 @@ public abstract class PostFragmentBase extends Fragment {
     protected static class StaggeredGridLayoutManagerItemOffsetDecoration extends RecyclerView.ItemDecoration {
 
         private final int mHalfOffset;
-        private final int mQuaterOffset;
-        private final int mCard3HorizontalSpace;
+        private final int mTotalHorizontalOffset;
+        private final int mCard3Margin;
         private final int mCard3VerticalSpace;
         private final int mNColumns;
 
         StaggeredGridLayoutManagerItemOffsetDecoration(int itemOffset, int nColumns) {
-            mNColumns = nColumns;
-            mCard3HorizontalSpace = -itemOffset / 4 * 3;
+            // Callers only build this for a multi-column feed, but the count comes from a
+            // preference string, and a restored or hand-edited backup can carry a 0 that
+            // StaggeredGridLayoutManager itself accepts. Clamping keeps the divisions below safe.
+            mNColumns = Math.max(1, nColumns);
             mCard3VerticalSpace = -itemOffset / 4;
+            // Card Layout 3 items carry their own 16dp horizontal margin (layout_marginStart /
+            // layout_marginEnd in the item_post_card_3_* layouts, and applyCompactItemLayoutParams
+            // for the compact variant). The decoration cancels it back out so that layout ends up
+            // with the same gaps as the others. itemOffset is that same 16dp.
+            mCard3Margin = itemOffset;
             mHalfOffset = itemOffset / 2;
-            mQuaterOffset = itemOffset / 4;
+            // StaggeredGridLayoutManager hands every span exactly totalSpace / spanCount, so the
+            // items only come out the same width if each one is inset by the same *total* amount.
+            // Splitting that constant total unevenly across the span is what puts a half-offset
+            // margin at the outer edges and a half-offset gutter between columns while keeping the
+            // widths equal. The outer columns used to be a quarter-offset wider than the inner
+            // ones, which made their cards a different height and drifted the columns out of
+            // alignment as the feed was scrolled (#373).
+            mTotalHorizontalOffset = mHalfOffset * (mNColumns + 1) / mNColumns;
         }
 
         StaggeredGridLayoutManagerItemOffsetDecoration(@NonNull Context context, @DimenRes int itemOffsetId, int nColumns) {
@@ -1114,6 +1128,12 @@ public abstract class PostFragmentBase extends Fragment {
 
             int spanIndex = layoutParams.getSpanIndex();
 
+            // Derive the left inset by subtracting the right one from the constant total, so that
+            // the integer division can shift where a gutter falls by a pixel but can never make one
+            // column wider than another.
+            int right = mHalfOffset * (spanIndex + 1) / mNColumns;
+            int left = mTotalHorizontalOffset - right;
+
             if (parent.getAdapter() != null) {
                 RecyclerView.ViewHolder viewHolder = parent.getChildViewHolder(view);
                 if (viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardVideoAutoplayViewHolder ||
@@ -1121,15 +1141,12 @@ public abstract class PostFragmentBase extends Fragment {
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardWithPreviewViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardGalleryTypeViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardTextTypeViewHolder) {
-                    int cardLeft = (spanIndex == 0) ? -mHalfOffset : mCard3HorizontalSpace;
-                    int cardRight = (spanIndex == mNColumns - 1) ? -mHalfOffset : mCard3HorizontalSpace;
-                    outRect.set(cardLeft, mCard3VerticalSpace, cardRight, mCard3VerticalSpace);
+                    outRect.set(left - mCard3Margin, mCard3VerticalSpace,
+                            right - mCard3Margin, mCard3VerticalSpace);
                     return;
                 }
             }
 
-            int left = (spanIndex == 0) ? mHalfOffset : mQuaterOffset;
-            int right = (spanIndex == mNColumns - 1) ? mHalfOffset : mQuaterOffset;
             outRect.set(left, 0, right, 0);
         }
     }

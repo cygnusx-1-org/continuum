@@ -17,41 +17,48 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.media3.ui.AspectRatioFrameLayout
-            android:id="@+id/aspect_ratio_frame_layout_item_post_card_3_video_type_autoplay"
+        <ml.docilealligator.infinityforreddit.customviews.MaxHeightSquareFrameLayout
+            android:id="@+id/preview_frame_layout_item_post_card_3_video_type_autoplay"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:background="#000000"
-            app:resize_mode="fixed_width">
+            android:layout_height="wrap_content">
 
-            <androidx.media3.ui.PlayerView
-                android:id="@+id/player_view_item_post_card_3_video_type_autoplay"
+            <androidx.media3.ui.AspectRatioFrameLayout
+                android:id="@+id/aspect_ratio_frame_layout_item_post_card_3_video_type_autoplay"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animateLayoutChanges="true"
-                app:show_timeout="1500"
-                app:auto_show="false"
-                app:controller_layout_id="@layout/exo_autoplay_playback_control_view"
-                app:animation_enabled="false" />
+                android:layout_height="0dp"
+                android:background="#000000"
+                app:resize_mode="fixed_width">
 
-            <pl.droidsonroids.gif.GifImageView
-                android:id="@+id/preview_image_view_item_post_card_3_video_type_autoplay"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="fitStart"
-                android:visibility="gone" />
+                <androidx.media3.ui.PlayerView
+                    android:id="@+id/player_view_item_post_card_3_video_type_autoplay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    app:show_timeout="1500"
+                    app:auto_show="false"
+                    app:controller_layout_id="@layout/exo_autoplay_playback_control_view"
+                    app:animation_enabled="false" />
 
-            <ImageView
-                android:id="@+id/error_loading_video_image_view_item_post_card_3_video_type_autoplay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:layout_gravity="center"
-                android:background="@drawable/play_button_round_background"
-                android:src="@drawable/ic_error_white_36dp"
-                android:visibility="gone" />
+                <pl.droidsonroids.gif.GifImageView
+                    android:id="@+id/preview_image_view_item_post_card_3_video_type_autoplay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitStart"
+                    android:visibility="gone" />
 
-        </androidx.media3.ui.AspectRatioFrameLayout>
+                <ImageView
+                    android:id="@+id/error_loading_video_image_view_item_post_card_3_video_type_autoplay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/play_button_round_background"
+                    android:src="@drawable/ic_error_white_36dp"
+                    android:visibility="gone" />
+
+            </androidx.media3.ui.AspectRatioFrameLayout>
+
+        </ml.docilealligator.infinityforreddit.customviews.MaxHeightSquareFrameLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

@@ -970,12 +970,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     Post.Preview preview = getSuitablePreview(mPost.getPreviews());
                     if (preview != null) {
                         if (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0) {
-                            ((PostDetailGalleryViewHolder) holder).adapter.setRatio(-1);
+                            ((PostDetailGalleryViewHolder) holder).adapter.setMaxPreviewHeight(
+                                    mActivity.getResources().getDisplayMetrics().heightPixels / 2);
+                            ((PostDetailGalleryViewHolder) holder).adapter.setRatio(1);
                         } else {
+                            ((PostDetailGalleryViewHolder) holder).adapter.setMaxPreviewHeight(0);
                             ((PostDetailGalleryViewHolder) holder).adapter.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
                         }
                     } else {
-                        ((PostDetailGalleryViewHolder) holder).adapter.setRatio(-1);
+                        ((PostDetailGalleryViewHolder) holder).adapter.setMaxPreviewHeight(
+                                mActivity.getResources().getDisplayMetrics().heightPixels / 2);
+                        ((PostDetailGalleryViewHolder) holder).adapter.setRatio(1);
                     }
                     ((PostDetailGalleryViewHolder) holder).adapter.setBlurImage(
                             (mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost.isSpoiler() && mNeedBlurSpoiler));
@@ -2736,7 +2741,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
             adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface, mPostDetailMarkwon,
                     mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor,
-                    mCardViewColor, mCommentColor, mScale);
+                    mCardViewColor, mCommentColor);
             binding.galleryRecyclerViewItemPostDetailGallery.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(binding.galleryRecyclerViewItemPostDetailGallery);
             LinearLayoutManagerBugFixed layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);

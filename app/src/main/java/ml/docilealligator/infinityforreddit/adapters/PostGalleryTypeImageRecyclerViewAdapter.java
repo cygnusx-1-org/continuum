@@ -37,28 +37,27 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     private final int mPrimaryTextColor;
     private int mCardViewColor;
     private int mCommentColor;
-    private final float mScale;
     private ArrayList<Post.Gallery> galleryImages;
     private boolean blurImage;
     private float ratio;
+    private int maxPreviewHeight;
     private final boolean showCaption;
 
     public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
-                                                   int mColorAccent, int mPrimaryTextColor, float scale) {
+                                                   int mColorAccent, int mPrimaryTextColor) {
         this.glide = glide;
         this.typeface = typeface;
         this.saveMemoryCenterInisdeDownsampleStrategy = saveMemoryCenterInisdeDownsampleStrategy;
         this.mColorAccent = mColorAccent;
         this.mPrimaryTextColor = mPrimaryTextColor;
-        this.mScale = scale;
         showCaption = false;
     }
 
     public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface, Markwon postDetailMarkwon,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
                                                    int mColorAccent, int mPrimaryTextColor, int mCardViewColor,
-                                                   int mCommentColor, float scale) {
+                                                   int mCommentColor) {
         this.glide = glide;
         this.typeface = typeface;
         this.mPostDetailMarkwon = postDetailMarkwon;
@@ -67,7 +66,6 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         this.mPrimaryTextColor = mPrimaryTextColor;
         this.mCardViewColor = mCardViewColor;
         this.mCommentColor = mCommentColor;
-        this.mScale = scale;
         showCaption = true;
     }
 
@@ -79,13 +77,15 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
 
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-        if (ratio < 0) {
-            int height = (int) (400 * mScale);
-            holder.binding.imageViewItemGalleryImageInPostFeed.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            holder.binding.imageViewItemGalleryImageInPostFeed.getLayoutParams().height = height;
-        } else {
-            holder.binding.imageViewItemGalleryImageInPostFeed.setRatio(ratio);
-        }
+        // Every tile in a gallery is given the same shape, taken from the post's first preview, so
+        // the other images in it need not match. Only the square preview is a shape none of them
+        // was measured against, and it is the one that has to crop to fill; sizing from the post's
+        // own ratio letterboxes instead, which is what this has always done. maxPreviewHeight is
+        // set alongside the square ratio and left at 0 otherwise, so it distinguishes the two.
+        holder.binding.imageViewItemGalleryImageInPostFeed.setScaleType(
+                maxPreviewHeight > 0 ? ImageView.ScaleType.CENTER_CROP : ImageView.ScaleType.FIT_CENTER);
+        holder.binding.imageViewItemGalleryImageInPostFeed.setRatioMaxHeight(maxPreviewHeight);
+        holder.binding.imageViewItemGalleryImageInPostFeed.setRatio(ratio);
         holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
         holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
 
@@ -239,8 +239,21 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         this.blurImage = blurImage;
     }
 
+    /**
+     * @param ratio height-to-width ratio for every tile, always positive: the gallery images' own
+     *              ratio, or {@code 1} for the square "Fixed Height in Card" preview.
+     */
     public void setRatio(float ratio) {
         this.ratio = ratio;
+    }
+
+    /**
+     * @param maxPreviewHeight ceiling in pixels for a tile's height, or {@code 0} for none. Only
+     *                         the square preview needs one -- a tile sized from the image's own
+     *                         ratio is already the shape the caller asked for.
+     */
+    public void setMaxPreviewHeight(int maxPreviewHeight) {
+        this.maxPreviewHeight = maxPreviewHeight;
     }
 
     class ImageViewHolder extends RecyclerView.ViewHolder {

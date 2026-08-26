@@ -89,6 +89,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomShee
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.MaxHeightSquareFrameLayout;
 import ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkRightThumbnailBinding;
@@ -150,6 +151,12 @@ import retrofit2.Retrofit;
 
 @SuppressWarnings("NullAway.Init")
 public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerView.ViewHolder> implements CacheManager {
+    /**
+     * Height-to-width ratio of a "Fixed Height in Card" preview: square, so every preview in the
+     * feed is the same height as every other one. See {@link #setSquarePreview}.
+     */
+    private static final float SQUARE_PREVIEW_RATIO = 1f;
+
     private static final int VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE = 1;
     private static final int VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE = 2;
     private static final int VIEW_TYPE_POST_CARD_GALLERY_TYPE = 3;
@@ -277,7 +284,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mHideTheNumberOfComments;
     private boolean mLegacyAutoplayVideoControllerUI;
     private boolean mFixedHeightPreviewInCard;
-    private int mNColumns = 2;
     private boolean mHideTextPostContent;
     private boolean mEasierToWatchInFullScreen;
     private boolean mDisableProfileAvatarAnimation;
@@ -1033,11 +1039,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 if (holder instanceof PostBaseVideoAutoplayViewHolder) {
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.previewImageView.setVisibility(View.VISIBLE);
                     Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
+                    VideoAutoplayImpl toroPlayer = ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer;
                     if (!mFixedHeightPreviewInCard && preview != null) {
-                        ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.aspectRatioFrameLayout.setAspectRatio((float) preview.getPreviewWidth() / preview.getPreviewHeight());
-                        mGlide.load(preview.getPreviewUrl()).centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.previewImageView);
+                        toroPlayer.previewFrameLayout.setSquarePreview(false);
+                        toroPlayer.aspectRatioFrameLayout.setAspectRatio((float) preview.getPreviewWidth() / preview.getPreviewHeight());
+                        mGlide.load(preview.getPreviewUrl()).centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(toroPlayer.previewImageView);
                     } else {
-                        ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.aspectRatioFrameLayout.setAspectRatio(1);
+                        // The square is the wrapper's to impose, so that it can bound the height;
+                        // clearing the media3 frame's own ratio makes it honour that measurement.
+                        toroPlayer.aspectRatioFrameLayout.setAspectRatio(0);
+                        toroPlayer.previewFrameLayout.setMaxHeight(getMaxPreviewHeight());
+                        toroPlayer.previewFrameLayout.setSquarePreview(true);
                     }
                     if (!((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.isManuallyPaused) {
                         if (mFragment.getMasterMutingOption() == null) {
@@ -1124,12 +1136,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 }
                                 ((PostWithPreviewTypeViewHolder) holder).imageView.setVisibility(View.VISIBLE);
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    int height = (int) (400 * mScale);
-                                    ((PostWithPreviewTypeViewHolder) holder).imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                                    ((PostWithPreviewTypeViewHolder) holder).imageView.getLayoutParams().height = height;
+                                    setSquarePreview(((PostWithPreviewTypeViewHolder) holder).imageView);
                                 } else {
-                                    ((PostWithPreviewTypeViewHolder) holder).imageView
-                                            .setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+                                    setPreviewRatio(((PostWithPreviewTypeViewHolder) holder).imageView, preview);
                                 }
                                 ((PostWithPreviewTypeViewHolder) holder).imageView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                                     @Override
@@ -1166,12 +1175,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
                         if (preview != null) {
                             if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio(-1);
+                                ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
+                            ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
                             } else {
+                                ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(0);
                                 ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
                             }
                         } else {
-                            ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio(-1);
+                            ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
+                            ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
                         }
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(
@@ -1375,12 +1387,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setVisibility(View.VISIBLE);
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    int height = getGalleryFixedPreviewHeight();
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
+                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
                                 } else {
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery
-                                            .setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+                                    setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                 }
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                                     @Override
@@ -1410,12 +1419,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
 
                                     if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                        int height = getGalleryFixedPreviewHeight();
-                                        ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                                        ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
+                                        setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
                                     } else {
-                                        ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery
-                                                .setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+                                        setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                     }
                                     ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                                         @Override
@@ -1440,12 +1446,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    int height = getGalleryFixedPreviewHeight();
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
+                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
                                 } else {
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery
-                                            .setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+                                    setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                 }
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                                     @Override
@@ -1471,12 +1474,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_link_post_type_indicator_day_night_24dp));
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    int height = getGalleryFixedPreviewHeight();
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.getLayoutParams().height = height;
+                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
                                 } else {
-                                    ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery
-                                            .setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+                                    setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                 }
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                                     @Override
@@ -1525,12 +1525,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).imageIndexTextView.setText(mActivity.getString(R.string.image_index_in_gallery, 1, post.getGallery().size()));
                     if (preview != null) {
                         if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                            ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio(-1);
+                            ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
+                            ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
                         } else {
-                            ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+                            ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(0);
+                                ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
                         }
                     } else {
-                        ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio(-1);
+                        ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
+                            ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
                     }
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(
@@ -1540,12 +1543,47 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
-    // Fixed-height gallery tiles historically used a flat 400dp height at every column count,
-    // which becomes a tall sliver once cells get narrow. Keep that 400dp at 1-2 columns (the
-    // historical defaults) and scale it down proportionally at 3+ columns so tiles keep a
-    // consistent aspect ratio in narrow cells.
-    private int getGalleryFixedPreviewHeight() {
-        return (int) (400 * mScale * 2 / Math.max(2, mNColumns));
+    /**
+     * Size a preview to a square, so that it is as tall as the column it sits in is wide.
+     *
+     * <p>This is what Settings -&gt; Interface -&gt; Post -&gt; "Fixed Height in Card" gives you:
+     * every preview in the feed ends up the same height as every other one, because every column is
+     * the same width. It is also the fallback for a post whose preview metadata carries no usable
+     * dimensions to size from.
+     *
+     * <p>It has to be expressed as a ratio rather than as a layout height.
+     * {@link AspectRatioGifImageView#onMeasure} replaces the measured height with
+     * {@code width * ratio} for any positive ratio, so a height written to the layout params is
+     * silently discarded -- which is what the flat 400dp height that used to be here always
+     * was (#373).
+     */
+    private void setSquarePreview(AspectRatioGifImageView imageView) {
+        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imageView.setRatioMaxHeight(getMaxPreviewHeight());
+        imageView.setRatio(SQUARE_PREVIEW_RATIO);
+    }
+
+    /**
+     * Size a preview from the dimensions Reddit reported for it, the behaviour when "Fixed Height
+     * in Card" is off. Clears the square preview's height cap, which would otherwise crop whatever
+     * post this recycled view holds next.
+     */
+    private static void setPreviewRatio(AspectRatioGifImageView imageView, Post.Preview preview) {
+        imageView.setRatioMaxHeight(0);
+        imageView.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+    }
+
+    /**
+     * Ceiling for a fixed-height preview: half the feed's visible height.
+     *
+     * <p>A square preview is as tall as its column is wide. In portrait a column is never
+     * especially wide, so that lands well, but in landscape a column can be wider than the screen
+     * is tall -- measured at one column on a phone, the preview alone came to more than two
+     * screenfuls. Deriving the ceiling from the viewport instead of the width keeps a post's header
+     * and the top of the next post on screen at any column count and any orientation.
+     */
+    private int getMaxPreviewHeight() {
+        return mActivity.getResources().getDisplayMetrics().heightPixels / 2;
     }
 
     @Nullable
@@ -1893,10 +1931,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setFixedHeightPreviewInCard(boolean fixedHeightPreviewInCard) {
         mFixedHeightPreviewInCard = fixedHeightPreviewInCard;
-    }
-
-    public void setNColumns(int nColumns) {
-        mNColumns = nColumns;
     }
 
     public void setMarkPostsAsReadSettings(boolean markPostsAsRead, boolean markPostsAsReadAfterVoting,
@@ -2934,6 +2968,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     @UnstableApi
     public abstract class VideoAutoplayImpl implements ToroPlayer {
         View itemView;
+        MaxHeightSquareFrameLayout previewFrameLayout;
         AspectRatioFrameLayout aspectRatioFrameLayout;
         GifImageView previewImageView;
         ImageView errorLoadingRedgifsImageView;
@@ -2956,12 +2991,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         private Drawable pauseDrawable;
         private boolean setDefaultResolutionAlready;
 
-        public VideoAutoplayImpl(View itemView, AspectRatioFrameLayout aspectRatioFrameLayout,
+        public VideoAutoplayImpl(View itemView, MaxHeightSquareFrameLayout previewFrameLayout,
+                                 AspectRatioFrameLayout aspectRatioFrameLayout,
                                  GifImageView previewImageView, ImageView errorLoadingRedgifsImageView,
                                  PlayerView videoPlayer, ImageView videoQualityButton, ImageView muteButton, ImageView fullscreenButton,
                                  ImageView playPauseButton, DefaultTimeBar progressBar,
                                  Drawable playDrawable, Drawable pauseDrawable) {
             this.itemView = itemView;
+            this.previewFrameLayout = previewFrameLayout;
             this.aspectRatioFrameLayout = aspectRatioFrameLayout;
             this.previewImageView = previewImageView;
             this.errorLoadingRedgifsImageView = errorLoadingRedgifsImageView;
@@ -3567,6 +3604,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                         @Nullable CustomTextView nsfwTextView,
                                         @Nullable CustomTextView spoilerTextView,
                                         @Nullable CustomTextView flairTextView,
+                                        MaxHeightSquareFrameLayout previewFrameLayout,
                                         AspectRatioFrameLayout aspectRatioFrameLayout,
                                         GifImageView previewImageView,
                                         ImageView errorLoadingRedgifsImageView,
@@ -3606,7 +3644,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     saveButton,
                     shareButton);
 
-            toroPlayer = new VideoAutoplayImpl(rootView, aspectRatioFrameLayout, previewImageView,
+            toroPlayer = new VideoAutoplayImpl(rootView, previewFrameLayout, aspectRatioFrameLayout, previewImageView,
                     errorLoadingRedgifsImageView, videoPlayer, videoQualityButton, muteButton, fullscreenButton, playPauseButton,
                     progressBar,
                     AppCompatResources.getDrawable(mActivity, R.drawable.ic_play_arrow_24dp),
@@ -3700,6 +3738,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.nsfwTextViewItemPostVideoTypeAutoplay,
                     binding.spoilerCustomTextViewItemPostVideoTypeAutoplay,
                     binding.flairCustomTextViewItemPostVideoTypeAutoplay,
+                    binding.previewFrameLayoutItemPostVideoTypeAutoplay,
                     binding.aspectRatioFrameLayoutItemPostVideoTypeAutoplay,
                     binding.previewImageViewItemPostVideoTypeAutoplay,
                     binding.errorLoadingVideoImageViewItemPostVideoTypeAutoplay,
@@ -3741,6 +3780,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.nsfwTextViewItemPostVideoTypeAutoplay,
                     binding.spoilerCustomTextViewItemPostVideoTypeAutoplay,
                     binding.flairCustomTextViewItemPostVideoTypeAutoplay,
+                    binding.previewFrameLayoutItemPostVideoTypeAutoplay,
                     binding.aspectRatioFrameLayoutItemPostVideoTypeAutoplay,
                     binding.previewImageViewItemPostVideoTypeAutoplay,
                     binding.errorLoadingVideoImageViewItemPostVideoTypeAutoplay,
@@ -3949,8 +3989,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     // Re-correct the reserved aspect ratio from the actual drawable: the preview
                     // metadata ratio can differ from the bitmap Reddit actually serves, which would
                     // otherwise letterbox the image with black against the card background. Only do
-                    // this in ratio mode; the fixed-height-preview path uses CENTER_CROP + a fixed
-                    // height and must not be switched to ratio sizing.
+                    // this when the preview was sized from its own dimensions; a square
+                    // fixed-height preview is deliberately not the drawable's shape, and
+                    // center-crops to fill instead.
                     boolean ratioMode = !mFixedHeightPreviewInCard && preview != null
                             && preview.getPreviewWidth() > 0 && preview.getPreviewHeight() > 0;
                     if (ratioMode && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
@@ -4058,7 +4099,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             noPreviewImageView.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
 
             adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface,
-                    mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor, mScale);
+                    mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor);
             galleryRecyclerView.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(galleryRecyclerView);
             galleryRecyclerView.setRecycledViewPool(mGalleryRecycledViewPool);
@@ -5080,7 +5121,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface,
-                    mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor, mScale);
+                    mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor);
             recyclerView.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(recyclerView);
             recyclerView.setRecycledViewPool(mGalleryRecycledViewPool);
@@ -5265,6 +5306,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.nsfwTextViewItemPostCard2VideoAutoplay,
                     binding.spoilerCustomTextViewItemPostCard2VideoAutoplay,
                     binding.flairCustomTextViewItemPostCard2VideoAutoplay,
+                    binding.previewFrameLayoutItemPostCard2VideoAutoplay,
                     binding.aspectRatioFrameLayoutItemPostCard2VideoAutoplay,
                     binding.previewImageViewItemPostCard2VideoAutoplay,
                     binding.errorLoadingVideoImageViewItemPostCard2VideoAutoplay,
@@ -5308,6 +5350,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.nsfwTextViewItemPostCard2VideoAutoplay,
                     binding.spoilerCustomTextViewItemPostCard2VideoAutoplay,
                     binding.flairCustomTextViewItemPostCard2VideoAutoplay,
+                    binding.previewFrameLayoutItemPostCard2VideoAutoplay,
                     binding.aspectRatioFrameLayoutItemPostCard2VideoAutoplay,
                     binding.previewImageViewItemPostCard2VideoAutoplay,
                     binding.errorLoadingVideoImageViewItemPostCard2VideoAutoplay,
@@ -5468,6 +5511,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     null,
+                    binding.previewFrameLayoutItemPostCard3VideoTypeAutoplay,
                     binding.aspectRatioFrameLayoutItemPostCard3VideoTypeAutoplay,
                     binding.previewImageViewItemPostCard3VideoTypeAutoplay,
                     binding.errorLoadingVideoImageViewItemPostCard3VideoTypeAutoplay,
@@ -5509,6 +5553,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     null,
                     null,
                     null,
+                    binding.previewFrameLayoutItemPostCard3VideoTypeAutoplay,
                     binding.aspectRatioFrameLayoutItemPostCard3VideoTypeAutoplay,
                     binding.previewImageViewItemPostCard3VideoTypeAutoplay,
                     binding.errorLoadingVideoImageViewItemPostCard3VideoTypeAutoplay,

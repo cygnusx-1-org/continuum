@@ -250,9 +250,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         });
 
         int nColumns = getNColumns(resources);
-        if (mAdapter != null) {
-            mAdapter.setNColumns(nColumns);
-        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             binding.recyclerViewHistoryPostFragment.setLayoutManager(mLinearLayoutManager);
@@ -476,9 +473,6 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             previousPosition = mStaggeredGridLayoutManager.findFirstVisibleItemPositions(into)[0];
         }
         int nColumns = getNColumns(getResources());
-        if (mAdapter != null) {
-            mAdapter.setNColumns(nColumns);
-        }
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             if (binding.recyclerViewHistoryPostFragment.getItemDecorationCount() > 0) {
