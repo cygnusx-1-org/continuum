@@ -148,6 +148,84 @@
 
             </RelativeLayout>
 
+            <LinearLayout
+                android:id="@+id/random_subreddits_linear_layout_search_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/random_subreddit_text_view_search_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/random_subreddit"
+                    android:textColor="?attr/primaryTextColor"
+                    android:textSize="?attr/font_default"
+                    android:fontFamily="?attr/font_family"
+                    app:drawableStartCompat="@drawable/ic_random_day_night_24dp"
+                    android:drawablePadding="32dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground" />
+
+                <TextView
+                    android:id="@+id/random_subscribed_subreddit_text_view_search_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/random_subscribed_subreddit"
+                    android:textColor="?attr/primaryTextColor"
+                    android:textSize="?attr/font_default"
+                    android:fontFamily="?attr/font_family"
+                    app:drawableStartCompat="@drawable/ic_random_day_night_24dp"
+                    android:drawablePadding="32dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground" />
+
+                <TextView
+                    android:id="@+id/random_nsfw_subreddit_text_view_search_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/random_nsfw_subreddit"
+                    android:textColor="?attr/primaryTextColor"
+                    android:textSize="?attr/font_default"
+                    android:fontFamily="?attr/font_family"
+                    app:drawableStartCompat="@drawable/ic_random_day_night_24dp"
+                    android:drawablePadding="32dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground" />
+
+                <TextView
+                    android:id="@+id/random_subreddits_note_text_view_search_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:text="@string/random_subreddit_sfw_not_guaranteed"
+                    android:textColor="?attr/secondaryTextColor"
+                    android:textSize="?attr/font_12"
+                    android:fontFamily="?attr/font_family" />
+
+            </LinearLayout>
+
             <View
                 android:id="@+id/divider_search_activity"
                 android:layout_width="match_parent"

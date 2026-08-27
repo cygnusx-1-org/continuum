@@ -151,6 +151,10 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     // state across rotation. Without this, the AppBarLayout resets to fully expanded on
     // every recreate, pushing the post feed down even when the user was scrolled mid-feed.
     private boolean mAppBarCollapsed = false;
+    // Left unset when onCreate redirects an r/random, r/randnsfw or r/myrandom name and
+    // finishes: nothing initialises past that point, and neither onDestroy nor
+    // onSaveInstanceState -- the only callbacks that still run -- reads these.
+    @SuppressWarnings("NullAway.Init")
     public SubredditViewModel mSubredditViewModel;
     private boolean mRecordedVisit;
 
@@ -190,7 +194,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     CustomThemeWrapper mCustomThemeWrapper;
     @Inject
     Executor mExecutor;
+    @SuppressWarnings("NullAway.Init") // See mSubredditViewModel above.
     private FragmentManager fragmentManager;
+    @SuppressWarnings("NullAway.Init") // See mSubredditViewModel above.
     private SectionsPagerAdapter sectionsPagerAdapter;
     private NavigationWrapper navigationWrapper;
     @Nullable
@@ -215,6 +221,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private String mMessageFullname;
     @Nullable
     private String mNewAccountName;
+    @SuppressWarnings("NullAway.Init") // See mSubredditViewModel above.
     private RequestManager glide;
     private int expandedTabTextColor;
     private int expandedTabBackgroundColor;
@@ -231,6 +238,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Nullable
     private Bitmap subredditIconBitmap;
     private ActivityViewSubredditDetailBinding binding;
+    @SuppressWarnings("NullAway.Init") // See mSubredditViewModel above.
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
     @Override
@@ -425,6 +433,19 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         // which ignores case and not whitespace. The row never matches, so the observer never binds
         // the header. Trimming where the extra is consumed covers every entry point at once.
         subredditName = Objects.requireNonNull(getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY)).trim();
+
+        // r/random, r/randnsfw and r/myrandom are not subreddits any more -- Reddit answers 404
+        // "banned" for all three -- so arriving here with one means picking a real subreddit and
+        // going there instead. Intercepted at the destination rather than at each caller because
+        // every route that takes a typed name ends up here: Go to Subreddit in six activities, the
+        // Subscriptions search field, and deep links.
+        Intent randomSubredditIntent = FetchRandomSubredditActivity.intentFor(this, subredditName);
+        if (randomSubredditIntent != null) {
+            startActivity(randomSubredditIntent);
+            finish();
+            return;
+        }
+
         initialSortType = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TYPE);
         initialSortTime = getIntent().getStringExtra(EXTRA_INITIAL_SORT_TIME);
 

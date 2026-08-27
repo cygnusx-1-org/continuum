@@ -258,11 +258,14 @@ public interface RedditAPI {
     @POST("api/v2/gold/gild")
     Call<String> awardThing(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
 
-    @GET("/r/random/comments.json?limit=1&raw_json=1")
-    Call<String> getRandomPost();
-
-    @GET("/r/randnsfw/new.json?sort=new&t=all&limit=1&raw_json=1")
-    Call<String> getRandomNSFWPost();
+    /**
+     * Confirms a whole batch of candidate subreddit names in one request, comma-separated. A live
+     * subreddit comes back with non-null {@code subscribers}, a banned or private one with null,
+     * and a deleted one not at all. Used by the random-subreddit pick, which cannot ask Reddit for
+     * randomness any more: {@code r/random} and {@code r/randnsfw} now resolve as banned subreddits.
+     */
+    @GET("/api/info.json?raw_json=1")
+    Call<String> getSubredditsInfo(@HeaderMap Map<String, String> headers, @Query("sr_name") String subredditNames);
 
     @POST("/api/read_all_messages")
     Call<String> readAllMessages(@HeaderMap Map<String, String> headers);

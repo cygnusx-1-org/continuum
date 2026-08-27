@@ -1389,8 +1389,10 @@
     <string name="random">Random</string>
     <string name="random_subreddit">Random Subreddit</string>
     <string name="random_nsfw_subreddit">Random NSFW Subreddit</string>
+    <string name="random_subscribed_subreddit">Random Subscribed Subreddit</string>
     <string name="random_post">Random Post</string>
     <string name="random_nsfw_post">Random NSFW Post</string>
+    <string name="random_subreddit_sfw_not_guaranteed">Safe for work is not guaranteed. Reddit\'s NSFW flag is set by each subreddit\'s own moderators, so a subreddit nobody flagged looks safe here.</string>
     <string name="fetch_random_thing_failed">Try again later</string>
 
     <string name="select_video_quality">Select Video Quality</string>

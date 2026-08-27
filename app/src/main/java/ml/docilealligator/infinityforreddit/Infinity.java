@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.FontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder;
+import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditRepository;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MaterialYouUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -98,6 +99,8 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
     CustomThemeWrapper customThemeWrapper;
     @Inject
     Executor executor;
+    @Inject
+    RandomSubredditRepository randomSubredditRepository;
 
     @Override
     public void onCreate() {
@@ -324,6 +327,11 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
     @Override
     public void onStart(@NonNull LifecycleOwner owner) {
         canStartLockScreenActivity = true;
+
+        // Opportunistic and cheap: the cadence inside decides whether anything is actually
+        // fetched, and a list a few days stale still picks, because every pick is validated
+        // against the API at the moment it is made.
+        randomSubredditRepository.refreshListsIfDue();
     }
 
     @Override

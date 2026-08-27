@@ -464,6 +464,10 @@ public class SharedPreferencesUtils {
     public static final String RECENTLY_VISITED_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.recently_visited";
     public static final String RECENTLY_VISITED_ENABLED_BASE = "_recently_visited_enabled";
 
+    // ETag and check timestamps for the random-subreddit name lists. Its own file: the keys are
+    // bookkeeping, not settings, and nothing on a preference screen reads them.
+    public static final String RANDOM_SUBREDDITS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.random_subreddits";
+
     public static final String CURRENT_ACCOUNT_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.current_account";
     public static final String ACCOUNT_NAME = "account_name";
     public static final String ACCESS_TOKEN = "access_token";

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +32,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
@@ -76,10 +78,13 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.post.PostViewModel;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
+import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditNames;
+import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditRepository;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -129,8 +134,22 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private int userAnchorPos = RecyclerView.NO_POSITION;
     private int userAnchorOffset = 0;
 
+    /**
+     * Non-null when this feed is a random tab -- the pseudo-name it was created with
+     * ("random"/"randnsfw"/"myrandom"). It stays the key for this tab's sort type, post layout and
+     * post filter, so those survive a re-roll; {@link #currentRandomSubreddit} is the subreddit
+     * actually being shown underneath it.
+     */
+    @Nullable
+    private String randomSubredditPseudoName;
+    /** The subreddit a random tab is currently showing. Null until the first roll lands. */
+    @Nullable
+    private String currentRandomSubreddit;
+
     @SuppressWarnings("NullAway.Init")
     PostViewModel mPostViewModel;
+    @Inject
+    RandomSubredditRepository mRandomSubredditRepository;
     @Inject
     @Named("redgifs")
     Retrofit mRedgifsRetrofit;
@@ -370,6 +389,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             });
         } else if (postType == PostType.SUBREDDIT) {
             subredditName = getArguments().getString(EXTRA_NAME);
+            // A tab named random/randnsfw/myrandom is a feed that re-rolls rather than a subreddit.
+            randomSubredditPseudoName = RandomSubredditNames.canonicalise(subredditName);
             if (savedInstanceState == null) {
                 postFragmentId += Objects.requireNonNull(subredditName).hashCode();
             }
@@ -394,7 +415,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
                 }
             }
-            boolean displaySubredditName = Constants.isFirehoseSubreddit(subredditName);
+            // A random tab shows a different subreddit after every refresh, so each post names its
+            // own -- the same reason the firehose feeds do.
+            boolean displaySubredditName = Constants.isFirehoseSubreddit(subredditName)
+                    || randomSubredditPseudoName != null;
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
@@ -1007,6 +1031,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     private void initializeAndBindPostViewModel() {
+        if (randomSubredditPseudoName != null && currentRandomSubreddit == null) {
+            // Nothing to page yet. The roll comes back here once it has a subreddit.
+            rollRandomSubreddit();
+            return;
+        }
         if (postType == PostType.SEARCH) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
@@ -1018,7 +1047,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit,
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
-                    mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, subredditName,
+                    mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences,
+                    randomSubredditPseudoName != null ? currentRandomSubreddit : subredditName,
                     postType, sortType, Objects.requireNonNull(postFilter), readPostsList)
             ).get(PostViewModel.class);
         } else if (postType == PostType.MULTIREDDIT) {
@@ -1464,6 +1494,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         if (isInLazyMode) {
             stopLazyMode();
         }
+        if (randomSubredditPseudoName != null) {
+            // On a random tab a refresh is the whole feature: it means "show me a different
+            // subreddit", not "reload this one". Rolling replaces the name the pager reads and
+            // re-triggers it, exactly as the anonymous feed does when its subscription list changes.
+            saveCache();
+            rollRandomSubreddit();
+            return;
+        }
         if (isAnonymousFrontPageOrMultireddit()) {
             // The anonymous home/multireddit feed is built from the locally stored subscription
             // list, so a refresh must re-read it from the database. This both picks up subreddits
@@ -1484,6 +1522,55 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private boolean isAnonymousFrontPageOrMultireddit() {
         return mActivity != null && mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)
                 && (postType == PostType.ANONYMOUS_FRONT_PAGE || postType == PostType.ANONYMOUS_MULTIREDDIT);
+    }
+
+    /**
+     * Picks the subreddit a random tab shows, and shows it. Called once when the tab first needs a
+     * feed, and again on every pull-to-refresh.
+     *
+     * A first roll has no view model yet and builds one; later rolls push the new name onto the
+     * existing one, which re-triggers the paging pipeline without rebuilding the Pager.
+     */
+    private void rollRandomSubreddit() {
+        boolean anonymous = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT);
+        mRandomSubredditRepository.pickForName(
+                randomSubredditPseudoName,
+                mActivity.accountName,
+                anonymous ? mRetrofit : mOauthRetrofit,
+                anonymous ? Collections.emptyMap() : APIUtils.getOAuthHeader(mActivity.accessToken),
+                new Handler(Looper.getMainLooper()),
+                new RandomSubredditRepository.PickListener() {
+                    @Override
+                    public void onRandomSubredditPicked(@NonNull String pickedSubredditName) {
+                        if (!isUsableForRandomRoll()) {
+                            return;
+                        }
+                        currentRandomSubreddit = pickedSubredditName;
+                        binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
+                        if (mPostViewModel == null) {
+                            initializeAndBindPostViewModel();
+                        } else {
+                            mPostViewModel.changeSubredditName(pickedSubredditName);
+                            goBackToTop();
+                        }
+                    }
+
+                    @Override
+                    public void onRandomSubredditPickFailed() {
+                        if (!isUsableForRandomRoll()) {
+                            return;
+                        }
+                        // Also the no-subscriptions case for myrandom, which is a healthy device
+                        // with nothing to pick from. showErrorView stops the refresh spinner.
+                        showErrorView(R.string.fetch_random_thing_failed);
+                    }
+                });
+    }
+
+    /** Whether a roll that has come back still has a live fragment and view to land in. */
+    private boolean isUsableForRandomRoll() {
+        return mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed()
+                && isAdded() && !isDetached() && getView() != null;
     }
 
     private void reloadAnonymousFrontPageOrMultireddit() {

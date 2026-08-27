@@ -669,6 +669,63 @@ if (!project.hasProperty('skipDeviceTests') || project.property('skipDeviceTests
     }
 }
 
+// The two subreddit-name lists that ship in the APK are symlinks into the sibling
+// cygnusx-1-org/subreddit-lists checkout. Without that checkout the build still produces a
+// perfectly valid APK -- one with no lists in it -- and nothing goes visibly wrong: the feature
+// falls back to downloading on first use, so the only symptom is every user paying a ~2 MB
+// download that the shipped copy exists to avoid. That is far too quiet a failure to ship, so
+// the build stops instead of guessing.
+def shippedSubredditLists = ['subreddits-sfw.txt', 'subreddits-nsfw.txt'].collect {
+    file("src/main/assets/random_subreddits/$it")
+}
+def subredditListsCheckout = new File(rootDir.parentFile, 'subreddit-lists')
+
+tasks.register('verifyShippedSubredditLists') {
+    group = 'verification'
+    description = 'Fails if the subreddit-name lists shipped in the APK are missing or dangling.'
+    // Two stat calls, so re-running is cheaper than reasoning about when a symlink whose target
+    // vanished counts as a changed input. Declaring the lists as inputs would be worse than
+    // useless here: an absent input reads as "nothing to do", which is the exact state to catch.
+    outputs.upToDateWhen { false }
+
+    def lists = shippedSubredditLists
+    def checkout = subredditListsCheckout
+    doLast {
+        def problems = lists.findResults { listFile ->
+            def path = listFile.toPath()
+            if (!java.nio.file.Files.exists(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                return "$listFile -- not present"
+            }
+            if (!java.nio.file.Files.exists(path)) {
+                return java.nio.file.Files.isSymbolicLink(path)
+                        ? "$listFile -- dangling symlink to ${java.nio.file.Files.readSymbolicLink(path)}"
+                        : "$listFile -- unreadable"
+            }
+            if (listFile.length() == 0L) {
+                return "$listFile -- empty"
+            }
+            return null
+        }
+
+        if (problems) {
+            throw new GradleException("The subreddit-name lists that ship in the APK are not readable:\n"
+                    + problems.collect { "  $it" }.join('\n')
+                    + "\n\nThey are symlinks into a sibling checkout. Clone it and build again:\n"
+                    + "  git clone https://github.com/cygnusx-1-org/subreddit-lists.git $checkout\n")
+        }
+    }
+}
+
+// Hooked ahead of the asset merge rather than onto `check` alone, so every path that can produce
+// an APK is covered -- assemble, install, bundle, and the androidTest build.
+tasks.matching { it.name ==~ /merge.*Assets/ }.configureEach {
+    dependsOn 'verifyShippedSubredditLists'
+}
+
+tasks.named('check') {
+    dependsOn 'verifyShippedSubredditLists'
+}
+
 interface CopyApkParameters extends WorkParameters, Serializable {
     RegularFileProperty getInputApkFile()
     RegularFileProperty getOutputApkFile()

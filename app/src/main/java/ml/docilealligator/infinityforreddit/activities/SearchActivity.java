@@ -26,6 +26,7 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.core.widget.TextViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,6 +51,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySearchBinding;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
+import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditNames;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQueryViewModel;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
@@ -120,6 +122,11 @@ public class SearchActivity extends BaseActivity {
     private boolean searchOnlyUsers;
     private boolean searchSubredditsAndUsers;
     private boolean incognitoKeyboard;
+    /**
+     * The random rows open a subreddit outright, which is the wrong move when this screen was
+     * opened to hand a name back to whoever launched it.
+     */
+    private boolean canOpenRandomSubreddit;
     @SuppressWarnings("NullAway.Init")
     private SearchActivityRecyclerViewAdapter adapter;
     private SubredditAutocompleteRecyclerViewAdapter subredditAutocompleteRecyclerViewAdapter;
@@ -280,6 +287,7 @@ public class SearchActivity extends BaseActivity {
                                                     public void onParseSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
                                                         binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.GONE);
                                                         binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
+                                                        showRandomSubredditOptions(false);
                                                         subredditAutocompleteRecyclerViewAdapter.setSubreddits(subredditData);
                                                     }
 
@@ -304,6 +312,7 @@ public class SearchActivity extends BaseActivity {
                     binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
                     binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.GONE);
                     binding.clearSearchEditViewSearchActivity.setVisibility(View.GONE);
+                    showRandomSubredditOptions(true);
                 }
             }
         });
@@ -330,6 +339,15 @@ public class SearchActivity extends BaseActivity {
                 finish();
             }
         });
+
+        binding.randomSubredditTextViewSearchActivity.setOnClickListener(
+                view -> openRandomSubreddit(RandomSubredditNames.RANDOM));
+
+        binding.randomSubscribedSubredditTextViewSearchActivity.setOnClickListener(
+                view -> openRandomSubreddit(RandomSubredditNames.MYRANDOM));
+
+        binding.randomNsfwSubredditTextViewSearchActivity.setOnClickListener(
+                view -> openRandomSubreddit(RandomSubredditNames.RANDNSFW));
 
         binding.viewAllSearchHistoryButtonSearchActivity.setOnClickListener(view -> {
             Intent intent = new Intent(this, SearchHistoryActivity.class);
@@ -402,6 +420,7 @@ public class SearchActivity extends BaseActivity {
             binding.subredditNameRelativeLayoutSearchActivity.setVisibility(View.GONE);
             binding.dividerSearchActivity.setVisibility(View.GONE);
         } else {
+            canOpenRandomSubreddit = true;
             binding.subredditNameRelativeLayoutSearchActivity.setOnClickListener(view -> {
                 Intent intent = new Intent(this, SubscribedThingListingActivity.class);
                 intent.putExtra(SubscribedThingListingActivity.EXTRA_THING_SELECTION_MODE, true);
@@ -409,6 +428,8 @@ public class SearchActivity extends BaseActivity {
                 requestThingSelectionForCurrentActivityLauncher.launch(intent);
             });
         }
+
+        showRandomSubredditOptions(true);
     }
 
     private void bindView() {
@@ -490,6 +511,21 @@ public class SearchActivity extends BaseActivity {
                 adapter.setRecentSearchQueries(recentSearchQueries);
             });
         }
+    }
+
+    /**
+     * Follows the recent-search list: the fixed rows belong to the empty search screen, and step
+     * aside as soon as autocomplete has something to show.
+     */
+    private void showRandomSubredditOptions(boolean show) {
+        binding.randomSubredditsLinearLayoutSearchActivity.setVisibility(
+                show && canOpenRandomSubreddit ? View.VISIBLE : View.GONE);
+    }
+
+    private void openRandomSubreddit(String randomSubredditName) {
+        startActivity(Objects.requireNonNull(
+                FetchRandomSubredditActivity.intentFor(this, randomSubredditName)));
+        finish();
     }
 
     private void search(String query) {
@@ -602,6 +638,15 @@ public class SearchActivity extends BaseActivity {
         binding.viewAllSearchHistoryButtonSearchActivity.setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor()));
         binding.deleteAllRecentSearchesButtonSearchActivity.setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor()));
         binding.dividerSearchActivity.setBackgroundColor(mCustomThemeWrapper.getDividerColor());
+        int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
+        ColorStateList primaryIconTint = ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor());
+        binding.randomSubredditTextViewSearchActivity.setTextColor(primaryTextColor);
+        TextViewCompat.setCompoundDrawableTintList(binding.randomSubredditTextViewSearchActivity, primaryIconTint);
+        binding.randomSubscribedSubredditTextViewSearchActivity.setTextColor(primaryTextColor);
+        TextViewCompat.setCompoundDrawableTintList(binding.randomSubscribedSubredditTextViewSearchActivity, primaryIconTint);
+        binding.randomNsfwSubredditTextViewSearchActivity.setTextColor(primaryTextColor);
+        TextViewCompat.setCompoundDrawableTintList(binding.randomNsfwSubredditTextViewSearchActivity, primaryIconTint);
+        binding.randomSubredditsNoteTextViewSearchActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
         if (typeface != null) {
             Utils.setFontToAllTextViews(binding.getRoot(), typeface);
         }

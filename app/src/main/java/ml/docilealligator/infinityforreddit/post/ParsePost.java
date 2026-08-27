@@ -177,34 +177,6 @@ public class ParsePost {
         }
     }
 
-    public static void parseRandomPost(Executor executor, Handler handler, String response, boolean isNSFW, ParseRandomPostListener parseRandomPostListener) {
-        executor.execute(() -> {
-            try {
-                JSONArray postsArray = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
-                if (postsArray.length() == 0) {
-                    handler.post(parseRandomPostListener::onParseRandomPostFailed);
-                } else {
-                    JSONObject post = postsArray.getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY);
-                    String subredditName = post.getString(JSONUtils.SUBREDDIT_KEY);
-                    String postId;
-                    if (isNSFW) {
-                        postId = post.getString(JSONUtils.ID_KEY);
-                    } else {
-                        postId = Utils.idFromFullname(post.getString(JSONUtils.LINK_ID_KEY));
-                    }
-                    if (postId.isEmpty()) {
-                        handler.post(parseRandomPostListener::onParseRandomPostFailed);
-                    } else {
-                        handler.post(() -> parseRandomPostListener.onParseRandomPostSuccess(postId, subredditName));
-                    }
-                }
-            } catch (JSONException | RuntimeException e) {
-                e.printStackTrace();
-                handler.post(parseRandomPostListener::onParseRandomPostFailed);
-            }
-        });
-    }
-
     @WorkerThread
     public static Post parseBasicData(JSONObject data) throws JSONException {
         String id = data.getString(JSONUtils.ID_KEY);
@@ -1106,10 +1078,5 @@ public class ParsePost {
     public interface ParsePostListener {
         void onParsePostSuccess(Post post);
         void onParsePostFail();
-    }
-
-    public interface ParseRandomPostListener {
-        void onParseRandomPostSuccess(String postId, String subredditName);
-        void onParseRandomPostFailed();
     }
 }

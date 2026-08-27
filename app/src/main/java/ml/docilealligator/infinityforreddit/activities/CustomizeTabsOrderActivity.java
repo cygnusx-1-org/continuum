@@ -41,6 +41,7 @@ import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFi
 import ml.docilealligator.infinityforreddit.databinding.ActivityCustomizeTabsOrderBinding;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.MultiRedditViewModel;
+import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditNames;
 import ml.docilealligator.infinityforreddit.settings.MainPageTabInput;
 import ml.docilealligator.infinityforreddit.settings.MainPageTabsUtils;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
@@ -284,6 +285,15 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
         addOption(labels, actions, getString(R.string.subreddit), () -> promptForName(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT, R.string.settings_tab_subreddit_name));
         // "Subscribed Subreddits" picks from the account's subscriptions; "Subreddit" above takes a free-text name.
         addOption(labels, actions, getString(R.string.subscribed_subreddits), this::pickSubscribedSubreddit);
+        // The three random flavours are subreddit tabs whose name is a pseudo-subreddit; listed
+        // here because nothing else would tell anyone the names are accepted. A pull-to-refresh on
+        // one of these tabs lands on a different subreddit.
+        addOption(labels, actions, getString(R.string.random_subreddit),
+                () -> addRandomTab(RandomSubredditNames.RANDOM));
+        addOption(labels, actions, getString(R.string.random_subscribed_subreddit),
+                () -> addRandomTab(RandomSubredditNames.MYRANDOM));
+        addOption(labels, actions, getString(R.string.random_nsfw_subreddit),
+                () -> addRandomTab(RandomSubredditNames.RANDNSFW));
         // "MultiReddit" picks from the account's own multireddits; "User MultiReddit" takes a free-text path.
         addOption(labels, actions, getString(R.string.multi_reddit), this::pickOwnMultiReddit);
         addOption(labels, actions, getString(R.string.user_multi_reddit), () -> promptForName(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_MULTIREDDIT, R.string.settings_tab_multi_reddit_name));
@@ -300,6 +310,18 @@ public class CustomizeTabsOrderActivity extends BaseActivity implements Activity
                 .setTitle(R.string.settings_add_tab)
                 .setItems(labels.toArray(new String[0]), (dialogInterface, i) -> actions.get(i).run())
                 .show();
+    }
+
+    /**
+     * A random tab is an ordinary subreddit tab whose name is one of the pseudo-subreddits, so it
+     * shares the duplicate check with the rest and needs no new tab type.
+     */
+    private void addRandomTab(String randomSubredditName) {
+        if (MainPageTabsUtils.isDuplicate(tabs, SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT, randomSubredditName)) {
+            Toast.makeText(this, R.string.tab_already_added, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        addTab(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT, randomSubredditName);
     }
 
     private void addOption(List<String> labels, List<Runnable> actions, String label, Runnable action) {

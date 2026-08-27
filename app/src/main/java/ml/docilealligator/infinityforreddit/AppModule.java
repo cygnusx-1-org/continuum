@@ -132,6 +132,13 @@ abstract class AppModule {
     }
 
     @Provides
+    @Named("random_subreddits")
+    @Singleton
+    static SharedPreferences provideRandomSubredditsSharedPreferences(Application application) {
+        return application.getSharedPreferences(SharedPreferencesUtils.RANDOM_SUBREDDITS_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    }
+
+    @Provides
     @Named("current_account")
     static SharedPreferences provideCurrentAccountSharedPreferences(Application application) {
         return application.getSharedPreferences(SharedPreferencesUtils.CURRENT_ACCOUNT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
