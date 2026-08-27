@@ -53,8 +53,12 @@ object MediaFileNameUtils {
     @JvmStatic
     fun getDownloadFileName(post: Post, galleryIndex: Int): String {
         var sanitizedTitle = sanitizeFilename(post.title)
-        if (!post.id.isNullOrEmpty()) {
-            sanitizedTitle = sanitizedTitle + "_" + post.id
+        // Sanitize the id too. A Reddit id is base36 and comes from the parsed API response, so in
+        // practice this is a no-op, but appending it raw after the title has already been sanitized
+        // would let anything unexpected in it straight into a path.
+        val postId = post.id
+        if (!postId.isNullOrEmpty()) {
+            sanitizedTitle = sanitizedTitle + "_" + sanitizeFilename(postId)
         }
 
         var url = ""
@@ -108,9 +112,28 @@ object MediaFileNameUtils {
     @JvmStatic
     @JvmOverloads
     fun getDownloadFileName(imgurMedia: ImgurMedia, title: String?, index: Int = -1): String {
-        val resolvedTitle = if (title.isNullOrBlank()) imgurMedia.id else title
+        // The Reddit paths put the post id (and the comment id) in the name, which is what makes
+        // two different posts unable to collide. Imgur names carried only the album title, so two
+        // different albums sharing a title collided; the media id closes that.
+        //
+        // Guard on the resolved name rather than on the title, because an untitled media falls back
+        // to its own id — here, and again in the callers, which substitute the id before calling.
+        // Appending it in that case would name the file "id_id".
+        //
+        // Sanitize the id once and reuse that value. It has to be sanitized because, unlike a
+        // Reddit post id, an Imgur id can come straight from a user-supplied URL path segment via
+        // LinkResolverActivity, so it can carry characters that are illegal in a filename. And it
+        // has to be a single evaluation because sanitizeFilename is not idempotent for input that
+        // sanitizes away to nothing — it appends a timestamp — so sanitizing twice and comparing
+        // the two results would never match.
+        val mediaId = imgurMedia.id
+        val sanitizedId = if (mediaId.isNullOrEmpty()) null else sanitizeFilename(mediaId)
+        var name = if (title.isNullOrBlank()) sanitizedId ?: sanitizeFilename(null) else sanitizeFilename(title)
+        if (sanitizedId != null && name != sanitizedId) {
+            name = name + "_" + sanitizedId
+        }
         val indexSuffix = if (index >= 0) "_" + (index + 1) else ""
-        return sanitizeFilename(resolvedTitle) + indexSuffix + getExtension(imgurMedia)
+        return name + indexSuffix + getExtension(imgurMedia)
     }
 
     private fun getExtension(url: String?, mediaType: Int): String {

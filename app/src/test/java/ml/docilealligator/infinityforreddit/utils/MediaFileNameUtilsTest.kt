@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils
 
+import ml.docilealligator.infinityforreddit.post.ImgurMedia
 import ml.docilealligator.infinityforreddit.post.Post
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -65,5 +66,37 @@ class MediaFileNameUtilsTest {
         assertEquals("Holiday_abc123_1.jpg", MediaFileNameUtils.getDownloadFileName(post, 0))
         assertEquals("Holiday_abc123_2.jpg", MediaFileNameUtils.getDownloadFileName(post, 1))
         assertEquals("Holiday_abc123_3.jpg", MediaFileNameUtils.getDownloadFileName(post, 2))
+    }
+
+    @Test
+    fun `a post id in the name is what stops two posts from colliding`() {
+        val first = galleryPost("Holiday", "abc123")
+        val second = galleryPost("Holiday", "xyz789")
+
+        assertEquals("Holiday_abc123_1.jpg", MediaFileNameUtils.getDownloadFileName(first, 0))
+        assertEquals("Holiday_xyz789_1.jpg", MediaFileNameUtils.getDownloadFileName(second, 0))
+    }
+
+    @Test
+    fun `imgur media carries its id, so two albums sharing a title do not collide`() {
+        val fromOneAlbum = ImgurMedia("aaa111", "", "", "image/jpeg", "https://i.imgur.com/aaa111.jpg")
+        val fromAnother = ImgurMedia("bbb222", "", "", "image/jpeg", "https://i.imgur.com/bbb222.jpg")
+
+        assertEquals(
+            "Holiday_aaa111.jpg",
+            MediaFileNameUtils.getDownloadFileName(fromOneAlbum, "Holiday")
+        )
+        assertEquals(
+            "Holiday_bbb222.jpg",
+            MediaFileNameUtils.getDownloadFileName(fromAnother, "Holiday")
+        )
+    }
+
+    @Test
+    fun `imgur album items keep their one-based index alongside the id`() {
+        val media = ImgurMedia("aaa111", "", "", "image/jpeg", "https://i.imgur.com/aaa111.jpg")
+
+        assertEquals("Holiday_aaa111_1.jpg", MediaFileNameUtils.getDownloadFileName(media, "Holiday", 0))
+        assertEquals("Holiday_aaa111_2.jpg", MediaFileNameUtils.getDownloadFileName(media, "Holiday", 1))
     }
 }

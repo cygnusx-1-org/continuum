@@ -29,7 +29,6 @@ import androidx.annotation.OptIn;
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.media3.common.util.UnstableApi;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,9 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Executor;
@@ -59,6 +56,7 @@ import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.DocumentTreeUtils;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -665,80 +663,104 @@ public class DownloadMediaService extends JobService {
                 ))
                 .build();
 
-        retrofit = retrofit.newBuilder().client(client).build();
+        // Keep this call's Retrofit local. A JobService instance is shared by every job routed to
+        // it, so assigning the injected field here let a second concurrent download swap the client
+        // out from under the first: both downloads then streamed through whichever client won, and
+        // that client carries the other download's progress listener, so one notification counted
+        // twice while the other never left 0%.
+        Retrofit downloadRetrofit = retrofit.newBuilder().client(client).build();
 
         boolean separateDownloadFolder = mSharedPreferences.getBoolean(SharedPreferencesUtils.SEPARATE_FOLDER_FOR_EACH_SUBREDDIT, false);
+        boolean isShare = intent.getInt(EXTRA_IS_SHARE, 0) == 1;
+
+        // Settle the destination folder and the filename before opening the response. Enumerating a
+        // SAF directory costs a Binder round trip per entry, seconds on a full download folder, and
+        // doing it with the response already open left the socket idle the whole time against
+        // OkHttp's read timeout. Nothing here needs the response.
+        //
+        // Only the lookups happen now; the directory and the file are still created after the
+        // download succeeds, so a failed request leaves nothing behind, exactly as before. A
+        // share-only request writes to the cache and needs no destination at all, so it skips this.
+        Uri destinationDirUri = null;
+        Uri subredditDirParentUri = null;
+        String subredditDirName = null;
+        String documentMimeType = mimeType;
+        if (!isShare) {
+            String destinationFileDirectory = getDownloadLocation(mediaType, isNsfw);
+            Log.d("ImgurDownload", "Got download location: " + destinationFileDirectory + " for mediaType=" + mediaType + ", isNsfw=" + isNsfw);
+
+            // Try to write into the user-chosen folder. This can fail if the persisted URI
+            // permission was lost (revoked, or granted to a different app build). We check the
+            // grant up front so we skip straight to the fallback instead of provoking a
+            // SecurityException deep inside DocumentsContract.
+            if (destinationFileDirectory != null && !destinationFileDirectory.isEmpty()
+                    && hasPersistedWritePermission(Uri.parse(destinationFileDirectory))) {
+                try {
+                    Uri treeDirUri = DocumentTreeUtils.treeRootDocumentUri(Uri.parse(destinationFileDirectory));
+                    if (separateDownloadFolder && subredditName != null && !subredditName.isEmpty()) {
+                        destinationDirUri = DocumentTreeUtils.findChildDocumentUri(this, treeDirUri, subredditName);
+                        if (destinationDirUri == null) {
+                            // The per-subreddit folder does not exist yet, so there is nothing to
+                            // deduplicate against. Create it once the download succeeds.
+                            subredditDirParentUri = treeDirUri;
+                            subredditDirName = subredditName;
+                        }
+                    } else {
+                        destinationDirUri = treeDirUri;
+                    }
+
+                    if (destinationDirUri != null) {
+                        // Filenames already carry the post id (and the comment id for comment
+                        // media), so the only way to collide is downloading the same media twice.
+                        // Handing createDocument a MIME type that matches the filename's extension
+                        // makes the provider produce exactly the " (n)" form this app uses, so
+                        // there is nothing to check up front and the directory never has to be
+                        // enumerated.
+                        String matchingMimeType = DocumentTreeUtils.mimeTypeMatchingExtension(fileName);
+                        if (matchingMimeType != null
+                                && DocumentTreeUtils.providerDeduplicatesOnCreate(destinationDirUri)) {
+                            documentMimeType = matchingMimeType;
+                        } else {
+                            // Either the extension maps to nothing, so the provider would append the
+                            // suffix after it, or this is a provider whose collision handling we do
+                            // not know. Pick a free name ourselves.
+                            fileName = DocumentTreeUtils.deduplicateFileName(fileName,
+                                    DocumentTreeUtils.listChildDisplayNamesLowercase(this, destinationDirUri));
+                        }
+                    }
+                } catch (SecurityException | IllegalArgumentException e) {
+                    // IllegalArgumentException: the stored location is not a tree URI, so nothing
+                    // below can address a document under it.
+                    Log.e("ImgurDownload", "Cannot use the chosen download folder: " + e.getMessage());
+                    destinationDirUri = null;
+                    subredditDirParentUri = null;
+                    subredditDirName = null;
+                }
+            }
+        }
 
         Response<ResponseBody> response;
         String destinationFileUriString = null;
         boolean isDefaultDestination = true;
         try {
-            response = retrofit.create(DownloadFile.class).downloadFile(fileUrl).execute();
+            response = downloadRetrofit.create(DownloadFile.class).downloadFile(fileUrl).execute();
             if (response.isSuccessful() && response.body() != null) {
-                if (intent.getInt(EXTRA_IS_SHARE, 0) == 1) {
+                if (isShare) {
                     // Share-only: write to the cache and hand the file to the requesting activity.
                     return shareMediaFromCache(params, builder, mediaType, randomNotificationIdOffset,
                             response.body(), fileName, mimeType);
                 }
 
-                String destinationFileDirectory = getDownloadLocation(mediaType, isNsfw);
-                Log.d("ImgurDownload", "Got download location: " + destinationFileDirectory + " for mediaType=" + mediaType + ", isNsfw=" + isNsfw);
-
-                DocumentFile picFile = null;
-
-                // Try to write into the user-chosen folder. This can fail if the persisted URI
-                // permission was lost (revoked, or granted to a different app build). We check the
-                // grant up front so we skip straight to the fallback instead of provoking a
-                // SecurityException deep inside DocumentsContract.
-                if (destinationFileDirectory != null && !destinationFileDirectory.isEmpty()
-                        && hasPersistedWritePermission(Uri.parse(destinationFileDirectory))) {
-                    try {
-                        DocumentFile dir;
-                        if (separateDownloadFolder && subredditName != null && !subredditName.isEmpty()) {
-                            DocumentFile treeDir = DocumentFile.fromTreeUri(DownloadMediaService.this, Uri.parse(destinationFileDirectory));
-                            dir = treeDir == null ? null : treeDir.findFile(subredditName);
-                            if (dir == null && treeDir != null) {
-                                dir = treeDir.createDirectory(subredditName);
-                            }
-                        } else {
-                            dir = DocumentFile.fromTreeUri(DownloadMediaService.this, Uri.parse(destinationFileDirectory));
-                        }
-
-                        if (dir != null) {
-                            int dotIndex = fileName.lastIndexOf('.');
-                            String baseName = (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
-                            String extension = (dotIndex == -1) ? "" : fileName.substring(dotIndex);
-
-                            DocumentFile[] files = dir.listFiles();
-                            HashSet<String> existingFileNames = new HashSet<>();
-                            if (files != null) {
-                                for (DocumentFile file : files) {
-                                    if (file.getName() != null) {
-                                        existingFileNames.add(file.getName().toLowerCase(Locale.US));
-                                    }
-                                }
-                            }
-
-                            if (existingFileNames.contains(fileName.toLowerCase(Locale.US))) {
-                                int num = 1;
-                                String newFileName;
-                                do {
-                                    newFileName = baseName + " (" + num + ")" + extension;
-                                    num++;
-                                } while (existingFileNames.contains(newFileName.toLowerCase(Locale.US)));
-                                fileName = newFileName;
-                            }
-
-                            picFile = dir.createFile(mimeType, fileName);
-                        }
-                    } catch (SecurityException e) {
-                        Log.e("ImgurDownload", "Lost permission for chosen download folder: " + e.getMessage());
-                    }
+                if (destinationDirUri == null && subredditDirParentUri != null && subredditDirName != null) {
+                    destinationDirUri = DocumentTreeUtils.createDirectory(this, subredditDirParentUri, subredditDirName);
                 }
 
-                if (picFile != null) {
+                Uri picFileUri = destinationDirUri == null ? null
+                        : DocumentTreeUtils.createDocument(this, destinationDirUri, documentMimeType, fileName);
+
+                if (picFileUri != null) {
                     isDefaultDestination = false;
-                    destinationFileUriString = picFile.getUri().toString();
+                    destinationFileUriString = picFileUri.toString();
                     Log.d("ImgurDownload", "File created successfully at: " + destinationFileUriString);
                 } else {
                     // The chosen folder is unusable. Save to the default media location so the

@@ -404,6 +404,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     Uri uri = Uri.parse(link);
                     intent.setData(uri);
                     intent.putExtra(LinkResolverActivity.EXTRA_IS_NSFW, mPost.isNSFW());
+                    // Carried through to the Imgur/media viewers, which name downloads after the
+                    // post and file them under the subreddit. Without these the feed's link path
+                    // supplies them and the post detail's does not, so the same media saves to a
+                    // different place and under a different name depending on where it was opened.
+                    intent.putExtra(LinkResolverActivity.EXTRA_SUBREDDIT_NAME, mPost.getSubredditName());
+                    intent.putExtra(LinkResolverActivity.EXTRA_POST_TITLE_KEY, mPost.getTitle());
                     mActivity.startActivity(intent);
                 });
             }
@@ -1331,6 +1337,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 Uri uri = Uri.parse(post.getUrl());
                 intent.setData(uri);
                 intent.putExtra(LinkResolverActivity.EXTRA_IS_NSFW, post.isNSFW());
+                intent.putExtra(LinkResolverActivity.EXTRA_SUBREDDIT_NAME, post.getSubredditName());
+                intent.putExtra(LinkResolverActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
                 mActivity.startActivity(intent);
             } else if (post.getPostType() == Post.GALLERY_TYPE) {
                 Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
@@ -2642,6 +2650,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 Uri uri = Uri.parse(mPost.getUrl());
                 intent.setData(uri);
                 intent.putExtra(LinkResolverActivity.EXTRA_IS_NSFW, mPost.isNSFW());
+                intent.putExtra(LinkResolverActivity.EXTRA_SUBREDDIT_NAME, mPost.getSubredditName());
+                intent.putExtra(LinkResolverActivity.EXTRA_POST_TITLE_KEY, mPost.getTitle());
                 mActivity.startActivity(intent);
             });
 
