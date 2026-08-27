@@ -6,6 +6,7 @@
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
 
+* Fixed Misaligned middle columns with fixed height enabled #373
 * Implemented Random subreddit feature #86
 
 r/random is SFW(Safe for Work) content, but there is no guarantee. The moderators have to have not marked the subreddit NSFW(Not Safe for Work). There are over 300k subreddits in this list.
