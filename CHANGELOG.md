@@ -2,6 +2,24 @@
 
 ---
 
+8.2.5.9.9.9.7 / 2026-8-26
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Random subreddit feature #86
+
+r/random is SFW(Safe for Work) content, but there is no guarantee. The moderators have to have not marked the subreddit NSFW(Not Safe for Work). There are over 300k subreddits in this list.
+
+r/randnsfw is NSFW subreddits. These are subreddits where the moderators did mark it as NSFW. It can be anything text to images to video. It is also ALL the orientations and fetishes. There are over 70k subreddits in this list.
+
+r/myrandom is a random subscribed subreddit from your own subscriptions on that account.
+
+Subscriptions's FAB button and Go to Subreddit will take you to a random subreddit, but you can't refresh to get another random subreddit. Adding the virtual subreddits as a tab will let you refresh to get a new random subreddit.
+
+Subreddits with no posts are skipped.
+
+See [Issue 86](https://github.com/cygnusx-1-org/continuum/issues/86) for more details.
+
 8.2.5.9.9.9.6 / 2026-8-25
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
