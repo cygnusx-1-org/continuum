@@ -5,6 +5,12 @@
     <color name="colorAccent">#FF1868</color>
     <color name="transparentActionBarAndExoPlayerControllerColor">#00000000</color>
     <color name="backgroundColor">#FFFFFF</color>
+
+    <!-- The "Recovered" chip on a post or comment whose content came from the archive rather than
+         from Reddit. Fixed rather than themed: it marks where the content came from, and has to
+         read the same way under every theme. -->
+    <color name="recoveredChipBackground">#D32F2F</color>
+    <color name="recoveredChipText">#FFFFFF</color>
     <color name="playButtonBackgroundColor">#000000</color>
     <color name="roundedBottomSheetPrimaryBackground">#FFFFFF</color>
     <color name="roundedBottomSheetPrimaryNavigationBarColor">#000000</color>

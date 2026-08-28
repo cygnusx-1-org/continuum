@@ -75,6 +75,7 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.RecoveredFlair;
 import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -180,6 +181,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                             && oldComment.isEdited() == newComment.isEdited()
                             && oldComment.isLocked() == newComment.isLocked()
                             && oldComment.isRemoved() == newComment.isRemoved()
+                            && oldComment.isRecovered() == newComment.isRecovered()
                             && oldComment.isApproved() == newComment.isApproved()
                             && oldComment.hasReply() == newComment.hasReply()
                             && oldComment.isSaved() == newComment.isSaved()
@@ -412,9 +414,28 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 if (comment.getAuthorFlairHTML() != null && !comment.getAuthorFlairHTML().equals("")) {
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
                     Utils.setHTMLWithImageToTextView(((CommentBaseViewHolder) holder).authorFlairTextView, comment.getAuthorFlairHTML(), true);
+                    if (comment.isRecovered()) {
+                        // Read back after the HTML pass rather than parsed twice: the flair may carry
+                        // inline emoji images that only setHTMLWithImageToTextView knows how to build.
+                        TextView flairTextView = ((CommentBaseViewHolder) holder).authorFlairTextView;
+                        flairTextView.setText(RecoveredFlair.prependTo(mActivity, flairTextView.getText()));
+                    }
                 } else if (comment.getAuthorFlair() != null && !comment.getAuthorFlair().equals("")) {
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
-                    ((CommentBaseViewHolder) holder).authorFlairTextView.setText(comment.getAuthorFlair());
+                    ((CommentBaseViewHolder) holder).authorFlairTextView.setText(
+                            comment.isRecovered()
+                                    ? RecoveredFlair.prependTo(mActivity, comment.getAuthorFlair())
+                                    : comment.getAuthorFlair());
+                } else if (comment.isRecovered()) {
+                    ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
+                    ((CommentBaseViewHolder) holder).authorFlairTextView.setText(RecoveredFlair.label(mActivity));
+                } else {
+                    // A holder is rebound to a different comment without being recycled whenever a
+                    // row shifts — which is every collapse, expand and "load more" — so onViewRecycled
+                    // is not enough to clear this. Without the else, the previous comment's flair
+                    // stays on screen, and now that a recovered comment shows its marker here, that
+                    // means a Recovered badge on a comment that was never recovered.
+                    ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.GONE);
                 }
 
                 if (comment.isSubmitter()) {

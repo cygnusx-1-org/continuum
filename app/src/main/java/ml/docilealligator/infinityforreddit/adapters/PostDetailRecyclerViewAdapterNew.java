@@ -31,6 +31,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
 import androidx.media3.common.C;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
@@ -773,6 +774,14 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 Utils.setHTMLWithImageToTextView(((PostDetailBaseViewHolder) holder).flairTextView, mPost.getFlair(), false);
             }
 
+            // Explicit else, the way the NSFW chip above does it: bind must decide the chip either
+            // way, because onViewRecycled only runs when a holder actually goes back to the pool.
+            if (mPost.isRecovered()) {
+                ((PostDetailBaseViewHolder) holder).recoveredTextView.setVisibility(View.VISIBLE);
+            } else {
+                ((PostDetailBaseViewHolder) holder).recoveredTextView.setVisibility(View.GONE);
+            }
+
             if (mHideUpvoteRatio) {
                 ((PostDetailBaseViewHolder) holder).upvoteRatioTextView.setVisibility(View.GONE);
             } else {
@@ -1361,6 +1370,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             ((PostDetailBaseViewHolder) holder).downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
             ((PostDetailBaseViewHolder) holder).downvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
             ((PostDetailBaseViewHolder) holder).flairTextView.setVisibility(View.GONE);
+            ((PostDetailBaseViewHolder) holder).recoveredTextView.setVisibility(View.GONE);
             ((PostDetailBaseViewHolder) holder).lockedImageView.setVisibility(View.GONE);
             ((PostDetailBaseViewHolder) holder).spoilerTextView.setVisibility(View.GONE);
             ((PostDetailBaseViewHolder) holder).nsfwTextView.setVisibility(View.GONE);
@@ -1432,6 +1442,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         CustomTextView nsfwTextView;
         CustomTextView spoilerTextView;
         CustomTextView flairTextView;
+        CustomTextView recoveredTextView;
         TextView upvoteRatioTextView;
         RecyclerView contentMarkdownView;
         ConstraintLayout bottomConstraintLayout;
@@ -1459,6 +1470,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                          CustomTextView nSFWTextView,
                          CustomTextView spoilerTextView,
                          CustomTextView flairTextView,
+                         CustomTextView recoveredTextView,
                          TextView upvoteRatioTextView,
                          RecyclerView contentMarkdownView,
                          ConstraintLayout bottomConstraintLayout,
@@ -1481,6 +1493,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             this.nsfwTextView = nSFWTextView;
             this.spoilerTextView = spoilerTextView;
             this.flairTextView = flairTextView;
+            this.recoveredTextView = recoveredTextView;
             this.upvoteRatioTextView = upvoteRatioTextView;
             this.contentMarkdownView = contentMarkdownView;
             this.bottomConstraintLayout = bottomConstraintLayout;
@@ -2010,6 +2023,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             flairTextView.setBackgroundColor(mFlairBackgroundColor);
             flairTextView.setBorderColor(mFlairBackgroundColor);
             flairTextView.setTextColor(mFlairTextColor);
+            int recoveredBackgroundColor = ContextCompat.getColor(mActivity, R.color.recoveredChipBackground);
+            recoveredTextView.setBackgroundColor(recoveredBackgroundColor);
+            recoveredTextView.setBorderColor(recoveredBackgroundColor);
+            recoveredTextView.setTextColor(ContextCompat.getColor(mActivity, R.color.recoveredChipText));
             archivedImageView.setColorFilter(mArchivedTintColor, PorterDuff.Mode.SRC_IN);
             lockedImageView.setColorFilter(mLockedTintColor, PorterDuff.Mode.SRC_IN);
             crosspostImageView.setColorFilter(mCrosspostTintColor, PorterDuff.Mode.SRC_IN);
@@ -2065,6 +2082,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                                      CustomTextView nsfwTextView,
                                                      CustomTextView spoilerTextView,
                                                      CustomTextView flairTextView,
+                                                     CustomTextView recoveredTextView,
                                                      TextView upvoteRatioTextView,
                                                      AspectRatioFrameLayout aspectRatioFrameLayout,
                                                      PlayerView playerView,
@@ -2097,6 +2115,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     nsfwTextView,
                     spoilerTextView,
                     flairTextView,
+                    recoveredTextView,
                     upvoteRatioTextView,
                     contentMarkdownView,
                     bottomConstraintLayout,
@@ -2443,6 +2462,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailVideoAutoplay,
                     binding.spoilerCustomTextViewItemPostDetailVideoAutoplay,
                     binding.flairCustomTextViewItemPostDetailVideoAutoplay,
+                    binding.recoveredCustomTextViewItemPostDetailVideoAutoplay,
                     binding.upvoteRatioTextViewItemPostDetailVideoAutoplay,
                     binding.aspectRatioFrameLayoutItemPostDetailVideoAutoplay,
                     binding.playerViewItemPostDetailVideoAutoplay,
@@ -2481,6 +2501,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailVideoAutoplay,
                     binding.spoilerCustomTextViewItemPostDetailVideoAutoplay,
                     binding.flairCustomTextViewItemPostDetailVideoAutoplay,
+                    binding.recoveredCustomTextViewItemPostDetailVideoAutoplay,
                     binding.upvoteRatioTextViewItemPostDetailVideoAutoplay,
                     binding.aspectRatioFrameLayoutItemPostDetailVideoAutoplay,
                     binding.playerViewItemPostDetailVideoAutoplay,
@@ -2521,6 +2542,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailVideoAndGifPreview,
                     binding.spoilerCustomTextViewItemPostDetailVideoAndGifPreview,
                     binding.flairCustomTextViewItemPostDetailVideoAndGifPreview,
+                    binding.recoveredCustomTextViewItemPostDetailVideoAndGifPreview,
                     binding.upvoteRatioTextViewItemPostDetailVideoAndGifPreview,
                     binding.contentMarkdownViewItemPostDetailVideoAndGifPreview,
                     binding.bottomConstraintLayoutItemPostDetailVideoAndGifPreview,
@@ -2566,6 +2588,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailImageAndGifAutoplay,
                     binding.spoilerCustomTextViewItemPostDetailImageAndGifAutoplay,
                     binding.flairCustomTextViewItemPostDetailImageAndGifAutoplay,
+                    binding.recoveredCustomTextViewItemPostDetailImageAndGifAutoplay,
                     binding.upvoteRatioTextViewItemPostDetailImageAndGifAutoplay,
                     binding.contentMarkdownViewItemPostDetailImageAndGifAutoplay,
                     binding.bottomConstraintLayoutItemPostDetailImageAndGifAutoplay,
@@ -2609,6 +2632,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailLink,
                     binding.spoilerCustomTextViewItemPostDetailLink,
                     binding.flairCustomTextViewItemPostDetailLink,
+                    binding.recoveredCustomTextViewItemPostDetailLink,
                     binding.upvoteRatioTextViewItemPostDetailLink,
                     binding.contentMarkdownViewItemPostDetailLink,
                     binding.bottomConstraintLayoutItemPostDetailLink,
@@ -2681,6 +2705,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailNoPreview,
                     binding.spoilerCustomTextViewItemPostDetailNoPreview,
                     binding.flairCustomTextViewItemPostDetailNoPreview,
+                    binding.recoveredCustomTextViewItemPostDetailNoPreview,
                     binding.upvoteRatioTextViewItemPostDetailNoPreview,
                     binding.contentMarkdownViewItemPostDetailNoPreview,
                     binding.bottomConstraintLayoutItemPostDetailNoPreview,
@@ -2729,6 +2754,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailGallery,
                     binding.spoilerCustomTextViewItemPostDetailGallery,
                     binding.flairCustomTextViewItemPostDetailGallery,
+                    binding.recoveredCustomTextViewItemPostDetailGallery,
                     binding.upvoteRatioTextViewItemPostDetailGallery,
                     binding.contentMarkdownViewItemPostDetailGallery,
                     binding.bottomConstraintLayoutItemPostDetailGallery,
@@ -2883,6 +2909,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     binding.nsfwTextViewItemPostDetailText,
                     binding.spoilerCustomTextViewItemPostDetailText,
                     binding.flairCustomTextViewItemPostDetailText,
+                    binding.recoveredCustomTextViewItemPostDetailText,
                     binding.upvoteRatioTextViewItemPostDetailText,
                     binding.contentMarkdownViewItemPostDetailText,
                     binding.bottomConstraintLayoutItemPostDetailText,

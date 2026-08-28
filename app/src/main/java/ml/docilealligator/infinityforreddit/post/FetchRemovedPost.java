@@ -110,6 +110,7 @@ public class FetchRemovedPost {
                             }
                             applyRecoveredBody(post, result.body);
                         }
+                        post.setRecovered(true);
                         listener.fetchSuccess(post);
                     }
 
@@ -388,6 +389,22 @@ public class FetchRemovedPost {
         if (text == null) {
             return false;
         }
+        // Every placeholder opens with '[', so skip the leading padding and check that one character
+        // before normalising. trim().toLowerCase() copies the string twice, and this runs over every
+        // loaded comment body each time the post-detail menu is rebuilt; an ordinary comment now
+        // costs a character compare instead of two copies of itself.
+        //
+        // The skip condition is trim()'s own (<= ' '), not Character.isWhitespace, because the two
+        // disagree — NUL is stripped by trim but is not "whitespace" — and this has to accept
+        // exactly what the normalised comparison below would have accepted.
+        int start = 0;
+        while (start < text.length() && text.charAt(start) <= ' ') {
+            start++;
+        }
+        if (start == text.length() || text.charAt(start) != '[') {
+            return false;
+        }
+
         String normalized = text.trim().toLowerCase(Locale.ENGLISH);
         return normalized.equals("[removed]")
                 || normalized.equals("[deleted]")

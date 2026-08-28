@@ -63,6 +63,7 @@ class ViewPostDetailSearchLocaleTest {
         return ViewPostDetailFragmentViewModelNew(
             retrofitRespondingWith(200, "{}"),
             retrofitRespondingWith(200, "{}"),
+            retrofitRespondingWith(200, "{}"),
             db,
             null,
             "-",

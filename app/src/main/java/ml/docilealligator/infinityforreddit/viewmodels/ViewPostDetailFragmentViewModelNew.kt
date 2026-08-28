@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import ml.docilealligator.infinityforreddit.AppResult
 import ml.docilealligator.infinityforreddit.PostDetailCommentsCache
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
@@ -21,13 +22,16 @@ import ml.docilealligator.infinityforreddit.SingleLiveEvent
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.comment.Comment
+import ml.docilealligator.infinityforreddit.comment.FetchRemovedComment
 import ml.docilealligator.infinityforreddit.comment.ParseComment
+import ml.docilealligator.infinityforreddit.comment.RecoverRemovedComments
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage
 import ml.docilealligator.infinityforreddit.moderation.CommentModerationEvent
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
+import ml.docilealligator.infinityforreddit.post.RecoverRemovedPost
 import ml.docilealligator.infinityforreddit.post.hidePost
 import ml.docilealligator.infinityforreddit.post.unhidePost
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType
@@ -53,12 +57,14 @@ import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class ViewPostDetailFragmentViewModelNew(
     private val retrofit: Retrofit,
     private val oauthRetrofit: Retrofit,
+    private val arcticShiftRetrofit: Retrofit,
     private val redditDataRoomDatabase: RedditDataRoomDatabase,
     private val accessToken: String?,
     private val accountName: String,
@@ -105,6 +111,17 @@ class ViewPostDetailFragmentViewModelNew(
         val children: ArrayList<String>
     )
 
+    /**
+     * Outcome of an explicit comment-recovery pass. [completed] is false when the archive cut the
+     * pass short — a rate limit, its own throttle, a network failure — which is a different thing
+     * to tell the user than "the archive has nothing for these comments".
+     */
+    data class CommentRecoveryResult(
+        val recovered: Int,
+        val attempted: Int,
+        val completed: Boolean
+    )
+
     sealed class SubredditError {
         data class Network(val e: Exception?) : SubredditError()
         data class Response(val code: Int, val message: String?) : SubredditError()
@@ -146,6 +163,19 @@ class ViewPostDetailFragmentViewModelNew(
      * visit used, and bumped by every explicit refresh. See [commentLimitFor].
      */
     private var commentFetchNonce: Int = Random.nextInt(COMMENT_LIMIT_MAX)
+
+    /** Emitted for the explicit recovery action only; the automatic pass is silent. */
+    val commentRecoveryEventLiveData: SingleLiveEvent<CommentRecoveryResult> = SingleLiveEvent()
+
+    /**
+     * Comment ids the archive has already answered for, so re-scanning the list after every "load
+     * more" does not spend requests re-learning that the same comments are not archived. Ids from a
+     * pass that stopped early are deliberately not recorded here, so they are retried rather than
+     * written off as absent.
+     */
+    private val recoveryAttemptedIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    private var commentRecoveryJob: Job? = null
 
     val derivedPostId: String?
         get() = _dataState.value.post?.id ?: postId
@@ -393,6 +423,12 @@ class ViewPostDetailFragmentViewModelNew(
         sortType: SortType.Type,
         changeRefreshState: Boolean
     ) {
+        // This fetch replaces the comment list outright — a sort change and a refresh both land
+        // here — so every recovered body is about to revert to the placeholder Reddit serves. Let
+        // the archive be asked about them again; otherwise the ids are remembered as already
+        // handled and the bodies never come back.
+        recoveryAttemptedIds.clear()
+
         /*fetchCommentJob?.cancel()
         fetchCommentJob = viewModelScope.launch {
 
@@ -1053,6 +1089,8 @@ class ViewPostDetailFragmentViewModelNew(
                     newComments
                 }
 
+                preRecoverComments(newComments)
+
                 AppResult.Success(ParseCommentsResult(
                     commentData,
                     newComments,
@@ -1159,6 +1197,8 @@ class ViewPostDetailFragmentViewModelNew(
                     newComments
                 }
 
+                preRecoverComments(newComments)
+
                 AppResult.Success(
                     ParseCommentsResult(commentData, newComments, moreChildrenIds)
                 )
@@ -1171,7 +1211,7 @@ class ViewPostDetailFragmentViewModelNew(
 
     @Nullable
     private suspend fun parsePost(response: String?): Post? {
-        return withContext(Dispatchers.Default) {
+        val post = withContext(Dispatchers.Default) {
             val allData: JSONArray =
                 JSONArray(response).getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY)
                     .getJSONArray(JSONUtils.CHILDREN_KEY)
@@ -1181,7 +1221,15 @@ class ViewPostDetailFragmentViewModelNew(
                 val data = allData.getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY)
                 ParsePost.parseBasicData(data)
             }
-        }
+        } ?: return null
+
+        // Recovered before it is handed on, so a removed post is never drawn as
+        // "[ Removed by moderator ]" and then swapped for its real title a moment later. Under the
+        // same budget as the feed path: recoverIfRemoved has no deadline of its own, and the network
+        // timeouts behind it are 30s, which is not something a post's first draw may wait on.
+        return withTimeoutOrNull(POST_RECOVERY_WAIT_MILLIS) {
+            RecoverRemovedPost.recoverIfRemoved(arcticShiftRetrofit, post)
+        } ?: post
     }
 
     // The comment sort fallback is the "Comment Default Sort Type" setting, resolved in the
@@ -1349,6 +1397,10 @@ class ViewPostDetailFragmentViewModelNew(
     }
 
     fun restoreCache(cache: PostDetailCommentsCache) {
+        // The cached comments were recovered when they were first parsed, and this is what stops the
+        // restored view offering to recover the ones the archive already said it does not have.
+        recoveryAttemptedIds.addAll(cache.recoveryAttemptedIds)
+
         if (_dataState.value.post == null) {
             _dataState.value = _dataState.value.copy(
                 post = cache.post,
@@ -1699,6 +1751,168 @@ class ViewPostDetailFragmentViewModelNew(
                 }
             }
         }
+    }
+
+    /**
+     * Recovers the post this view was opened with — one the feed handed over already parsed — before
+     * the fragment draws it for the first time.
+     *
+     * [onReady] is called on the main thread with the post to draw: synchronously when Reddit has
+     * not scrubbed this post, so an ordinary post's path is exactly as it was, and otherwise once
+     * the archive has answered or the wait has run out.
+     */
+    fun recoverPostBeforeFirstRender(post: Post, onReady: (Post) -> Unit) {
+        if (!RecoverRemovedPost.needsRecovery(post)) {
+            onReady(post)
+            return
+        }
+
+        viewModelScope.launch {
+            val recovered = withTimeoutOrNull(POST_RECOVERY_WAIT_MILLIS) {
+                RecoverRemovedPost.recoverIfRemoved(arcticShiftRetrofit, post)
+            }
+            if (recovered != null) {
+                // Published before onReady so the adapter is holding the recovered post by the time
+                // the fragment attaches it, which is what makes this a first draw and not a redraw.
+                _dataState.value = _dataState.value.copy(post = recovered)
+            }
+            // Either way the post is drawn exactly once. A late answer is deliberately dropped
+            // rather than applied: swapping the title out from under a post already on screen is
+            // the redraw this whole path exists to avoid.
+            onReady(recovered ?: post)
+        }
+    }
+
+    /**
+     * Recovers a freshly parsed page of comments before it is handed to the list, so a removed
+     * comment arrives with its archived body already in place rather than appearing as "[deleted]"
+     * and swapping a moment later. Covers replies that are still collapsed too — expanding a thread
+     * puts those same objects on screen.
+     *
+     * Skipped above [RecoverRemovedComments.AUTO_RECOVERY_COMMENT_LIMIT] comments, where recovery is
+     * the user's call, so opening a mega-thread is never made to wait on the archive.
+     */
+    private suspend fun preRecoverComments(comments: List<Comment>) {
+        if ((_dataState.value.post?.getNComments()
+                ?: 0) > RecoverRemovedComments.AUTO_RECOVERY_COMMENT_LIMIT) {
+            return
+        }
+        recoveryAttemptedIds.addAll(
+            RecoverRemovedComments.recoverInPlace(arcticShiftRetrofit, comments, recoveryAttemptedIds)
+        )
+    }
+
+    /**
+     * A snapshot of the ids the archive has answered for, for the comments cache to carry. Copied
+     * because the cache outlives this ViewModel and the live set keeps changing.
+     */
+    fun getRecoveryAttemptedIds(): Set<String> = HashSet(recoveryAttemptedIds)
+
+    /**
+     * Whether any loaded comment is still a removal placeholder the archive has not been asked about
+     * — which is exactly when the explicit action has something to do.
+     *
+     * Ids are recorded as attempted only once the archive has answered for them, so a comment it
+     * simply does not hold stops counting after the first pass; what is left are the threads
+     * recovery skipped for being over the cap, and the pages whose pre-render wait ran out.
+     */
+    fun hasUnrecoveredComments(): Boolean {
+        val comments = _dataState.value.comments ?: return false
+        return RecoverRemovedComments.hasCandidateOutside(comments, recoveryAttemptedIds)
+    }
+
+    /**
+     * The explicit "Recover deleted comments" action, and now the only path that patches comments
+     * already on screen.
+     *
+     * Automatic recovery happens before the first draw ([preRecoverComments]); when it cannot — a
+     * thread over [RecoverRemovedComments.AUTO_RECOVERY_COMMENT_LIMIT], or a page whose wait ran out
+     * — nothing is recovered behind the user's back. This is what they tap instead, and
+     * [hasUnrecoveredComments] is what puts it in the menu.
+     *
+     * One archive request per 250 ids, and one list update per request: 150 removed comments cost
+     * one call, not 150.
+     */
+    fun recoverRemovedComments() {
+        if (commentRecoveryJob?.isActive == true) {
+            // The tap already showed "Recovering…", so returning silently would leave that as the
+            // last thing the user saw.
+            commentRecoveryEventLiveData.value = CommentRecoveryResult(0, 0, completed = false)
+            return
+        }
+
+        val comments = _dataState.value.comments ?: return
+        val ids = RecoverRemovedComments.candidateIds(comments)
+            .filterNot { recoveryAttemptedIds.contains(it) }
+        if (ids.isEmpty()) {
+            commentRecoveryEventLiveData.value = CommentRecoveryResult(0, 0, completed = true)
+            return
+        }
+
+        commentRecoveryJob = viewModelScope.launch {
+            var recovered = 0
+            val completed = RecoverRemovedComments.recover(arcticShiftRetrofit, ids) { requested, results ->
+                recoveryAttemptedIds.addAll(requested)
+                recovered += applyRecoveredComments(results)
+            }
+
+            commentRecoveryEventLiveData.value =
+                CommentRecoveryResult(recovered, ids.size, completed)
+            commentRecoveryJob = null
+            // No automatic re-sweep for comments that arrived mid-pass: they stay unrecovered, which
+            // keeps the menu item showing, so the escape hatch advertises itself rather than the app
+            // redrawing the list again unasked.
+        }
+    }
+
+    /**
+     * Splices recovered bodies into the loaded comments, matching on id rather than position — a
+     * reply or a "load more" can have shifted every index while the request was in flight. One list
+     * emission for the whole batch, never one per comment.
+     *
+     * @return how many comments were actually updated.
+     */
+    private fun applyRecoveredComments(recovered: Map<String, FetchRemovedComment.Result>): Int {
+        if (recovered.isEmpty()) {
+            return 0
+        }
+        val comments = _dataState.value.comments ?: return 0
+
+        val updatedComments = ArrayList(comments)
+        val replacements = HashMap<Comment, Comment>()
+        for (i in updatedComments.indices) {
+            val existing = updatedComments[i]
+            val result = existing.id?.let { recovered[it] } ?: continue
+
+            // Copied rather than written in place: this list is already on screen, and DiffUtil only
+            // rebinds a row when the instance it compares against has changed.
+            val updatedComment = Comment(existing)
+            if (!RecoverRemovedComments.applyTo(updatedComment, result)) {
+                continue
+            }
+            updatedComments[i] = updatedComment
+            replacements[existing] = updatedComment
+        }
+
+        if (replacements.isEmpty()) {
+            return 0
+        }
+
+        // A reply lives in two places at once: this list, and its parent's children. Swapping only
+        // the list entry leaves the tree holding the un-recovered original, which collapsing the
+        // thread and expanding it again puts straight back on screen — recovered body and marker
+        // both gone. Comment has identity equality, so the map keys are the instances themselves.
+        for (comment in updatedComments) {
+            val children = comment.children ?: continue
+            for (j in children.indices) {
+                replacements[children[j]]?.let { children[j] = it }
+            }
+        }
+
+        _dataState.value = _dataState.value.copy(
+            comments = updatedComments
+        )
+        return replacements.size
     }
 
     fun editComment(commentContentMarkdown: String?, position: Int) {
@@ -2435,7 +2649,19 @@ class ViewPostDetailFragmentViewModelNew(
         /** Width of the band of comment `limit` values a thread's fetches rotate through. */
         private const val COMMENT_LIMIT_STEP = 50
 
+        /**
+         * How long a removed post's first draw waits for the archive.
+         *
+         * Generous on purpose: this is usually the session's first archive request, so it pays DNS
+         * and the TLS handshake on top of the call itself, and 2s was short enough to lose that race
+         * on mobile data — leaving the post drawn as "[ Removed by moderator ]" with no second
+         * chance. The network timeouts behind it are 30s, far too long to hold a screen on, so the
+         * deadline is here rather than left to them.
+         */
+        private const val POST_RECOVERY_WAIT_MILLIS = 5_000L
+
         fun provideFactory(retrofit: Retrofit, oauthRetrofit: Retrofit,
+                           arcticShiftRetrofit: Retrofit,
                            redditDataRoomDatabase: RedditDataRoomDatabase,
                            accessToken: String?, accountName: String,
                            post: Post?, postId: String?, commentId: String?,
@@ -2454,7 +2680,7 @@ class ViewPostDetailFragmentViewModelNew(
                     extras: CreationExtras
                 ): T {
                     return ViewPostDetailFragmentViewModelNew(
-                        retrofit, oauthRetrofit, redditDataRoomDatabase, accessToken, accountName,
+                        retrofit, oauthRetrofit, arcticShiftRetrofit, redditDataRoomDatabase, accessToken, accountName,
                         post, postId, commentId, comments, children,
                         sortType, sortTypeSharedPreferences,
                         postHistorySharedPreferences, respectSubredditRecommendedSortType,

@@ -124,4 +124,11 @@
         android:title="@string/recover_post"
         app:showAsAction="never"
         android:visible="false" />
+
+    <item
+        android:id="@+id/action_recover_comments_view_post_detail_fragment"
+        android:orderInCategory="19"
+        android:title="@string/recover_deleted_comments"
+        app:showAsAction="never"
+        android:visible="false" />
 </menu>

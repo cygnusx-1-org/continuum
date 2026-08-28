@@ -485,7 +485,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         viewPostDetailFragmentViewModel = new ViewModelProvider(
                 this,
                 ViewPostDetailFragmentViewModelNew.Companion.provideFactory(
-                        mRetrofit, mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
+                        mRetrofit, mOauthRetrofit, mArcticShiftRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
                         mActivity.accountName, mPost, postId, singleCommentId, comments, children,
                         sortType, mSortTypeSharedPreferences, mPostHistorySharedPreferences,
                         mSharedPreferences.getBoolean(SharedPreferencesUtils.RESPECT_SUBREDDIT_RECOMMENDED_COMMENT_SORT_TYPE, false),
@@ -669,22 +669,49 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 viewPostDetailFragmentViewModel.fetchPostAndCommentsById(postId);
             }
         } else {
-            if (!renderContent()) {
-                return;
-            }
-
-            PostDetailCommentsCache cache = savedInstanceState == null && viewPostDetailFragmentViewModel.getSingleCommentId() == null
-                    ? postDetailCommentsCacheManager.getCache(mPost) : null;
-            if (restoreCache(cache)) {
-                postDetailCommentsCacheManager.removeCache(mPost);
-
-                restoreCommentScrollPosition();
-            } else {
-                if (comments == null) {
-                    viewPostDetailFragmentViewModel.fetchCommentsRespectRecommendedSort(false);
-                } else {
-                    restoreCommentScrollPosition();
+            // A removed post is recovered before this first draw rather than after it, so it never
+            // renders as "[ Removed by moderator ]" and swaps to its real content a moment later.
+            // The callback runs inline for a post Reddit has not scrubbed, which is every ordinary
+            // one, leaving the path below unchanged for them.
+            boolean[] renderRefused = {false};
+            viewPostDetailFragmentViewModel.recoverPostBeforeFirstRender(mPost, postToRender -> {
+                // The archive request outlives this fragment; ignore a late reply once it is torn
+                // down so we don't touch a null activity/binding.
+                if (mActivity == null || !isAdded()) {
+                    return Unit.INSTANCE;
                 }
+
+                mPost = postToRender;
+                // Handed to the adapter directly rather than left to the dataState observer: that
+                // observer is bound to the *view* lifecycle, which is not STARTED yet while bindView
+                // runs, so a recovery landing in this window would be held back until onStart and the
+                // post would draw un-recovered in the meantime. Unconditional: for an unrecovered
+                // post this is the same object the adapter already holds, so it re-applies identical
+                // state, and the dataState observer makes the same call at onStart regardless.
+                mPostAdapter.updatePost(postToRender);
+                if (!renderContent()) {
+                    renderRefused[0] = true;
+                    return Unit.INSTANCE;
+                }
+
+                PostDetailCommentsCache cache = savedInstanceState == null && viewPostDetailFragmentViewModel.getSingleCommentId() == null
+                        ? postDetailCommentsCacheManager.getCache(mPost) : null;
+                if (restoreCache(cache)) {
+                    postDetailCommentsCacheManager.removeCache(mPost);
+
+                    restoreCommentScrollPosition();
+                } else {
+                    if (comments == null) {
+                        viewPostDetailFragmentViewModel.fetchCommentsRespectRecommendedSort(false);
+                    } else {
+                        restoreCommentScrollPosition();
+                    }
+                }
+                return Unit.INSTANCE;
+            });
+
+            if (renderRefused[0]) {
+                return;
             }
         }
 
@@ -710,6 +737,19 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
         viewPostDetailFragmentViewModel.getCommentModerationEventLiveData().observe(getViewLifecycleOwner(), moderationEvent -> {
             showMessage(moderationEvent.getToastMessageResId());
+        });
+
+        viewPostDetailFragmentViewModel.getCommentRecoveryEventLiveData().observe(getViewLifecycleOwner(), result -> {
+            if (result.getRecovered() > 0) {
+                Toast.makeText(mActivity, getString(R.string.recovered_deleted_comments,
+                        result.getRecovered(), result.getAttempted()), Toast.LENGTH_SHORT).show();
+            } else if (!result.getCompleted()) {
+                // Distinguish "the archive cut us off" from "the archive has nothing" — the first
+                // is worth retrying in a moment, the second never is.
+                Toast.makeText(mActivity, R.string.recover_deleted_comments_interrupted, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(mActivity, R.string.no_deleted_comments_to_recover, Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -842,6 +882,15 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             MenuItem recoverPostItem = mMenu.findItem(R.id.action_recover_post_view_post_detail_fragment);
             recoverPostItem.setVisible(canRecoverPost);
             Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, recoverPostItem, mActivity.getString(R.string.recover_post));
+
+            // Offered whenever something is actually left to recover, rather than by thread size:
+            // that covers the threads held back for being over the cap and the ones whose automatic
+            // pass ran out of time, and keeps the item away from every thread that already recovered
+            // everything the archive has. setupMenu runs on each data-state emission, so it follows
+            // the comments as they load.
+            MenuItem recoverCommentsItem = mMenu.findItem(R.id.action_recover_comments_view_post_detail_fragment);
+            recoverCommentsItem.setVisible(viewPostDetailFragmentViewModel.hasUnrecoveredComments());
+            Utils.setTitleWithCustomFontToMenuItem(mActivity.typeface, recoverCommentsItem, mActivity.getString(R.string.recover_deleted_comments));
         }
     }
 
@@ -1140,6 +1189,10 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 Utils.translateText(mActivity, textToTranslate.toString());
             }
             return true;
+        } else if (itemId == R.id.action_recover_comments_view_post_detail_fragment) {
+            Toast.makeText(mActivity, R.string.recovering_deleted_comments, Toast.LENGTH_SHORT).show();
+            viewPostDetailFragmentViewModel.recoverRemovedComments();
+            return true;
         } else if (itemId == R.id.action_recover_post_view_post_detail_fragment) {
             Toast.makeText(mActivity, R.string.fetching_removed_post, Toast.LENGTH_SHORT).show();
             FetchRemovedPost.fetchRemovedPost(mArcticShiftRetrofit, mPost, new FetchRemovedPost.FetchRemovedPostListener() {
@@ -1251,7 +1304,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 comments,
                 children,
                 viewPostDetailFragmentViewModel.getSortType(),
-                commentScrollPosition
+                commentScrollPosition,
+                viewPostDetailFragmentViewModel.getRecoveryAttemptedIds()
         );
     }
 

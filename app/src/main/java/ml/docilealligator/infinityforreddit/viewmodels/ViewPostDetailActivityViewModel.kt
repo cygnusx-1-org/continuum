@@ -93,7 +93,7 @@ class ViewPostDetailActivityViewModel(
         userWhere: String?,
         multiPath: String?,
         query: String?,
-        sortType: SortType.Type,
+        sortType: SortType.Type?,
         sortTime: SortType.Time?,
         postFilter: PostFilter?,
         @ReadPostType readPostType: Int,
@@ -117,6 +117,15 @@ class ViewPostDetailActivityViewModel(
             _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.LOADING)
 
             if (postType != PostType.READ_POSTS) {
+                // Read posts are the one listing with no sort of its own — HistoryPostFragment sends
+                // none, and the branch below never asks for one, so a non-null parameter here threw
+                // on entry for a call that would not have used it. Every other listing puts the sort
+                // in the request path, so without one there is no request to make.
+                if (sortType == null) {
+                    _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.NO_MORE_POSTS)
+                    return@launch
+                }
+
                 try {
                     val api: RedditAPIKt =
                         (if (accountName == Account.ANONYMOUS_ACCOUNT) retrofit else oauthRetrofit).create(

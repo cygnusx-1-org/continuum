@@ -77,6 +77,8 @@ public class Comment implements Parcelable {
     @Nullable
     private String approvedBy;
     private boolean removed;
+    /** Set when this comment's body came back from the archive rather than from Reddit. */
+    private boolean isRecovered;
     private boolean spam;
     private boolean isExpanded;
     private boolean hasExpandedBefore;
@@ -185,6 +187,7 @@ public class Comment implements Parcelable {
         this.approvedAtUTC = commentToBeCopied.approvedAtUTC;
         this.approvedBy = commentToBeCopied.approvedBy;
         this.removed = commentToBeCopied.removed;
+        this.isRecovered = commentToBeCopied.isRecovered;
         this.spam = commentToBeCopied.spam;
         this.isExpanded = commentToBeCopied.isExpanded;
         this.hasExpandedBefore = commentToBeCopied.hasExpandedBefore;
@@ -231,6 +234,7 @@ public class Comment implements Parcelable {
         approvedAtUTC = in.readLong();
         approvedBy = in.readString();
         removed = in.readByte() != 0;
+        isRecovered = in.readByte() != 0;
         spam = in.readByte() != 0;
         isExpanded = in.readByte() != 0;
         hasExpandedBefore = in.readByte() != 0;
@@ -456,6 +460,14 @@ public class Comment implements Parcelable {
         this.approvedBy = approvedBy;
     }
 
+    public boolean isRecovered() {
+        return isRecovered;
+    }
+
+    public void setRecovered(boolean recovered) {
+        isRecovered = recovered;
+    }
+
     public boolean isRemoved() {
         return removed;
     }
@@ -637,6 +649,7 @@ public class Comment implements Parcelable {
         parcel.writeLong(approvedAtUTC);
         parcel.writeString(approvedBy);
         parcel.writeByte((byte) (removed ? 1 : 0));
+        parcel.writeByte((byte) (isRecovered ? 1 : 0));
         parcel.writeByte((byte) (spam ? 1 : 0));
         parcel.writeByte((byte) (isExpanded ? 1 : 0));
         parcel.writeByte((byte) (hasExpandedBefore ? 1 : 0));

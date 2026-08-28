@@ -3138,6 +3138,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     FetchStreamableVideo.fetchStreamableVideoInRecyclerViewAdapter(mExecutor, new Handler(),
                             fetchRedgifsOrStreamableVideoCall,
                             new FetchVideoLinkListener() {
+                                // Reference equality is the point, not an oversight: this asks
+                                // whether the holder is still bound to the very object the fetch was
+                                // started for. Post.equals() compares id *plus* mutable state
+                                // (voteType, saved, isRead...), so upvoting the post while the video
+                                // URL was in flight would make equals() false and drop the binding
+                                // for a post still on screen.
+                                @SuppressWarnings("ReferenceEquality")
                                 @Override
                                 public void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {
                                     StreamableVideo.Media media = streamableVideo.mp4 == null ? streamableVideo.mp4Mobile : streamableVideo.mp4;
@@ -3152,6 +3159,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     }
                                 }
 
+                                @SuppressWarnings("ReferenceEquality") // Same holder-identity check as above.
                                 @Override
                                 public void failed(@Nullable Integer messageRes) {
                                     if (post == getPost()) {

@@ -36,6 +36,7 @@ import ml.docilealligator.infinityforreddit.font.FontStyle
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils
+import ml.docilealligator.infinityforreddit.utils.RecoveredFlair
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,6 +114,7 @@ class RoborazziLayoutTest(private val case: Case) {
         val themeType: Int,
         val fontScale: FontScale,
         val reveal: List<Int> = emptyList(),
+        val recoveredFlair: Boolean = false,
     ) {
         /**
          * `{layout}_{theme}_sw{n}dp[_land][_xlarge]` — the pre-existing scheme with a suffix per new
@@ -140,6 +142,7 @@ class RoborazziLayoutTest(private val case: Case) {
         @param:LayoutRes val res: Int,
         val family: Family,
         val reveal: List<Int> = emptyList(),
+        val recoveredFlair: Boolean = false,
     )
 
     companion object {
@@ -283,6 +286,40 @@ class RoborazziLayoutTest(private val case: Case) {
             // left to LayoutVariantIdParityTest and the InconsistentLayoutVariantIds lint check.
         )
 
+        /**
+         * The archive-recovery markers (issue #372), which no other case can reach: both are shown
+         * only for content recovered from Arctic Shift, so every golden above captures them absent.
+         *
+         * The post chip is crossed with the rest of its flow row — spoiler, NSFW and link flair all
+         * revealed at once — because "does the new chip fit" is a question about the busiest row,
+         * not the empty one. Chip *colours* come from the adapter and so are not exercised here;
+         * what these pin is geometry: whether the row wraps, and whether anything is pushed out of
+         * the item.
+         */
+        private val RECOVERED_LAYOUTS: List<LayoutSpec> = listOf(
+            LayoutSpec(
+                "detailTextRecovered", R.layout.item_post_detail_text, Family.NONE,
+                reveal = listOf(
+                    R.id.spoiler_custom_text_view_item_post_detail_text,
+                    R.id.nsfw_text_view_item_post_detail_text,
+                    R.id.flair_custom_text_view_item_post_detail_text,
+                    R.id.recovered_custom_text_view_item_post_detail_text,
+                ),
+            ),
+            LayoutSpec(
+                "detailLinkRecovered", R.layout.item_post_detail_link, Family.NONE,
+                reveal = listOf(
+                    R.id.spoiler_custom_text_view_item_post_detail_link,
+                    R.id.nsfw_text_view_item_post_detail_link,
+                    R.id.flair_custom_text_view_item_post_detail_link,
+                    R.id.recovered_custom_text_view_item_post_detail_link,
+                ),
+            ),
+            LayoutSpec(
+                "commentRecovered", R.layout.item_comment, Family.NONE, recoveredFlair = true,
+            ),
+        )
+
         /** Common phones (320/360/411/443/448), this dev's phone (527), tablets (600/934). */
         private val FEED_CORE_WIDTHS = listOf(320, 360, 411, 443, 448, 527, 600, 934)
         private val SECONDARY_CORE_WIDTHS = listOf(320, 411, 527, 600)
@@ -321,6 +358,9 @@ class RoborazziLayoutTest(private val case: Case) {
             // Font scale: the overflow stressor, at the narrowest widths where it bites first.
             addAll(tier(FEED_LAYOUTS, LIGHT_ONLY, FEED_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
             addAll(tier(SECONDARY_LAYOUTS, LIGHT_ONLY, SECONDARY_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
+            // Recovery markers: the core widths, plus the same font-scale stressor.
+            addAll(tier(RECOVERED_LAYOUTS, LIGHT_DARK, SECONDARY_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
+            addAll(tier(RECOVERED_LAYOUTS, LIGHT_ONLY, SECONDARY_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
         }
 
         private fun tier(
@@ -336,7 +376,7 @@ class RoborazziLayoutTest(private val case: Case) {
                         arrayOf<Any>(
                             Case(
                                 spec.name, spec.res, spec.family, swDp, orientation, themeLabel,
-                                themeType, fontScale, spec.reveal,
+                                themeType, fontScale, spec.reveal, spec.recoveredFlair,
                             ),
                         )
                     }
@@ -496,6 +536,15 @@ class RoborazziLayoutTest(private val case: Case) {
         // configuration's layout omits the view, which is deliberate: the golden then loses the
         // control and the pixel diff is the failure. See LayoutSpec.reveal.
         case.reveal.forEach { id -> view.findViewById<View>(id)?.visibility = View.VISIBLE }
+        // The comment byline's "Recovered" marker is a span the adapter builds, not a view the XML
+        // ships, so revealing an id cannot capture it. Bound with flair of its own, because the two
+        // share one line and crowding them is the point of the case. See LayoutSpec.recoveredFlair.
+        if (case.recoveredFlair) {
+            view.findViewById<TextView>(R.id.author_flair_text_view_item_post_comment)?.let {
+                it.visibility = View.VISIBLE
+                it.text = RecoveredFlair.prependTo(activity, "Verified Contributor")
+            }
+        }
         activity.setContentView(
             view,
             ViewGroup.LayoutParams(itemWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT),

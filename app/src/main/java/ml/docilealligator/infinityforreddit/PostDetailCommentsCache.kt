@@ -10,6 +10,11 @@ class PostDetailCommentsCache(
     val visibleComments: ArrayList<Comment>,
     val children: ArrayList<String>?,
     val sortType: SortType.Type,
-    val scrollPosition: Int
+    val scrollPosition: Int,
+    /**
+     * Comment ids the archive has already answered for, carried across with the comments so a
+     * restored view does not offer to recover the ones it already knows are not there.
+     */
+    val recoveryAttemptedIds: Set<String>
     ) {
 }

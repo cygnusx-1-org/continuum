@@ -1947,6 +1947,12 @@
     <string name="show_removed_post_failed">Could not find the removed post</string>
     <string name="fetching_removed_comment">Fetching removed comment</string>
     <string name="show_removed_comment_failed">Could not find the removed comment</string>
+    <string name="recovered">Recovered</string>
+    <string name="recover_deleted_comments">Recover Deleted Comments</string>
+    <string name="recovering_deleted_comments">Recovering deleted comments</string>
+    <string name="recovered_deleted_comments">Recovered %1$d of %2$d deleted comments</string>
+    <string name="no_deleted_comments_to_recover">No deleted comments to recover</string>
+    <string name="recover_deleted_comments_interrupted">The archive is busy — try again in a moment</string>
     <string name="comment_spam_status">This comment is removed as spam</string>
 
     <string name="copying_multi_reddit">Copying</string>

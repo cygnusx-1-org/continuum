@@ -80,6 +80,8 @@ public class Post implements Parcelable {
     private boolean sendReplies;
     private final boolean isCrosspost;
     private boolean isRead;
+    /** Set when this post's content came back from the archive rather than from Reddit. */
+    private boolean isRecovered;
     @Nullable
     private String crosspostParentId;
     @Nullable
@@ -143,6 +145,7 @@ public class Post implements Parcelable {
         this.distinguished = distinguished;
         this.suggestedSort = suggestedSort;
         isRead = false;
+        isRecovered = false;
     }
 
     public Post(String id, String fullName, String subredditName, String subredditNamePrefixed,
@@ -188,6 +191,7 @@ public class Post implements Parcelable {
         this.distinguished = distinguished;
         this.suggestedSort = suggestedSort;
         isRead = false;
+        isRecovered = false;
     }
 
     public Post(@NonNull Post postToBeCopied) {
@@ -233,6 +237,7 @@ public class Post implements Parcelable {
         this.sendReplies = postToBeCopied.sendReplies;
         this.isCrosspost = postToBeCopied.isCrosspost;
         this.isRead = postToBeCopied.isRead;
+        this.isRecovered = postToBeCopied.isRecovered;
         this.crosspostParentId = postToBeCopied.crosspostParentId;
         this.distinguished = postToBeCopied.distinguished;
         this.suggestedSort = postToBeCopied.suggestedSort;
@@ -299,6 +304,7 @@ public class Post implements Parcelable {
         removed = in.readByte() != 0;
         spam = in.readByte() != 0;
         isRead = in.readByte() != 0;
+        isRecovered = in.readByte() != 0;
         crosspostParentId = in.readString();
         distinguished = in.readString();
         suggestedSort = in.readString();
@@ -684,6 +690,7 @@ public class Post implements Parcelable {
         dest.writeByte((byte) (removed ? 1 : 0));
         dest.writeByte((byte) (spam ? 1 : 0));
         dest.writeByte((byte) (isRead ? 1 : 0));
+        dest.writeByte((byte) (isRecovered ? 1 : 0));
         dest.writeString(crosspostParentId);
         dest.writeString(distinguished);
         dest.writeString(suggestedSort);
@@ -777,6 +784,14 @@ public class Post implements Parcelable {
 
     public void markAsRead() {
         isRead = true;
+    }
+
+    public boolean isRecovered() {
+        return isRecovered;
+    }
+
+    public void setRecovered(boolean recovered) {
+        isRecovered = recovered;
     }
 
     public boolean isRead() {
