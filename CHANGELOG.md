@@ -2,6 +2,14 @@
 
 ---
 
+8.3.0.1 / 2026-8-29
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Updated to 8.3.0
+* Implemented Recover deleted comments automatically #372
+* Fixed Media downloads occasionally take a long time #378
+
 8.2.5.9.9.9.7 / 2026-8-26
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
