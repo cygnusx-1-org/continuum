@@ -80,7 +80,7 @@ android {
 
         minSdk 24
         targetSdk 36
-        versionCode 226
+        versionCode 228
         versionName "8.3.0.1"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         // The fallback must be 22 characters (APIKeysPreferenceFragment.CLIENT_ID_LENGTH) and must
