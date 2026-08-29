@@ -238,7 +238,7 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
             }
         });
 
-        binding.imageViewViewImageOrGifActivity.setImageViewFactory(new GlideGifImageViewFactory(new SaveMemoryCenterInisdeDownsampleStrategy(Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))));
+        binding.imageViewViewImageOrGifActivity.setImageViewFactory(new GlideGifImageViewFactory(new SaveMemoryCenterInisdeDownsampleStrategy(SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"))));
 
         binding.imageViewViewImageOrGifActivity.setImageLoaderCallback(new ImageLoader.Callback() {
             @Override

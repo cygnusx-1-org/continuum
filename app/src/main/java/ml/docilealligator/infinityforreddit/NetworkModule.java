@@ -65,9 +65,9 @@ abstract class NetworkModule {
             Proxy.Type proxyType = Proxy.Type.valueOf(mProxySharedPreferences.getString(SharedPreferencesUtils.PROXY_TYPE, "HTTP"));
             if (proxyType != Proxy.Type.DIRECT) {
                 String proxyHost = mProxySharedPreferences.getString(SharedPreferencesUtils.PROXY_HOSTNAME, "127.0.0.1");
-                int proxyPort = Integer.parseInt(mProxySharedPreferences.getString(SharedPreferencesUtils.PROXY_PORT, "1080"));
+                int proxyPort = SharedPreferencesUtils.getInt(mProxySharedPreferences, SharedPreferencesUtils.PROXY_PORT, "1080");
 
-                InetSocketAddress proxyAddr = new InetSocketAddress(proxyHost, proxyPort);
+                InetSocketAddress proxyAddr = InetSocketAddress.createUnresolved(proxyHost, proxyPort);
                 Proxy proxy = new Proxy(proxyType, proxyAddr);
                 builder.proxy(proxy);
             }

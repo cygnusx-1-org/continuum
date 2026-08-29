@@ -105,6 +105,11 @@ public class FetchMultiRedditInfo {
     @WorkerThread
     @Nullable
     public static MultiReddit parseMultiRedditInfo(@Nullable String response) {
+        if (response == null) {
+            // A null body is a failed parse, same as a malformed one: it used to reach
+            // new JSONObject(null), whose NPE the JSONException catch below does not cover.
+            return null;
+        }
         try {
             JSONObject object = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
             String path = object.getString(JSONUtils.PATH_KEY);

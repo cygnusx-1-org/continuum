@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
@@ -50,7 +51,8 @@ public class UploadedImageBlockParser extends AbstractBlockParser {
                 String id = matcher.group(2);
                 UploadedImage uploadedImage = uploadedImageMap.get(id);
                 if (uploadedImage != null) {
-                    String caption = matcher.group(1);
+                    // "(.*)" always participates in a successful match, empty at worst.
+                    String caption = Objects.requireNonNull(matcher.group(1));
                     uploadedImage.setCaption(caption);
                     return BlockStart.of(new UploadedImageBlockParser(uploadedImage));
                 }

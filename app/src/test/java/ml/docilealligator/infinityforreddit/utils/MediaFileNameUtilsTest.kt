@@ -15,7 +15,7 @@ import org.junit.Test
 class MediaFileNameUtilsTest {
 
     private fun galleryPost(title: String, id: String) = Post(
-        id, "t3_$id", "pics", "r/pics", "bob", "", "", 0L,
+        id, "t3_$id", "pics", "r/pics", "bob", "t2_bob", "", "", 0L,
         title, "/r/pics/comments/$id/", 0, Post.GALLERY_TYPE, 0, 0, 100, "",
         false, false, false, false, false, false, false, false,
         false, false, false, 0L, null, false, false, "", null

@@ -106,12 +106,18 @@ class DocumentTreeUtilsTest {
         // media URL, then its per-media-type defaults, then ".unknown" when it cannot tell. This is
         // what decides whether a real download takes the fast path or the fallback, so it is worth
         // knowing which side of the line each one lands on rather than assuming.
-        for (extension in listOf("jpg", "jpeg", "png", "gif", "mp4", "webm", "mov", "avi", "apng")) {
+        for (extension in listOf("jpg", "jpeg", "png", "gif", "mp4", "webm", "mov", "avi")) {
             assertNotNull(
                 "no type for .$extension, so its downloads deduplicate the slow way",
                 DocumentTreeUtils.mimeTypeMatchingExtension("holiday.$extension")
             )
         }
+
+        // ".apng" dropped out of the platform MIME table at API 36. Answering with a type of our
+        // own would be worse than the fallback: FileSystemProvider derives its own type from the
+        // same table, and only deduplicates into "name (n).ext" when the two agree — disagree and
+        // it produces "name.apng (1)", with the extension stranded mid-name.
+        assertNull(DocumentTreeUtils.mimeTypeMatchingExtension("holiday.apng"))
 
         // ".unknown" is the one it emits when the media type is unrecognised, and nothing can type
         // it — which is exactly when falling back to checking the directory is the right answer.

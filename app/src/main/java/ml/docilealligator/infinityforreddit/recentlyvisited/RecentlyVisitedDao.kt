@@ -12,6 +12,18 @@ interface RecentlyVisitedDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(recentlyVisited: RecentlyVisited)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(recentlyVisited: List<RecentlyVisited>)
+
+    /**
+     * Every account's rows, for Settings backup. This table only ever exists locally -- unlike
+     * subscriptions or multireddits there is nothing on Reddit to re-sync it from -- so leaving it
+     * out of a backup loses it outright, and restoring deletes the accounts it hangs off, taking it
+     * with them through the ON DELETE CASCADE.
+     */
+    @Query("SELECT * FROM recently_visited")
+    fun getAllForBackup(): List<RecentlyVisited>
+
     @Query(
         "SELECT * FROM recently_visited WHERE username = :accountName AND type = :type " +
                 "AND name LIKE :searchQuery COLLATE NOCASE ORDER BY last_visited DESC"

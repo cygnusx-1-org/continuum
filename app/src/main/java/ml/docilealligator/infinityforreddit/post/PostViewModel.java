@@ -17,6 +17,7 @@ import androidx.paging.PagingData;
 import androidx.paging.PagingDataTransforms;
 import androidx.paging.PagingLiveData;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -29,6 +30,7 @@ import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCache;
 import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
@@ -61,6 +63,7 @@ public class PostViewModel extends ViewModel {
     @Nullable
     private String userWhere;
     private ReadPostsListInterface readPostsList;
+    private final UserProfileImagesBatchLoader loader;
     private final MutableLiveData<Boolean> hideReadPostsValue = new MutableLiveData<>();
 
     private final LiveData<PagingData<Post>> posts;
@@ -92,7 +95,8 @@ public class PostViewModel extends ViewModel {
                          @Nullable String accessToken, @NonNull String accountName,
                          SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                          @Nullable SharedPreferences postHistorySharedPreferences, @PostType int postType,
-                         SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
+                         SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList,
+                         UserProfileImagesBatchLoader loader) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -104,6 +108,7 @@ public class PostViewModel extends ViewModel {
         this.sortType = sortType;
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
+        this.loader = loader;
 
         sortTypeLiveData = new MutableLiveData<>(sortType);
         postFilterLiveData = new MutableLiveData<>(postFilter);
@@ -134,7 +139,8 @@ public class PostViewModel extends ViewModel {
                          @Nullable String accessToken, @NonNull String accountName,
                          SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                          @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String subredditName, @PostType int postType,
-                         SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
+                         SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList,
+                         UserProfileImagesBatchLoader loader) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -146,6 +152,7 @@ public class PostViewModel extends ViewModel {
         this.sortType = sortType;
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
+        this.loader = loader;
         this.name = subredditName;
 
         sortTypeLiveData = new MutableLiveData<>(sortType);
@@ -178,7 +185,8 @@ public class PostViewModel extends ViewModel {
                          @Nullable String accessToken, @NonNull String accountName,
                          SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                          @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String multiredditPath, @Nullable String query,
-                         @PostType int postType, SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
+                         @PostType int postType, SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList,
+                         UserProfileImagesBatchLoader loader) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -190,6 +198,7 @@ public class PostViewModel extends ViewModel {
         this.sortType = sortType;
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
+        this.loader = loader;
         this.name = multiredditPath;
         this.query = query;
 
@@ -224,7 +233,7 @@ public class PostViewModel extends ViewModel {
                          @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                          @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String username,
                          @PostType int postType, SortType sortType, PostFilter postFilter, @Nullable String userWhere,
-                         ReadPostsListInterface readPostsList) {
+                         ReadPostsListInterface readPostsList, UserProfileImagesBatchLoader loader) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -236,6 +245,7 @@ public class PostViewModel extends ViewModel {
         this.sortType = sortType;
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
+        this.loader = loader;
         this.name = username;
         this.userWhere = userWhere;
 
@@ -270,7 +280,7 @@ public class PostViewModel extends ViewModel {
                          SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                          @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String subredditName, @Nullable String query,
                          @Nullable String trendingSource, @PostType int postType, SortType sortType, PostFilter postFilter,
-                         ReadPostsListInterface readPostsList) {
+                         ReadPostsListInterface readPostsList, UserProfileImagesBatchLoader loader) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -282,6 +292,7 @@ public class PostViewModel extends ViewModel {
         this.sortType = sortType;
         this.postFilter = postFilter;
         this.readPostsList = readPostsList;
+        this.loader = loader;
         this.name = subredditName;
         this.query = query;
         this.trendingSource = trendingSource;
@@ -469,13 +480,15 @@ public class PostViewModel extends ViewModel {
         @Nullable
         private String userWhere;
         private final ReadPostsListInterface readPostsList;
+        private final UserProfileImagesBatchLoader loader;
 
         // Front page
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        @Nullable SharedPreferences postHistorySharedPreferences, @PostType int postType, SortType sortType,
-                       PostFilter postFilter, ReadPostsListInterface readPostsList) {
+                       PostFilter postFilter, ReadPostsListInterface readPostsList,
+                       UserProfileImagesBatchLoader loader) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -488,6 +501,7 @@ public class PostViewModel extends ViewModel {
             this.sortType = sortType;
             this.postFilter = postFilter;
             this.readPostsList = readPostsList;
+            this.loader = loader;
         }
 
         // PostType.SUBREDDIT
@@ -495,7 +509,8 @@ public class PostViewModel extends ViewModel {
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String name, @PostType int postType, SortType sortType,
-                       PostFilter postFilter, ReadPostsListInterface readPostsList) {
+                       PostFilter postFilter, ReadPostsListInterface readPostsList,
+                       UserProfileImagesBatchLoader loader) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -509,6 +524,7 @@ public class PostViewModel extends ViewModel {
             this.sortType = sortType;
             this.postFilter = postFilter;
             this.readPostsList = readPostsList;
+            this.loader = loader;
         }
 
         // PostType.MULTIREDDIT
@@ -516,7 +532,8 @@ public class PostViewModel extends ViewModel {
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        SharedPreferences postHistorySharedPreferences, @Nullable String name, @Nullable String query, @PostType int postType, SortType sortType,
-                       PostFilter postFilter, ReadPostsListInterface readPostsList) {
+                       PostFilter postFilter, ReadPostsListInterface readPostsList,
+                       UserProfileImagesBatchLoader loader) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -531,6 +548,7 @@ public class PostViewModel extends ViewModel {
             this.sortType = sortType;
             this.postFilter = postFilter;
             this.readPostsList = readPostsList;
+            this.loader = loader;
         }
 
         //User posts
@@ -538,7 +556,8 @@ public class PostViewModel extends ViewModel {
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String username, @PostType int postType,
-                       SortType sortType, PostFilter postFilter, @Nullable String where, ReadPostsListInterface readPostsList) {
+                       SortType sortType, PostFilter postFilter, @Nullable String where, ReadPostsListInterface readPostsList,
+                       UserProfileImagesBatchLoader loader) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -553,6 +572,7 @@ public class PostViewModel extends ViewModel {
             this.postFilter = postFilter;
             userWhere = where;
             this.readPostsList = readPostsList;
+            this.loader = loader;
         }
 
         // PostType.SEARCH
@@ -560,7 +580,8 @@ public class PostViewModel extends ViewModel {
                        @Nullable String accessToken, @NonNull String accountName,
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String name, @Nullable String query, @Nullable String trendingSource,
-                       @PostType int postType, SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList) {
+                       @PostType int postType, SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList,
+                       UserProfileImagesBatchLoader loader) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -576,13 +597,14 @@ public class PostViewModel extends ViewModel {
             this.sortType = sortType;
             this.postFilter = postFilter;
             this.readPostsList = readPostsList;
+            this.loader = loader;
         }
 
         //Anonymous Front Page
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                        SharedPreferences sharedPreferences, @Nullable String concatenatedSubredditNames,
                        @PostType int postType, SortType sortType, PostFilter postFilter,
-                       ReadPostsListInterface readPostsList) {
+                       ReadPostsListInterface readPostsList, UserProfileImagesBatchLoader loader) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -599,6 +621,7 @@ public class PostViewModel extends ViewModel {
             this.sortType = sortType;
             this.postFilter = postFilter;
             this.readPostsList = readPostsList;
+            this.loader = loader;
         }
 
         @NonNull
@@ -607,27 +630,27 @@ public class PostViewModel extends ViewModel {
             if (postType == PostType.FRONT_PAGE) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, postType, sortType, postFilter, readPostsList);
+                        postHistorySharedPreferences, postType, sortType, postFilter, readPostsList, loader);
             } else if (postType == PostType.SEARCH) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, name, query, trendingSource, postType, sortType, postFilter, readPostsList);
+                        postHistorySharedPreferences, name, query, trendingSource, postType, sortType, postFilter, readPostsList, loader);
             } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList);
+                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList, loader);
             } else if (postType == PostType.MULTIREDDIT) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, name, query, postType, sortType, postFilter, readPostsList);
+                        postHistorySharedPreferences, name, query, postType, sortType, postFilter, readPostsList, loader);
             } else if (postType == PostType.ANONYMOUS_FRONT_PAGE || postType == PostType.ANONYMOUS_MULTIREDDIT) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList);
+                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList, loader);
             } else {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, name, postType, sortType, postFilter, userWhere, readPostsList);
+                        postHistorySharedPreferences, name, postType, sortType, postFilter, userWhere, readPostsList, loader);
             }
         }
     }
@@ -637,6 +660,10 @@ public class PostViewModel extends ViewModel {
             addSource(sortTypeLiveData, sortType -> setValue(Pair.create(postFilterLiveData.getValue(), sortType)));
             addSource(postFilterLiveData, postFilter -> setValue(Pair.create(postFilter, sortTypeLiveData.getValue())));
         }
+    }
+
+    public void loadAuthorIcons(List<Post> posts, UserProfileImagesBatchLoader.LoadIconListener loadIconListener) {
+        loader.loadAuthorImagesInPosts(accessToken, posts, loadIconListener);
     }
 
     public void approvePost(@NonNull Post post, int position) {
@@ -786,7 +813,7 @@ public class PostViewModel extends ViewModel {
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
                 if (response.isSuccessful()) {
                     post.setIsModerator(!post.isModerator());
-                    moderationEventLiveData.postValue(post.isModerator() ? new PostModerationEvent.DistinguishedAsMod(post, position): new PostModerationEvent.UndistinguishedAsMod(post, position));
+                    moderationEventLiveData.postValue(post.isModerator() ? new PostModerationEvent.DistinguishedAsMod(post, position) : new PostModerationEvent.UndistinguishedAsMod(post, position));
                 } else {
                     moderationEventLiveData.postValue(post.isModerator() ? new PostModerationEvent.UndistinguishAsModFailed(post, position) : new PostModerationEvent.DistinguishAsModFailed(post, position));
                 }
@@ -820,4 +847,5 @@ public class PostViewModel extends ViewModel {
             }
         });
     }
+
 }

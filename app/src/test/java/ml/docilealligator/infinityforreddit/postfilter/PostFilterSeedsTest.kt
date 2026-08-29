@@ -31,7 +31,7 @@ class PostFilterSeedsTest {
         flair: String = "Discussion",
         url: String = "https://www.bbc.co.uk/news/123",
     ) = Post(
-        "id", "t3_id", subredditName, "r/$subredditName", author, "", "", 0L,
+        "id", "t3_id", subredditName, "r/$subredditName", author, "t2_$author", "", "", 0L,
         "A title", url, "/r/$subredditName/comments/id/", 10, 0, 0, 0,
         100, flair, false, false, false, false, false, false, false, false,
         false, false, false, 0L, null, false, false, "", null,

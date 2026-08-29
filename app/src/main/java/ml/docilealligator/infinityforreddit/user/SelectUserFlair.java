@@ -39,10 +39,11 @@ public class SelectUserFlair {
         oauthRetrofit.create(RedditAPI.class).selectUserFlair(APIUtils.getOAuthHeader(accessToken), params, subredditName).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful() && response.body() != null) {
+                String responseBody = response.body();
+                if (response.isSuccessful() && responseBody != null) {
                     executor.execute(() -> {
                         try {
-                            JSONObject responseObject = new JSONObject(response.body()).getJSONObject(JSONUtils.JSON_KEY);
+                            JSONObject responseObject = new JSONObject(responseBody).getJSONObject(JSONUtils.JSON_KEY);
 
                             if (responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() != 0) {
                                 JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY)

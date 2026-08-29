@@ -48,8 +48,9 @@ public class FetchUserData {
 
             try {
                 Response<String> response = userInfo.execute();
-                if (response.isSuccessful() && response.body() != null) {
-                    processFetchUserDataResponse(response, handler, redditDataRoomDatabase, fetchUserDataListener);
+                String responseBody = response.body();
+                if (response.isSuccessful() && responseBody != null) {
+                    processFetchUserDataResponse(responseBody, handler, redditDataRoomDatabase, fetchUserDataListener);
                 } else {
                     if (oauthRetrofit == null || isOauth) {
                         handler.post(fetchUserDataListener::onFetchUserDataFailed);
@@ -70,11 +71,13 @@ public class FetchUserData {
         });
     }
 
+    // Takes the body rather than the Response: the body is what this parses, and both call sites
+    // already have to prove it non-null before getting here.
     @WorkerThread
-    private static void processFetchUserDataResponse(Response<String> response, Handler handler,
+    private static void processFetchUserDataResponse(String responseBody, Handler handler,
                                                      @Nullable RedditDataRoomDatabase redditDataRoomDatabase,
                                                      FetchUserDataListener fetchUserDataListener) throws JSONException {
-        JSONObject jsonResponse = new JSONObject(response.body());
+        JSONObject jsonResponse = new JSONObject(responseBody);
         UserData userData = parseUserDataBase(jsonResponse, true);
         if (redditDataRoomDatabase != null) {
             redditDataRoomDatabase.accountDao().updateAccountInfo(userData.getName(), userData.getIconUrl(), userData.getBanner(), userData.getTotalKarma(), userData.isMod());
@@ -90,8 +93,9 @@ public class FetchUserData {
             Response<String> response = oauthRetrofit.create(RedditAPI.class).getUserDataOauth(
                     APIUtils.getOAuthHeader(accessToken), username
             ).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                processFetchUserDataResponse(response, handler, redditDataRoomDatabase, fetchUserDataListener);
+            String responseBody = response.body();
+            if (response.isSuccessful() && responseBody != null) {
+                processFetchUserDataResponse(responseBody, handler, redditDataRoomDatabase, fetchUserDataListener);
             } else {
                 handler.post(fetchUserDataListener::onFetchUserDataFailed);
             }

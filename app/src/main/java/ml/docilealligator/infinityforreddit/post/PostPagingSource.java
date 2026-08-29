@@ -7,6 +7,7 @@ import androidx.paging.ListenableFuturePagingSource;
 import androidx.paging.PagingState;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.RedditError;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
@@ -33,6 +35,7 @@ import ml.docilealligator.infinityforreddit.utils.SavedPostCache;
 import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
 import ml.docilealligator.infinityforreddit.utils.SavedThingSearchFilter;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import okhttp3.ResponseBody;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -171,7 +174,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         if (path != null && path.endsWith("/")) {
             multiRedditPath = path.substring(0, path.length() - 1);
         } else {
-            multiRedditPath = path;
+            multiRedditPath = path == null ? "" : path;
         }
         this.query = query;
         this.postType = postType;
@@ -231,6 +234,18 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         posts = new ArrayList<>();
     }
 
+    public static class PostPagingSourceError extends Exception {
+        public final int code;
+        @Nullable
+        public final String message;
+
+        PostPagingSourceError(int code, @Nullable String message) {
+            super(message);
+            this.code = code;
+            this.message = message;
+        }
+    }
+
     @Nullable
     @Override
     public String getRefreshKey(@NonNull PagingState<String, Post> pagingState) {
@@ -261,9 +276,23 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
     public LoadResult<String, Post> transformData(Response<String> response) {
         if (!response.isSuccessful()) {
-            return new LoadResult.Error<>(new Exception("Error getting response"));
+            //{"reason": "banned", "message": "Not Found", "error": 404}
+            try (ResponseBody errorBody = response.errorBody()) {
+                if (errorBody != null) {
+                    // Gson returns null for an empty or literal-null body. Reading the reason
+                    // off it threw an NPE that the catch below swallowed, silently discarding the
+                    // specific reason instead of reporting it.
+                    RedditError redditError = new Gson().fromJson(errorBody.string(), RedditError.class);
+                    if (redditError != null) {
+                        return new LoadResult.Error<>(new PostPagingSourceError(response.code(), redditError.getReason()));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return new LoadResult.Error<>(new PostPagingSourceError(response.code(), null));
         }
-        return transformData(parseListing(response.body()));
+        return transformData(parseListing(response.body()), response.code());
     }
 
     // Parses the response body once and shares it (versus re-parsing for the posts and the `after`
@@ -280,10 +309,10 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         }
     }
 
-    private LoadResult<String, Post> transformData(@Nullable JSONObject json) {
+    private LoadResult<String, Post> transformData(@Nullable JSONObject json, int responseCode) {
         LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(json, -1, postFilter, readPostsList);
         if (newPosts == null) {
-            return new LoadResult.Error<>(new Exception("Error parsing posts"));
+            return new LoadResult.Error<>(new PostPagingSourceError(responseCode, "Error parsing posts"));
         }
         String lastItem = ParsePost.getLastItem(json);
         int currentPostsSize = posts.size();
@@ -586,7 +615,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             }
             // Parse once and share the listing between transformData and the Saved-cache accumulation.
             JSONObject json = parseListing(response.body());
-            LoadResult<String, Post> result = transformData(json);
+            LoadResult<String, Post> result = transformData(json, 200);
             // Accumulate raw children as the user pages so that reaching the end via normal browsing
             // (not just search) warms the persistent Saved cache too.
             if (isSavedFeed()) {
@@ -614,7 +643,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private ListenableFuture<LoadResult<String, Post>> loadSearchPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
         ListenableFuture<Response<String>> searchPosts;
         if (subredditOrUserName == null) {
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                 searchPosts = api.searchPostsListenableFuture(query, loadParams.getKey(), sortType.getType(), sortType.getTime(),
                         trendingSource);
             } else {
@@ -622,7 +651,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                         sortType.getTime(), trendingSource, APIUtils.getOAuthHeader(accessToken));
             }
         } else {
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
                 searchPosts = api.searchPostsInSpecificSubredditListenableFuture(subredditOrUserName, query,
                         sortType.getType(), sortType.getTime(), loadParams.getKey());
             } else {
@@ -670,7 +699,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             LinkedHashSet<Post> newPosts = ParsePost.parseDuplicatePostsSync(responseString, postFilter, readPostsList);
             String lastItem = ParsePost.getDuplicatesLastItem(responseString);
             if (newPosts == null) {
-                return new LoadResult.Error<>(new Exception("Error parsing posts"));
+                return new LoadResult.Error<>(new PostPagingSourceError(response.code(), "Error parsing posts"));
             } else {
                 int currentPostsSize = posts.size();
                 if (lastItem != null && lastItem.equals(previousLastItem)) {
@@ -700,7 +729,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 }
             }
         } else {
-            return new LoadResult.Error<>(new Exception("Error getting response"));
+            return new LoadResult.Error<>(new PostPagingSourceError(response.code(), null));
         }
     }
 
@@ -826,8 +855,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private String getMainAfterKey(@Nullable String compositeKey) {
         if (compositeKey == null || !compositeKey.startsWith("{")) return compositeKey;
         try {
-            String m = new JSONObject(compositeKey).optString("m", null);
-            return (m != null && !m.isEmpty()) ? m : null;
+            String m = new JSONObject(compositeKey).optString("m");
+            return m.isEmpty() ? null : m;
         } catch (JSONException e) {
             return compositeKey;
         }

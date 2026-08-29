@@ -76,7 +76,6 @@ public class ViewImgurImageFragment extends Fragment {
     private RequestManager glide;
     private ImgurMedia imgurMedia;
     private boolean isDownloading = false;
-    private boolean isActionBarHidden = false;
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
     private FragmentViewImgurImageBinding binding;
     ViewGalleryViewModel viewGalleryViewModel;
@@ -103,12 +102,12 @@ public class ViewImgurImageFragment extends Fragment {
         loadImage();
 
         binding.imageViewViewImgurImageFragment.setOnClickListener(view -> {
-            if (isActionBarHidden) {
+            if (activity.isActionBarHidden()) {
                 activity.getWindow().getDecorView().setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-                isActionBarHidden = false;
+                activity.setActionBarHidden(false);
                 binding.bottomNavigationViewImgurImageFragment.setVisibility(View.VISIBLE);
             } else {
                 activity.getWindow().getDecorView().setSystemUiVisibility(
@@ -118,7 +117,7 @@ public class ViewImgurImageFragment extends Fragment {
                                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
-                isActionBarHidden = true;
+                activity.setActionBarHidden(true);
                 binding.bottomNavigationViewImgurImageFragment.setVisibility(View.GONE);
             }
         });

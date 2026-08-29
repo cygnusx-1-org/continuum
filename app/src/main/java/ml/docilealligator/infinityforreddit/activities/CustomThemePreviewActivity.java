@@ -96,7 +96,7 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
                 Objects.requireNonNull(customThemeSettingsItems), "ThemePreview");
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
-        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM));
+        int systemThemeType = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM);
         switch (systemThemeType) {
             case 0:
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
@@ -191,7 +191,7 @@ public class CustomThemePreviewActivity extends AppCompatActivity implements Cus
 
         if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_RIGHT_TO_GO_BACK, true)) {
             mSliderPanel = Slidr.attach(this,
-                    Float.parseFloat(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_RIGHT_TO_GO_BACK_SENSITIVITY, "0.1")));
+                    SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.SWIPE_RIGHT_TO_GO_BACK_SENSITIVITY, "0.1"));
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

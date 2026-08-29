@@ -29,6 +29,7 @@ import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.comment.CommentDraft;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
 import ml.docilealligator.infinityforreddit.customtheme.CustomTheme;
@@ -38,6 +39,9 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
+import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisited;
+import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
+import ml.docilealligator.infinityforreddit.reminder.Reminder;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
@@ -163,6 +167,25 @@ public class BackupSettings {
             String localSavedJson = new Gson().toJson(localSaved);
             boolean res25 = saveDatabaseTableToFile(localSavedJson, databaseDirFile.getAbsolutePath(), "/local_saved.json");
 
+            List<CommentDraft> commentDrafts = redditDataRoomDatabase.commentDraftDao().getCommentDraftsForBackup();
+            String commentDraftsJson = new Gson().toJson(commentDrafts);
+            boolean res27 = saveDatabaseTableToFile(commentDraftsJson, databaseDirFile.getAbsolutePath(), "/comment_drafts.json");
+
+            List<Reminder> reminders = redditDataRoomDatabase.reminderDao().getAllRemindersForBackup();
+            String remindersJson = new Gson().toJson(reminders);
+            boolean res28 = saveDatabaseTableToFile(remindersJson, databaseDirFile.getAbsolutePath(), "/reminders.json");
+
+            // Recently visited and search history are local-only: nothing on Reddit can re-sync
+            // them, and restoring clears the accounts they hang off, so without these two they do
+            // not survive a restore at all. The recently_visited/search *settings* travel in the
+            // shared-preferences files above; this is the data they govern.
+            List<RecentlyVisited> recentlyVisited = redditDataRoomDatabase.recentlyVisitedDao().getAllForBackup();
+            String recentlyVisitedJson = new Gson().toJson(recentlyVisited);
+            boolean res29 = saveDatabaseTableToFile(recentlyVisitedJson, databaseDirFile.getAbsolutePath(), "/recently_visited.json");
+
+            List<RecentSearchQuery> recentSearchQueries = redditDataRoomDatabase.recentSearchQueryDao().getAllForBackup();
+            String recentSearchQueriesJson = new Gson().toJson(recentSearchQueries);
+            boolean res30 = saveDatabaseTableToFile(recentSearchQueriesJson, databaseDirFile.getAbsolutePath(), "/recent_search_queries.json");
 
             boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri, password);
 
@@ -176,7 +199,7 @@ public class BackupSettings {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
                         && res18 && res19 && res20 && res21 && res22 && res23 && res24 && res25 && res26
-                        && zipRes && resPrivate;
+                        && res27 && res28 && res29 && res30 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {

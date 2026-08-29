@@ -17,12 +17,14 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -98,7 +100,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         }
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
-        int systemThemeType = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM));
+        int systemThemeType = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM);
         switch (systemThemeType) {
             case 0:
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
@@ -152,7 +154,10 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
 
         EventBus.getDefault().register(this);
 
-        Objects.requireNonNull(getSupportActionBar()).hide();
+        // Continuum dropped the "use bottom toolbar in media viewer" option and made the bottom
+        // bar the default (it carries the rotate action), so the top toolbar upstream reinstated
+        // never shows here.
+        binding.toolbarViewRedditGalleryActivity.setVisibility(View.GONE);
 
         viewGalleryViewModel = new ViewModelProvider(this).get(ViewGalleryViewModel.class);
 
@@ -160,7 +165,13 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
             @NonNull
             @Override
             public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
-                viewGalleryViewModel.setInsets(Utils.getInsets(insets, false, false));
+                Insets allInsets = Utils.getInsets(insets, false, false);
+
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.toolbarViewRedditGalleryActivity.getLayoutParams();
+                params.topMargin = allInsets.top;
+                binding.toolbarViewRedditGalleryActivity.setLayoutParams(params);
+
+                viewGalleryViewModel.setInsets(allInsets);
                 return WindowInsetsCompat.CONSUMED;
             }
         });
@@ -180,13 +191,13 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         isNsfw = post.isNSFW();
 
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
-            binding.getRoot().setOnDragDismissedListener(dragDirection -> {
+            binding.haulerViewViewRedditGalleryActivity.setOnDragDismissedListener(dragDirection -> {
                 int slide = dragDirection == DragDirection.UP ? R.anim.slide_out_up : R.anim.slide_out_down;
                 finish();
                 overridePendingTransition(0, slide);
             });
         } else {
-            binding.getRoot().setDragEnabled(false);
+            binding.haulerViewViewRedditGalleryActivity.setDragEnabled(false);
         }
 
         setupViewPager(savedInstanceState);

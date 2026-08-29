@@ -34,10 +34,11 @@ public class FetchMessage {
         oauthRetrofit.create(RedditAPI.class).getMessages(APIUtils.getOAuthHeader(accessToken), where, after).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful() && response.body() != null) {
+                String responseBody = response.body();
+                if (response.isSuccessful() && responseBody != null) {
                     executor.execute(() -> {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body());
+                            JSONObject jsonResponse = new JSONObject(responseBody);
                             JSONArray messageArray = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.CHILDREN_KEY);
                             List<Message> messages = ParseMessage.parseMessages(messageArray, locale, messageType);
                             String newAfter = jsonResponse.getJSONObject(JSONUtils.DATA_KEY).getString(JSONUtils.AFTER_KEY);
@@ -73,10 +74,11 @@ public class FetchMessage {
         oauthRetrofit.create(RedditAPI.class).getMessages(APIUtils.getOAuthHeader(accessToken), WHERE_UNREAD, null).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful() && response.body() != null) {
+                String responseBody = response.body();
+                if (response.isSuccessful() && responseBody != null) {
                     executor.execute(() -> {
                         try {
-                            JSONObject data = new JSONObject(response.body()).getJSONObject(JSONUtils.DATA_KEY);
+                            JSONObject data = new JSONObject(responseBody).getJSONObject(JSONUtils.DATA_KEY);
                             int count = data.getJSONArray(JSONUtils.CHILDREN_KEY).length();
                             handler.post(() -> listener.fetchSuccess(count));
                         } catch (JSONException e) {

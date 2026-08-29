@@ -145,8 +145,8 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
                         java.util.Objects.requireNonNull(activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
                                 SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
                         new SaveMemoryCenterInisdeDownsampleStrategy(
-                                Integer.parseInt(activity.getDefaultSharedPreferences()
-                                        .getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))
+                                SharedPreferencesUtils.getInt(activity.getDefaultSharedPreferences(),
+                                        SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"))
                 );
                 dismiss();
             });
@@ -195,8 +195,8 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
                 java.util.Objects.requireNonNull(activity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
                         SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
                 new SaveMemoryCenterInisdeDownsampleStrategy(
-                        Integer.parseInt(activity.getDefaultSharedPreferences()
-                                .getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))
+                        SharedPreferencesUtils.getInt(activity.getDefaultSharedPreferences(),
+                                SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"))
         );
     }
 

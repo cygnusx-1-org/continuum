@@ -18,6 +18,7 @@ import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.VReddItReturnType
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt
+import ml.docilealligator.infinityforreddit.extensions.getFileNameFromUrlString
 import ml.docilealligator.infinityforreddit.fetchVideoLink
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo
@@ -41,8 +42,8 @@ class ViewVideoViewModel(
     private val vReddItUrl: String?,
     private var streamableShortCode: String?,
     var isDataSavingMode: Boolean = false,
-    var dataSavingModeDefaultResolution: Int = 0,
-    var nonDataSavingModeDefaultResolution: Int = 0,
+    val dataSavingModeDefaultResolution: Int = 0,
+    val nonDataSavingModeDefaultResolution: Int = 0,
     var playbackSpeed: Int
 ) : ViewModel() {
     var wasPlaying: Boolean = false
@@ -103,15 +104,15 @@ class ViewVideoViewModel(
             } else {
                 post?.let {
                     if (it.isImgur) {
-                        "Imgur-" + FilenameUtils.getName(videoDownloadUrl);
+                        "Imgur-" + (videoDownloadUrl?.getFileNameFromUrlString() ?: (getRandomString() + ".mp4"));
                     } else {
                         if (videoType == ViewVideoActivity.VIDEO_TYPE_DIRECT) {
-                            FilenameUtils.getName(videoDownloadUrl) ?: (getRandomString() + ".mp4")
+                            videoDownloadUrl?.getFileNameFromUrlString() ?: (getRandomString() + ".mp4")
                         } else {
                             it.subredditName + "-" + it.id + ".mp4";
                         }
                     }
-                } ?: FilenameUtils.getName(videoDownloadUrl) ?: (getRandomString() + ".mp4")
+                } ?: videoDownloadUrl?.getFileNameFromUrlString() ?: (getRandomString() + ".mp4")
             }
         }
 
@@ -144,7 +145,7 @@ class ViewVideoViewModel(
             )
 
             when (result) {
-                is AppResult.Success<*> -> {
+                is AppResult.Success -> {
                     when (val data = result.data) {
                         is StreamableVideo -> {
                             videoDownloadUrl = data.mp4?.url ?: data.mp4Mobile?.url
@@ -172,7 +173,7 @@ class ViewVideoViewModel(
                             val optionalResult = data.optionalResult
                             optionalResult?.let {
                                 when (it) {
-                                    is AppResult.Success<*> -> {
+                                    is AppResult.Success -> {
                                         when (val optionalData = it.data) {
                                             is StreamableVideo -> {
                                                 videoDownloadUrl = optionalData.mp4?.url ?: optionalData.mp4Mobile?.url

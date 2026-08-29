@@ -19,9 +19,9 @@ import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.comment.Comment;
+import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
-import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel;
 import org.json.JSONException;
 import org.json.JSONObject;
 import retrofit2.Response;
@@ -35,15 +35,21 @@ public class UserProfileImagesBatchLoader {
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
     private final Retrofit mRetrofit;
     private final Retrofit mOauthRetrofit;
-    private final Map<String, String> mAuthorFullNameToImageMap;
-    private final Queue<Comment> mCommentQueue;
-    private final Map<String, ViewPostDetailActivityViewModel.LoadIconListener> mAuthorFullNameToListenerMap;
-    private final List<Comment> mCallingComments;
-    private final Set<String> mLoadingAuthorFullNames;
+    private final Map<String, String> mUserFullNameToImageMap;
+    private final Queue<String> mUserFullnameQueue;
+    private final Map<String, LoadIconListener> mUserFullNameToListenerMap;
+    private final List<String> mCallingUserFullnames;
+    private final Set<String> mLoadingUserFullNames;
+    // Reddit's local user cache is keyed on the username, not on the t2_ fullname the queue
+    // carries, so the fullname alone cannot hit it. The callers below know both, so they hand the
+    // pairing in and the batch loop resolves the username from here; without it every avatar goes
+    // to the network even when it is already stored.
+    private final Map<String, String> mUserFullnameToUsernameMap;
+    private final Object mUsernameMapLock = new Object();
     private final Object mImageMapLock = new Object();
-    private final Object mCommentQueueLock = new Object();
+    private final Object mUserFullnameQueueLock = new Object();
     private final Object mListenerMapLock = new Object();
-    private final Object mCallingCommentsLock = new Object();
+    private final Object mCallingUserFullnamesLock = new Object();
     private final Object mLoadingSetLock = new Object();
     private boolean mIsLoadingBatch = false;
 
@@ -54,39 +60,79 @@ public class UserProfileImagesBatchLoader {
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mRetrofit = retrofit;
         mOauthRetrofit = oauthRetrofit;
-        mAuthorFullNameToImageMap = new HashMap<>();
-        mCommentQueue = new ArrayDeque<>();
-        mAuthorFullNameToListenerMap = new HashMap<>();
-        mCallingComments = new ArrayList<>();
-        mLoadingAuthorFullNames = new HashSet<>();
+        mUserFullNameToImageMap = new HashMap<>();
+        mUserFullnameQueue = new ArrayDeque<>();
+        mUserFullNameToListenerMap = new HashMap<>();
+        mCallingUserFullnames = new ArrayList<>();
+        mLoadingUserFullNames = new HashSet<>();
+        mUserFullnameToUsernameMap = new HashMap<>();
     }
 
-    public void loadAuthorImages(@Nullable String accessToken, List<Comment> comments,
-                                 @NonNull ViewPostDetailActivityViewModel.LoadIconListener loadIconListener) {
-        if (comments.isEmpty()) {
-            // No comments means no author to resolve an icon for, so there is nothing to report:
-            // LoadIconListener only has a success callback keyed on an author full name, and we
-            // have none. Returning here keeps the comments.get(0) calls below in bounds.
+    public void loadAuthorImagesInPosts(@Nullable String accessToken, List<Post> posts,
+                                        @NonNull LoadIconListener loadIconListener) {
+        List<String> userFullnames = new ArrayList<>();
+        Map<String, String> userFullnameToUsername = new HashMap<>();
+        for (Post post : posts) {
+            String authorFullname = post.getAuthorFullname();
+            if (authorFullname == null || authorFullname.isEmpty()) {
+                continue;
+            }
+            userFullnames.add(authorFullname);
+            userFullnameToUsername.put(authorFullname, post.getAuthor());
+        }
+        loadAuthorImages(accessToken, userFullnames, userFullnameToUsername, loadIconListener);
+    }
+
+    public void loadAuthorImagesInComments(@Nullable String accessToken, List<Comment> comments,
+                                           @NonNull LoadIconListener loadIconListener) {
+        List<String> userFullnames = new ArrayList<>();
+        Map<String, String> userFullnameToUsername = new HashMap<>();
+        for (Comment comment : comments) {
+            String authorFullName = comment.getAuthorFullName();
+            if (authorFullName == null || authorFullName.isEmpty()) {
+                continue;
+            }
+            userFullnames.add(authorFullName);
+            String author = comment.getAuthor();
+            if (author != null) {
+                userFullnameToUsername.put(authorFullName, author);
+            }
+        }
+        loadAuthorImages(accessToken, userFullnames, userFullnameToUsername, loadIconListener);
+    }
+
+    private void loadAuthorImages(@Nullable String accessToken, List<String> userFullnames,
+                                  Map<String, String> userFullnameToUsername,
+                                  @NonNull LoadIconListener loadIconListener) {
+        if (userFullnames.isEmpty()) {
+            // Nothing carries an author full name, so there is no icon to resolve and nothing to
+            // report: LoadIconListener only has a success callback keyed on one. Returning here
+            // also keeps the get(0) below in bounds.
             return;
         }
-        String authorFullName = comments.get(0).getAuthorFullName();
+
+        synchronized (mUsernameMapLock) {
+            mUserFullnameToUsernameMap.putAll(userFullnameToUsername);
+        }
+
+        String authorFullName = userFullnames.get(0);
         synchronized (mImageMapLock) {
-            if (mAuthorFullNameToImageMap.containsKey(authorFullName)) {
-                loadIconListener.loadIconSuccess(authorFullName, mAuthorFullNameToImageMap.get(authorFullName));
+            if (mUserFullNameToImageMap.containsKey(authorFullName)) {
+                loadIconListener.loadIconSuccess(authorFullName, mUserFullNameToImageMap.get(authorFullName));
                 return;
             }
         }
 
         synchronized (mListenerMapLock) {
-            mAuthorFullNameToListenerMap.put(authorFullName, loadIconListener);
+            mUserFullNameToListenerMap.put(authorFullName, loadIconListener);
         }
 
-        synchronized (mCommentQueueLock) {
-            mCommentQueue.addAll(comments);
+        synchronized (mUserFullnameQueueLock) {
+            mUserFullnameQueue.addAll(userFullnames);
         }
 
-        synchronized (mCallingCommentsLock) {
-            mCallingComments.add(comments.get(0));
+        synchronized (mCallingUserFullnamesLock) {
+            mCallingUserFullnames.add(authorFullName);
         }
 
         if (!mIsLoadingBatch) {
@@ -95,8 +141,8 @@ public class UserProfileImagesBatchLoader {
     }
 
     private void loadNextBatch(@Nullable String accessToken) {
-        synchronized (mCommentQueueLock) {
-            if (mCommentQueue.isEmpty()) {
+        synchronized (mUserFullnameQueueLock) {
+            if (mUserFullnameQueue.isEmpty()) {
                 return;
             }
         }
@@ -104,36 +150,39 @@ public class UserProfileImagesBatchLoader {
         mIsLoadingBatch = true;
 
         mExecutor.execute(() -> {
-            synchronized (mCallingCommentsLock) {
-                Iterator<Comment> iterator = mCallingComments.iterator();
+            synchronized (mCallingUserFullnamesLock) {
+                Iterator<String> iterator = mCallingUserFullnames.iterator();
                 while (iterator.hasNext()) {
-                    Comment c = iterator.next();
-                    String authorFullName = c.getAuthorFullName();
-                    ViewPostDetailActivityViewModel.LoadIconListener loadIconListener;
+                    String userFullname = iterator.next();
+                    LoadIconListener loadIconListener;
                     synchronized (mListenerMapLock) {
-                        loadIconListener = mAuthorFullNameToListenerMap.get(authorFullName);
+                        loadIconListener = mUserFullNameToListenerMap.get(userFullname);
                     }
 
                     if (loadIconListener != null) {
                         synchronized (mImageMapLock) {
-                            if (mAuthorFullNameToImageMap.containsKey(authorFullName)) {
-                                String url = mAuthorFullNameToImageMap.get(authorFullName);
-                                mHandler.post(() -> loadIconListener.loadIconSuccess(authorFullName, url));
+                            if (mUserFullNameToImageMap.containsKey(userFullname)) {
+                                String url = mUserFullNameToImageMap.get(userFullname);
+                                mHandler.post(() -> loadIconListener.loadIconSuccess(userFullname, url));
                                 iterator.remove();
                                 continue;
                             }
                         }
 
-                        String author = c.getAuthor();
-                        UserData userData = author != null ? mRedditDataRoomDatabase.userDao().getUserData(author) : null;
+                        String username;
+                        synchronized (mUsernameMapLock) {
+                            username = mUserFullnameToUsernameMap.get(userFullname);
+                        }
+                        UserData userData = username != null
+                                ? mRedditDataRoomDatabase.userDao().getUserData(username) : null;
                         if (userData != null) {
                             String iconImageUrl = userData.getIconUrl();
                             synchronized (mImageMapLock) {
-                                mAuthorFullNameToImageMap.put(authorFullName, iconImageUrl == null ? "" : iconImageUrl);
+                                mUserFullNameToImageMap.put(userFullname, iconImageUrl == null ? "" : iconImageUrl);
                             }
-                            mHandler.post(() -> loadIconListener.loadIconSuccess(authorFullName, iconImageUrl));
+                            mHandler.post(() -> loadIconListener.loadIconSuccess(userFullname, iconImageUrl));
                             synchronized (mListenerMapLock) {
-                                mAuthorFullNameToListenerMap.remove(authorFullName);
+                                mUserFullNameToListenerMap.remove(userFullname);
                             }
                             iterator.remove();
                         }
@@ -145,43 +194,42 @@ public class UserProfileImagesBatchLoader {
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            synchronized (mCommentQueueLock) {
-                for (int i = 0; i < BATCH_SIZE && !mCommentQueue.isEmpty(); i++) {
-                    Comment comment = mCommentQueue.poll();
-                    if (comment == null || comment.getAuthorFullName() == null || comment.getAuthorFullName().isEmpty()) {
+            synchronized (mUserFullnameQueueLock) {
+                for (int i = 0; i < BATCH_SIZE && !mUserFullnameQueue.isEmpty(); i++) {
+                    String userFullname = mUserFullnameQueue.poll();
+                    if (userFullname == null || userFullname.isEmpty()) {
                         i--;
                         continue;
                     }
 
-                    String authorFullName = comment.getAuthorFullName();
                     boolean alreadyCached;
                     synchronized (mImageMapLock) {
-                        alreadyCached = mAuthorFullNameToImageMap.containsKey(authorFullName);
+                        alreadyCached = mUserFullNameToImageMap.containsKey(userFullname);
                     }
                     if (!alreadyCached) {
-                        stringBuilder.append(authorFullName).append(",");
+                        stringBuilder.append(userFullname).append(",");
                         synchronized (mLoadingSetLock) {
-                            mLoadingAuthorFullNames.add(authorFullName);
+                            mLoadingUserFullNames.add(userFullname);
                         }
                     } else if (i == 0) {
-                        ViewPostDetailActivityViewModel.LoadIconListener loadIconListener;
+                        LoadIconListener loadIconListener;
                         synchronized (mListenerMapLock) {
-                            loadIconListener = mAuthorFullNameToListenerMap.get(authorFullName);
+                            loadIconListener = mUserFullNameToListenerMap.get(userFullname);
                         }
                         if (loadIconListener != null) {
                             String url;
                             synchronized (mImageMapLock) {
-                                url = mAuthorFullNameToImageMap.get(authorFullName);
+                                url = mUserFullNameToImageMap.get(userFullname);
                             }
                             mHandler.post(() -> {
-                                loadIconListener.loadIconSuccess(authorFullName, url);
+                                loadIconListener.loadIconSuccess(userFullname, url);
                             });
                             synchronized (mListenerMapLock) {
-                                mAuthorFullNameToListenerMap.remove(authorFullName);
+                                mUserFullNameToListenerMap.remove(userFullname);
                             }
                         }
-                        for (int j = 0; j < BATCH_SIZE - 1 && !mCommentQueue.isEmpty(); j++) {
-                            mCommentQueue.poll();
+                        for (int j = 0; j < BATCH_SIZE - 1 && !mUserFullnameQueue.isEmpty(); j++) {
+                            mUserFullnameQueue.poll();
                         }
                         break;
                     }
@@ -198,10 +246,14 @@ public class UserProfileImagesBatchLoader {
                     } else {
                         response = mRetrofit.create(RedditAPI.class).loadPartialUserData(stringBuilder.toString()).execute();
                     }
-                    if (response.isSuccessful()) {
-                        parseUserProfileImages(response.body());
+                    String responseBody = response.body();
+                    if (response.isSuccessful() && responseBody != null) {
+                        parseUserProfileImages(responseBody);
                         callListenerAndLoadNextBatch(accessToken, true);
                     } else {
+                        // A successful-but-empty body used to reach new JSONObject(null), which
+                        // throws NPE rather than JSONException and so escaped onto the executor
+                        // thread instead of falling through to the failure path here.
                         callListenerAndLoadNextBatch(accessToken, false);
                     }
                 } catch (IOException e) {
@@ -216,15 +268,15 @@ public class UserProfileImagesBatchLoader {
     }
 
     @WorkerThread
-    private void parseUserProfileImages(@Nullable String response) {
+    private void parseUserProfileImages(String response) {
         try {
             JSONObject jsonResponse = new JSONObject(response);
             synchronized (mLoadingSetLock) {
-                for (String s : mLoadingAuthorFullNames) {
+                for (String s : mLoadingUserFullNames) {
                     try {
-                        String imageUrl = jsonResponse.getJSONObject(s).getString(JSONUtils.PROFILE_IMG_KEY).replaceAll("&amp;","&");
+                        String imageUrl = jsonResponse.getJSONObject(s).getString(JSONUtils.PROFILE_IMG_KEY).replace("&amp;","&");
                         synchronized (mImageMapLock) {
-                            mAuthorFullNameToImageMap.put(s, imageUrl);
+                            mUserFullNameToImageMap.put(s, imageUrl);
                         }
                     } catch (JSONException e) {
                         Log.e("UserProfileImagesBatchLoader", "parseUserProfileImages failed", e);
@@ -238,36 +290,40 @@ public class UserProfileImagesBatchLoader {
 
     private void callListenerAndLoadNextBatch(@Nullable String accessToken, boolean loadSuccessful) {
         synchronized (mLoadingSetLock) {
-            for (String s : mLoadingAuthorFullNames) {
-                ViewPostDetailActivityViewModel.LoadIconListener loadIconListener;
+            for (String s : mLoadingUserFullNames) {
+                LoadIconListener loadIconListener;
                 synchronized (mListenerMapLock) {
-                    loadIconListener = mAuthorFullNameToListenerMap.get(s);
+                    loadIconListener = mUserFullNameToListenerMap.get(s);
                 }
                 if (loadIconListener != null) {
                     String imageUrl;
                     synchronized (mImageMapLock) {
-                        imageUrl = mAuthorFullNameToImageMap.get(s);
+                        imageUrl = mUserFullNameToImageMap.get(s);
                     }
                     mHandler.post(() -> {
                         loadIconListener.loadIconSuccess(s, imageUrl);
                     });
                     synchronized (mListenerMapLock) {
-                        mAuthorFullNameToListenerMap.remove(s);
+                        mUserFullNameToListenerMap.remove(s);
                     }
                 }
                 if (!loadSuccessful) {
                     synchronized (mImageMapLock) {
-                        if (!mAuthorFullNameToImageMap.containsKey(s)) {
-                            mAuthorFullNameToImageMap.put(s, "");
+                        if (!mUserFullNameToImageMap.containsKey(s)) {
+                            mUserFullNameToImageMap.put(s, "");
                         }
                     }
                 }
             }
 
-            mLoadingAuthorFullNames.clear();
+            mLoadingUserFullNames.clear();
         }
 
         mIsLoadingBatch = false;
         loadNextBatch(accessToken);
+    }
+
+    public interface LoadIconListener {
+        void loadIconSuccess(String subredditOrUserName, @Nullable String iconUrl);
     }
 }

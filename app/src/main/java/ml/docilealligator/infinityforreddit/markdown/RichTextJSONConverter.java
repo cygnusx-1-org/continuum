@@ -10,6 +10,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import ml.docilealligator.infinityforreddit.markdown.giphygif.GiphyGifBlock;
 import ml.docilealligator.infinityforreddit.markdown.giphygif.GiphyGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerNode;
@@ -110,6 +111,15 @@ public class RichTextJSONConverter implements Visitor {
         contentArrayStack = new ArrayDeque<>();
 
         contentArrayStack.push(document);
+    }
+
+    /**
+     * The array every visit method appends its node to. The constructor pushes {@code document} and
+     * nothing ever pops it -- each visit method pops only what it pushed -- so the stack is never
+     * empty here and {@link Deque#peek()} never returns null.
+     */
+    private JSONArray currentContentArray() {
+        return Objects.requireNonNull(contentArrayStack.peek());
     }
 
     public String constructRichTextJSON(Context context, String markdown,
@@ -244,7 +254,7 @@ public class RichTextJSONConverter implements Visitor {
             JSONArray cArray = contentArrayStack.pop();
 
             nodeJSON.put(CONTENT, cArray);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -268,7 +278,7 @@ public class RichTextJSONConverter implements Visitor {
 
             nodeJSON.put(CONTENT, cArray);
             nodeJSON.put(IS_ORDERED_LIST, false);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -317,7 +327,7 @@ public class RichTextJSONConverter implements Visitor {
             }
 
             nodeJSON.put(CONTENT, cArray);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -355,7 +365,7 @@ public class RichTextJSONConverter implements Visitor {
 
             convertToRawTextJSONObject(cArray);
             nodeJSON.put(CONTENT, cArray);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
 
             formats = new ArrayList<>();
             textSB.delete(0, textSB.length());
@@ -403,7 +413,7 @@ public class RichTextJSONConverter implements Visitor {
             }
 
             nodeJSON.put(CONTENT, cArray);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -424,7 +434,7 @@ public class RichTextJSONConverter implements Visitor {
                     content.put(FORMAT, formatsArray);
                 }
 
-                contentArrayStack.peek().put(content);
+                currentContentArray().put(content);
 
                 formats = new ArrayList<>();
                 textSB.delete(0, textSB.length());
@@ -452,7 +462,7 @@ public class RichTextJSONConverter implements Visitor {
                 nodeJSON.put(FORMAT, formatsArray);
             }
 
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
 
             formats = new ArrayList<>();
             textSB.delete(0, textSB.length());
@@ -478,7 +488,7 @@ public class RichTextJSONConverter implements Visitor {
             JSONArray cArray = contentArrayStack.pop();
 
             nodeJSON.put(CONTENT, cArray);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -502,7 +512,7 @@ public class RichTextJSONConverter implements Visitor {
 
             nodeJSON.put(CONTENT, cArray);
             nodeJSON.put(IS_ORDERED_LIST, true);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -540,7 +550,7 @@ public class RichTextJSONConverter implements Visitor {
             }
 
             nodeJSON.put(CONTENT, cArray);
-            contentArrayStack.peek().put(nodeJSON);
+            currentContentArray().put(nodeJSON);
 
             formats = new ArrayList<>();
             textSB.delete(0, textSB.length());
@@ -600,7 +610,7 @@ public class RichTextJSONConverter implements Visitor {
                 }
 
 
-                contentArrayStack.peek().put(nodeJSON);
+                currentContentArray().put(nodeJSON);
 
                 formats = new ArrayList<>();
                 textSB.delete(0, textSB.length());
@@ -669,7 +679,7 @@ public class RichTextJSONConverter implements Visitor {
 
                 cArray.put(contentJSONObject);
                 nodeJSON.put(CONTENT, cArray);
-                contentArrayStack.peek().put(nodeJSON);
+                currentContentArray().put(nodeJSON);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
@@ -688,7 +698,7 @@ public class RichTextJSONConverter implements Visitor {
                     child.accept(this);
 
                     JSONArray array = contentArrayStack.pop();
-                    contentArrayStack.peek().put(array);
+                    currentContentArray().put(array);
                 }
                 child = child.getNext();
             }
@@ -743,7 +753,7 @@ public class RichTextJSONConverter implements Visitor {
                             break;
                     }
                 }
-                contentArrayStack.peek().put(nodeJSON);
+                currentContentArray().put(nodeJSON);
 
                 formats = new ArrayList<>();
                 textSB.delete(0, textSB.length());

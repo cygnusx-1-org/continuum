@@ -326,8 +326,8 @@ public class FetchRemovedPost {
         if (source == null) {
             return null;
         }
-        String url = source.optString("url", null);
-        if (url == null || !url.startsWith("http")) {
+        String url = source.optString("url");
+        if (!url.startsWith("http")) {
             return null;
         }
         // The archive stores the url html-escaped (&amp;); the image loader needs the raw url.
@@ -434,13 +434,13 @@ public class FetchRemovedPost {
 
     @Nullable
     private static String readString(JSONObject obj, String key) {
-        // isNull() is true for both an absent key and a JSON null; optString(key, null) alone would
+        // isNull() is true for both an absent key and a JSON null; optString() alone would
         // return the literal string "null" for the latter (org.json quirk).
         if (obj.isNull(key)) {
             return null;
         }
-        String value = obj.optString(key, null);
-        return value == null || value.trim().isEmpty() ? null : value;
+        String value = obj.optString(key);
+        return value.trim().isEmpty() ? null : value;
     }
 
     private static boolean readBoolean(JSONObject obj, String key) {

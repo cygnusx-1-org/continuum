@@ -31,6 +31,8 @@ public class Post implements Parcelable {
     @Nullable
     private String subredditIconUrl;
     private String author;
+    @Nullable
+    private String authorFullname;
     private String authorNamePrefixed;
     @Nullable
     private String authorIconUrl;
@@ -104,7 +106,7 @@ public class Post implements Parcelable {
 
     //Text and video posts
     public Post(String id, String fullName, String subredditName, String subredditNamePrefixed,
-                String author, String authorFlair, String authorFlairHTML, long postTimeMillis,
+                String author, @Nullable String authorFullname, String authorFlair, String authorFlairHTML, long postTimeMillis,
                 String title, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
                 boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
@@ -115,6 +117,7 @@ public class Post implements Parcelable {
         this.subredditName = subredditName;
         this.subredditNamePrefixed = subredditNamePrefixed;
         this.author = author;
+        this.authorFullname = authorFullname;
         this.authorNamePrefixed = "u/" + author;
         this.authorFlair = authorFlair;
         this.authorFlairHTML = authorFlairHTML;
@@ -149,7 +152,7 @@ public class Post implements Parcelable {
     }
 
     public Post(String id, String fullName, String subredditName, String subredditNamePrefixed,
-                String author, String authorFlair, String authorFlairHTML, long postTimeMillis, String title,
+                String author, @Nullable String authorFullname, String authorFlair, String authorFlairHTML, long postTimeMillis, String title,
                 String url, String permalink, int score, int postType, int voteType, int nComments,
                 int upvoteRatio, String flair, boolean hidden, boolean spoiler,
                 boolean nsfw, boolean stickied, boolean archived, boolean locked, boolean saved, boolean sendReplies,
@@ -160,6 +163,7 @@ public class Post implements Parcelable {
         this.subredditName = subredditName;
         this.subredditNamePrefixed = subredditNamePrefixed;
         this.author = author;
+        this.authorFullname = authorFullname;
         this.authorNamePrefixed = "u/" + author;
         this.authorFlair = authorFlair;
         this.authorFlairHTML = authorFlairHTML;
@@ -201,6 +205,7 @@ public class Post implements Parcelable {
         this.subredditNamePrefixed = postToBeCopied.subredditNamePrefixed;
         this.subredditIconUrl = postToBeCopied.subredditIconUrl;
         this.author = postToBeCopied.author;
+        this.authorFullname = postToBeCopied.authorFullname;
         this.authorNamePrefixed = postToBeCopied.authorNamePrefixed;
         this.authorIconUrl = postToBeCopied.authorIconUrl;
         this.authorFlair = postToBeCopied.authorFlair;
@@ -260,6 +265,7 @@ public class Post implements Parcelable {
         subredditNamePrefixed = Objects.requireNonNull(in.readString());
         subredditIconUrl = in.readString();
         author = Objects.requireNonNull(in.readString());
+        authorFullname = in.readString();
         authorNamePrefixed = Objects.requireNonNull(in.readString());
         authorIconUrl = in.readString();
         authorFlair = Objects.requireNonNull(in.readString());
@@ -354,6 +360,12 @@ public class Post implements Parcelable {
 
     public String getAuthor() {
         return author;
+    }
+
+    // Will be null or empty if the post is deleted
+    @Nullable
+    public String getAuthorFullname() {
+        return authorFullname;
     }
 
     public boolean isAuthorDeleted() {
@@ -646,6 +658,7 @@ public class Post implements Parcelable {
         dest.writeString(subredditNamePrefixed);
         dest.writeString(subredditIconUrl);
         dest.writeString(author);
+        dest.writeString(authorFullname);
         dest.writeString(authorNamePrefixed);
         dest.writeString(authorIconUrl);
         dest.writeString(authorFlair);
@@ -870,7 +883,8 @@ public class Post implements Parcelable {
                 && removed == ((Post) obj).removed
                 && spam == ((Post) obj).spam
                 && locked == ((Post) obj).locked
-                && Objects.equals(distinguished, ((Post) obj).distinguished);
+                && Objects.equals(distinguished, ((Post) obj).distinguished)
+                && Objects.equals(selfText, ((Post) obj).selfText);
     }
 
     @Override

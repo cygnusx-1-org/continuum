@@ -315,7 +315,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         fixViewPager2Sensitivity(binding.viewPagerSearchResultActivity);
 
         if (savedInstanceState == null) {
-            binding.viewPagerSearchResultActivity.setCurrentItem(Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_SEARCH_RESULT_TAB, "0")), false);
+            binding.viewPagerSearchResultActivity.setCurrentItem(SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_SEARCH_RESULT_TAB, "0"), false);
         }
 
         fabOption = bottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS);
@@ -465,7 +465,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == android.R.id.home) {
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
             return true;
         } else if (itemId == R.id.action_sort_search_result_activity) {
             displaySortTypeBottomSheetFragment();

@@ -40,6 +40,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -94,6 +95,7 @@ import ml.docilealligator.infinityforreddit.events.ShowDividerInCompactLayoutPre
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -155,6 +157,9 @@ public abstract class PostFragmentBase extends Fragment {
     protected final Map<String, String> subredditOrUserIcons = new HashMap<>();
     @Nullable
     private PostPositionUpdateEventToPostList pendingScrollToPostEvent;
+    @Nullable
+    private View.OnLayoutChangeListener onLayoutChangeListener;
+    private int recyclerViewWidth;
 
     public PostFragmentBase() {
         // Required empty public constructor
@@ -202,7 +207,7 @@ public abstract class PostFragmentBase extends Fragment {
                 lazyModeHandler.postDelayed(this, (long) (lazyModeInterval * 1000));
             }
         };
-        lazyModeInterval = Float.parseFloat(mSharedPreferences.getString(SharedPreferencesUtils.LAZY_MODE_INTERVAL_KEY, "2.5"));
+        lazyModeInterval = SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.LAZY_MODE_INTERVAL_KEY, "2.5");
         resumeLazyModeCountDownTimer = new CountDownTimer((long) (lazyModeInterval * 1000), (long) (lazyModeInterval * 1000)) {
             @Override
             public void onTick(long l) {
@@ -218,9 +223,9 @@ public abstract class PostFragmentBase extends Fragment {
         mGlide = Glide.with(mActivity);
 
         vibrateWhenActionTriggered = mSharedPreferences.getBoolean(SharedPreferencesUtils.VIBRATE_WHEN_ACTION_TRIGGERED, true);
-        swipeActionThreshold = Float.parseFloat(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_ACTION_THRESHOLD, "0.3"));
-        swipeRightAction = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1"));
-        swipeLeftAction = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0"));
+        swipeActionThreshold = SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.SWIPE_ACTION_THRESHOLD, "0.3");
+        swipeRightAction = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1");
+        swipeLeftAction = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0");
         initializeSwipeActionDrawable();
 
         touchHelper = new AdjustableTouchSlopItemTouchHelper(new AdjustableTouchSlopItemTouchHelper.Callback() {
@@ -323,6 +328,26 @@ public abstract class PostFragmentBase extends Fragment {
             return false;
         });
 
+        onLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            int width = right - left;
+            if (recyclerViewWidth == width) {
+                return;
+            }
+            recyclerViewWidth = width;
+            PostRecyclerViewAdapter adapter = getPostAdapter();
+            if (adapter != null) {
+                if (mStaggeredGridLayoutManager != null) {
+                    width /= mStaggeredGridLayoutManager.getSpanCount();
+                }
+                int finalWidth = width;
+                v.post(() -> {
+                    adapter.provideItemWidth(Utils.convertPxToDp(finalWidth, mActivity));
+                    refreshAdapter();
+                });
+            }
+        };
+        getPostRecyclerView().addOnLayoutChangeListener(onLayoutChangeListener);
+
         SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.LONG_PRESS_POST_NON_MEDIA_AREA, SharedPreferencesUtils.LONG_PRESS_POST_VALUE_SHOW_POST_OPTIONS).observe(getViewLifecycleOwner(), s -> {
             if (getPostAdapter() != null) {
                 getPostAdapter().setLongPressPostNonMediaAreaAction(s);
@@ -360,6 +385,15 @@ public abstract class PostFragmentBase extends Fragment {
     public void onResume() {
         super.onResume();
         scrollToPostSwipedToInPostDetail();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (onLayoutChangeListener != null) {
+            getPostRecyclerView().removeOnLayoutChangeListener(onLayoutChangeListener);
+            onLayoutChangeListener = null;
+        }
     }
 
     @Override
@@ -407,7 +441,7 @@ public abstract class PostFragmentBase extends Fragment {
         isInLazyMode = true;
         isLazyModePaused = false;
 
-        lazyModeInterval = Float.parseFloat(mSharedPreferences.getString(SharedPreferencesUtils.LAZY_MODE_INTERVAL_KEY, "2.5"));
+        lazyModeInterval = SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.LAZY_MODE_INTERVAL_KEY, "2.5");
         lazyModeHandler.postDelayed(lazyModeRunnable, (long) (lazyModeInterval * 1000));
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Toast.makeText(mActivity, getString(R.string.lazy_mode_start, lazyModeInterval),
@@ -477,34 +511,34 @@ public abstract class PostFragmentBase extends Fragment {
         if (resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             switch (postLayout) {
                 case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_CARD_LAYOUT_2, "1"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_CARD_LAYOUT_2, "1");
                 case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_COMPACT_LAYOUT, "1"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_COMPACT_LAYOUT, "1");
                 case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT, "2"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT, "2");
                 default:
                     if (getResources().getBoolean(R.bool.isTablet)) {
                         if (foldEnabled) {
-                            return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED, "2"));
+                            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED, "2");
                         } else {
-                            return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "2"));
+                            return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "2");
                         }
                     }
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "1"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT, "1");
             }
         } else {
             switch (postLayout) {
                 case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_CARD_LAYOUT_2, "2"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_CARD_LAYOUT_2, "2");
                 case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_COMPACT_LAYOUT, "2"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_COMPACT_LAYOUT, "2");
                 case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT, "2"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT, "2");
                 default:
                     if (getResources().getBoolean(R.bool.isTablet) && foldEnabled) {
-                        return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED, "2"));
+                        return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED, "2");
                     }
-                    return Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE, "2"));
+                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE, "2");
             }
         }
     }
@@ -542,7 +576,7 @@ public abstract class PostFragmentBase extends Fragment {
         return false;
     }
 
-    public final void loadIcon(String subredditOrUserName, boolean isSubreddit, LoadIconListener loadIconListener) {
+    public final void loadIcon(String subredditOrUserName, boolean isSubreddit, UserProfileImagesBatchLoader.LoadIconListener loadIconListener) {
         if (subredditOrUserIcons.containsKey(subredditOrUserName)) {
             loadIconListener.loadIconSuccess(subredditOrUserName, subredditOrUserIcons.get(subredditOrUserName));
         } else {
@@ -562,6 +596,8 @@ public abstract class PostFragmentBase extends Fragment {
             }
         }
     }
+
+    public abstract void loadUserIcon(List<Post> posts, UserProfileImagesBatchLoader.LoadIconListener loadIconListener);
 
     protected abstract boolean scrollPostsByCount(int count);
 
@@ -596,6 +632,8 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     protected abstract void showErrorView(int stringResId);
+
+    protected abstract void showErrorView(String errorMessage);
 
     @NonNull
     protected abstract SwipeRefreshLayout getSwipeRefreshLayout();
@@ -734,6 +772,7 @@ public abstract class PostFragmentBase extends Fragment {
                     post.setIsRedgifs(true);
                     post.setRedgifsId(event.post.getRedgifsId());
                 }
+                post.setMediaMetadataMap(event.post.getMediaMetadataMap());
                 post.setVoteType(event.post.getVoteType());
                 post.setScore(event.post.getScore());
                 post.setNComments(event.post.getNComments());
@@ -892,12 +931,14 @@ public abstract class PostFragmentBase extends Fragment {
             String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
             boolean stateChanged = false;
             if (autoplay.equals(SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI)) {
-                getPostAdapter().setAutoplay(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_WIFI);
-                stateChanged = true;
+                if (getPostAdapter().setAutoplay(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_WIFI)) {
+                    stateChanged = true;
+                }
             }
             if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
-                getPostAdapter().setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
-                stateChanged = true;
+                if (getPostAdapter().setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR)) {
+                    stateChanged = true;
+                }
             }
 
             if (stateChanged) {
@@ -1149,9 +1190,5 @@ public abstract class PostFragmentBase extends Fragment {
 
             outRect.set(left, 0, right, 0);
         }
-    }
-
-    public interface LoadIconListener {
-        void loadIconSuccess(String subredditOrUserName, @Nullable String iconUrl);
     }
 }

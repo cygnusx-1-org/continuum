@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.adapters;
 
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -14,14 +15,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import io.noties.markwon.Markwon;
 import java.util.ArrayList;
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.databinding.ItemGalleryImageInPostFeedBinding;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -42,6 +46,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     private float ratio;
     private int maxPreviewHeight;
     private final boolean showCaption;
+    private boolean isGridLayout;
 
     public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
@@ -77,15 +82,23 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
 
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-        // Every tile in a gallery is given the same shape, taken from the post's first preview, so
-        // the other images in it need not match. Only the square preview is a shape none of them
-        // was measured against, and it is the one that has to crop to fill; sizing from the post's
-        // own ratio letterboxes instead, which is what this has always done. maxPreviewHeight is
-        // set alongside the square ratio and left at 0 otherwise, so it distinguishes the two.
-        holder.binding.imageViewItemGalleryImageInPostFeed.setScaleType(
-                maxPreviewHeight > 0 ? ImageView.ScaleType.CENTER_CROP : ImageView.ScaleType.FIT_CENTER);
-        holder.binding.imageViewItemGalleryImageInPostFeed.setRatioMaxHeight(maxPreviewHeight);
-        holder.binding.imageViewItemGalleryImageInPostFeed.setRatio(ratio);
+        if (isGridLayout) {
+            // Grid tiles are square by construction, so the post's preview shape does not apply.
+            holder.binding.imageViewItemGalleryImageInPostFeed.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            holder.binding.imageViewItemGalleryImageInPostFeed.setRatioMaxHeight(0);
+            holder.binding.imageViewItemGalleryImageInPostFeed.setRatio(1);
+        } else {
+            // Every tile in a gallery is given the same shape, taken from the post's first preview,
+            // so the other images in it need not match. Only the square preview is a shape none of
+            // them was measured against, and it is the one that has to crop to fill; sizing from
+            // the post's own ratio letterboxes instead, which is what this has always done.
+            // maxPreviewHeight is set alongside the square ratio and left at 0 otherwise, so it
+            // distinguishes the two.
+            holder.binding.imageViewItemGalleryImageInPostFeed.setScaleType(
+                    maxPreviewHeight > 0 ? ImageView.ScaleType.CENTER_CROP : ImageView.ScaleType.FIT_CENTER);
+            holder.binding.imageViewItemGalleryImageInPostFeed.setRatioMaxHeight(maxPreviewHeight);
+            holder.binding.imageViewItemGalleryImageInPostFeed.setRatio(ratio);
+        }
         holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
         holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
 
@@ -144,6 +157,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         holder.binding.captionTextViewItemGalleryImageInPostFeed.setText("");
         holder.binding.captionUrlTextViewItemGalleryImageInPostFeed.setText("");
         holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
+        holder.binding.errorImageViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
         glide.clear(holder.binding.imageViewItemGalleryImageInPostFeed);
     }
 
@@ -182,21 +196,39 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
+                if (isGridLayout) {
+                    holder.binding.errorImageViewItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
+                } else {
+                    holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
+                }
                 return false;
             }
 
             @Override
             public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                holder.binding.errorImageViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
                 holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
                 holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
                 return false;
             }
         });
         if (blurImage) {
-            imageRequestBuilder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)))
-                    .into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            if (isGridLayout) {
+                imageRequestBuilder
+                        .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0), new BlurTransformation(50, 2))))
+                        .into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            } else {
+                imageRequestBuilder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)))
+                        .into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            }
         } else {
-            imageRequestBuilder.centerInside().downsample(saveMemoryCenterInisdeDownsampleStrategy).into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            if (isGridLayout) {
+                imageRequestBuilder
+                        .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0))))
+                        .downsample(saveMemoryCenterInisdeDownsampleStrategy).into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            } else {
+                imageRequestBuilder.centerInside().downsample(saveMemoryCenterInisdeDownsampleStrategy).into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            }
         }
     }
 
@@ -224,8 +256,9 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             holder.binding.captionTextViewItemGalleryImageInPostFeed.setSelected(true);
         }
         if (!previewCaptionUrlIsEmpty) {
-            String domain = Uri.parse(previewCaptionUrl).getHost();
-            domain = (domain != null && domain.startsWith("www.")) ? domain.substring(4) : domain;
+            String host = Uri.parse(previewCaptionUrl).getHost();
+            // A URL with no authority has no host; label the link with the URL rather than "null".
+            String domain = host == null ? previewCaptionUrl : (host.startsWith("www.") ? host.substring(4) : host);
             mPostDetailMarkwon.setMarkdown(holder.binding.captionUrlTextViewItemGalleryImageInPostFeed, String.format("[%s](%s)", domain, previewCaptionUrl));
         }
     }
@@ -256,6 +289,10 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         this.maxPreviewHeight = maxPreviewHeight;
     }
 
+    public void setIsGridLayout(boolean isGridLayout) {
+        this.isGridLayout = isGridLayout;
+    }
+
     class ImageViewHolder extends RecyclerView.ViewHolder {
 
         ItemGalleryImageInPostFeedBinding binding;
@@ -274,6 +311,23 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             }
             binding.progressBarItemGalleryImageInPostFeed.setIndicatorColor(mColorAccent);
             binding.errorTextViewItemGalleryImageInPostFeed.setTextColor(mPrimaryTextColor);
+            binding.errorImageViewItemGalleryImageInPostFeed.setColorFilter(
+                    // mPrimaryTextColor is the correct color here.
+                    mPrimaryTextColor,
+                    PorterDuff.Mode.SRC_IN
+            );
+
+            binding.errorTextViewItemGalleryImageInPostFeed.setOnClickListener(view -> {
+                binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
+                binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
+                loadImage(this);
+            });
+
+            binding.errorImageViewItemGalleryImageInPostFeed.setOnClickListener(view -> {
+                binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
+                binding.errorImageViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
+                loadImage(this);
+            });
         }
     }
 }

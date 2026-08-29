@@ -50,6 +50,7 @@ import ml.docilealligator.infinityforreddit.databinding.FragmentCommentsListingB
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.thing.ReplyNotificationsToggle;
+import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -173,9 +174,9 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
         boolean enableSwipeAction = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false);
         boolean vibrateWhenActionTriggered = mSharedPreferences.getBoolean(SharedPreferencesUtils.VIBRATE_WHEN_ACTION_TRIGGERED, true);
-        swipeActionThreshold = Float.parseFloat(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_ACTION_THRESHOLD, "0.3"));
-        swipeRightAction = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1"));
-        swipeLeftAction = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0"));
+        swipeActionThreshold = SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.SWIPE_ACTION_THRESHOLD, "0.3");
+        swipeRightAction = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1");
+        swipeLeftAction = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0");
         initializeSwipeActionDrawable();
         touchHelper = new AdjustableTouchSlopItemTouchHelper(new AdjustableTouchSlopItemTouchHelper.Callback() {
             boolean exceedThreshold = false;
@@ -281,7 +282,7 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
         if (enableSwipeAction) {
             touchHelper.attachToRecyclerView(
                     binding.recyclerViewCommentsListingFragment,
-                    Float.parseFloat(mSharedPreferences.getString(SharedPreferencesUtils.SWIPE_ACTION_SENSITIVITY_IN_COMMENTS, "5"))
+                    SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.SWIPE_ACTION_SENSITIVITY_IN_COMMENTS, "5")
             );
         }
 
@@ -553,13 +554,58 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
                 });
     }
 
+    public void toggleSaveComment(Comment comment, int position) {
+        if (comment.isSaved()) {
+            SaveThing.unsaveThing(mOauthRetrofit, mActivity.accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
+                @Override
+                public void success() {
+                    Toast.makeText(mActivity, R.string.comment_unsaved_success, Toast.LENGTH_SHORT).show();
+                    comment.setSaved(false);
+                    if (mAdapter != null) {
+                        mAdapter.toggleSaveComment(comment, position);
+                    }
+                }
+
+                @Override
+                public void failed() {
+                    Toast.makeText(mActivity, R.string.comment_unsaved_failed, Toast.LENGTH_SHORT).show();
+                    comment.setSaved(true);
+                    if (mAdapter != null) {
+                        mAdapter.toggleSaveComment(comment, position);
+                    }
+                }
+            });
+        } else {
+            SaveThing.saveThing(mOauthRetrofit, mActivity.accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
+                @Override
+                public void success() {
+                    Toast.makeText(mActivity, R.string.comment_saved_success, Toast.LENGTH_SHORT).show();
+                    comment.setSaved(true);
+                    if (mAdapter != null) {
+                        mAdapter.toggleSaveComment(comment, position);
+                    }
+                }
+
+                @Override
+                public void failed() {
+                    Toast.makeText(mActivity, R.string.comment_saved_failed, Toast.LENGTH_SHORT).show();
+                    comment.setSaved(false);
+                    if (mAdapter != null) {
+                        mAdapter.toggleSaveComment(comment, position);
+                    }
+                }
+            });
+        }
+    }
+
     @Subscribe
     public void onChangeNetworkStatusEvent(ChangeNetworkStatusEvent changeNetworkStatusEvent) {
         if (mAdapter != null) {
             String dataSavingMode = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
             if (dataSavingMode.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA)) {
-                mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
-                refreshAdapter(binding.recyclerViewCommentsListingFragment, mAdapter);
+                if (mAdapter.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR)) {
+                    refreshAdapter(binding.recyclerViewCommentsListingFragment, mAdapter);
+                }
             }
         }
     }
@@ -602,5 +648,10 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     @Override
     public void toggleLock(@NonNull Comment comment, int position) {
         mCommentViewModel.toggleLock(comment, position);
+    }
+
+    @Override
+    public void toggleMod(@NonNull Comment comment, int position) {
+        mCommentViewModel.toggleMod(comment, position);
     }
 }

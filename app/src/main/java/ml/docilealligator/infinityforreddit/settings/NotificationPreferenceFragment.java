@@ -56,7 +56,7 @@ public class NotificationPreferenceFragment extends CustomFontPreferenceFragment
         ListPreference notificationIntervalListPreference = findPreference(SharedPreferencesUtils.NOTIFICATION_INTERVAL_KEY);
 
         enableNotification = sharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_NOTIFICATION_KEY, true);
-        notificationInterval = Long.parseLong(sharedPreferences.getString(SharedPreferencesUtils.NOTIFICATION_INTERVAL_KEY, "1"));
+        notificationInterval = SharedPreferencesUtils.getLong(sharedPreferences, SharedPreferencesUtils.NOTIFICATION_INTERVAL_KEY, "1");
 
         if (enableNotification) {
             if (notificationIntervalListPreference != null) {

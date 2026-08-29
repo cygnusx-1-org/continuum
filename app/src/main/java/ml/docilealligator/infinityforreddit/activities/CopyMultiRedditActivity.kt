@@ -134,7 +134,7 @@ class CopyMultiRedditActivity : BaseActivity() {
         windowInsetsController.isAppearanceLightStatusBars = customThemeWrapper.isLightStatusBar
 
         setContent {
-            AppTheme(customThemeWrapper.themeType) {
+            AppTheme(customThemeWrapper.themeType, mSharedPreferences) {
                 // LocalResources, not LocalContext: a Context read is not invalidated by a
                 // Configuration change, so getString() off it can hand back a stale-locale
                 // string. The resId here only becomes known inside the effect below, so it

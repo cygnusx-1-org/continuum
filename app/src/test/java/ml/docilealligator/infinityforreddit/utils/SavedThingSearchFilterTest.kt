@@ -19,7 +19,7 @@ import org.junit.Test
 class SavedThingSearchFilterTest {
 
     private fun post(title: String, subreddit: String, author: String) = Post(
-        "abc123", "t3_abc123", subreddit, "r/$subreddit", author, "", "", 0L,
+        "abc123", "t3_abc123", subreddit, "r/$subreddit", author, "t2_$author", "", "", 0L,
         title, "/r/$subreddit/comments/abc123/", 0, Post.TEXT_TYPE, 0, 0, 100, "",
         false, false, false, false, false, false, false, false,
         false, false, false, 0L, null, false, false, "", null

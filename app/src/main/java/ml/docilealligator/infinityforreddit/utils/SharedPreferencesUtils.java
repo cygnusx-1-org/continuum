@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils;
 
+import android.content.SharedPreferences;
 import android.view.Display;
 import androidx.annotation.Nullable;
 
@@ -235,7 +236,6 @@ public class SharedPreferencesUtils {
     public static final String LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI = "legacy_autoplay_video_controller_ui";
     public static final String FIXED_HEIGHT_PREVIEW_IN_CARD = "fixed_height_preview_in_card";
     public static final String HIDE_TEXT_POST_CONTENT = "hide_text_post_content";
-    public static final String SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD = "show_fewer_toolbar_options_threshold";
     public static final String SHOW_AUTHOR_AVATAR = "show_author_avatar";
     public static final String DISABLE_PROFILE_AVATAR_ANIMATION = "disable_profile_avatar_animation";
     public static final String SHOW_USER_PREFIX = "show_user_prefix";
@@ -264,6 +264,8 @@ public class SharedPreferencesUtils {
     public static final String NAVIGATION_DRAWER_SWIPE_AREA = "navigation_drawer_swipe_area";
     public static final String COMMENT_THREAD_CONTINUITY_CAPACITY = "comment_thread_continuity_capacity";
     public static final String CURRENT_VERSION = "current_version";
+    public static final String SHOW_GALLERY_MEDIA_AS_GRID = "show_gallery_media_as_grid";
+    public static final String SHOW_POST_AND_COMMENT_TOOLBAR_ITEMS_BASED_ON_SPACE = "show_post_and_comment_toolbar_items_based_on_space";
 
     public static String getPostDetailFabPortraitX(@Nullable Display display) {
         if (display == null) {
@@ -310,6 +312,29 @@ public class SharedPreferencesUtils {
 
     public static boolean canShowEmote(int embeddedMediaType) {
         return embeddedMediaType == 15 || embeddedMediaType == 6 || embeddedMediaType == 5 || embeddedMediaType == 1;
+    }
+
+    // Every numeric setting in the app is stored as a string (they are all backed by a
+    // ListPreference or an EditTextPreference) and parsed on read. SharedPreferences.getString is
+    // declared @Nullable whatever the default, so the raw Integer.parseInt(prefs.getString(key,
+    // "0")) shape hands a possible null straight to the parser. The framework's own implementation
+    // will not actually produce one -- Editor.putString(key, null) commits as a remove, so no key
+    // ever holds null -- but the contract permits it, and these resolve it to the default, which is
+    // what every call site already meant.
+
+    public static int getInt(SharedPreferences preferences, String key, String defaultValue) {
+        String value = preferences.getString(key, defaultValue);
+        return Integer.parseInt(value == null ? defaultValue : value);
+    }
+
+    public static long getLong(SharedPreferences preferences, String key, String defaultValue) {
+        String value = preferences.getString(key, defaultValue);
+        return Long.parseLong(value == null ? defaultValue : value);
+    }
+
+    public static float getFloat(SharedPreferences preferences, String key, String defaultValue) {
+        String value = preferences.getString(key, defaultValue);
+        return Float.parseFloat(value == null ? defaultValue : value);
     }
 
     public static final String DEFAULT_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit_preferences";
@@ -561,6 +586,7 @@ public class SharedPreferencesUtils {
     public static final String HIDE_THE_NUMBER_OF_AWARDS_LEGACY = "hide_the_number_of_awards";
     public static final String HIDE_COMMENT_AWARDS_LEGACY = "hide_comment_awards";
     public static final String IMMERSIVE_INTERFACE_IGNORE_NAV_BAR_KEY_LEGACY = "immersive_interface_ignore_nav_bar";
+    public static final String SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD = "show_fewer_toolbar_options_threshold";
 
     //Current account
     public static final String APPLICATION_ONLY_ACCESS_TOKEN_LEGACY = "app_only_access_token";

@@ -24,10 +24,11 @@ public class FetchMyInfo {
         oauthRetrofit.create(RedditAPI.class).getMyInfo(APIUtils.getOAuthHeader(accessToken)).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful() && response.body() != null) {
+                String responseBody = response.body();
+                if (response.isSuccessful() && responseBody != null) {
                     executor.execute(() -> {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body());
+                            JSONObject jsonResponse = new JSONObject(responseBody);
                             String name = jsonResponse.getString(JSONUtils.NAME_KEY);
                             String profileImageUrl = Html.fromHtml(jsonResponse.getString(JSONUtils.ICON_IMG_KEY)).toString();
                             String bannerImageUrl = !jsonResponse.isNull(JSONUtils.SUBREDDIT_KEY) ? Html.fromHtml(jsonResponse.getJSONObject(JSONUtils.SUBREDDIT_KEY).getString(JSONUtils.BANNER_IMG_KEY)).toString() : null;

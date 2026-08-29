@@ -493,6 +493,12 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
 
     @WorkerThread
     private static void parseComments(@Nullable String response, ParseCommentsAsyncTaskListener parseCommentsAsyncTaskListener) {
+        if (response == null) {
+            // A null body is a failed parse, same as a malformed one: it used to reach
+            // new JSONObject(null), whose NPE the JSONException catch below does not cover.
+            parseCommentsAsyncTaskListener.parseFailed();
+            return;
+        }
         try {
             JSONObject data = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
             JSONArray commentsJSONArray = data.getJSONArray(JSONUtils.CHILDREN_KEY);

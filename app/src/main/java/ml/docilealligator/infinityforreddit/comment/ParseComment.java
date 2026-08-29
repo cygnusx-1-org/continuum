@@ -155,6 +155,12 @@ public class ParseComment {
 
     static void parseSentComment(Executor executor, Handler handler, @Nullable String response, int depth, ParseSentCommentListener parseSentCommentListener) {
         executor.execute(() -> {
+            if (response == null) {
+                // A null body is a failed parse, same as a malformed one: it used to reach
+                // new JSONObject(null), whose NPE the JSONException catch below does not cover.
+                handler.post(() -> parseSentCommentListener.onParseSentCommentFailed(null));
+                return;
+            }
             try {
                 JSONObject sentCommentData = new JSONObject(response);
                 if (!sentCommentData.has(JSONUtils.ID_KEY) && sentCommentData.has(JSONUtils.JSON_KEY)) {

@@ -46,6 +46,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSh
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.CommentIndentationView;
+import ml.docilealligator.infinityforreddit.customviews.CommentToolbar;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
@@ -64,6 +65,7 @@ import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntr
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
+import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -200,7 +202,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         };
         mEmoteCloseBracketInlineProcessor = new EmoteCloseBracketInlineProcessor();
         mEmotePlugin = EmotePlugin.create(activity,
-                Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 mediaMetadata -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
@@ -221,7 +223,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mImageAndGifPlugin,
                 mVideoPlugin, mCommentColor, commentSpoilerBackgroundColor, onLinkLongClickListener);
         mImageAndGifEntry = new ImageAndGifEntry(activity, Glide.with(activity),
-                Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 (mediaMetadata, commentId, postId) -> {
                     if (canStartActivity) {
                         canStartActivity = false;
@@ -243,7 +245,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                     }
                 });
         mVideoEntry = new VideoEntry(activity,
-                Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 mediaMetadata -> {
                     if (canStartActivity) {
                         canStartActivity = false;
@@ -254,7 +256,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                         Intent intent = new Intent(activity, ViewVideoActivity.class);
                         intent.setData(Uri.parse(mediaMetadata.original.url));
                         intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
-                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, mediaMetadata.original.url);
+                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
                         activity.startActivity(intent);
                     }
                 });
@@ -333,6 +335,14 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 } else {
                     ((CommentBaseViewHolder) holder).saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
                 }
+
+                // Save visibility belongs to CommentToolbar, which measures the row instead of
+                // guessing from a dp threshold. Declaring the intent here rather than writing the
+                // visibility directly is also what tells the toolbar its content has been rebound,
+                // so it re-runs the fit search for this row instead of reusing the level it worked
+                // out for whichever row this holder showed last. There is never an expand chevron
+                // in a comments listing.
+                ((CommentBaseViewHolder) holder).bottomConstraintLayout.setOptionalVisibility(true, false);
             }
         }
     }
@@ -410,6 +420,14 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         }
     }
 
+    public void toggleSaveComment(Comment comment, int position) {
+        Comment oldComment = getItem(position);
+        if (oldComment != null) {
+            oldComment.setSaved(comment.isSaved());
+            notifyItemChanged(position);
+        }
+    }
+
     public void editComment(Comment comment, int position) {
         Comment oldComment = getItem(position);
         if (oldComment != null) {
@@ -446,9 +464,8 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         this.canStartActivity = canStartActivity;
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        mEmotePlugin.setDataSavingMode(dataSavingMode);
-        mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        return mEmotePlugin.setDataSavingMode(dataSavingMode) || mImageAndGifEntry.setDataSavingMode(dataSavingMode);
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
@@ -465,7 +482,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         TextView authorFlairTextView;
         TextView commentTimeTextView;
         RecyclerView commentMarkdownView;
-        ConstraintLayout bottomConstraintLayout;
+        CommentToolbar bottomConstraintLayout;
         MaterialButton upvoteButton;
         TextView scoreTextView;
         MaterialButton downvoteButton;
@@ -485,7 +502,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                          TextView authorFlairTextView,
                          TextView commentTimeTextView,
                          RecyclerView commentMarkdownView,
-                         ConstraintLayout bottomConstraintLayout,
+                         CommentToolbar bottomConstraintLayout,
                          MaterialButton upvoteButton,
                          TextView scoreTextView,
                          MaterialButton downvoteButton,
@@ -583,7 +600,6 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
             downvoteButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
             moreButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
             saveButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
-            replyButton.setIconTint(ColorStateList.valueOf(mCommentIconAndInfoColor));
             commentDivider.setBackgroundColor(mDividerColor);
 
             authorTextView.setOnClickListener(view -> {

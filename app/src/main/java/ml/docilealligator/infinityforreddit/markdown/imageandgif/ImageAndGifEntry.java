@@ -63,7 +63,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         this.glide = glide;
         SharedPreferences sharedPreferences = baseActivity.getDefaultSharedPreferences();
         this.saveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(
-                Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")));
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
         this.onItemClickListener = onItemClickListener;
         colorAccent = baseActivity.getCustomThemeWrapper().getColorAccent();
         primaryTextColor = baseActivity.getCustomThemeWrapper().getPrimaryTextColor();
@@ -98,7 +98,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         this.blurImage = blurImage;
         SharedPreferences sharedPreferences = baseActivity.getDefaultSharedPreferences();
         this.saveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(
-                Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")));
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
         this.onItemClickListener = onItemClickListener;
         colorAccent = baseActivity.getCustomThemeWrapper().getColorAccent();
         primaryTextColor = baseActivity.getCustomThemeWrapper().getPrimaryTextColor();
@@ -272,8 +272,13 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         this.currentPostId = postId;
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        this.dataSavingMode = dataSavingMode;
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        if (this.dataSavingMode != dataSavingMode) {
+            this.dataSavingMode = dataSavingMode;
+            return true;
+        }
+
+        return false;
     }
 
     public void setBlurImage(boolean blurImage) {

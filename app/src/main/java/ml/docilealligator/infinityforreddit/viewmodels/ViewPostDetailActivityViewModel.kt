@@ -19,7 +19,6 @@ import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.post.PostType
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter
-import ml.docilealligator.infinityforreddit.readpost.NullReadPostsList
 import ml.docilealligator.infinityforreddit.readpost.ReadPost
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface
@@ -78,8 +77,8 @@ class ViewPostDetailActivityViewModel(
         return posts?.getOrNull(index)
     }
 
-    fun loadAuthorImages(comments: List<Comment>, loadIconListener: LoadIconListener) {
-        loader.loadAuthorImages(accessToken, comments, loadIconListener)
+    fun loadAuthorImages(comments: List<Comment>, loadIconListener: UserProfileImagesBatchLoader.LoadIconListener) {
+        loader.loadAuthorImagesInComments(accessToken, comments, loadIconListener)
     }
 
     fun fetchMorePosts(
@@ -351,10 +350,6 @@ class ViewPostDetailActivityViewModel(
                 )
             }
         }
-    }
-
-    interface LoadIconListener {
-        fun loadIconSuccess(authorFullName: String?, iconUrl: String?)
     }
 
     companion object {

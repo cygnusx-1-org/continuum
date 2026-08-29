@@ -367,14 +367,12 @@ public class SubmitPostService extends JobService {
                 return;
             }
             String cacheFilePath;
-
             // The last path segment of a MediaStore document URI can contain characters
             // (e.g. ':' in "video:57226") that are illegal on FAT/exFAT filesystems used by
             // SD cards. Sanitize it so the cache file can actually be created.
             String lastPathSegment = mediaUri.getLastPathSegment();
             String fileName = lastPathSegment == null
-                ? "video" : lastPathSegment.replaceAll("[^a-zA-Z0-9._-]", "_");
-
+                    ? "video" : lastPathSegment.replaceAll("[^a-zA-Z0-9._-]", "_");
             if (type != null && type.contains("gif")) {
                 cacheFilePath = cacheDir + "/" + fileName + ".gif";
             } else {
@@ -430,8 +428,11 @@ public class SubmitPostService extends JobService {
     @WorkerThread private void submitGalleryPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset, Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, String payload) {
         try {
             Response<String> response = newAuthenticatorOauthRetrofit.create(RedditAPI.class).submitGalleryPost(APIUtils.getOAuthHeader(selectedAccount.getAccessToken()), payload).execute();
-            if (response.isSuccessful()) {
-                JSONObject responseObject = new JSONObject(response.body()).getJSONObject(JSONUtils.JSON_KEY);
+            String responseBody = response.body();
+            // A successful-but-empty body reached new JSONObject(null), which throws NPE rather
+            // than JSONException and so escaped the catch below instead of reporting the failure.
+            if (response.isSuccessful() && responseBody != null) {
+                JSONObject responseObject = new JSONObject(responseBody).getJSONObject(JSONUtils.JSON_KEY);
                 if (responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() != 0) {
                     JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY).getJSONArray(responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() - 1);
                     if (error.length() != 0) {
@@ -467,8 +468,11 @@ public class SubmitPostService extends JobService {
     @WorkerThread private void submitPollPost(JobParameters parameters, NotificationManagerCompat manager, int randomNotificationIdOffset, Retrofit newAuthenticatorOauthRetrofit, Account selectedAccount, String payload) {
         try {
             Response<String> response = newAuthenticatorOauthRetrofit.create(RedditAPI.class).submitPollPost(APIUtils.getOAuthHeader(selectedAccount.getAccessToken()), payload).execute();
-            if (response.isSuccessful()) {
-                JSONObject responseObject = new JSONObject(response.body()).getJSONObject(JSONUtils.JSON_KEY);
+            String responseBody = response.body();
+            // A successful-but-empty body reached new JSONObject(null), which throws NPE rather
+            // than JSONException and so escaped the catch below instead of reporting the failure.
+            if (response.isSuccessful() && responseBody != null) {
+                JSONObject responseObject = new JSONObject(responseBody).getJSONObject(JSONUtils.JSON_KEY);
                 if (responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() != 0) {
                     JSONArray error = responseObject.getJSONArray(JSONUtils.ERRORS_KEY).getJSONArray(responseObject.getJSONArray(JSONUtils.ERRORS_KEY).length() - 1);
                     if (error.length() != 0) {

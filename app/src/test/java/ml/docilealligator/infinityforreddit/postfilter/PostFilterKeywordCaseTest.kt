@@ -44,7 +44,7 @@ class PostFilterKeywordCaseTest {
     }
 
     private fun post(title: String) = Post(
-        "id", "t3_id", "android", "r/android", "author", "", "", 0L,
+        "id", "t3_id", "android", "r/android", "author", "t2_author", "", "", 0L,
         title, "https://example.com/x", "/r/android/comments/id/", 10, 0, 0, 0,
         100, "", false, false, false, false, false, false, false, false,
         false, false, false, 0L, null, false, false, "", null,

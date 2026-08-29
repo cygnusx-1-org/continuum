@@ -570,7 +570,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
 
         boolean enableNotification = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_NOTIFICATION_KEY, true);
-        long notificationInterval = Long.parseLong(mSharedPreferences.getString(SharedPreferencesUtils.NOTIFICATION_INTERVAL_KEY, "1"));
+        long notificationInterval = SharedPreferencesUtils.getLong(mSharedPreferences, SharedPreferencesUtils.NOTIFICATION_INTERVAL_KEY, "1");
         TimeUnit timeUnit = (notificationInterval == 15 || notificationInterval == 30) ? TimeUnit.MINUTES : TimeUnit.HOURS;
 
         WorkManager workManager = WorkManager.getInstance(this);
@@ -1063,6 +1063,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             } else {
                                 intent = new Intent(MainActivity.this, AccountSavedThingActivity.class);
                             }
+                        } else if (stringId == R.string.reminders) {
+                            intent = new Intent(MainActivity.this, ReminderListingActivity.class);
                         } else if (stringId == R.string.light_theme) {
                             mSharedPreferences.edit().putString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_LIGHT).apply();
                             AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);

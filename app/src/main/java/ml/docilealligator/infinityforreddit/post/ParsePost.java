@@ -198,6 +198,7 @@ public class ParsePost {
             Log.e("ParsePost", "parseBasicData failed", e);
         }
         String author = data.getString(JSONUtils.AUTHOR_KEY);
+        String authorFullname = data.has(JSONUtils.AUTHOR_FULLNAME_KEY) ? data.getString(JSONUtils.AUTHOR_FULLNAME_KEY) : "";
         StringBuilder authorFlairHTMLBuilder = new StringBuilder();
         if (data.has(JSONUtils.AUTHOR_FLAIR_RICHTEXT_KEY)) {
             JSONArray flairArray = data.getJSONArray(JSONUtils.AUTHOR_FLAIR_RICHTEXT_KEY);
@@ -354,7 +355,7 @@ public class ParsePost {
             data = data.getJSONArray(JSONUtils.CROSSPOST_PARENT_LIST).getJSONObject(0);
             Post crosspostParent = parseBasicData(data);
             Post post = parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
-                    subredditIconUrl, author, authorFlair, authorFlairHTMLBuilder.toString(),
+                    subredditIconUrl, author, authorFullname, authorFlair, authorFlairHTMLBuilder.toString(),
                     postTime, title, previews, mediaMetadataMap,
                     score, voteType, nComments, upvoteRatio, flair, hidden, spoiler, nsfw, stickied,
                     archived, locked, saved, sendReplies, deleted, removed, true, canModPost, approved,
@@ -364,7 +365,7 @@ public class ParsePost {
             return post;
         } else {
             return parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
-                    subredditIconUrl, author, authorFlair, authorFlairHTMLBuilder.toString(),
+                    subredditIconUrl, author, authorFullname, authorFlair, authorFlairHTMLBuilder.toString(),
                     postTime, title, previews, mediaMetadataMap,
                     score, voteType, nComments, upvoteRatio, flair, hidden,
                     spoiler, nsfw, stickied, archived, locked, saved, sendReplies, deleted, removed, false,
@@ -386,7 +387,7 @@ public class ParsePost {
     @SuppressWarnings("UnusedVariable")
     private static Post parseData(JSONObject data, String permalink, String id, String fullName,
                                   String subredditName, String subredditNamePrefixed, @Nullable String subredditIconUrl,
-                                  String author, String authorFlair, String authorFlairHTML,
+                                  String author, @Nullable String authorFullname, String authorFlair, String authorFlairHTML,
                                   long postTimeMillis, String title, ArrayList<Post.Preview> previews,
                                   @Nullable Map<String, MediaMetadata> mediaMetadataMap, int score, int voteType,
                                   int nComments, int upvoteRatio, String flair, boolean hidden,
@@ -409,7 +410,7 @@ public class ParsePost {
             if (url.contains(permalink)) {
                 //Text post
                 int postType = Post.TEXT_TYPE;
-                post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFullname,
                         authorFlair, authorFlairHTML, postTimeMillis, title, permalink, score, postType,
                         voteType, nComments, upvoteRatio, flair, hidden, spoiler, nsfw,
                         stickied, archived, locked, saved, sendReplies, isCrosspost, canModPost, approved,
@@ -419,7 +420,7 @@ public class ParsePost {
                     //Image post
                     int postType = Post.IMAGE_TYPE;
 
-                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFullname,
                             authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
                             postType, voteType, nComments, upvoteRatio, flair, hidden,
                             spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost, canModPost,
@@ -449,11 +450,12 @@ public class ParsePost {
                         String videoUrl = Html.fromHtml(redditVideoObject.getString(JSONUtils.HLS_URL_KEY)).toString();
                         String videoDownloadUrl = redditVideoObject.getString(JSONUtils.FALLBACK_URL_KEY);
 
-                        post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFlair,
-                                authorFlairHTML, postTimeMillis, title, permalink, score, postType, voteType,
-                                nComments, upvoteRatio, flair, hidden, spoiler, nsfw, stickied,
-                                archived, locked, saved, sendReplies, isCrosspost, canModPost, approved,
-                                approvedAtUTC, approvedBy, removed, spam, distinguished, suggestedSort);
+                        post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                permalink, score, postType, voteType, nComments, upvoteRatio, flair,
+                                hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies,
+                                isCrosspost, canModPost, approved, approvedAtUTC, approvedBy, removed,
+                                spam, distinguished, suggestedSort);
 
                         post.setVideoUrl(videoUrl);
                         post.setVideoDownloadUrl(videoDownloadUrl);
@@ -461,11 +463,11 @@ public class ParsePost {
                         //No preview link post
                         int postType = Post.NO_PREVIEW_LINK_TYPE;
                         post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
-                                authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
-                                postType, voteType, nComments, upvoteRatio, flair, hidden,
-                                spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost,
-                                canModPost, approved, approvedAtUTC, approvedBy, removed, spam, distinguished,
-                                suggestedSort);
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                url, permalink, score, postType, voteType, nComments, upvoteRatio,
+                                flair, hidden, spoiler, nsfw, stickied, archived, locked, saved,
+                                sendReplies, isCrosspost, canModPost, approved, approvedAtUTC,
+                                approvedBy, removed, spam, distinguished, suggestedSort);
                         if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                             post.setSelfText("");
                         } else {
@@ -551,8 +553,8 @@ public class ParsePost {
                 String videoUrl = Html.fromHtml(redditVideoObject.getString(JSONUtils.HLS_URL_KEY)).toString();
                 String videoDownloadUrl = redditVideoObject.getString(JSONUtils.FALLBACK_URL_KEY);
 
-                post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFlair,
-                        authorFlairHTML, postTimeMillis, title, permalink, score, postType, voteType,
+                post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFullname,
+                        authorFlair, authorFlairHTML, postTimeMillis, title, permalink, score, postType, voteType,
                         nComments, upvoteRatio, flair, hidden, spoiler, nsfw, stickied,
                         archived, locked, saved, sendReplies, isCrosspost, canModPost, approved, approvedAtUTC,
                         approvedBy, removed, spam, distinguished, suggestedSort);
@@ -571,11 +573,12 @@ public class ParsePost {
                             url = url.substring(0, url.length() - 5) + ".mp4";
                         }
 
-                        post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFlair,
-                                authorFlairHTML, postTimeMillis, title, permalink, score, postType, voteType,
-                                nComments, upvoteRatio, flair, hidden, spoiler, nsfw, stickied,
-                                archived, locked, saved, sendReplies, isCrosspost, canModPost, approved, approvedAtUTC,
-                                approvedBy, removed, spam, distinguished, suggestedSort);
+                        post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                permalink, score, postType, voteType, nComments, upvoteRatio, flair,
+                                hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies,
+                                isCrosspost, canModPost, approved, approvedAtUTC, approvedBy, removed,
+                                spam, distinguished, suggestedSort);
                         post.setPreviews(previews);
                         post.setVideoUrl(url);
                         post.setVideoDownloadUrl(url);
@@ -588,11 +591,12 @@ public class ParsePost {
                         String videoDownloadUrl = data.getJSONObject(JSONUtils.PREVIEW_KEY)
                                 .getJSONObject(JSONUtils.REDDIT_VIDEO_PREVIEW_KEY).getString(JSONUtils.FALLBACK_URL_KEY);
 
-                        post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFlair,
-                                authorFlairHTML, postTimeMillis, title, permalink, score, postType, voteType,
-                                nComments, upvoteRatio, flair, hidden, spoiler, nsfw, stickied,
-                                archived, locked, saved, sendReplies, isCrosspost, canModPost, approved, approvedAtUTC,
-                                approvedBy, removed, spam, distinguished, suggestedSort);
+                        post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                permalink, score, postType, voteType, nComments, upvoteRatio, flair,
+                                hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies,
+                                isCrosspost, canModPost, approved, approvedAtUTC, approvedBy, removed,
+                                spam, distinguished, suggestedSort);
                         post.setPreviews(previews);
                         post.setVideoUrl(videoUrl);
                         post.setVideoDownloadUrl(videoDownloadUrl);
@@ -605,8 +609,8 @@ public class ParsePost {
                         int postType = Post.IMAGE_TYPE;
 
                         post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
-                                authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
-                                postType, voteType, nComments, upvoteRatio, flair,
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                url, permalink, score, postType, voteType, nComments, upvoteRatio, flair,
                                 hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost,
                                 canModPost, approved, approvedAtUTC, approvedBy, removed, spam, distinguished,
                                 suggestedSort);
@@ -626,8 +630,8 @@ public class ParsePost {
                         //Gif post
                         int postType = Post.GIF_TYPE;
                         post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
-                                authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
-                                postType, voteType, nComments, upvoteRatio, flair,
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                url, permalink, score, postType, voteType, nComments, upvoteRatio, flair,
                                 hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost,
                                 canModPost, approved, approvedAtUTC, approvedBy, removed, spam, distinguished,
                                 suggestedSort);
@@ -655,8 +659,8 @@ public class ParsePost {
                         }
 
                         post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
-                                authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
-                                postType, voteType, nComments, upvoteRatio, flair,
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                url, permalink, score, postType, voteType, nComments, upvoteRatio, flair,
                                 hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost,
                                 canModPost, approved, approvedAtUTC, approvedBy, removed, spam, distinguished,
                                 suggestedSort);
@@ -669,8 +673,8 @@ public class ParsePost {
                         int postType = Post.VIDEO_TYPE;
 
                         post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
-                                authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
-                                postType, voteType, nComments, upvoteRatio, flair,
+                                authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                url, permalink, score, postType, voteType, nComments, upvoteRatio, flair,
                                 hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost,
                                 canModPost, approved, approvedAtUTC, approvedBy, removed, spam, distinguished,
                                 suggestedSort);
@@ -683,8 +687,8 @@ public class ParsePost {
                             int postType = Post.TEXT_TYPE;
 
                             post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
-                                    authorFlair, authorFlairHTML, postTimeMillis, title, permalink, score,
-                                    postType, voteType, nComments, upvoteRatio, flair,
+                                    authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                    permalink, score, postType, voteType, nComments, upvoteRatio, flair,
                                     hidden, spoiler, nsfw, stickied, archived, locked, saved, sendReplies,
                                     isCrosspost, canModPost, approved, approvedAtUTC, approvedBy, removed,
                                     spam, distinguished, suggestedSort);
@@ -696,11 +700,11 @@ public class ParsePost {
                             int postType = Post.LINK_TYPE;
 
                             post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
-                                    authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
-                                    postType, voteType, nComments, upvoteRatio, flair, hidden, spoiler, nsfw,
-                                    stickied, archived, locked, saved, sendReplies, isCrosspost, canModPost,
-                                    approved, approvedAtUTC, approvedBy, removed, spam, distinguished,
-                                    suggestedSort);
+                                    authorFullname, authorFlair, authorFlairHTML, postTimeMillis, title,
+                                    url, permalink, score, postType, voteType, nComments, upvoteRatio,
+                                    flair, hidden, spoiler, nsfw, stickied, archived, locked, saved,
+                                    sendReplies, isCrosspost, canModPost, approved, approvedAtUTC,
+                                    approvedBy, removed, spam, distinguished, suggestedSort);
 
                             if (data.isNull(JSONUtils.SELFTEXT_KEY)) {
                                 post.setSelfText("");
@@ -754,7 +758,7 @@ public class ParsePost {
                     //Image post
                     int postType = Post.IMAGE_TYPE;
 
-                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFullname,
                             authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
                             postType, voteType, nComments, upvoteRatio, flair, hidden,
                             spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost, canModPost,
@@ -776,7 +780,7 @@ public class ParsePost {
                     //Video post
                     int postType = Post.VIDEO_TYPE;
 
-                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFullname,
                             authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
                             postType, voteType, nComments, upvoteRatio, flair, hidden,
                             spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost, canModPost,
@@ -788,7 +792,7 @@ public class ParsePost {
                     //CP No Preview Link post
                     int postType = Post.NO_PREVIEW_LINK_TYPE;
 
-                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author,
+                    post = new Post(id, fullName, subredditName, subredditNamePrefixed, author, authorFullname,
                             authorFlair, authorFlairHTML, postTimeMillis, title, url, permalink, score,
                             postType, voteType, nComments, upvoteRatio, flair, hidden,
                             spoiler, nsfw, stickied, archived, locked, saved, sendReplies, isCrosspost, canModPost,

@@ -7,6 +7,7 @@ import androidx.paging.ListenableFuturePagingSource;
 import androidx.paging.PagingState;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.RedditError;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
@@ -22,6 +24,7 @@ import ml.docilealligator.infinityforreddit.readpost.NullReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.HttpException;
 import retrofit2.Response;
@@ -87,7 +90,7 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
                 String responseString = response.body();
                 LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, NullReadPostsList.getInstance());
                 if (newPosts == null) {
-                    return new LoadResult.Error<>(new Exception("Error parsing posts"));
+                    return new LoadResult.Error<>(new PostPagingSource.PostPagingSourceError(response.code(), "Error parsing posts"));
                 } else {
                     if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                         setMetadataToAnonymousPosts(newPosts);
@@ -99,11 +102,24 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
                     return new LoadResult.Page<>(new ArrayList<>(newPosts), null, Long.toString(lastItem));
                 }
             } else {
-                return new LoadResult.Error<>(new Exception("Response failed"));
+                try (ResponseBody errorBody = response.errorBody()) {
+                    if (errorBody != null) {
+                        // Gson returns null for an empty or literal-null body. Reading the reason
+                        // off it threw an NPE that the catch below swallowed, silently discarding
+                        // the specific reason instead of reporting it.
+                        RedditError redditError = new Gson().fromJson(errorBody.string(), RedditError.class);
+                        if (redditError != null) {
+                            return new LoadResult.Error<>(new PostPagingSource.PostPagingSourceError(response.code(), redditError.getReason()));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return new LoadResult.Error<>(new PostPagingSource.PostPagingSourceError(response.code(), null));
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return new LoadResult.Error<>(new Exception("Response failed"));
+            return new LoadResult.Error<>(new PostPagingSource.PostPagingSourceError(0, "Error getting response"));
         }
     }
 

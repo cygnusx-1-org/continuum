@@ -40,6 +40,7 @@ import ml.docilealligator.infinityforreddit.font.FontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder;
 import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditRepository;
+import ml.docilealligator.infinityforreddit.reminder.ReminderManager;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MaterialYouUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -101,6 +102,8 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
     Executor executor;
     @Inject
     RandomSubredditRepository randomSubredditRepository;
+    @Inject
+    ReminderManager reminderManager;
 
     @Override
     public void onCreate() {
@@ -121,7 +124,7 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
                 mInternalSharedPreferences, executor, redditDataRoomDatabase);
 
         appLock = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.APP_LOCK, false);
-        appLockTimeout = Long.parseLong(mSecuritySharedPreferences.getString(SharedPreferencesUtils.APP_LOCK_TIMEOUT, "600000"));
+        appLockTimeout = SharedPreferencesUtils.getLong(mSecuritySharedPreferences, SharedPreferencesUtils.APP_LOCK_TIMEOUT, "600000");
         isSecureMode = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.SECURE_MODE, false);
 
         // Give the block recorder somewhere to write. Until this runs it silently drops what it is
@@ -254,6 +257,8 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
                         amoledThemeSharedPreferences, mInternalSharedPreferences, null);
             }
         }
+
+        reminderManager.checkAndSetAllAlarms();
     }
 
     /**

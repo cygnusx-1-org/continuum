@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -55,7 +56,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
@@ -160,11 +160,11 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     @Nullable
     public Typeface typeface;
 
-    //private Uri mVideoUri;
     private ExoPlayer player;
     @UnstableApi
     private DefaultTrackSelector trackSelector;
     private DataSource.Factory dataSourceFactory;
+    private Player.Listener playerListener;
 
     /*private String videoDownloadUrl;
     private String videoFileName;
@@ -183,8 +183,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     //private boolean setDefaultResolutionAlready = false;
     @Nullable
     private Integer originalOrientation;
-    /*private int playbackSpeed = 100;
-    private boolean useBottomAppBar;*/
     private ViewVideoActivityBindingAdapter binding;
     private static final String ROTATION_TAG = "VideoRotation";
     private int currentRotation = 0; // Track current rotation in degrees (0, 90, 180, 270)
@@ -265,8 +263,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     @Inject
     SimpleCache mSimpleCache;
 
-    //private Post post;
-
     @OptIn(markerClass = UnstableApi.class)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -281,7 +277,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         }
 
         boolean systemDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
-        int systemThemeType = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM));
+        int systemThemeType = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.THEME_KEY, SharedPreferencesUtils.THEME_FOLLOW_SYSTEM);
         switch (systemThemeType) {
             case 0:
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO);
@@ -342,7 +338,10 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         Resources resources = getResources();
 
-        Objects.requireNonNull(getSupportActionBar()).hide();
+        // Continuum dropped the "use bottom toolbar in media viewer" option and made the bottom
+        // bar the default: rotate, share and playback speed live there, so the top toolbar
+        // upstream reinstated never shows.
+        binding.getToolbar().setVisibility(View.GONE);
         binding.getBottomAppBar().setVisibility(View.VISIBLE);
         binding.getBackButton().setOnClickListener(view -> {
             finish();
@@ -371,8 +370,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
         binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
 
-        /*dataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"));
-        nonDataSavingModeDefaultResolution = Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"));*/
 
         LinearLayout controllerLinearLayout = findViewById(R.id.linear_layout_exo_playback_control_view);
         // Used when the platform reports no gesture inset (e.g. 3-button nav): still keep a small
@@ -383,6 +380,11 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             @Override
             public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat insets) {
                 Insets allInsets = Utils.getInsets(insets, false, false);
+
+                ViewGroup.MarginLayoutParams toolbarParams = (ViewGroup.MarginLayoutParams) binding.getToolbar().getLayoutParams();
+                toolbarParams.topMargin = allInsets.top;
+                binding.getToolbar().setLayoutParams(toolbarParams);
+
                 ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) controllerLinearLayout.getLayoutParams();
                 params.bottomMargin = allInsets.bottom;
                 params.setMarginStart(allInsets.left);
@@ -401,7 +403,6 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         Post post = intent.getParcelableExtra(EXTRA_POST);
         if (post != null) {
             binding.getTitleTextView().setText(post.getTitle());
-            /*videoFallbackDirectUrl = post.getVideoFallBackDirectUrl();*/
         }
 
         String dataSavingModeString = Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
@@ -425,13 +426,13 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                         intent.getStringExtra(EXTRA_REDGIFS_ID),
                         intent.getStringExtra(EXTRA_V_REDD_IT_URL),
                         intent.getStringExtra(EXTRA_STREAMABLE_SHORT_CODE),
-                        isDataSavingMode, Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360")),
-                        Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0")),
-                        Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100"))
+                        isDataSavingMode, SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"),
+                        SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"),
+                        SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100")
                 )
         ).get(ViewVideoViewModel.class);
 
-        binding.getRoot().setOnDragDismissedListener(dragDirection -> {
+        binding.getHaulerView().setOnDragDismissedListener(dragDirection -> {
             player.stop();
             int slide = dragDirection == DragDirection.UP ? R.anim.slide_out_up : R.anim.slide_out_down;
             finish();
@@ -439,9 +440,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         });
 
 
-        /*isNSFW = intent.getBooleanExtra(EXTRA_IS_NSFW, false);*/
         if (savedInstanceState == null) {
-            if (mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION, false)) {
+            if (!getResources().getBoolean(R.bool.isTablet)
+                    && mSharedPreferences.getBoolean(SharedPreferencesUtils.VIDEO_PLAYER_AUTOMATIC_LANDSCAPE_ORIENTATION, false)) {
                 originalOrientation = resources.getConfiguration().orientation;
                 try {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
@@ -493,6 +494,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             playerControlView.addVisibilityListener(visibility -> {
                 switch (visibility) {
                     case View.GONE:
+
                         getWindow().getDecorView().setSystemUiVisibility(
                                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -502,6 +504,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
                         break;
                     case View.VISIBLE:
+
                         getWindow().getDecorView().setSystemUiVisibility(
                                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -607,7 +610,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             Util.handlePlayPauseButtonAction(player);
         });
 
-        player.addListener(new Player.Listener() {
+        playerListener = new Player.Listener() {
             @Override
             public void onEvents(@NonNull Player player, @NonNull Player.Events events) {
                 if (events.containsAny(
@@ -698,7 +701,14 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                                 // Reddit video HLS usually has two audio tracks. The first is mono.
                                 // The second (index 1) is stereo.
                                 // Select the stereo audio track if possible.
-                                trackSelector.setParameters(trackSelector.buildUponParameters().setOverrideForType(new TrackSelectionOverride(trackGroup.getMediaTrackGroup(), 1)));
+                                trackSelector.setParameters(
+                                        trackSelector.buildUponParameters()
+                                                .setOverrideForType(new TrackSelectionOverride(
+                                                                trackGroup.getMediaTrackGroup(),
+                                                                trackGroup.getMediaTrackGroup().length > 1 ? 1 : 0
+                                                        )
+                                                )
+                                );
                             }
                             if (binding.getMuteButton().getVisibility() != View.VISIBLE) {
                                 binding.getMuteButton().setVisibility(View.VISIBLE);
@@ -726,7 +736,17 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             public void onPlayerError(@NonNull PlaybackException error) {
                 viewVideoViewModel.loadFallbackVideo(player.getCurrentMediaItem(), savedInstanceState);
             }
-        });
+
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                if (isPlaying) {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                } else {
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            }
+        };
+        player.addListener(playerListener);
 
         // Produces DataSource instances through which media data is loaded.
         dataSourceFactory = new CacheDataSource.Factory().setCache(mSimpleCache).setUpstreamDataSourceFactory(new OkHttpDataSource.Factory(mOkHttpClient).setUserAgent(APIUtils.USER_AGENT));
@@ -880,30 +900,28 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             }
         });
 
-        viewVideoViewModel.getVideoUriLiveData().observe(this, new Observer<Uri>() {
-            @Override
-            public void onChanged(Uri uri) {
-                if (uri == null) {
-                    binding.getLoadingIndicator().setVisibility(View.VISIBLE);
+        viewVideoViewModel.getVideoUriLiveData().observe(this, uri -> {
+            if (uri == null) {
+                binding.getLoadingIndicator().setVisibility(View.VISIBLE);
 
-                    viewVideoViewModel.loadVideoLink(mRetrofit, mVReddItRetrofit, mRedgifsRetrofit,
-                            mStreamableApiProvider, mCurrentAccountSharedPreferences);
+                viewVideoViewModel.loadVideoLink(mRetrofit, mVReddItRetrofit, mRedgifsRetrofit,
+                        mStreamableApiProvider, mCurrentAccountSharedPreferences);
+            } else {
+                binding.getLoadingIndicator().setVisibility(View.GONE);
+                if (viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) {
+                    // Prepare the player with the source.
+                    player.prepare();
+                    player.setMediaSource(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(uri)));
+                    preparePlayer(savedInstanceState);
                 } else {
-                    binding.getLoadingIndicator().setVisibility(View.GONE);
-                    if (viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) {
-                        // Prepare the player with the source.
-                        player.prepare();
-                        player.setMediaSource(new HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(uri)));
-                        preparePlayer(savedInstanceState);
-                    } else {
-                        // Prepare the player with the source.
-                        player.prepare();
-                        player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(uri)));
-                        preparePlayer(savedInstanceState);
-                    }
+                    // Prepare the player with the source.
+                    player.prepare();
+                    player.setMediaSource(new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(uri)));
+                    preparePlayer(savedInstanceState);
                 }
             }
         });
+
 
         viewVideoViewModel.getErrorResId().observe(this, messageRes -> {
             if (messageRes == null) {
@@ -918,6 +936,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     }
 
     private void applyCustomTheme() {
+        if (binding.getToolbar().getNavigationIcon() != null) {
+            binding.getToolbar().getNavigationIcon().setColorFilter(Color.WHITE, android.graphics.PorterDuff.Mode.SRC_IN);
+        }
+        if (binding.getToolbar().getOverflowIcon() != null) {
+            binding.getToolbar().getOverflowIcon().setColorFilter(Color.WHITE, android.graphics.PorterDuff.Mode.SRC_IN);
+        }
         binding.getPlayPauseButton().setBackgroundColor(mCustomThemeWrapper.getColorAccent());
         binding.getPlayPauseButton().setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getFABIconColor()));
     }
@@ -930,6 +954,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         }
         if (viewVideoViewModel.getResumePosition() > 0) {
             player.seekTo(viewVideoViewModel.getResumePosition());
+            viewVideoViewModel.setResumePosition(-1);
         }
 
         player.setPlayWhenReady(true);
@@ -1248,7 +1273,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     }
 
     private void setSwipeToDismissEnabled(boolean enabled) {
-        binding.getRoot().setDragEnabled(enabled);
+        binding.getHaulerView().setDragEnabled(enabled);
         binding.getNestedScrollView().setScrollEnabled(enabled);
     }
 
@@ -1284,6 +1309,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     protected void onDestroy() {
         EventBus.getDefault().unregister(this);
         super.onDestroy();
+        if (playerListener != null) {
+            player.removeListener(playerListener);
+        }
         player.seekToDefaultPosition();
         player.stop();
         player.release();

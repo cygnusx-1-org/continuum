@@ -259,9 +259,10 @@ public class WikiActivity extends BaseActivity {
         mRetrofit.create(RedditAPI.class).getWikiPage(mSubredditName, Objects.requireNonNull(getIntent().getStringExtra(EXTRA_WIKI_PATH))).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful()) {
+                String responseBody = response.body();
+                if (response.isSuccessful() && responseBody != null) {
                     try {
-                        String markdown = new JSONObject(response.body())
+                        String markdown = new JSONObject(responseBody)
                                 .getJSONObject(JSONUtils.DATA_KEY).getString(JSONUtils.CONTENT_MD_KEY);
                         markwonAdapter.setMarkdown(markwon, Utils.modifyMarkdown(markdown));
                         // noinspection NotifyDataSetChanged
@@ -270,6 +271,10 @@ public class WikiActivity extends BaseActivity {
                         e.printStackTrace();
                         showErrorView(R.string.error_loading_wiki);
                     }
+                } else if (response.isSuccessful()) {
+                    // Successful but empty. This used to reach new JSONObject(null), whose NPE the
+                    // catch above does not cover, so an empty wiki response crashed the activity.
+                    showErrorView(R.string.error_loading_wiki);
                 } else {
                     if (response.code() == 404 || response.code() == 403) {
                         showErrorView(R.string.no_wiki);

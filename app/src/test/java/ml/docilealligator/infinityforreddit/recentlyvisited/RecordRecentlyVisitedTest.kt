@@ -42,6 +42,12 @@ class RecordRecentlyVisitedTest {
             inserted += recentlyVisited
         }
 
+        override fun insertAll(recentlyVisited: List<RecentlyVisited>) {
+            inserted += recentlyVisited
+        }
+
+        override fun getAllForBackup(): List<RecentlyVisited> = inserted.toList()
+
         override fun trimToLimit(accountName: String, type: Int, limit: Int) {
             trims += Triple(accountName, type, limit)
         }

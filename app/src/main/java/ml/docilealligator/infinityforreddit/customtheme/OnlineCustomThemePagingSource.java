@@ -58,6 +58,11 @@ public class OnlineCustomThemePagingSource extends ListenableFuturePagingSource<
             List<OnlineCustomThemeMetadata> themeMetadataList = new ArrayList<>();
             try {
                 String responseString = response.body();
+                if (responseString == null) {
+                    // A null body is a failed parse, same as a malformed one: it used to reach
+                    // new JSONObject(null), whose NPE the JSONException catch below does not cover.
+                    return new LoadResult.Error<>(new Exception("Response failed"));
+                }
                 JSONObject data = new JSONObject(responseString);
                 int page = data.getInt(JSONUtils.PAGE_KEY);
                 JSONArray themesArray = data.getJSONArray(JSONUtils.DATA_KEY);

@@ -62,6 +62,12 @@ public class FetchRules {
     private static void parseRules(Executor executor, Handler handler, @Nullable String response,
                                    FetchRulesListener fetchRulesListener) {
         executor.execute(() -> {
+            if (response == null) {
+                // A null body is a failed parse, same as a malformed one: it used to reach
+                // new JSONObject(null), whose NPE the JSONException catch below does not cover.
+                handler.post(fetchRulesListener::failed);
+                return;
+            }
             try {
                 JSONArray rulesArray = new JSONObject(response).getJSONArray(JSONUtils.RULES_KEY);
                 ArrayList<Rule> rules = new ArrayList<>();

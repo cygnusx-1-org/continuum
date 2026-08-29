@@ -19,8 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.ListAdapter;
@@ -46,11 +48,13 @@ import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
+import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.CommentMoreBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.CommentIndentationView;
+import ml.docilealligator.infinityforreddit.customviews.CommentToolbar;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
@@ -130,7 +134,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private boolean mNeedBlurNsfw;
     private boolean mDoNotBlurNsfwInNsfwSubreddits;
     private boolean mNeedBlurSpoiler;
-    private final int mDepthThreshold;
     private final CommentRecyclerViewAdapterCallback mCommentRecyclerViewAdapterCallback;
     private final Drawable expandDrawable;
     private final Drawable collapseDrawable;
@@ -191,6 +194,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 }
             };
 
+    @OptIn(markerClass = UnstableApi.class)
     public CommentsRecyclerViewAdapterNew(BaseActivity activity, ViewPostDetailFragmentNew fragment,
                                           CustomThemeWrapper customThemeWrapper,
                                           Retrofit oauthRetrofit,
@@ -246,7 +250,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         };
         mEmoteCloseBracketInlineProcessor = new EmoteCloseBracketInlineProcessor();
         mEmotePlugin = EmotePlugin.create(activity,
-                Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 mediaMetadata -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
@@ -275,7 +279,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mNeedBlurNsfw = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.BLUR_NSFW_BASE, true);
         mDoNotBlurNsfwInNsfwSubreddits = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS, false);
         mNeedBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, false);
-        mImageAndGifEntry = new ImageAndGifEntry(activity, mGlide, Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")), false,
+        mImageAndGifEntry = new ImageAndGifEntry(activity, mGlide, SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"), false,
                 (mediaMetadata, commentId, postId) -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
@@ -300,10 +304,25 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                         activity.startActivity(intent);
                     }
                 });
-        mVideoEntry = new VideoEntry(activity, Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")), new VideoEntry.OnItemClickListener() {
+        mVideoEntry = new VideoEntry(activity, SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"), new VideoEntry.OnItemClickListener() {
             @Override
             public void onItemClick(@org.jetbrains.annotations.Nullable MediaMetadata mediaMetadata) {
+                if (canStartActivity) {
+                    canStartActivity = false;
+                    if (mediaMetadata == null) {
+                        return;
+                    }
 
+                    Intent intent = new Intent(activity, ViewVideoActivity.class);
+                    intent.setData(Uri.parse(mediaMetadata.original.url));
+                    intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
+                    intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
+                    if (post != null) {
+                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, post.getSubredditName());
+                    }
+                    intent.putExtra(ViewVideoActivity.EXTRA_ID, mediaMetadata.id);
+                    activity.startActivity(intent);
+                }
             }
         });
         recycledViewPool = new RecyclerView.RecycledViewPool();
@@ -320,7 +339,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mShowCommentDivider = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, false);
         mShowCommentTopPadding = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_TOP_PADDING, false);
         mCommentTopPaddingPx = (int) Utils.convertDpToPixel(8, activity);
-        mDividerType = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.COMMENT_DIVIDER_TYPE, "0"));
+        mDividerType = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.COMMENT_DIVIDER_TYPE, "0");
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
         mFullyCollapseComment = sharedPreferences.getBoolean(SharedPreferencesUtils.FULLY_COLLAPSE_COMMENT, false);
         mShowOnlyOneCommentLevelIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ONLY_ONE_COMMENT_LEVEL_INDICATOR, false);
@@ -328,7 +347,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
         mShowUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_USER_PREFIX, false);
         mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS, false);
-        mDepthThreshold = sharedPreferences.getInt(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD, 5);
+        //mDepthThreshold = sharedPreferences.getInt(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD, 5);
 
         mCommentRecyclerViewAdapterCallback = commentRecyclerViewAdapterCallback;
 
@@ -456,7 +475,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 }
 
                 if (mShowAuthorAvatar) {
-                    if (comment.getAuthorIconUrl() == null) {
+                    if (comment.getAuthorIconUrl() == null && comment.getAuthorFullName() != null && !comment.getAuthorFullName().isEmpty()) {
                         if (position >= 0) {
                             List<Comment> commentBatch = getCurrentList().subList(position, Math.min(getCurrentList().size(), UserProfileImagesBatchLoader.BATCH_SIZE + position));
                             mFragment.loadIcon(commentBatch, (authorFullName, iconUrl) -> {
@@ -585,13 +604,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
                 ((CommentBaseViewHolder) holder).commentIndentationView.setShowOnlyOneDivider(mShowOnlyOneCommentLevelIndicator);
                 ((CommentBaseViewHolder) holder).commentIndentationView.setLevelAndColors(comment.getDepth(), verticalBlockColors);
-                if (comment.getDepth() >= mDepthThreshold) {
-                    ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
-                    ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.GONE);
-                } else {
-                    ((CommentBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
-                    ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.VISIBLE);
-                }
+                // The reply button is never hidden. When the row runs out of room CommentToolbar
+                // drops the options that are also reachable from the overflow sheet and then shrinks
+                // the icons, so there is nothing left for a depth threshold to decide.
+                ((CommentBaseViewHolder) holder).replyButton.setVisibility(View.VISIBLE);
 
                 if (comment.hasReply()) {
                     if (comment.isExpanded()) {
@@ -599,8 +615,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     } else {
                         ((CommentBaseViewHolder) holder).expandButton.setCompoundDrawablesWithIntrinsicBounds(expandDrawable, null, null, null);
                     }
-                    ((CommentBaseViewHolder) holder).expandButton.setVisibility(View.VISIBLE);
                 }
+                ((CommentBaseViewHolder) holder).bottomConstraintLayout.setOptionalVisibility(
+                        true, comment.hasReply());
 
                 switch (comment.getVoteType()) {
                     case Comment.VOTE_TYPE_UPVOTE:
@@ -650,7 +667,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 ((CommentFullyCollapsedViewHolder) holder).binding.userNameTextViewItemCommentFullyCollapsed.setText(authorText);
 
                 if (mShowAuthorAvatar) {
-                    if (comment.getAuthorIconUrl() == null) {
+                    if (comment.getAuthorIconUrl() == null && comment.getAuthorFullName() != null && !comment.getAuthorFullName().isEmpty()) {
                         if (position >= 0) {
                             List<Comment> commentBatch = getCurrentList().subList(position, Math.min(getCurrentList().size(), UserProfileImagesBatchLoader.BATCH_SIZE + position));
                             mFragment.loadIcon(commentBatch, (authorFullName, iconUrl) -> {
@@ -699,11 +716,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 }
 
                 if (comment.getChildCount() > 0) {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.VISIBLE);
                     ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setText("+" + comment.getChildCount());
-                } else {
-                    ((CommentFullyCollapsedViewHolder) holder).binding.childCountTextViewItemCommentFullyCollapsed.setVisibility(View.GONE);
                 }
+                // CollapsedCommentHeader drops the trailing metadata from the measure pass when the
+                // row runs out of room, so the child count's own visibility is its to decide.
+                ((CommentFullyCollapsedViewHolder) holder).binding.headerLinearLayoutItemCommentFullyCollapsed
+                        .setOptionalVisibility(comment.getChildCount() > 0);
                 if (mShowElapsedTime) {
                     ((CommentFullyCollapsedViewHolder) holder).binding.timeTextViewItemCommentFullyCollapsed.setText(Utils.getElapsedTime(mActivity, comment.getCommentTimeMillis()));
                 } else {
@@ -726,6 +744,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 ((CommentFullyCollapsedViewHolder) holder).binding.verticalBlockIndentationItemCommentFullyCollapsed.setLevelAndColors(comment.getDepth(), verticalBlockColors);
 
                 applyParentDividerTopMargin(holder.itemView, comment);
+
             }
         } else if (holder instanceof LoadMoreChildCommentsViewHolder) {
             Comment placeholder = getItem(position);
@@ -796,13 +815,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         }
     }
 
-    public void setSaveComment(int position, boolean isSaved) {
-        Comment comment = getItem(position);
-        if (comment != null) {
-            comment.setSaved(isSaved);
-        }
-    }
-
     public int getSearchedPosition() {
         return mSearchedPosition;
     }
@@ -843,9 +855,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         }
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        mEmotePlugin.setDataSavingMode(dataSavingMode);
-        mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        return mEmotePlugin.setDataSavingMode(dataSavingMode) || mImageAndGifEntry.setDataSavingMode(dataSavingMode);
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
@@ -895,7 +906,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     }
 
     public interface CommentRecyclerViewAdapterCallback {
-        void expandComment(int position);
+        boolean toggleExpandComment(int position);
         void collapseComment(int position);
         void fetchMoreChildComments(int position);
     }
@@ -911,7 +922,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         TextView childCountTextView;
         RecyclerView commentMarkdownView;
         TextView editedTextView;
-        ConstraintLayout bottomConstraintLayout;
+        CommentToolbar bottomConstraintLayout;
         MaterialButton upvoteButton;
         TextView scoreTextView;
         MaterialButton downvoteButton;
@@ -938,7 +949,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                          TextView childCountTextView,
                          RecyclerView commentMarkdownView,
                          TextView editedTextView,
-                         ConstraintLayout bottomConstraintLayout,
+                         CommentToolbar bottomConstraintLayout,
                          MaterialButton upvoteButton,
                          TextView scoreTextView,
                          MaterialButton downvoteButton,
@@ -1105,9 +1116,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_COMMENT, comment);
                     bundle.putInt(CommentMoreBottomSheetFragment.EXTRA_POSITION, getBindingAdapterPosition());
                     bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_IS_NSFW, mPost != null && mPost.isNSFW());
-                    if (comment.getDepth() >= mDepthThreshold) {
-                        bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_AND_SAVE_OPTION, true);
-                    }
+                    bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_OPTION,
+                            mPost != null && !mPost.isArchived() && !mPost.isLocked() && !comment.isLocked());
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_POST, mPost);
                     int commentPos = getBindingAdapterPosition();
                     List<Comment> currentList = getCurrentList();
@@ -1418,9 +1428,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             });
 
             expandButton.setOnClickListener(view -> {
-                if (expandButton.getVisibility() == View.VISIBLE) {
-                    mCommentRecyclerViewAdapterCallback.expandComment(getBindingAdapterPosition());
-                } else if (mFullyCollapseComment) {
+                if (!mCommentRecyclerViewAdapterCallback.toggleExpandComment(getBindingAdapterPosition())
+                        && mFullyCollapseComment) {
                     mCommentRecyclerViewAdapterCallback.collapseComment(getBindingAdapterPosition());
                 }
             });
@@ -1479,9 +1488,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             }
         }
 
-        private boolean expandComments() {
+        private void expandComments() {
             expandButton.performClick();
-            return true;
         }
 
         private boolean hideToolbar() {
@@ -1623,7 +1631,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             }
 
             itemView.setOnClickListener(view -> {
-                mCommentRecyclerViewAdapterCallback.expandComment(getBindingAdapterPosition());
+                mCommentRecyclerViewAdapterCallback.toggleExpandComment(getBindingAdapterPosition());
             });
 
             itemView.setOnLongClickListener(view -> {

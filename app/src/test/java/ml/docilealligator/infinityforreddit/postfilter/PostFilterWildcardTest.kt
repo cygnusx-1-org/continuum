@@ -26,7 +26,7 @@ class PostFilterWildcardTest {
     }
 
     private fun post(subredditName: String) = Post(
-        "id", "t3_id", subredditName, "r/$subredditName", "author", "", "", 0L,
+        "id", "t3_id", subredditName, "r/$subredditName", "author", "t2_author", "", "", 0L,
         "A title", "https://example.com/x", "/r/$subredditName/comments/id/", 10, 0, 0, 0,
         100, "", false, false, false, false, false, false, false, false,
         false, false, false, 0L, null, false, false, "", null,

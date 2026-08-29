@@ -134,13 +134,13 @@ public class FetchRemovedComment {
 
     @Nullable
     private static String readString(JSONObject obj, String key) {
-        // isNull() is true for both an absent key and a JSON null; optString(key, null) alone would
+        // isNull() is true for both an absent key and a JSON null; optString() alone would
         // return the literal string "null" for the latter (org.json quirk).
         if (obj.isNull(key)) {
             return null;
         }
-        String value = obj.optString(key, null);
-        return value == null || value.trim().isEmpty() ? null : value;
+        String value = obj.optString(key);
+        return value.trim().isEmpty() ? null : value;
     }
 
     public static final class Result {

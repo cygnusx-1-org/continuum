@@ -46,6 +46,8 @@ import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisited;
 import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisitedDao;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQueryDao;
+import ml.docilealligator.infinityforreddit.reminder.Reminder;
+import ml.docilealligator.infinityforreddit.reminder.ReminderDao;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditDao;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditDao;
@@ -59,7 +61,8 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         SubscribedUserData.class, MultiReddit.class, CustomTheme.class, RecentSearchQuery.class,
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
-        LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class}, version = 39, exportSchema = false)
+        LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class,
+        Reminder.class}, version = 40, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -77,7 +80,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29,
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
-                        MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39)
+                        MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40)
                 .build();
     }
 
@@ -130,6 +133,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     public abstract LocalSavedThingDao localSavedThingDao();
 
     public abstract RecentlyVisitedDao recentlyVisitedDao();
+
+    public abstract ReminderDao reminderDao();
 
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -716,6 +721,20 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                     + " ADD COLUMN is_followed INTEGER DEFAULT 1 NOT NULL");
             database.execSQL("ALTER TABLE subscribed_users"
                     + " ADD COLUMN is_saved INTEGER DEFAULT 0 NOT NULL");
+        }
+    };
+
+    // Upstream numbers the reminders table as migration 32 -> 33, but Continuum already used
+    // 32 -> 33 for api_call_records and its chain is at 39, so the table lands on the end of
+    // Continuum's chain instead. The schema itself is upstream's, unchanged.
+    private static final Migration MIGRATION_39_40 = new Migration(39, 40) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE reminders"
+                    + "(username TEXT, post_id TEXT NOT NULL, comment_id TEXT NOT NULL, content TEXT NOT NULL, "
+                    + "created_at INTEGER DEFAULT 0 NOT NULL, reminder_time INTEGER DEFAULT 0 NOT NULL, "
+                    + "PRIMARY KEY(post_id, comment_id, reminder_time), "
+                    + "FOREIGN KEY(username) REFERENCES accounts(username) ON DELETE SET NULL)");
         }
     };
 }

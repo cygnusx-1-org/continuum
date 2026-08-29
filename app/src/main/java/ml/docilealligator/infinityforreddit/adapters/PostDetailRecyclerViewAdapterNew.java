@@ -44,6 +44,7 @@ import androidx.media3.ui.DefaultTimeBar;
 import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.TimeBar;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -71,6 +72,7 @@ import javax.inject.Provider;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.FetchVideoLinkListener;
+import ml.docilealligator.infinityforreddit.PostGalleryGridLayoutItemDecoration;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
@@ -116,12 +118,15 @@ import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInli
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
+import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
+import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
@@ -165,8 +170,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final EmoteCloseBracketInlineProcessor mEmoteCloseBracketInlineProcessor;
     private final EmotePlugin mEmotePlugin;
     private final ImageAndGifPlugin mImageAndGifPlugin;
+    private final VideoPlugin mVideoPlugin;
     private final Markwon mPostDetailMarkwon;
     private final ImageAndGifEntry mImageAndGifEntry;
+    private final VideoEntry mVideoEntry;
     private final CustomMarkwonAdapter mMarkwonAdapter;
     @Nullable
     private final String mAccessToken;
@@ -195,15 +202,18 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final boolean mHideSubredditAndUserPrefix;
     private final boolean mHideTheNumberOfVotes;
     private final boolean mHideTheNumberOfComments;
+    private final boolean mShowGalleryMediaAsGrid;
     private final boolean mSeparatePostAndComments;
     private final boolean mLegacyAutoplayVideoControllerUI;
     private final boolean mEasierToWatchInFullScreen;
     private final boolean mDisableProfileAvatarAnimation;
+    private final boolean mShowToolbarItemsBasedOnSpace;
     private final int mDataSavingModeDefaultResolution;
     private final int mNonDataSavingModeDefaultResolution;
     private final int mMaxResolution;
     private final PostDetailRecyclerViewAdapterCallback mPostDetailRecyclerViewAdapterCallback;
     private Supplier<ArrayList<Comment>> mCommentsSupplier;
+    private int itemWidth;
 
     private final int mColorAccent;
     private final int mCardViewColor;
@@ -246,6 +256,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private boolean canStartActivity = true;
     private boolean canPlayVideo = true;
 
+    @OptIn(markerClass = UnstableApi.class)
     public PostDetailRecyclerViewAdapterNew(@NonNull BaseActivity activity, ViewPostDetailFragmentNew fragment,
                                          Executor executor, CustomThemeWrapper customThemeWrapper,
                                          Retrofit oauthRetrofit, Retrofit retrofit,
@@ -270,7 +281,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mVideoMuteManager = videoMuteManager;
         mGlide = glide;
-        mMaxResolution = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
+        mMaxResolution = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000");
         mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         int markdownColor = customThemeWrapper.getPostContentColor();
@@ -280,8 +291,9 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mSeparatePostAndComments = separatePostAndComments;
         mLegacyAutoplayVideoControllerUI = sharedPreferences.getBoolean(SharedPreferencesUtils.LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI, false);
         mEasierToWatchInFullScreen = sharedPreferences.getBoolean(SharedPreferencesUtils.EASIER_TO_WATCH_IN_FULL_SCREEN, false);
-        mDataSavingModeDefaultResolution = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"));
-        mNonDataSavingModeDefaultResolution = Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"));
+        mShowToolbarItemsBasedOnSpace = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_POST_AND_COMMENT_TOOLBAR_ITEMS_BASED_ON_SPACE, false);
+        mDataSavingModeDefaultResolution = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360");
+        mNonDataSavingModeDefaultResolution = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0");
 
         mAccessToken = accessToken;
         mAccountName = accountName;
@@ -329,6 +341,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mHideSubredditAndUserPrefix = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
         mHideTheNumberOfVotes = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES, false);
         mHideTheNumberOfComments = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_COMMENTS, false);
+        mShowGalleryMediaAsGrid = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false);
 
         mPostHistorySharedPreferences = postHistorySharedPreferences;
 
@@ -432,7 +445,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         };
         mEmoteCloseBracketInlineProcessor = new EmoteCloseBracketInlineProcessor();
         mEmotePlugin = EmotePlugin.create(activity,
-                Integer.parseInt(sharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 mDataSavingMode, mDisableImagePreview, mediaMetadata -> {
                     if (mPost == null) {
                         return;
@@ -452,11 +465,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     }
                 });
         mImageAndGifPlugin = new ImageAndGifPlugin();
+        mVideoPlugin = new VideoPlugin();
         mPostDetailMarkwon = MarkdownUtils.createFullRedditMarkwon(mActivity,
-                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mImageAndGifPlugin, markdownColor,
-                postSpoilerBackgroundColor, onLinkLongClickListener);
+                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mImageAndGifPlugin,
+                mVideoPlugin, markdownColor, postSpoilerBackgroundColor, onLinkLongClickListener);
         mImageAndGifEntry = new ImageAndGifEntry(activity,
-                mGlide, Integer.parseInt(postDetailsSharedPreferences.getString(SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15")),
+                mGlide, SharedPreferencesUtils.getInt(postDetailsSharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 mDataSavingMode, mDisableImagePreview,
                 (mPost != null && mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost != null && mPost.isSpoiler() && mNeedBlurSpoiler),
                 (mediaMetadata, commentId, postId) -> {
@@ -477,7 +491,25 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         activity.startActivity(intent);
                     }
                 });
-        mMarkwonAdapter = MarkdownUtils.createCustomTablesAndImagesAdapter(mActivity, mImageAndGifEntry);
+        mVideoEntry = new VideoEntry(activity,
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
+                mediaMetadata -> {
+                    if (canStartActivity) {
+                        canStartActivity = false;
+                        if (mediaMetadata == null) {
+                            return;
+                        }
+
+                        Intent intent = new Intent(activity, ViewVideoActivity.class);
+                        intent.setData(Uri.parse(mediaMetadata.original.url));
+                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
+                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
+                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, post == null ? "Unknown" : post.getSubredditName());
+                        intent.putExtra(ViewVideoActivity.EXTRA_ID, mediaMetadata.id);
+                        activity.startActivity(intent);
+                    }
+                });
+        mMarkwonAdapter = MarkdownUtils.createCustomTablesAndImagesAdapter(mActivity, mImageAndGifEntry, mVideoEntry);
     }
 
     public void setCommentsSupplier(Supplier<ArrayList<Comment>> supplier) {
@@ -813,6 +845,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 ((PostDetailBaseViewHolder) holder).contentMarkdownView.setAdapter(mMarkwonAdapter);
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(mPost.getMediaMetadataMap());
                 mImageAndGifPlugin.setMediaMetadataMap(mPost.getMediaMetadataMap());
+                mVideoPlugin.setMediaMetadataMap(mPost.getMediaMetadataMap());
                 mMarkwonAdapter.setMarkdown(mPostDetailMarkwon, mPost.getSelfText());
                 // noinspection NotifyDataSetChanged
                 mMarkwonAdapter.notifyDataSetChanged();
@@ -976,12 +1009,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     }
                 }
             } else if (holder instanceof PostDetailGalleryViewHolder) {
+                int gallerySize = mPost.getGallery().size();
                 if (mDataSavingMode && mDisableImagePreview) {
                     ((PostDetailGalleryViewHolder) holder).binding.noPreviewPostTypeImageViewItemPostDetailGallery.setVisibility(View.VISIBLE);
                     ((PostDetailGalleryViewHolder) holder).binding.noPreviewPostTypeImageViewItemPostDetailGallery.setImageResource(R.drawable.ic_gallery_day_night_24dp);
                 } else {
                     ((PostDetailGalleryViewHolder) holder).binding.galleryFrameLayoutItemPostDetailGallery.setVisibility(View.VISIBLE);
-                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, 1, mPost.getGallery().size()));
+                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, 1, gallerySize));
                     Post.Preview preview = getSuitablePreview(mPost.getPreviews());
                     if (preview != null) {
                         if (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0) {
@@ -1014,6 +1048,82 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery)
                         );
                     }
+                }
+
+                RecyclerView.LayoutManager layoutManager = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager();
+                if (layoutManager instanceof GridLayoutManager) {
+                    int spanCount = gallerySize == 2 || gallerySize == 4 ? 2 : 3;
+                    ((GridLayoutManager) layoutManager).setSpanCount(spanCount);
+                    if (((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getItemDecorationCount() > 0) {
+                        RecyclerView.ItemDecoration itemDecoration = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getItemDecorationAt(0);
+                        if (itemDecoration instanceof PostGalleryGridLayoutItemDecoration) {
+                            ((PostGalleryGridLayoutItemDecoration) itemDecoration).setSpanCount(spanCount);
+                        }
+                    }
+
+                    int padding = (int) (8 * mScale);
+                    ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.setPadding(
+                            0, 0, padding, 0
+                    );
+                    ((PostDetailGalleryViewHolder) holder).adapter.setIsGridLayout(true);
+                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setVisibility(View.GONE);
+                } else if (layoutManager instanceof LinearLayoutManagerBugFixed) {
+                    ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.setPadding(0, 0, 0, 0);
+                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setVisibility(View.VISIBLE);
+                }
+            }
+
+            if (mShowToolbarItemsBasedOnSpace) {
+                if (itemWidth < 250) {
+                    if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                        ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                        ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.GONE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                        ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.GONE);
+                    }
+                } else if (itemWidth < 316) {
+                    if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                        ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                        ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                        ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.GONE);
+                    }
+                } else if (itemWidth < 420) {
+                    if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                        ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.GONE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                        ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                        ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                        ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.VISIBLE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                        ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                    }
+                    if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                        ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.VISIBLE);
+                    }
+                }
+            } else {
+                if (((PostDetailBaseViewHolder) holder).commentsCountButton != null) {
+                    ((PostDetailBaseViewHolder) holder).commentsCountButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostDetailBaseViewHolder) holder).saveButton != null) {
+                    ((PostDetailBaseViewHolder) holder).saveButton.setVisibility(View.VISIBLE);
+                }
+                if (((PostDetailBaseViewHolder) holder).shareButton != null) {
+                    ((PostDetailBaseViewHolder) holder).shareButton.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -1187,14 +1297,25 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mNeedBlurSpoiler = needBlurSpoiler;
     }
 
-    public void setAutoplay(boolean autoplay) {
-        mAutoplay = autoplay;
+    public boolean setAutoplay(boolean autoplay) {
+        if (mAutoplay != autoplay) {
+            mAutoplay = autoplay;
+            return true;
+        }
+
+        return false;
     }
 
-    public void setDataSavingMode(boolean dataSavingMode) {
-        mDataSavingMode = dataSavingMode;
-        mEmotePlugin.setDataSavingMode(dataSavingMode);
-        mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    public boolean setDataSavingMode(boolean dataSavingMode) {
+        if (mDataSavingMode != dataSavingMode) {
+            mDataSavingMode = dataSavingMode;
+            mEmotePlugin.setDataSavingMode(dataSavingMode);
+            mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+
+            return true;
+        }
+
+        return false;
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
@@ -1255,6 +1376,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
         typeTextView.setBackgroundColor(color);
         typeTextView.setBorderColor(color);
+    }
+
+    public void provideItemWidth(int width) {
+        itemWidth = width;
     }
 
     private void openMedia(@Nullable Post post) {
@@ -1510,11 +1635,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 }
                 PostOptionsBottomSheetFragment postOptionsBottomSheetFragment;
                 if (mPost.getPostType() == Post.GALLERY_TYPE && this instanceof PostDetailGalleryViewHolder) {
-                    postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost,
-                            mFragment.getPostListPosition(),
-                            ((LinearLayoutManagerBugFixed) java.util.Objects.requireNonNull(((PostDetailGalleryViewHolder) this).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager())).findFirstVisibleItemPosition());
+                    RecyclerView.LayoutManager layoutManager = ((PostDetailGalleryViewHolder) this).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager();
+                    if (layoutManager instanceof LinearLayoutManagerBugFixed) {
+                        postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost,
+                                mFragment.getPostListPosition(),
+                                ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition(),
+                                false);
+                    } else {
+                        postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost, mFragment.getPostListPosition(), false);
+                    }
                 } else {
-                    postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost, mFragment.getPostListPosition());
+                    postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(mPost, mFragment.getPostListPosition(), false);
                 }
                 postOptionsBottomSheetFragment.show(mFragment.getChildFragmentManager(), postOptionsBottomSheetFragment.getTag());
                 return true;
@@ -1658,9 +1789,14 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 }
 
                 if (Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
-                    ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
-                            mPost.getId(), ReadPostType.ANONYMOUS_UPVOTED_POSTS,
-                            ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                    if (previousVoteType == 1) {
+                        ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                mPost.getId(), ReadPostType.ANONYMOUS_UPVOTED_POSTS);
+                    } else {
+                        ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                mPost.getId(), ReadPostType.ANONYMOUS_UPVOTED_POSTS,
+                                ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                    }
                     mPostDetailRecyclerViewAdapterCallback.updatePost(mPost);
                     return;
                 } else {
@@ -1761,9 +1897,14 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 }
 
                 if (Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
-                    ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
-                            mPost.getId(), ReadPostType.ANONYMOUS_DOWNVOTED_POSTS,
-                            ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                    if (previousVoteType == -1) {
+                        ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                mPost.getId(), ReadPostType.ANONYMOUS_DOWNVOTED_POSTS);
+                    } else {
+                        ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                                mPost.getId(), ReadPostType.ANONYMOUS_DOWNVOTED_POSTS,
+                                ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                    }
                     mPostDetailRecyclerViewAdapterCallback.updatePost(mPost);
                     return;
                 } else {
@@ -2780,7 +2921,16 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     mCardViewColor, mCommentColor);
             binding.galleryRecyclerViewItemPostDetailGallery.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(binding.galleryRecyclerViewItemPostDetailGallery);
-            LinearLayoutManagerBugFixed layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
+            RecyclerView.LayoutManager layoutManager;
+            if (mShowGalleryMediaAsGrid) {
+                adapter.setIsGridLayout(true);
+                layoutManager = new GridLayoutManager(mActivity, 3);
+                PostGalleryGridLayoutItemDecoration itemDecoration =
+                        new PostGalleryGridLayoutItemDecoration(mActivity, R.dimen.staggeredLayoutManagerItemOffset, 2);
+                binding.galleryRecyclerViewItemPostDetailGallery.addItemDecoration(itemDecoration);
+            } else {
+                layoutManager = new LinearLayoutManagerBugFixed(mActivity, RecyclerView.HORIZONTAL, false);
+            }
             binding.galleryRecyclerViewItemPostDetailGallery.setLayoutManager(layoutManager);
             binding.galleryRecyclerViewItemPostDetailGallery.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -2794,7 +2944,9 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     if (mPost == null) {
                         return;
                     }
-                    binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, layoutManager.findFirstVisibleItemPosition() + 1, mPost.getGallery().size()));
+                    if (layoutManager instanceof LinearLayoutManagerBugFixed) {
+                        binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition() + 1, mPost.getGallery().size()));
+                    }
                 }
             });
             binding.galleryRecyclerViewItemPostDetailGallery.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
@@ -2849,7 +3001,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                     int position = getBindingAdapterPosition();
                                     if (position >= 0) {
                                         if (mPost != null) {
-                                            openMedia(mPost, layoutManager.findFirstVisibleItemPosition());
+                                            View itemView = binding.galleryRecyclerViewItemPostDetailGallery.findChildViewUnder(e.getX(), e.getY());
+                                            int currentItemPosition = -1;
+                                            if (itemView != null) {
+                                                currentItemPosition = binding.galleryRecyclerViewItemPostDetailGallery.getChildAdapterPosition(itemView);
+                                            }
+                                            openMedia(mPost, Math.max(0, currentItemPosition));
                                         }
                                     }
                                 }
@@ -2885,7 +3042,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             });
 
             binding.noPreviewPostTypeImageViewItemPostDetailGallery.setOnClickListener(view -> {
-                openMedia(mPost, layoutManager.findFirstVisibleItemPosition());
+                openMedia(mPost);
             });
         }
     }

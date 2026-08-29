@@ -27,9 +27,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -49,10 +51,13 @@ import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
 import ml.docilealligator.infinityforreddit.post.HistoryPostViewModel;
+import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
+import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -97,6 +102,10 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     SharedPreferences mPostFeedScrolledPositionSharedPreferences;
     @Inject
     ExoCreator mExoCreator;
+    @Inject
+    Executor mExecutor;
+    @Inject
+    UserProfileImagesBatchLoader loader;
     private PostRecyclerViewAdapter mAdapter;
     private int maxPosition = -1;
     @Nullable
@@ -190,11 +199,11 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
         boolean isTablet = getResources().getBoolean(R.bool.isTablet);
         if (foldEnabled && isTablet) {
-            defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(
-                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_UNFOLDED_KEY, "0"));
+            defaultPostLayout = SharedPreferencesUtils.getInt(mSharedPreferences,
+                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_UNFOLDED_KEY, "0");
         } else {
-            defaultPostLayout = Integer.parseInt(mSharedPreferences.getString(
-                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"));
+            defaultPostLayout = SharedPreferencesUtils.getInt(mSharedPreferences,
+                    SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0");
         }
         readPostType = getArguments().getInt(EXTRA_READ_POST_TYPE, ReadPostType.READ_POSTS);
         Locale locale = getResources().getConfiguration().locale;
@@ -328,7 +337,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     private void initializeAndBindPostViewModel() {
         mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                 mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
-                mActivity.accountName, mSharedPreferences, readPostType, Objects.requireNonNull(postFilter))).get(HistoryPostViewModel.class);
+                mActivity.accountName, mSharedPreferences, readPostType, Objects.requireNonNull(postFilter), loader)).get(HistoryPostViewModel.class);
 
         bindPostViewModel();
     }
@@ -349,7 +358,18 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                 }
             } else if (refreshLoadState instanceof LoadState.Error) {
                 binding.fetchPostInfoLinearLayoutHistoryPostFragment.setOnClickListener(view -> refresh());
-                showErrorView(R.string.load_posts_error);
+                Throwable e = ((LoadState.Error) refreshLoadState).getError();
+                if (e instanceof PostPagingSource.PostPagingSourceError) {
+                    if (((PostPagingSource.PostPagingSourceError) e).code == 403 && Account.ANONYMOUS_ACCOUNT.equals(mActivity.accountName)) {
+                        showErrorView(R.string.load_posts_error_anonymous_403);
+                    }  else if (((PostPagingSource.PostPagingSourceError) e).message != null) {
+                        showErrorView(getString(R.string.load_posts_error_with_reason, ((PostPagingSource.PostPagingSourceError) e).message));
+                    } else {
+                        showErrorView(R.string.load_posts_error);
+                    }
+                } else {
+                    showErrorView(R.string.load_posts_error);
+                }
             }
             if (!(refreshLoadState instanceof LoadState.Loading) && appendLoadState instanceof LoadState.NotLoading) {
                 if (appendLoadState.getEndOfPaginationReached() && mAdapter.getItemCount() < 1) {
@@ -432,11 +452,30 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     @Override
+    public void loadUserIcon(List<Post> posts, UserProfileImagesBatchLoader.LoadIconListener loadIconListener) {
+        /*if (subredditOrUserIcons.containsKey(subredditOrUserFullname)) {
+            loadIconListener.loadIconSuccess(subredditOrUserFullname, subredditOrUserIcons.get(subredditOrUserFullname));
+        }*/
+
+        mHistoryPostViewModel.loadAuthorIcons(posts, loadIconListener);
+    }
+
+    @Override
     protected void showErrorView(int stringResId) {
         if (mActivity != null && isAdded()) {
             binding.swipeRefreshLayoutHistoryPostFragment.setRefreshing(false);
             binding.fetchPostInfoLinearLayoutHistoryPostFragment.setVisibility(View.VISIBLE);
             binding.fetchPostInfoTextViewHistoryPostFragment.setText(stringResId);
+        }
+    }
+
+    @Override
+    protected void showErrorView(String errorMessage) {
+        if (mActivity != null && isAdded()) {
+            binding.swipeRefreshLayoutHistoryPostFragment.setRefreshing(false);
+            binding.fetchPostInfoLinearLayoutHistoryPostFragment.setVisibility(View.VISIBLE);
+            binding.fetchPostInfoTextViewHistoryPostFragment.setText(errorMessage);
+            mGlide.load(R.drawable.error_image).into(binding.fetchPostInfoImageViewHistoryPostFragment);
         }
     }
 

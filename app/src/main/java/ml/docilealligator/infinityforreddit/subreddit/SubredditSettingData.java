@@ -590,7 +590,7 @@ public class SubredditSettingData {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (!(o instanceof SubredditSettingData that)) return false;
         return defaultSet == that.defaultSet && toxicityThresholdChatLevel == that.toxicityThresholdChatLevel

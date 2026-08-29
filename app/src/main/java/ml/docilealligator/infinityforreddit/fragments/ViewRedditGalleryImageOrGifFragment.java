@@ -125,7 +125,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
             binding.captionUrlTextViewViewRedditGalleryImageOrGifFragment.setTypeface(activity.typeface);
         }
 
-        binding.imageViewViewRedditGalleryImageOrGifFragment.setImageViewFactory(new GlideGifImageViewFactory(new SaveMemoryCenterInisdeDownsampleStrategy(Integer.parseInt(mSharedPreferences.getString(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")))));
+        binding.imageViewViewRedditGalleryImageOrGifFragment.setImageViewFactory(new GlideGifImageViewFactory(new SaveMemoryCenterInisdeDownsampleStrategy(SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"))));
 
         binding.imageViewViewRedditGalleryImageOrGifFragment.setImageLoaderCallback(new ImageLoader.Callback() {
             @Override

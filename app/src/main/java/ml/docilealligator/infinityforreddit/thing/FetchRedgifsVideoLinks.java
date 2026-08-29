@@ -130,6 +130,12 @@ public class FetchRedgifsVideoLinks {
 
     private static void parseRedgifsVideoLinks(Handler handler, @Nullable String response,
                                               FetchVideoLinkListener fetchVideoLinkListener) {
+        if (response == null) {
+            // A null body is a failed parse, same as a malformed one: it used to reach
+            // new JSONObject(null), whose NPE the JSONException catch below does not cover.
+            handler.post(() -> fetchVideoLinkListener.failed(null));
+            return;
+        }
         /*try {
             *//*String mp4 = new JSONObject(response).getJSONObject(JSONUtils.GIF_KEY).getJSONObject(JSONUtils.URLS_KEY)
                     .getString(JSONUtils.HD_KEY);
@@ -175,6 +181,11 @@ public class FetchRedgifsVideoLinks {
 
     @Nullable
     private static String parseRedgifsVideoLinks(@Nullable String response) {
+        if (response == null) {
+            // A null body is a failed parse, same as a malformed one: it used to reach
+            // new JSONObject(null), whose NPE the JSONException catch below does not cover.
+            return null;
+        }
         try {
             JSONObject jsonResponse = new JSONObject(response);
             JSONObject gif = jsonResponse.getJSONObject(JSONUtils.GIF_KEY);

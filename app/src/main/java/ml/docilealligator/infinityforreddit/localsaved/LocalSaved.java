@@ -198,8 +198,8 @@ public class LocalSaved {
         for (int i = 0; i < children.length(); i++) {
             JSONObject childData = children.getJSONObject(i).optJSONObject("data");
             if (childData != null) {
-                String name = childData.optString("name", null);
-                if (name != null && !name.isEmpty()) {
+                String name = childData.optString("name");
+                if (!name.isEmpty()) {
                     present.add(name);
                 }
             }
@@ -207,8 +207,8 @@ public class LocalSaved {
         if (data.isNull("after")) {
             return null;
         }
-        String after = data.optString("after", null);
+        String after = data.optString("after");
         // Treat an empty token as "no more pages" so we don't re-fetch page 1 in a loop.
-        return (after != null && after.isEmpty()) ? null : after;
+        return after.isEmpty() ? null : after;
     }
 }

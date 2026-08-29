@@ -79,9 +79,9 @@ android {
         }
 
         minSdk 24
-        targetSdk 35
-        versionCode 225
-        versionName "8.2.5.9.9.9.7"
+        targetSdk 36
+        versionCode 226
+        versionName "8.3.0.1"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         // The fallback must be 22 characters (APIKeysPreferenceFragment.CLIENT_ID_LENGTH) and must
         // not be R.string.default_client_id, or the API Keys dialog leaves its OK button disabled
@@ -192,8 +192,10 @@ android {
 // NullAway compile-time null checking, run via Error Prone. Scope is intentionally
 // tight: every other Error Prone check is disabled, and NullAway only analyzes code
 // under an @NullMarked scope (OnlyNullMarked), so the build stays green until a
-// package opts in with a @NullMarked package-info.java. Roll out one package at a
-// time. Dagger @Inject fields are treated as initialized without a constructor
+// package opts in with a @NullMarked package-info.java; that rollout is complete, and
+// every Java package under src/main now carries one (the packages that do not are
+// pure-Kotlin, or the vendored ones excluded by path below).
+// Dagger @Inject fields are treated as initialized without a constructor
 // assignment: NullAway's default ExcludedFieldAnnotations set already includes
 // javax.inject.Inject and jakarta.inject.Inject, so injected fields won't trip the
 // initialization check. We extend that set (additively — NullAway seeds it from its
@@ -277,6 +279,18 @@ tasks.withType(JavaCompile).configureEach { compileTask ->
 
         option('NullAway:OnlyNullMarked', 'true')
         option('NullAway:JSpecifyMode', 'true')
+        // Without these, NullAway trusts every *unannotated* dependency to return non-null, and
+        // OnlyNullMarked makes almost all of them unannotated: none of android.jar, AndroidX,
+        // Retrofit or OkHttp carries a JSpecify @NullMarked (Retrofit declares the JSR-305
+        // @EverythingIsNonNull instead), so their @Nullable returns were invisible. They are all
+        // annotated in their class files -- android.jar uses android.annotation.Nullable,
+        // Retrofit uses javax.annotation.Nullable -- and AcknowledgeRestrictiveAnnotations makes
+        // NullAway honour them, which is what catches things like an unguarded Response.body().
+        // AcknowledgeAndroidRecent extends that to the SDK's @RecentlyNullable/@RecentlyNonNull
+        // and throws at configuration time unless AcknowledgeRestrictiveAnnotations is set too,
+        // so the two always travel together.
+        option('NullAway:AcknowledgeRestrictiveAnnotations', 'true')
+        option('NullAway:AcknowledgeAndroidRecent', 'true')
         option('NullAway:ExcludedFieldAnnotations', 'androidx.room.Embedded,androidx.room.Relation,com.google.gson.annotations.SerializedName')
         option('NullAway:TreatGeneratedAsUnannotated', 'true')
         // A handful of annotation processors emit their generated classes into the root
@@ -296,10 +310,9 @@ tasks.withType(JavaCompile).configureEach { compileTask ->
         // Android UI classes initialize their @NonNull fields in lifecycle callbacks (onCreate/
         // onCreateView/onViewCreated), not the constructor. Tell NullAway to treat those as
         // initializer methods so such fields don't trip the "not initialized" check.
-        // NOTE: This is now active for the marked Fragment-holding packages (fragments,
-        // bottomsheetfragments, settings, etc.). Only `activities` remains un-@NullMarked, so this
-        // option does nothing for that package yet; it is wired up ahead of time so it checks cleanly
-        // once it is re-marked. (PreferenceFragmentCompat.onCreatePreferences is deliberately NOT a
+        // NOTE: This is active for every marked Activity- and Fragment-holding package
+        // (activities, fragments, bottomsheetfragments, settings, etc.).
+        // (PreferenceFragmentCompat.onCreatePreferences is deliberately NOT a
         // known initializer — the settings rollout kept @NonNull fields set there either constructor-
         // initialized or scoped to locals, and made genuinely-optional fields @Nullable instead.)
         option('NullAway:KnownInitializers',
@@ -535,7 +548,13 @@ dependencies {
     implementation 'androidx.compose.material3:material3:1.5.0-alpha01'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
-    //implementation 'androidx.compose.material3.adaptive:adaptive'
+    implementation'androidx.compose.material3.adaptive:adaptive:1.1.0'
+    configurations.configureEach {
+        resolutionStrategy.force(
+                "androidx.compose.material3.adaptive:adaptive:1.1.0",
+                "androidx.compose.material3.adaptive:adaptive-android:1.1.0"
+        )
+    }
     implementation 'androidx.activity:activity-compose:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4'
     implementation 'androidx.compose.runtime:runtime-livedata'
