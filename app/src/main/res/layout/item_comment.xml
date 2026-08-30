@@ -167,31 +167,16 @@
                 app:iconSize="24dp"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/childCountTextViewItemPostComment"
+                app:layout_constraintEnd_toStartOf="@+id/score_text_view_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/childCountTextViewItemPostComment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:visibility="gone"
-                android:textSize="?attr/font_12"
-                android:textStyle="bold"
-                android:fontFamily="?attr/font_family"
-                tools:text="+99"
-                tools:visibility="visible"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/score_text_view_item_post_comment"
-                app:layout_constraintStart_toEndOf="@+id/upvote_button_item_post_comment" />
-
-            <TextView
                 android:id="@+id/score_text_view_item_post_comment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minWidth="@dimen/comment_score_min_width"
                 android:gravity="center"
                 android:textSize="?attr/font_12"
                 android:textStyle="bold"
@@ -199,7 +184,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/downvote_button_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/childCountTextViewItemPostComment"
+                app:layout_constraintStart_toEndOf="@+id/upvote_button_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton
@@ -215,10 +200,33 @@
                 app:icon="@drawable/ic_downvote_24dp"
                 app:iconSize="24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/placeholder_item_post_comment"
+                app:layout_constraintEnd_toStartOf="@+id/childCountTextViewItemPostComment"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/score_text_view_item_post_comment"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- The child count badge sits outside the upvote/score/downvote group, between the
+                 downvote button and the flexible placeholder. Anywhere inside that group its width
+                 lands on one side of the score only, which pushes the score off the centre line
+                 between the two arrows by half the badge - by a different amount for "+5" than for
+                 "+43" (issue #385). Out here the only thing its width changes is how much slack the
+                 placeholder takes, so the score is centred between the arrows in every state and
+                 nothing moves when the badge appears. It needs no start margin: the downvote button
+                 already carries 8dp of padding inside its end edge. -->
+            <TextView
+                android:id="@+id/childCountTextViewItemPostComment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:textSize="?attr/font_12"
+                android:textStyle="bold"
+                android:fontFamily="?attr/font_family"
+                tools:text="+99"
+                tools:visibility="visible"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/placeholder_item_post_comment"
+                app:layout_constraintStart_toEndOf="@+id/downvote_button_item_post_comment" />
 
             <View
                 android:id="@+id/placeholder_item_post_comment"
@@ -229,7 +237,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/expand_button_item_post_comment"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/downvote_button_item_post_comment"
+                app:layout_constraintStart_toEndOf="@+id/childCountTextViewItemPostComment"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.button.MaterialButton

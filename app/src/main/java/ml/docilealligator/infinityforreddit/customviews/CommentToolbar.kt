@@ -13,10 +13,18 @@ import ml.docilealligator.infinityforreddit.R
  * The bottom toolbar of a comment row.
  *
  * The reply button is never dropped, whatever the width. When the row cannot fit, this shrinks in
- * stages: first the options that are also reachable from the overflow sheet (save, then the expand
- * chevron), then the icon metrics of everything that is left. Deciding this from the measure pass
- * rather than from a dp threshold means it stays correct for any combination of window width,
+ * stages: first the score column's declared minimum, which costs the row nothing it can see; then
+ * the options that are also reachable from the overflow sheet (save, then the expand chevron);
+ * then the icon metrics of everything that is left. Deciding this from the measure pass rather
+ * than from a dp threshold means it stays correct for any combination of window width,
  * indentation depth, font scale and display size, and it re-evaluates when any of those change.
+ *
+ * The score column is why the first stage exists. Giving it a fixed width would space the vote
+ * arrows evenly but spend that width on every row, including the deeply indented ones that have
+ * none to spare; giving it none leaves the arrows landing somewhere different on every row. As a
+ * minimum released under pressure it is wide wherever the row can afford it and free wherever it
+ * cannot, without either a dp threshold or a guess about how much space the display size and font
+ * scale have left.
  */
 class CommentToolbar @JvmOverloads constructor(
     context: Context,
@@ -26,10 +34,11 @@ class CommentToolbar @JvmOverloads constructor(
 
     private companion object {
         const val LEVEL_FULL = 0
-        const val LEVEL_NO_SAVE = 1
-        const val LEVEL_NO_EXPAND = 2
-        const val LEVEL_SMALL_ICONS = 3
-        const val LEVEL_TINY_ICONS = 4
+        const val LEVEL_NARROW_SCORE = 1
+        const val LEVEL_NO_SAVE = 2
+        const val LEVEL_NO_EXPAND = 3
+        const val LEVEL_SMALL_ICONS = 4
+        const val LEVEL_TINY_ICONS = 5
         const val LEVEL_MAX = LEVEL_TINY_ICONS
     }
 
@@ -51,6 +60,7 @@ class CommentToolbar @JvmOverloads constructor(
     private var saveButton: View? = null
     private var expandButton: View? = null
     private var placeholder: View? = null
+    private var scoreTextView: TextView? = null
 
     // Captured from the inflated layout so a compacted row can be restored when it is recycled into
     // a wider one. Every metric compaction touches has to be recorded here: restoring only some of
@@ -76,6 +86,7 @@ class CommentToolbar @JvmOverloads constructor(
         saveButton = findViewById(R.id.save_button_item_post_comment)
         expandButton = findViewById(R.id.expand_button_item_post_comment)
         placeholder = findViewById(R.id.placeholder_item_post_comment)
+        scoreTextView = findViewById(R.id.score_text_view_item_post_comment)
     }
 
     /**
@@ -143,7 +154,10 @@ class CommentToolbar @JvmOverloads constructor(
             originals[child] = ChildMetrics(
                 child.paddingStart, child.paddingTop, child.paddingEnd, child.paddingBottom,
                 (child as? MaterialButton)?.iconSize ?: 0,
-                (child as? MaterialButton)?.minWidth ?: 0,
+                // Any TextView, not just the buttons: the score declares its column width as
+                // android:minWidth, and a row recycled after being compacted has no other record
+                // of what the layout asked for.
+                (child as? TextView)?.minWidth ?: 0,
                 child.minimumWidth,
                 (child as? MaterialButton)?.insetTop ?: 0,
                 (child as? MaterialButton)?.insetBottom ?: 0
@@ -183,6 +197,22 @@ class CommentToolbar @JvmOverloads constructor(
                 child.minimumWidth = if (compact) 0 else original.minimumWidth
                 child.insetTop = if (compact) 0 else original.insetTop
                 child.insetBottom = if (compact) 0 else original.insetBottom
+            }
+            if (child is TextView && child === scoreTextView) {
+                // Released before anything the user can see is dropped, and taken back the moment
+                // the row has room again. MaterialButton owns its own minWidth above; the score is
+                // a plain TextView, so nothing else here would restore it.
+                //
+                // Both minimums have to go. A single android:minWidth in the layout lands in two
+                // independent fields - TextView's, which its onMeasure applies, and View's, which
+                // reaches the same measure through getSuggestedMinimumWidth() - because View and
+                // TextView each declare that attribute and each parse it. Clearing only TextView's
+                // leaves the column stuck at its full width, and the row then pays for it by
+                // dropping the save button instead, which is the outcome this level exists to
+                // avoid.
+                val narrow = level >= LEVEL_NARROW_SCORE
+                child.minWidth = if (narrow) 0 else original.minWidth
+                child.minimumWidth = if (narrow) 0 else original.minimumWidth
             }
             if (child is MaterialButton || child is TextView) {
                 if (horizontalPadding < 0) {

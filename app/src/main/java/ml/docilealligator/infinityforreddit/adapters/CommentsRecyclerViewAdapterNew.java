@@ -579,11 +579,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 // child count (issue #219). The top badge belongs to the collapsed top row
                 // (toolbar hidden), the bottom badge to the comment toolbar.
                 // A comment that has children holds the badge's slot for its whole life and only
-                // toggles INVISIBLE, never GONE. The badge sits between the upvote button and the
-                // score inside a spread_inside chain, so taking it out of the layout re-spreads the
-                // chain and drags the score across on every expand and collapse. childCount does
-                // not change when a comment expands, so the reserved width is the width the badge
-                // comes back at.
+                // toggles INVISIBLE, never GONE. The slot no longer decides where the score sits -
+                // the badge is anchored outside the vote group for that (issue #385) - but
+                // CommentToolbar.requiredWidth() counts everything that is not GONE, so releasing
+                // the slot would shrink the row's required width on expand and grow it again on
+                // collapse. A row that is already close to its limit would then cross a compaction
+                // level in one direction and back in the other, dropping and restoring the save
+                // button or the chevron as the user toggles. childCount does not change when a
+                // comment expands, so the reserved width is the width the badge comes back at.
                 if (comment.hasReply() && comment.getChildCount() > 0) {
                     String childCountString = "+" + comment.getChildCount();
                     ((CommentBaseViewHolder) holder).topChildCountTextView.setText(childCountString);
@@ -1007,17 +1010,18 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 constraintSet.clear(replyButton.getId(), ConstraintSet.END);
                 constraintSet.clear(moreButton.getId(), ConstraintSet.START);
                 constraintSet.clear(moreButton.getId(), ConstraintSet.END);
-                constraintSet.connect(upvoteButton.getId(), ConstraintSet.END, childCountTextView.getId(), ConstraintSet.START);
-                constraintSet.connect(upvoteButton.getId(), ConstraintSet.START, placeholder.getId(), ConstraintSet.END);
-                constraintSet.connect(childCountTextView.getId(), ConstraintSet.START, upvoteButton.getId(), ConstraintSet.END);
-                // clear() above wiped the XML marginEnd, so re-apply the gap to the score here.
-                constraintSet.connect(childCountTextView.getId(), ConstraintSet.END, scoreTextView.getId(), ConstraintSet.START,
-                        (int) Utils.convertDpToPixel(8, mActivity));
+                // Mirror of the XML order, so the badge stays on the placeholder side of the vote
+                // group here too and the score keeps the centre line between the two arrows: the
+                // group reads placeholder, badge, upvote, score, downvote against the end edge.
+                constraintSet.connect(upvoteButton.getId(), ConstraintSet.END, scoreTextView.getId(), ConstraintSet.START);
+                constraintSet.connect(upvoteButton.getId(), ConstraintSet.START, childCountTextView.getId(), ConstraintSet.END);
+                constraintSet.connect(childCountTextView.getId(), ConstraintSet.START, placeholder.getId(), ConstraintSet.END);
+                constraintSet.connect(childCountTextView.getId(), ConstraintSet.END, upvoteButton.getId(), ConstraintSet.START);
                 constraintSet.connect(scoreTextView.getId(), ConstraintSet.END, downvoteButton.getId(), ConstraintSet.START);
-                constraintSet.connect(scoreTextView.getId(), ConstraintSet.START, childCountTextView.getId(), ConstraintSet.END);
+                constraintSet.connect(scoreTextView.getId(), ConstraintSet.START, upvoteButton.getId(), ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
                 constraintSet.connect(downvoteButton.getId(), ConstraintSet.START, scoreTextView.getId(), ConstraintSet.END);
-                constraintSet.connect(placeholder.getId(), ConstraintSet.END, upvoteButton.getId(), ConstraintSet.START);
+                constraintSet.connect(placeholder.getId(), ConstraintSet.END, childCountTextView.getId(), ConstraintSet.START);
                 constraintSet.connect(placeholder.getId(), ConstraintSet.START, moreButton.getId(), ConstraintSet.END);
                 constraintSet.connect(moreButton.getId(), ConstraintSet.START, expandButton.getId(), ConstraintSet.END);
                 constraintSet.connect(moreButton.getId(), ConstraintSet.END, placeholder.getId(), ConstraintSet.START);
