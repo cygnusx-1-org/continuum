@@ -127,6 +127,11 @@ public class SearchActivity extends BaseActivity {
      * opened to hand a name back to whoever launched it.
      */
     private boolean canOpenRandomSubreddit;
+    /**
+     * Whether NSFW content is allowed at all. Read once: this screen is created fresh on every
+     * launch and offers no route to the settings that would change it.
+     */
+    private boolean nsfw;
     @SuppressWarnings("NullAway.Init")
     private SearchActivityRecyclerViewAdapter adapter;
     private SubredditAutocompleteRecyclerViewAdapter subredditAutocompleteRecyclerViewAdapter;
@@ -205,7 +210,18 @@ public class SearchActivity extends BaseActivity {
             binding.searchEditTextSearchActivity.setHint(R.string.search_subreddits_and_users_hint);
         }
 
-        boolean nsfw = mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false);
+        // Two terms because "Disable NSFW forever" never clears the per-account switch: it only
+        // sets its own preference, so that switch can still read true underneath it.
+        nsfw = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)
+                && mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false);
+
+        // Naming a NSFW subreddit picker is the kind of thing that makes the app awkward to open in
+        // public, so the row is not offered to anyone who has turned NSFW off. The note goes with
+        // it: it is about NSFW too, and it is the longest piece of text on the screen.
+        if (!nsfw) {
+            binding.randomNsfwSubredditTextViewSearchActivity.setVisibility(View.GONE);
+            binding.randomSubredditsNoteTextViewSearchActivity.setVisibility(View.GONE);
+        }
 
         subredditAutocompleteRecyclerViewAdapter = new SubredditAutocompleteRecyclerViewAdapter(this,
                 mCustomThemeWrapper, subredditData -> {
