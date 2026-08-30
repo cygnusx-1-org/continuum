@@ -1403,6 +1403,7 @@
     <string name="change_post_layout">Change Post Layout</string>
 
     <string name="edited">Edited</string>
+    <string name="post_time_edited">%1$s (edited)</string>
     <string name="edited_time">Edited on %s</string>
 
     <string name="warning">Warning</string>

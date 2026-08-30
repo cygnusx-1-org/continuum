@@ -67,6 +67,7 @@ public class Post implements Parcelable {
     private final String permalink;
     private String flair;
     private final long postTimeMillis;
+    private long editedTimeMillis;
     private int score;
     private int postType;
     private int voteType;
@@ -227,6 +228,7 @@ public class Post implements Parcelable {
         this.permalink = postToBeCopied.permalink;
         this.flair = postToBeCopied.flair;
         this.postTimeMillis = postToBeCopied.postTimeMillis;
+        this.editedTimeMillis = postToBeCopied.editedTimeMillis;
         this.score = postToBeCopied.score;
         this.postType = postToBeCopied.postType;
         this.voteType = postToBeCopied.voteType;
@@ -289,6 +291,7 @@ public class Post implements Parcelable {
         permalink = Objects.requireNonNull(in.readString());
         flair = Objects.requireNonNull(in.readString());
         postTimeMillis = in.readLong();
+        editedTimeMillis = in.readLong();
         score = in.readInt();
         postType = in.readInt();
         voteType = in.readInt();
@@ -408,6 +411,23 @@ public class Post implements Parcelable {
 
     public long getPostTimeMillis() {
         return postTimeMillis;
+    }
+
+    /**
+     * Reddit sends {@code edited} as {@code false} when a post was never edited and as the edit
+     * timestamp otherwise, so a non-zero value is the flag. Note Reddit suppresses it entirely for
+     * edits made within a few minutes of posting -- see the same grace period on comments.
+     */
+    public boolean isEdited() {
+        return editedTimeMillis != 0;
+    }
+
+    public long getEditedTimeMillis() {
+        return editedTimeMillis;
+    }
+
+    public void setEditedTimeMillis(long editedTimeMillis) {
+        this.editedTimeMillis = editedTimeMillis;
     }
 
     public String getTitle() {
@@ -682,6 +702,7 @@ public class Post implements Parcelable {
         dest.writeString(permalink);
         dest.writeString(flair);
         dest.writeLong(postTimeMillis);
+        dest.writeLong(editedTimeMillis);
         dest.writeInt(score);
         dest.writeInt(postType);
         dest.writeInt(voteType);

@@ -551,9 +551,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             case Post.IMAGE_TYPE:
                 return VIEW_TYPE_POST_DETAIL_IMAGE;
             case Post.LINK_TYPE:
-                return VIEW_TYPE_POST_DETAIL_LINK;
             case Post.NO_PREVIEW_LINK_TYPE:
-                // Use the LINK view type when a thumbnail fallback is available (e.g. crossposts)
+                // Use the LINK view type when a preview or thumbnail fallback is available (e.g.
+                // crossposts). Without one the link holder would leave an empty image slot, so fall
+                // through to the no-preview holder, which renders the same LINK chip and domain.
                 if (getSuitablePreview(mPost.getPreviews()) != null) {
                     return VIEW_TYPE_POST_DETAIL_LINK;
                 } else {
@@ -786,12 +787,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         moderatorDrawable, null, null, null);
             }
 
-            if (mShowElapsedTime) {
-                ((PostDetailBaseViewHolder) holder).postTimeTextView.setText(
-                        Utils.getElapsedTime(mActivity, mPost.getPostTimeMillis()));
-            } else {
-                ((PostDetailBaseViewHolder) holder).postTimeTextView.setText(Utils.getFormattedTime(mLocale, mPost.getPostTimeMillis(), mTimeFormatPattern));
-            }
+            String postTime = mShowElapsedTime
+                    ? Utils.getElapsedTime(mActivity, mPost.getPostTimeMillis())
+                    : Utils.getFormattedTime(mLocale, mPost.getPostTimeMillis(), mTimeFormatPattern);
+            // The marker stays wordless because this text view only gets 40% of the header width;
+            // the edit time itself is a tap away, as it is on a comment.
+            ((PostDetailBaseViewHolder) holder).postTimeTextView.setText(mPost.isEdited()
+                    ? mActivity.getString(R.string.post_time_edited, postTime)
+                    : postTime);
+            // The tap handler is attached once at construction, so without this every post's
+            // timestamp would be announced as activatable by TalkBack while doing nothing.
+            ((PostDetailBaseViewHolder) holder).postTimeTextView.setClickable(mPost.isEdited());
 
             if (mPost.isLocked()) {
                 ((PostDetailBaseViewHolder) holder).lockedImageView.setVisibility(View.VISIBLE);
@@ -1158,7 +1164,18 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             return preview;
         }
 
-        // Thumbnail fallback for post detail view (e.g. crossposts without previews)
+        // Thumbnail fallback for post detail view (e.g. crossposts without previews). Reddit's
+        // `thumbnail` is at most 140px wide, so a preview synthesised from it gets stretched to the
+        // full card width; skip it when the body already embeds its own media, where that upscale
+        // would sit above content that renders itself. Same rule as issue #317, applied once here
+        // rather than one holder at a time -- it still catches shapes that reach no other guard,
+        // such as a crosspost that kept its own thumbnail while inheriting a parent's inline media.
+        // A gallery post is exempt: its holder draws the gallery and only reads this preview to
+        // bound the tile height.
+        if (mPost != null && mPost.embedsInlineBodyMedia() && mPost.getPostType() != Post.GALLERY_TYPE) {
+            return null;
+        }
+
         String thumbnailUrl = mPost != null ? mPost.getThumbnailUrl() : null;
         if (thumbnailUrl != null && !thumbnailUrl.isEmpty() && !thumbnailUrl.equals("self")
                 && !thumbnailUrl.equals("default") && !thumbnailUrl.equals("nsfw")
@@ -1680,6 +1697,20 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             });
 
             authorFlairTextView.setOnClickListener(view -> userTextView.performClick());
+
+            postTimeTextView.setOnClickListener(view -> {
+                if (mPost == null || !mPost.isEdited()) {
+                    return;
+                }
+                Toast.makeText(view.getContext(), view.getContext().getString(R.string.edited_time, mShowElapsedTime ?
+                        Utils.getElapsedTime(mActivity, mPost.getEditedTimeMillis()) :
+                        Utils.getFormattedTime(mLocale, mPost.getEditedTimeMillis(), mTimeFormatPattern)
+                ), Toast.LENGTH_SHORT).show();
+            });
+            // A clickable child consumes the touch, so without this the timestamp would swallow the
+            // long press that opens the post options sheet -- on every post, edited or not, since
+            // the listener above is attached once at construction.
+            postTimeTextView.setOnLongClickListener(view -> itemView.performLongClick());
 
             crosspostImageView.setOnClickListener(view -> {
                 if (mPost == null) {

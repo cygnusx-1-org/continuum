@@ -266,6 +266,10 @@ public class ParsePost {
 
         String permalink = Html.fromHtml(data.getString(JSONUtils.PERMALINK_KEY)).toString();
         String thumbnailUrl = data.isNull(JSONUtils.THUMBNAIL_KEY) ? "" : data.getString(JSONUtils.THUMBNAIL_KEY);
+        // Read here, before the crosspost branch below reassigns `data` to the parent post: an edit
+        // belongs to this post, not to the post it crossposts. Reddit sends `false` (-> 0) when the
+        // post was never edited and the edit time in seconds otherwise.
+        long editedTimeMillis = data.optLong(JSONUtils.EDITED_KEY) * 1000;
         ArrayList<Post.Preview> previews = new ArrayList<>();
 
         // A link post that points at another Reddit post carries that post's image as a preview, but
@@ -361,16 +365,20 @@ public class ParsePost {
                     archived, locked, saved, sendReplies, deleted, removed, true, canModPost, approved,
                     approvedAtUTC, approvedBy, spam, distinguished, suggestedSort, thumbnailUrl);
             post.setCrosspostParentId(crosspostParent.getId());
+            post.setEditedTimeMillis(editedTimeMillis);
 
             return post;
         } else {
-            return parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
+            Post post = parseData(data, permalink, id, fullName, subredditName, subredditNamePrefixed,
                     subredditIconUrl, author, authorFullname, authorFlair, authorFlairHTMLBuilder.toString(),
                     postTime, title, previews, mediaMetadataMap,
                     score, voteType, nComments, upvoteRatio, flair, hidden,
                     spoiler, nsfw, stickied, archived, locked, saved, sendReplies, deleted, removed, false,
                     canModPost, approved, approvedAtUTC, approvedBy, spam, distinguished, suggestedSort,
                     thumbnailUrl);
+            post.setEditedTimeMillis(editedTimeMillis);
+
+            return post;
         }
     }
 
@@ -397,6 +405,9 @@ public class ParsePost {
                                   long approvedAtUTC, @Nullable String approvedBy, boolean spam,
                                   String distinguished, @Nullable String suggestedSort, String thumbnailUrl) throws JSONException {
         Post post;
+        // Working copy: the deleted-gallery demotion below clears the thumbnail, and this is what
+        // gets assigned to the post at the end of the method.
+        String resolvedThumbnailUrl = thumbnailUrl;
 
         boolean isVideo = data.getBoolean(JSONUtils.IS_VIDEO_KEY);
         String url = Html.fromHtml(data.getString(JSONUtils.URL_KEY)).toString();
@@ -882,18 +893,33 @@ public class ParsePost {
                     ArrayList<Post.Gallery> gallery = new ArrayList<>();
                     for (int i = 0; i < galleryIdsArray.length(); i++) {
                         String galleryId = galleryIdsArray.getJSONObject(i).getString(JSONUtils.MEDIA_ID_KEY);
-                        JSONObject singleGalleryObject = galleryObject.getJSONObject(galleryId);
-                        String mimeType = singleGalleryObject.getString(JSONUtils.M_KEY);
+                        // A deleted image keeps its `gallery_data` entry but loses its
+                        // `media_metadata` one. getJSONObject would throw on the first such item and
+                        // the catch below would discard the whole list, so a gallery that lost one
+                        // image lost the ones it still had -- and now gets demoted to a text post
+                        // with no images at all. Skip the missing item and keep the survivors; only
+                        // a gallery with nothing left reaches the demotion.
+                        JSONObject singleGalleryObject = galleryObject.optJSONObject(galleryId);
+                        if (singleGalleryObject == null) {
+                            continue;
+                        }
+                        // An entry can also be present but unusable: Reddit marks media whose
+                        // processing failed with a `status` other than "valid" and sends it without
+                        // the `m` and `s` keys the lines below need. Skip it exactly like a missing
+                        // entry -- reading it would throw and cost the gallery its good images too.
+                        // JSONUtils.parseMediaMetadata skips the same shape for the same reason.
+                        String mimeType = singleGalleryObject.optString(JSONUtils.M_KEY);
+                        JSONObject sourceObject = singleGalleryObject.optJSONObject(JSONUtils.S_KEY);
+                        if (mimeType.isEmpty() || sourceObject == null) {
+                            continue;
+                        }
                         String galleryItemUrl;
                         if (mimeType.contains("jpg") || mimeType.contains("png")) {
-                            galleryItemUrl = singleGalleryObject.getJSONObject(JSONUtils.S_KEY).getString(JSONUtils.U_KEY);
+                            galleryItemUrl = sourceObject.getString(JSONUtils.U_KEY);
+                        } else if (mimeType.contains("gif")) {
+                            galleryItemUrl = sourceObject.getString(JSONUtils.GIF_KEY);
                         } else {
-                            JSONObject sourceObject = singleGalleryObject.getJSONObject(JSONUtils.S_KEY);
-                            if (mimeType.contains("gif")) {
-                                galleryItemUrl = sourceObject.getString(JSONUtils.GIF_KEY);
-                            } else {
-                                galleryItemUrl = sourceObject.getString(JSONUtils.MP4_KEY);
-                            }
+                            galleryItemUrl = sourceObject.getString(JSONUtils.MP4_KEY);
                         }
 
                         JSONObject galleryItem = galleryIdsArray.getJSONObject(i);
@@ -908,8 +934,8 @@ public class ParsePost {
                         }
 
                         if (previews.isEmpty() && (mimeType.contains("jpg") || mimeType.contains("png"))) {
-                            previews.add(new Post.Preview(galleryItemUrl, singleGalleryObject.getJSONObject(JSONUtils.S_KEY).getInt(JSONUtils.X_KEY),
-                                    singleGalleryObject.getJSONObject(JSONUtils.S_KEY).getInt(JSONUtils.Y_KEY), galleryItemCaption, galleryItemCaptionUrl));
+                            previews.add(new Post.Preview(galleryItemUrl, sourceObject.getInt(JSONUtils.X_KEY),
+                                    sourceObject.getInt(JSONUtils.Y_KEY), galleryItemCaption, galleryItemCaptionUrl));
                         }
 
                         Post.Gallery postGalleryItem = new Post.Gallery(mimeType, galleryItemUrl, "", subredditName + "-" + galleryId + "." + mimeType.substring(mimeType.lastIndexOf("/") + 1), galleryItemCaption, galleryItemCaptionUrl);
@@ -972,6 +998,31 @@ public class ParsePost {
 }
                      */
                     Log.e("ParsePost", "parseData failed", e);
+                }
+
+                // The gallery did not survive: its `gallery_data` items resolve to nothing in
+                // `media_metadata`, which is what Reddit leaves behind once the images are deleted.
+                // Left in the link family the post is labelled LINK and offers to open its own
+                // `https://www.reddit.com/gallery/<id>` url -- a page that is this post. It is not
+                // really a text post either, but with no images left that is the closest honest
+                // type, and it is the one the self-referential `url.contains(permalink)` tests
+                // above would already have picked if a gallery url contained its permalink. Null
+                // the url to match how those branches build a text post. This has to run after the
+                // upgrade attempt, never before it: a healthy gallery reaches here as a link type
+                // too, and demoting early would cost it its gallery.
+                if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
+                    post.setPostType(Post.TEXT_TYPE);
+                    post.setUrl(null);
+                    // Drop the thumbnail with it. It is a 140px remnant of images Reddit no longer
+                    // serves, and both the feed and the post detail will synthesise a full-width
+                    // preview out of any thumbnail they are handed -- the blurry upscale this
+                    // demotion exists to remove. Without this the upscale only disappears for a
+                    // post whose body happens to embed its own media, which is the rarer case:
+                    // once the images are gone `media_metadata` holds inline-body entries only, so
+                    // a deleted gallery with a plain text body has none and keeps the blurry
+                    // header. Cleared on the local because the tail of this method assigns
+                    // `post.setThumbnailUrl(...)` last and would put it straight back.
+                    resolvedThumbnailUrl = "";
                 }
             } else if (post.getPostType() == Post.LINK_TYPE) {
                 String authority = uri.getAuthority();
@@ -1045,7 +1096,7 @@ public class ParsePost {
             }
         }
 
-        post.setThumbnailUrl(thumbnailUrl);
+        post.setThumbnailUrl(resolvedThumbnailUrl);
         post.setMediaMetadataMap(mediaMetadataMap);
         post.setSubredditIconUrl(subredditIconUrl);
         return post;
