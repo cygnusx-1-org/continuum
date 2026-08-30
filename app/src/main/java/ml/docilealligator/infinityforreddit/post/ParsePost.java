@@ -925,10 +925,10 @@ public class ParsePost {
                         // inline feed/post-detail rendering. This avoids decoding the full-size
                         // source (often several thousand px) into a bitmap on every bind, which
                         // keeps the result in Glide's memory cache far longer. For GIFs/videos the
-                        // `p` previews are static stills, which is exactly what the feed wants — the
-                        // feed never animates the source, and decoding the full animated GIF inline
-                        // can fail outright. The full-screen media view is unaffected: it always
-                        // loads `url` (the source) directly, never feedPreviewUrl.
+                        // `p` previews are static stills, which is what the feed shows until gif
+                        // autoplay picks that tile — only then is the source (often tens of MB)
+                        // loaded, for that one tile. The full-screen media view is unaffected: it
+                        // always loads `url` (the source) directly, never feedPreviewUrl.
                         if (singleGalleryObject.has(JSONUtils.P_KEY)) {
                             JSONArray previewsArray = singleGalleryObject.getJSONArray(JSONUtils.P_KEY);
                             String bestPreviewUrl = null;

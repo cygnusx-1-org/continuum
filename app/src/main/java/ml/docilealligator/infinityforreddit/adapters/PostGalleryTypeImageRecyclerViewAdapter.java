@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.adapters;
 
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -24,6 +25,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import io.noties.markwon.Markwon;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
@@ -47,6 +49,19 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     private int maxPreviewHeight;
     private final boolean showCaption;
     private boolean isGridLayout;
+    // Whether this post is eligible to animate its gifs at all: Video Autoplay is on (and, on the
+    // "On Wi-Fi" setting, we are on Wi-Fi), and the post is not one autoplay skips (NSFW with
+    // "Autoplay NSFW videos" off, or a spoiler). Set by the host adapter on every bind.
+    private boolean autoplayGif;
+    // Whether the host RecyclerView's autoplay coordinator has currently selected this post to
+    // play, honouring Settings -> Video -> "Simultaneous autoplay limit" across the whole feed.
+    private boolean playing;
+    // The gallery page the pager is settled on. Only that tile animates -- the neighbouring pages
+    // RecyclerView keeps bound for a smooth swipe are off screen, and animating them would spend
+    // the autoplay budget on frames nobody sees.
+    private int currentPosition;
+    @Nullable
+    private RecyclerView attachedRecyclerView;
 
     public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
@@ -147,6 +162,18 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     }
 
     @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        attachedRecyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        attachedRecyclerView = null;
+    }
+
+    @Override
     public void onViewRecycled(@NonNull ImageViewHolder holder) {
         super.onViewRecycled(holder);
         if (holder.pendingLayoutListener != null) {
@@ -185,13 +212,21 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         }
 
         Post.Gallery galleryImage = galleryImages.get(index);
-        // Prefer the resolution-bounded feed preview for static images; fall back to the source
-        // (always used for GIFs/videos and for images without a usable preview). The full-screen
+        // Prefer the resolution-bounded feed preview, which for a gif is a static still. The source
+        // -- the animated gif itself, often tens of MB -- is loaded only for the one tile that is
+        // playing (issue #382), or when there is no usable preview to fall back on. The full-screen
         // media view is unaffected — it loads `url` directly.
-        String loadUrl = galleryImage.feedPreviewUrl != null ? galleryImage.feedPreviewUrl : galleryImage.url;
+        boolean loadSource = shouldAnimate(index) || galleryImage.feedPreviewUrl == null;
+        String loadUrl = loadSource ? galleryImage.url : galleryImage.feedPreviewUrl;
 
+        // A still is worth caching decoded (ALL); an animated gif must not be. Its decoded resource
+        // is the animation library's GifDecoder, which has no Glide result encoder, so ALL fails
+        // the load outright with NoResultEncoderAvailableException — which also left a gif with no
+        // still to fall back on showing the error tile. DATA caches the downloaded bytes instead,
+        // which is the expensive half anyway.
+        boolean animatedResource = loadSource && galleryImage.mediaType == Post.Gallery.TYPE_GIF;
         RequestBuilder<Drawable> imageRequestBuilder = glide.load(loadUrl)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(animatedResource ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL)
                 .listener(new RequestListener<>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -209,6 +244,16 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
                 holder.binding.errorImageViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
                 holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
                 holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
+                if (resource instanceof Animatable) {
+                    // A gif with no usable still to fall back on lands here even when this tile is
+                    // not the one playing. Glide starts the animation immediately after this
+                    // callback returns, so undo it on the next loop rather than from here.
+                    holder.binding.imageViewItemGalleryImageInPostFeed.post(() -> {
+                        if (!shouldAnimate(holder.getBindingAdapterPosition())) {
+                            stopAnimation(holder);
+                        }
+                    });
+                }
                 return false;
             }
         });
@@ -228,6 +273,115 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
                         .downsample(saveMemoryCenterInisdeDownsampleStrategy).into(holder.binding.imageViewItemGalleryImageInPostFeed);
             } else {
                 imageRequestBuilder.centerInside().downsample(saveMemoryCenterInisdeDownsampleStrategy).into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            }
+        }
+    }
+
+    /**
+     * Whether the tile at {@code index} should be showing a running gif right now: this post is
+     * eligible, the autoplay coordinator has picked it, and {@code index} is the page the pager is
+     * settled on. Grid layout is excluded — every tile is on screen at once there, so animating
+     * them would mean fetching every gif in the gallery at full size.
+     */
+    private boolean shouldAnimate(int index) {
+        return playing && index == currentPosition && canAnimateCurrentTile();
+    }
+
+    /**
+     * Whether the settled page is a gif this post is allowed to animate. Used by the host
+     * ViewHolder to decide whether to ask for one of the autoplay slots at all, so a gallery
+     * sitting on a still image never takes a slot from a video.
+     */
+    public boolean canAnimateCurrentTile() {
+        return autoplayGif && !isGridLayout && !blurImage
+                && galleryImages != null && currentPosition >= 0 && currentPosition < galleryImages.size()
+                && galleryImages.get(currentPosition).mediaType == Post.Gallery.TYPE_GIF;
+    }
+
+    public void setAutoplayGif(boolean autoplayGif) {
+        this.autoplayGif = autoplayGif;
+    }
+
+    /** Called by the host ViewHolder when the autoplay coordinator starts or stops this post. */
+    public void setPlaying(boolean playing) {
+        if (this.playing == playing) {
+            return;
+        }
+        this.playing = playing;
+        if (playing) {
+            startCurrentTile();
+        } else {
+            forEachAttachedHolder(this::stopAnimation);
+        }
+    }
+
+    /**
+     * Called by the host ViewHolder when the pager settles. Returns whether the settled page
+     * actually changed, i.e. whether which tile may animate has to be reconsidered.
+     */
+    public boolean setCurrentPosition(int currentPosition) {
+        if (this.currentPosition == currentPosition) {
+            return false;
+        }
+        this.currentPosition = currentPosition;
+        if (!playing) {
+            return true;
+        }
+        forEachAttachedHolder(holder -> {
+            if (holder.getBindingAdapterPosition() != this.currentPosition) {
+                stopAnimation(holder);
+            }
+        });
+        startCurrentTile();
+        return true;
+    }
+
+    // The settled tile may already hold the animated gif (paused, or scrolled back to), in which
+    // case it only needs restarting; otherwise it is showing the still and has to load the source.
+    private void startCurrentTile() {
+        if (!shouldAnimate(currentPosition)) {
+            return;
+        }
+        ImageViewHolder holder = findAttachedHolder(currentPosition);
+        if (holder == null) {
+            // Not bound yet — loadImage() consults shouldAnimate() when it is.
+            return;
+        }
+        Drawable drawable = holder.binding.imageViewItemGalleryImageInPostFeed.getDrawable();
+        if (drawable instanceof Animatable) {
+            ((Animatable) drawable).start();
+        } else {
+            loadImage(holder);
+        }
+    }
+
+    private void stopAnimation(ImageViewHolder holder) {
+        Drawable drawable = holder.binding.imageViewItemGalleryImageInPostFeed.getDrawable();
+        if (drawable instanceof Animatable && ((Animatable) drawable).isRunning()) {
+            // Leave the frame it stopped on: it is a frame of the gif itself, so freezing beats
+            // reloading the still and flashing a different image in its place.
+            ((Animatable) drawable).stop();
+        }
+    }
+
+    @Nullable
+    private ImageViewHolder findAttachedHolder(int position) {
+        if (attachedRecyclerView == null) {
+            return null;
+        }
+        RecyclerView.ViewHolder holder = attachedRecyclerView.findViewHolderForAdapterPosition(position);
+        return holder instanceof ImageViewHolder ? (ImageViewHolder) holder : null;
+    }
+
+    private void forEachAttachedHolder(Consumer<ImageViewHolder> action) {
+        if (attachedRecyclerView == null) {
+            return;
+        }
+        for (int i = 0; i < attachedRecyclerView.getChildCount(); i++) {
+            RecyclerView.ViewHolder holder =
+                    attachedRecyclerView.getChildViewHolder(attachedRecyclerView.getChildAt(i));
+            if (holder instanceof ImageViewHolder) {
+                action.accept((ImageViewHolder) holder);
             }
         }
     }
@@ -265,6 +419,8 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
 
     public void setGalleryImages(@Nullable ArrayList<Post.Gallery> galleryImages) {
         this.galleryImages = galleryImages != null ? galleryImages : new java.util.ArrayList<>();
+        // A recycled holder is showing a different post now, so its pager starts back at page one.
+        currentPosition = 0;
         notifyDataSetChanged();
     }
 

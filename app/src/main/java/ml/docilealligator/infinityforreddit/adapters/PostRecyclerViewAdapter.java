@@ -139,6 +139,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoPlayerViewHelper;
 import ml.docilealligator.infinityforreddit.videoautoplay.MultiPlayPlayerSelector;
 import ml.docilealligator.infinityforreddit.videoautoplay.Playable;
+import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
@@ -1238,9 +1239,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
                             ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
                         }
+                        boolean blurGallery = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler);
+                        ((PostBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(blurGallery);
+                        ((PostBaseGalleryTypeViewHolder) holder).adapter.setAutoplayGif(shouldAutoplayGalleryGif(post, blurGallery));
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
-                        ((PostBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(
-                                (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler));
                     }
                     applyTypeColor(((PostBaseGalleryTypeViewHolder) holder).typeTextView, post.getPostType());
 
@@ -1696,9 +1698,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
                             ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
                     }
+                    boolean blurGallery = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler);
+                    ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(blurGallery);
+                    ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setAutoplayGif(shouldAutoplayGalleryGif(post, blurGallery));
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
-                    ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(
-                            (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler));
                 }
             }
         }
@@ -1788,6 +1791,20 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     private boolean shouldUseCompactLayout(Post post) {
         return (post.getPreviews() == null || post.getPreviews().isEmpty()) && !hasValidThumbnailFallback(post.getThumbnailUrl());
+    }
+
+    /**
+     * Whether a gallery post may animate its gifs in the feed (issue #382). This is the same rule
+     * an autoplaying video post follows — Settings -&gt; Video -&gt; "Video Autoplay" (already folded
+     * into {@link #mAutoplay} together with the Wi-Fi check), skipping NSFW posts when "Autoplay
+     * NSFW videos" is off, and skipping spoilers — plus two of its own: a blurred gallery keeps its
+     * still, and so does the grid layout, where every tile is on screen at once and animating them
+     * would mean pulling every gif in the gallery at full size.
+     */
+    private boolean shouldAutoplayGalleryGif(Post post, boolean blurGallery) {
+        return mAutoplay && !blurGallery && !mShowGalleryMediaAsGrid
+                && !((!mAutoplayNsfwVideos && post.isNSFW()) || post.isSpoiler())
+                && post.hasGalleryGif();
     }
 
     private int getTypeColor(int postType) {
@@ -4246,13 +4263,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 && mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false);
     }
 
-    public abstract class PostBaseGalleryTypeViewHolder extends PostBaseViewHolder {
+    public abstract class PostBaseGalleryTypeViewHolder extends PostBaseViewHolder implements ToroPlayer {
         FrameLayout frameLayout;
         RecyclerView galleryRecyclerView;
         CustomTextView imageIndexTextView;
         ImageView noPreviewImageView;
 
         PostGalleryTypeImageRecyclerViewAdapter adapter;
+        GalleryGifAutoplay toroPlayer;
         private boolean swipeLocked;
 
         PostBaseGalleryTypeViewHolder(View rootView,
@@ -4323,6 +4341,28 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
             adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface,
                     mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor);
+            toroPlayer = new GalleryGifAutoplay(rootView, galleryRecyclerView, adapter) {
+                @Override
+                protected boolean canPlay() {
+                    return canPlayVideo;
+                }
+
+                @Override
+                protected double visibleAreaThreshold() {
+                    return mStartAutoplayVisibleAreaOffset;
+                }
+
+                @Override
+                @Nullable
+                protected PlayerSelector playerSelector() {
+                    return multiPlayPlayerSelector;
+                }
+
+                @Override
+                public int getPlayerOrder() {
+                    return getBindingAdapterPosition();
+                }
+            };
             galleryRecyclerView.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(galleryRecyclerView);
             galleryRecyclerView.setRecycledViewPool(mGalleryRecycledViewPool);
@@ -4339,6 +4379,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
+                    if (newState != RecyclerView.SCROLL_STATE_IDLE) {
+                        return;
+                    }
+                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                    if (layoutManager instanceof LinearLayoutManagerBugFixed) {
+                        toroPlayer.onGalleryPageSettled(
+                                ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition());
+                    }
                 }
 
                 @Override
@@ -4494,6 +4542,53 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         public boolean isSwipeLocked() {
             return swipeLocked;
+        }
+
+        @NonNull
+        @Override
+        public View getPlayerView() {
+            return toroPlayer.getPlayerView();
+        }
+
+        @NonNull
+        @Override
+        public PlaybackInfo getCurrentPlaybackInfo() {
+            return toroPlayer.getCurrentPlaybackInfo();
+        }
+
+        @Override
+        public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
+            toroPlayer.initialize(container, playbackInfo);
+        }
+
+        @Override
+        public void play() {
+            toroPlayer.play();
+        }
+
+        @Override
+        public void pause() {
+            toroPlayer.pause();
+        }
+
+        @Override
+        public boolean isPlaying() {
+            return toroPlayer.isPlaying();
+        }
+
+        @Override
+        public void release() {
+            toroPlayer.release();
+        }
+
+        @Override
+        public boolean wantsToPlay() {
+            return toroPlayer.wantsToPlay();
+        }
+
+        @Override
+        public int getPlayerOrder() {
+            return toroPlayer.getPlayerOrder();
         }
     }
 
@@ -5328,7 +5423,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
-    class PostGalleryBaseGalleryTypeViewHolder extends RecyclerView.ViewHolder {
+    class PostGalleryBaseGalleryTypeViewHolder extends RecyclerView.ViewHolder implements ToroPlayer {
 
         FrameLayout frameLayout;
         RecyclerView recyclerView;
@@ -5336,6 +5431,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         ImageView noPreviewImageView;
 
         PostGalleryTypeImageRecyclerViewAdapter adapter;
+        GalleryGifAutoplay toroPlayer;
         private final LinearLayoutManagerBugFixed layoutManager;
 
         Post post;
@@ -5371,6 +5467,28 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
             adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface,
                     mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor);
+            toroPlayer = new GalleryGifAutoplay(itemView, recyclerView, adapter) {
+                @Override
+                protected boolean canPlay() {
+                    return canPlayVideo;
+                }
+
+                @Override
+                protected double visibleAreaThreshold() {
+                    return mStartAutoplayVisibleAreaOffset;
+                }
+
+                @Override
+                @Nullable
+                protected PlayerSelector playerSelector() {
+                    return multiPlayPlayerSelector;
+                }
+
+                @Override
+                public int getPlayerOrder() {
+                    return getBindingAdapterPosition();
+                }
+            };
             recyclerView.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(recyclerView);
             recyclerView.setRecycledViewPool(mGalleryRecycledViewPool);
@@ -5383,6 +5501,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        toroPlayer.onGalleryPageSettled(layoutManager.findFirstVisibleItemPosition());
+                    }
                 }
 
                 @Override
@@ -5526,6 +5647,53 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((MarkPostAsReadInterface) mActivity).markPostAsRead(post);
                 }
             }
+        }
+
+        @NonNull
+        @Override
+        public View getPlayerView() {
+            return toroPlayer.getPlayerView();
+        }
+
+        @NonNull
+        @Override
+        public PlaybackInfo getCurrentPlaybackInfo() {
+            return toroPlayer.getCurrentPlaybackInfo();
+        }
+
+        @Override
+        public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
+            toroPlayer.initialize(container, playbackInfo);
+        }
+
+        @Override
+        public void play() {
+            toroPlayer.play();
+        }
+
+        @Override
+        public void pause() {
+            toroPlayer.pause();
+        }
+
+        @Override
+        public boolean isPlaying() {
+            return toroPlayer.isPlaying();
+        }
+
+        @Override
+        public void release() {
+            toroPlayer.release();
+        }
+
+        @Override
+        public boolean wantsToPlay() {
+            return toroPlayer.wantsToPlay();
+        }
+
+        @Override
+        public int getPlayerOrder() {
+            return toroPlayer.getPlayerOrder();
         }
     }
 

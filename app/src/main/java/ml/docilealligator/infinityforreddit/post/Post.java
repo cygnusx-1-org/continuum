@@ -855,6 +855,19 @@ public class Post implements Parcelable {
         this.gallery = gallery != null ? gallery : new ArrayList<>();
     }
 
+    /**
+     * Whether any item in this gallery is an animated gif, i.e. whether the post has anything for
+     * the feed's gif autoplay to play.
+     */
+    public boolean hasGalleryGif() {
+        for (Gallery galleryItem : gallery) {
+            if (galleryItem.mediaType == Gallery.TYPE_GIF) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Nullable
     public String getMp4Variant() {
         return mp4Variant;
@@ -905,9 +918,10 @@ public class Post implements Parcelable {
         public String url;
         public String fallbackUrl;
         private boolean hasFallback;
-        // A smaller, resolution-bounded preview used only when rendering the gallery inline in the
-        // feed/post-detail card. The full-screen media view keeps using `url` (the source). Null for
-        // GIFs/videos and for images that have no usable preview.
+        // A smaller, resolution-bounded preview used when rendering the gallery inline in the
+        // feed/post-detail card. The full-screen media view keeps using `url` (the source). For a
+        // gif this is a static still, so the inline gallery falls back to `url` for the one tile
+        // autoplay is animating. Null for items that have no usable preview.
         @Nullable
         public String feedPreviewUrl;
         public String fileName;

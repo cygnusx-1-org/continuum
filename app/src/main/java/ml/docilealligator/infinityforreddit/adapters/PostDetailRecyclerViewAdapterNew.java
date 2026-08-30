@@ -1031,8 +1031,14 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                 mActivity.getResources().getDisplayMetrics().heightPixels / 2);
                         ((PostDetailGalleryViewHolder) holder).adapter.setRatio(1);
                     }
-                    ((PostDetailGalleryViewHolder) holder).adapter.setBlurImage(
-                            (mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost.isSpoiler() && mNeedBlurSpoiler));
+                    boolean blurGallery = (mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost.isSpoiler() && mNeedBlurSpoiler);
+                    ((PostDetailGalleryViewHolder) holder).adapter.setBlurImage(blurGallery);
+                    // Same rule the feed follows for gallery gifs (issue #382): Video Autoplay on,
+                    // not an autoplay-skipped NSFW/spoiler post, not blurred, not the grid layout.
+                    ((PostDetailGalleryViewHolder) holder).adapter.setAutoplayGif(
+                            mAutoplay && !blurGallery && !mShowGalleryMediaAsGrid
+                                    && !((!mAutoplayNsfwVideos && mPost.isNSFW()) || mPost.isSpoiler())
+                                    && mPost.hasGalleryGif());
                     // Delay setGalleryImages until the gallery RecyclerView has been
                     // laid out with its final width. In the split post/comments view,
                     // the RecyclerView may have width=0 during initial bind because the
@@ -2875,9 +2881,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
     }
 
-    class PostDetailGalleryViewHolder extends PostDetailBaseViewHolder {
+    class PostDetailGalleryViewHolder extends PostDetailBaseViewHolder implements ToroPlayer {
         ItemPostDetailGalleryBinding binding;
         PostGalleryTypeImageRecyclerViewAdapter adapter;
+        GalleryGifAutoplay toroPlayer;
 
         PostDetailGalleryViewHolder(@NonNull ItemPostDetailGalleryBinding binding) {
             super(binding.getRoot());
@@ -2919,6 +2926,23 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             adapter = new PostGalleryTypeImageRecyclerViewAdapter(mGlide, mActivity.typeface, mPostDetailMarkwon,
                     mSaveMemoryCenterInsideDownsampleStrategy, mColorAccent, mPrimaryTextColor,
                     mCardViewColor, mCommentColor);
+            toroPlayer = new GalleryGifAutoplay(binding.getRoot(),
+                    binding.galleryRecyclerViewItemPostDetailGallery, adapter) {
+                @Override
+                protected boolean canPlay() {
+                    return canPlayVideo;
+                }
+
+                @Override
+                protected double visibleAreaThreshold() {
+                    return mStartAutoplayVisibleAreaOffset;
+                }
+
+                @Override
+                public int getPlayerOrder() {
+                    return getBindingAdapterPosition();
+                }
+            };
             binding.galleryRecyclerViewItemPostDetailGallery.setAdapter(adapter);
             new PagerSnapHelper().attachToRecyclerView(binding.galleryRecyclerViewItemPostDetailGallery);
             RecyclerView.LayoutManager layoutManager;
@@ -2936,6 +2960,11 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE
+                            && layoutManager instanceof LinearLayoutManagerBugFixed) {
+                        toroPlayer.onGalleryPageSettled(
+                                ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition());
+                    }
                 }
 
                 @Override
@@ -3044,6 +3073,53 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             binding.noPreviewPostTypeImageViewItemPostDetailGallery.setOnClickListener(view -> {
                 openMedia(mPost);
             });
+        }
+
+        @NonNull
+        @Override
+        public View getPlayerView() {
+            return toroPlayer.getPlayerView();
+        }
+
+        @NonNull
+        @Override
+        public PlaybackInfo getCurrentPlaybackInfo() {
+            return toroPlayer.getCurrentPlaybackInfo();
+        }
+
+        @Override
+        public void initialize(@NonNull Container container, @NonNull PlaybackInfo playbackInfo) {
+            toroPlayer.initialize(container, playbackInfo);
+        }
+
+        @Override
+        public void play() {
+            toroPlayer.play();
+        }
+
+        @Override
+        public void pause() {
+            toroPlayer.pause();
+        }
+
+        @Override
+        public boolean isPlaying() {
+            return toroPlayer.isPlaying();
+        }
+
+        @Override
+        public void release() {
+            toroPlayer.release();
+        }
+
+        @Override
+        public boolean wantsToPlay() {
+            return toroPlayer.wantsToPlay();
+        }
+
+        @Override
+        public int getPlayerOrder() {
+            return toroPlayer.getPlayerOrder();
         }
     }
 
