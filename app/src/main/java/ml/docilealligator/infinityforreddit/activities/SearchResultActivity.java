@@ -91,6 +91,13 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     public static final String EXTRA_SEARCH_IN_MULTIREDDIT = "ESIM";
     public static final String EXTRA_SEARCH_IN_THING_TYPE = "ESITT";
     public static final String EXTRA_SHOULD_RETURN_SUBREDDIT_AND_USER_NAME = "ESRSAUN";
+    public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
+    public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
+    public static final String EXTRA_INITIAL_TAB = "EIT";
+
+    public static final int TAB_POSTS = 0;
+    public static final int TAB_SUBREDDITS = 1;
+    public static final int TAB_USERS = 2;
 
     private static final String INSERT_SEARCH_QUERY_SUCCESS_STATE = "ISQSS";
 
@@ -139,6 +146,10 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     private MultiReddit mSearchInMultiReddit;
     @SelectThingReturnKey.THING_TYPE
     private int mSearchInThingType;
+    @Nullable
+    private String initialSortType;
+    @Nullable
+    private String initialSortTime;
     private boolean mInsertSearchQuerySuccess;
     private boolean mReturnSubredditAndUserName;
     private FragmentManager fragmentManager;
@@ -228,6 +239,8 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         mSearchInMultiReddit = intent.getParcelableExtra(EXTRA_SEARCH_IN_MULTIREDDIT);
         mSearchInThingType = intent.getIntExtra(EXTRA_SEARCH_IN_THING_TYPE, SelectThingReturnKey.THING_TYPE.SUBREDDIT);
         mReturnSubredditAndUserName = intent.getBooleanExtra(EXTRA_SHOULD_RETURN_SUBREDDIT_AND_USER_NAME, false);
+        initialSortType = intent.getStringExtra(EXTRA_INITIAL_SORT_TYPE);
+        initialSortTime = intent.getStringExtra(EXTRA_INITIAL_SORT_TIME);
 
         if (query != null) {
             mQuery = query;
@@ -315,7 +328,13 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         fixViewPager2Sensitivity(binding.viewPagerSearchResultActivity);
 
         if (savedInstanceState == null) {
-            binding.viewPagerSearchResultActivity.setCurrentItem(SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_SEARCH_RESULT_TAB, "0"), false);
+            // A search link naming a result kind (?type=sr) opens on that tab; everything else
+            // opens on the tab the user configured.
+            int initialTab = getIntent().getIntExtra(EXTRA_INITIAL_TAB, -1);
+            if (initialTab < 0 || initialTab >= sectionsPagerAdapter.getItemCount()) {
+                initialTab = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_SEARCH_RESULT_TAB, "0");
+            }
+            binding.viewPagerSearchResultActivity.setCurrentItem(initialTab, false);
         }
 
         fabOption = bottomAppBarSharedPreference.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS);
@@ -848,6 +867,10 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
             }
             bundle.putString(PostFragment.EXTRA_QUERY, mQuery);
             bundle.putString(PostFragment.EXTRA_TRENDING_SOURCE, getIntent().getStringExtra(EXTRA_TRENDING_SOURCE));
+            if (initialSortType != null) {
+                bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
+                bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
+            }
             mFragment.setArguments(bundle);
             return mFragment;
         }

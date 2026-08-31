@@ -338,9 +338,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.SEARCH_TYPE;
             nameOfUsage = PostFilterUsage.NO_USAGE;
 
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_POST, SortType.Type.RELEVANCE.name());
-            String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SEARCH_POST, SortType.Time.ALL.name());
-            sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+            SortType overrideSortType = getOverrideSortType(savedInstanceState);
+            if (overrideSortType != null) {
+                sortType = overrideSortType;
+            } else {
+                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_POST, SortType.Type.RELEVANCE.name());
+                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SEARCH_POST, SortType.Time.ALL.name());
+                sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+            }
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
@@ -1444,9 +1449,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         outState.putString(CONCATENATED_SUBREDDIT_NAMES_STATE, concatenatedSubredditNames);
         outState.putLong(POST_FRAGMENT_ID_STATE, postFragmentId);
 
-        // Only the subreddit/multireddit/user paths restore this (see getOverrideSortType).
+        // Only the subreddit/multireddit/user/search paths restore this (see getOverrideSortType).
         if ((postType == PostType.SUBREDDIT || postType == PostType.MULTIREDDIT
-                || postType == PostType.ANONYMOUS_MULTIREDDIT || postType == PostType.USER)
+                || postType == PostType.ANONYMOUS_MULTIREDDIT || postType == PostType.USER
+                || postType == PostType.SEARCH)
                 && sortType != null) {
             outState.putString(SORT_TYPE_STATE, sortType.getType().name());
             if (sortType.getTime() != null) {
@@ -1459,7 +1465,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
      * Resolves a sort that should take precedence over the saved/default sort: the live sort
      * restored across a config change, or a sort carried by an opening deep link on fresh
      * creation. Returns null to fall back to the saved/default sort. Only consulted by the
-     * subreddit, multireddit (incl. anonymous), and user paths.
+     * subreddit, multireddit (incl. anonymous), user, and search paths.
      */
     @Nullable
     private SortType getOverrideSortType(@Nullable Bundle savedInstanceState) {

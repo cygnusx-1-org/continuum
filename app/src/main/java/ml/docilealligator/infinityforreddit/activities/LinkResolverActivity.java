@@ -28,6 +28,8 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
+import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -64,6 +66,16 @@ public class LinkResolverActivity extends AppCompatActivity {
     private static final String POST_WITHOUT_SUBREDDIT_PATTERN = "/comments/\\w+(/[\\w-]+)*/?";
     private static final String REDDIT_GALLERY_PATTERN = "/gallery/\\w+/?";
     private static final String SIDEBAR_PATTERN = "/[rR]/[\\w.-]+/about/sidebar";
+    // Search links. The query lives in ?q=; the path decides the scope: /search is site-wide,
+    // /r/<sub>/search and /user/<owner>/m/<multi>/search (plus the /me/m/<multi> shortcut) scope to
+    // that listing when the link asks for it, and /user/<name>/search searches a profile. A
+    // combined /r/a+b/search is deliberately excluded — \w admits no '+' — because the search
+    // endpoint takes the subreddit as a path segment and would escape it into a 404.
+    private static final String SEARCH_PATTERN = "/search/?";
+    private static final String SUBREDDIT_SEARCH_PATTERN = "/[rR]/[\\w.-]+/search/?";
+    private static final String USER_SEARCH_PATTERN = "/(u|U|user)/[\\w-]+/search/?";
+    private static final String MULTIREDDIT_USER_SEARCH_PATTERN = "/(u|U|user)/[\\w-]+/m/[\\w-]+/search/?";
+    private static final String MULTIREDDIT_ME_SEARCH_PATTERN = "/me/m/[\\w-]+/search/?";
     private static final String MULTIREDDIT_PATTERN_2 = "/[rR]/(\\w+\\+?)+" + SUBREDDIT_SORT_SUFFIX + "/?";
     // A user's multireddit: /user/<name>/m/<multi> (or the /me/m/<multi> shortcut), optional sort suffix.
     private static final String MULTIREDDIT_USER_PATTERN = "/(u|U|user)/[\\w-]+/m/[\\w-]+" + SUBREDDIT_SORT_SUFFIX + "/?";
@@ -142,6 +154,12 @@ public class LinkResolverActivity extends AppCompatActivity {
             return false;
         }
 
+        // Likewise search links, of which the site-wide /search is a single path segment that
+        // POST_PATTERN_3 would otherwise claim.
+        if (isSearchPath(path)) {
+            return false;
+        }
+
         return path.matches(POST_PATTERN) || path.matches(POST_PATTERN_2)
                 || path.matches(POST_PATTERN_3) || path.matches(COMMENT_PATTERN)
                 || path.matches(POST_WITHOUT_SUBREDDIT_PATTERN)
@@ -195,6 +213,166 @@ public class LinkResolverActivity extends AppCompatActivity {
             SortType.Time sortTime = urlParamToSortTime(uri.getQueryParameter("t"));
             intent.putExtra(ViewUserDetailActivity.EXTRA_INITIAL_SORT_TIME,
                     (sortTime != null ? sortTime : SortType.Time.ALL).name());
+        }
+    }
+
+    /**
+     * Whether a path is one of the Reddit search forms. Checked ahead of the post patterns because
+     * the site-wide {@code /search} is a single path segment that {@link #POST_PATTERN_3} would
+     * otherwise claim as a post id.
+     */
+    private static boolean isSearchPath(String path) {
+        return path.matches(SEARCH_PATTERN) || path.matches(SUBREDDIT_SEARCH_PATTERN)
+                || path.matches(USER_SEARCH_PATTERN) || path.matches(MULTIREDDIT_USER_SEARCH_PATTERN)
+                || path.matches(MULTIREDDIT_ME_SEARCH_PATTERN);
+    }
+
+    /**
+     * Opens a search link in {@link SearchResultActivity}, carrying over the query, the scope its
+     * path asks for, the sort and the results tab.
+     *
+     * <p>A subreddit's or multireddit's search box only narrows the search when "limit my search
+     * to ..." is ticked, which the link carries as {@code restrict_sr}; without it that same page
+     * searches all of Reddit, so an unrestricted link must not be narrowed to the listing it came
+     * from. A profile search has no such toggle and always scopes to the user.
+     *
+     * <p>With no query there is nothing to search, so the link opens {@link SearchActivity} on the
+     * same scope with an empty search box rather than an empty result screen.
+     */
+    private void handleSearchUri(Uri uri, String path, List<String> segments) {
+        String searchInSubredditOrUserName = null;
+        MultiReddit searchInMultiReddit = null;
+        @SelectThingReturnKey.THING_TYPE int searchInThingType = SelectThingReturnKey.THING_TYPE.SUBREDDIT;
+
+        if (path.matches(SUBREDDIT_SEARCH_PATTERN)) {
+            if (restrictsToListing(uri)) {
+                searchInSubredditOrUserName = segments.get(1);
+            }
+        } else if (path.matches(USER_SEARCH_PATTERN)) {
+            searchInSubredditOrUserName = segments.get(1);
+            searchInThingType = SelectThingReturnKey.THING_TYPE.USER;
+        } else if (path.matches(MULTIREDDIT_USER_SEARCH_PATTERN)
+                || path.matches(MULTIREDDIT_ME_SEARCH_PATTERN)) {
+            boolean meForm = segments.get(0).equals("me");
+            String multiOwner = meForm
+                    ? mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "")
+                    : segments.get(1);
+            if (multiOwner == null || (meForm && multiOwner.isEmpty())) {
+                // /me/ has no meaning without a signed-in account.
+                deepLinkError(uri);
+                return;
+            }
+            if (restrictsToListing(uri)) {
+                // Only the path is read back from this (SearchResultActivity hands it to the
+                // multireddit search endpoint), so the rest is filled in from the link itself
+                // instead of waiting on a lookup of a multireddit that may not even be the
+                // signed-in account's.
+                String multiName = segments.get(meForm ? 2 : 3);
+                String multiPath = "/user/" + multiOwner + "/m/" + multiName;
+                searchInMultiReddit = new MultiReddit(multiPath, multiName, multiName, null, null,
+                        null, null, multiOwner, 0, 0, false, false, false);
+                searchInThingType = SelectThingReturnKey.THING_TYPE.MULTIREDDIT;
+            }
+        }
+
+        String query = getSearchQuery(uri);
+        if (query == null || query.trim().isEmpty()) {
+            Intent intent = new Intent(this, SearchActivity.class);
+            intent.putExtra(SearchActivity.EXTRA_SEARCH_IN_SUBREDDIT_OR_USER_NAME, searchInSubredditOrUserName);
+            intent.putExtra(SearchActivity.EXTRA_SEARCH_IN_MULTIREDDIT, searchInMultiReddit);
+            intent.putExtra(SearchActivity.EXTRA_SEARCH_IN_THING_TYPE, searchInThingType);
+            startActivity(intent);
+            return;
+        }
+
+        Intent intent = new Intent(this, SearchResultActivity.class);
+        intent.putExtra(SearchResultActivity.EXTRA_QUERY, query);
+        intent.putExtra(SearchResultActivity.EXTRA_SEARCH_IN_SUBREDDIT_OR_USER_NAME, searchInSubredditOrUserName);
+        intent.putExtra(SearchResultActivity.EXTRA_SEARCH_IN_MULTIREDDIT, searchInMultiReddit);
+        intent.putExtra(SearchResultActivity.EXTRA_SEARCH_IN_THING_TYPE, searchInThingType);
+        putSearchInitialSort(intent, uri);
+        int initialTab = searchResultTab(uri);
+        if (initialTab >= 0) {
+            intent.putExtra(SearchResultActivity.EXTRA_INITIAL_TAB, initialTab);
+        }
+        startActivity(intent);
+    }
+
+    /**
+     * Reads {@code ?q=} out of a search link. {@link Uri#getQueryParameter} unescapes %XX but
+     * leaves '+' alone, and old.reddit's search form submits spaces as '+' (q=arc+browser), so the
+     * raw parameter is decoded here rather than reaching Reddit with its pluses intact.
+     */
+    @Nullable
+    private static String getSearchQuery(Uri uri) {
+        String encodedQuery = uri.getEncodedQuery();
+        if (encodedQuery == null) {
+            return null;
+        }
+        @SuppressWarnings("StringSplitter") // Trailing empty fields carry no parameter to read.
+        String[] params = encodedQuery.split("&");
+        for (String param : params) {
+            int equalsIndex = param.indexOf('=');
+            if (equalsIndex > 0 && param.substring(0, equalsIndex).equals("q")) {
+                return Uri.decode(param.substring(equalsIndex + 1).replace("+", "%20"));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Whether a subreddit's or multireddit's search link asks to stay inside that listing, i.e.
+     * whether Reddit's "limit my search to ..." checkbox was ticked when the link was made.
+     */
+    private static boolean restrictsToListing(Uri uri) {
+        String restrictSr = uri.getQueryParameter("restrict_sr");
+        // Reddit's own links say "on"; "1"/"true"/"yes" turn up in hand-written and API-built ones.
+        return "on".equalsIgnoreCase(restrictSr) || "1".equals(restrictSr)
+                || "true".equalsIgnoreCase(restrictSr) || "yes".equalsIgnoreCase(restrictSr);
+    }
+
+    /**
+     * Threads ?sort=/?t= from a search link through to the results screen. A search takes a time
+     * alongside every sort (unlike a listing, where only top/controversial carry one) and defaults
+     * to all-time when ?t= is absent, so a recognized sort always travels with a time.
+     */
+    private void putSearchInitialSort(Intent intent, Uri uri) {
+        SortType.Type sortType = urlSegmentToSortType(uri.getQueryParameter("sort"));
+        if (sortType != SortType.Type.RELEVANCE && sortType != SortType.Type.HOT
+                && sortType != SortType.Type.TOP && sortType != SortType.Type.NEW
+                && sortType != SortType.Type.COMMENTS) {
+            // Search accepts only those five. Anything else — a listing sort like ?sort=best, or a
+            // sort Reddit has never had — would be handed to the API verbatim.
+            return;
+        }
+        SortType.Time sortTime = urlParamToSortTime(uri.getQueryParameter("t"));
+        intent.putExtra(SearchResultActivity.EXTRA_INITIAL_SORT_TYPE, sortType.name());
+        intent.putExtra(SearchResultActivity.EXTRA_INITIAL_SORT_TIME,
+                (sortTime != null ? sortTime : SortType.Time.ALL).name());
+    }
+
+    /**
+     * Maps ?type= to the results tab it names, or -1 to leave the screen on the user's default tab.
+     * Reddit spells the three kinds link/sr/user in old URLs and posts/communities/users in new
+     * ones; a link asking for several (type=link,sr) names no single tab.
+     */
+    private static int searchResultTab(Uri uri) {
+        String type = uri.getQueryParameter("type");
+        if (type == null) {
+            return -1;
+        }
+        switch (type) {
+            case "link":
+            case "posts":
+                return SearchResultActivity.TAB_POSTS;
+            case "sr":
+            case "communities":
+                return SearchResultActivity.TAB_SUBREDDITS;
+            case "user":
+            case "users":
+                return SearchResultActivity.TAB_USERS;
+            default:
+                return -1;
         }
     }
 
@@ -345,6 +523,10 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 } catch (Exception e) {
                                     deepLinkError(uri);
                                 }
+                            } else if (authority.contains("reddit.com") && isSearchPath(path)) {
+                                // reddit.com only, matching opensPostDetail: on redd.it a lone
+                                // segment is a post id, so redd.it/search is the post "search".
+                                handleSearchUri(uri, path, segments);
                             } else if (path.matches(MULTIREDDIT_USER_PATTERN) || path.matches(MULTIREDDIT_ME_PATTERN)) {
                                 // Multireddit: /user/<name>/m/<multi> or the /me/m/<multi> shortcut,
                                 // optionally with a listing-sort suffix. Normalize both to /user/<owner>/m/<multi>.
