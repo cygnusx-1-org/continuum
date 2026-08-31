@@ -14,6 +14,18 @@ Note v8a is the 64-bit build, and should be considered the default choice.
 * Described and enabled by default Click to Show Media in Gallery Layout
 * Added an edited marker and edit time to the post detail header
 
+8.3.0.2 / 2026-8-31
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Search links support #381
+* Implemented Add option to hide non media posts in Gallery view #377
+* Implemented Auto play gifs in a Reddit Gallery, without having to open the gallery #382
+* Fixed some comments have incorrect space between upvote button and count #385
+* Implemented Option To Toggle off Random Subreddit Feature. #386
+* Described and enabled by default Click to Show Media in Gallery Layout
+* Added an edited marker and edit time to the post detail header
+
 8.3.0.1 / 2026-8-29
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
