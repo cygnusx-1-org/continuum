@@ -149,6 +149,13 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     @State
     @Nullable
     PostFilter postFilter;
+    /**
+     * Whether the feed that handed over the post list was showing media posts only. Kept so the
+     * posts fetched here as the user swipes past the end of that list are filtered the way the feed
+     * was, instead of quietly reintroducing the text and link posts it hid (issue #377).
+     */
+    @State
+    boolean mediaOnly;
     // Passed to fetchMorePosts() as a @NonNull sort type; restored by Bridge / set from the post-list
     // event, which NullAway can't see, so its init is asserted rather than proven.
     @SuppressWarnings("NullAway.Init")
@@ -545,7 +552,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                             accessToken, accountName, false, postType,
                             subredditName, concatenatedSubredditNames, username,
                             userWhere, multiPath, query, sortType, sortTime, postFilter,
-                            readPostType, readPostsList
+                            readPostType, readPostsList, mediaOnly
                     );
                 }
                 ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
@@ -765,7 +772,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                 accessToken, accountName, changePage, postType,
                 subredditName, concatenatedSubredditNames, username,
                 userWhere, multiPath, query, sortType, sortTime, postFilter,
-                readPostType, readPostsList
+                readPostType, readPostsList, mediaOnly
         );
     }
 
@@ -794,6 +801,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             this.trendingSource = event.trendingSource;
             this.readPostType = event.readPostType;
             this.postFilter = event.postFilter;
+            this.mediaOnly = event.mediaOnly;
             SortType eventSortType = event.sortType;
             if (eventSortType != null) {
                 this.sortType = eventSortType.getType();

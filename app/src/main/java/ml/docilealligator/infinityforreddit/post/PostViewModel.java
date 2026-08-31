@@ -65,9 +65,18 @@ public class PostViewModel extends ViewModel {
     private ReadPostsListInterface readPostsList;
     private final UserProfileImagesBatchLoader loader;
     private final MutableLiveData<Boolean> hideReadPostsValue = new MutableLiveData<>();
+    /**
+     * Whether the feed is currently showing media posts only -- the gallery layout's "Media Posts
+     * Only" setting, which the fragment re-applies whenever the layout it is showing changes
+     * (issue #377). Not part of {@link PostFilter}: it is a property of the layout on screen, not
+     * of the feed, and it must not follow the user into the card layouts.
+     */
+    private final MutableLiveData<Boolean> mediaOnlyValue = new MutableLiveData<>(false);
+    private final HideReadPostsAndMediaOnlyLiveData hideReadPostsAndMediaOnlyLiveData =
+            new HideReadPostsAndMediaOnlyLiveData(hideReadPostsValue, mediaOnlyValue);
 
     private final LiveData<PagingData<Post>> posts;
-    private final LiveData<PagingData<Post>> postsWithReadPostsHidden;
+    private final LiveData<PagingData<Post>> filteredPosts;
     // Saved-screen search. Only the Saved tab sets this; when non-empty the paging source loads the
     // whole saved listing, filters by the query, and returns every match at once (see
     // PostPagingSource#loadAllUserPostsFiltered). Read on the paging executor when a source is built,
@@ -123,12 +132,7 @@ public class PostViewModel extends ViewModel {
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
-        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
-                currentlyReadPostIds -> Transformations.map(
-                        posts,
-                        postPagingData -> PagingDataTransforms.filter(
-                                postPagingData, executor,
-                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
+        filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -168,12 +172,7 @@ public class PostViewModel extends ViewModel {
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
-        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
-                currentlyReadPostIds -> Transformations.map(
-                        posts,
-                        postPagingData -> PagingDataTransforms.filter(
-                                postPagingData, executor,
-                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
+        filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
@@ -215,12 +214,7 @@ public class PostViewModel extends ViewModel {
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
-        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
-                currentlyReadPostIds -> Transformations.map(
-                        posts,
-                        postPagingData -> PagingDataTransforms.filter(
-                                postPagingData, executor,
-                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
+        filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
@@ -262,12 +256,7 @@ public class PostViewModel extends ViewModel {
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
-        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
-                currentlyReadPostIds -> Transformations.map(
-                        posts,
-                        postPagingData -> PagingDataTransforms.filter(
-                                postPagingData, executor,
-                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
+        filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
@@ -310,20 +299,70 @@ public class PostViewModel extends ViewModel {
             return PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this));
         });
 
-        postsWithReadPostsHidden = PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsValue,
-                currentlyReadPostIds -> Transformations.map(
-                        posts,
-                        postPagingData -> PagingDataTransforms.filter(
-                                postPagingData, executor,
-                                post -> !post.isRead() || !Boolean.TRUE.equals(hideReadPostsValue.getValue())))), ViewModelKt.getViewModelScope(this));
+        filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
                 && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE, false));
     }
 
+    /**
+     * The feed as the fragment sees it: {@link #posts} with the two filters that belong to the
+     * screen rather than to the listing layered on top -- read posts, once the user has hidden
+     * them, and non-media posts, while the gallery layout is showing media only.
+     *
+     * <p>Both filter the cached paging stream on the way out instead of being handed to the paging
+     * source, so toggling either one re-filters what is already loaded rather than refetching the
+     * feed. {@link PostFilter}, by contrast, is applied while parsing the response, which is why a
+     * change to it costs a whole new fetch.
+     */
+    private LiveData<PagingData<Post>> buildFilteredPosts() {
+        return PagingLiveData.cachedIn(Transformations.switchMap(hideReadPostsAndMediaOnlyLiveData,
+                hideReadPostsAndMediaOnly -> Transformations.map(
+                        posts,
+                        postPagingData -> PagingDataTransforms.filter(
+                                postPagingData, executor, this::isPostVisible))), ViewModelKt.getViewModelScope(this));
+    }
+
+    private boolean isPostVisible(Post post) {
+        if (Boolean.TRUE.equals(hideReadPostsValue.getValue()) && post.isRead()) {
+            return false;
+        }
+        return !Boolean.TRUE.equals(mediaOnlyValue.getValue()) || post.isMediaPost();
+    }
+
     public LiveData<PagingData<Post>> getPosts() {
-        return postsWithReadPostsHidden;
+        return filteredPosts;
+    }
+
+    /**
+     * Show only media posts, or stop doing so. Called by the fragment with the gallery layout's
+     * "Media Posts Only" setting when the feed is first bound and again whenever the post layout
+     * changes, so leaving the gallery layout brings the text, poll and link posts straight back.
+     *
+     * <p>Only an actual change is posted. Re-posting the current value would make the switchMap
+     * tear down and rebuild the filter pipeline while the previous collection is still cancelling,
+     * and the two collectors then race over the cached post stream and crash paging with a
+     * ConcurrentModificationException -- the same trap {@link #hideReadPosts()} guards against
+     * (issue #321).
+     */
+    public void setMediaOnly(boolean mediaOnly) {
+        if (mediaOnly != Boolean.TRUE.equals(mediaOnlyValue.getValue())) {
+            mediaOnlyValue.setValue(mediaOnly);
+            PostPagingSource currentSource = pagingSource;
+            if (currentSource != null) {
+                currentSource.setMediaOnly(mediaOnly);
+                if (mediaOnly) {
+                    // Turning it on can leave nothing on screen: the pages already loaded were
+                    // fetched without it and may hold no media at all, and a feed presenting nothing
+                    // never asks Paging for more (see PostPagingSource#loadFuture). Reload so those
+                    // pages are fetched again by a source that now knows to keep going until it has
+                    // something to show. Only on the way on -- turning it off can only add posts
+                    // back, and those are already cached.
+                    currentSource.invalidate();
+                }
+            }
+        }
     }
 
     @Nullable
@@ -395,6 +434,9 @@ public class PostViewModel extends ViewModel {
                         name, postType, sortType, postFilter, userWhere, searchQuery, savedSearchCache, readPostsList);
                 break;
         }
+        // Pagination only: the source never drops a post for this, it just refuses to stop on a page
+        // the feed would show nothing from. See PostPagingSource#loadFuture.
+        paging3PagingSource.setMediaOnly(Boolean.TRUE.equals(mediaOnlyValue.getValue()));
         pagingSource = paging3PagingSource;
         return paging3PagingSource;
     }
@@ -651,6 +693,27 @@ public class PostViewModel extends ViewModel {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
                         postHistorySharedPreferences, name, postType, sortType, postFilter, userWhere, readPostsList, loader);
+            }
+        }
+    }
+
+    /**
+     * The two feed-level filter flags as one trigger, so the filtered stream is rebuilt once when
+     * either changes rather than being wired to whichever one happened to be added first.
+     *
+     * <p>Emits only on a real change. A MediatorLiveData dispatches every source when it becomes
+     * active, so without this an ordinary combine would fire twice on the first observer and
+     * rebuild the pipeline twice back to back -- the rebuild race behind issue #321.
+     */
+    private static class HideReadPostsAndMediaOnlyLiveData extends MediatorLiveData<Pair<Boolean, Boolean>> {
+        HideReadPostsAndMediaOnlyLiveData(LiveData<Boolean> hideReadPostsValue, LiveData<Boolean> mediaOnlyValue) {
+            addSource(hideReadPostsValue, hideReadPosts -> update(Pair.create(hideReadPosts, mediaOnlyValue.getValue())));
+            addSource(mediaOnlyValue, mediaOnly -> update(Pair.create(hideReadPostsValue.getValue(), mediaOnly)));
+        }
+
+        private void update(Pair<Boolean, Boolean> hideReadPostsAndMediaOnly) {
+            if (!hideReadPostsAndMediaOnly.equals(getValue())) {
+                setValue(hideReadPostsAndMediaOnly);
             }
         }
     }

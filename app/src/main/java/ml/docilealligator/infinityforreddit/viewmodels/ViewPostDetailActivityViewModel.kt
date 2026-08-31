@@ -64,6 +64,14 @@ class ViewPostDetailActivityViewModel(
         textToSpeechHelper = null
     }
 
+    /**
+     * The listing cursor from the last response, rather than the last post that survived filtering.
+     * A page can be fetched and kept in full, in part, or not at all -- "Media Posts Only" on a page
+     * of link posts keeps none of it -- and paging from the last *kept* post would then re-request
+     * the page just read and never move. Reddit's own `after` is what actually advances.
+     */
+    private var lastListingCursor: String? = null
+
     private var _loadMorePostsState = MutableStateFlow(LoadMorePostsState(LoadingMorePostsStatus.NOT_LOADING, 0))
     val loadMorePostsState = _loadMorePostsState.asLiveData()
 
@@ -96,7 +104,8 @@ class ViewPostDetailActivityViewModel(
         sortTime: SortType.Time?,
         postFilter: PostFilter?,
         @ReadPostType readPostType: Int,
-        readPostsList: ReadPostsListInterface?
+        readPostsList: ReadPostsListInterface?,
+        mediaOnly: Boolean
     ) {
         viewModelScope.launch {
             if (_loadMorePostsState.value.status == LoadingMorePostsStatus.LOADING
@@ -130,94 +139,117 @@ class ViewPostDetailActivityViewModel(
                         (if (accountName == Account.ANONYMOUS_ACCOUNT) retrofit else oauthRetrofit).create(
                             RedditAPIKt::class.java
                         )
-                    val response: Response<String>?
-                    val afterKey = posts?.let {
-                        it.lastOrNull()?.fullName
-                    }
-                    when (postType) {
-                        PostType.SUBREDDIT -> response = subredditName?.let {
-                            if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                                api.getSubredditBestPosts(
-                                    subredditName, sortType, sortTime, afterKey,
-                                    APIUtils.subredditAPICallLimit(subredditName)
-                                )
-                            } else {
-                                api.getSubredditBestPostsOauth(
-                                    subredditName, sortType,
-                                    sortTime, afterKey, APIUtils.subredditAPICallLimit(subredditName),
-                                    APIUtils.getOAuthHeader(accessToken)
-                                )
-                            }
+                    // A page every post of which is filtered out adds nothing, and stopping there
+                    // would end the swipe list for good on the first run of link posts even though
+                    // the listing goes on. Keep asking, bounded, exactly as PostPagingSource does
+                    // for the feed itself (issue #377).
+                    var barrenPages = 0
+                    while (true) {
+                        val response: Response<String>?
+                        val afterKey = lastListingCursor ?: posts?.let {
+                            it.lastOrNull()?.fullName
                         }
+                        when (postType) {
+                            PostType.SUBREDDIT -> response = subredditName?.let {
+                                if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                                    api.getSubredditBestPosts(
+                                        subredditName, sortType, sortTime, afterKey,
+                                        APIUtils.subredditAPICallLimit(subredditName)
+                                    )
+                                } else {
+                                    api.getSubredditBestPostsOauth(
+                                        subredditName, sortType,
+                                        sortTime, afterKey, APIUtils.subredditAPICallLimit(subredditName),
+                                        APIUtils.getOAuthHeader(accessToken)
+                                    )
+                                }
+                            }
 
-                        PostType.USER -> response = username?.let {
-                            if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                                api.getUserPosts(username, afterKey, sortType, sortTime)
+                            PostType.USER -> response = username?.let {
+                                if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                                    api.getUserPosts(username, afterKey, sortType, sortTime)
+                                } else {
+                                    userWhere?.let {
+                                        api.getUserPostsOauth(
+                                            username, userWhere, afterKey, sortType,
+                                            sortTime, APIUtils.getOAuthHeader(accessToken)
+                                        )
+                                    }
+                                }
+                            }
+
+                            PostType.SEARCH -> response = if (subredditName == null) {
+                                if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                                    api.searchPosts(
+                                        query, afterKey, sortType, sortTime
+                                    )
+                                } else {
+                                    api.searchPostsOauth(
+                                        query, afterKey, sortType,
+                                        sortTime, APIUtils.getOAuthHeader(accessToken)
+                                    )
+                                }
                             } else {
-                                userWhere?.let {
-                                    api.getUserPostsOauth(
-                                        username, userWhere, afterKey, sortType,
+                                if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                                    api.searchPostsInSpecificSubreddit(
+                                        subredditName, query,
+                                        sortType, sortTime, afterKey
+                                    )
+                                } else {
+                                    api.searchPostsInSpecificSubredditOauth(
+                                        subredditName, query,
+                                        sortType, sortTime, afterKey,
+                                        APIUtils.getOAuthHeader(accessToken)
+                                    )
+                                }
+                            }
+
+                            PostType.MULTIREDDIT -> response = multiPath?.let {
+                                if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                                    api.getMultiRedditPosts(multiPath, afterKey, sortTime)
+                                } else {
+                                    api.getMultiRedditPostsOauth(
+                                        multiPath, afterKey,
                                         sortTime, APIUtils.getOAuthHeader(accessToken)
                                     )
                                 }
                             }
-                        }
 
-                        PostType.SEARCH -> response = if (subredditName == null) {
-                            if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                                api.searchPosts(
-                                    query, afterKey, sortType, sortTime
-                                )
-                            } else {
-                                api.searchPostsOauth(
-                                    query, afterKey, sortType,
-                                    sortTime, APIUtils.getOAuthHeader(accessToken)
+                            PostType.ANONYMOUS_FRONT_PAGE, PostType.ANONYMOUS_MULTIREDDIT -> response = concatenatedSubredditNames?.let {
+                                api.getAnonymousFrontPageOrMultiredditPosts(
+                                    concatenatedSubredditNames, sortType,
+                                    sortTime, afterKey, APIUtils.subredditAPICallLimit(subredditName),
+                                    APIUtils.ANONYMOUS_USER_AGENT
                                 )
                             }
-                        } else {
-                            if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                                api.searchPostsInSpecificSubreddit(
-                                    subredditName, query,
-                                    sortType, sortTime, afterKey
-                                )
-                            } else {
-                                api.searchPostsInSpecificSubredditOauth(
-                                    subredditName, query,
-                                    sortType, sortTime, afterKey,
-                                    APIUtils.getOAuthHeader(accessToken)
-                                )
-                            }
-                        }
 
-                        PostType.MULTIREDDIT -> response = multiPath?.let {
-                            if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                                api.getMultiRedditPosts(multiPath, afterKey, sortTime)
-                            } else {
-                                api.getMultiRedditPostsOauth(
-                                    multiPath, afterKey,
-                                    sortTime, APIUtils.getOAuthHeader(accessToken)
-                                )
-                            }
-                        }
-
-                        PostType.ANONYMOUS_FRONT_PAGE, PostType.ANONYMOUS_MULTIREDDIT -> response = concatenatedSubredditNames?.let {
-                            api.getAnonymousFrontPageOrMultiredditPosts(
-                                concatenatedSubredditNames, sortType,
-                                sortTime, afterKey, APIUtils.subredditAPICallLimit(subredditName),
-                                APIUtils.ANONYMOUS_USER_AGENT
+                            else -> response = api.getBestPosts(
+                                sortType, sortTime, afterKey,
+                                APIUtils.getOAuthHeader(accessToken)
                             )
                         }
 
-                        else -> response = api.getBestPosts(
-                            sortType, sortTime, afterKey,
-                            APIUtils.getOAuthHeader(accessToken)
-                        )
-                    }
+                        if (response?.isSuccessful != true) {
+                            _loadMorePostsState.value =
+                                LoadMorePostsState(LoadingMorePostsStatus.FAILED)
+                            return@launch
+                        }
 
-                    if (response?.isSuccessful == true) {
-                        finalizePosts(response, postFilter, readPostsList, changePage)
-                    } else {
-                        _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.FAILED)
+                        val cursorBeforePage = lastListingCursor
+                        val addedPosts =
+                            finalizePosts(response, postFilter, mediaOnly, readPostsList, changePage)
+                        barrenPages++
+                        // Stop on anything gained, on the end of the listing, on a cursor that did
+                        // not move (asking again would re-read the same page), and on the cap. The
+                        // state finalizePosts already set is the right one in every case: LOADED
+                        // when something was added, NO_MORE_POSTS when we gave up or ran out.
+                        if (addedPosts
+                            || lastListingCursor == null
+                            || lastListingCursor == cursorBeforePage
+                            || barrenPages >= MAX_BARREN_SWIPE_PAGES
+                        ) {
+                            break
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -251,7 +283,7 @@ class ViewPostDetailActivityViewModel(
                     }
 
                     if (response.isSuccessful) {
-                        finalizePosts(response, postFilter, readPostsList, changePage)
+                        finalizePosts(response, postFilter, mediaOnly, readPostsList, changePage)
                     } else {
                         _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.FAILED)
                     }
@@ -266,6 +298,7 @@ class ViewPostDetailActivityViewModel(
     private fun parsePostsSync(
         response: String?,
         postFilter: PostFilter?,
+        mediaOnly: Boolean,
         readPostsList: ReadPostsListInterface?
     ): ArrayList<Post>? {
         val newPosts = ArrayList<Post>()
@@ -284,7 +317,10 @@ class ViewPostDetailActivityViewModel(
                     }
                     val data = allPostsData.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY)
                     val post = ParsePost.parseBasicData(data)
-                    if (PostFilter.isPostAllowed(post, postFilter)) {
+                    // mediaOnly is the gallery feed's "Media Posts Only" setting, carried over so
+                    // swiping past the posts the feed handed us does not start turning up the text
+                    // and link posts it was hiding (issue #377).
+                    if (PostFilter.isPostAllowed(post, postFilter) && (!mediaOnly || post.isMediaPost)) {
                         newPosts.add(post)
                         newPostsIds.add(post.id)
                     }
@@ -302,6 +338,8 @@ class ViewPostDetailActivityViewModel(
                 }
             }
 
+            lastListingCursor = ParsePost.getLastItem(jsonResponse)
+
             return newPosts
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -309,17 +347,20 @@ class ViewPostDetailActivityViewModel(
         }
     }
 
+    /** Returns whether this page actually added anything to the swipe list. */
     private suspend fun finalizePosts(
         response: Response<String>,
         postFilter: PostFilter?,
+        mediaOnly: Boolean,
         readPostsList: ReadPostsListInterface?,
         changePage: Boolean
-    ) {
+    ): Boolean {
         val newPosts = withContext(Dispatchers.Default) {
-            parsePostsSync(response.body(), postFilter, readPostsList)
+            parsePostsSync(response.body(), postFilter, mediaOnly, readPostsList)
         }
         if (newPosts == null) {
             _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.NO_MORE_POSTS)
+            return false
         } else {
             posts?.let { posts ->
                 val currentPostsSize = posts.size
@@ -334,12 +375,14 @@ class ViewPostDetailActivityViewModel(
                 }
                 if (currentPostsSize == posts.size) {
                     _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.NO_MORE_POSTS)
+                    return false
                 } else {
                     _loadMorePostsState.value = LoadMorePostsState(
                         LoadingMorePostsStatus.LOADED,
                         posts.size - currentPostsSize,
                         changePage
                     )
+                    return true
                 }
             } ?: run {
                 posts = newPosts
@@ -348,11 +391,18 @@ class ViewPostDetailActivityViewModel(
                     posts?.size ?: 0,
                     changePage
                 )
+                return newPosts.isNotEmpty()
             }
         }
     }
 
     companion object {
+        /**
+         * How many pages the swipe list may pull while every one of them is filtered away to
+         * nothing, before it accepts that there is no more to show.
+         */
+        private const val MAX_BARREN_SWIPE_PAGES = 5
+
         fun provideFactory(
             retrofit: Retrofit,
             oauthRetrofit: Retrofit,

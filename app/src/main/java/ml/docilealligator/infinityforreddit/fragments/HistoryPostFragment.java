@@ -343,6 +343,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     private void bindPostViewModel() {
+        // Before the first observe, so the initial value costs no pipeline rebuild.
+        applyMediaOnlyPosts();
+
         mHistoryPostViewModel.getPosts().observe(getViewLifecycleOwner(), posts -> mAdapter.submitData(getViewLifecycleOwner().getLifecycle(), posts));
 
         mAdapter.addLoadStateListener(combinedLoadStates -> {
@@ -539,6 +542,15 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             mAdapter.setPostLayout(postLayout);
             refreshAdapter();
         }
+
+        applyMediaOnlyPosts();
+    }
+
+    @Override
+    protected void applyMediaOnlyPosts() {
+        if (mHistoryPostViewModel != null) {
+            mHistoryPostViewModel.setMediaOnly(shouldShowMediaOnlyPosts());
+        }
     }
 
     @Override
@@ -658,6 +670,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         EventBus.getDefault().post(new ProvidePostListToViewPostDetailActivityEvent(postFragmentId,
                 new ArrayList<>(mAdapter.snapshot()), PostType.READ_POSTS,
                 null, null, null, null,
-                null, null, null, readPostType, postFilter, null, null));
+                null, null, null, readPostType, postFilter, null, null,
+                shouldShowMediaOnlyPosts()));
     }
 }

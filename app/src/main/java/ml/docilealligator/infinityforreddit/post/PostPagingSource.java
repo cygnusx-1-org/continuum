@@ -108,6 +108,32 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     @Nullable
     private String subredditOnlyName;
 
+    /**
+     * Whether the feed reading this source is showing media posts only, so that a page carrying no
+     * media is a page it will display nothing from (issue #377).
+     *
+     * <p>Only pagination consults this. The posts themselves are never dropped here -- the feed
+     * filters them on the way out of the view model, which is what lets the setting be turned off
+     * without refetching -- so all this changes is when a load is allowed to stop.
+     *
+     * <p>Written from the main thread when the setting or the post layout changes, read on the
+     * paging executor while a load runs, hence volatile. A change does not invalidate the source:
+     * pages already loaded stay, and only the next load sees the new value.
+     */
+    private volatile boolean mediaOnly;
+
+    /**
+     * How many further pages one load may pull while every page so far has come back with nothing
+     * the feed can show, and how large those extra pages are.
+     *
+     * <p>The cap is what stops a listing with no media in it at all (r/AskReddit, say) from walking
+     * the whole subreddit. The hop size is deliberately not {@code loadParams.getLoadSize()}: an
+     * initial load asks for 10 posts, and giving up after 60 would call a subreddit media-less on
+     * far too little evidence.
+     */
+    private static final int MAX_BARREN_PAGE_HOPS = 5;
+    private static final int BARREN_PAGE_HOP_LOAD_SIZE = 100;
+
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                      @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
                      @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences, @PostType int postType,
@@ -252,9 +278,110 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         return null;
     }
 
+    public void setMediaOnly(boolean mediaOnly) {
+        this.mediaOnly = mediaOnly;
+    }
+
+    /**
+     * Load a page the feed can actually show something from.
+     *
+     * <p>Paging appends more data when the presenter reaches the end of what is on screen, and the
+     * presenter asks by way of the item it is binding. A page every item of which is filtered out
+     * downstream therefore ends the feed for good: nothing is presented, so nothing is bound, so no
+     * hint is raised and no further page is ever requested. What the user sees is a blank feed with
+     * no posts and no "no posts found" -- the latter is gated on end-of-pagination, which never
+     * arrives either.
+     *
+     * <p>Three things empty a page out from under the feed: a post filter that excludes everything
+     * on it, "Media Posts Only" on a page of text and link posts, and Reddit repeating a cursor so
+     * that {@link #transformData} discards the lot as duplicates. All three land here as a page with
+     * nothing to present and a next key still in hand, and the answer to all three is the same one
+     * {@link #loadUserPostsWithKey} already applies on the user listing: keep following the next key
+     * until a page yields something, and hand back everything gathered on the way as one page.
+     *
+     * <p>Nothing is discarded while hopping. The non-media and filtered-out posts are still returned
+     * and still cached, so turning the setting back off shows them without a refetch.
+     *
+     * <p>If {@link #MAX_BARREN_PAGE_HOPS} pages go by with nothing to show, the page comes back with
+     * a null next key. That is a deliberate lie about the listing being over, and the honest option
+     * -- keeping the key -- is worse: it restores exactly the blank screen this exists to remove,
+     * whereas ending pagination lets the feed say "no posts found", which is what a listing with no
+     * media in its first several hundred posts effectively means.
+     */
     @NonNull
     @Override
     public ListenableFuture<LoadResult<String, Post>> loadFuture(@NonNull LoadParams<String> loadParams) {
+        return loadPastBarrenPages(loadParams, 0);
+    }
+
+    private ListenableFuture<LoadResult<String, Post>> loadPastBarrenPages(@NonNull LoadParams<String> loadParams,
+                                                                          int hopsSoFar) {
+        return Futures.transformAsync(loadOnce(loadParams), result -> {
+            if (!(result instanceof LoadResult.Page)) {
+                return Futures.immediateFuture(result);
+            }
+
+            @SuppressWarnings("unchecked")
+            LoadResult.Page<String, Post> page = (LoadResult.Page<String, Post>) result;
+            String nextKey = page.getNextKey();
+            if (nextKey == null || presentsSomething(page.getData())) {
+                return Futures.immediateFuture(result);
+            }
+
+            if (hopsSoFar >= MAX_BARREN_PAGE_HOPS) {
+                return Futures.immediateFuture(
+                        new LoadResult.Page<>(page.getData(), page.getPrevKey(), null));
+            }
+
+            LoadParams<String> nextParams = new LoadParams.Append<>(
+                    nextKey,
+                    Math.max(loadParams.getLoadSize(), BARREN_PAGE_HOP_LOAD_SIZE),
+                    loadParams.getPlaceholdersEnabled());
+            return Futures.transform(loadPastBarrenPages(nextParams, hopsSoFar + 1),
+                    tail -> concatenatePages(page, tail), executor);
+        }, executor);
+    }
+
+    /**
+     * Whether the feed will render at least one of these posts. Read posts are not considered: a
+     * feed hiding those can still empty a page out, but that filter lives in the view model and the
+     * source is not told about it.
+     */
+    private boolean presentsSomething(List<Post> pagePosts) {
+        if (pagePosts.isEmpty()) {
+            return false;
+        }
+        if (!mediaOnly) {
+            return true;
+        }
+        for (Post post : pagePosts) {
+            if (post.isMediaPost()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Joins a barren page to whatever the hop after it returned. The prev key stays the first page's
+     * and the next key becomes the last one's, so the merged page keys as though it had been loaded
+     * in one go. An error from the hop is returned as the error -- the head presents nothing on its
+     * own, so surfacing it with a retry beats showing the blank feed.
+     */
+    private static LoadResult<String, Post> concatenatePages(LoadResult.Page<String, Post> head,
+                                                             LoadResult<String, Post> tail) {
+        if (!(tail instanceof LoadResult.Page)) {
+            return tail;
+        }
+        @SuppressWarnings("unchecked")
+        LoadResult.Page<String, Post> tailPage = (LoadResult.Page<String, Post>) tail;
+        List<Post> merged = new ArrayList<>(head.getData().size() + tailPage.getData().size());
+        merged.addAll(head.getData());
+        merged.addAll(tailPage.getData());
+        return new LoadResult.Page<>(merged, head.getPrevKey(), tailPage.getNextKey());
+    }
+
+    private ListenableFuture<LoadResult<String, Post>> loadOnce(@NonNull LoadParams<String> loadParams) {
         RedditAPI api = retrofit.create(RedditAPI.class);
         switch (postType) {
             case PostType.FRONT_PAGE:

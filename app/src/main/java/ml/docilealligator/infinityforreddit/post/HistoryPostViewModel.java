@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.Pager;
 import androidx.paging.PagingConfig;
 import androidx.paging.PagingData;
+import androidx.paging.PagingDataTransforms;
 import androidx.paging.PagingLiveData;
 import androidx.paging.PagingSource;
 import java.util.List;
@@ -36,6 +37,13 @@ public class HistoryPostViewModel extends ViewModel {
     private final UserProfileImagesBatchLoader loader;
 
     private final LiveData<PagingData<Post>> posts;
+    private final LiveData<PagingData<Post>> filteredPosts;
+
+    /**
+     * Whether the feed is currently showing media posts only -- the gallery layout's "Media Posts
+     * Only" setting, re-applied by the fragment whenever the post layout changes (issue #377).
+     */
+    private final MutableLiveData<Boolean> mediaOnlyValue = new MutableLiveData<>(false);
 
     private final MutableLiveData<PostFilter> postFilterLiveData;
     // Saved-screen search for the Local Saved posts tab. When non-empty the paging source loads the
@@ -70,10 +78,35 @@ public class HistoryPostViewModel extends ViewModel {
         Pager<String, Post> pager = new Pager<>(new PagingConfig(25, 4, false, 10), this::returnPagingSource);
 
         posts = Transformations.switchMap(postFilterLiveData, postFilterValue -> PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this)));
+
+        // Filters the cached paging stream on the way out rather than being handed to the paging
+        // source, so turning the setting off brings the hidden posts back without re-reading the
+        // history.
+        filteredPosts = PagingLiveData.cachedIn(Transformations.switchMap(mediaOnlyValue,
+                mediaOnly -> Transformations.map(
+                        posts,
+                        postPagingData -> PagingDataTransforms.filter(
+                                postPagingData, executor,
+                                post -> !Boolean.TRUE.equals(mediaOnlyValue.getValue()) || post.isMediaPost()))),
+                ViewModelKt.getViewModelScope(this));
     }
 
     public LiveData<PagingData<Post>> getPosts() {
-        return posts;
+        return filteredPosts;
+    }
+
+    /**
+     * Show only media posts, or stop doing so. Called by the fragment with the gallery layout's
+     * "Media Posts Only" setting when the feed is bound and again on every post layout change.
+     *
+     * <p>Only an actual change is posted: re-posting the current value would rebuild the filter
+     * pipeline while the previous collection is still cancelling, which is what crashes paging with
+     * a ConcurrentModificationException (issue #321).
+     */
+    public void setMediaOnly(boolean mediaOnly) {
+        if (mediaOnly != Boolean.TRUE.equals(mediaOnlyValue.getValue())) {
+            mediaOnlyValue.setValue(mediaOnly);
+        }
     }
 
     // Refreshes the current source in place (invalidate() rebuilds it from the factory with the new

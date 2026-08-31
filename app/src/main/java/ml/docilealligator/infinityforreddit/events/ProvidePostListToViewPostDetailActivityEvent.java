@@ -37,13 +37,20 @@ public class ProvidePostListToViewPostDetailActivityEvent {
     public SortType sortType;
     @Nullable
     public ReadPostsListInterface readPostsList;
+    /**
+     * Whether the feed handing over this list was showing media posts only, so that the posts it
+     * loads on its own as the user swipes past the end are filtered the same way the feed was
+     * (issue #377). Without it the swipe quietly leaves the filter behind.
+     */
+    public boolean mediaOnly;
 
     public ProvidePostListToViewPostDetailActivityEvent(long postFragmentId, ArrayList<Post> posts, @PostType int postType,
                                                         @Nullable String subredditName, @Nullable String concatenatedSubredditNames,
                                                         @Nullable String username, @Nullable String userWhere,
                                                         @Nullable String multiPath, @Nullable String query, @Nullable String trendingSource,
                                                         @ReadPostType int readPostType, @Nullable PostFilter postFilter,
-                                                        @Nullable SortType sortType, @Nullable ReadPostsListInterface readPostsList) {
+                                                        @Nullable SortType sortType, @Nullable ReadPostsListInterface readPostsList,
+                                                        boolean mediaOnly) {
         this.postFragmentId = postFragmentId;
         this.posts = posts;
         this.postType = postType;
@@ -58,5 +65,6 @@ public class ProvidePostListToViewPostDetailActivityEvent {
         this.postFilter = postFilter;
         this.sortType = sortType;
         this.readPostsList = readPostsList;
+        this.mediaOnly = mediaOnly;
     }
 }

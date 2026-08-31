@@ -372,6 +372,8 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT, true).observe(getViewLifecycleOwner(), mediaOnly -> applyMediaOnlyPosts());
+
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -548,6 +550,23 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     public abstract void changePostLayout(int postLayout, boolean temporary);
+
+    /**
+     * Whether the feed should be showing media posts only right now: the "Media Posts Only"
+     * setting, which belongs to the gallery layout and applies to no other one (issue #377).
+     */
+    protected final boolean shouldShowMediaOnlyPosts() {
+        return postLayout == SharedPreferencesUtils.POST_LAYOUT_GALLERY
+                && mSharedPreferences.getBoolean(SharedPreferencesUtils.MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT, true);
+    }
+
+    /**
+     * Push {@link #shouldShowMediaOnlyPosts()} onto the view model backing this feed. Called when
+     * the feed is bound, whenever the post layout changes, and whenever the setting changes -- so
+     * switching away from the gallery layout brings the hidden posts straight back. The view model
+     * ignores a value it already holds, and this may run before it exists at all.
+     */
+    protected abstract void applyMediaOnlyPosts();
 
     @Nullable
     public final Boolean getMasterMutingOption() {

@@ -734,6 +734,9 @@
     <string name="settings_user_default_sort_type_title">User Default Sort Type</string>
     <string name="settings_user_default_sort_time_title">User Default Sort Time</string>
     <string name="settings_click_to_show_media_in_gallery_layout">Click to Show Media in Gallery Layout</string>
+    <string name="settings_click_to_show_media_in_gallery_layout_summary">Swap tap and long press in gallery layout: tap opens the media, long press opens the post and its comments</string>
+    <string name="settings_media_only_posts_in_gallery_layout_title">Media Posts Only</string>
+    <string name="settings_media_only_posts_in_gallery_layout_summary">In gallery layout, show only image, GIF, video and gallery posts. Text, poll and link posts are hidden</string>
     <string name="settings_hide_post_type">Hide Post Type</string>
     <string name="settings_post_type_triangle_indicator">Post Type Triangle Indicator</string>
     <string name="settings_post_type_triangle_indicator_summary">Show post type as a colored triangle on the thumbnail in compact layout instead of a text badge</string>

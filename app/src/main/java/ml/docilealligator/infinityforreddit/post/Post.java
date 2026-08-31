@@ -617,6 +617,21 @@ public class Post implements Parcelable {
         this.postType = postType;
     }
 
+    /**
+     * Whether the post's own content is media: an image, a GIF, a video or a Reddit gallery.
+     *
+     * <p>A link post is not media, preview or no. The preview Reddit attaches to one belongs to the
+     * article on the far side of the link, not to the post, so a feed showing only media has no
+     * business showing it. Text posts are not media either, and polls come through as text posts --
+     * this app never parses {@code poll_data}, so a poll is just a self post.
+     *
+     * <p>Used by the gallery layout's "Media Posts Only" filter (issue #377).
+     */
+    public boolean isMediaPost() {
+        return postType == IMAGE_TYPE || postType == GIF_TYPE || postType == VIDEO_TYPE
+                || postType == GALLERY_TYPE;
+    }
+
     public int getVoteType() {
         return voteType;
     }

@@ -62,7 +62,7 @@ class LoadMorePostsWithoutSortTest {
             null, "-", false, PostType.READ_POSTS,
             null, null, null, null, null, null,
             null, null, null,
-            ReadPostType.READ_POSTS, null
+            ReadPostType.READ_POSTS, null, false
         )
     }
 }

@@ -1178,6 +1178,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     private void bindPostViewModel() {
+        // Before the first observe, so the initial value costs no pipeline rebuild. Both
+        // initializeAndBindPostViewModel paths land here.
+        applyMediaOnlyPosts();
+
         mPostViewModel.getPosts().observe(getViewLifecycleOwner(), posts -> {
             mAdapter.submitData(getViewLifecycleOwner().getLifecycle(), posts);
         });
@@ -1746,6 +1750,15 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             mAdapter.setPostLayout(postLayout);
             refreshAdapter();
         }
+
+        applyMediaOnlyPosts();
+    }
+
+    @Override
+    protected void applyMediaOnlyPosts() {
+        if (mPostViewModel != null) {
+            mPostViewModel.setMediaOnly(shouldShowMediaOnlyPosts());
+        }
     }
 
     @Override
@@ -1956,7 +1969,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             EventBus.getDefault().post(new ProvidePostListToViewPostDetailActivityEvent(postFragmentId,
                     new ArrayList<>(mAdapter.snapshot()), postType, subredditName,
                     concatenatedSubredditNames, username, where, multiRedditPath, query, trendingSource,
-                    ReadPostType.INVALID, postFilter, sortType, readPostsList));
+                    ReadPostType.INVALID, postFilter, sortType, readPostsList,
+                    shouldShowMediaOnlyPosts()));
         }
     }
 

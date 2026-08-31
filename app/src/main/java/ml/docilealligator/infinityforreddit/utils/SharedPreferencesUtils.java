@@ -205,6 +205,7 @@ public class SharedPreferencesUtils {
     public static final String USER_DEFAULT_SORT_TYPE = "user_default_sort_type";
     public static final String USER_DEFAULT_SORT_TIME = "user_default_sort_time";
     public static final String CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT = "click_to_show_media_in_gallery_layout";
+    public static final String MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT = "media_only_posts_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
     public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
