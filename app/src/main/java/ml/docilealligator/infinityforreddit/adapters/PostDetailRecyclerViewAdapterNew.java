@@ -31,7 +31,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.content.ContextCompat;
 import androidx.media3.common.C;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
@@ -237,6 +236,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final int mFlairTextColor;
     private final int mNSFWBackgroundColor;
     private final int mNSFWTextColor;
+    private final int mRecoveredBackgroundColor;
+    private final int mRecoveredTextColor;
     private final int mArchivedTintColor;
     private final int mLockedTintColor;
     private final int mCrosspostTintColor;
@@ -364,6 +365,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mSpoilerTextColor = customThemeWrapper.getSpoilerTextColor();
         mNSFWBackgroundColor = customThemeWrapper.getNsfwBackgroundColor();
         mNSFWTextColor = customThemeWrapper.getNsfwTextColor();
+        // The archive-recovery marker has no theme entry of its own; see RecoveredFlair for why it
+        // borrows the NSFW chip's.
+        mRecoveredBackgroundColor = customThemeWrapper.getNsfwBackgroundColor();
+        mRecoveredTextColor = customThemeWrapper.getNsfwTextColor();
         mArchivedTintColor = customThemeWrapper.getArchivedIconTint();
         mLockedTintColor = customThemeWrapper.getLockedIconTint();
         mCrosspostTintColor = customThemeWrapper.getCrosspostIconTint();
@@ -2201,10 +2206,9 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             flairTextView.setBackgroundColor(mFlairBackgroundColor);
             flairTextView.setBorderColor(mFlairBackgroundColor);
             flairTextView.setTextColor(mFlairTextColor);
-            int recoveredBackgroundColor = ContextCompat.getColor(mActivity, R.color.recoveredChipBackground);
-            recoveredTextView.setBackgroundColor(recoveredBackgroundColor);
-            recoveredTextView.setBorderColor(recoveredBackgroundColor);
-            recoveredTextView.setTextColor(ContextCompat.getColor(mActivity, R.color.recoveredChipText));
+            recoveredTextView.setBackgroundColor(mRecoveredBackgroundColor);
+            recoveredTextView.setBorderColor(mRecoveredBackgroundColor);
+            recoveredTextView.setTextColor(mRecoveredTextColor);
             archivedImageView.setColorFilter(mArchivedTintColor, PorterDuff.Mode.SRC_IN);
             lockedImageView.setColorFilter(mLockedTintColor, PorterDuff.Mode.SRC_IN);
             crosspostImageView.setColorFilter(mCrosspostTintColor, PorterDuff.Mode.SRC_IN);

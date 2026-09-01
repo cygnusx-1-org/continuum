@@ -292,9 +292,10 @@ class RoborazziLayoutTest(private val case: Case) {
          *
          * The post chip is crossed with the rest of its flow row — spoiler, NSFW and link flair all
          * revealed at once — because "does the new chip fit" is a question about the busiest row,
-         * not the empty one. Chip *colours* come from the adapter and so are not exercised here;
-         * what these pin is geometry: whether the row wraps, and whether anything is pushed out of
-         * the item.
+         * not the empty one. The post chip's *colours* come from the adapter and so are not
+         * exercised here; what those pin is geometry: whether the row wraps, and whether anything is
+         * pushed out of the item. The comment span is drawn by RecoveredFlair from colours this
+         * passes in, so its goldens do capture the theme's NSFW chip colours (issue #387).
          */
         private val RECOVERED_LAYOUTS: List<LayoutSpec> = listOf(
             LayoutSpec(
@@ -426,6 +427,10 @@ class RoborazziLayoutTest(private val case: Case) {
         val textColor: Int = wrapper.primaryTextColor
         val iconColor: Int = wrapper.postIconAndInfoColor
 
+        /** What the comment adapter hands RecoveredFlair: the NSFW chip's colours. */
+        val recoveredBackground: Int = wrapper.nsfwBackgroundColor
+        val recoveredText: Int = wrapper.nsfwTextColor
+
         private val sampleBitmap: Bitmap = makeSampleBitmap()
 
         /** A fresh BitmapDrawable per slot (shares the bitmap, but bounds are per-instance). */
@@ -542,7 +547,9 @@ class RoborazziLayoutTest(private val case: Case) {
         if (case.recoveredFlair) {
             view.findViewById<TextView>(R.id.author_flair_text_view_item_post_comment)?.let {
                 it.visibility = View.VISIBLE
-                it.text = RecoveredFlair.prependTo(activity, "Verified Contributor")
+                it.text = RecoveredFlair.prependTo(
+                    activity, "Verified Contributor", palette.recoveredBackground, palette.recoveredText,
+                )
             }
         }
         activity.setContentView(

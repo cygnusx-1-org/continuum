@@ -148,6 +148,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final int mModeratorColor;
     private final int mCurrentUserColor;
     private final int mAuthorFlairTextColor;
+    private final int mRecoveredBackgroundColor;
+    private final int mRecoveredTextColor;
     private final int mUpvotedColor;
     private final int mDownvotedColor;
     private final int mSingleCommentThreadBackgroundColor;
@@ -361,6 +363,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mModeratorColor = customThemeWrapper.getModerator();
         mCurrentUserColor = customThemeWrapper.getCurrentUser();
         mAuthorFlairTextColor = customThemeWrapper.getAuthorFlairTextColor();
+        // The archive-recovery marker has no theme entry of its own; see RecoveredFlair for why it
+        // borrows the NSFW chip's.
+        mRecoveredBackgroundColor = customThemeWrapper.getNsfwBackgroundColor();
+        mRecoveredTextColor = customThemeWrapper.getNsfwTextColor();
         mUsernameColor = customThemeWrapper.getUsername();
         mUpvotedColor = customThemeWrapper.getUpvoted();
         mDownvotedColor = customThemeWrapper.getDownvoted();
@@ -437,17 +443,20 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                         // Read back after the HTML pass rather than parsed twice: the flair may carry
                         // inline emoji images that only setHTMLWithImageToTextView knows how to build.
                         TextView flairTextView = ((CommentBaseViewHolder) holder).authorFlairTextView;
-                        flairTextView.setText(RecoveredFlair.prependTo(mActivity, flairTextView.getText()));
+                        flairTextView.setText(RecoveredFlair.prependTo(mActivity, flairTextView.getText(),
+                                mRecoveredBackgroundColor, mRecoveredTextColor));
                     }
                 } else if (comment.getAuthorFlair() != null && !comment.getAuthorFlair().equals("")) {
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setText(
                             comment.isRecovered()
-                                    ? RecoveredFlair.prependTo(mActivity, comment.getAuthorFlair())
+                                    ? RecoveredFlair.prependTo(mActivity, comment.getAuthorFlair(),
+                                            mRecoveredBackgroundColor, mRecoveredTextColor)
                                     : comment.getAuthorFlair());
                 } else if (comment.isRecovered()) {
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
-                    ((CommentBaseViewHolder) holder).authorFlairTextView.setText(RecoveredFlair.label(mActivity));
+                    ((CommentBaseViewHolder) holder).authorFlairTextView.setText(RecoveredFlair.label(mActivity,
+                            mRecoveredBackgroundColor, mRecoveredTextColor));
                 } else {
                     // A holder is rebound to a different comment without being recycled whenever a
                     // row shifts — which is every collapse, expand and "load more" — so onViewRecycled
