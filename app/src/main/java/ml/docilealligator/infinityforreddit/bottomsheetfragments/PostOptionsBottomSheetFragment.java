@@ -198,8 +198,15 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
             switch (mPost.getPostType()) {
                 case Post.IMAGE_TYPE:
+                    // A single image has exactly one thing to download, so it never needs an index:
+                    // download() passes 0 and DownloadMediaService ignores it for this post type.
+                    binding.downloadTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                    binding.downloadTextViewPostOptionsBottomSheetFragment.setText(R.string.download_image);
+                    break;
                 case Post.GALLERY_TYPE:
-                    if (getArguments().getInt(EXTRA_GALLERY_INDEX, -1) >= 0) {
+                    // Only offered when the caller knows which gallery item is on screen; otherwise
+                    // there is nothing to single out and "Download all" below is the only option.
+                    if (requireArguments().getInt(EXTRA_GALLERY_INDEX, -1) >= 0) {
                         binding.downloadTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
                         binding.downloadTextViewPostOptionsBottomSheetFragment.setText(R.string.download_image);
                     }
