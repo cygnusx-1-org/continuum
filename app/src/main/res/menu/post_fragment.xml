@@ -15,7 +15,7 @@
 
     <item
         android:id="@+id/action_more_options_post_fragment"
-        android:orderInCategory="102"
+        android:orderInCategory="103"
         android:title="@string/action_more_options"
         app:showAsAction="never" />
 </menu>

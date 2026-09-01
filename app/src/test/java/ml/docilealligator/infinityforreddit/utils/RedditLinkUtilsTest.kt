@@ -12,7 +12,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Settings > Miscellaneous > Use old.reddit.com, applied to links on their way out of the app.
+ * The Reddit-link helpers: recognizing a link as Reddit's, and Settings > Miscellaneous > Use
+ * old.reddit.com applied to links on their way out of the app.
  *
  * The setting is opt-in and deliberately narrow: only the hosts that serve the same paths as
  * old.reddit.com may be rewritten. Sending a media or share-shortener host to old.reddit.com
@@ -79,6 +80,95 @@ class RedditLinkUtilsTest {
 
         untouched.forEach { url ->
             assertEquals(url, RedditLinkUtils.applyLinkDomain(preferences, url))
+        }
+    }
+
+    @Test
+    fun `reddit's own hosts are recognized as reddit links`() {
+        val links = listOf(
+            "https://www.reddit.com/r/pics/comments/abc123/sunset/",
+            "https://reddit.com/r/pics/",
+            "https://old.reddit.com/r/pics/",
+            "http://www.reddit.com/r/pics/",
+            "https://i.redd.it/abc123.jpg",
+            "https://v.redd.it/abc123",
+            "https://redd.it/abc123",
+            "https://reddit.app.link/abc123"
+        )
+
+        links.forEach { url ->
+            assertEquals(url, RedditLinkUtils.redditLinkOrNull(url))
+        }
+    }
+
+    @Test
+    fun `a link copied without its scheme comes back with one`() {
+        assertEquals(
+            "https://www.reddit.com/r/pics/comments/abc123/sunset/",
+            RedditLinkUtils.redditLinkOrNull("www.reddit.com/r/pics/comments/abc123/sunset/")
+        )
+        assertEquals("https://redd.it/abc123", RedditLinkUtils.redditLinkOrNull("redd.it/abc123"))
+    }
+
+    @Test
+    fun `scheme and host come back lowercased, the rest untouched`() {
+        assertEquals(
+            "https://www.reddit.com/r/Leathercraft/comments/1qo3jrv/",
+            RedditLinkUtils.redditLinkOrNull("HTTPS://WWW.REDDIT.COM/r/Leathercraft/comments/1qo3jrv/")
+        )
+        assertEquals(
+            "https://reddit.com/r/pics/",
+            RedditLinkUtils.redditLinkOrNull("Reddit.com/r/pics/")
+        )
+        // A query keeps its case, and a port and userinfo survive the rebuild.
+        assertEquals(
+            "https://www.reddit.com/search/?q=Arc+Browser",
+            RedditLinkUtils.redditLinkOrNull("https://WWW.Reddit.com/search/?q=Arc+Browser")
+        )
+        assertEquals(
+            "https://www.reddit.com:8443/r/pics/",
+            RedditLinkUtils.redditLinkOrNull("https://WWW.REDDIT.COM:8443/r/pics/")
+        )
+    }
+
+    @Test
+    fun `surrounding whitespace is trimmed off`() {
+        assertEquals(
+            "https://www.reddit.com/r/pics/",
+            RedditLinkUtils.redditLinkOrNull("  https://www.reddit.com/r/pics/\n")
+        )
+    }
+
+    @Test
+    fun `a look-alike domain is not a reddit link`() {
+        val notReddit = listOf(
+            "https://www.reddit.example.com/r/pics/",
+            "https://reddit.com.example.net/r/pics/",
+            "https://example.com/reddit.com/not-reddit",
+            "https://notreddit.com/r/pics/",
+            "https://example.com/"
+        )
+
+        notReddit.forEach { url ->
+            assertEquals(null, RedditLinkUtils.redditLinkOrNull(url))
+        }
+    }
+
+    @Test
+    fun `text that is not an http link is not a reddit link`() {
+        val notLinks = listOf(
+            null,
+            "",
+            "   ",
+            "just some copied text",
+            "ftp://www.reddit.com/r/pics/",
+            "mailto:someone@reddit.com",
+            "content://media/external/images/media/1",
+            "look at this https://www.reddit.com/r/pics/"
+        )
+
+        notLinks.forEach { text ->
+            assertEquals(null, RedditLinkUtils.redditLinkOrNull(text))
         }
     }
 

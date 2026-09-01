@@ -29,4 +29,11 @@
         android:orderInCategory="5"
         android:title="@string/action_change_post_layout"
         app:showAsAction="never" />
+
+    <!-- Ordered to land directly above PostFragment's "More Options" (103) in the merged menu. -->
+    <item
+        android:id="@+id/action_open_clipboard_reddit_link_main_activity"
+        android:orderInCategory="102"
+        android:title="@string/action_open_clipboard_reddit_link"
+        app:showAsAction="never" />
 </menu>
