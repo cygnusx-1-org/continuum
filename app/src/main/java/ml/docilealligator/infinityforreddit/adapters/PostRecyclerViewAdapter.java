@@ -142,6 +142,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.Playable;
 import ml.docilealligator.infinityforreddit.videoautoplay.PlayerSelector;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
+import ml.docilealligator.infinityforreddit.videoautoplay.VideoScrubHelper;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 import org.greenrobot.eventbus.EventBus;
@@ -3302,6 +3303,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     fullscreenButton.performClick();
                 }
             });
+
+            VideoScrubHelper.attach(videoPlayer, aspectRatioFrameLayout, () -> helper);
         }
 
         void bindVideoUri(Uri videoUri) {
