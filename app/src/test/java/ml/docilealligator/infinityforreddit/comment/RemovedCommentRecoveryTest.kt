@@ -28,7 +28,7 @@ class RemovedCommentRecoveryTest {
         author: String = "someone",
         removed: Boolean = false,
     ): Comment = Comment(
-        id, "t1_$id", author, "t2_author", "", "", null,
+        id, "t1_$id", author, "t2_author", "", "", null, null,
         0L, body, body,
         "t3_link", "subreddit", "t3_link", 0,
         0, false, "", "/r/subreddit/comments/link/_/$id/",

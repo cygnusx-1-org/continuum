@@ -40,6 +40,13 @@ class VideoEntry(
     private val canShowImage: Boolean
     private val canShowGif: Boolean
 
+    // Set as each comment/post body is bound, then captured into the holder below. A click fires
+    // long after bindHolder returned, by which time these have moved on to another row, so the
+    // holder has to keep its own copy -- same arrangement as ImageAndGifEntry.
+    private var currentCommentId: String? = null
+    private var currentPostId: String? = null
+    private var currentPostTitle: String? = null
+
     init {
         val sharedPreferences = baseActivity.getDefaultSharedPreferences()
         this.saveMemoryCenterInsideDownsampleStrategy = SaveMemoryCenterInisdeDownsampleStrategy(
@@ -62,6 +69,9 @@ class VideoEntry(
 
     override fun bindHolder(markwon: Markwon, holder: Holder, node: VideoBlock) {
         holder.videoBlock = node
+        holder.commentId = currentCommentId
+        holder.postId = currentPostId
+        holder.postTitle = currentPostTitle
 
         if (node.mediaMetadata.caption != null) {
             holder.binding.captionTextViewMarkdownVideoBlock.visibility = View.VISIBLE
@@ -111,6 +121,9 @@ class VideoEntry(
         val binding: MarkdownVideoBlockBinding
     ) : MarkwonAdapter.Holder(binding.getRoot()) {
         var videoBlock: VideoBlock? = null
+        var commentId: String? = null
+        var postId: String? = null
+        var postTitle: String? = null
         /*var container: Container? = null
         var helper: ExoPlayerViewHelper? = null
         var volume = 0f
@@ -131,7 +144,9 @@ class VideoEntry(
             }
 
             binding.frameLayoutMarkdownVideoBlock.setOnClickListener {
-                onItemClickListener.onItemClick(videoBlock?.mediaMetadata)
+                onItemClickListener.onItemClick(
+                    videoBlock?.mediaMetadata, commentId, postId, postTitle
+                )
             }
 
             binding.captionTextViewMarkdownVideoBlock.movementMethod = BetterLinkMovementMethod.newInstance()
@@ -344,7 +359,24 @@ class VideoEntry(
         }*/
     }
 
+    fun setCurrentCommentId(commentId: String?) {
+        this.currentCommentId = commentId
+    }
+
+    fun setCurrentPostId(postId: String?) {
+        this.currentPostId = postId
+    }
+
+    fun setCurrentPostTitle(postTitle: String?) {
+        this.currentPostTitle = postTitle
+    }
+
     interface OnItemClickListener {
-        fun onItemClick(mediaMetadata: MediaMetadata?)
+        fun onItemClick(
+            mediaMetadata: MediaMetadata?,
+            commentId: String?,
+            postId: String?,
+            postTitle: String?,
+        )
     }
 }

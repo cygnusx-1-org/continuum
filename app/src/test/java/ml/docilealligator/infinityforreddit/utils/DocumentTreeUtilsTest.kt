@@ -7,6 +7,7 @@ import android.content.pm.ProviderInfo
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
+import android.os.Bundle
 import android.provider.DocumentsContract
 import androidx.test.core.app.ApplicationProvider
 import ml.docilealligator.infinityforreddit.TestInfinity
@@ -56,6 +57,9 @@ class DocumentTreeUtilsTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
+        FakeDocumentsProvider.createRequests.clear()
+        FakeDocumentsProvider.refuseNonAscii = false
+        FakeDocumentsProvider.refuseAll = false
     }
 
     // ---- mimeTypeMatchingExtension -------------------------------------------------------------
@@ -259,6 +263,89 @@ class DocumentTreeUtilsTest {
 
     private fun directoryUri(): Uri = DocumentTreeUtils.treeRootDocumentUri(treeUri)
 
+    // ---- createDocumentWithAsciiFallback -------------------------------------------------------
+
+    @Test
+    fun `a destination that accepts the name gets the name, untouched`() {
+        registerFakeProvider()
+
+        val created = DocumentTreeUtils.createDocumentWithAsciiFallback(
+            context, treeUri, "video/mp4", "Cool_clip_\uD83D\uDC9A_abc123_def456.mp4"
+        )
+
+        assertNotNull(created)
+        assertEquals("Cool_clip_\uD83D\uDC9A_abc123_def456.mp4", created!!.displayName)
+        // Exactly one attempt. The happy path is every destination reachable on Android today, so
+        // the fallback must not cost it a second round trip.
+        assertEquals(1, FakeDocumentsProvider.createRequests.size)
+    }
+
+    @Test
+    fun `a destination that refuses the name is retried with an ASCII one`() {
+        registerFakeProvider()
+        FakeDocumentsProvider.refuseNonAscii = true
+
+        val created = DocumentTreeUtils.createDocumentWithAsciiFallback(
+            context, treeUri, "video/mp4", "Caf\u00E9_\uD83D\uDC9A_abc123_def456.mp4"
+        )
+
+        assertNotNull(created)
+        // The full name goes first; only the refusal reduces it.
+        assertEquals(2, FakeDocumentsProvider.createRequests.size)
+        assertEquals("Caf\u00E9_\uD83D\uDC9A_abc123_def456.mp4", FakeDocumentsProvider.createRequests[0])
+        assertEquals("Cafe_abc123_def456.mp4", FakeDocumentsProvider.createRequests[1])
+    }
+
+    @Test
+    fun `the retry keeps the ids, which are what stop two posts colliding`() {
+        registerFakeProvider()
+        FakeDocumentsProvider.refuseNonAscii = true
+
+        // A title already at the byte budget, with both ids appended after it -- the shape a
+        // length-capped name really has. An earlier version budgeted the whole name here and cut
+        // the ids off the end.
+        val name = "\u6f22".repeat(33) + "_abc123_def456.mp4"
+        DocumentTreeUtils.createDocumentWithAsciiFallback(context, treeUri, "video/mp4", name)
+
+        val retried = FakeDocumentsProvider.createRequests[1]
+        assertTrue("lost the ids: $retried", retried.endsWith("abc123_def456.mp4"))
+    }
+
+    @Test
+    fun `the name that succeeded is the one handed back`() {
+        registerFakeProvider()
+        FakeDocumentsProvider.refuseNonAscii = true
+
+        val created = DocumentTreeUtils.createDocumentWithAsciiFallback(
+            context, treeUri, "video/mp4", "Caf\u00E9_abc123.mp4"
+        )
+
+        // Callers keep using this name after creation, for the MediaStore record and the completion
+        // notification, so handing back the name that was asked for rather than the one that was
+        // written would leave them describing a file that is not there.
+        assertNotNull(created)
+        assertEquals("Cafe_abc123.mp4", created!!.displayName)
+        assertTrue(created.uri.toString().endsWith("Cafe_abc123.mp4"))
+    }
+
+    @Test
+    fun `an already-ASCII name is never attempted twice`() {
+        registerFakeProvider()
+        // Refuses everything, so the retry is only skipped if the code decides it would be futile
+        // rather than because the first attempt happened to succeed.
+        FakeDocumentsProvider.refuseAll = true
+
+        // Quote stripping ran when the name was built, so this arrives pure ASCII. It is refused
+        // for some other reason -- no space, no permission -- and an identical second attempt would
+        // be wasted.
+        val created = DocumentTreeUtils.createDocumentWithAsciiFallback(
+            context, treeUri, "video/mp4", "Quoted_title_abc123.mp4"
+        )
+
+        assertNull(created)
+        assertEquals(1, FakeDocumentsProvider.createRequests.size)
+    }
+
     private fun givenChildren(vararg idToName: Pair<String, String>) {
         FakeDocumentsProvider.children = idToName.toList()
         FakeDocumentsProvider.answers = true
@@ -288,6 +375,15 @@ class DocumentTreeUtilsTest {
     class FakeDocumentsProvider : ContentProvider() {
 
         companion object {
+            /** Every display name `createDocument` was asked for, in order. */
+            val createRequests = mutableListOf<String>()
+
+            /** Makes the provider refuse any name holding a character it cannot store. */
+            var refuseNonAscii = false
+
+            /** Makes the provider refuse every name, whatever it contains. */
+            var refuseAll = false
+
             /**
              * A name that is not a SAF document column at all, so no projection can ever ask for
              * it: position 0 is never a column a caller wanted, and it can neither collide with a
@@ -326,6 +422,36 @@ class DocumentTreeUtilsTest {
                 )
             }
             return cursor
+        }
+
+        /**
+         * Answers `DocumentsContract.createDocument`, which reaches a provider as a `call`.
+         *
+         * With [refuseNonAscii] set the provider stands in for a filesystem that cannot store the
+         * name it was handed: it returns no URI, which is the only signal SAF gives a caller, and
+         * the one [DocumentTreeUtils.createDocumentWithAsciiFallback] exists to react to.
+         */
+        override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
+            if (method != "android:createDocument") {
+                return null
+            }
+            val displayName = extras?.getString(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                ?: return null
+            createRequests.add(displayName)
+            if (refuseAll || (refuseNonAscii && displayName.any { it.code > 0x7E })) {
+                return null
+            }
+            return Bundle().apply {
+                // DocumentsContract.EXTRA_URI is not public on every API level; "uri" is the key
+                // it reads back. The name is encoded because a download name is a post title, and
+                // an unencoded '#' or '?' in one would silently truncate the URI here -- a harness
+                // that quietly drops part of what it was given makes tests pass for the wrong
+                // reason.
+                putParcelable(
+                    "uri",
+                    Uri.parse("content://$EXTERNAL_STORAGE/document/" + Uri.encode(displayName))
+                )
+            }
         }
 
         override fun getType(uri: Uri): String? = null

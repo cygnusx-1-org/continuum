@@ -1,8 +1,10 @@
 package ml.docilealligator.infinityforreddit.utils
 
+import ml.docilealligator.infinityforreddit.comment.Comment
 import ml.docilealligator.infinityforreddit.post.ImgurMedia
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService
+import java.text.Normalizer
 import org.apache.commons.io.FilenameUtils
 
 /**
@@ -14,7 +16,32 @@ import org.apache.commons.io.FilenameUtils
  */
 object MediaFileNameUtils {
 
-    private const val MAX_TITLE_LENGTH = 100
+    /**
+     * Byte budget for the title part of a name, measured as UTF-8 rather than as UTF-16 units.
+     *
+     * Every filesystem Android exposes to an app caps one path component at 255 *bytes* -- measured
+     * on ext4, on FUSE-backed emulated storage, and on a real vfat SD card, all of which reject 256
+     * ASCII bytes and equally reject 86 CJK characters (258 bytes). A UTF-16 count could not express
+     * that: 100 units is 100 bytes of ASCII but 300 bytes of CJK, which overflows once the ids and
+     * extension are appended.
+     *
+     * 100 bytes keeps an ASCII title byte-for-byte identical to what this produced before, and
+     * leaves ample room under 255 for `_<postId>_<commentId><ext>`.
+     */
+    private const val MAX_TITLE_BYTES = 100
+
+    /**
+     * Every quotation mark, single and double, not just the two ASCII ones. Only `"` is illegal in
+     * a filename, but Reddit titles carry the typographic forms constantly and they are just as
+     * unwanted in a name.
+     *
+     * Deliberately excludes the primes `\u2032` and `\u2033`, which look like quotes but measure
+     * feet and inches -- stripping them would turn `24\u2033 monitor` into `24 monitor`.
+     */
+    private val QUOTE_MARKS = Regex(
+        "[\"\u201C\u201D\u201E\u201F\u00AB\u00BB\u301D\u301E\u301F\uFF02" +
+            "'\u2018\u2019\u201A\u201B\u2039\u203A\uFF07]"
+    )
 
     /**
      * Sanitizes an arbitrary title into a filesystem-safe filename component.
@@ -25,16 +52,23 @@ object MediaFileNameUtils {
             return "reddit_media" // Default name if title is missing
         }
 
+        // Quotes are stripped outright rather than mapped to a separator like the illegal
+        // characters below, because they sit *inside* words as often as around them. An apostrophe
+        // is the common case -- "it\u2019s my birthday" has to become "its", not "it_s" -- and the
+        // same holds for a title wrapped in quotes, where substituting a separator only to collapse
+        // and trim it again is a longer route to the same name.
+        //
         // Remove characters that are invalid in filenames on most systems, collapse runs of
         // whitespace/underscores, and trim leading/trailing underscores.
         var sanitized = inputName
-            .replace(Regex("[\\\\/:*?\"<>|]"), "_")
+            .replace(QUOTE_MARKS, "")
+            .replace(Regex("[\\\\/:*?<>|]"), "_")
             .replace(Regex("[\\s_]+"), "_")
             .replace(Regex("^_+|_+$"), "")
 
         // Limit length to avoid issues with max path length.
-        if (sanitized.length > MAX_TITLE_LENGTH) {
-            sanitized = sanitized.substring(0, MAX_TITLE_LENGTH).replace(Regex("_+$"), "")
+        if (sanitized.utf8Size() > MAX_TITLE_BYTES) {
+            sanitized = sanitized.truncateToUtf8Bytes(MAX_TITLE_BYTES).replace(Regex("_+$"), "")
         }
 
         // Handle the case where sanitization results in an empty string.
@@ -42,6 +76,74 @@ object MediaFileNameUtils {
             return "reddit_media_" + System.currentTimeMillis()
         }
         return sanitized
+    }
+
+    private fun String.utf8Size(): Int = toByteArray(Charsets.UTF_8).size
+
+    /**
+     * Cuts this string to at most [maxBytes] of UTF-8, always on a code-point boundary.
+     *
+     * Advancing by code point rather than by `char` is what keeps a surrogate pair intact. Half a
+     * pair is not merely cosmetic: encoding a lone surrogate to UTF-8 substitutes `?`, which is one
+     * of the characters [sanitizeFilename] strips precisely because it is illegal on FAT, so a
+     * split emoji could put an illegal character back into a name that had just been cleaned.
+     */
+    private fun String.truncateToUtf8Bytes(maxBytes: Int): String {
+        var end = 0
+        var used = 0
+        while (end < length) {
+            val codePoint = codePointAt(end)
+            val width = when {
+                codePoint < 0x80 -> 1
+                codePoint < 0x800 -> 2
+                codePoint < 0x10000 -> 3
+                else -> 4
+            }
+            if (used + width > maxBytes) {
+                break
+            }
+            used += width
+            end += Character.charCount(codePoint)
+        }
+        return substring(0, end)
+    }
+
+    /**
+     * Rewrites [fileName] using ASCII only, keeping its extension.
+     *
+     * Every destination reachable on Android today stores the full range -- emoji, CJK, Cyrillic and
+     * accented Latin all round-trip intact on ext4, on FUSE-backed emulated storage and on a vfat SD
+     * card, and AOSP's own `isValidFatFilenameChar` treats them as valid. So this is not applied up
+     * front; it is the retry for a destination that turns out to disagree, which is the only way to
+     * tell one apart from another through SAF or MediaStore.
+     */
+    @JvmStatic
+    fun toAsciiFilename(fileName: String): String {
+        val dot = fileName.lastIndexOf('.')
+        val base = if (dot > 0) fileName.substring(0, dot) else fileName
+        val extension = if (dot > 0) fileName.substring(dot) else ""
+
+        // Decompose first so accented Latin folds to its base letter -- "Caf\u00E9" becomes "Cafe"
+        // rather than "Caf_". Scripts with no ASCII equivalent, and emoji, have nothing to fold to
+        // and fall through to the separator below.
+        val folded = Normalizer.normalize(base, Normalizer.Form.NFD)
+            .replace(Regex("\\p{Mn}+"), "")
+
+        val asciiBase = folded
+            .replace(Regex("[^\\x20-\\x7E]+"), "_")
+            .replace(Regex("[\\s_]+"), "_")
+            .replace(Regex("^_+|_+$"), "")
+
+        // A title written entirely in a non-Latin script sanitizes away to nothing here, so it needs
+        // the same fallback sanitizeFilename uses rather than an empty name.
+        val safeBase = asciiBase.ifEmpty { "reddit_media_" + System.currentTimeMillis() }
+
+        // No length budget here. [fileName] arrives already bounded -- its title went through
+        // sanitizeFilename and the ids were appended after -- and folding only ever shrinks it, so
+        // there is nothing left to cut. Applying the *title* budget to a *whole* name would truncate
+        // the ids off the end, which are what stop two posts colliding, and would make an
+        // already-ASCII name compare unequal to its input so the caller retried with the worse name.
+        return safeBase + extension
     }
 
     /**
@@ -52,14 +154,7 @@ object MediaFileNameUtils {
      */
     @JvmStatic
     fun getDownloadFileName(post: Post, galleryIndex: Int): String {
-        var sanitizedTitle = sanitizeFilename(post.title)
-        // Sanitize the id too. A Reddit id is base36 and comes from the parsed API response, so in
-        // practice this is a no-op, but appending it raw after the title has already been sanitized
-        // would let anything unexpected in it straight into a path.
-        val postId = post.id
-        if (!postId.isNullOrEmpty()) {
-            sanitizedTitle = sanitizedTitle + "_" + sanitizeFilename(postId)
-        }
+        val sanitizedTitle = joinTitleAndIds(post.title, post.id, null)
 
         var url = ""
         var mediaType = -1
@@ -100,6 +195,104 @@ object MediaFileNameUtils {
         val indexSuffix =
             if (post.postType == Post.GALLERY_TYPE && galleryIndex >= 0) "_" + (galleryIndex + 1) else ""
         return sanitizedTitle + indexSuffix + getExtension(url, mediaType)
+    }
+
+    /**
+     * Builds the filename for a media item embedded in a post body or a comment, rather than for
+     * the post's own media.
+     *
+     * The host post's type says nothing about an embedded item — a video embedded in a self post
+     * sits on a [Post.TEXT_TYPE] post — so the extension has to come from the media URL here
+     * instead of from [getDownloadFileName]'s post-type switch, which would yield ".unknown".
+     *
+     * @param postTitle title of the host post
+     * @param postId id of the host post
+     * @param commentId id of the comment the media is embedded in, or null for a post body
+     * @param mediaUrl the URL actually being downloaded, used for the extension
+     * @param mediaType a [DownloadMediaService] media type, used when the URL carries no extension
+     */
+    @JvmStatic
+    fun getEmbeddedMediaFileName(
+        postTitle: String?,
+        postId: String?,
+        commentId: String?,
+        mediaUrl: String?,
+        mediaType: Int,
+    ): String {
+        return joinTitleAndIds(postTitle, postId, commentId) + getExtension(mediaUrl, mediaType)
+    }
+
+    /**
+     * Builds the filename for the image or GIF the viewer currently has open.
+     *
+     * Separate from [getEmbeddedMediaFileName] on the two counts only the viewer knows about: an
+     * APNG is an extension of its own, which no [DownloadMediaService] media type can express, and
+     * a missing title falls back to a name that says which of the two kinds it was.
+     *
+     * @param postTitle title of the host post, or null when the caller has none
+     * @param postId id of the host post
+     * @param commentId id of the comment the media is embedded in, or null for a post's own image
+     *     or one embedded in a post body
+     * @param imageUrl the URL actually being downloaded, used for the extension
+     * @param isGif whether the viewer resolved the media to a GIF
+     * @param isApng whether the viewer resolved the media to an APNG
+     */
+    @JvmStatic
+    fun getViewedImageFileName(
+        postTitle: String?,
+        postId: String?,
+        commentId: String?,
+        imageUrl: String?,
+        isGif: Boolean,
+        isApng: Boolean,
+    ): String {
+        val title = if (postTitle.isNullOrEmpty()) {
+            if (isGif || isApng) "reddit_gif" else "reddit_image"
+        } else {
+            postTitle
+        }
+        return joinTitleAndIds(title, postId, commentId) +
+            getViewedImageExtension(imageUrl, isGif, isApng)
+    }
+
+    /**
+     * Names the screenshot shared from a post card, so a receiving app shows something meaningful
+     * rather than a generic name. A screenshot is always a PNG render of the card.
+     */
+    @JvmStatic
+    fun getScreenshotFileName(post: Post, withComments: Boolean): String {
+        val base = joinTitleAndIds(post.title, post.id, null)
+        return if (withComments) base + "_comments.png" else "$base.png"
+    }
+
+    /** Names the screenshot shared from a single comment. */
+    @JvmStatic
+    fun getScreenshotFileName(comment: Comment): String =
+        "comment_" + joinTitleAndIds(comment.author, comment.id, null) + ".png"
+
+    /**
+     * Joins a title and the ids that disambiguate it into the stem of a filename.
+     *
+     * The order is the reason this lives in one place. Each part is sanitized on its own and joined
+     * afterwards, never the other way round: sanitizing the joined string would put the ids inside
+     * [MAX_TITLE_BYTES], so a title long enough to reach the cap -- routine once the budget counts
+     * bytes and the title is CJK -- truncates the ids away, and the ids are what stop two posts
+     * from colliding. Nor is it equivalent for a degenerate title, because [sanitizeFilename] is
+     * not idempotent for input that sanitizes away to nothing.
+     *
+     * An id is sanitized rather than appended raw. A Reddit id is base36 and comes from the parsed
+     * API response, so in practice that is a no-op, but the title has already been cleaned by this
+     * point and nothing else would stop an unexpected id from reaching a path.
+     */
+    private fun joinTitleAndIds(title: String?, postId: String?, commentId: String?): String {
+        var name = sanitizeFilename(title)
+        if (!postId.isNullOrEmpty()) {
+            name = name + "_" + sanitizeFilename(postId)
+        }
+        if (!commentId.isNullOrEmpty()) {
+            name = name + "_" + sanitizeFilename(commentId)
+        }
+        return name
     }
 
     /**
@@ -149,6 +342,28 @@ object MediaFileNameUtils {
             DownloadMediaService.EXTRA_MEDIA_TYPE_GIF -> ".gif"
             DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO -> ".mp4"
             else -> ".unknown"
+        }
+    }
+
+    /**
+     * The extension for the image or GIF on screen: the URL's own when it is one this viewer could
+     * be showing, otherwise whatever the viewer resolved the media to.
+     *
+     * Wider than [getExtension]'s list by "apng", which the viewer tells apart from a plain PNG and
+     * which no [DownloadMediaService] media type carries.
+     */
+    private fun getViewedImageExtension(imageUrl: String?, isGif: Boolean, isApng: Boolean): String {
+        val extension = FilenameUtils.getExtension(imageUrl)
+        if (!extension.isNullOrEmpty() &&
+            extension.matches(Regex("(?i)(jpg|jpeg|png|apng|gif|mp4|webm|mov|avi)"))
+        ) {
+            // Limit extension length to prevent abuse.
+            return "." + extension.lowercase().substring(0, minOf(extension.length, 5))
+        }
+        return when {
+            isApng -> ".apng"
+            isGif -> ".gif"
+            else -> ".jpg"
         }
     }
 

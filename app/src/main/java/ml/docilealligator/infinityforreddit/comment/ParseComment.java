@@ -303,6 +303,10 @@ public class ParseComment {
         }
         String authorFlair = singleCommentData.isNull(JSONUtils.AUTHOR_FLAIR_TEXT_KEY) ? "" : singleCommentData.getString(JSONUtils.AUTHOR_FLAIR_TEXT_KEY);
         String linkAuthor = singleCommentData.has(JSONUtils.LINK_AUTHOR_KEY) ? singleCommentData.getString(JSONUtils.LINK_AUTHOR_KEY) : null;
+        // Only comment *listings* carry link_title; a thread response omits it because the caller
+        // already holds the post. isNull() covers both the missing key and an explicit JSON null.
+        String linkTitle = singleCommentData.isNull(JSONUtils.LINK_TITLE_KEY)
+                ? null : singleCommentData.getString(JSONUtils.LINK_TITLE_KEY);
         // Reddit sometimes returns an empty link_id in the response to a freshly sent comment, so this
         // must not assume a "t3_" prefix is there to strip.
         String linkId = singleCommentData.isNull(JSONUtils.LINK_ID_KEY)
@@ -354,7 +358,7 @@ public class ParseComment {
         long edited = singleCommentData.optLong(JSONUtils.EDITED_KEY) * 1000;
 
         return new Comment(id, fullName, author, authorFullname, authorFlair, authorFlairHTMLBuilder.toString(),
-                linkAuthor, submitTime, commentMarkdown, commentRawText,
+                linkAuthor, linkTitle, submitTime, commentMarkdown, commentRawText,
                 linkId, subredditName, parentId, score, voteType, isSubmitter, distinguished,
                 permalink, depth, collapsed, hasReply, scoreHidden, saved, sendReplies, locked, canModComment,
                 approved, approvedAtUTC, approvedBy, removed, spam, edited, mediaMetadataMap);

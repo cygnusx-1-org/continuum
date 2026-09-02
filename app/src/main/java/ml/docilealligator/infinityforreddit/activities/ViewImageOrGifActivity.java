@@ -485,43 +485,16 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     }
 
     // Builds the filename using the post title passed in the intent, mirroring the download path so
-    // that the save and share actions produce identical filenames.
+    // that the save and share actions produce identical filenames. The rules themselves live in
+    // MediaFileNameUtils, where they are covered; keeping a second copy here is what let the
+    // sanitize-then-append order drift out of step with the download path once already.
     private String buildDownloadFileName() {
-        String postTitle = getIntent().getStringExtra(EXTRA_POST_TITLE_KEY);
-        String commentId = getIntent().getStringExtra(EXTRA_COMMENT_ID_KEY);
-        String postId = getIntent().getStringExtra(EXTRA_POST_ID_KEY);
-        String title = (postTitle != null && !postTitle.isEmpty()) ? postTitle
-                : ((isGif || isApng) ? "reddit_gif" : "reddit_image");
-        if (postId != null && !postId.isEmpty()) {
-            title = title + "_" + postId;
-        }
-        if (commentId != null && !commentId.isEmpty()) {
-            title = title + "_" + commentId;
-        }
-
-        String sanitizedTitle = MediaFileNameUtils.sanitizeFilename(title);
-
-        String extension;
-        if (mImageUrl != null) {
-            String urlExt = org.apache.commons.io.FilenameUtils.getExtension(mImageUrl);
-            if (urlExt != null && !urlExt.isEmpty() && urlExt.matches("(?i)(jpg|jpeg|png|apng|gif|mp4|webm|mov|avi)")) {
-                extension = "." + urlExt.toLowerCase(Locale.US).substring(0, Math.min(urlExt.length(), 5));
-            } else if (isApng) {
-                extension = ".apng";
-            } else if (isGif) {
-                extension = ".gif";
-            } else {
-                extension = ".jpg"; // Default for images if URL extension is weird
-            }
-        } else if (isApng) {
-            extension = ".apng";
-        } else if (isGif) {
-            extension = ".gif";
-        } else {
-            extension = ".jpg";
-        }
-
-        return sanitizedTitle + extension;
+        Intent intent = getIntent();
+        return MediaFileNameUtils.getViewedImageFileName(
+                intent.getStringExtra(EXTRA_POST_TITLE_KEY),
+                intent.getStringExtra(EXTRA_POST_ID_KEY),
+                intent.getStringExtra(EXTRA_COMMENT_ID_KEY),
+                mImageUrl, isGif, isApng);
     }
 
     private void shareImage() {

@@ -45,6 +45,13 @@ public class Comment implements Parcelable {
     private String authorIconUrl;
     @Nullable
     private String linkAuthor;
+    /**
+     * Title of the post this comment belongs to. Reddit sends `link_title` on comment *listings*
+     * (a user's comments, a subreddit's comments) but not inside a thread, where the caller already
+     * has the post, so this is null on the post-detail path.
+     */
+    @Nullable
+    private String linkTitle;
     private long commentTimeMillis;
     @Nullable
     private String commentMarkdown;
@@ -94,7 +101,7 @@ public class Comment implements Parcelable {
     private Map<String, MediaMetadata> mediaMetadataMap;
 
     public Comment(String id, String fullName, String author, String authorFullName, String authorFlair,
-                   String authorFlairHTML, @Nullable String linkAuthor,
+                   String authorFlairHTML, @Nullable String linkAuthor, @Nullable String linkTitle,
                    long commentTimeMillis, String commentMarkdown, String commentRawText,
                    String linkId, String subredditName, String parentId, int score,
                    int voteType, boolean isSubmitter, String distinguished, String permalink,
@@ -109,6 +116,7 @@ public class Comment implements Parcelable {
         this.authorFlair = authorFlair;
         this.authorFlairHTML = authorFlairHTML;
         this.linkAuthor = linkAuthor;
+        this.linkTitle = linkTitle;
         this.commentTimeMillis = commentTimeMillis;
         this.commentMarkdown = commentMarkdown;
         this.commentRawText = commentRawText;
@@ -163,6 +171,7 @@ public class Comment implements Parcelable {
         this.authorFlairHTML = commentToBeCopied.authorFlairHTML;
         this.authorIconUrl = commentToBeCopied.authorIconUrl;
         this.linkAuthor = commentToBeCopied.linkAuthor;
+        this.linkTitle = commentToBeCopied.linkTitle;
         this.commentTimeMillis = commentToBeCopied.commentTimeMillis;
         this.commentMarkdown = commentToBeCopied.commentMarkdown;
         this.commentRawText = commentToBeCopied.commentRawText;
@@ -210,6 +219,7 @@ public class Comment implements Parcelable {
         authorFlairHTML = in.readString();
         authorIconUrl = in.readString();
         linkAuthor = in.readString();
+        linkTitle = in.readString();
         commentTimeMillis = in.readLong();
         commentMarkdown = in.readString();
         commentRawText = in.readString();
@@ -307,6 +317,11 @@ public class Comment implements Parcelable {
     @Nullable
     public String getLinkAuthor() {
         return linkAuthor;
+    }
+
+    @Nullable
+    public String getLinkTitle() {
+        return linkTitle;
     }
 
     public long getCommentTimeMillis() {
@@ -629,6 +644,7 @@ public class Comment implements Parcelable {
         parcel.writeString(authorFlairHTML);
         parcel.writeString(authorIconUrl);
         parcel.writeString(linkAuthor);
+        parcel.writeString(linkTitle);
         parcel.writeLong(commentTimeMillis);
         parcel.writeString(commentMarkdown);
         parcel.writeString(commentRawText);

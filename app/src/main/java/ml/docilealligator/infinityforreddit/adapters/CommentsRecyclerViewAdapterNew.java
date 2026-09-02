@@ -282,7 +282,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mDoNotBlurNsfwInNsfwSubreddits = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS, false);
         mNeedBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, false);
         mImageAndGifEntry = new ImageAndGifEntry(activity, mGlide, SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"), false,
-                (mediaMetadata, commentId, postId) -> {
+                (mediaMetadata, commentId, postId, postTitle) -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
                     if (mediaMetadata.isGIF) {
                         intent.putExtra(ViewImageOrGifActivity.EXTRA_GIF_URL_KEY, mediaMetadata.original.url);
@@ -292,8 +292,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, mPost != null && mPost.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, mPost != null ? mPost.getSubredditName() : "Unknown");
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
-                    if (mPost != null) {
-                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, mPost.getTitle());
+                    if (postTitle != null && !postTitle.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, postTitle);
                     }
                     if (commentId != null && !commentId.isEmpty()) {
                         intent.putExtra(ViewImageOrGifActivity.EXTRA_COMMENT_ID_KEY, commentId);
@@ -308,7 +308,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 });
         mVideoEntry = new VideoEntry(activity, SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"), new VideoEntry.OnItemClickListener() {
             @Override
-            public void onItemClick(@org.jetbrains.annotations.Nullable MediaMetadata mediaMetadata) {
+            public void onItemClick(@org.jetbrains.annotations.Nullable MediaMetadata mediaMetadata,
+                                    @Nullable String commentId, @Nullable String postId,
+                                    @Nullable String postTitle) {
                 if (canStartActivity) {
                     canStartActivity = false;
                     if (mediaMetadata == null) {
@@ -319,8 +321,22 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     intent.setData(Uri.parse(mediaMetadata.original.url));
                     intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
                     intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
-                    if (post != null) {
-                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, post.getSubredditName());
+                    // mPost, not the constructor's post: the fragment builds this adapter before
+                    // the post arrives and fills it in later via updatePost, so the captured
+                    // parameter stays null on a post opened from a link.
+                    if (mPost != null) {
+                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, mPost.getSubredditName());
+                        intent.putExtra(ViewVideoActivity.EXTRA_IS_NSFW, mPost.isNSFW());
+                        intent.putExtra(ViewVideoActivity.EXTRA_POST, mPost);
+                    }
+                    if (postTitle != null && !postTitle.isEmpty()) {
+                        intent.putExtra(ViewVideoActivity.EXTRA_POST_TITLE, postTitle);
+                    }
+                    if (postId != null && !postId.isEmpty()) {
+                        intent.putExtra(ViewVideoActivity.EXTRA_POST_ID, postId);
+                    }
+                    if (commentId != null && !commentId.isEmpty()) {
+                        intent.putExtra(ViewVideoActivity.EXTRA_COMMENT_ID, commentId);
                     }
                     intent.putExtra(ViewVideoActivity.EXTRA_ID, mediaMetadata.id);
                     activity.startActivity(intent);
@@ -555,6 +571,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 mImageAndGifPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mImageAndGifEntry.setCurrentCommentId(comment.getId());
                 mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
+                // A thread response carries no link_title, so fall back to the post this screen
+                // already holds.
+                String linkTitle = comment.getLinkTitle() != null
+                        ? comment.getLinkTitle() : (mPost == null ? null : mPost.getTitle());
+                mImageAndGifEntry.setCurrentPostTitle(linkTitle);
+                mVideoEntry.setCurrentCommentId(comment.getId());
+                mVideoEntry.setCurrentPostId(comment.getLinkId());
+                mVideoEntry.setCurrentPostTitle(linkTitle);
                 mVideoPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
                 ((CommentBaseViewHolder) holder).mMarkwonAdapter.setMarkdown(mCommentMarkwon, java.util.Objects.requireNonNullElse(comment.getCommentMarkdown(), ""));
                 // noinspection NotifyDataSetChanged

@@ -23,9 +23,17 @@ class VideoBlockParser(
         return null
     }
 
-    companion object Factory : AbstractBlockParserFactory() {
-        private val videoPattern: Pattern =
-            Pattern.compile("!\\[.*]\\(https://reddit\\.com/link/([^/]+)/video/([^/]+)/player\\)")
+    /**
+     * One factory per [VideoPlugin], holding that plugin's map -- the same shape as
+     * ImageAndGifBlockParser.Factory.
+     *
+     * The map is rebound before every render, from whichever comment or post body is being bound,
+     * so it must not outlive the plugin that owns it. As a companion object it was a single
+     * process-wide slot shared by all three adapters that build a VideoPlugin, which both kept the
+     * last-bound comment's MediaMetadata alive for the life of the process and left every plugin
+     * reading a map some other screen had set.
+     */
+    class Factory : AbstractBlockParserFactory() {
         private var mediaMetadataMap: Map<String, MediaMetadata>? = null
 
         override fun tryStart(
@@ -46,6 +54,12 @@ class VideoBlockParser(
 
         fun setMediaMetadataMap(mediaMetadataMap: Map<String, MediaMetadata>?) {
             this.mediaMetadataMap = mediaMetadataMap
+        }
+
+        private companion object {
+            // Stateless, so it stays shared: compiling this per factory would be pure waste.
+            private val videoPattern: Pattern =
+                Pattern.compile("!\\[.*]\\(https://reddit\\.com/link/([^/]+)/video/([^/]+)/player\\)")
         }
     }
 }

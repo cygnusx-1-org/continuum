@@ -157,6 +157,46 @@ object DocumentTreeUtils {
         }
     }
 
+    /**
+     * A document that was created, and the name it actually got -- which is not always the name
+     * that was asked for.
+     */
+    data class CreatedDocument(@JvmField val uri: Uri, @JvmField val displayName: String)
+
+    /**
+     * Creates a document, retrying once with an ASCII-only name if the provider refuses the one
+     * given.
+     *
+     * Emoji, CJK and accented Latin survive on every destination reachable on Android today, so the
+     * full name is always tried first and is what a caller normally gets. There is no way to ask a
+     * SAF provider in advance which characters its filesystem accepts, so a refusal is the signal:
+     * a destination that cannot store them says so, and only then is the name reduced.
+     *
+     * The name that succeeded comes back with the URI because callers keep using it afterwards --
+     * for the MediaStore record and the completion notification -- and silently substituting a
+     * different one would leave them describing a file that is not there.
+     */
+    @JvmStatic
+    fun createDocumentWithAsciiFallback(
+        context: Context,
+        parentDocumentUri: Uri,
+        mimeType: String,
+        displayName: String,
+    ): CreatedDocument? {
+        createDocument(context, parentDocumentUri, mimeType, displayName)?.let {
+            return CreatedDocument(it, displayName)
+        }
+
+        val asciiName = MediaFileNameUtils.toAsciiFilename(displayName)
+        if (asciiName == displayName) {
+            return null
+        }
+
+        Log.w(TAG, "Retrying '$displayName' as '$asciiName' under $parentDocumentUri")
+        return createDocument(context, parentDocumentUri, mimeType, asciiName)
+            ?.let { CreatedDocument(it, asciiName) }
+    }
+
     private fun childDocumentsUriOrNull(directoryUri: Uri): Uri? = try {
         DocumentsContract.buildChildDocumentsUriUsingTree(
             directoryUri,

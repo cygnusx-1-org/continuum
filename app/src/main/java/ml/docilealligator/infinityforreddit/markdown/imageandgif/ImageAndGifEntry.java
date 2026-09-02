@@ -120,6 +120,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         holder.imageAndGifBlock = node;
         holder.commentId = currentCommentId;
         holder.postId = currentPostId;
+        holder.postTitle = currentPostTitle;
 
         holder.binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.VISIBLE);
 
@@ -263,6 +264,8 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     private String currentCommentId;
     @Nullable
     private String currentPostId;
+    @Nullable
+    private String currentPostTitle;
 
     public void setCurrentCommentId(@Nullable String commentId) {
         this.currentCommentId = commentId;
@@ -270,6 +273,10 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
 
     public void setCurrentPostId(@Nullable String postId) {
         this.currentPostId = postId;
+    }
+
+    public void setCurrentPostTitle(@Nullable String postTitle) {
+        this.currentPostTitle = postTitle;
     }
 
     public boolean setDataSavingMode(boolean dataSavingMode) {
@@ -299,6 +306,8 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         String commentId;
         @Nullable
         String postId;
+        @Nullable
+        String postTitle;
 
         public Holder(@NonNull MarkdownImageAndGifBlockBinding binding) {
             super(binding.getRoot());
@@ -372,7 +381,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
 
             binding.imageViewMarkdownImageAndGifBlock.setOnClickListener(view -> {
                 if (imageAndGifBlock != null) {
-                    onItemClickListener.onItemClick(imageAndGifBlock.mediaMetadata, commentId, postId);
+                    onItemClickListener.onItemClick(imageAndGifBlock.mediaMetadata, commentId, postId, postTitle);
                 }
             });
 
@@ -393,6 +402,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     }
 
     public interface OnItemClickListener {
-        void onItemClick(MediaMetadata mediaMetadata, @Nullable String commentId, @Nullable String postId);
+        void onItemClick(MediaMetadata mediaMetadata, @Nullable String commentId, @Nullable String postId,
+                         @Nullable String postTitle);
     }
 }

@@ -224,7 +224,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 mVideoPlugin, mCommentColor, commentSpoilerBackgroundColor, onLinkLongClickListener);
         mImageAndGifEntry = new ImageAndGifEntry(activity, Glide.with(activity),
                 SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
-                (mediaMetadata, commentId, postId) -> {
+                (mediaMetadata, commentId, postId, postTitle) -> {
                     if (canStartActivity) {
                         canStartActivity = false;
                         Intent intent = new Intent(activity, ViewImageOrGifActivity.class);
@@ -235,6 +235,11 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                         }
                         intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, username);
                         intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                        // This screen has no Post; the title comes from the comment's own
+                        // link_title. Without it the name falls back to a bare "reddit_image".
+                        if (postTitle != null && !postTitle.isEmpty()) {
+                            intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, postTitle);
+                        }
                         if (commentId != null && !commentId.isEmpty()) {
                             intent.putExtra(ViewImageOrGifActivity.EXTRA_COMMENT_ID_KEY, commentId);
                         }
@@ -246,7 +251,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 });
         mVideoEntry = new VideoEntry(activity,
                 SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId, postTitle) -> {
                     if (canStartActivity) {
                         canStartActivity = false;
                         if (mediaMetadata == null) {
@@ -257,6 +262,19 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                         intent.setData(Uri.parse(mediaMetadata.original.url));
                         intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
                         intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
+                        // No Post on this screen, so the download is named from the comment's own
+                        // link_title plus the two ids. The subreddit comes from the listing.
+                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, username);
+                        if (postTitle != null && !postTitle.isEmpty()) {
+                            intent.putExtra(ViewVideoActivity.EXTRA_POST_TITLE, postTitle);
+                        }
+                        if (postId != null && !postId.isEmpty()) {
+                            intent.putExtra(ViewVideoActivity.EXTRA_POST_ID, postId);
+                        }
+                        if (commentId != null && !commentId.isEmpty()) {
+                            intent.putExtra(ViewVideoActivity.EXTRA_COMMENT_ID, commentId);
+                        }
+                        intent.putExtra(ViewVideoActivity.EXTRA_ID, mediaMetadata.id);
                         activity.startActivity(intent);
                     }
                 });
@@ -303,6 +321,10 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 mImageAndGifPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mImageAndGifEntry.setCurrentCommentId(comment.getId());
                 mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
+                mImageAndGifEntry.setCurrentPostTitle(comment.getLinkTitle());
+                mVideoEntry.setCurrentCommentId(comment.getId());
+                mVideoEntry.setCurrentPostId(comment.getLinkId());
+                mVideoEntry.setCurrentPostTitle(comment.getLinkTitle());
                 mVideoPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
                 ((CommentBaseViewHolder) holder).markwonAdapter.setMarkdown(mMarkwon, java.util.Objects.requireNonNullElse(comment.getCommentMarkdown(), ""));
                 // noinspection NotifyDataSetChanged

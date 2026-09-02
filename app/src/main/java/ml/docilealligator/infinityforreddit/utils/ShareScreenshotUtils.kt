@@ -61,7 +61,7 @@ fun sharePostAsScreenshot(
 ) {
     //val binding: SharedPostBinding = SharedPostBinding.inflate(LayoutInflater.from(ContextThemeWrapper(baseActivity, R.style.AppTheme)))
     val binding: SharedPostBinding = SharedPostBinding.inflate(LayoutInflater.from(baseActivity))
-    val fileName = screenshotFileName(post)
+    val fileName = MediaFileNameUtils.getScreenshotFileName(post, false)
 
     binding.titleTextViewSharedPost.text = post.title
     binding.subredditNameTextViewSharedPost.text = post.subredditNamePrefixed
@@ -178,7 +178,7 @@ fun sharePostWithCommentsAsScreenshot(
     saveMemoryCenterInsideDownsampleStrategy: SaveMemoryCenterInisdeDownsampleStrategy
 ) {
     val binding: SharedPostWithCommentsBinding = SharedPostWithCommentsBinding.inflate(LayoutInflater.from(baseActivity))
-    val fileName = screenshotFileName(post, withComments = true)
+    val fileName = MediaFileNameUtils.getScreenshotFileName(post, true)
 
     binding.titleTextViewSharedPostWithComments.text = post.title
     binding.subredditNameTextViewSharedPostWithComments.text = post.subredditNamePrefixed
@@ -320,7 +320,7 @@ fun shareCommentAsScreenshot(
     binding.qrCodeImageViewSharedComment.setImageDrawable(generateQRCode(baseActivity, customThemeWrapper, comment.permalink ?: ""))
 
     measureView(binding.getRoot())
-    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), screenshotFileName(comment))
+    shareScreenshot(baseActivity, getBitmapFromView(binding.getRoot()), MediaFileNameUtils.getScreenshotFileName(comment))
 }
 
 private fun measureView(rootView: View) {
@@ -399,17 +399,4 @@ private fun shareScreenshot(context: Context, bitmap: Bitmap, fileName: String) 
     } catch (e: IOException) {
         e.printStackTrace()
     }
-}
-
-// Names the shared screenshot after the post (and comments) so apps like Google Drive show a
-// meaningful filename instead of a generic one. Screenshots are always PNG renders of the card.
-private fun screenshotFileName(post: Post, withComments: Boolean = false): String {
-    val title = MediaFileNameUtils.sanitizeFilename(post.title)
-    val base = if (post.id.isNullOrEmpty()) title else "${title}_${post.id}"
-    return if (withComments) "${base}_comments.png" else "$base.png"
-}
-
-private fun screenshotFileName(comment: Comment): String {
-    val author = MediaFileNameUtils.sanitizeFilename(comment.author)
-    return if (comment.id.isNullOrEmpty()) "comment_$author.png" else "comment_${author}_${comment.id}.png"
 }

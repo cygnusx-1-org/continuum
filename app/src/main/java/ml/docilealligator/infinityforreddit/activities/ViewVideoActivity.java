@@ -133,6 +133,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     public static final String EXTRA_SUBREDDIT = "ES";
     public static final String EXTRA_ID = "EI";
     public static final String EXTRA_POST = "EP";
+    // Embedded (VIDEO_TYPE_MARKDOWN_PARSED) media only: the host post and comment this video was
+    // embedded in. They name the download, and they are carried separately from EXTRA_POST because
+    // a comment listing has no Post to send -- see CommentsListingRecyclerViewAdapter.
+    public static final String EXTRA_POST_TITLE = "EPT";
+    public static final String EXTRA_POST_ID = "EPI";
+    public static final String EXTRA_COMMENT_ID = "ECI";
     public static final String EXTRA_PROGRESS_SECONDS = "EPS";
     public static final String EXTRA_REDGIFS_ID = "EGI";
     public static final String EXTRA_V_REDD_IT_URL = "EVRIU";
@@ -414,15 +420,23 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             isDataSavingMode = networkType == Utils.NETWORK_TYPE_CELLULAR;
         }
 
+        int intentVideoType = intent.getIntExtra(EXTRA_VIDEO_TYPE, VIDEO_TYPE_NORMAL);
+        // The embed launchers pass the host post so its title can head the screen, but an embedded
+        // item is not that post's video: falling back to the post's direct URL would play and then
+        // save the wrong file, and would flip videoType away from VIDEO_TYPE_MARKDOWN_PARSED so the
+        // download would take the host post's name too.
+        String fallbackDirectUrl = (post == null || intentVideoType == VIDEO_TYPE_MARKDOWN_PARSED)
+                ? null : post.getVideoFallBackDirectUrl();
+
         viewVideoViewModel = new ViewModelProvider(
                 this,
                 ViewVideoViewModel.Companion.provideFactory(post,
                         intent.getData(), intent.getStringExtra(EXTRA_VIDEO_DOWNLOAD_URL),
-                        post != null ? post.getVideoFallBackDirectUrl() : null,
+                        fallbackDirectUrl,
                         intent.getStringExtra(EXTRA_SUBREDDIT), intent.getStringExtra(EXTRA_ID),
                         intent.getBooleanExtra(EXTRA_IS_NSFW, false),
                         intent.getLongExtra(EXTRA_PROGRESS_SECONDS, -1),
-                        intent.getIntExtra(EXTRA_VIDEO_TYPE, VIDEO_TYPE_NORMAL),
+                        intentVideoType,
                         intent.getStringExtra(EXTRA_REDGIFS_ID),
                         intent.getStringExtra(EXTRA_V_REDD_IT_URL),
                         intent.getStringExtra(EXTRA_STREAMABLE_SHORT_CODE),
@@ -1349,7 +1363,67 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         return false;
     }
 
+    /**
+     * Whether the video on screen is a media item embedded in a post body or a comment, rather than
+     * the post's own video. Such an item says nothing about the host post's type or URL, so it must
+     * not be named or routed from the post -- see {@link #buildDownloadFileName()}.
+     */
+    private boolean isEmbeddedMedia() {
+        return viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED;
+    }
+
+    /**
+     * The name for an embedded item, shared by the download and share actions so both produce the
+     * same file. Read from the intent rather than the view model because a comment listing has no
+     * Post to carry them -- mirroring ViewImageOrGifActivity.buildDownloadFileName().
+     */
+    private String buildEmbeddedMediaFileName() {
+        Intent intent = getIntent();
+        // A thread response carries no link_title, so the comment adapters send the post's title;
+        // a comment listing has no Post at all and sends Comment.getLinkTitle().
+        return MediaFileNameUtils.getEmbeddedMediaFileName(
+                intent.getStringExtra(EXTRA_POST_TITLE),
+                intent.getStringExtra(EXTRA_POST_ID),
+                intent.getStringExtra(EXTRA_COMMENT_ID),
+                viewVideoViewModel.getVideoDownloadUrl(),
+                DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO);
+    }
+
+    /**
+     * Schedules the mux-and-save job for an embedded item. The download URL is a video-only CMAF
+     * track whose audio sits beside it, and DownloadRedditVideoService is the only service that
+     * fetches the sibling audio and muxes the two; it also walks a resolution ladder when the
+     * optimistic CMAF_1080.mp4 guess is not one of the renditions Reddit produced.
+     */
+    private void scheduleEmbeddedMediaJob(boolean isShare) {
+        PersistableBundle extras = new PersistableBundle();
+        extras.putString(DownloadRedditVideoService.EXTRA_VIDEO_URL, viewVideoViewModel.getVideoDownloadUrl());
+        extras.putString(DownloadRedditVideoService.EXTRA_POST_ID, viewVideoViewModel.getId());
+        extras.putString(DownloadRedditVideoService.EXTRA_SUBREDDIT, viewVideoViewModel.getSubredditName());
+        extras.putInt(DownloadRedditVideoService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
+        extras.putString(DownloadRedditVideoService.EXTRA_FILE_NAME, buildEmbeddedMediaFileName());
+        if (isShare) {
+            extras.putInt(DownloadRedditVideoService.EXTRA_IS_SHARE, 1);
+        }
+
+        //TODO: contentEstimatedBytes
+        JobInfo jobInfo = DownloadRedditVideoService.constructJobInfo(this, 5000000, extras);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+    }
+
     private void shareVideo() {
+        // Handled first and on its own: an embedded item is not the post's own media, so nothing
+        // below may consult the host post, and on a comment listing there is no Post to consult.
+        if (isEmbeddedMedia()) {
+            if (viewVideoViewModel.getVideoDownloadUrl() == null) {
+                Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this, R.string.preparing_video_for_sharing, Toast.LENGTH_SHORT).show();
+            scheduleEmbeddedMediaJob(true);
+            return;
+        }
+
         Post post = viewVideoViewModel.getPost();
         if (post == null || viewVideoViewModel.getVideoDownloadUrl() == null) {
             Toast.makeText(this, R.string.fetching_video_info_please_wait, Toast.LENGTH_SHORT).show();
@@ -1465,6 +1539,15 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
 
         if (downloadLocation == null || downloadLocation.isEmpty()) {
             Toast.makeText(this, R.string.download_location_not_set, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Handled first and on its own: an embedded item is not the post's own media, so the host
+        // post being a GIF or a Tumblr post must not decide what gets downloaded, and on a comment
+        // listing there is no Post at all.
+        if (isEmbeddedMedia()) {
+            scheduleEmbeddedMediaJob(false);
+            Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
             return;
         }
 

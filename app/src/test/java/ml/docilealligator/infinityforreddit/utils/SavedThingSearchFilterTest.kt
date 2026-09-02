@@ -26,7 +26,7 @@ class SavedThingSearchFilterTest {
     )
 
     private fun comment(body: String, subreddit: String, author: String) = Comment(
-        "c1", "t1_c1", author, "t2_$author", "", "", null, 0L,
+        "c1", "t1_c1", author, "t2_$author", "", "", null, null, 0L,
         body, body, "t3_abc123", subreddit, "t3_abc123", 0,
         0, false, "", "/r/$subreddit/comments/abc123/c1/", 0, false, false,
         false, false, false, false, false, false, 0L, null, false, false, 0L, null

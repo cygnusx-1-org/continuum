@@ -31,7 +31,7 @@ class CommentFilterKeywordCaseTest {
     }
 
     private fun comment(body: String) = Comment(
-        "c1", "t1_c1", "author", "t2_author", "", "", null, 0L,
+        "c1", "t1_c1", "author", "t2_author", "", "", null, null, 0L,
         body, body, "t3_id", "android", "t3_id", 0,
         0, false, "", "/r/android/comments/id/c1/", 0, false, false,
         false, false, false, false, false, false, 0L, null, false, false, 0L, null

@@ -54,6 +54,7 @@ import ml.docilealligator.infinityforreddit.broadcastreceivers.DownloadedMediaDe
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
 import ml.docilealligator.infinityforreddit.utils.DocumentTreeUtils;
+import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -96,7 +97,15 @@ public class DownloadRedditVideoService extends JobService {
     @Inject
     Executor executor;
     private NotificationManagerCompat notificationManager;
-    private final String[] possibleVideoUrlSuffices = new String[]{"/CMAF_720.mp4", "/CMAF_480.mp4", "/CMAF_360.mp4"};
+    // Tried in order after the caller's own URL fails. Reddit only produces renditions up to the
+    // source height -- a 640x360 upload has no 480 or 720 -- and the callers pass an optimistic
+    // CMAF_1080.mp4 that exists only for >=1080p sources, so the first few entries miss routinely.
+    // Older videos predate the CMAF naming and use DASH_ instead, with or without an extension,
+    // which is why the audio ladder below already spans both generations; this one has to as well.
+    private final String[] possibleVideoUrlSuffices = new String[]{
+            "/CMAF_720.mp4", "/CMAF_480.mp4", "/CMAF_360.mp4", "/CMAF_270.mp4", "/CMAF_220.mp4",
+            "/DASH_720.mp4", "/DASH_480.mp4", "/DASH_360.mp4", "/DASH_240.mp4",
+            "/DASH_720", "/DASH_480", "/DASH_360", "/DASH_240"};
     private final String[] possibleAudioUrlSuffices = new String[]{"/CMAF_AUDIO_128.mp4", "/CMAF_AUDIO_64.mp4", "/DASH_AUDIO_128.mp4", "/DASH_audio.mp4", "/DASH_audio", "/audio.mp4", "/audio"};
 
     public DownloadRedditVideoService() {
@@ -297,12 +306,15 @@ public class DownloadRedditVideoService extends JobService {
                                 destinationDirUri = DocumentTreeUtils.createDirectory(this, subredditDirParentUri, subredditDirName);
                             }
 
-                            Uri picFileUri = destinationDirUri == null ? null
-                                    : DocumentTreeUtils.createDocument(this, destinationDirUri, "video/mp4", destinationFileName);
+                            DocumentTreeUtils.CreatedDocument created = destinationDirUri == null ? null
+                                    : DocumentTreeUtils.createDocumentWithAsciiFallback(this, destinationDirUri, "video/mp4", destinationFileName);
 
-                            if (picFileUri != null) {
+                            if (created != null) {
+                                // The fallback may have reduced the name; keep the variable truthful
+                                // because the notification and MediaStore record both still read it.
+                                destinationFileName = created.displayName;
                                 isDefaultDestination = false;
-                                destinationFileUriString = picFileUri.toString();
+                                destinationFileUriString = created.uri.toString();
                             } else {
                                 // The chosen folder is unusable. Save to the default media location so the
                                 // download still succeeds, and prompt the user to re-select their folder.
@@ -676,7 +688,13 @@ public class DownloadRedditVideoService extends JobService {
             } else {
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, destinationFileName);
-                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
+                // Same reason as DownloadMediaService: a declared type that disagrees with the
+                // name's extension makes MediaStore append one. Only a video/ subtype is accepted,
+                // because the collection and RELATIVE_PATH below are both video-only.
+                String videoMimeType = DocumentTreeUtils.mimeTypeMatchingExtension(destinationFileName);
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE,
+                        videoMimeType != null && videoMimeType.startsWith("video/")
+                                ? videoMimeType : "video/mp4");
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, destinationFileUriString);
                 contentValues.put(MediaStore.Video.Media.IS_PENDING, 1);
 
@@ -686,6 +704,15 @@ public class DownloadRedditVideoService extends JobService {
                 try {
                     final Uri contentUri = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
                     uri = contentResolver.insert(contentUri, contentValues);
+                    if (uri == null) {
+                        // Same fallback as the SAF path: a destination that will not take the
+                        // name's non-ASCII characters gets an ASCII one rather than no file.
+                        String asciiName = MediaFileNameUtils.toAsciiFilename(destinationFileName);
+                        if (!asciiName.equals(destinationFileName)) {
+                            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, asciiName);
+                            uri = contentResolver.insert(contentUri, contentValues);
+                        }
+                    }
 
                     if (uri == null) {
                         throw new IOException("Failed to create new MediaStore record.");

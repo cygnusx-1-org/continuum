@@ -755,12 +755,15 @@ public class DownloadMediaService extends JobService {
                     destinationDirUri = DocumentTreeUtils.createDirectory(this, subredditDirParentUri, subredditDirName);
                 }
 
-                Uri picFileUri = destinationDirUri == null ? null
-                        : DocumentTreeUtils.createDocument(this, destinationDirUri, documentMimeType, fileName);
+                DocumentTreeUtils.CreatedDocument created = destinationDirUri == null ? null
+                        : DocumentTreeUtils.createDocumentWithAsciiFallback(this, destinationDirUri, documentMimeType, fileName);
 
-                if (picFileUri != null) {
+                if (created != null) {
+                    // The fallback may have reduced the name; keep the variable truthful because the
+                    // write below and the completion notification both still read it.
+                    fileName = created.displayName;
                     isDefaultDestination = false;
-                    destinationFileUriString = picFileUri.toString();
+                    destinationFileUriString = created.uri.toString();
                     Log.d("ImgurDownload", "File created successfully at: " + destinationFileUriString);
                 } else {
                     // The chosen folder is unusable. Save to the default media location so the
@@ -975,12 +978,47 @@ public class DownloadMediaService extends JobService {
                         mimeType = "image/jpeg";
                 }
 
+                // The name's own extension is the truth about the bytes on disk, so it decides
+                // both the declared type and the collection below. MediaStore appends an extension
+                // of its own when the declared type disagrees with the name, which is what turned a
+                // PNG download into "name.png.jpg": every non-GIF image was declared image/jpeg
+                // whatever the name said.
+                //
+                // A GIF post does not hit that, despite what the mediaType/extension pairing
+                // suggests -- ParsePost sets its videoUrl to the .gif URL itself, so the name is
+                // ".gif" and already agrees with image/gif. Verified on device.
+                //
+                // Restricted to the two types that have a collection here. An extension mapping to
+                // audio/ or anything else would have nowhere to go, so the mediaType guess stands.
+                String extensionMimeType = DocumentTreeUtils.mimeTypeMatchingExtension(destinationFileName);
+
+                if (extensionMimeType != null
+                        && (extensionMimeType.startsWith("image/") || extensionMimeType.startsWith("video/"))) {
+                    mimeType = extensionMimeType;
+                }
+
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, destinationFileUriString);
                 contentValues.put(MediaStore.MediaColumns.IS_PENDING, 1);
 
-                final Uri contentUri = mediaType == EXTRA_MEDIA_TYPE_VIDEO ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY) : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+                // Follows the declared type rather than mediaType: MediaStore rejects a video/
+                // MIME inserted into the images collection outright. RELATIVE_PATH does not need to
+                // follow suit -- Pictures/ accepts video and Movies/ accepts images -- so a GIF post
+                // saved as an mp4 keeps landing where it always did.
+                final Uri contentUri = mimeType.startsWith("video/")
+                        ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                        : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
                 Uri uri = contentResolver.insert(contentUri, contentValues);
+
+                if (uri == null) {
+                    // Same fallback as the SAF path: a destination that will not take the name's
+                    // non-ASCII characters gets an ASCII one rather than no file at all.
+                    String asciiName = MediaFileNameUtils.toAsciiFilename(destinationFileName);
+                    if (!asciiName.equals(destinationFileName)) {
+                        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, asciiName);
+                        uri = contentResolver.insert(contentUri, contentValues);
+                    }
+                }
 
                 if (uri == null) {
                     throw new IOException("Failed to create new MediaStore record.");

@@ -478,7 +478,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 mGlide, SharedPreferencesUtils.getInt(postDetailsSharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 mDataSavingMode, mDisableImagePreview,
                 (mPost != null && mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost != null && mPost.isSpoiler() && mNeedBlurSpoiler),
-                (mediaMetadata, commentId, postId) -> {
+                (mediaMetadata, commentId, postId, postTitle) -> {
                     if (mPost == null) {
                         return;
                     }
@@ -491,6 +491,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, mPost.isNSFW());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, mPost.getSubredditName());
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
+                    // Without these the name falls back to a bare "reddit_image", which collides
+                    // across every post.
+                    if (postTitle != null && !postTitle.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, postTitle);
+                    }
+                    if (postId != null && !postId.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, postId);
+                    }
+                    if (commentId != null && !commentId.isEmpty()) {
+                        intent.putExtra(ViewImageOrGifActivity.EXTRA_COMMENT_ID_KEY, commentId);
+                    }
                     if (canStartActivity) {
                         canStartActivity = false;
                         activity.startActivity(intent);
@@ -498,7 +509,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 });
         mVideoEntry = new VideoEntry(activity,
                 SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
-                mediaMetadata -> {
+                (mediaMetadata, commentId, postId, postTitle) -> {
                     if (canStartActivity) {
                         canStartActivity = false;
                         if (mediaMetadata == null) {
@@ -509,7 +520,24 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         intent.setData(Uri.parse(mediaMetadata.original.url));
                         intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_MARKDOWN_PARSED);
                         intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, MediaMetadata.getDownloadUrlForMarkdownParsedVideo(mediaMetadata.original.url));
-                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, post == null ? "Unknown" : post.getSubredditName());
+                        // mPost, not the constructor's post: the fragment builds this adapter
+                        // before the post arrives and fills it in later via updatePost, so the
+                        // captured parameter stays null on a post opened from a link. getItemCount
+                        // is 0 until mPost is set, so a body embed cannot be tapped before then.
+                        intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, mPost == null ? "Unknown" : mPost.getSubredditName());
+                        if (mPost != null) {
+                            intent.putExtra(ViewVideoActivity.EXTRA_IS_NSFW, mPost.isNSFW());
+                            intent.putExtra(ViewVideoActivity.EXTRA_POST, mPost);
+                        }
+                        if (postTitle != null && !postTitle.isEmpty()) {
+                            intent.putExtra(ViewVideoActivity.EXTRA_POST_TITLE, postTitle);
+                        }
+                        if (postId != null && !postId.isEmpty()) {
+                            intent.putExtra(ViewVideoActivity.EXTRA_POST_ID, postId);
+                        }
+                        if (commentId != null && !commentId.isEmpty()) {
+                            intent.putExtra(ViewVideoActivity.EXTRA_COMMENT_ID, commentId);
+                        }
                         intent.putExtra(ViewVideoActivity.EXTRA_ID, mediaMetadata.id);
                         activity.startActivity(intent);
                     }
@@ -857,6 +885,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(mPost.getMediaMetadataMap());
                 mImageAndGifPlugin.setMediaMetadataMap(mPost.getMediaMetadataMap());
                 mVideoPlugin.setMediaMetadataMap(mPost.getMediaMetadataMap());
+                // A post body embed has no comment id; the name is title + post id.
+                mImageAndGifEntry.setCurrentCommentId(null);
+                mImageAndGifEntry.setCurrentPostId(mPost.getId());
+                mImageAndGifEntry.setCurrentPostTitle(mPost.getTitle());
+                mVideoEntry.setCurrentCommentId(null);
+                mVideoEntry.setCurrentPostId(mPost.getId());
+                mVideoEntry.setCurrentPostTitle(mPost.getTitle());
                 mMarkwonAdapter.setMarkdown(mPostDetailMarkwon, mPost.getSelfText());
                 // noinspection NotifyDataSetChanged
                 mMarkwonAdapter.notifyDataSetChanged();
