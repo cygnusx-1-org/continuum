@@ -103,7 +103,8 @@
 %1$d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"Ngày bánh ga tô:
 %1$s"</string>
-    <string name="since">"Từ khi"</string>
+    <string name="since_info">"Từ khi
+%1$s"</string>
     <string name="profile">"Trang cá nhân"</string>
     <string name="subscriptions">"Mục đã đăng kí"</string>
     <string name="multi_reddit">"Multireddit"</string>

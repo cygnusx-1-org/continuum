@@ -118,8 +118,8 @@
     <!-- Fuzzy -->
     <string name="karma_info_user_detail">"कर्म: %1$d(%2$d + %3$d)"</string>
     <string name="cakeday_info">"केक दिवस: %1$s"</string>
-    <string name="since">"से (समय):
-"</string>
+    <string name="since_info">"से (समय):
+%1$s"</string>
     <string name="profile">"प्रोफाइल"</string>
     <string name="subscriptions">"सब्सक्रिप्शन्स"</string>
     <string name="multi_reddit">"मल्टीरैडिट"</string>

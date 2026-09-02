@@ -109,7 +109,8 @@
 %1$d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"케이크날:
 %1$s"</string>
-    <string name="since">"가입:"</string>
+    <string name="since_info">"가입:
+%1$s"</string>
     <string name="profile">"프로필"</string>
     <string name="subscriptions">"구독"</string>
     <string name="multi_reddit">"멀티레딧"</string>

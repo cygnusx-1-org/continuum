@@ -111,7 +111,8 @@ Tippen für Neuversuch."</string>
 %1$,d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"Cake Day:
 %1$s"</string>
-    <string name="since">"Seit:"</string>
+    <string name="since_info">"Seit:
+%1$s"</string>
     <string name="profile">"Profil"</string>
     <string name="subscriptions">"Abonnements"</string>
     <string name="multi_reddit">"Multireddit"</string>

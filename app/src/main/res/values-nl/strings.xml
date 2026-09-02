@@ -106,7 +106,8 @@ Druk om opnieuw te proberen."</string>
 %1$d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"Taartdag:
 %1$s"</string>
-    <string name="since">"Sinds:"</string>
+    <string name="since_info">"Sinds:
+%1$s"</string>
     <string name="profile">"Profiel"</string>
     <string name="subscriptions">"Abonnementen"</string>
     <string name="multi_reddit">"Multireddit"</string>

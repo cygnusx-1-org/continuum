@@ -89,7 +89,8 @@
 %1$d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"Tortanap:
 %1$s"</string>
-    <string name="since">"Ez óta:"</string>
+    <string name="since_info">"Ez óta:
+%1$s"</string>
     <string name="profile">"Profil"</string>
     <string name="subscriptions">"Feliratkozások"</string>
     <string name="multi_reddit">"Multireddit"</string>

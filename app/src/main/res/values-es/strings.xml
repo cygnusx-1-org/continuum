@@ -113,7 +113,8 @@ Toca para reintentar."</string>
 %1$d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"Cumpleaños:
 %1$s"</string>
-    <string name="since">"Desde:"</string>
+    <string name="since_info">"Desde:
+%1$s"</string>
     <string name="profile">"Perfil de usuario"</string>
     <string name="subscriptions">"Suscripciones"</string>
     <string name="multi_reddit">"Multireddit"</string>

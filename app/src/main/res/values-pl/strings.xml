@@ -104,7 +104,8 @@ Naciśnij, aby spróbować ponownie."</string>
 %1$,d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"Cake day:
 %1$s"</string>
-    <string name="since">"Od:"</string>
+    <string name="since_info">"Od:
+%1$s"</string>
     <string name="profile">"Profil"</string>
     <string name="subscriptions">"Subskrybcje"</string>
     <string name="multi_reddit">"Multireddit"</string>

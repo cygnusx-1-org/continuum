@@ -107,7 +107,8 @@ Toque para tentar de novo."</string>
 %1$,d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"Dia do bolo:
 %1$s"</string>
-    <string name="since">"Desde:"</string>
+    <string name="since_info">"Desde:
+%1$s"</string>
     <string name="profile">"Perfil"</string>
 
     <!-- Estava "incrições" (sem o S depois no N) -->

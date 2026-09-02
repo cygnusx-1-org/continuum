@@ -112,7 +112,8 @@
 %1$d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"День торта:
 %1$s"</string>
-    <string name="since">"Создан:"</string>
+    <string name="since_info">"Создан:
+%1$s"</string>
     <string name="profile">"Профиль"</string>
     <string name="subscriptions">"Подписки"</string>
     <string name="multi_reddit">"Мультиреддит"</string>

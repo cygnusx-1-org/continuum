@@ -114,7 +114,8 @@
 %1$s"</string>
 
     <!-- Fuzzy -->
-    <string name="since">"作成日:"</string>
+    <string name="since_info">"作成日:
+%1$s"</string>
     <string name="profile">"プロフィール"</string>
     <string name="subscriptions">"登録済み"</string>
     <string name="multi_reddit">"カスタムフィード"</string>

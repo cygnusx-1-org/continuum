@@ -168,7 +168,7 @@
     <string name="karma_info">Karma: %1$,d</string>
     <string name="karma_info_user_detail">Karma:\n%1$,d (%2$d + %3$d)</string>
     <string name="cakeday_info">Cake day:\n%1$s</string>
-    <string name="since">Since:</string>
+    <string name="since_info">Since:\n%1$s</string>
 
     <string name="profile">Profile</string>
     <string name="subscriptions">Subscriptions</string>

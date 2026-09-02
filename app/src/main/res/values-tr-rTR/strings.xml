@@ -110,7 +110,8 @@ Tekrar denemek için tıklayın."</string>
 Eng: Since 2010
 Tr: 2010'dan beri
 This translation does it work well in this kinda format. People use "since" in signs/pamphlets in Turkey because of this. I decided to use the word "since" as well. -->
-    <string name="since">"Kuruluş:"</string>
+    <string name="since_info">"Kuruluş:
+%1$s"</string>
     <string name="profile">"Profil"</string>
     <string name="subscriptions">"Abonelikler"</string>
     <string name="multi_reddit">"Multireddit"</string>

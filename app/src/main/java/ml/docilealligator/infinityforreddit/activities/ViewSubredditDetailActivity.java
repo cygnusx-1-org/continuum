@@ -597,8 +597,8 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 binding.subredditNameTextViewViewSubredditDetailActivity.setText(subredditFullName);
                 String nSubscribers = getString(R.string.subscribers_number_detail, subredditData.getNSubscribers());
                 binding.subscriberCountTextViewViewSubredditDetailActivity.setText(nSubscribers);
-                binding.creationTimeTextViewViewSubredditDetailActivity.setText(new SimpleDateFormat("MMM d, yyyy",
-                        locale).format(subredditData.getCreatedUTC()));
+                binding.sinceTextViewViewSubredditDetailActivity.setText(getString(R.string.since_info,
+                        new SimpleDateFormat("MMM d, yyyy", locale).format(subredditData.getCreatedUTC())));
                 description = subredditData.getDescription();
                 if (hideSubredditDescription || description.equals("")) {
                     binding.descriptionTextViewViewSubredditDetailActivity.setVisibility(View.GONE);
@@ -699,7 +699,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
         binding.subscriberCountTextViewViewSubredditDetailActivity.setTextColor(primaryTextColor);
         binding.sinceTextViewViewSubredditDetailActivity.setTextColor(primaryTextColor);
-        binding.creationTimeTextViewViewSubredditDetailActivity.setTextColor(primaryTextColor);
         binding.descriptionTextViewViewSubredditDetailActivity.setTextColor(primaryTextColor);
         navigationWrapper.applyCustomTheme(mCustomThemeWrapper.getBottomAppBarIconColor(), mCustomThemeWrapper.getBottomAppBarBackgroundColor());
         applyTabLayoutTheme(binding.tabLayoutViewSubredditDetailActivity);
@@ -709,7 +708,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             binding.subscribeSubredditChipViewSubredditDetailActivity.setTypeface(typeface);
             binding.subscriberCountTextViewViewSubredditDetailActivity.setTypeface(typeface);
             binding.sinceTextViewViewSubredditDetailActivity.setTypeface(typeface);
-            binding.creationTimeTextViewViewSubredditDetailActivity.setTypeface(typeface);
             binding.descriptionTextViewViewSubredditDetailActivity.setTypeface(typeface);
         }
         unsubscribedColor = mCustomThemeWrapper.getUnsubscribed();
