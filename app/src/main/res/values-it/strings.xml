@@ -933,7 +933,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Scorri verticalmente per tornare indietro dai media"</string>
     <string name="settings_hide_post_flair">"Nascondi i flair dei post"</string>
     <string name="settings_crash_reports_title">"Rapporti sui crash"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Pericoloso"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Mostra indicatori di un solo livello di commenti"</string>
     <string name="save_comment">"Salva"</string>
     <string name="unsave_comment">"Non salvare"</string>

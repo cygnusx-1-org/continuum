@@ -14,8 +14,10 @@ import androidx.annotation.Nullable;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
+import java.util.List;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,6 +35,12 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedBottomSheetDialogFragment {
+
+    /**
+     * Leaves the account in use out of the list, for callers that mean "an account other than this
+     * one". Anonymous is absent either way: it is not a row in the accounts table.
+     */
+    public static final String EXTRA_EXCLUDE_CURRENT_ACCOUNT = "EECA";
 
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
@@ -71,6 +79,20 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
                 });
         binding.recyclerViewAccountChooserBottomSheetFragment.setAdapter(adapter);
 
+        return binding.getRoot();
+    }
+
+    /**
+     * Fills the list, behind the fingerprint prompt when the account section is locked.
+     *
+     * Here rather than in {@code onCreateView} so that the view exists by the time anything
+     * observes against its lifecycle: the prompt answers asynchronously, and
+     * {@link #observeAccounts()} tests for the view being gone.
+     */
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.REQUIRE_AUTHENTICATION_TO_GO_TO_ACCOUNT_SECTION_IN_NAVIGATION_DRAWER, false)) {
             BiometricManager biometricManager = BiometricManager.from(activity);
             if (biometricManager.canAuthenticate(BIOMETRIC_STRONG | DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS) {
@@ -81,11 +103,7 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
                     public void onAuthenticationSucceeded(
                             @NonNull BiometricPrompt.AuthenticationResult result) {
                         super.onAuthenticationSucceeded(result);
-                        accountViewModel = new ViewModelProvider(AccountChooserBottomSheetFragment.this,
-                                new AccountViewModel.Factory(executor, redditDataRoomDatabase)).get(AccountViewModel.class);
-                        accountViewModel.getAllAccountsLiveData().observe(getViewLifecycleOwner(), accounts -> {
-                            adapter.changeAccountsDataset(accounts);
-                        });
+                        observeAccounts();
                     }
 
                     @Override
@@ -105,14 +123,33 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
                 dismiss();
             }
         } else {
-            accountViewModel = new ViewModelProvider(this,
-                    new AccountViewModel.Factory(executor, redditDataRoomDatabase)).get(AccountViewModel.class);
-            accountViewModel.getAllAccountsLiveData().observe(getViewLifecycleOwner(), accounts -> {
-                adapter.changeAccountsDataset(accounts);
-            });
+            observeAccounts();
+        }
+    }
+
+    /**
+     * Fills the list, with every account or with every account but the one in use, per
+     * {@link #EXTRA_EXCLUDE_CURRENT_ACCOUNT}.
+     *
+     * Reached from the biometric callback as well, which arrives whenever the fingerprint prompt
+     * is answered -- possibly after the sheet has been dismissed or rotated away, at which point
+     * {@code getViewLifecycleOwner()} throws.
+     */
+    private void observeAccounts() {
+        if (getView() == null) {
+            return;
         }
 
-        return binding.getRoot();
+        accountViewModel = new ViewModelProvider(this,
+                new AccountViewModel.Factory(executor, redditDataRoomDatabase)).get(AccountViewModel.class);
+
+        Bundle arguments = getArguments();
+        LiveData<List<Account>> accounts =
+                arguments != null && arguments.getBoolean(EXTRA_EXCLUDE_CURRENT_ACCOUNT, false)
+                        ? accountViewModel.getAccountsExceptCurrentAccountLiveData()
+                        : accountViewModel.getAllAccountsLiveData();
+
+        accounts.observe(getViewLifecycleOwner(), adapter::changeAccountsDataset);
     }
 
     @Override

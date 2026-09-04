@@ -1,12 +1,17 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
+import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import java.io.File;
@@ -18,7 +23,9 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +33,7 @@ import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountSettingsMigration;
 import ml.docilealligator.infinityforreddit.comment.CommentDraft;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
@@ -50,26 +58,27 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.io.FileUtils;
 
+/**
+ * Puts an encrypted backup zip back, preference file by preference file and table by table.
+ *
+ * Like {@link BackupSettings} this opens the account-scoped files itself instead of taking them
+ * injected: writing a backed up key through {@code AccountScopedSharedPreferences} would scope it a
+ * second time, onto whichever account happens to be signed in when the restore runs.
+ */
 public class RestoreSettings {
     public static void restoreSettings(Context context, Executor executor, Handler handler,
                                 ContentResolver contentResolver, Uri zipFileUri,
                                 String password,
                                 RedditDataRoomDatabase redditDataRoomDatabase,
-                                SharedPreferences defaultSharedPreferences,
                                 SharedPreferences currentAccountSharedPreferences,
                                 SharedPreferences lightThemeSharedPreferences,
                                 SharedPreferences darkThemeSharedPreferences,
                                 SharedPreferences amoledThemeSharedPreferences,
-                                SharedPreferences sortTypeSharedPreferences,
-                                SharedPreferences postLayoutSharedPreferences,
-                                SharedPreferences postDetailsSharedPreferences,
                                 SharedPreferences postFeedScrolledPositionSharedPreferences,
                                 SharedPreferences mainActivityTabsSharedPreferences,
                                 SharedPreferences proxySharedPreferences,
                                 SharedPreferences nsfwAndSpoilerSharedPreferencs,
-                                SharedPreferences bottomAppBarSharedPreferences,
                                 SharedPreferences postHistorySharedPreferences,
-                                SharedPreferences navigationDrawerSharedPreferences,
                                 SharedPreferences recentlyVisitedSharedPreferences,
                                 RestoreSettingsListener restoreSettingsListener) {
         executor.execute(() -> {
@@ -113,74 +122,64 @@ public class RestoreSettings {
                     File restoreFilesDir = files[0];
                     File[] restoreFiles = restoreFilesDir.listFiles();
                     boolean result = true;
+                    // What a failure ends on. Null means the generic "partially failed": some file
+                    // in an otherwise readable archive did not import.
+                    String failureMessage = null;
                     if (restoreFiles != null) {
-                        SharedPreferences defaultPrefsPrivate = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+                        // The account-scoped files, past the façade: a backed up key already
+                        // carries its account, and writing it through the injected instance would
+                        // scope it again onto whoever is signed in now.
+                        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+                        // Exact names, not prefixes. The backup writes one file per preference file,
+                        // named after it; matching on a prefix would pour a file named after an
+                        // existing one into the wrong preferences.
+                        Map<String, SharedPreferences> targets = new HashMap<>();
+                        targets.put(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, defaultSharedPreferences);
+                        targets.put(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + "_private",
+                                context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE));
+                        targets.put(CustomThemeSharedPreferencesUtils.LIGHT_THEME_SHARED_PREFERENCES_FILE, lightThemeSharedPreferences);
+                        targets.put(CustomThemeSharedPreferencesUtils.DARK_THEME_SHARED_PREFERENCES_FILE, darkThemeSharedPreferences);
+                        targets.put(CustomThemeSharedPreferencesUtils.AMOLED_THEME_SHARED_PREFERENCES_FILE, amoledThemeSharedPreferences);
+                        targets.put(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE,
+                                rawFile(context, SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE));
+                        targets.put(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE,
+                                rawFile(context, SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE));
+                        targets.put(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
+                                rawFile(context, SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE));
+                        targets.put(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
+                                rawFile(context, SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE));
+                        targets.put(SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE, postFeedScrolledPositionSharedPreferences);
+                        targets.put(SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE, mainActivityTabsSharedPreferences);
+                        targets.put(SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE, proxySharedPreferences);
+                        targets.put(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE, nsfwAndSpoilerSharedPreferencs);
+                        targets.put(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
+                                rawFile(context, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE));
+                        targets.put(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE, postHistorySharedPreferences);
+                        targets.put(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE, recentlyVisitedSharedPreferences);
+
+                        Map<String, Object> restoredDefaultPreferences = null;
+
                         for (File f : restoreFiles) {
                             if (f.isFile()) {
-                                if (f.getName().equals(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + "_private.txt")) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(defaultPrefsPrivate, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().equals(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + ".txt")) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(defaultSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.LIGHT_THEME_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(lightThemeSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.DARK_THEME_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(darkThemeSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(CustomThemeSharedPreferencesUtils.AMOLED_THEME_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(amoledThemeSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(sortTypeSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(postLayoutSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(postDetailsSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(postFeedScrolledPositionSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(mainActivityTabsSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(proxySharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(nsfwAndSpoilerSharedPreferencs, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(bottomAppBarSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(postHistorySharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(navigationDrawerSharedPreferences, f.toString());
-                                    result = result && imported;
-                                } else if (f.getName().startsWith(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE)) {
-                                    // Not `&&`: the import must run even if an earlier one failed.
-                                    boolean imported = importSharedPreferencsFromFile(recentlyVisitedSharedPreferences, f.toString());
-                                    result = result && imported;
+                                String name = f.getName();
+                                if (!name.endsWith(BackupSettings.PREFERENCES_FILE_SUFFIX)) {
+                                    continue;
+                                }
+                                String backedUpFile = name.substring(0,
+                                        name.length() - BackupSettings.PREFERENCES_FILE_SUFFIX.length());
+                                SharedPreferences target = targets.get(backedUpFile);
+                                if (target == null) {
+                                    continue;
+                                }
+
+                                Map<String, Object> imported = importSharedPreferencesFromFile(target, f.toString());
+                                // Read into a local first: every file must be imported even after
+                                // one has failed.
+                                result = result && imported != null;
+                                if (imported != null
+                                        && SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE.equals(backedUpFile)) {
+                                    restoredDefaultPreferences = imported;
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {
                                 redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
@@ -223,24 +222,6 @@ public class RestoreSettings {
                                     List<CustomTheme> customThemes = getListFromFile(customThemesFile, new TypeToken<List<CustomTheme>>() {}.getType());
                                     restoreCustomThemes(context, redditDataRoomDatabase, customThemes);
                                 }
-                                if (postFiltersFile.exists()) {
-                                    List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
-                                    redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
-
-                                    if (postFilterUsageFile.exists()) {
-                                        List<PostFilterUsage> postFilterUsage = getListFromFile(postFilterUsageFile, new TypeToken<List<PostFilterUsage>>() {}.getType());
-                                        redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
-                                    }
-                                }
-                                if (commentFiltersFile.exists()) {
-                                    List<CommentFilter> commentFilters = getListFromFile(commentFiltersFile, new TypeToken<List<CommentFilter>>() {}.getType());
-                                    redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
-
-                                    if (commentFilterUsageFile.exists()) {
-                                        List<CommentFilterUsage> commentFilterUsage = getListFromFile(commentFilterUsageFile, new TypeToken<List<CommentFilterUsage>>() {}.getType());
-                                        redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
-                                    }
-                                }
                                 if (accountsFile.exists()) {
                                     List<Account> accounts = getListFromFile(accountsFile, new TypeToken<List<Account>>() {}.getType());
                                     // Only replace local accounts when the backup actually has some; an empty
@@ -272,6 +253,52 @@ public class RestoreSettings {
                                                 .putString(SharedPreferencesUtils.ACCESS_TOKEN, currentAccount.getAccessToken())
                                                 .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, currentAccount.getProfileImageUrl())
                                                 .apply();
+                                        }
+                                    }
+                                }
+                                // Filters after accounts, though nothing here has a foreign key on
+                                // one: a backup taken before a filter had an owner has to be shared
+                                // out among the accounts, and that list is only right once the block
+                                // above has restored them.
+                                if (postFiltersFile.exists()) {
+                                    List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
+                                    List<PostFilterUsage> postFilterUsage = postFilterUsageFile.exists()
+                                            ? getListFromFile(postFilterUsageFile, new TypeToken<List<PostFilterUsage>>() {}.getType())
+                                            : Collections.emptyList();
+                                    if (namesAccounts(postFiltersFile)) {
+                                        redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
+                                        redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
+                                    } else {
+                                        for (String username : accountNames(redditDataRoomDatabase)) {
+                                            for (PostFilter postFilter : postFilters) {
+                                                postFilter.username = username;
+                                            }
+                                            redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
+                                            for (PostFilterUsage usage : postFilterUsage) {
+                                                usage.username = username;
+                                            }
+                                            redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
+                                        }
+                                    }
+                                }
+                                if (commentFiltersFile.exists()) {
+                                    List<CommentFilter> commentFilters = getListFromFile(commentFiltersFile, new TypeToken<List<CommentFilter>>() {}.getType());
+                                    List<CommentFilterUsage> commentFilterUsage = commentFilterUsageFile.exists()
+                                            ? getListFromFile(commentFilterUsageFile, new TypeToken<List<CommentFilterUsage>>() {}.getType())
+                                            : Collections.emptyList();
+                                    if (namesAccounts(commentFiltersFile)) {
+                                        redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
+                                        redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
+                                    } else {
+                                        for (String username : accountNames(redditDataRoomDatabase)) {
+                                            for (CommentFilter commentFilter : commentFilters) {
+                                                commentFilter.username = username;
+                                            }
+                                            redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
+                                            for (CommentFilterUsage usage : commentFilterUsage) {
+                                                usage.username = username;
+                                            }
+                                            redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
                                         }
                                     }
                                 }
@@ -327,8 +354,20 @@ public class RestoreSettings {
                                 }
                             }
                         }
+
+                        // A backup taken before the key scheme holds per-account settings under
+                        // their old global spellings, which nothing reads any more. Letting the
+                        // migration run once more over the restored files is what turns them back
+                        // into settings; on a backup that already has them it finds nothing to do.
+                        AccountSettingsMigration.rerunIfBackupPredatesAccountScope(
+                                rawFile(context, SharedPreferencesUtils.INTERNAL_SHARED_PREFERENCES_FILE),
+                                restoredDefaultPreferences);
                     } else {
-                        handler.post(() -> restoreSettingsListener.failed(context.getString(R.string.restore_settings_failed_file_corrupted)));
+                        // Nothing was read, so nothing was restored. Without this the success branch
+                        // below would fire too, toasting success and restarting the app on a restore
+                        // that put nothing back.
+                        result = false;
+                        failureMessage = context.getString(R.string.restore_settings_failed_file_corrupted);
                     }
 
                     FileUtils.deleteDirectory(new File(cachePath));
@@ -337,20 +376,15 @@ public class RestoreSettings {
                         handler.post(() -> {
                             restoreSettingsListener.success();
 
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException e) {
-                                // Restore the interrupted status
-                                Thread.currentThread().interrupt();
-                                // Optionally log the interruption
-                                android.util.Log.w("RestoreSettings", "Sleep interrupted before app restart", e);
-                            }
-
-                            // Trigger restart after posting success message
-                            AppRestartHelper.triggerAppRestart(context);
+                            // Delayed rather than slept: this runs on the main thread, so sleeping
+                            // here would freeze input and rendering for the whole two seconds the
+                            // success toast is meant to be readable in.
+                            handler.postDelayed(() -> AppRestartHelper.triggerAppRestart(context), 2000);
                         });
                     } else {
-                        handler.post(() -> restoreSettingsListener.failed(context.getString(R.string.restore_settings_partially_failed)));
+                        String message = failureMessage != null ? failureMessage
+                                : context.getString(R.string.restore_settings_partially_failed);
+                        handler.post(() -> restoreSettingsListener.failed(message));
                     }
                 }
             } catch (IOException e) {
@@ -430,47 +464,87 @@ public class RestoreSettings {
         return customTheme.getJSONModel().equals(seededTheme.getJSONModel());
     }
 
-    private static boolean importSharedPreferencsFromFile(SharedPreferences sharedPreferences, String uriString) {
-        boolean result = false;
-        ObjectInputStream input = null;
+    /** The file itself, past any account scoping the injected instance would apply. */
+    private static SharedPreferences rawFile(Context context, String fileName) {
+        return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+    }
 
-        try {
-            input = new ObjectInputStream(new FileInputStream(uriString));
+    /**
+     * Reads one backed up preference file into {@code sharedPreferences} and returns what it held,
+     * or null if it could not be read.
+     *
+     * Writes with commit(): a restore ends by killing the process, and apply() only promises that
+     * the write reaches disk eventually.
+     */
+    @SuppressLint("ApplySharedPref")
+    @Nullable
+    private static Map<String, Object> importSharedPreferencesFromFile(SharedPreferences sharedPreferences,
+                                                                       String uriString) {
+        try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(uriString))) {
             Object object = input.readObject();
-            if (object instanceof Map) {
-                Map<String, Object> map = (Map<String, Object>) object;
-                Set<Map.Entry<String, Object>> entrySet = map.entrySet();
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                for (Map.Entry<String, Object> e : entrySet) {
-                    if (e.getValue() instanceof String) {
-                        editor.putString(e.getKey(), (String) e.getValue());
-                    } else if (e.getValue() instanceof Integer) {
-                        editor.putInt(e.getKey(), (Integer) e.getValue());
-                    } else if (e.getValue() instanceof Float) {
-                        editor.putFloat(e.getKey(), (Float) e.getValue());
-                    } else if (e.getValue() instanceof Boolean) {
-                        editor.putBoolean(e.getKey(), (Boolean) e.getValue());
-                    } else if (e.getValue() instanceof Long) {
-                        editor.putLong(e.getKey(), (Long) e.getValue());
-                    }
-                }
-
-                editor.apply();
-
-                result = true;
+            if (!(object instanceof Map)) {
+                return null;
             }
-        } catch (IOException | ClassNotFoundException e) {
-            Log.e("RestoreSettings", "importSharedPreferencsFromFile failed", e);
-        } finally {
-            try {
-                if (input != null) {
-                    input.close();
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) object;
+            Set<Map.Entry<String, Object>> entrySet = map.entrySet();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            for (Map.Entry<String, Object> e : entrySet) {
+                if (e.getValue() instanceof String) {
+                    editor.putString(e.getKey(), (String) e.getValue());
+                } else if (e.getValue() instanceof Integer) {
+                    editor.putInt(e.getKey(), (Integer) e.getValue());
+                } else if (e.getValue() instanceof Float) {
+                    editor.putFloat(e.getKey(), (Float) e.getValue());
+                } else if (e.getValue() instanceof Boolean) {
+                    editor.putBoolean(e.getKey(), (Boolean) e.getValue());
+                } else if (e.getValue() instanceof Long) {
+                    editor.putLong(e.getKey(), (Long) e.getValue());
                 }
-            } catch (IOException ex) {
-                Log.e("RestoreSettings", "importSharedPreferencsFromFile failed", ex);
             }
+            editor.commit();
+
+            return map;
+        } catch (IOException | ClassNotFoundException | RuntimeException e) {
+            // RuntimeException too: the map is cast unchecked, so a backup whose serialized keys
+            // are not Strings throws ClassCastException out of putString. Escaping the task would
+            // leave the screen with no toast, no restart and a half-written preferences file;
+            // counted as a failed import instead, like any other unreadable file.
+            Log.e("RestoreSettings", "importSharedPreferencesFromFile failed", e);
+            return null;
         }
-        return result;
+    }
+
+    /**
+     * Whether a backed up filter file says which account each filter belongs to.
+     *
+     * Backups taken before filters had an owner do not, and Gson fills the field in from its own
+     * initialiser rather than leaving it null, so the JSON is the only place the difference shows.
+     * An unreadable or empty file is treated as saying so: there is then nothing to share out.
+     */
+    private static boolean namesAccounts(File file) {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            JsonElement parsed = JsonParser.parseReader(reader);
+            if (!parsed.isJsonArray() || parsed.getAsJsonArray().size() == 0) {
+                return true;
+            }
+            JsonElement first = parsed.getAsJsonArray().get(0);
+            return !first.isJsonObject() || first.getAsJsonObject().has("username");
+        } catch (Exception e) {
+            Log.e("RestoreSettings", "namesAccounts failed", e);
+            return true;
+        }
+    }
+
+    /** Every account the database holds, anonymous included. */
+    private static List<String> accountNames(RedditDataRoomDatabase redditDataRoomDatabase) {
+        List<String> names = new ArrayList<>();
+        names.add(Account.ANONYMOUS_ACCOUNT);
+        for (Account account : redditDataRoomDatabase.accountDao().getAllAccounts()) {
+            names.add(account.getAccountName());
+        }
+        return names;
     }
 
     private static <T> List<T> getListFromFile(File file, Type dataType) {

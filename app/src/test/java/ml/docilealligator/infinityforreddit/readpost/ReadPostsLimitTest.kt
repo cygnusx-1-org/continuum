@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
 import ml.docilealligator.infinityforreddit.TestInfinity
 import ml.docilealligator.infinityforreddit.account.Account
+import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -36,13 +37,13 @@ class ReadPostsLimitTest {
 
     private fun setLimitEnabled(accountName: String, enabled: Boolean) {
         preferences.edit()
-            .putBoolean(accountName + SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED, enabled)
+            .putBoolean(AccountScope.key(accountName, SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED), enabled)
             .commit()
     }
 
     private fun setLimit(accountName: String, limit: Int) {
         preferences.edit()
-            .putInt(accountName + SharedPreferencesUtils.READ_POSTS_LIMIT, limit)
+            .putInt(AccountScope.key(accountName, SharedPreferencesUtils.READ_POSTS_LIMIT), limit)
             .commit()
     }
 

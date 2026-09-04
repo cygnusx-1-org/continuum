@@ -17,12 +17,12 @@ import androidx.room.ForeignKey
  */
 @Entity(
     tableName = "post_filter_blocked_subreddit",
-    primaryKeys = ["filter_name", "rule_value", "subreddit_name"],
+    primaryKeys = ["filter_name", "username", "rule_value", "subreddit_name"],
     foreignKeys = [
         ForeignKey(
             entity = PostFilter::class,
-            parentColumns = ["name"],
-            childColumns = ["filter_name"],
+            parentColumns = ["name", "username"],
+            childColumns = ["filter_name", "username"],
             onDelete = ForeignKey.CASCADE,
         ),
     ],
@@ -31,6 +31,10 @@ data class PostFilterBlockedSubreddit(
     /** Name of the [PostFilter] that owns the rule. Cascades, so deleting a filter clears its rows. */
     @ColumnInfo(name = "filter_name")
     val filterName: String,
+
+    /** The account owning that filter; the other half of the key the cascade follows. */
+    @ColumnInfo(name = "username")
+    val username: String,
 
     /** The term exactly as stored in the filter's column, asterisks included (e.g. `*irl*`). */
     @ColumnInfo(name = "rule_value")

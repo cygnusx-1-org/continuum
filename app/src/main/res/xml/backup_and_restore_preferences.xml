@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:key="backup_settings"
+        app:title="@string/settings_backup_settings_title"
+        app:summary="@string/settings_backup_settings_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:key="restore_settings"
+        app:title="@string/settings_restore_settings_title" />
+
+</PreferenceScreen>

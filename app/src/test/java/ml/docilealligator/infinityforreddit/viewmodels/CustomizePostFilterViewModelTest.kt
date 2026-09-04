@@ -76,7 +76,7 @@ class CustomizePostFilterViewModelTest {
         // A Room DAO that throws, so SavePostFilter's DB work fails and must still report a terminal
         // outcome. originalName != name below ensures getPostFilter (the throwing call) is reached.
         val throwingDao = mock<PostFilterDao>()
-        whenever(throwingDao.getPostFilter(any())).thenThrow(RuntimeException("boom"))
+        whenever(throwingDao.getPostFilter(any(), any())).thenThrow(RuntimeException("boom"))
         val throwingDb = mock<RedditDataRoomDatabase>()
         whenever(throwingDb.postFilterDao()).thenReturn(throwingDao)
 

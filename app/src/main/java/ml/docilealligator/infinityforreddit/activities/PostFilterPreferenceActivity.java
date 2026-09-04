@@ -167,7 +167,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         binding.recyclerViewPostFilterPreferenceActivity.setAdapter(adapter);
 
         postFilterWithUsageViewModel = new ViewModelProvider(this,
-                new PostFilterWithUsageViewModel.Factory(redditDataRoomDatabase)).get(PostFilterWithUsageViewModel.class);
+                new PostFilterWithUsageViewModel.Factory(redditDataRoomDatabase, accountName)).get(PostFilterWithUsageViewModel.class);
 
         postFilterWithUsageViewModel.getPostFilterWithUsageListLiveData().observe(this, new Observer<List<PostFilterWithUsage>>() {
             @Override

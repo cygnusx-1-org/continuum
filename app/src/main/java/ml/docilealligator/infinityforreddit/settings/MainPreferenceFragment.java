@@ -4,15 +4,12 @@ import static androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRON
 import static androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.biometric.BiometricManager;
 import androidx.preference.Preference;
-import javax.inject.Inject;
-import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.ApiStatisticsActivity;
@@ -20,14 +17,9 @@ import ml.docilealligator.infinityforreddit.activities.CommentFilterPreferenceAc
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
-import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
-
-    @Inject
-    @Named("default")
-    SharedPreferences sharedPreferences;
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
@@ -35,7 +27,6 @@ public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 
         Preference securityPreference = findPreference(SharedPreferencesUtils.SECURITY);
-        CustomFontPreferenceWithBackground dataSavingModePreference = findPreference(SharedPreferencesUtils.DATA_SAVING_MODE_PREFERENCE);
         Preference postFilterPreference = findPreference(SharedPreferencesUtils.POST_FILTER);
         Preference commentFilterPreference = findPreference(SharedPreferencesUtils.COMMENT_FILTER);
         Preference privacyPolicyPreference = findPreference(SharedPreferencesUtils.PRIVACY_POLICY_KEY);
@@ -44,11 +35,10 @@ public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         BiometricManager biometricManager = BiometricManager.from(mActivity);
         if (biometricManager.canAuthenticate(BIOMETRIC_STRONG | DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS) {
             if (securityPreference != null) {
+                // Only hidden, not promoted: Security used to be the first row of its group and
+                // handed the rounded top on to the next one. It sits in the middle now, so rounding
+                // anything here would open a seam mid-group instead of closing one.
                 securityPreference.setVisible(false);
-
-                if (dataSavingModePreference != null) {
-                    dataSavingModePreference.setTop(true);
-                }
             }
         }
 

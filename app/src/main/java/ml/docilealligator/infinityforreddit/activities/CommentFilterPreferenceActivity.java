@@ -134,7 +134,7 @@ public class CommentFilterPreferenceActivity extends BaseActivity {
         binding.recyclerViewCommentFilterPreferenceActivity.setAdapter(adapter);
 
         commentFilterWithUsageViewModel = new ViewModelProvider(this,
-                new CommentFilterWithUsageViewModel.Factory(redditDataRoomDatabase)).get(CommentFilterWithUsageViewModel.class);
+                new CommentFilterWithUsageViewModel.Factory(redditDataRoomDatabase, accountName)).get(CommentFilterWithUsageViewModel.class);
 
         commentFilterWithUsageViewModel.getCommentFilterWithUsageListLiveData().observe(this, commentFilterWithUsages -> adapter.setCommentFilterWithUsageList(commentFilterWithUsages));
     }

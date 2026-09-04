@@ -19,8 +19,12 @@ import dagger.Provides;
 import java.io.File;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScopedKeys;
+import ml.docilealligator.infinityforreddit.account.AccountScopedSharedPreferences;
 import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LoopAvailableExoCreator;
@@ -57,11 +61,30 @@ abstract class AppModule {
         return new ApiCallTracker(redditDataRoomDatabase, sharedPreferences, executor);
     }
 
+    /**
+     * The current account, read fresh on every key so that the settings an activity sees follow an
+     * account switch without anything having to be rebuilt.
+     */
+    private static Supplier<String> currentAccountName(SharedPreferences currentAccountSharedPreferences) {
+        return () -> currentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME,
+                Account.ANONYMOUS_ACCOUNT);
+    }
+
+    private static SharedPreferences accountScoped(String fileName, SharedPreferences delegate,
+                                                   SharedPreferences currentAccountSharedPreferences) {
+        Supplier<String> accountName = currentAccountName(currentAccountSharedPreferences);
+        return new AccountScopedSharedPreferences(delegate,
+                key -> AccountScopedKeys.isScoped(fileName, key), accountName::get);
+    }
+
     @Provides
     @Named("default")
     @Singleton
-    static SharedPreferences provideSharedPreferences(Application application) {
-        return PreferenceManager.getDefaultSharedPreferences(application);
+    static SharedPreferences provideSharedPreferences(Application application,
+                                                      @Named("current_account") SharedPreferences currentAccountSharedPreferences) {
+        return accountScoped(AccountScopedKeys.DEFAULT_PREFERENCES,
+                PreferenceManager.getDefaultSharedPreferences(application),
+                currentAccountSharedPreferences);
     }
 
     @Provides
@@ -87,14 +110,20 @@ abstract class AppModule {
 
     @Provides
     @Named("sort_type")
-    static SharedPreferences provideSortTypeSharedPreferences(Application application) {
-        return application.getSharedPreferences(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    static SharedPreferences provideSortTypeSharedPreferences(Application application,
+                                                              @Named("current_account") SharedPreferences currentAccountSharedPreferences) {
+        return accountScoped(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE,
+                application.getSharedPreferences(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE),
+                currentAccountSharedPreferences);
     }
 
     @Provides
     @Named("post_layout")
-    static SharedPreferences providePostLayoutSharedPreferences(Application application) {
-        return application.getSharedPreferences(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    static SharedPreferences providePostLayoutSharedPreferences(Application application,
+                                                                @Named("current_account") SharedPreferences currentAccountSharedPreferences) {
+        return accountScoped(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE,
+                application.getSharedPreferences(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE),
+                currentAccountSharedPreferences);
     }
 
     @Provides
@@ -117,8 +146,11 @@ abstract class AppModule {
 
     @Provides
     @Named("bottom_app_bar")
-    static SharedPreferences provideBottoappBarSharedPreferences(Application application) {
-        return application.getSharedPreferences(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    static SharedPreferences provideBottoappBarSharedPreferences(Application application,
+                                                                 @Named("current_account") SharedPreferences currentAccountSharedPreferences) {
+        return accountScoped(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
+                application.getSharedPreferences(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE),
+                currentAccountSharedPreferences);
     }
 
     @Provides
@@ -148,14 +180,20 @@ abstract class AppModule {
 
     @Provides
     @Named("navigation_drawer")
-    static SharedPreferences provideNavigationDrawerSharedPreferences(Application application) {
-        return application.getSharedPreferences(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    static SharedPreferences provideNavigationDrawerSharedPreferences(Application application,
+                                                                      @Named("current_account") SharedPreferences currentAccountSharedPreferences) {
+        return accountScoped(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
+                application.getSharedPreferences(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE),
+                currentAccountSharedPreferences);
     }
 
     @Provides
     @Named("post_details")
-    static SharedPreferences providePostDetailsSharedPreferences(Application application) {
-        return application.getSharedPreferences(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    static SharedPreferences providePostDetailsSharedPreferences(Application application,
+                                                                 @Named("current_account") SharedPreferences currentAccountSharedPreferences) {
+        return accountScoped(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
+                application.getSharedPreferences(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE),
+                currentAccountSharedPreferences);
     }
 
     @Provides
@@ -278,10 +316,7 @@ abstract class AppModule {
     @Provides
     @Singleton
     static VideoMuteManager provideVideoMuteManager(@Named("default") SharedPreferences sharedPreferences) {
-        return new VideoMuteManager(
-                sharedPreferences.getBoolean(SharedPreferencesUtils.MUTE_AUTOPLAYING_VIDEOS, true),
-                sharedPreferences.getBoolean(SharedPreferencesUtils.REMEMBER_MUTING_OPTION_IN_POST_FEED, false)
-        );
+        return new VideoMuteManager(sharedPreferences);
     }
 
     @Provides

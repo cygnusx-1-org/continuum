@@ -8,9 +8,10 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 public class FetchCommentFilter {
     public static void fetchCommentFilter(Executor executor, Handler handler,
                                           RedditDataRoomDatabase redditDataRoomDatabase,
-                                          String subreddit, FetchCommentFilterListener fetchCommentFilterListener) {
+                                          String subreddit, String accountName,
+                                          FetchCommentFilterListener fetchCommentFilterListener) {
         executor.execute(() -> {
-            List<CommentFilter> commentFilterList = redditDataRoomDatabase.commentFilterDao().getValidCommentFilters(CommentFilterUsage.SUBREDDIT_TYPE, subreddit);
+            List<CommentFilter> commentFilterList = redditDataRoomDatabase.commentFilterDao().getValidCommentFilters(CommentFilterUsage.SUBREDDIT_TYPE, subreddit, accountName);
             CommentFilter commentFilter = CommentFilter.mergeCommentFilter(commentFilterList);
 
             handler.post(() -> fetchCommentFilterListener.success(commentFilter));

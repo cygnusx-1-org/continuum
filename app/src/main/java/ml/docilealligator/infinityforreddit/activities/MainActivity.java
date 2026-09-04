@@ -78,6 +78,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.account.AccountViewModel;
 import ml.docilealligator.infinityforreddit.adapters.SubredditAutocompleteRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.adapters.navigationdrawer.NavigationDrawerRecyclerViewMergedAdapter;
@@ -798,9 +799,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
 
         if (showBottomAppBar) {
-            int optionCount = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, 4);
-            int option1 = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS);
-            int option2 = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_MULTIREDDITS);
+            int optionCount = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, 4);
+            int option1 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_SUBSCRIPTIONS);
+            int option2 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_MULTIREDDITS);
 
             if (optionCount == 2) {
                 navigationWrapper.bindOptionDrawableResource(getBottomAppBarOptionDrawableResource(option1), getBottomAppBarOptionDrawableResource(option2));
@@ -834,8 +835,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     });
                 }
             } else {
-                int option3 = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH : SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX);
-                int option4 = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE : SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE);
+                int option3 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_REFRESH : SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_INBOX);
+                int option4 = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_CHANGE_SORT_TYPE : SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_PROFILE);
 
                 navigationWrapper.bindOptionDrawableResource(getBottomAppBarOptionDrawableResource(option1),
                         getBottomAppBarOptionDrawableResource(option2), getBottomAppBarOptionDrawableResource(option3),
@@ -895,7 +896,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             navigationWrapper.floatingActionButton.setLayoutParams(lp);
         }
 
-        fabOption = mBottomAppBarSharedPreference.getInt((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB,
+        fabOption = mBottomAppBarSharedPreference.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB,
                 SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_SUBMIT_POSTS);
         switch (fabOption) {
             case SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_REFRESH:
@@ -1082,11 +1083,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                 mCustomThemeWrapper.setThemeType(CustomThemeSharedPreferencesUtils.DARK);
                             }
                         } else if (stringId == R.string.enable_nsfw) {
-                            String nsfwKey = (accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE;
+                            String nsfwKey = AccountScope.key(accountName, SharedPreferencesUtils.NSFW_BASE);
                             mNsfwAndSpoilerSharedPreferences.edit().putBoolean(nsfwKey, true).apply();
                             EventBus.getDefault().post(new ChangeNSFWEvent(true));
                         } else if (stringId == R.string.disable_nsfw) {
-                            String nsfwKey = (accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE;
+                            String nsfwKey = AccountScope.key(accountName, SharedPreferencesUtils.NSFW_BASE);
                             mNsfwAndSpoilerSharedPreferences.edit().putBoolean(nsfwKey, false).apply();
                             EventBus.getDefault().post(new ChangeNSFWEvent(false));
                         } else if (stringId == R.string.settings_show_thumbnail_on_the_left_in_compact_layout) {
@@ -1173,22 +1174,22 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         // MainActivity outlives a trip through Settings, so the drawer row has to follow the
         // setting live rather than waiting for a restart.
         SharedPreferencesLiveDataKt.booleanLiveData(mRecentlyVisitedSharedPreferences,
-                        accountName + SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE, false)
+                        AccountScope.key(accountName, SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE), false)
                 .observe(this, enabled -> adapter.setShowRecentlyVisited(enabled));
         binding.navDrawerRecyclerViewMainActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
         binding.navDrawerRecyclerViewMainActivity.setAdapter(adapter.getConcatAdapter());
 
-        mShowFavoriteMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS, false);
-        mShowMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_MULTIREDDITS, false);
-        mShowFavoriteUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS, false);
-        mShowUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_USERS_MULTIREDDITS, false);
-        mShowFavoriteSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS, false);
-        mShowSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS, false);
+        mShowFavoriteMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS), false);
+        mShowMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_MULTIREDDITS), false);
+        mShowFavoriteUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS), false);
+        mShowUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_USERS_MULTIREDDITS), false);
+        mShowFavoriteSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS), false);
+        mShowSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS), false);
         sectionsPagerAdapter = new SectionsPagerAdapter(this,
                 MainPageTabsUtils.load(mMainActivityTabsSharedPreferences, accountName));
         binding.includedAppBar.viewPagerMainActivity.setAdapter(sectionsPagerAdapter);
         binding.includedAppBar.viewPagerMainActivity.setUserInputEnabled(!mDisableSwipingBetweenTabs);
-        if (mMainActivityTabsSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES, true)) {
+        if (mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), true)) {
             // Always scrollable so tabs render at their natural width and never wrap.
             binding.includedAppBar.tabLayoutMainActivity.setTabMode(TabLayout.MODE_SCROLLABLE);
             new TabLayoutMediator(binding.includedAppBar.tabLayoutMainActivity, binding.includedAppBar.viewPagerMainActivity, (tab, position) -> {
@@ -1976,7 +1977,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return false;
         });
 
-        boolean nsfw = mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false);
+        boolean nsfw = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.NSFW_BASE), false);
         Handler handler = new Handler();
         thingEditText.addTextChangedListener(new TextWatcher() {
             @Override

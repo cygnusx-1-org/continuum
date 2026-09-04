@@ -10,14 +10,18 @@ import java.util.List;
 
 @Dao
 public interface CommentFilterUsageDao {
-    @Query("SELECT * FROM comment_filter_usage WHERE name = :name")
-    LiveData<List<CommentFilterUsage>> getAllCommentFilterUsageLiveData(String name);
+    @Query("SELECT * FROM comment_filter_usage WHERE name = :name AND username = :username")
+    LiveData<List<CommentFilterUsage>> getAllCommentFilterUsageLiveData(String name, String username);
 
-    @Query("SELECT * FROM comment_filter_usage WHERE name = :name")
-    List<CommentFilterUsage> getAllCommentFilterUsage(String name);
+    @Query("SELECT * FROM comment_filter_usage WHERE name = :name AND username = :username")
+    List<CommentFilterUsage> getAllCommentFilterUsage(String name, String username);
 
+    /** Every account's usages, for the backup. */
     @Query("SELECT * FROM comment_filter_usage")
     List<CommentFilterUsage> getAllCommentFilterUsageForBackup();
+
+    @Query("SELECT * FROM comment_filter_usage WHERE username = :username")
+    List<CommentFilterUsage> getAllCommentFilterUsageForAccount(String username);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(CommentFilterUsage CommentFilterUsage);

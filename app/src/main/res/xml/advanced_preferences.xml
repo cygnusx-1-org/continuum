@@ -40,18 +40,6 @@
         app:title="@string/settings_reset_all_settings_title" />
 
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
-        app:title="@string/settings_category_backup_and_restore_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:key="backup_settings"
-        app:title="@string/settings_backup_settings_title"
-        app:summary="@string/settings_backup_settings_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:key="restore_settings"
-        app:title="@string/settings_restore_settings_title" />
-
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         app:title="@string/settings_crash_reports_title"
         app:fragment="ml.docilealligator.infinityforreddit.settings.CrashReportsFragment" />

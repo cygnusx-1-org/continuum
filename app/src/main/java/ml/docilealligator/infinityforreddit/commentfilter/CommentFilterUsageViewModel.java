@@ -10,8 +10,10 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 public class CommentFilterUsageViewModel extends ViewModel {
     private final LiveData<List<CommentFilterUsage>> mCommentFilterUsageListLiveData;
 
-    public CommentFilterUsageViewModel(RedditDataRoomDatabase redditDataRoomDatabase, String name) {
-        mCommentFilterUsageListLiveData = redditDataRoomDatabase.commentFilterUsageDao().getAllCommentFilterUsageLiveData(name);
+    public CommentFilterUsageViewModel(RedditDataRoomDatabase redditDataRoomDatabase, String name,
+                                       String accountName) {
+        mCommentFilterUsageListLiveData = redditDataRoomDatabase.commentFilterUsageDao()
+                .getAllCommentFilterUsageLiveData(name, accountName);
     }
 
     public LiveData<List<CommentFilterUsage>> getCommentFilterUsageListLiveData() {
@@ -22,17 +24,19 @@ public class CommentFilterUsageViewModel extends ViewModel {
 
         private final RedditDataRoomDatabase mRedditDataRoomDatabase;
         private final String mName;
+        private final String mAccountName;
 
-        public Factory(RedditDataRoomDatabase redditDataRoomDatabase, String name) {
+        public Factory(RedditDataRoomDatabase redditDataRoomDatabase, String name, String accountName) {
             mRedditDataRoomDatabase = redditDataRoomDatabase;
             mName = name;
+            mAccountName = accountName;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             //noinspection unchecked
-            return (T) new CommentFilterUsageViewModel(mRedditDataRoomDatabase, mName);
+            return (T) new CommentFilterUsageViewModel(mRedditDataRoomDatabase, mName, mAccountName);
         }
     }
 }

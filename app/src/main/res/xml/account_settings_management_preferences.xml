@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="copy_settings_from_account"
+        app:icon="@drawable/ic_copy_day_night_24dp"
+        app:title="@string/settings_copy_settings_from_account_title"
+        app:summary="@string/settings_copy_settings_from_account_summary"
+        app:top="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="reset_account_settings"
+        app:icon="@drawable/ic_refresh_day_night_24dp"
+        app:title="@string/settings_reset_account_settings_title"
+        app:summary="@string/settings_reset_account_settings_summary"
+        app:bottom="true" />
+
+</androidx.preference.PreferenceScreen>

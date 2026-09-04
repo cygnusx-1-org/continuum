@@ -19,15 +19,13 @@ class ApiCallTracker(
     private val sharedPreferences: SharedPreferences,
     private val executor: Executor
 ) {
-    @Volatile
-    var isEnabled: Boolean =
-        sharedPreferences.getBoolean(SharedPreferencesUtils.API_MONITORING_ENABLED, true)
-        private set
+    /** Read on use rather than cached: the preference can change under a running process. */
+    val isEnabled: Boolean
+        get() = sharedPreferences.getBoolean(SharedPreferencesUtils.API_MONITORING_ENABLED, true)
 
     private val sinceLastPrune = AtomicInteger(0)
 
     fun setEnabled(enabled: Boolean) {
-        isEnabled = enabled
         sharedPreferences.edit()
             .putBoolean(SharedPreferencesUtils.API_MONITORING_ENABLED, enabled)
             .apply()

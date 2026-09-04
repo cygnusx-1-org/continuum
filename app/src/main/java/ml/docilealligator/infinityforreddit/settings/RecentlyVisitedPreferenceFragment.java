@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.databinding.FragmentRecentlyVisitedSettingsBinding;
 import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
@@ -76,13 +77,13 @@ public class RecentlyVisitedPreferenceFragment extends Fragment {
 
         binding.saveRecentlyVisitedSwitchRecentlyVisitedPreferenceFragment.setChecked(
                 recentlyVisitedSharedPreferences.getBoolean(
-                        mActivity.accountName + SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE, false));
+                        AccountScope.key(mActivity.accountName, SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE), false));
 
         binding.saveRecentlyVisitedLinearLayoutRecentlyVisitedPreferenceFragment.setOnClickListener(view ->
                 binding.saveRecentlyVisitedSwitchRecentlyVisitedPreferenceFragment.performClick());
         binding.saveRecentlyVisitedSwitchRecentlyVisitedPreferenceFragment.setOnCheckedChangeListener((compoundButton, b) -> {
             recentlyVisitedSharedPreferences.edit().putBoolean(
-                    mActivity.accountName + SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE, b).apply();
+                    AccountScope.key(mActivity.accountName, SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE), b).apply();
             if (!b) {
                 // Switching it off is the only way to clear the list, so it has to actually clear it.
                 RecordRecentlyVisited.purge(mExecutor, mRedditDataRoomDatabase, mActivity.accountName);

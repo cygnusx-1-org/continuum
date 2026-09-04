@@ -999,7 +999,6 @@ https://play.google.com/store/"</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Вертикальный жест для закрытия медиафайла"</string>
     <string name="settings_hide_post_flair">"Скрыть флейр поста"</string>
     <string name="settings_crash_reports_title">"Отчёты о сбоях"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Опасные"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Показывать только один индикатор уровня комментария"</string>
     <string name="save_comment">"Сохранить"</string>
     <string name="unsave_comment">"Удалить"</string>

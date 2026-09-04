@@ -983,7 +983,6 @@ https://play.google.com/store/"</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Ковзніть вертикально, щоб вернутися назад від зображення або Gif"</string>
     <string name="settings_hide_post_flair">"Ховати лички дописів"</string>
     <string name="settings_crash_reports_title">"Звіти про збої"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Небезпечно"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Показувати лише один показник рівня коментарів"</string>
     <string name="save_comment">"Зберегти"</string>
     <string name="unsave_comment">"Не зберігати"</string>

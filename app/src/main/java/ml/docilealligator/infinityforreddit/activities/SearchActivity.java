@@ -44,6 +44,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.adapters.SearchActivityRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.adapters.SubredditAutocompleteRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
@@ -210,10 +211,7 @@ public class SearchActivity extends BaseActivity {
             binding.searchEditTextSearchActivity.setHint(R.string.search_subreddits_and_users_hint);
         }
 
-        // Two terms because "Disable NSFW forever" never clears the per-account switch: it only
-        // sets its own preference, so that switch can still read true underneath it.
-        nsfw = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)
-                && mNsfwAndSpoilerSharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.NSFW_BASE, false);
+        nsfw = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.NSFW_BASE), false);
 
         // Naming a NSFW subreddit picker is the kind of thing that makes the app awkward to open in
         // public, so the row is not offered to anyone who has turned NSFW off. The note goes with

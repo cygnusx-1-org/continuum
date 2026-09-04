@@ -101,7 +101,9 @@ import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
 import ml.docilealligator.infinityforreddit.services.EditProfileService;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.settings.APIKeysPreferenceFragment;
+import ml.docilealligator.infinityforreddit.settings.AccountSettingsManagementPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.AdvancedPreferenceFragment;
+import ml.docilealligator.infinityforreddit.settings.BackupAndRestorePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CommentPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CrashReportsFragment;
 import ml.docilealligator.infinityforreddit.settings.CustomizeBottomAppBarFragment;
@@ -128,6 +130,13 @@ import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
 @Component(modules = {AppModule.class, NetworkModule.class})
 public interface AppComponent {
     ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker apiCallTracker();
+
+    /**
+     * For the few helpers that have a Context but no injection point of their own. Going through
+     * here keeps them on the account-scoped instance instead of opening the file by name.
+     */
+    @javax.inject.Named("default")
+    android.content.SharedPreferences defaultSharedPreferences();
 
     void inject(MainActivity mainActivity);
 
@@ -201,6 +210,8 @@ public interface AppComponent {
 
     void inject(MainPreferenceFragment mainPreferenceFragment);
 
+    void inject(AccountSettingsManagementPreferenceFragment accountSettingsManagementPreferenceFragment);
+
     void inject(AccountSavedThingActivity accountSavedThingActivity);
 
     void inject(ViewImageOrGifActivity viewGIFActivity);
@@ -227,6 +238,8 @@ public interface AppComponent {
     void inject(SidebarFragment sidebarFragment);
 
     void inject(AdvancedPreferenceFragment advancedPreferenceFragment);
+
+    void inject(BackupAndRestorePreferenceFragment backupAndRestorePreferenceFragment);
 
     void inject(APIKeysPreferenceFragment apiKeysPreferenceFragment);
     void inject(CustomThemePreviewActivity customThemePreviewActivity);

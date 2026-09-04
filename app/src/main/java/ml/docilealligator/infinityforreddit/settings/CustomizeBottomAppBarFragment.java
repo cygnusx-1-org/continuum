@@ -86,12 +86,12 @@ public class CustomizeBottomAppBarFragment extends Fragment {
         String[] mainActivityOptionAnonymous = resources.getStringArray(R.array.settings_main_activity_bottom_app_bar_options_anonymous);
         String[] mainActivityOptionAnonymousValues = resources.getStringArray(R.array.settings_main_activity_bottom_app_bar_options_anonymous_values);
         String[] fabOptions;
-        mainActivityOptionCount = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, 4);
-        mainActivityOption1 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 0);
-        mainActivityOption2 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, 1);
-        mainActivityOption3 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, 2);
-        mainActivityOption4 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, 3);
-        mainActivityFAB = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? 7: 0);
+        mainActivityOptionCount = sharedPreferences.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, 4);
+        mainActivityOption1 = sharedPreferences.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 0);
+        mainActivityOption2 = sharedPreferences.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, 1);
+        mainActivityOption3 = sharedPreferences.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, 2);
+        mainActivityOption4 = sharedPreferences.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, 3);
+        mainActivityFAB = sharedPreferences.getInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? 7: 0);
 
         mainActivityOption1 = Utils.fixIndexOutOfBounds(mainActivityOptions, mainActivityOption1);
         mainActivityOption2 = Utils.fixIndexOutOfBounds(mainActivityOptions, mainActivityOption2);
@@ -133,7 +133,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setTitle(R.string.settings_tab_count)
                     .setSingleChoiceItems(R.array.settings_bottom_app_bar_option_count_options, mainActivityOptionCount / 2 - 1, (dialogInterface, i) -> {
                         mainActivityOptionCount = (i + 1) * 2;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, mainActivityOptionCount).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_COUNT, mainActivityOptionCount).apply();
                         binding.mainActivityOptionCountTextViewCustomizeBottomAppBarFragment.setText(Integer.toString(mainActivityOptionCount));
                         EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
@@ -147,7 +147,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mainActivityOptionAnonymous : mainActivityOptions, mainActivityOption1, (dialogInterface, i) -> {
                         mainActivityOption1 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption1;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, optionToSaveToPreference).apply();
                         binding.mainActivityOption1TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
                         EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
@@ -161,7 +161,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mainActivityOptionAnonymous : mainActivityOptions, mainActivityOption2, (dialogInterface, i) -> {
                         mainActivityOption2 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption2;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2, optionToSaveToPreference).apply();
                         binding.mainActivityOption2TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
                         EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
@@ -175,7 +175,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mainActivityOptionAnonymous : mainActivityOptions, mainActivityOption3, (dialogInterface, i) -> {
                         mainActivityOption3 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption3;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3, optionToSaveToPreference).apply();
                         binding.mainActivityOption3TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
                         EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
@@ -189,7 +189,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mainActivityOptionAnonymous : mainActivityOptions, mainActivityOption4, (dialogInterface, i) -> {
                         mainActivityOption4 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(mainActivityOptionAnonymousValues[i]) : mainActivityOption4;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4, optionToSaveToPreference).apply();
                         binding.mainActivityOption4TextViewCustomizeBottomAppBarFragment.setText(mainActivityOptions[optionToSaveToPreference]);
                         EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
@@ -212,7 +212,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         } else {
                             optionToSaveToPreference = i;
                         }
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, optionToSaveToPreference).apply();
                         binding.mainActivityFabTextViewCustomizeBottomAppBarFragment.setText(fabOptions[mainActivityFAB]);
                         EventBus.getDefault().post(new ChangeBottomAppBarEvent());
                         dialogInterface.dismiss();
@@ -223,12 +223,12 @@ public class CustomizeBottomAppBarFragment extends Fragment {
         String[] otherActivitiesOptions = resources.getStringArray(R.array.settings_other_activities_bottom_app_bar_options);
         String[] otherActivitiesOptionAnonymous = resources.getStringArray(R.array.settings_other_activities_bottom_app_bar_options_anonymous);
         String[] otherActivitiesOptionAnonymousValues = resources.getStringArray(R.array.settings_other_activities_bottom_app_bar_options_anonymous_values);
-        otherActivitiesOptionCount = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_COUNT, 4);
-        otherActivitiesOption1 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1, 0);
-        otherActivitiesOption2 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2, 1);
-        otherActivitiesOption3 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3, 2);
-        otherActivitiesOption4 = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4, 3);
-        otherActivitiesFAB = sharedPreferences.getInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? 7: 0);
+        otherActivitiesOptionCount = sharedPreferences.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_COUNT, 4);
+        otherActivitiesOption1 = sharedPreferences.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1, 0);
+        otherActivitiesOption2 = sharedPreferences.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2, 1);
+        otherActivitiesOption3 = sharedPreferences.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3, 2);
+        otherActivitiesOption4 = sharedPreferences.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4, 3);
+        otherActivitiesFAB = sharedPreferences.getInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? 7: 0);
 
         otherActivitiesOption1 = Utils.fixIndexOutOfBounds(otherActivitiesOptions, otherActivitiesOption1);
         otherActivitiesOption2 = Utils.fixIndexOutOfBounds(otherActivitiesOptions, otherActivitiesOption2);
@@ -266,7 +266,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setTitle(R.string.settings_tab_count)
                     .setSingleChoiceItems(R.array.settings_bottom_app_bar_option_count_options, otherActivitiesOptionCount / 2 - 1, (dialogInterface, i) -> {
                         otherActivitiesOptionCount = (i + 1) * 2;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_COUNT, otherActivitiesOptionCount).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_COUNT, otherActivitiesOptionCount).apply();
                         binding.otherActivitiesOptionCountTextViewCustomizeBottomAppBarFragment.setText(Integer.toString(otherActivitiesOptionCount));
                         dialogInterface.dismiss();
                     })
@@ -279,7 +279,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? otherActivitiesOptionAnonymous : otherActivitiesOptions, otherActivitiesOption1, (dialogInterface, i) -> {
                         otherActivitiesOption1 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(otherActivitiesOptionAnonymousValues[i]) : otherActivitiesOption1;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1, optionToSaveToPreference).apply();
                         binding.otherActivitiesOption1TextViewCustomizeBottomAppBarFragment.setText(otherActivitiesOptions[optionToSaveToPreference]);
                         dialogInterface.dismiss();
                     })
@@ -292,7 +292,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? otherActivitiesOptionAnonymous : otherActivitiesOptions, otherActivitiesOption2, (dialogInterface, i) -> {
                         otherActivitiesOption2 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(otherActivitiesOptionAnonymousValues[i]) : otherActivitiesOption2;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2, optionToSaveToPreference).apply();
                         binding.otherActivitiesOption2TextViewCustomizeBottomAppBarFragment.setText(otherActivitiesOptions[optionToSaveToPreference]);
                         dialogInterface.dismiss();
                     })
@@ -305,7 +305,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? otherActivitiesOptionAnonymous : otherActivitiesOptions, otherActivitiesOption3, (dialogInterface, i) -> {
                         otherActivitiesOption3 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(otherActivitiesOptionAnonymousValues[i]) : otherActivitiesOption3;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3, optionToSaveToPreference).apply();
                         binding.otherActivitiesOption3TextViewCustomizeBottomAppBarFragment.setText(otherActivitiesOptions[optionToSaveToPreference]);
                         dialogInterface.dismiss();
                     })
@@ -318,7 +318,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                     .setSingleChoiceItems(mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? otherActivitiesOptionAnonymous : otherActivitiesOptions, otherActivitiesOption4, (dialogInterface, i) -> {
                         otherActivitiesOption4 = i;
                         int optionToSaveToPreference = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Integer.parseInt(otherActivitiesOptionAnonymousValues[i]) : otherActivitiesOption4;
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4, optionToSaveToPreference).apply();
                         binding.otherActivitiesOption4TextViewCustomizeBottomAppBarFragment.setText(otherActivitiesOptions[optionToSaveToPreference]);
                         dialogInterface.dismiss();
                     })
@@ -340,7 +340,7 @@ public class CustomizeBottomAppBarFragment extends Fragment {
                         } else {
                             optionToSaveToPreference = i;
                         }
-                        sharedPreferences.edit().putInt((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : "") + SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, optionToSaveToPreference).apply();
+                        sharedPreferences.edit().putInt(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, optionToSaveToPreference).apply();
                         binding.otherActivitiesFabTextViewCustomizeBottomAppBarFragment.setText(fabOptions[otherActivitiesFAB]);
                         dialogInterface.dismiss();
                     })

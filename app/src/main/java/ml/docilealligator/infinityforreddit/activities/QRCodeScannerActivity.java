@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -49,6 +50,17 @@ public class QRCodeScannerActivity extends AppCompatActivity {
             Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         }
         setTitle(R.string.scan_qr_code);
+
+        // Through the dispatcher rather than onBackPressed(), which a back *gesture* never calls:
+        // the caller would then be left waiting on a result this screen had decided not to send.
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Ensure we set a result when user presses back button
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
 
         barcodeView = findViewById(R.id.barcode_scanner);
 
@@ -105,10 +117,4 @@ public class QRCodeScannerActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed() {
-        // Ensure we set a result when user presses back button
-        setResult(RESULT_CANCELED);
-        super.onBackPressed();
-    }
 }

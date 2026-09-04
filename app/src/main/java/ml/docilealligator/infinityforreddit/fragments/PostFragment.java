@@ -49,6 +49,7 @@ import ml.docilealligator.infinityforreddit.PostModerationActionHandler;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.AccountPostsActivity;
 import ml.docilealligator.infinityforreddit.activities.AccountSavedThingActivity;
 import ml.docilealligator.infinityforreddit.activities.ActivityToolbarInterface;
@@ -914,7 +915,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         new Handler(), usage, nameOfUsage, (postFilter) -> {
                             if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
                                 this.postFilter = postFilter;
-                                this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(mActivity.accountName + SharedPreferencesUtils.NSFW_BASE, false);
+                                this.postFilter.allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                                 initializeAndBindPostViewModel();
                             }
                         });
@@ -929,7 +930,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                                 (postFilter, concatenatedSubredditNames) -> {
                                     if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
                                         this.postFilter = postFilter;
-                                        this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                        this.postFilter.allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                                         this.concatenatedSubredditNames = concatenatedSubredditNames;
                                         if (concatenatedSubredditNames == null) {
                                             showErrorView(R.string.anonymous_front_page_no_subscriptions);
@@ -947,7 +948,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                                 (postFilter, concatenatedSubredditNames) -> {
                                     if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
                                         this.postFilter = postFilter;
-                                        this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                        this.postFilter.allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                                         this.concatenatedSubredditNames = concatenatedSubredditNames;
                                         if (concatenatedSubredditNames == null) {
                                             showErrorView(R.string.anonymous_multireddit_no_subreddit);
@@ -964,7 +965,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                             new Handler(), usage, nameOfUsage, (postFilter) -> {
                                 if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
                                     this.postFilter = postFilter;
-                                    this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                    this.postFilter.allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                                     initializeAndBindPostViewModel();
                                 }
                             });
@@ -973,7 +974,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                             new Handler(), usage, nameOfUsage, (postFilter) -> {
                                 if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
                                     this.postFilter = postFilter;
-                                    this.postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                    this.postFilter.allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                                     initializeAndBindPostViewModelForAnonymous(null);
                                 }
                             });
@@ -984,7 +985,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilterAndConcatenatedSubredditNames(mRedditDataRoomDatabase, mExecutor, new Handler(), usage, nameOfUsage,
                                 (postFilter, concatenatedSubredditNames) -> {
                                     if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
-                                        Objects.requireNonNull(this.postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                        Objects.requireNonNull(this.postFilter).allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                                         this.concatenatedSubredditNames = concatenatedSubredditNames;
                                         if (concatenatedSubredditNames == null) {
                                             showErrorView(R.string.anonymous_front_page_no_subscriptions);
@@ -1001,7 +1002,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilterAndConcatenatedSubredditNames(mRedditDataRoomDatabase, mExecutor, new Handler(), multiRedditPath, usage, nameOfUsage,
                                 (postFilter, concatenatedSubredditNames) -> {
                                     if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
-                                        Objects.requireNonNull(this.postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                                        Objects.requireNonNull(this.postFilter).allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                                         this.concatenatedSubredditNames = concatenatedSubredditNames;
                                         if (concatenatedSubredditNames == null) {
                                             showErrorView(R.string.anonymous_multireddit_no_subreddit);
@@ -1119,8 +1120,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         if (postFilter == null) {
                             postFilter = fetchedPostFilter;
                         }
-                        Objects.requireNonNull(postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)
-                                && mNsfwAndSpoilerSharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_BASE, false);
+                        Objects.requireNonNull(postFilter).allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
                         concatenatedSubredditNames = fetchedConcatenatedSubredditNames;
                         if (concatenatedSubredditNames == null) {
                             // Unsubscribing from the last subreddit leaves no feed to show. The
@@ -1690,7 +1690,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     public void changeNSFW(boolean nsfw) {
-        Objects.requireNonNull(postFilter).allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && nsfw;
+        Objects.requireNonNull(postFilter).allowNSFW = nsfw;
         if (mPostViewModel != null) {
             mPostViewModel.changePostFilter(postFilter);
         }

@@ -27,6 +27,7 @@ import ml.docilealligator.infinityforreddit.PostModerationActionHandler;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
@@ -137,7 +138,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
      */
     private boolean markPostReadForNewWindow() {
         if (mPost.isRead() || !mPostHistorySharedPreferences.getBoolean(
-                mBaseActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false)) {
+                AccountScope.key(mBaseActivity.accountName, SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE), false)) {
             return false;
         }
 

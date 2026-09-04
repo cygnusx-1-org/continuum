@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
@@ -805,9 +806,7 @@ public class LinkResolverActivity extends AppCompatActivity {
         }
 
         String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
-        String linkHandlerKey = (accountName != null && !accountName.isEmpty())
-                ? accountName + SharedPreferencesUtils.LINK_HANDLER_BASE
-                : SharedPreferencesUtils.LINK_HANDLER;
+        String linkHandlerKey = AccountScope.key(accountName, SharedPreferencesUtils.LINK_HANDLER_BASE);
         int linkHandler = SharedPreferencesUtils.getInt(mSharedPreferences, linkHandlerKey, "0");
         if (linkHandler == 0) {
             openInBrowser(uri, pm, true);
@@ -824,9 +823,7 @@ public class LinkResolverActivity extends AppCompatActivity {
 
     private void openInSpecificBrowser(Uri uri, PackageManager pm) {
         String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
-        String pkgKey = (accountName != null && !accountName.isEmpty())
-                ? accountName + SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE_BASE
-                : SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE;
+        String pkgKey = AccountScope.key(accountName, SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE_BASE);
         String pkg = mSharedPreferences.getString(pkgKey, "");
         if (pkg != null && !pkg.isEmpty()) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -883,9 +880,7 @@ public class LinkResolverActivity extends AppCompatActivity {
         String selectedPackage = null;
         if (ephemeral) {
             String accountName = mCurrentAccountSharedPreferences.getString(SharedPreferencesUtils.ACCOUNT_NAME, "");
-            String ephemeralPkgKey = (accountName != null && !accountName.isEmpty())
-                    ? accountName + SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE
-                    : SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE;
+            String ephemeralPkgKey = AccountScope.key(accountName, SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE);
             String preferredPackage = mSharedPreferences.getString(ephemeralPkgKey, "");
             if (preferredPackage != null && !preferredPackage.isEmpty()
                     && CustomTabsClient.isEphemeralBrowsingSupported(this, preferredPackage)) {

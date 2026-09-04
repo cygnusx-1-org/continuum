@@ -988,7 +988,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Posunout vertikálně pro návrat zpět z obrázku a GIFu"</string>
     <string name="settings_hide_post_flair">"Skrýt štítek příspěvku"</string>
     <string name="settings_crash_reports_title">"Hlášení o pádech"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Nebezpečné"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Zobrazit pouze jeden indikátor úrovně komentáře"</string>
     <string name="save_comment">"Uložit"</string>
     <string name="unsave_comment">"Neukládat"</string>

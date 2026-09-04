@@ -7,17 +7,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 
-@Entity(tableName = "comment_filter")
+@Entity(tableName = "comment_filter", primaryKeys = {"name", "username"})
 public class CommentFilter implements Parcelable {
-    @PrimaryKey
+    /**
+     * The account this filter belongs to, [Account.ANONYMOUS_ACCOUNT] when logged out. Half the
+     * primary key, so two accounts can each have a filter of the same name.
+     */
+    @NonNull
+    @ColumnInfo(name = "username")
+    public String username = Account.ANONYMOUS_ACCOUNT;
     @NonNull
     // Empty, not a placeholder: a filter has to be named by whoever makes it, and a default name
     // that looks filled in is one the user saves without reading. The Customize screen refuses to
@@ -42,6 +48,7 @@ public class CommentFilter implements Parcelable {
     }
 
     protected CommentFilter(Parcel in) {
+        username = Objects.requireNonNull(in.readString());
         name = Objects.requireNonNull(in.readString());
         displayMode = in.readInt();
         maxVote = in.readInt();
@@ -146,6 +153,7 @@ public class CommentFilter implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(username);
         dest.writeString(name);
         dest.writeInt(displayMode);
         dest.writeInt(maxVote);

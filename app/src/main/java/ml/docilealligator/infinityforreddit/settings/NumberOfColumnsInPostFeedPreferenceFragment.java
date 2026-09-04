@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceManager;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
@@ -32,7 +31,7 @@ public class NumberOfColumnsInPostFeedPreferenceFragment extends CustomFontPrefe
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.number_of_columns_in_post_feed_preferences, rootKey);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        SharedPreferences sharedPreferences = mActivity.getDefaultSharedPreferences();
         boolean foldEnabled = sharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
 
         Preference portraitUnfolded = findPreference(SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED);

@@ -654,7 +654,6 @@
     <string name="suggest_title_failed">"தலைப்பைப் பரிந்துரைப்பதில் தோல்வி"</string>
     <string name="action_delete_logs">"பயன்குறிப்புகளை அழி"</string>
     <string name="settings_crash_reports_title">"சிதைவறிக்கைகள்"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"ஆபத்தானது"</string>
     <string name="save_comment">"சேமி"</string>
     <string name="unsave_comment">"சேமிக்கா"</string>
 

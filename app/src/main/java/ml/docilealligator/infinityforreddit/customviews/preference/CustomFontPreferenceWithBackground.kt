@@ -96,7 +96,11 @@ class CustomFontPreferenceWithBackground @JvmOverloads constructor(
                 }
             }
             if (titleTextView is TextView) {
-                titleTextView.setTextColor(it.primaryTextColor)
+                // Dimmed when disabled, as the icon above already is: the row keeps its place in the
+                // group either way, so the colour is the only thing telling the two states apart.
+                titleTextView.setTextColor(
+                    if (isEnabled) it.primaryTextColor else it.secondaryTextColor
+                )
             }
             if (summaryTextView is TextView) {
                 summaryTextView.setTextColor(it.secondaryTextColor)

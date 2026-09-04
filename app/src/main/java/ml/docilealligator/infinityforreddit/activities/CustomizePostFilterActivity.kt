@@ -297,7 +297,7 @@ class CustomizePostFilterActivity :
      */
     private fun observeBlockedCounts() {
         mRedditDataRoomDatabase.postFilterBlockedSubredditDao()
-            .getBlockedCountsLiveData(originalName)
+            .getBlockedCountsLiveData(originalName, accountName)
             .observe(this) { counts ->
                 adapter.setBlockedCounts(
                     counts.associate { it.ruleValue.lowercase(Locale.ENGLISH) to it.blockedCount }
@@ -319,7 +319,7 @@ class CustomizePostFilterActivity :
         observer: (List<PostFilterBlockedSubreddit>) -> Unit,
     ) {
         mRedditDataRoomDatabase.postFilterBlockedSubredditDao()
-            .getBlockedSubredditsLiveData(originalName, rule.value)
+            .getBlockedSubredditsLiveData(originalName, accountName, rule.value)
             .observe(owner) { observer(it) }
     }
 
@@ -330,7 +330,7 @@ class CustomizePostFilterActivity :
     ) {
         mExecutor.execute {
             mRedditDataRoomDatabase.postFilterBlockedSubredditDao()
-                .setExcepted(originalName, rule.value, subredditName, excepted)
+                .setExcepted(originalName, accountName, rule.value, subredditName, excepted)
         }
     }
 
@@ -390,7 +390,7 @@ class CustomizePostFilterActivity :
         }
         val name = originalName
         mExecutor.execute {
-            val stored = mRedditDataRoomDatabase.postFilterUsageDao().getAllPostFilterUsage(name)
+            val stored = mRedditDataRoomDatabase.postFilterUsageDao().getAllPostFilterUsage(name, accountName)
             Handler(Looper.getMainLooper()).post {
                 if (isFinishing || isDestroyed) {
                     return@post
@@ -495,7 +495,8 @@ class CustomizePostFilterActivity :
         usages.retainAll { isContinuumAllUsage(it) }
         addUsage(
             PostFilterUsage(
-                postFilter.name, PostFilterUsage.SUBREDDIT_TYPE, Constants.CONTINUUM_ALL_SUBREDDIT
+                postFilter.name, accountName, PostFilterUsage.SUBREDDIT_TYPE,
+                Constants.CONTINUUM_ALL_SUBREDDIT
             )
         )
         adapter.setUsages(usages)
@@ -594,14 +595,14 @@ class CustomizePostFilterActivity :
     private fun addUsages(type: Int, namesOfUsage: List<String>) {
         var added = false
         for (nameOfUsage in namesOfUsage) {
-            added = addUsage(PostFilterUsage(postFilter.name, type, nameOfUsage)) || added
+            added = addUsage(PostFilterUsage(postFilter.name, accountName, type, nameOfUsage)) || added
         }
         if (added) {
             adapter.setUsages(usages)
         }
     }
 
-    /** The table is keyed on (name, usage, name_of_usage); a repeat is the same row. */
+    /** The table is keyed on (name, username, usage, name_of_usage); a repeat is the same row. */
     private fun addUsage(usage: PostFilterUsage): Boolean {
         if (usages.any { it.usage == usage.usage && it.nameOfUsage.equals(usage.nameOfUsage, true) }) {
             return false
@@ -773,6 +774,9 @@ class CustomizePostFilterActivity :
      * still has to be folded back into its columns.
      */
     private fun constructPostFilter() {
+        // A filter you are editing is always your own, so stamp the account rather than trusting
+        // whatever the extra or a fresh instance came with.
+        postFilter.username = accountName
         postFilter.name = postFilter.name.trim()
         postFilter.maxAwards = -1
         postFilter.minAwards = -1

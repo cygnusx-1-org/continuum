@@ -25,6 +25,7 @@ import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.SingleLiveEvent;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
@@ -135,7 +136,7 @@ public class PostViewModel extends ViewModel {
         filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false));
     }
 
     // PostType.SUBREDDIT || PostType.ANONYMOUS_FRONT_PAGE || PostType.ANONYMOUS_MULTIREDDIT
@@ -175,8 +176,8 @@ public class PostViewModel extends ViewModel {
         filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && ((postType != PostType.SUBREDDIT || Constants.isFirehoseSubreddit(subredditName)) || postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE, false)));
+                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false)
+                && ((postType != PostType.SUBREDDIT || Constants.isFirehoseSubreddit(subredditName)) || postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE), false)));
     }
 
     // PostType.MULTIREDDIT
@@ -217,7 +218,7 @@ public class PostViewModel extends ViewModel {
         filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false));
+                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false));
     }
 
     // PostPagingSource.TYPE_USER
@@ -259,8 +260,8 @@ public class PostViewModel extends ViewModel {
         filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_USERS_BASE, false));
+                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false)
+                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_USERS_BASE), false));
     }
 
     // postType == PostType.SEARCH
@@ -302,8 +303,8 @@ public class PostViewModel extends ViewModel {
         filteredPosts = buildFilteredPosts();
 
         hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE, false)
-                && postHistorySharedPreferences.getBoolean((accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName) + SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE, false));
+                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false)
+                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE), false));
     }
 
     /**

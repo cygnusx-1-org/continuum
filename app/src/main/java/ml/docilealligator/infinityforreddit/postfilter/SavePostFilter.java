@@ -43,11 +43,12 @@ public class SavePostFilter {
         List<PostFilterBlockedSubreddit> kept = new ArrayList<>(blocked.size());
         for (PostFilterBlockedSubreddit b : blocked) {
             if (keptTerms.contains(b.getRuleValue().toLowerCase(Locale.ENGLISH))) {
-                kept.add(new PostFilterBlockedSubreddit(postFilter.name, b.getRuleValue(),
-                        b.getSubredditName(), b.getFirstBlocked(), b.getBlockCount(), b.getExcepted()));
+                kept.add(new PostFilterBlockedSubreddit(postFilter.name, postFilter.username,
+                        b.getRuleValue(), b.getSubredditName(), b.getFirstBlocked(),
+                        b.getBlockCount(), b.getExcepted()));
             }
         }
-        redditDataRoomDatabase.postFilterBlockedSubredditDao().deleteAllForFilter(postFilter.name);
+        redditDataRoomDatabase.postFilterBlockedSubredditDao().deleteAllForFilter(postFilter.name, postFilter.username);
         redditDataRoomDatabase.postFilterBlockedSubredditDao().insertAll(kept);
     }
 
@@ -70,7 +71,7 @@ public class SavePostFilter {
         executor.execute(() -> {
             try {
                 if (!originalName.equals(postFilter.name) &&
-                        redditDataRoomDatabase.postFilterDao().getPostFilter(postFilter.name) != null) {
+                        redditDataRoomDatabase.postFilterDao().getPostFilter(postFilter.name, postFilter.username) != null) {
                     handler.post(savePostFilterListener::duplicate);
                 } else {
                     // Atomic: on a rename the delete + insert + usage re-key must all land or none, so a
@@ -78,21 +79,22 @@ public class SavePostFilter {
                     redditDataRoomDatabase.runInTransaction(() -> {
                         List<PostFilterUsage> postFilterUsages = usages != null
                                 ? usages
-                                : redditDataRoomDatabase.postFilterUsageDao().getAllPostFilterUsage(originalName);
+                                : redditDataRoomDatabase.postFilterUsageDao().getAllPostFilterUsage(originalName, postFilter.username);
                         // Read before the delete: the blocked-subreddit rows cascade off the filter
                         // row, and they are discovered data a rename must not throw away.
                         List<PostFilterBlockedSubreddit> blocked = redditDataRoomDatabase
-                                .postFilterBlockedSubredditDao().getAllForFilter(originalName);
+                                .postFilterBlockedSubredditDao().getAllForFilter(originalName, postFilter.username);
                         if (!originalName.equals(postFilter.name)) {
-                            redditDataRoomDatabase.postFilterDao().deletePostFilter(originalName);
+                            redditDataRoomDatabase.postFilterDao().deletePostFilter(originalName, postFilter.username);
                         } else if (usages != null) {
                             // An explicit set replaces the stored one, so usages the user removed on
                             // screen have to go. A rename already drops them with the old filter row.
-                            redditDataRoomDatabase.postFilterUsageDao().deleteAllPostFilterUsage(originalName);
+                            redditDataRoomDatabase.postFilterUsageDao().deleteAllPostFilterUsage(originalName, postFilter.username);
                         }
                         redditDataRoomDatabase.postFilterDao().insert(postFilter);
                         for (PostFilterUsage postFilterUsage : postFilterUsages) {
                             postFilterUsage.name = postFilter.name;
+                            postFilterUsage.username = postFilter.username;
                             redditDataRoomDatabase.postFilterUsageDao().insert(postFilterUsage);
                         }
                         saveBlockedSubreddits(redditDataRoomDatabase, postFilter, blocked);

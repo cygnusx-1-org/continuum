@@ -986,7 +986,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Omhoog swipen om terug te gaan van foto's en gif's"</string>
     <string name="settings_hide_post_flair">"Verberg Post Flair"</string>
     <string name="settings_crash_reports_title">"Crashrapporten"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Gevaarlijk"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Laat alleen één reactieniveau indicator zien"</string>
     <string name="save_comment">"Opslaan"</string>
     <string name="unsave_comment">"Niet opslaan"</string>

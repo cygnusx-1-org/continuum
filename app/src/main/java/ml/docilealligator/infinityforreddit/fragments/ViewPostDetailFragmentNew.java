@@ -65,6 +65,7 @@ import ml.docilealligator.infinityforreddit.PostModerationActionHandler;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.EditPostActivity;
 import ml.docilealligator.infinityforreddit.activities.PostFilterPreferenceActivity;
@@ -496,7 +497,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                         mSharedPreferences.getBoolean(SharedPreferencesUtils.RESPECT_SUBREDDIT_RECOMMENDED_COMMENT_SORT_TYPE, false),
                         mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_COMMENT_SORT, true),
                         commentDefaultSortType,
-                        mPostHistorySharedPreferences.getBoolean(mActivity.accountName + SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE, false),
+                        mPostHistorySharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE), false),
                         !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_TOP_LEVEL_COMMENTS_FIRST, false),
                         getArguments().getString(EXTRA_CONTEXT_NUMBER, "8")
                 )
@@ -1415,8 +1416,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
     private boolean showSensitiveWarning() {
         if (mPost != null && mPost.isNSFW()
-                && (mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false)
-                || !mNsfwAndSpoilerSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : (mActivity.accountName)) + SharedPreferencesUtils.NSFW_BASE, false))) {
+                && !mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false)) {
             MaterialAlertDialogBuilder sensitiveWarningBuilder = new MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
                     .setTitle(R.string.warning)
                     .setMessage(R.string.this_post_contains_sensitive_content)

@@ -24,7 +24,7 @@ import javax.inject.Named;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.databinding.FragmentNsfwAndSpoilerBinding;
@@ -39,17 +39,12 @@ public class NsfwAndSpoilerFragment extends Fragment {
 
     private FragmentNsfwAndSpoilerBinding binding;
     @Inject
-    @Named("default")
-    SharedPreferences sharedPreferences;
-    @Inject
     @Named("nsfw_and_spoiler")
     SharedPreferences nsfwAndBlurringSharedPreferences;
 
     private SettingsActivity mActivity;
     private boolean blurNsfw;
     private boolean doNotBlurNsfwInNsfwSubreddits;
-    private boolean disableNsfwForever;
-    private boolean manuallyCheckDisableNsfwForever = true;
 
     public NsfwAndSpoilerFragment() {
         // Required empty public constructor
@@ -83,11 +78,10 @@ public class NsfwAndSpoilerFragment extends Fragment {
             Utils.setFontToAllTextViews(binding.getRoot(), mActivity.typeface);
         }
 
-        boolean enableNsfw = nsfwAndBlurringSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE, false);
-        blurNsfw = nsfwAndBlurringSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.BLUR_NSFW_BASE, true);
-        doNotBlurNsfwInNsfwSubreddits = nsfwAndBlurringSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS, false);
-        boolean blurSpoiler = nsfwAndBlurringSharedPreferences.getBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, false);
-        disableNsfwForever = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false);
+        boolean enableNsfw = nsfwAndBlurringSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
+        blurNsfw = nsfwAndBlurringSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.BLUR_NSFW_BASE), true);
+        doNotBlurNsfwInNsfwSubreddits = nsfwAndBlurringSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS), false);
+        boolean blurSpoiler = nsfwAndBlurringSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.BLUR_SPOILER_BASE), false);
 
         if (enableNsfw) {
             binding.blurNsfwLinearLayoutNsfwAndSpoilerFragment.setVisibility(View.VISIBLE);
@@ -98,16 +92,10 @@ public class NsfwAndSpoilerFragment extends Fragment {
         binding.blurNsfwSwitchNsfwAndSpoilerFragment.setChecked(blurNsfw);
         binding.doNotBlurNsfwInNsfwSubredditsSwitchNsfwAndSpoilerFragment.setChecked(doNotBlurNsfwInNsfwSubreddits);
         binding.blurSpoilerSwitchNsfwAndSpoilerFragment.setChecked(blurSpoiler);
-        binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.setChecked(disableNsfwForever);
-        binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.setEnabled(!disableNsfwForever);
-        if (disableNsfwForever) {
-            binding.disableNsfwForeverTextViewNsfwAndSpoilerFragment.setTextColor(mActivity.customThemeWrapper.getSecondaryTextColor());
-            binding.disableNsfwForeverLinearLayoutNsfwAndSpoilerFragment.setEnabled(false);
-        }
 
         binding.enableNsfwLinearLayoutNsfwAndSpoilerFragment.setOnClickListener(view -> binding.enableNsfwSwitchNsfwAndSpoilerFragment.performClick());
         binding.enableNsfwSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
-            nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE, b).apply();
+            nsfwAndBlurringSharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), b).apply();
             if (b) {
                 binding.blurNsfwLinearLayoutNsfwAndSpoilerFragment.setVisibility(View.VISIBLE);
                 binding.doNotBlurNsfwInNsfwSubredditsLinearLayoutNsfwAndSpoilerFragment.setVisibility(View.VISIBLE);
@@ -121,7 +109,7 @@ public class NsfwAndSpoilerFragment extends Fragment {
         binding.blurNsfwLinearLayoutNsfwAndSpoilerFragment.setOnClickListener(view -> binding.blurNsfwSwitchNsfwAndSpoilerFragment.performClick());
         binding.blurNsfwSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
             blurNsfw = b;
-            nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.BLUR_NSFW_BASE, b).apply();
+            nsfwAndBlurringSharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.BLUR_NSFW_BASE), b).apply();
             EventBus.getDefault().post(new ChangeNSFWBlurEvent(b, doNotBlurNsfwInNsfwSubreddits));
         });
 
@@ -130,47 +118,14 @@ public class NsfwAndSpoilerFragment extends Fragment {
         });
         binding.doNotBlurNsfwInNsfwSubredditsSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
             doNotBlurNsfwInNsfwSubreddits = b;
-            nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS, b).apply();
+            nsfwAndBlurringSharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS), b).apply();
             EventBus.getDefault().post(new ChangeNSFWBlurEvent(blurNsfw, b));
         });
 
         binding.blurSpoilerLinearLayoutNsfwAndSpoilerFragment.setOnClickListener(view -> binding.blurSpoilerSwitchNsfwAndSpoilerFragment.performClick());
         binding.blurSpoilerSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
-            nsfwAndBlurringSharedPreferences.edit().putBoolean((mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, b).apply();
+            nsfwAndBlurringSharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.BLUR_SPOILER_BASE), b).apply();
             EventBus.getDefault().post(new ChangeSpoilerBlurEvent(b));
-        });
-
-        binding.disableNsfwForeverLinearLayoutNsfwAndSpoilerFragment.setOnClickListener(view -> {
-            binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.performClick();
-        });
-        binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (manuallyCheckDisableNsfwForever) {
-                manuallyCheckDisableNsfwForever = false;
-                new MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
-                        .setTitle(R.string.warning)
-                        .setMessage(R.string.disable_over_18_forever_message)
-                        .setPositiveButton(R.string.yes, (dialogInterface, i)
-                                -> {
-                            sharedPreferences.edit().putBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, true).apply();
-                            disableNsfwForever = true;
-                            binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.setEnabled(false);
-                            binding.disableNsfwForeverLinearLayoutNsfwAndSpoilerFragment.setEnabled(false);
-                            binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.setChecked(true);
-                            binding.disableNsfwForeverTextViewNsfwAndSpoilerFragment.setTextColor(mActivity.customThemeWrapper.getSecondaryTextColor());
-                            EventBus.getDefault().post(new ChangeNSFWEvent(false));
-                        })
-                        .setNegativeButton(R.string.no, (dialogInterface, i) -> {
-                            binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.setChecked(false);
-                            manuallyCheckDisableNsfwForever = true;
-                        })
-                        .setOnDismissListener(dialogInterface -> {
-                            if (!disableNsfwForever) {
-                                binding.disableNsfwForeverSwitchNsfwAndSpoilerFragment.setChecked(false);
-                            }
-                            manuallyCheckDisableNsfwForever = true;
-                        })
-                        .show();
-            }
         });
 
         TextView messageTextView = new TextView(mActivity);
@@ -204,8 +159,6 @@ public class NsfwAndSpoilerFragment extends Fragment {
         binding.blurNsfwTextViewNsfwAndSpoilerFragment.setTextColor(primaryTextColor);
         binding.doNotBlurNsfwTextViewNsfwAndSpoilerFragment.setTextColor(primaryTextColor);
         binding.blurSpoilerTextViewNsfwAndSpoilerFragment.setTextColor(primaryTextColor);
-        binding.dangerousTextViewNsfwAndSpoilerFragment.setTextColor(primaryTextColor);
-        binding.disableNsfwForeverTextViewNsfwAndSpoilerFragment.setTextColor(primaryTextColor);
     }
 
     @Override

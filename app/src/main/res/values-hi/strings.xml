@@ -29,7 +29,7 @@
     <string name="view_imgur_media_activity_image_label">"चित्र %1$d/%2$d"</string>
 
     <!-- Fuzzy -->
-    <string name="view_imgur_media_activity_video_label">"वीडियो %1$/%2$d"</string>
+    <string name="view_imgur_media_activity_video_label">"वीडियो %1$d/%2$d"</string>
 
     <!-- Or one can use as is form in Devnagari script ' पी एम भेजें' -->
     <string name="send_private_message_activity_label">"व्यक्तिगत संदेश भेजें"</string>

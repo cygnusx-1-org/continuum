@@ -28,6 +28,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScopedKeys;
+import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySettingsBinding;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
@@ -50,7 +53,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 public class SettingsActivity extends BaseActivity implements
-        PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+        PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
+        AccountChooserBottomSheetFragment.AccountChooserListener {
 
     private static final String TITLE_STATE = "TS";
 
@@ -63,7 +67,52 @@ public class SettingsActivity extends BaseActivity implements
     @Named("current_account")
     SharedPreferences mCurrentAccountSharedPreferences;
     @Inject
+    @Named("navigation_drawer")
+    SharedPreferences mNavigationDrawerSharedPreferences;
+    @Inject
+    @Named("post_details")
+    SharedPreferences mPostDetailsSharedPreferences;
+    @Inject
     CustomThemeWrapper mCustomThemeWrapper;
+
+    /**
+     * The account-scoped preferences behind a settings screen, or null for a screen whose file is
+     * not per-account. Screens name their file through
+     * {@code PreferenceManager.setSharedPreferencesName}; a null name, or the default name androidx
+     * starts out with, means the default file.
+     *
+     * Preference screens otherwise reach their file by name, which bypasses the scoping entirely and
+     * would write an edit somewhere nothing reads it.
+     */
+    @Nullable
+    public SharedPreferences accountScopedPreferencesFor(@Nullable String sharedPreferencesName) {
+        // The default file answers to two names: androidx starts every PreferenceManager on it by
+        // name rather than leaving the name null, so matching only null missed every screen that
+        // lives there — they read and wrote the unscoped key while the app read the scoped one.
+        //
+        // Built rather than taken from SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, which names
+        // the legacy file only the API keys screen uses. androidx keeps this private, so the
+        // convention is spelled out here; it is the same one the platform has always used.
+        if (sharedPreferencesName == null
+                || sharedPreferencesName.equals(getPackageName() + "_preferences")) {
+            return mSharedPreferences;
+        }
+        if (sharedPreferencesName.equals(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE)) {
+            return mNavigationDrawerSharedPreferences;
+        }
+        if (sharedPreferencesName.equals(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE)) {
+            return mPostDetailsSharedPreferences;
+        }
+        // Fail closed. Returning null here would say "not per-account" and hand the screen back to
+        // androidx's by-name lookup, which is the very thing this method exists to prevent; a
+        // screen added on sort_type, post_layout or bottom_app_bar would then write unscoped keys
+        // with nothing to show for it. Whoever adds one has to inject its instance above.
+        if (AccountScopedKeys.isWholeFileScoped(sharedPreferencesName)) {
+            throw new IllegalStateException(
+                    "No account-scoped SharedPreferences injected for " + sharedPreferencesName);
+        }
+        return null;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -285,6 +334,19 @@ public class SettingsActivity extends BaseActivity implements
         binding.appbarLayoutSettingsActivity.setExpanded(true);
         setTitle(pref.getTitle());
         return true;
+    }
+
+    /**
+     * The account chooser reports to the activity hosting it, so pass the choice on to the settings
+     * screen that asked for it. One screen is showing at a time, which is what makes that
+     * unambiguous.
+     */
+    @Override
+    public void onAccountSelected(Account account) {
+        Fragment current = getSupportFragmentManager().findFragmentById(R.id.frame_layout_settings_activity);
+        if (current instanceof AccountChooserBottomSheetFragment.AccountChooserListener) {
+            ((AccountChooserBottomSheetFragment.AccountChooserListener) current).onAccountSelected(account);
+        }
     }
 
     @Override

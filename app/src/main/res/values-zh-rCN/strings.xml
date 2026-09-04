@@ -1007,7 +1007,6 @@ Reddit 视频分辨率较低。
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"垂直滑动退出图片和动图界面"</string>
     <string name="settings_hide_post_flair">"隐藏帖子头衔"</string>
     <string name="settings_crash_reports_title">"崩溃报告"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"危险"</string>
     <string name="settings_show_only_one_comment_level_indicator">"仅显示一个评论层级指示"</string>
     <string name="save_comment">"保存"</string>
     <string name="unsave_comment">"取消保存"</string>

@@ -8,6 +8,7 @@ import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.TestInfinity
 import ml.docilealligator.infinityforreddit.account.AccountDao
+import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditDao
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserDao
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
@@ -86,7 +87,7 @@ class RecordRecentlyVisitedTest {
 
     private fun turnTheSettingOn() {
         preferences.edit()
-            .putBoolean(account + SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE, true)
+            .putBoolean(AccountScope.key(account, SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE), true)
             .commit()
     }
 

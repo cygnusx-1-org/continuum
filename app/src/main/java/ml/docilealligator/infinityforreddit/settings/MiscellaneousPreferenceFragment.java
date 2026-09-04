@@ -10,11 +10,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsService;
-import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import java.util.ArrayList;
@@ -26,8 +24,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
-import ml.docilealligator.infinityforreddit.events.ChangePostFeedMaxResolutionEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -58,16 +56,15 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         ListPreference mainPageBackButtonActionListPreference = findPreference(SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION);
         SwitchPreference savePostFeedScrolledPositionSwitch = findPreference(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION);
         ListPreference languageListPreference = findPreference(SharedPreferencesUtils.LANGUAGE);
-        EditTextPreference postFeedMaxResolution = findPreference(SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION);
 
         List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
         boolean hasEphemeralBrowser = !ephemeralBrowsers.isEmpty();
 
         List<String[]> installedBrowsers = findInstalledBrowsers(mActivity);
 
-        String linkHandlerKey = mActivity.accountName + SharedPreferencesUtils.LINK_HANDLER_BASE;
-        String ephemeralPkgKey = mActivity.accountName + SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE;
-        String specificPkgKey = mActivity.accountName + SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE_BASE;
+        String linkHandlerKey = AccountScope.key(mActivity.accountName, SharedPreferencesUtils.LINK_HANDLER_BASE);
+        String ephemeralPkgKey = AccountScope.key(mActivity.accountName, SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE_BASE);
+        String specificPkgKey = AccountScope.key(mActivity.accountName, SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE_BASE);
         String currentLinkHandler = mSharedPreferences.getString(linkHandlerKey, "0");
 
         if (linkHandlerListPreference != null) {
@@ -150,22 +147,6 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
             });
         }
 
-        if (postFeedMaxResolution != null) {
-            postFeedMaxResolution.setOnPreferenceChangeListener((preference, newValue) -> {
-                try {
-                    int resolution = Integer.parseInt((String) newValue);
-                    if (resolution <= 0) {
-                        Toast.makeText(mActivity, R.string.not_a_valid_number, Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                    EventBus.getDefault().post(new ChangePostFeedMaxResolutionEvent(resolution));
-                } catch (NumberFormatException e) {
-                    Toast.makeText(mActivity, R.string.not_a_valid_number, Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-                return true;
-            });
-        }
     }
 
     private static List<String[]> findInstalledBrowsers(Context context) {

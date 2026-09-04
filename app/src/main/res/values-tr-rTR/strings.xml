@@ -1009,7 +1009,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Resim ve Gif'ten Geri Dönmek İçin Dikey Kaydır"</string>
     <string name="settings_hide_post_flair">"Gönderi Etiketini Gizle"</string>
     <string name="settings_crash_reports_title">"Kilitlenme Raporları"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Sakıncalı"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Sadece Bir Yorum Seviyesi Belirtecini Göster"</string>
     <string name="save_comment">"Kaydet"</string>
     <string name="unsave_comment">"Kaydetme"</string>

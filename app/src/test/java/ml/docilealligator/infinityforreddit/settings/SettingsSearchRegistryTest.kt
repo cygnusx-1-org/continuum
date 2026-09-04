@@ -116,11 +116,17 @@ class SettingsSearchRegistryTest {
         assertEquals(expected, item.breadcrumb)
     }
 
+    /**
+     * The settings root is split into an "All accounts" and a "This account" group, and the search
+     * index says which one a screen came from — that is the answer to "is this setting shared?".
+     */
     @Test
-    fun topLevelScreensAreReachableFromTheRootBreadcrumb() {
+    fun topLevelScreensNameTheGroupTheyBelongTo() {
         val item = itemTitled(R.string.settings_interface_title)
 
-        assertEquals(context.getString(R.string.settings_activity_label), item.breadcrumb)
+        val expected = context.getString(R.string.settings_activity_label) +
+            " › " + context.getString(R.string.settings_group_this_account)
+        assertEquals(expected, item.breadcrumb)
         assertEquals(InterfacePreferenceFragment::class.java, item.fragmentClass)
     }
 
@@ -168,10 +174,19 @@ class SettingsSearchRegistryTest {
 
     @Test
     fun indexesCategoryOnASubScreen() {
-        val item = itemTitled(R.string.settings_category_backup_and_restore_title)
+        val item = itemTitled(R.string.settings_category_gesture_sensitivity_title)
 
-        assertEquals(context.getString(R.string.settings_advanced_master_title), item.breadcrumb)
-        assertEquals(AdvancedPreferenceFragment::class.java, item.fragmentClass)
+        assertEquals(context.getString(R.string.settings_gestures_and_buttons_title), item.breadcrumb)
+        assertEquals(GesturesAndButtonsPreferenceFragment::class.java, item.fragmentClass)
+    }
+
+    @Test
+    fun indexesSettingsOnTheBackupAndRestoreScreen() {
+        val item = itemTitled(R.string.settings_backup_settings_title)
+
+        assertEquals(context.getString(R.string.settings_category_backup_and_restore_title),
+            item.breadcrumb)
+        assertEquals(BackupAndRestorePreferenceFragment::class.java, item.fragmentClass)
     }
 
     /**
@@ -188,9 +203,11 @@ class SettingsSearchRegistryTest {
 
         // app:key="data_saving_mode_preference" on the root; the title is reused by a switch on
         // the screen it opens, so pick the root's row by its breadcrumb.
+        val rootAllAccounts = context.getString(R.string.settings_activity_label) +
+            " › " + context.getString(R.string.settings_group_all_accounts)
         val dataSaving = items.single {
             it.title == context.getString(R.string.settings_data_saving_mode) &&
-                it.breadcrumb == context.getString(R.string.settings_activity_label)
+                it.breadcrumb == rootAllAccounts
         }
         assertEquals(DataSavingModePreferenceFragment::class.java, dataSaving.fragmentClass)
         assertNull(dataSaving.key)

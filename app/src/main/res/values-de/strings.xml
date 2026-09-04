@@ -1031,7 +1031,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Vertikal wischen, um zurück zu den Medien zu gelangen"</string>
     <string name="settings_hide_post_flair">"Beitragsflair verstecken"</string>
     <string name="settings_crash_reports_title">"Absturzmeldungen"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Gefährlich"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Nur einen Indikator für die Kommentarebene anzeigen"</string>
     <string name="save_comment">"Speichern"</string>
     <string name="unsave_comment">"Nicht mehr speichern"</string>

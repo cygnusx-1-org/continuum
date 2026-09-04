@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
@@ -62,7 +63,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
         LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class,
-        Reminder.class}, version = 40, exportSchema = false)
+        Reminder.class}, version = 41, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -80,7 +81,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29,
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
-                        MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40)
+                        MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40,
+                        MIGRATION_40_41)
                 .build();
     }
 
@@ -135,6 +137,124 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     public abstract RecentlyVisitedDao recentlyVisitedDao();
 
     public abstract ReminderDao reminderDao();
+
+    /**
+     * Gives every filter an owner.
+     *
+     * Both filter tables were keyed by name alone, so one filter list served every account. The key
+     * is (name, username) now, and the two usage tables and the blocked-subreddit table follow it
+     * through their foreign keys.
+     *
+     * Every account alive at this point, anonymous included, gets a copy of every filter — the same
+     * rule the preference migration used, so nobody's filters appear to vanish on the upgrade.
+     * Accounts added later start with none.
+     *
+     * Rebuilt rather than altered: SQLite cannot add a column to a primary key. The unconstrained
+     * `_old` copies are what lets the originals be dropped children-first without the foreign keys
+     * objecting.
+     */
+    @VisibleForTesting
+    static final Migration MIGRATION_40_41 = new Migration(40, 41) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL(
+                    "CREATE TABLE post_filter_old AS SELECT * FROM post_filter ");
+            database.execSQL(
+                    "CREATE TABLE post_filter_usage_old AS SELECT * FROM post_filter_usage ");
+            database.execSQL(
+                    "CREATE TABLE post_filter_blocked_subreddit_old AS SELECT * FROM post_filter_blocked_subreddit ");
+            database.execSQL(
+                    "CREATE TABLE comment_filter_old AS SELECT * FROM comment_filter ");
+            database.execSQL(
+                    "CREATE TABLE comment_filter_usage_old AS SELECT * FROM comment_filter_usage ");
+            database.execSQL(
+                    "DROP TABLE post_filter_usage ");
+            database.execSQL(
+                    "DROP TABLE post_filter_blocked_subreddit ");
+            database.execSQL(
+                    "DROP TABLE comment_filter_usage ");
+            database.execSQL(
+                    "DROP TABLE post_filter ");
+            database.execSQL(
+                    "DROP TABLE comment_filter ");
+            database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `post_filter` (`username` TEXT NOT NULL, `name` TEXT NOT NULL, "
+                    + "`max_vote` INTEGER NOT NULL, `min_vote` INTEGER NOT NULL, `max_comments` INTEGER NOT NULL, "
+                    + "`min_comments` INTEGER NOT NULL, `max_awards` INTEGER NOT NULL, `min_awards` INTEGER NOT NULL, "
+                    + "`only_nsfw` INTEGER NOT NULL, `only_spoiler` INTEGER NOT NULL, `post_title_excludes_regex` TEXT, "
+                    + "`post_title_contains_regex` TEXT, `post_title_excludes_strings` TEXT, "
+                    + "`post_title_contains_strings` TEXT, `exclude_subreddits` TEXT, `contain_subreddits` TEXT, "
+                    + "`exclude_users` TEXT, `contain_users` TEXT, `contain_flairs` TEXT, `exclude_flairs` TEXT, "
+                    + "`exclude_domains` TEXT, `contain_domains` TEXT, `contain_text_type` INTEGER NOT NULL, "
+                    + "`contain_link_type` INTEGER NOT NULL, `contain_image_type` INTEGER NOT NULL, `contain_gif_type` "
+                    + "INTEGER NOT NULL, `contain_video_type` INTEGER NOT NULL, `contain_gallery_type` INTEGER NOT "
+                    + "NULL, PRIMARY KEY(`name`, `username`)) ");
+            database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `comment_filter` (`username` TEXT NOT NULL, `name` TEXT NOT NULL, "
+                    + "`display_mode` INTEGER NOT NULL, `max_vote` INTEGER NOT NULL, `min_vote` INTEGER NOT NULL, "
+                    + "`exclude_strings` TEXT, `exclude_users` TEXT, PRIMARY KEY(`name`, `username`)) ");
+            database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `post_filter_usage` (`name` TEXT NOT NULL, `username` TEXT NOT NULL, "
+                    + "`usage` INTEGER NOT NULL, `name_of_usage` TEXT NOT NULL, PRIMARY KEY(`name`, `username`, "
+                    + "`usage`, `name_of_usage`), FOREIGN KEY(`name`, `username`) REFERENCES `post_filter`(`name`, "
+                    + "`username`) ON UPDATE NO ACTION ON DELETE CASCADE ) ");
+            database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `comment_filter_usage` (`name` TEXT NOT NULL, `username` TEXT NOT "
+                    + "NULL, `usage` INTEGER NOT NULL, `name_of_usage` TEXT NOT NULL, PRIMARY KEY(`name`, `username`, "
+                    + "`usage`, `name_of_usage`), FOREIGN KEY(`name`, `username`) REFERENCES `comment_filter`(`name`, "
+                    + "`username`) ON UPDATE NO ACTION ON DELETE CASCADE ) ");
+            database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `post_filter_blocked_subreddit` (`filter_name` TEXT NOT NULL, "
+                    + "`username` TEXT NOT NULL, `rule_value` TEXT NOT NULL, `subreddit_name` TEXT NOT NULL, "
+                    + "`first_blocked` INTEGER NOT NULL, `block_count` INTEGER NOT NULL, `excepted` INTEGER NOT NULL, "
+                    + "PRIMARY KEY(`filter_name`, `username`, `rule_value`, `subreddit_name`), FOREIGN "
+                    + "KEY(`filter_name`, `username`) REFERENCES `post_filter`(`name`, `username`) ON UPDATE NO ACTION "
+                    + "ON DELETE CASCADE ) ");
+            database.execSQL(
+                    "INSERT INTO post_filter (username, name, max_vote, min_vote, max_comments, min_comments, "
+                    + "max_awards, min_awards, only_nsfw, only_spoiler, post_title_excludes_regex, "
+                    + "post_title_contains_regex, post_title_excludes_strings, post_title_contains_strings, "
+                    + "exclude_subreddits, contain_subreddits, exclude_users, contain_users, contain_flairs, "
+                    + "exclude_flairs, exclude_domains, contain_domains, contain_text_type, contain_link_type, "
+                    + "contain_image_type, contain_gif_type, contain_video_type, contain_gallery_type) SELECT "
+                    + "a.username, f.name, f.max_vote, f.min_vote, f.max_comments, f.min_comments, f.max_awards, "
+                    + "f.min_awards, f.only_nsfw, f.only_spoiler, f.post_title_excludes_regex, "
+                    + "f.post_title_contains_regex, f.post_title_excludes_strings, f.post_title_contains_strings, "
+                    + "f.exclude_subreddits, f.contain_subreddits, f.exclude_users, f.contain_users, f.contain_flairs, "
+                    + "f.exclude_flairs, f.exclude_domains, f.contain_domains, f.contain_text_type, "
+                    + "f.contain_link_type, f.contain_image_type, f.contain_gif_type, f.contain_video_type, "
+                    + "f.contain_gallery_type FROM post_filter_old f, (SELECT username FROM accounts UNION SELECT '-') "
+                    + "a ");
+            database.execSQL(
+                    "INSERT INTO comment_filter (username, name, display_mode, max_vote, min_vote, exclude_strings, "
+                    + "exclude_users) SELECT a.username, f.name, f.display_mode, f.max_vote, f.min_vote, "
+                    + "f.exclude_strings, f.exclude_users FROM comment_filter_old f, (SELECT username FROM accounts "
+                    + "UNION SELECT '-') a ");
+            database.execSQL(
+                    "INSERT INTO post_filter_usage (username, name, usage, name_of_usage) SELECT a.username, f.name, "
+                    + "f.usage, f.name_of_usage FROM post_filter_usage_old f, (SELECT username FROM accounts UNION "
+                    + "SELECT '-') a ");
+            database.execSQL(
+                    "INSERT INTO comment_filter_usage (username, name, usage, name_of_usage) SELECT a.username, "
+                    + "f.name, f.usage, f.name_of_usage FROM comment_filter_usage_old f, (SELECT username FROM accounts "
+                    + "UNION SELECT '-') a ");
+            database.execSQL(
+                    "INSERT INTO post_filter_blocked_subreddit (username, filter_name, rule_value, subreddit_name, "
+                    + "first_blocked, block_count, excepted) SELECT a.username, f.filter_name, f.rule_value, "
+                    + "f.subreddit_name, f.first_blocked, f.block_count, f.excepted FROM "
+                    + "post_filter_blocked_subreddit_old f, (SELECT username FROM accounts UNION SELECT '-') a ");
+            database.execSQL(
+                    "DROP TABLE post_filter_old ");
+            database.execSQL(
+                    "DROP TABLE post_filter_usage_old ");
+            database.execSQL(
+                    "DROP TABLE post_filter_blocked_subreddit_old ");
+            database.execSQL(
+                    "DROP TABLE comment_filter_old ");
+            database.execSQL(
+                    "DROP TABLE comment_filter_usage_old ");
+        }
+    };
 
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override

@@ -17,6 +17,7 @@ import java.util.Set;
 import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -48,7 +49,11 @@ public class MainPageTabsUtils {
             SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_USERS_MULTIREDDITS,
     };
 
-    private static String prefix(String accountName) {
+    /**
+     * The prefix the pre-{@link AccountScope} keys used. Only {@link #migrateFromLegacy} still needs
+     * it, to find configurations written before the tab list became a single ordered key.
+     */
+    private static String legacyPrefix(String accountName) {
         return accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : accountName;
     }
 
@@ -74,7 +79,7 @@ public class MainPageTabsUtils {
 
     public static boolean isGroupToggleEnabled(SharedPreferences prefs, String accountName, int source) {
         String key = toggleKeyForGroupSource(source);
-        return key != null && prefs.getBoolean(prefix(accountName) + key, false);
+        return key != null && prefs.getBoolean(AccountScope.key(accountName, key), false);
     }
 
     public static Set<Integer> enabledSources(SharedPreferences prefs, String accountName) {
@@ -92,7 +97,7 @@ public class MainPageTabsUtils {
      * the live toggle lists — call {@link #merge} with the current toggle data for that.
      */
     public static List<MainPageTabInput> load(SharedPreferences prefs, String accountName) {
-        String json = prefs.getString(prefix(accountName) + SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER, null);
+        String json = prefs.getString(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER), null);
         if (json == null) {
             List<MainPageTabInput> migrated = migrateFromLegacy(prefs, accountName);
             save(prefs, accountName, migrated);
@@ -108,7 +113,7 @@ public class MainPageTabsUtils {
     }
 
     public static void save(SharedPreferences prefs, String accountName, List<MainPageTabInput> tabs) {
-        prefs.edit().putString(prefix(accountName) + SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER, gson.toJson(tabs)).apply();
+        prefs.edit().putString(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER), gson.toJson(tabs)).apply();
     }
 
     private static List<MainPageTabInput> defaultTabs() {
@@ -120,7 +125,7 @@ public class MainPageTabsUtils {
     }
 
     private static List<MainPageTabInput> migrateFromLegacy(SharedPreferences prefs, String accountName) {
-        String p = prefix(accountName);
+        String p = legacyPrefix(accountName);
         if (!prefs.contains(p + SharedPreferencesUtils.MAIN_PAGE_TAB_COUNT)
                 && !prefs.contains(p + SharedPreferencesUtils.MAIN_PAGE_TAB_1_POST_TYPE)) {
             return defaultTabs();

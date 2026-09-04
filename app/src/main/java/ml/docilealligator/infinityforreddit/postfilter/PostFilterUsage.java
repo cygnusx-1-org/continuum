@@ -9,9 +9,9 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import java.util.Objects;
 
-@Entity(tableName = "post_filter_usage", primaryKeys = {"name", "usage", "name_of_usage"},
-        foreignKeys = @ForeignKey(entity = PostFilter.class, parentColumns = "name",
-                childColumns = "name", onDelete = ForeignKey.CASCADE))
+@Entity(tableName = "post_filter_usage", primaryKeys = {"name", "username", "usage", "name_of_usage"},
+        foreignKeys = @ForeignKey(entity = PostFilter.class, parentColumns = {"name", "username"},
+                childColumns = {"name", "username"}, onDelete = ForeignKey.CASCADE))
 public class PostFilterUsage implements Parcelable {
     public static final int HOME_TYPE = 1;
     public static final int SUBREDDIT_TYPE = 2;
@@ -29,14 +29,20 @@ public class PostFilterUsage implements Parcelable {
     @NonNull
     @ColumnInfo(name = "name")
     public String name;
+    /** The account owning the filter this usage belongs to; half of the key it points at. */
+    @NonNull
+    @ColumnInfo(name = "username")
+    public String username;
     @ColumnInfo(name = "usage")
     public int usage;
     @NonNull
     @ColumnInfo(name = "name_of_usage")
     public String nameOfUsage;
 
-    public PostFilterUsage(@NonNull String name, int usage, @Nullable String nameOfUsage) {
+    public PostFilterUsage(@NonNull String name, @NonNull String username, int usage,
+                           @Nullable String nameOfUsage) {
         this.name = name;
+        this.username = username;
         this.usage = usage;
         if (nameOfUsage == null || nameOfUsage.equals("")) {
             this.nameOfUsage = NO_USAGE;
@@ -47,6 +53,7 @@ public class PostFilterUsage implements Parcelable {
 
     protected PostFilterUsage(Parcel in) {
         name = Objects.requireNonNull(in.readString());
+        username = Objects.requireNonNull(in.readString());
         usage = in.readInt();
         nameOfUsage = Objects.requireNonNull(in.readString());
     }
@@ -71,6 +78,7 @@ public class PostFilterUsage implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(name);
+        parcel.writeString(username);
         parcel.writeInt(usage);
         parcel.writeString(nameOfUsage);
     }

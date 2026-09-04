@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,28 +53,42 @@ import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.EncryptionMethod;
 import org.apache.commons.io.FileUtils;
 
+/**
+ * Writes every preference file and database table to an encrypted zip.
+ *
+ * The account-scoped files are opened here rather than taken injected. The injected ones are
+ * {@code AccountScopedSharedPreferences}, whose {@code getAll()} answers for the current account
+ * only: it renames that account's keys back to their bases and drops every other account's
+ * entirely. A backup taken through it would quietly hold one account's settings under names that
+ * belong to nobody.
+ */
 public class BackupSettings {
+
+    /** Suffix every preference file in a backup carries; the name before it is the file's own. */
+    static final String PREFERENCES_FILE_SUFFIX = ".txt";
+
     public static void backupSettings(Context context, Executor executor, Handler handler,
                                     ContentResolver contentResolver, Uri destinationDirUri,
                                     String password,
                                     RedditDataRoomDatabase redditDataRoomDatabase,
-                                    SharedPreferences defaultSharedPreferences,
                                     SharedPreferences lightThemeSharedPreferences,
                                     SharedPreferences darkThemeSharedPreferences,
                                     SharedPreferences amoledThemeSharedPreferences,
-                                    SharedPreferences sortTypeSharedPreferences,
-                                    SharedPreferences postLayoutSharedPreferences,
-                                    SharedPreferences postDetailsSharedPreferences,
                                     SharedPreferences postFeedScrolledPositionSharedPreferences,
                                     SharedPreferences mainActivityTabsSharedPreferences,
                                     SharedPreferences proxySharedPreferences,
                                     SharedPreferences nsfwAndSpoilerSharedPreferences,
-                                    SharedPreferences bottomAppBarSharedPreferences,
                                     SharedPreferences postHistorySharedPreferences,
-                                    SharedPreferences navigationDrawerSharedPreferences,
                                     SharedPreferences recentlyVisitedSharedPreferences,
                                     BackupSettingsListener backupSettingsListener) {
         executor.execute(() -> {
+            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences sortTypeSharedPreferences = rawFile(context, SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE);
+            SharedPreferences postLayoutSharedPreferences = rawFile(context, SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE);
+            SharedPreferences postDetailsSharedPreferences = rawFile(context, SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE);
+            SharedPreferences navigationDrawerSharedPreferences = rawFile(context, SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
+            SharedPreferences bottomAppBarSharedPreferences = rawFile(context, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE);
+
             File cacheDir = Utils.getCacheDir(context);
             if (cacheDir == null) {
                 handler.post(() -> backupSettingsListener.failed(context.getText(R.string.restore_settings_failed_cannot_get_cache_dir).toString()));
@@ -100,7 +115,7 @@ public class BackupSettings {
 
             boolean res = saveMapToFile(filteredDefaultPrefsMap, backupDir, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE);
 
-            SharedPreferences defaultPrefsPrivate = context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE);
+            SharedPreferences defaultPrefsPrivate = rawFile(context, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE);
             boolean resPrivate = saveMapToFile(defaultPrefsPrivate.getAll(), backupDir, SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE + "_private");
 
 
@@ -139,7 +154,7 @@ public class BackupSettings {
             String customThemesJson = new Gson().toJson(customThemes);
             boolean res18 = saveDatabaseTableToFile(customThemesJson, databaseDirFile.getAbsolutePath(), "/custom_themes.json");
 
-            List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getAllPostFilters();
+            List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getAllPostFiltersForBackup();
             String postFiltersJson = new Gson().toJson(postFilters);
             boolean res19 = saveDatabaseTableToFile(postFiltersJson, databaseDirFile.getAbsolutePath(), "/post_filters.json");
 
@@ -147,7 +162,7 @@ public class BackupSettings {
             String postFilterUsageJson = new Gson().toJson(postFilterUsage);
             boolean res20 = saveDatabaseTableToFile(postFilterUsageJson, databaseDirFile.getAbsolutePath(), "/post_filter_usage.json");
 
-            List<CommentFilter> commentFilters = redditDataRoomDatabase.commentFilterDao().getAllCommentFilters();
+            List<CommentFilter> commentFilters = redditDataRoomDatabase.commentFilterDao().getAllCommentFiltersForBackup();
             String commentFiltersJson = new Gson().toJson(commentFilters);
             boolean res21 = saveDatabaseTableToFile(commentFiltersJson, databaseDirFile.getAbsolutePath(), "/comment_filters.json");
 
@@ -213,8 +228,14 @@ public class BackupSettings {
         });
     }
 
+    /** The file itself, past any account scoping the injected instance would apply. */
+    private static SharedPreferences rawFile(Context context, String fileName) {
+        return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+    }
+
     private static boolean saveMapToFile(Map<String, ?> mapToSave, String backupDir, String fileName) {
-        try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(backupDir + "/" + fileName + ".txt"))) {
+        try (ObjectOutputStream output = new ObjectOutputStream(
+                new FileOutputStream(backupDir + "/" + fileName + PREFERENCES_FILE_SUFFIX))) {
             output.writeObject(mapToSave);
             return true;
         } catch (IOException e) {

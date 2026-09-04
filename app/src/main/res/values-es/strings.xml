@@ -1036,7 +1036,6 @@ https://s3.eu-west-1.amazonaws.com/po-pub/i/hJAe7sMhrfJzqjhp9VkDQOVC.PNG -->
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Deslizar verticalmente para regresar desde imágenes o GIF"</string>
     <string name="settings_hide_post_flair">"Ocultar la etiqueta de la publicación"</string>
     <string name="settings_crash_reports_title">"Informe de fallos"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Peligroso"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Mostrar solo un indicador del nivel de comentarios"</string>
     <string name="save_comment">"Guardar"</string>
     <string name="unsave_comment">"No guardar"</string>

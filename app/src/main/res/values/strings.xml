@@ -690,6 +690,20 @@
     <string name="settings_translation_summary">Translate this app on POEditor. Thanks to all contributors.</string>
     <string name="settings_credits_national_flags">National Flags</string>
     <string name="settings_credits_national_flags_summary">Icon made by Freepik from www.flaticon.com</string>
+    <string name="settings_group_all_accounts">All Accounts</string>
+    <string name="settings_group_this_account">This Account</string>
+    <string name="settings_account_settings_management_title">Account Settings Management</string>
+    <string name="settings_account_settings_management_summary">Copy another account\'s settings onto this one, or put this one back to defaults</string>
+    <string name="settings_group_other">Other</string>
+    <string name="settings_copy_settings_from_account_title">Copy Settings from Another Account</string>
+    <string name="settings_copy_settings_from_account_summary">Give this account the settings another one has</string>
+    <string name="settings_copy_settings_from_account_no_other_summary">There is no other account to copy from</string>
+    <string name="settings_reset_account_settings_title">Reset This Account\'s Settings</string>
+    <string name="settings_reset_account_settings_summary">Put this account back on the default settings</string>
+    <string name="copy_account_settings_confirmation">%1$s\'s settings and filters replace %2$s\'s. Main page tabs are left alone, and %1$s itself is not changed.\n\nThere is no undo — All Accounts › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
+    <string name="reset_account_settings_confirmation">%1$s goes back to the default settings, main page tabs and its post and comment filters included.\n\nThere is no undo — All Accounts › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
+    <string name="settings_device_title">Device</string>
+    <string name="settings_device_summary">Foldable support, image decoding limit</string>
     <string name="settings_miscellaneous_title">Miscellaneous</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_title">Respect Subreddit Recommended Comment Sort Type By Default</string>
     <string name="settings_respect_subreddit_recommended_comment_sort_type_summary">Used when enabled until you pick a sort when Save Comment Sort is enabled, not used when disabled, and used when enabled when Save Comment Sort is disabled</string>
@@ -751,6 +765,7 @@
     <string name="settings_hide_the_number_of_comments">Hide the Number of Comments</string>
     <string name="settings_show_avatar_on_the_right">Show Avatar on the Right</string>
     <string name="settings_category_backup_and_restore_title">Backup and Restore</string>
+    <string name="settings_backup_and_restore_summary">Save the settings of every account to an encrypted archive, or read one back</string>
     <string name="settings_backup_settings_title">Backup Settings</string>
     <string name="settings_backup_settings_summary">Includes accounts, Client ID, and Giphy API Key. You will be prompted to enter a password when creating the backup.</string>
     <string name="settings_restore_settings_title">Restore Settings</string>
@@ -773,8 +788,6 @@
     <string name="settings_show_thumbnail_on_the_left_toggle_in_navigation_drawer_title">Show Thumbnail on the Left Toggle</string>
     <string name="settings_default_search_result_tab">Default Search Result Tab</string>
     <string name="settings_crash_reports_title">Crash Reports</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">Dangerous</string>
-    <string name="settings_disable_over_18_forever_title">Forever Disable NSFW Content</string>
     <string name="settings_show_only_one_comment_level_indicator">Show Only One Comment Level Indicator</string>
     <string name="settings_video_player_automatic_landscape_orientation">Switch to Landscape Orientation in Video Player Automatically</string>
     <string name="settings_loop_video_title">Loop Video</string>
@@ -848,8 +861,8 @@
     <string name="settings_comment_filter_summary">Create and manage filters that hide comments</string>
     <string name="settings_sort_type_summary">Default sort type and time range for subreddits, users, and comments</string>
     <string name="settings_download_location_summary">Choose folders for downloaded images, GIFs, videos, and NSFW media</string>
-    <string name="settings_miscellaneous_summary">Link handling, browser, search history, language, and fold support</string>
-    <string name="settings_advanced_master_summary">Back up and restore settings, reset, clear cached data, and crash reports</string>
+    <string name="settings_miscellaneous_summary">Link handling, browser, search history, and language</string>
+    <string name="settings_advanced_master_summary">Reset settings, clear cached data, and crash reports</string>
 
     <!-- API keys-->
     <string name="settings_api_keys_title">API Keys</string>
@@ -1627,7 +1640,6 @@
 
     <string name="crash_reports_deleted">Crash reports have been deleted</string>
 
-    <string name="disable_over_18_forever_message">Once enabled, NSFW content will always be hidden, regardless of the NSFW content setting. This option is irreversible; the only way to re-enable the NSFW content is to clear the app data.\n\nDo you still want to enable it?</string>
 
     <string name="reply">Reply</string>
 

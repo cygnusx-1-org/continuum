@@ -40,6 +40,7 @@ import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RecyclerViewContentScrollingInterface;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.adapters.Paging3LoadingStateAdapter;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
@@ -279,8 +280,8 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                     new Handler(), PostFilterUsage.HISTORY_TYPE, PostFilterUsage.HISTORY_TYPE_USAGE_READ_POSTS, (postFilter) -> {
                         if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed() && !isDetached()) {
                             this.postFilter = postFilter;
-                            String nsfwKey = (mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName) + SharedPreferencesUtils.NSFW_BASE;
-                            postFilter.allowNSFW = !mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false) && mNsfwAndSpoilerSharedPreferences.getBoolean(nsfwKey, false);
+                            String nsfwKey = AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE);
+                            postFilter.allowNSFW = mNsfwAndSpoilerSharedPreferences.getBoolean(nsfwKey, false);
                             initializeAndBindPostViewModel();
                         }
                     });

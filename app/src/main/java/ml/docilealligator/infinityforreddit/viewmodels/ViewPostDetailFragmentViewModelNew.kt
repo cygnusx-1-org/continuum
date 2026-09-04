@@ -994,7 +994,7 @@ class ViewPostDetailFragmentViewModelNew(
     suspend fun fetchCommentFilter(subredditName: String): CommentFilter {
         val commentFilterList: List<CommentFilter> =
             redditDataRoomDatabase.commentFilterDaoKt()
-                .getValidCommentFilters(CommentFilterUsage.SUBREDDIT_TYPE, subredditName)
+                .getValidCommentFilters(CommentFilterUsage.SUBREDDIT_TYPE, subredditName, accountName)
         return CommentFilter.mergeCommentFilter(commentFilterList)
     }
 

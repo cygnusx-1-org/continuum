@@ -28,6 +28,7 @@ import com.livefront.bridge.SavedStateHandler;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
+import ml.docilealligator.infinityforreddit.account.AccountSettingsMigration;
 import ml.docilealligator.infinityforreddit.activities.LockScreenActivity;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.WallpaperChangeReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
@@ -132,16 +133,11 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
         PostFilterBlockRecorder.install(executor,
                 blocks -> redditDataRoomDatabase.postFilterBlockedSubredditDao().upsertAll(blocks));
 
-        // One-time migration: the combined "Save Sort Type" toggle was split into separate
-        // post-feed and comment toggles. Preserve a user's old choice (e.g. off) for both.
-        if (!mSharedPreferences.contains(SharedPreferencesUtils.SAVE_POST_SORT)
-                && mSharedPreferences.contains(SharedPreferencesUtils.SAVE_SORT_TYPE)) {
-            boolean savedSortType = mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_SORT_TYPE, true);
-            mSharedPreferences.edit()
-                    .putBoolean(SharedPreferencesUtils.SAVE_POST_SORT, savedSortType)
-                    .putBoolean(SharedPreferencesUtils.SAVE_COMMENT_SORT, savedSortType)
-                    .apply();
-        }
+        // One-time migration: every per-account setting moves onto the single AccountScope key
+        // scheme, retiring the five conventions that grew up around it. Also runs the removal of
+        // "Forever Disable NSFW", which has to follow it to write canonical keys.
+        AccountSettingsMigration.migrate(this, mInternalSharedPreferences, executor,
+                redditDataRoomDatabase);
 
         try {
             if (FontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))) {

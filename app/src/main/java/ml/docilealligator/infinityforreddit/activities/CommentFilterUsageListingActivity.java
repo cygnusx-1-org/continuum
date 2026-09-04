@@ -125,7 +125,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
         binding.recyclerViewCommentFilterUsageListingActivity.setAdapter(adapter);
 
         commentFilterUsageViewModel = new ViewModelProvider(this,
-                new CommentFilterUsageViewModel.Factory(redditDataRoomDatabase, commentFilter.name)).get(CommentFilterUsageViewModel.class);
+                new CommentFilterUsageViewModel.Factory(redditDataRoomDatabase, commentFilter.name, commentFilter.username)).get(CommentFilterUsageViewModel.class);
 
         commentFilterUsageViewModel.getCommentFilterUsageListLiveData().observe(this, commentFilterUsages -> adapter.setCommentFilterUsages(commentFilterUsages));
     }
@@ -165,7 +165,7 @@ public class CommentFilterUsageListingActivity extends BaseActivity {
 
                     CommentFilterUsage commentFilterUsage;
                     if (!Objects.requireNonNull(textInputEditText.getText()).toString().equals("")) {
-                        commentFilterUsage = new CommentFilterUsage(commentFilter.name, type, Objects.requireNonNull(textInputEditText.getText()).toString());
+                        commentFilterUsage = new CommentFilterUsage(commentFilter.name, commentFilter.username, type, Objects.requireNonNull(textInputEditText.getText()).toString());
                         SaveCommentFilterUsage.saveCommentFilterUsage(redditDataRoomDatabase, executor, commentFilterUsage);
                     }
                 })

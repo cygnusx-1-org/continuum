@@ -49,6 +49,8 @@ object PostFilterBlockRecorder {
     /** One (rule, subreddit) pair and how many posts it has hidden since the last write. */
     data class PendingBlock(
         val filterName: String,
+        /** The account owning the filter; two accounts' same-named filters are not one filter. */
+        val username: String,
         val ruleValue: String,
         val subredditName: String,
         val count: Int,
@@ -81,14 +83,16 @@ object PostFilterBlockRecorder {
      * enough to call per post: one map lookup and, at most, one scheduled callback.
      */
     @JvmStatic
-    fun record(filterName: String, ruleValue: String, subredditName: String) {
+    fun record(filterName: String, username: String, ruleValue: String, subredditName: String) {
         if (writer == null) {
             return
         }
-        val key = PostFilter.exceptionKey(filterName, ruleValue, subredditName)
+        // The account is part of the key as well as of the row: the pending map outlives an account
+        // switch, and two accounts' filters of the same name are two filters.
+        val key = username + "\u0000" + PostFilter.exceptionKey(filterName, ruleValue, subredditName)
         pending.compute(key) { _, existing ->
             existing?.copy(count = existing.count + 1)
-                ?: PendingBlock(filterName, ruleValue, subredditName, 1)
+                ?: PendingBlock(filterName, username, ruleValue, subredditName, 1)
         }
         scheduleFlush()
     }

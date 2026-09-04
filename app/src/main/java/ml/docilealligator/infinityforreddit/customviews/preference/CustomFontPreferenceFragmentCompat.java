@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.customviews.preference;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
+import ml.docilealligator.infinityforreddit.account.AccountScopedPreferenceDataStore;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapperReceiver;
 import ml.docilealligator.infinityforreddit.settings.SettingsScreenArgs;
@@ -27,6 +29,21 @@ public abstract class CustomFontPreferenceFragmentCompat extends PreferenceFragm
 
     protected SettingsActivity mActivity;
     protected View view;
+
+    /**
+     * Every screen inflates its preferences through here, which makes it the one place to point the
+     * per-account ones at their scoped storage. Screens whose file is not per-account (proxy,
+     * security, API keys) are left on androidx's own by-name lookup.
+     */
+    @Override
+    public void setPreferencesFromResource(int preferencesResId, @Nullable String key) {
+        SharedPreferences scoped =
+                mActivity.accountScopedPreferencesFor(getPreferenceManager().getSharedPreferencesName());
+        if (scoped != null) {
+            getPreferenceManager().setPreferenceDataStore(new AccountScopedPreferenceDataStore(scoped));
+        }
+        super.setPreferencesFromResource(preferencesResId, key);
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

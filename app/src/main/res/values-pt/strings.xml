@@ -988,7 +988,6 @@ Reprodução automática de vídeos desativada."</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"Deslize Verticalmente para Sair dos Média"</string>
     <string name="settings_hide_post_flair">"Esconder Flair da Publicação"</string>
     <string name="settings_crash_reports_title">"Relatório de Falhas"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"Perigoso"</string>
     <string name="settings_show_only_one_comment_level_indicator">"Mostrar Apenas Um Indicador do Nível de Comentário"</string>
     <string name="save_comment">"Guardar"</string>
     <string name="unsave_comment">"Esquecer"</string>

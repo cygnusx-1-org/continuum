@@ -42,6 +42,7 @@ import java.util.Objects;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
@@ -278,9 +279,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mImageAndGifPlugin,
                 mVideoPlugin, mCommentTextColor, commentSpoilerBackgroundColor, onLinkLongClickListener);
 
-        mNeedBlurNsfw = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.BLUR_NSFW_BASE, true);
-        mDoNotBlurNsfwInNsfwSubreddits = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS, false);
-        mNeedBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean((mAccountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mAccountName) + SharedPreferencesUtils.BLUR_SPOILER_BASE, false);
+        mNeedBlurNsfw = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.BLUR_NSFW_BASE), true);
+        mDoNotBlurNsfwInNsfwSubreddits = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS), false);
+        mNeedBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.BLUR_SPOILER_BASE), false);
         mImageAndGifEntry = new ImageAndGifEntry(activity, mGlide, SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"), false,
                 (mediaMetadata, commentId, postId, postTitle) -> {
                     Intent intent = new Intent(activity, ViewImageOrGifActivity.class);

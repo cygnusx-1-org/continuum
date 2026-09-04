@@ -476,7 +476,6 @@
     <string name="theme_item_unsubscribed_color_detail">"적용 대상: 구독 버튼"</string>
     <string name="settings_more_tabs_show_subscribed_subreddits_title">"구독한 서브레딧 보기"</string>
     <string name="only_spoiler">"스포일러만"</string>
-    <string name="settings_nsfw_and_spoiler_dangerous_group_title">"위험"</string>
     <string name="about">"정보"</string>
     <string name="exo_controls_volume_up_description">"볼륨 올리기"</string>
     <string name="exo_controls_volume_off_description">"볼륨 끄기"</string>

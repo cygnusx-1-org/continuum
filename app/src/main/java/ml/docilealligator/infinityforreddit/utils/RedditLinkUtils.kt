@@ -3,7 +3,7 @@ package ml.docilealligator.infinityforreddit.utils
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.net.toUri
-import androidx.preference.PreferenceManager
+import ml.docilealligator.infinityforreddit.Infinity
 
 /**
  * Helpers for the Reddit links the app reads in and hands out.
@@ -73,9 +73,19 @@ object RedditLinkUtils {
         return uri.buildUpon().scheme(scheme).encodedAuthority(authority).build().toString()
     }
 
+    /**
+     * For callers holding only a Context. Resolves the preferences through the application graph:
+     * `PreferenceManager.getDefaultSharedPreferences` would hand back the unscoped file and quietly
+     * ignore whichever account is signed in.
+     */
     @JvmStatic
-    fun applyLinkDomain(context: Context, url: String): String =
-        applyLinkDomain(PreferenceManager.getDefaultSharedPreferences(context), url)
+    fun applyLinkDomain(context: Context, url: String): String {
+        val application = context.applicationContext
+        if (application !is Infinity) {
+            return url
+        }
+        return applyLinkDomain(application.appComponent.defaultSharedPreferences(), url)
+    }
 
     @JvmStatic
     fun applyLinkDomain(sharedPreferences: SharedPreferences, url: String): String {

@@ -5,6 +5,7 @@ import java.util.Locale
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
+import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 
 /**
@@ -30,7 +31,7 @@ object RecordRecentlyVisited {
     @JvmStatic
     fun isEnabled(accountName: String, recentlyVisitedSharedPreferences: SharedPreferences): Boolean =
         recentlyVisitedSharedPreferences.getBoolean(
-            accountName + SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE, false
+            AccountScope.key(accountName, SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE), false
         )
 
     @JvmStatic

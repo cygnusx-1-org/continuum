@@ -34,18 +34,33 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
      */
     private static PostFilter resolvePostFilter(RedditDataRoomDatabase redditDataRoomDatabase,
                                                 int postFilterUsage, @Nullable String nameOfUsage) {
-        List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
-        PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
-        mergedPostFilter.wildcardSubredditMatchingEnabled =
-                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(nameOfUsage);
+        // Read before the filters, not after: a filter belongs to an account now, so the account is
+        // part of the question rather than something only the wildcard path needs.
+        Account currentAccount = redditDataRoomDatabase.accountDao().getCurrentAccount();
+        String accountName = currentAccount != null ? currentAccount.getAccountName() : Account.ANONYMOUS_ACCOUNT;
+        PostFilter mergedPostFilter = mergeValidPostFilters(redditDataRoomDatabase, postFilterUsage, nameOfUsage, accountName);
         if (!mergedPostFilter.wildcardSubredditMatchingEnabled || mergedPostFilter.subredditTermOwners.isEmpty()) {
             return mergedPostFilter;
         }
-        Account currentAccount = redditDataRoomDatabase.accountDao().getCurrentAccount();
-        String accountName = currentAccount != null ? currentAccount.getAccountName() : Account.ANONYMOUS_ACCOUNT;
         List<SubscribedSubredditData> subscribedSubreddits = redditDataRoomDatabase.subscribedSubredditDao().getAllSubscribedSubredditsList(accountName);
         updateNeverHideSubreddits(redditDataRoomDatabase, accountName, subscribedSubreddits);
-        refreshWildcardExceptions(redditDataRoomDatabase);
+        refreshWildcardExceptions(redditDataRoomDatabase, accountName);
+        return mergedPostFilter;
+    }
+
+    /**
+     * The account's filters for this feed, merged into one. The merged filter carries the account
+     * too, so the blocked-subreddit rows a wildcard term records land under the right owner.
+     */
+    private static PostFilter mergeValidPostFilters(RedditDataRoomDatabase redditDataRoomDatabase,
+                                                    int postFilterUsage, @Nullable String nameOfUsage,
+                                                    String accountName) {
+        List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao()
+                .getValidPostFilters(postFilterUsage, nameOfUsage, accountName);
+        PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
+        mergedPostFilter.username = accountName;
+        mergedPostFilter.wildcardSubredditMatchingEnabled =
+                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(nameOfUsage);
         return mergedPostFilter;
     }
 
@@ -57,15 +72,12 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
                                                 int postFilterUsage, @Nullable String nameOfUsage,
                                                 String accountName,
                                                 @Nullable List<SubscribedSubredditData> subscribedSubreddits) {
-        List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getValidPostFilters(postFilterUsage, nameOfUsage);
-        PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
-        mergedPostFilter.wildcardSubredditMatchingEnabled =
-                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(nameOfUsage);
+        PostFilter mergedPostFilter = mergeValidPostFilters(redditDataRoomDatabase, postFilterUsage, nameOfUsage, accountName);
         if (!mergedPostFilter.wildcardSubredditMatchingEnabled || mergedPostFilter.subredditTermOwners.isEmpty()) {
             return mergedPostFilter;
         }
         updateNeverHideSubreddits(redditDataRoomDatabase, accountName, subscribedSubreddits);
-        refreshWildcardExceptions(redditDataRoomDatabase);
+        refreshWildcardExceptions(redditDataRoomDatabase, accountName);
         return mergedPostFilter;
     }
 
@@ -73,9 +85,10 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
      * Refresh {@link PostFilter#wildcardExceptionKeys} from the subreddits the user has marked as
      * exceptions in a rule's blocked list.
      */
-    private static void refreshWildcardExceptions(RedditDataRoomDatabase redditDataRoomDatabase) {
+    private static void refreshWildcardExceptions(RedditDataRoomDatabase redditDataRoomDatabase,
+                                                 String accountName) {
         List<PostFilterBlockedSubreddit> exceptions =
-                redditDataRoomDatabase.postFilterBlockedSubredditDao().getAllExceptions();
+                redditDataRoomDatabase.postFilterBlockedSubredditDao().getAllExceptions(accountName);
         Set<String> keys = new HashSet<>();
         for (PostFilterBlockedSubreddit e : exceptions) {
             keys.add(PostFilter.exceptionKey(e.getFilterName(), e.getRuleValue(), e.getSubredditName()));

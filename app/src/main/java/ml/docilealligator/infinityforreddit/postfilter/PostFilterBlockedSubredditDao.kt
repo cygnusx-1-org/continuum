@@ -16,11 +16,12 @@ abstract class PostFilterBlockedSubredditDao {
      */
     @Query(
         "UPDATE post_filter_blocked_subreddit SET block_count = block_count + :count " +
-            "WHERE filter_name = :filterName AND rule_value = :ruleValue " +
+            "WHERE filter_name = :filterName AND username = :username AND rule_value = :ruleValue " +
             "AND subreddit_name = :subredditName",
     )
     abstract fun addToCount(
         filterName: String,
+        username: String,
         ruleValue: String,
         subredditName: String,
         count: Int,
@@ -35,11 +36,12 @@ abstract class PostFilterBlockedSubredditDao {
      */
     @Query(
         "INSERT OR IGNORE INTO post_filter_blocked_subreddit " +
-            "(filter_name, rule_value, subreddit_name, first_blocked, block_count, excepted) " +
-            "VALUES (:filterName, :ruleValue, :subredditName, :now, :count, 0)",
+            "(filter_name, username, rule_value, subreddit_name, first_blocked, block_count, excepted) " +
+            "VALUES (:filterName, :username, :ruleValue, :subredditName, :now, :count, 0)",
     )
     abstract fun insertIfAbsent(
         filterName: String,
+        username: String,
         ruleValue: String,
         subredditName: String,
         now: Long,
@@ -55,9 +57,11 @@ abstract class PostFilterBlockedSubredditDao {
         val now = System.currentTimeMillis()
         for (block in blocks) {
             val subredditName = PostFilterBlockRecorder.normalizeSubredditName(block.subredditName)
-            val updated = addToCount(block.filterName, block.ruleValue, subredditName, block.count)
+            val updated = addToCount(
+                block.filterName, block.username, block.ruleValue, subredditName, block.count)
             if (updated == 0) {
-                insertIfAbsent(block.filterName, block.ruleValue, subredditName, now, block.count)
+                insertIfAbsent(
+                    block.filterName, block.username, block.ruleValue, subredditName, now, block.count)
             }
         }
     }
@@ -65,11 +69,12 @@ abstract class PostFilterBlockedSubredditDao {
     /** Everything one rule has blocked, worst offender first — the order the list screen shows. */
     @Query(
         "SELECT * FROM post_filter_blocked_subreddit " +
-            "WHERE filter_name = :filterName AND rule_value = :ruleValue " +
+            "WHERE filter_name = :filterName AND username = :username AND rule_value = :ruleValue " +
             "ORDER BY block_count DESC, subreddit_name ASC",
     )
     abstract fun getBlockedSubredditsLiveData(
         filterName: String,
+        username: String,
         ruleValue: String,
     ): LiveData<List<PostFilterBlockedSubreddit>>
 
@@ -77,16 +82,21 @@ abstract class PostFilterBlockedSubredditDao {
     @Query(
         "SELECT rule_value AS ruleValue, COUNT(*) AS blockedCount " +
             "FROM post_filter_blocked_subreddit " +
-            "WHERE filter_name = :filterName AND excepted = 0 GROUP BY rule_value",
+            "WHERE filter_name = :filterName AND username = :username AND excepted = 0 GROUP BY rule_value",
     )
-    abstract fun getBlockedCountsLiveData(filterName: String): LiveData<List<RuleBlockedCount>>
+    abstract fun getBlockedCountsLiveData(
+        filterName: String,
+        username: String,
+    ): LiveData<List<RuleBlockedCount>>
 
     @Query(
         "UPDATE post_filter_blocked_subreddit SET excepted = :excepted " +
-            "WHERE filter_name = :filterName AND rule_value = :ruleValue AND subreddit_name = :subredditName",
+            "WHERE filter_name = :filterName AND username = :username " +
+            "AND rule_value = :ruleValue AND subreddit_name = :subredditName",
     )
     abstract fun setExcepted(
         filterName: String,
+        username: String,
         ruleValue: String,
         subredditName: String,
         excepted: Boolean,
@@ -97,15 +107,15 @@ abstract class PostFilterBlockedSubredditDao {
      * rows have to be read before the old filter row is deleted and re-inserted after the new one
      * lands — otherwise renaming a filter silently discards the very history this table exists for.
      */
-    @Query("SELECT * FROM post_filter_blocked_subreddit WHERE filter_name = :filterName")
-    abstract fun getAllForFilter(filterName: String): List<PostFilterBlockedSubreddit>
+    @Query("SELECT * FROM post_filter_blocked_subreddit WHERE filter_name = :filterName AND username = :username")
+    abstract fun getAllForFilter(filterName: String, username: String): List<PostFilterBlockedSubreddit>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertAll(blocked: List<PostFilterBlockedSubreddit>)
 
     /** Every exception, for the in-memory set the match path consults. */
-    @Query("SELECT * FROM post_filter_blocked_subreddit WHERE excepted = 1")
-    abstract fun getAllExceptions(): List<PostFilterBlockedSubreddit>
+    @Query("SELECT * FROM post_filter_blocked_subreddit WHERE excepted = 1 AND username = :username")
+    abstract fun getAllExceptions(username: String): List<PostFilterBlockedSubreddit>
 
     /**
      * Drops a rule's rows. Called when a rule is deleted or its term edited — an edited term is a
@@ -113,12 +123,12 @@ abstract class PostFilterBlockedSubredditDao {
      */
     @Query(
         "DELETE FROM post_filter_blocked_subreddit " +
-            "WHERE filter_name = :filterName AND rule_value = :ruleValue",
+            "WHERE filter_name = :filterName AND username = :username AND rule_value = :ruleValue",
     )
-    abstract fun deleteRule(filterName: String, ruleValue: String)
+    abstract fun deleteRule(filterName: String, username: String, ruleValue: String)
 
-    @Query("DELETE FROM post_filter_blocked_subreddit WHERE filter_name = :filterName")
-    abstract fun deleteAllForFilter(filterName: String)
+    @Query("DELETE FROM post_filter_blocked_subreddit WHERE filter_name = :filterName AND username = :username")
+    abstract fun deleteAllForFilter(filterName: String, username: String)
 
     /** A rule's term and the number of subreddits it has blocked. */
     data class RuleBlockedCount(val ruleValue: String, val blockedCount: Int)

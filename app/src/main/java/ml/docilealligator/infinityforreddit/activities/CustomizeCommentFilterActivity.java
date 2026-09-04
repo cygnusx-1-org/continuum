@@ -347,6 +347,11 @@ public class CustomizeCommentFilterActivity extends BaseActivity {
     }
 
     private void constructCommentFilter() throws PatternSyntaxException {
+        // A filter you are editing is always your own, so stamp the account rather than trusting
+        // whatever the extra or a fresh instance came with. Here rather than in
+        // saveCommentFilter() so the filter returned through RETURN_EXTRA_COMMENT_FILTER carries
+        // it too, as CustomizePostFilterActivity.constructPostFilter() does.
+        commentFilter.username = accountName;
         commentFilter.name = Objects.requireNonNull(binding.nameTextInputEditTextCustomizeCommentFilterActivity.getText()).toString();
         commentFilter.displayMode = binding.displayModeSpinnerCustomizeCommentFilterActivity.getSelectedItemPosition() == 0 ?
                 CommentFilter.DisplayMode.REMOVE_COMMENT : CommentFilter.DisplayMode.COLLAPSE_COMMENT;

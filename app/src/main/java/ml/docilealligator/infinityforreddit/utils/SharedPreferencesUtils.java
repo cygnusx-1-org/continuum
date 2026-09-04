@@ -156,6 +156,8 @@ public class SharedPreferencesUtils {
     public static final String DELETE_READ_POSTS_IN_DATABASE = "delete_read_posts_in_database";
     public static final String DELETE_ALL_LEGACY_SETTINGS = "delete_all_legacy_settings";
     public static final String RESET_ALL_SETTINGS = "reset_all_settings";
+    public static final String COPY_SETTINGS_FROM_ACCOUNT = "copy_settings_from_account";
+    public static final String RESET_ACCOUNT_SETTINGS = "reset_account_settings";
     public static final String IMAGE_DOWNLOAD_LOCATION = "image_download_location";
     public static final String GIF_DOWNLOAD_LOCATION = "gif_download_location";
     public static final String VIDEO_DOWNLOAD_LOCATION = "video_download_location";
@@ -221,7 +223,6 @@ public class SharedPreferencesUtils {
     public static final String SWIPE_BETWEEN_POSTS = "swipe_between_posts";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_CARD_LAYOUT_2 = "number_of_columns_in_post_feed_portrait_card_layout_2";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_CARD_LAYOUT_2 = "number_of_columns_in_post_feed_landscape_card_layout_2";
-    public static final String DISABLE_NSFW_FOREVER = "disable_nsfw_forever";
     public static final String SHOW_ONLY_ONE_COMMENT_LEVEL_INDICATOR = "show_only_one_comment_level_indicator";
     public static final String ENABLE_MATERIAL_YOU = "enable_material_you";
     public static final String APPLY_MATERIAL_YOU = "apply_material_you";
@@ -534,6 +535,10 @@ public class SharedPreferencesUtils {
     public static final String MATERIAL_YOU_SENTRY_COLOR = "material_you_sentry_color";
     public static final String DEFAULT_THEME_APPLIED = "default_theme_applied";
     public static final String DEFAULT_THEME_IN_PROGRESS = "default_theme_in_progress";
+    public static final String ACCOUNT_SCOPE_MIGRATED = "account_scope_migrated";
+    public static final String ACCOUNT_SCOPE_SEEDED = "account_scope_seeded";
+    public static final String BOTTOM_APP_BAR_SCOPE_MIGRATED = "bottom_app_bar_scope_migrated";
+    public static final String ACCOUNT_SCOPE_SEED_VERSION = "account_scope_seed_version";
 
     public static final String PROXY_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.proxy";
     public static final String PROXY_ENABLED = "proxy_enabled";

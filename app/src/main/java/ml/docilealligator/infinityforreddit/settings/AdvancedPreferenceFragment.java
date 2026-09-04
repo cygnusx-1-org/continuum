@@ -1,18 +1,10 @@
 package ml.docilealligator.infinityforreddit.settings;
 
-import static android.app.Activity.RESULT_OK;
-import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
-
-import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputType;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -24,14 +16,12 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
-import ml.docilealligator.infinityforreddit.asynctasks.BackupSettings;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllPostLayouts;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllReadPosts;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllSortTypes;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllSubreddits;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllThemes;
 import ml.docilealligator.infinityforreddit.asynctasks.DeleteAllUsers;
-import ml.docilealligator.infinityforreddit.asynctasks.RestoreSettings;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostDao;
@@ -44,8 +34,6 @@ import org.greenrobot.eventbus.EventBus;
  */
 public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentCompat {
 
-    private static final int SELECT_BACKUP_SETTINGS_DIRECTORY_REQUEST_CODE = 1;
-    private static final int SELECT_RESTORE_SETTINGS_DIRECTORY_REQUEST_CODE = 2;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -60,9 +48,6 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
     @Inject
     @Named("post_layout")
     SharedPreferences mPostLayoutSharedPreferences;
-    @Inject
-    @Named("post_details")
-    SharedPreferences mPostDetailsSharedPreferences;
     @Inject
     @Named("light_theme")
     SharedPreferences lightThemeSharedPreferences;
@@ -79,32 +64,11 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
     @Named("main_activity_tabs")
     SharedPreferences mainActivityTabsSharedPreferences;
     @Inject
-    @Named("proxy")
-    SharedPreferences proxySharedPreferences;
-    @Inject
     @Named("nsfw_and_spoiler")
     SharedPreferences nsfwAndBlurringSharedPreferences;
     @Inject
-    @Named("bottom_app_bar")
-    SharedPreferences bottomAppBarSharedPreferences;
-    @Inject
-    @Named("post_history")
-    SharedPreferences postHistorySharedPreferences;
-    @Inject
-    @Named("recently_visited")
-    SharedPreferences recentlyVisitedSharedPreferences;
-    @Inject
-    @Named("navigation_drawer")
-    SharedPreferences navigationDrawerSharedPreferences;
-    @Inject
     Executor executor;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    @Nullable
-    private String backupPassword;
-    @Nullable
-    private String restorePassword;
-    @Nullable
-    private Uri restoreFileUri;
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
@@ -121,8 +85,6 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
         Preference deleteReadPostsPreference = findPreference(SharedPreferencesUtils.DELETE_READ_POSTS_IN_DATABASE);
         Preference deleteAllLegacySettingsPreference = findPreference(SharedPreferencesUtils.DELETE_ALL_LEGACY_SETTINGS);
         Preference resetAllSettingsPreference = findPreference(SharedPreferencesUtils.RESET_ALL_SETTINGS);
-        Preference backupSettingsPreference = findPreference(SharedPreferencesUtils.BACKUP_SETTINGS);
-        Preference restoreSettingsPreference = findPreference(SharedPreferencesUtils.RESTORE_SETTINGS);
 
         if (deleteSubredditsPreference != null) {
             deleteSubredditsPreference.setOnPreferenceClickListener(preference -> {
@@ -220,7 +182,14 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
                 int tableCount = readPostDao.getReadPostsCount(mActivity.accountName, ReadPostType.READ_POSTS);
                 long tableEntrySize = readPostDao.getMaxReadPostEntrySize();
                 long tableSize = tableEntrySize * tableCount / 1024;
-                handler.post(() -> deleteReadPostsPreference.setSummary(getString(R.string.settings_read_posts_db_summary, tableSize, tableCount)));
+                handler.post(() -> {
+                    // Backing out of the screen while these two queries run detaches the fragment,
+                    // and getString() then throws "not attached to a context".
+                    if (!isAdded()) {
+                        return;
+                    }
+                    deleteReadPostsPreference.setSummary(getString(R.string.settings_read_posts_db_summary, tableSize, tableCount));
+                });
             });
             deleteReadPostsPreference.setOnPreferenceClickListener(preference -> {
                 new MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
@@ -262,15 +231,20 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
                             editor.remove(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_AWARDS_LEGACY);
                             editor.remove(SharedPreferencesUtils.HIDE_COMMENT_AWARDS_LEGACY);
                             editor.remove(SharedPreferencesUtils.IMMERSIVE_INTERFACE_IGNORE_NAV_BAR_KEY_LEGACY);
-                            editor.remove(SharedPreferencesUtils.SHOW_FEWER_TOOLBAR_OPTIONS_THRESHOLD);
 
-                            SharedPreferences.Editor sortTypeEditor = mSortTypeSharedPreferences.edit();
+                            // The sort type and post layout files are per-account whole-file, so
+                            // the injected instances would rewrite these keys into the signed-in
+                            // account's namespace and leave the bare legacy spellings — which are
+                            // the ones this action exists to delete — untouched. Opened raw.
+                            SharedPreferences.Editor sortTypeEditor = mActivity.getSharedPreferences(
+                                    SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).edit();
                             sortTypeEditor.remove(SharedPreferencesUtils.SORT_TYPE_ALL_POST_LEGACY);
                             sortTypeEditor.remove(SharedPreferencesUtils.SORT_TIME_ALL_POST_LEGACY);
                             sortTypeEditor.remove(SharedPreferencesUtils.SORT_TYPE_POPULAR_POST_LEGACY);
                             sortTypeEditor.remove(SharedPreferencesUtils.SORT_TIME_POPULAR_POST_LEGACY);
 
-                            SharedPreferences.Editor postLayoutEditor = mPostLayoutSharedPreferences.edit();
+                            SharedPreferences.Editor postLayoutEditor = mActivity.getSharedPreferences(
+                                    SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE).edit();
                             postLayoutEditor.remove(SharedPreferencesUtils.POST_LAYOUT_ALL_POST_LEGACY);
                             postLayoutEditor.remove(SharedPreferencesUtils.POST_LAYOUT_POPULAR_POST_LEGACY);
 
@@ -295,14 +269,9 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
                         .setTitle(R.string.are_you_sure)
                         .setPositiveButton(R.string.yes, (dialogInterface, i)
                                 -> {
-                            boolean disableNsfwForever = mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, false);
                             mSharedPreferences.edit().clear().apply();
                             mainActivityTabsSharedPreferences.edit().clear().apply();
                             nsfwAndBlurringSharedPreferences.edit().clear().apply();
-
-                            if (disableNsfwForever) {
-                                mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.DISABLE_NSFW_FOREVER, true).apply();
-                            }
 
                             Toast.makeText(mActivity, R.string.reset_all_settings_success, Toast.LENGTH_SHORT).show();
                             EventBus.getDefault().post(new RecreateActivityEvent());
@@ -312,232 +281,5 @@ public class AdvancedPreferenceFragment extends CustomFontPreferenceFragmentComp
                 return true;
             });
         }
-
-        if (backupSettingsPreference != null) {
-            backupSettingsPreference.setOnPreferenceClickListener(preference -> {
-                showPasswordDialog();
-                return true;
-            });
-        }
-
-        if (restoreSettingsPreference != null) {
-            restoreSettingsPreference.setOnPreferenceClickListener(preference -> {
-                Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-                chooseFile.setType("application/zip");
-                chooseFile = Intent.createChooser(chooseFile, "Choose a backup file");
-                startActivityForResult(chooseFile, SELECT_RESTORE_SETTINGS_DIRECTORY_REQUEST_CODE);
-                return true;
-            });
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == RESULT_OK && data != null) {
-            if (requestCode == SELECT_BACKUP_SETTINGS_DIRECTORY_REQUEST_CODE) {
-                Uri uri = data.getData();
-                String password = backupPassword;
-                if (uri != null && password != null) {
-                    BackupSettings.backupSettings(mActivity, executor, handler, mActivity.getContentResolver(), uri,
-                            password, mRedditDataRoomDatabase, mSharedPreferences, lightThemeSharedPreferences, darkThemeSharedPreferences,
-                            amoledThemeSharedPreferences, mSortTypeSharedPreferences, mPostLayoutSharedPreferences,
-                            mPostDetailsSharedPreferences, postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
-                            proxySharedPreferences, nsfwAndBlurringSharedPreferences, bottomAppBarSharedPreferences,
-                            postHistorySharedPreferences, navigationDrawerSharedPreferences, recentlyVisitedSharedPreferences,
-                            new BackupSettings.BackupSettingsListener() {
-                                @Override
-                                public void success() {
-                                    Toast.makeText(mActivity, R.string.backup_settings_success, Toast.LENGTH_LONG).show();
-                                    // Clear the password from memory after use
-                                    backupPassword = null;
-                                }
-
-                                @Override
-                                public void failed(String errorMessage) {
-                                    Toast.makeText(mActivity, errorMessage, Toast.LENGTH_LONG).show();
-                                    // Clear the password from memory after use
-                                    backupPassword = null;
-                                }
-                            });
-                }
-            } else if (requestCode == SELECT_RESTORE_SETTINGS_DIRECTORY_REQUEST_CODE) {
-                restoreFileUri = data.getData();
-                showRestorePasswordDialog();
-            }
-        }
-    }
-
-    private void showPasswordDialog() {
-        EditText passwordEditText = new EditText(mActivity);
-        passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        passwordEditText.setHint(R.string.enter_backup_password);
-
-        CheckBox showPasswordCheckBox = new CheckBox(mActivity);
-        showPasswordCheckBox.setText(R.string.show_password);
-        showPasswordCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            } else {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            }
-            passwordEditText.setSelection(passwordEditText.getText().length());
-        });
-
-        LinearLayout layout = new LinearLayout(mActivity);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        int padding = (int) (16 * getResources().getDisplayMetrics().density); // 16dp
-        layout.setPadding(padding, padding, padding, padding);
-        layout.addView(passwordEditText);
-        layout.addView(showPasswordCheckBox);
-
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
-                .setTitle(R.string.backup_password_dialog_title)
-                .setMessage(R.string.backup_password_dialog_message)
-                .setView(layout)
-                .setPositiveButton(R.string.ok, (dialog, which) -> {
-                    String password = passwordEditText.getText().toString().trim();
-                    // Password length validation is now handled by enabling/disabling the button
-                    backupPassword = password;
-                    Intent intent = new Intent(ACTION_OPEN_DOCUMENT_TREE);
-                    startActivityForResult(intent, SELECT_BACKUP_SETTINGS_DIRECTORY_REQUEST_CODE);
-                })
-                .setNegativeButton(R.string.cancel, null);
-
-        androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
-        dialog.show();
-        // Initially disable the OK button
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-
-        passwordEditText.addTextChangedListener(new android.text.TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(android.text.Editable s) {
-                String password = s.toString().trim();
-                boolean isValid = password.length() >= 6 && password.length() <= 32;
-                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setEnabled(isValid);
-                if (!isValid && password.length() > 0) { // Show error only if user has typed something and it's invalid
-                    if (password.length() < 6) {
-                        passwordEditText.setError(getString(R.string.password_too_short_error, 6));
-                    } else if (password.length() > 32) {
-                        passwordEditText.setError(getString(R.string.password_too_long_error, 32));
-                    }
-                } else {
-                    passwordEditText.setError(null); // Clear error when valid or empty
-                }
-            }
-        });
-    }
-
-    private void showRestorePasswordDialog() {
-        EditText passwordEditText = new EditText(mActivity);
-        passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        passwordEditText.setHint(R.string.enter_restore_password);
-
-        CheckBox showPasswordCheckBox = new CheckBox(mActivity);
-        showPasswordCheckBox.setText(R.string.show_password);
-        showPasswordCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            } else {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            }
-            passwordEditText.setSelection(passwordEditText.getText().length());
-        });
-
-        LinearLayout layout = new LinearLayout(mActivity);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        int padding = (int) (16 * getResources().getDisplayMetrics().density); // 16dp
-        layout.setPadding(padding, padding, padding, padding);
-        layout.addView(passwordEditText);
-        layout.addView(showPasswordCheckBox);
-
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
-                .setTitle(R.string.restore_password_dialog_title)
-                .setMessage(R.string.restore_password_dialog_message)
-                .setView(layout)
-                .setPositiveButton(R.string.ok, (dialog, which) -> {
-                    String password = passwordEditText.getText().toString().trim();
-                    // Password length validation is now handled by enabling/disabling the button
-                    restorePassword = password;
-                    performRestore();
-                })
-                .setNegativeButton(R.string.cancel, null);
-
-        androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
-        dialog.show();
-        // Initially disable the OK button
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setEnabled(false);
-
-        passwordEditText.addTextChangedListener(new android.text.TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(android.text.Editable s) {
-                String password = s.toString().trim();
-                boolean isValid = password.length() >= 6 && password.length() <= 32;
-                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setEnabled(isValid);
-                if (!isValid && password.length() > 0) { // Show error only if user has typed something and it's invalid
-                    if (password.length() < 6) {
-                        passwordEditText.setError(getString(R.string.password_too_short_error, 6));
-                    } else if (password.length() > 32) {
-                        passwordEditText.setError(getString(R.string.password_too_long_error, 32));
-                    }
-                } else {
-                    passwordEditText.setError(null); // Clear error when valid or empty
-                }
-            }
-        });
-    }
-
-    private void performRestore() {
-        Uri fileUri = restoreFileUri;
-        String password = restorePassword;
-        if (fileUri == null || password == null) {
-            return;
-        }
-        RestoreSettings.restoreSettings(mActivity, executor, handler, mActivity.getContentResolver(), fileUri,
-                password, mRedditDataRoomDatabase, mSharedPreferences, mCurrentAccountSharedPreferences, lightThemeSharedPreferences,
-                darkThemeSharedPreferences, amoledThemeSharedPreferences, mSortTypeSharedPreferences, mPostLayoutSharedPreferences,
-                mPostDetailsSharedPreferences, postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
-                proxySharedPreferences, nsfwAndBlurringSharedPreferences, bottomAppBarSharedPreferences,
-                postHistorySharedPreferences, navigationDrawerSharedPreferences, recentlyVisitedSharedPreferences,
-                new RestoreSettings.RestoreSettingsListener() {
-                    @Override
-                    public void success() {
-                        Toast.makeText(mActivity, R.string.restore_settings_success, Toast.LENGTH_LONG).show();
-                        // Clear the password from memory after use
-                        restorePassword = null;
-                        restoreFileUri = null;
-                    }
-
-                    @Override
-                    public void failed(String errorMessage) {
-                        Toast.makeText(mActivity, errorMessage, Toast.LENGTH_LONG).show();
-                        // Clear the password from memory after use
-                        restorePassword = null;
-                        restoreFileUri = null;
-                    }
-
-                    @Override
-                    public void failedWithWrongPassword(String errorMessage) {
-                        Toast.makeText(mActivity, errorMessage, Toast.LENGTH_LONG).show();
-                        // Don't clear restoreFileUri so it can be reused
-                        restorePassword = null;
-                        showRestorePasswordDialog();
-                    }
-                });
     }
 }

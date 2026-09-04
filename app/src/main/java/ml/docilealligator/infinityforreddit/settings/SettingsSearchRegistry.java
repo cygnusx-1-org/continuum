@@ -73,6 +73,10 @@ public class SettingsSearchRegistry {
         m.put(SortTypePreferenceFragment.class, R.xml.sort_type_preferences);
         m.put(DownloadLocationPreferenceFragment.class, R.xml.download_location_preferences);
         m.put(MiscellaneousPreferenceFragment.class, R.xml.miscellaneous_preferences);
+        m.put(AccountSettingsManagementPreferenceFragment.class,
+                R.xml.account_settings_management_preferences);
+        m.put(DevicePreferenceFragment.class, R.xml.device_preferences);
+        m.put(BackupAndRestorePreferenceFragment.class, R.xml.backup_and_restore_preferences);
         m.put(AdvancedPreferenceFragment.class, R.xml.advanced_preferences);
         m.put(AboutPreferenceFragment.class, R.xml.about_preferences);
         m.put(CreditsPreferenceFragment.class, R.xml.credits_preferences);

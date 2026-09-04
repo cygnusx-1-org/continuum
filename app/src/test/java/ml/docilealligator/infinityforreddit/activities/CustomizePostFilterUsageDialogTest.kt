@@ -75,7 +75,7 @@ class CustomizePostFilterUsageDialogTest {
      */
     @Test
     fun editedNameSurvivesRecreationRatherThanReverting() {
-        val existing = PostFilterUsage("filter", PostFilterUsage.SUBREDDIT_TYPE, "pics")
+        val existing = PostFilterUsage("filter", "-", PostFilterUsage.SUBREDDIT_TYPE, "pics")
         controller.get().onUsageClicked(existing)
         idle()
         assertEquals("pics", dialogEditText()!!.text.toString())

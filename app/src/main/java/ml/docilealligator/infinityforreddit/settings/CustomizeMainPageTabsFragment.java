@@ -29,7 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
-import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.CustomizeTabsOrderActivity;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
 import ml.docilealligator.infinityforreddit.databinding.FragmentCustomizeMainPageTabsBinding;
@@ -142,10 +142,10 @@ public class CustomizeMainPageTabsFragment extends Fragment {
                 SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_SUBSCRIBED_SUBREDDITS);
 
         // "Enable Tabs" maps directly to MAIN_PAGE_SHOW_TAB_NAMES (checked = show the tab bar), default on.
-        boolean showTabNames = mainActivityTabsSharedPreferences.getBoolean(accountPrefix() + SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES, true);
+        boolean showTabNames = mainActivityTabsSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), true);
         binding.showTabNamesSwitchMaterialCustomizeMainPageTabsFragment.setChecked(showTabNames);
         binding.showTabNamesSwitchMaterialCustomizeMainPageTabsFragment.setOnCheckedChangeListener((compoundButton, checked) -> {
-            mainActivityTabsSharedPreferences.edit().putBoolean(accountPrefix() + SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES, checked).apply();
+            mainActivityTabsSharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), checked).apply();
             mSettingsChanged = true;
             updateRestartButtonVisibility();
         });
@@ -155,15 +155,17 @@ public class CustomizeMainPageTabsFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private String accountPrefix() {
-        return mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? "" : mActivity.accountName;
-    }
-
     private void setupShowToggle(android.widget.CompoundButton switchMaterial, View row, int source) {
         String key = MainPageTabsUtils.toggleKeyForGroupSource(source);
-        switchMaterial.setChecked(mainActivityTabsSharedPreferences.getBoolean(accountPrefix() + key, false));
+        if (key == null) {
+            // Not a group source, so there is no toggle to persist. Previously this concatenated
+            // its way to a key literally ending in "null" and bound a switch that governed nothing.
+            row.setVisibility(View.GONE);
+            return;
+        }
+        switchMaterial.setChecked(mainActivityTabsSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, key), false));
         switchMaterial.setOnCheckedChangeListener((compoundButton, checked) -> {
-            mainActivityTabsSharedPreferences.edit().putBoolean(accountPrefix() + key, checked).apply();
+            mainActivityTabsSharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, key), checked).apply();
             if (!checked) {
                 // Turning a toggle off removes its items from the saved list; enabling re-materializes
                 // them (on the Tabs screen / at runtime), so nothing to do here for the on case.

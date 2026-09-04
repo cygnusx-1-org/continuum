@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.preference.ListPreference;
-import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
@@ -56,7 +55,7 @@ public class PostPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         }
 
         if (defaultPostLayoutUnfoldedList != null) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            SharedPreferences sharedPreferences = mActivity.getDefaultSharedPreferences();
             boolean foldEnabled = sharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
             defaultPostLayoutUnfoldedList.setVisible(foldEnabled);
             defaultPostLayoutUnfoldedList.setOnPreferenceChangeListener((preference, newValue) -> {

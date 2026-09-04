@@ -8,7 +8,6 @@ import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,11 +19,18 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.post.Post;
 
-@Entity(tableName = "post_filter")
+@Entity(tableName = "post_filter", primaryKeys = {"name", "username"})
 public class PostFilter implements Parcelable {
-    @PrimaryKey
+    /**
+     * The account this filter belongs to, [Account.ANONYMOUS_ACCOUNT] when logged out. Half the
+     * primary key: two accounts each having a filter called "NSFW" is the point of the column.
+     */
+    @NonNull
+    @ColumnInfo(name = "username")
+    public String username = Account.ANONYMOUS_ACCOUNT;
     @NonNull
     @ColumnInfo(name = "name")
     // Empty, not a placeholder: a filter has to be named by whoever makes it, and a default name
@@ -154,6 +160,7 @@ public class PostFilter implements Parcelable {
     }
 
     protected PostFilter(Parcel in) {
+        username = Objects.requireNonNull(in.readString());
         name = Objects.requireNonNull(in.readString());
         maxVote = in.readInt();
         minVote = in.readInt();
@@ -367,7 +374,7 @@ public class PostFilter implements Parcelable {
                     if (wildcardExceptionKeys.contains(exceptionKey(owner, filter, subredditName))) {
                         continue;
                     }
-                    PostFilterBlockRecorder.record(owner, filter, subredditName);
+                    PostFilterBlockRecorder.record(owner, postFilter.username, filter, subredditName);
                 }
                 return false;
             }
@@ -636,6 +643,7 @@ public class PostFilter implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(username);
         parcel.writeString(name);
         parcel.writeInt(maxVote);
         parcel.writeInt(minVote);
