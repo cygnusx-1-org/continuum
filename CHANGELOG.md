@@ -13,7 +13,7 @@ Note v8a is the 64-bit build, and should be considered the default choice.
 * Fixed missing Download Image in the Bottom Sheet menu for posts of type Image
 * Implemented make recovered flair follow theme #387
 
-TLDR: The Settings screen has be restructure in relation to the per-account settings.
+TLDR: The Settings screen has been restructured in relation to the per-account settings.
 
 Most settings are now per account. Settings is broken into "This Account" and "All Accounts" sections to be able to tell the per account settings from the global settings.
 
