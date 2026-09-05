@@ -22,6 +22,7 @@ import ml.docilealligator.infinityforreddit.extensions.getFileNameFromUrlString
 import ml.docilealligator.infinityforreddit.fetchVideoLink
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo
+import ml.docilealligator.infinityforreddit.utils.RedgifsUrlUtils
 import ml.docilealligator.infinityforreddit.utils.getRandomString
 import org.apache.commons.io.FilenameUtils
 import retrofit2.Retrofit
@@ -44,6 +45,7 @@ class ViewVideoViewModel(
     var isDataSavingMode: Boolean = false,
     val dataSavingModeDefaultResolution: Int = 0,
     val nonDataSavingModeDefaultResolution: Int = 0,
+    private val redgifsDefaultResolution: Int = 0,
     var playbackSpeed: Int
 ) : ViewModel() {
     var wasPlaying: Boolean = false
@@ -51,7 +53,15 @@ class ViewVideoViewModel(
     var isMute: Boolean = false
     var setDefaultResolutionAlready: Boolean = false
 
-    private val _videoUri = MutableStateFlow(videoUri)
+    /**
+     * Set once the downgraded Redgifs file has failed to play, which stops [redgifsPlaybackUri]
+     * from downgrading again. Without it the retry on the HD file in [loadFallbackVideo] would be
+     * rewritten straight back to the `-mobile` URL that just failed, and the player would loop on
+     * the same broken source.
+     */
+    private var redgifsSdVariantFailed = false
+
+    private val _videoUri = MutableStateFlow(redgifsPlaybackUri(videoUri))
     val videoUriLiveData = _videoUri.asLiveData()
 
     private val _errorResId = MutableStateFlow<Int?>(null)
@@ -67,13 +77,31 @@ class ViewVideoViewModel(
     /** Guards [loadVideoLink] so it runs at most once per ViewModel, across activity recreates. */
     private var videoLinkRequested = false
 
+
+    /**
+     * Redgifs' answer to the resolution preference, applied to every URI before it can reach the
+     * player. See [RedgifsUrlUtils.playbackUri] for why a Redgifs post needs a different *file*
+     * rather than a different track.
+     *
+     * Safe to call from the [_videoUri] initializer: it reads primary-constructor properties,
+     * which are assigned before any class-body initializer runs, and [redgifsSdVariantFailed],
+     * which is declared above that initializer. Keep both true -- a body property read before its
+     * own declaration silently yields the JVM default instead of its initializer's value, with no
+     * compiler complaint.
+     */
+    private fun redgifsPlaybackUri(uri: Uri?): Uri? =
+        if (redgifsSdVariantFailed) uri
+        else RedgifsUrlUtils.playbackUri(uri, isDataSavingMode, redgifsDefaultResolution)
+
     /**
      * Single point where a resolved URI becomes available. Clearing [errorResId] here is what keeps
      * it sticky *only* while there is nothing playable: with no URI the error is the only thing that
      * can hide ViewVideoActivity's loading indicator, but once a URI exists that activity's URI
      * observer hides it, so a stale error must not keep toasting over a working video.
      */
-    private fun publishVideoUri(uri: Uri?) {
+    private fun publishVideoUri(rawUri: Uri?) {
+        val uri = redgifsPlaybackUri(rawUri)
+
         // A null URI means the fetch produced nothing playable. Recording an error here rather than
         // at each call site is what makes the invariant structural: every caller either publishes
         // something the player can use, or surfaces a failure. Publishing null silently is what
@@ -256,6 +284,20 @@ class ViewVideoViewModel(
     }
 
     fun loadFallbackVideo(mediaItem: MediaItem?, savedInstanceState: Bundle?) {
+        // A downgraded Redgifs URL is derived rather than confirmed, so it can point at a file
+        // that was never transcoded. Walk back up to the HD file first: a Redgifs post parsed
+        // from a plain link has no videoFallBackDirectUrl, so without this the data-saving
+        // downgrade would turn a playable video into an error. Guarded by the flag so a second
+        // failure falls through to the fallback below instead of retrying forever.
+        if (!redgifsSdVariantFailed) {
+            val hdUri = RedgifsUrlUtils.hdVariant(mediaItem?.localConfiguration?.uri)
+            if (hdUri != null) {
+                redgifsSdVariantFailed = true
+                publishVideoUri(hdUri)
+                return
+            }
+        }
+
         val fallbackUrl = videoFallbackDirectUrl
         val canRetryWithFallback = mediaItem == null ||
             (mediaItem.localConfiguration != null &&
@@ -298,6 +340,7 @@ class ViewVideoViewModel(
             isDataSavingMode: Boolean = false,
             dataSavingModeDefaultResolution: Int = 0,
             nonDataSavingModeDefaultResolution: Int = 0,
+            redgifsDefaultResolution: Int = 0,
             playbackSpeed: Int
         ): ViewModelProvider.Factory {
             return object: ViewModelProvider.Factory {
@@ -310,7 +353,8 @@ class ViewVideoViewModel(
                         videoDownloadUrl, videoFallbackDirectUrl, subredditName, id,
                         isNSFW, resumePosition, videoType, redgifsId, vReddItUrl, streamableShortCode,
                         isDataSavingMode, dataSavingModeDefaultResolution,
-                        nonDataSavingModeDefaultResolution, playbackSpeed) as T
+                        nonDataSavingModeDefaultResolution, redgifsDefaultResolution,
+                        playbackSpeed) as T
                 }
             }
         }

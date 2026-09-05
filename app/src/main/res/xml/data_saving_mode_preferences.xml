@@ -33,4 +33,12 @@
         app:entryValues="@array/settings_reddit_video_default_resolution_values"
         app:useSimpleSummaryProvider="true" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="480"
+        app:key="redgifs_video_default_resolution"
+        android:title="@string/settings_redgifs_video_default_resolution"
+        app:entries="@array/settings_redgifs_video_default_resolution"
+        app:entryValues="@array/settings_redgifs_video_default_resolution_values"
+        app:useSimpleSummaryProvider="true" />
+
 </PreferenceScreen>

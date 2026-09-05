@@ -685,7 +685,7 @@
     <string name="settings_bottom_app_bar_option_4">Option 4</string>
     <string name="settings_bottom_app_bar_fab">Floating Action Button</string>
     <string name="settings_data_saving_mode">Data Saving Mode</string>
-    <string name="settings_data_saving_mode_info_summary">In data saving mode:\nPreview images are in lower resolution.\nReddit videos are in lower resolution.\nVideo autoplay is disabled.</string>
+    <string name="settings_data_saving_mode_info_summary">In data saving mode:\nPreview images are in lower resolution.\nReddit and Redgifs videos are in lower resolution.\nVideo autoplay is disabled.</string>
     <string name="settings_translation_title">Translation</string>
     <string name="settings_translation_summary">Translate this app on POEditor. Thanks to all contributors.</string>
     <string name="settings_credits_national_flags">National Flags</string>
@@ -847,6 +847,7 @@
     <string name="settings_post_feed_max_resolution_warning_title">Increase the value to show previews in higher resolution, but the app may crash unexpectedly.</string>
     <string name="settings_post_feed_max_resolution_title">Post Feed Preview Max Resolution (Width * Height)</string>
     <string name="settings_reddit_video_default_resolution">Reddit Video Default Resolution</string>
+    <string name="settings_redgifs_video_default_resolution">Redgifs Video Default Resolution</string>
     <string name="settings_comment_thread_continuity_capacity_title">Comment Thread Continuity Capacity</string>
     <string name="settings_comment_thread_continuity_capacity_summary">%1$s comment thread(s) will be cached for seamless continuity.</string>
     <string name="settings_easier_to_watch_in_full_screen_title">Easier to Watch in Full Screen</string>

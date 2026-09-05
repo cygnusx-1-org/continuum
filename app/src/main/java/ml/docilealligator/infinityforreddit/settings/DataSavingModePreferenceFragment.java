@@ -22,6 +22,7 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
         SwitchPreference disableImagePreviewPreference = findPreference(SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW);
         SwitchPreference onlyDisablePreviewInVideoAndGifPostsPreference = findPreference(SharedPreferencesUtils.ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS);
         ListPreference redditVideoDefaultResolutionListPreference = findPreference(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION);
+        ListPreference redgifsVideoDefaultResolutionListPreference = findPreference(SharedPreferencesUtils.REDGIFS_VIDEO_DEFAULT_RESOLUTION);
 
         if (dataSavingModeListPreference != null) {
             if (dataSavingModeListPreference.getValue().equals("0")) {
@@ -33,6 +34,9 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
                 }
                 if (redditVideoDefaultResolutionListPreference != null) {
                     redditVideoDefaultResolutionListPreference.setVisible(false);
+                }
+                if (redgifsVideoDefaultResolutionListPreference != null) {
+                    redgifsVideoDefaultResolutionListPreference.setVisible(false);
                 }
             }
             dataSavingModeListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -47,6 +51,9 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
                     if (redditVideoDefaultResolutionListPreference != null) {
                         redditVideoDefaultResolutionListPreference.setVisible(false);
                     }
+                    if (redgifsVideoDefaultResolutionListPreference != null) {
+                        redgifsVideoDefaultResolutionListPreference.setVisible(false);
+                    }
                 } else {
                     if (onlyDisablePreviewInVideoAndGifPostsPreference != null) {
                         onlyDisablePreviewInVideoAndGifPostsPreference.setVisible(true);
@@ -56,6 +63,9 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
                     }
                     if (redditVideoDefaultResolutionListPreference != null) {
                         redditVideoDefaultResolutionListPreference.setVisible(true);
+                    }
+                    if (redgifsVideoDefaultResolutionListPreference != null) {
+                        redgifsVideoDefaultResolutionListPreference.setVisible(true);
                     }
                 }
                 return true;

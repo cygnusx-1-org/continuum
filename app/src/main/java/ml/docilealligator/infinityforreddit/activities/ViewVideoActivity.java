@@ -442,6 +442,7 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                         intent.getStringExtra(EXTRA_STREAMABLE_SHORT_CODE),
                         isDataSavingMode, SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"),
                         SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"),
+                        SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDGIFS_VIDEO_DEFAULT_RESOLUTION, "480"),
                         SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100")
                 )
         ).get(ViewVideoViewModel.class);

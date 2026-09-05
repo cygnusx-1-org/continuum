@@ -253,6 +253,7 @@ public class SharedPreferencesUtils {
     public static final String HIDE_UPVOTE_RATIO = "hide_upvote_ratio";
     public static final String POST_FEED_MAX_RESOLUTION = "post_feed_max_resolution";
     public static final String REDDIT_VIDEO_DEFAULT_RESOLUTION = "reddit_video_default_resolution";
+    public static final String REDGIFS_VIDEO_DEFAULT_RESOLUTION = "redgifs_video_default_resolution";
     public static final String EASIER_TO_WATCH_IN_FULL_SCREEN = "easier_to_watch_in_full_screen";
     public static final String HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS = "hide_the_number_of_votes_in_comments";
     public static final String COMMENT_DIVIDER_TYPE = "comment_divider_type";
