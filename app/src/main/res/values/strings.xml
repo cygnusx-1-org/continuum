@@ -690,8 +690,8 @@
     <string name="settings_translation_summary">Translate this app on POEditor. Thanks to all contributors.</string>
     <string name="settings_credits_national_flags">National Flags</string>
     <string name="settings_credits_national_flags_summary">Icon made by Freepik from www.flaticon.com</string>
-    <string name="settings_group_all_accounts">All Accounts</string>
-    <string name="settings_group_this_account">This Account</string>
+    <string name="settings_group_global">Global</string>
+    <string name="settings_group_account">Account</string>
     <string name="settings_account_settings_management_title">Account Settings Management</string>
     <string name="settings_account_settings_management_summary">Copy another account\'s settings onto this one, put this one back to defaults, or delete what it has accumulated</string>
     <string name="settings_group_other">Other</string>
@@ -700,8 +700,8 @@
     <string name="settings_copy_settings_from_account_no_other_summary">There is no other account to copy from</string>
     <string name="settings_reset_account_settings_title">Reset All Account Settings</string>
     <string name="settings_reset_account_settings_summary">Put this account back on the default settings</string>
-    <string name="copy_account_settings_confirmation">%1$s\'s settings and filters replace %2$s\'s. Main page tabs are left alone, and %1$s itself is not changed.\n\nThere is no undo — All Accounts › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
-    <string name="reset_account_settings_confirmation">%1$s goes back to the default settings, main page tabs and its post and comment filters included.\n\nThere is no undo — All Accounts › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
+    <string name="copy_account_settings_confirmation">%1$s\'s settings and filters replace %2$s\'s. Main page tabs are left alone, and %1$s itself is not changed.\n\nThere is no undo — Global › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
+    <string name="reset_account_settings_confirmation">%1$s goes back to the default settings, main page tabs and its post and comment filters included.\n\nThere is no undo — Global › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
     <string name="settings_delete_account_subreddits_summary">Forget this account\'s subscribed subreddits and favourites</string>
     <string name="settings_delete_account_users_summary">Forget the users this account follows or has saved</string>
     <string name="settings_delete_account_sort_types_summary">Forget the sort order each feed remembers</string>

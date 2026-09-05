@@ -199,7 +199,7 @@ class AccountScopedScreenKeysTest {
         forEachStartTag(R.xml.main_preferences) { tag, parser ->
             if (tag == "CustomFontPreferenceCategory") {
                 underThisAccount = attributeResourceOf(parser, "title") ==
-                    R.string.settings_group_this_account
+                    R.string.settings_group_account
             } else if (underThisAccount) {
                 attributeOf(parser, "fragment")?.let(fragments::add)
             }

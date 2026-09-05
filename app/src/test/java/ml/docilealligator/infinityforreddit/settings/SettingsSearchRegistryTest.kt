@@ -125,7 +125,7 @@ class SettingsSearchRegistryTest {
         val item = itemTitled(R.string.settings_interface_title)
 
         val expected = context.getString(R.string.settings_activity_label) +
-            " › " + context.getString(R.string.settings_group_this_account)
+            " › " + context.getString(R.string.settings_group_account)
         assertEquals(expected, item.breadcrumb)
         assertEquals(InterfacePreferenceFragment::class.java, item.fragmentClass)
     }
@@ -204,7 +204,7 @@ class SettingsSearchRegistryTest {
         // app:key="data_saving_mode_preference" on the root; the title is reused by a switch on
         // the screen it opens, so pick the root's row by its breadcrumb.
         val rootAllAccounts = context.getString(R.string.settings_activity_label) +
-            " › " + context.getString(R.string.settings_group_all_accounts)
+            " › " + context.getString(R.string.settings_group_global)
         val dataSaving = items.single {
             it.title == context.getString(R.string.settings_data_saving_mode) &&
                 it.breadcrumb == rootAllAccounts
