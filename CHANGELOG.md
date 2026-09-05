@@ -2,6 +2,41 @@
 
 ---
 
+8.3.0.3 / 2026-9-4
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Per-account app settings #185
+* Implemented Subreddit's "Since" display broken #391
+* Fixed Comment embedded videos can't be downloaded. #389
+* Added an "Open Reddit Link in Clipboard" feature to the feed overflow menu
+* Fixed missing Download Image in the Bottom Sheet menu for posts of type Image
+* Implemented make recovered flair follow theme #387
+
+TLDR: The Settings screen has be restructure in relation to the per-account settings.
+
+Most settings are now per account. Settings is broken into "This Account" and "All Accounts" sections to be able to tell the per account settings from the global settings.
+
+Layout choices and the bottom bar settings now are per account.
+
+New accounts get default settings. Existing accounts get a copy of the existing settings.
+
+There is a new screen in Settings, "Account Settings Management". It has options to "Copy Settings from Another Account" and "Reset This Account's Settings".
+
+Miscellaneous is in the "This Account" section of Settings, but the settings that stayed global where added to the new Device screen in Settings.
+
+Themes are global, but theme choice is per account.
+
+"Backup and Restore" got broken out of Advanced as their own screen in Settings
+
+Backups and restores still include everything, including all accounts, as it was before.
+
+"Forever Disable NSFW Content" has been removed. It was a useless setting given how easily it could be bypassed.
+
+Advanced in Settings became "Global Settings Management"
+
+"Crash Reports" was moved to the bottom of Setnow tings under Debug.
+
 8.3.0.2 / 2026-8-31
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
