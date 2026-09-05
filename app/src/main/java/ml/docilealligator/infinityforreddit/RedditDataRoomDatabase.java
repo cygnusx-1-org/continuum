@@ -63,7 +63,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
         LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class,
-        Reminder.class}, version = 41, exportSchema = false)
+        Reminder.class}, version = 42, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -82,7 +82,47 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
                         MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40,
-                        MIGRATION_40_41)
+                        MIGRATION_40_41, MIGRATION_41_42)
+                .addCallback(ANONYMOUS_ACCOUNT_ROW)
+                .build();
+    }
+
+    /**
+     * Guarantees the anonymous account's row in {@code accounts}.
+     *
+     * <p>Every table that records something per account has a foreign key onto that row, so writing
+     * anything while logged out needs it to exist. Eleven call sites each used to create it
+     * themselves, immediately before their own write; anything new that wrote anonymous data had to
+     * know to do the same or hit a constraint failure. Making it an invariant of the open database
+     * is one statement instead, and one the next feature cannot forget.
+     *
+     * <p>On open rather than on create, so it holds however the file reached this version. It is
+     * filtered out of every {@code accounts} query by {@code username != '.anonymous'}, so its
+     * presence never makes anonymous look like a signed-in account.
+     */
+    private static final Callback ANONYMOUS_ACCOUNT_ROW = new Callback() {
+        @Override
+        public void onOpen(@NonNull SupportSQLiteDatabase db) {
+            super.onOpen(db);
+            db.execSQL("INSERT OR IGNORE INTO accounts (username, karma, is_current_user, is_mod)"
+                    + " VALUES ('.anonymous', 0, 0, 0)");
+        }
+    };
+
+    /**
+     * An in-memory database carrying the same callbacks as {@link #create}, for tests that need a
+     * real schema rather than a mock.
+     *
+     * <p>Exists so that {@link #ANONYMOUS_ACCOUNT_ROW} cannot be left off. A test that built its own
+     * builder would have no anonymous row, and every anonymous write it made would fail a foreign
+     * key that holds perfectly well in the app -- or worse, pass while the invariant the app relies
+     * on went unexercised.
+     */
+    @VisibleForTesting
+    public static RedditDataRoomDatabase createInMemoryForTest(final Context context) {
+        return Room.inMemoryDatabaseBuilder(context, RedditDataRoomDatabase.class)
+                .addCallback(ANONYMOUS_ACCOUNT_ROW)
+                .allowMainThreadQueries()
                 .build();
     }
 
@@ -255,6 +295,93 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                     "DROP TABLE comment_filter_usage_old ");
         }
     };
+
+    /**
+     * Renames the anonymous account from {@code "-"} to {@code ".anonymous"} in every table that
+     * stores an account name.
+     *
+     * <p>The two halves of the app had disagreed: a {@code username} column said {@code "-"} while a
+     * preference key said {@code ".anonymous"}, and nothing in the types stopped one reaching the
+     * other. They are one string now, so this brings the stored rows up to it. A table missed here
+     * is not a cosmetic problem -- its rows would be orphaned from an account name nothing looks up
+     * again, which is the anonymous profile silently emptying.
+     *
+     * <p>The work is {@link #renameAnonymousAccount}, which a restore shares.
+     */
+    @VisibleForTesting
+    static final Migration MIGRATION_41_42 = new Migration(41, 42) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            renameAnonymousAccount(database);
+        }
+    };
+
+    /** Every table with a {@code username} column that means "which account". */
+    @VisibleForTesting
+    static final String[] ACCOUNT_NAME_TABLES = {
+            "anonymous_multireddit_subreddits",
+            "comment_filter",
+            "comment_filter_usage",
+            "local_saved",
+            "multi_reddits",
+            "post_filter",
+            "post_filter_blocked_subreddit",
+            "post_filter_usage",
+            "read_posts",
+            "recent_search_queries",
+            "recently_visited",
+            "reminders",
+            "subscribed_subreddits",
+            "subscribed_users",
+    };
+
+    /**
+     * Moves anonymous rows from the old {@code "-"} account name onto {@code ".anonymous"}.
+     *
+     * <p>Called from {@link #MIGRATION_41_42} for a database being upgraded, and from
+     * {@code RestoreSettings} for rows read out of a backup taken before the rename -- which arrive
+     * as {@code "-"} however new the database is, so the migration alone does not cover them.
+     *
+     * <p>Written to be correct whether or not a {@code ".anonymous"} row already exists, because on
+     * the two paths it differs: an upgrading database has only the old row, while a restore happens
+     * long after {@link #ANONYMOUS_ACCOUNT_ROW} has created the new one. Hence the ordering --
+     * rename the parent if the name is free, move the children either way, then drop the old parent
+     * if it is still there.
+     *
+     * <p>Renaming rather than recreating matters: the anonymous row carries the application-only
+     * access token, which {@code AccountDaoKt} reads back by name, and inserting a fresh row and
+     * deleting the old one would throw it away.
+     *
+     * <p>The rename is also the one statement that leaves the foreign keys briefly unsatisfied --
+     * the children still name the old parent until the next statement -- which is what
+     * {@code defer_foreign_keys} is for. That pragma only has effect inside a transaction, so this
+     * opens its own rather than depending on the caller having one: a migration does, having been
+     * handed one by Room, and a restore does not. Nesting is safe, the inner one being counted
+     * rather than opened again. Dropping the old parent last is what leaves
+     * {@code ON DELETE CASCADE} nothing to take.
+     *
+     * <p>{@code custom_themes} is deliberately absent: its {@code username} column is an
+     * {@code int} holding a theme colour, not an account name.
+     */
+    public static void renameAnonymousAccount(@NonNull SupportSQLiteDatabase database) {
+        database.beginTransaction();
+        try {
+            database.execSQL("PRAGMA defer_foreign_keys = ON");
+            database.execSQL("UPDATE OR IGNORE accounts SET username = '.anonymous'"
+                    + " WHERE username = '-'");
+            for (String table : ACCOUNT_NAME_TABLES) {
+                database.execSQL("UPDATE " + table
+                        + " SET username = '.anonymous' WHERE username = '-'");
+            }
+            database.execSQL("DELETE FROM accounts WHERE username = '-'");
+            database.execSQL("INSERT OR IGNORE INTO accounts"
+                    + " (username, karma, is_current_user, is_mod)"
+                    + " VALUES ('.anonymous', 0, 0, 0)");
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+        }
+    }
 
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override

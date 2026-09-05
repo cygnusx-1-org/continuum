@@ -501,8 +501,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         if (loadParams.getKey() == null) {
             boolean savePostFeedScrolledPosition = sortType != null && sortType.getType() == SortType.Type.BEST && sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION, false);
             if (savePostFeedScrolledPosition && postFeedScrolledPositionSharedPreferences != null) {
-                String accountNameForCache = accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_ANONYMOUS : accountName;
-                afterKey = postFeedScrolledPositionSharedPreferences.getString(accountNameForCache + SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE, null);
+                afterKey = postFeedScrolledPositionSharedPreferences.getString(
+                        accountName + SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE, null);
             } else {
                 afterKey = null;
             }

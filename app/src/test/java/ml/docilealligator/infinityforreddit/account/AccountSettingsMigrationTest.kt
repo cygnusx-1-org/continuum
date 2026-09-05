@@ -28,6 +28,13 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AccountSettingsMigrationTest {
 
+    /**
+     * How anonymous was spelled in the key prefixes this migration reads. A literal, like the
+     * production copy: [Account.ANONYMOUS_ACCOUNT] has since become ".anonymous", while the keys
+     * these tests write are the ones that are still on disk saying "-".
+     */
+    private val LEGACY_ANONYMOUS_PREFIX = "-"
+
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     private lateinit var internal: SharedPreferences
@@ -145,7 +152,7 @@ class AccountSettingsMigrationTest {
         // under "-" for anonymous.
         bottomAppBar.edit()
             .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 5)
-            .putInt(Account.ANONYMOUS_ACCOUNT + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 9)
+            .putInt(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 9)
             .commit()
 
         migrateBottomAppBar("alice", "bob")
@@ -162,14 +169,14 @@ class AccountSettingsMigrationTest {
     fun `the old spellings go, so a second run has nothing to do`() {
         bottomAppBar.edit()
             .putInt(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 5)
-            .putInt(Account.ANONYMOUS_ACCOUNT + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 9)
+            .putInt(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1, 9)
             .commit()
 
         migrateBottomAppBar("alice")
 
         assertFalse(bottomAppBar.contains(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1))
         assertFalse(bottomAppBar.contains(
-            Account.ANONYMOUS_ACCOUNT + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1))
+            LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1))
     }
 
     @Test
@@ -205,7 +212,7 @@ class AccountSettingsMigrationTest {
         // The link handler was written under "-" and read back with no prefix at all, so both keys
         // exist and disagree. The one the user's choice landed in has to win.
         defaultPreferences.edit()
-            .putString(Account.ANONYMOUS_ACCOUNT + SharedPreferencesUtils.LINK_HANDLER_BASE, "4")
+            .putString(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.LINK_HANDLER_BASE, "4")
             .putString(SharedPreferencesUtils.LINK_HANDLER, "0")
             .commit()
 
@@ -214,7 +221,7 @@ class AccountSettingsMigrationTest {
         assertEquals("4", defaultPreferences.getString(
             AccountScope.key(null, SharedPreferencesUtils.LINK_HANDLER_BASE), null))
         assertFalse(defaultPreferences.contains(
-            Account.ANONYMOUS_ACCOUNT + SharedPreferencesUtils.LINK_HANDLER_BASE))
+            LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.LINK_HANDLER_BASE))
         assertFalse("every spelling it could have been read from goes, not just the one taken",
             defaultPreferences.contains(SharedPreferencesUtils.LINK_HANDLER))
     }
@@ -224,7 +231,7 @@ class AccountSettingsMigrationTest {
         // The other half of the disagreement: the NSFW screen wrote anonymous with an empty prefix
         // and post history wrote it with "-", so both spellings of the same switch can exist.
         nsfwAndSpoiler.edit()
-            .putBoolean(Account.ANONYMOUS_ACCOUNT + SharedPreferencesUtils.NSFW_BASE, true)
+            .putBoolean(LEGACY_ANONYMOUS_PREFIX + SharedPreferencesUtils.NSFW_BASE, true)
             .putBoolean(SharedPreferencesUtils.NSFW_BASE, false)
             .commit()
 

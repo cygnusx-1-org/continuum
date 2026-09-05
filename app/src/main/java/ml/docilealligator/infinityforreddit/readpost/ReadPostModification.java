@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.readpost;
 
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
-import ml.docilealligator.infinityforreddit.account.Account;
 
 public class ReadPostModification {
     public static void insertReadPost(RedditDataRoomDatabase redditDataRoomDatabase, Executor executor,
@@ -16,8 +15,6 @@ public class ReadPostModification {
                 readPostDao.deleteOldestReadPosts(username, readPostType);
             }
             if (username != null && !username.isEmpty()) {
-                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
-
                 readPostDao.insert(new ReadPost(username, postId, readPostType));
                 if (readPostType == ReadPostType.ANONYMOUS_UPVOTED_POSTS) {
                     readPostDao.deleteReadPost(username, postId, ReadPostType.ANONYMOUS_DOWNVOTED_POSTS);

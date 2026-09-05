@@ -38,7 +38,9 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
 
     /**
      * Leaves the account in use out of the list, for callers that mean "an account other than this
-     * one". Anonymous is absent either way: it is not a row in the accounts table.
+     * one". Anonymous is absent either way -- it is a row in the accounts table, but every query in
+     * {@link ml.docilealligator.infinityforreddit.account.AccountDao} that lists accounts filters it
+     * out, because it is a browsing mode rather than an account to choose.
      */
     public static final String EXTRA_EXCLUDE_CURRENT_ACCOUNT = "EECA";
 

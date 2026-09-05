@@ -13,7 +13,43 @@
         app:key="reset_account_settings"
         app:icon="@drawable/ic_refresh_day_night_24dp"
         app:title="@string/settings_reset_account_settings_title"
-        app:summary="@string/settings_reset_account_settings_summary"
+        app:summary="@string/settings_reset_account_settings_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_subreddits"
+        app:icon="@drawable/ic_subreddit_day_night_24dp"
+        app:title="@string/settings_delete_all_subreddits_data_in_database_title"
+        app:summary="@string/settings_delete_account_subreddits_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_users"
+        app:icon="@drawable/ic_user_day_night_24dp"
+        app:title="@string/settings_delete_all_users_data_in_database_title"
+        app:summary="@string/settings_delete_account_users_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_sort_types"
+        app:icon="@drawable/ic_sort_day_night_24dp"
+        app:title="@string/settings_delete_all_sort_type_data_in_database_title"
+        app:summary="@string/settings_delete_account_sort_types_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_post_layouts"
+        app:icon="@drawable/ic_post_layout_day_night_24dp"
+        app:title="@string/settings_delete_all_post_layout_data_in_database_title"
+        app:summary="@string/settings_delete_account_post_layouts_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_front_page_scrolled_position"
+        app:icon="@drawable/ic_bookmark_border_day_night_24dp"
+        app:title="@string/settings_delete_front_page_scrolled_positions_in_database_title"
+        app:summary="@string/settings_delete_account_front_page_scrolled_position_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_read_posts"
+        app:icon="@drawable/ic_history_day_night_24dp"
+        app:title="@string/settings_delete_read_posts_in_database_title"
+        app:summary=""
         app:bottom="true" />
 
 </androidx.preference.PreferenceScreen>

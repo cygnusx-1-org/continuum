@@ -16,8 +16,14 @@ public interface SubscribedSubredditDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<SubscribedSubredditData> subscribedSubredditDataList);
 
-    @Query("DELETE FROM subscribed_subreddits")
-    void deleteAllSubscribedSubreddits();
+    /**
+     * One account's subscription list. For a signed-in account it is a copy of what Reddit holds --
+     * favourites included, which come from {@code user_has_favorited} -- so it comes back on the
+     * next sync. Anonymous subscriptions are written locally and never synced, so for anonymous
+     * this is the only copy.
+     */
+    @Query("DELETE FROM subscribed_subreddits WHERE username = :accountName COLLATE NOCASE")
+    void deleteAllSubscribedSubreddits(String accountName);
 
     @Query("SELECT * from subscribed_subreddits WHERE username = :accountName AND name LIKE :searchQuery ORDER BY name COLLATE NOCASE ASC")
     LiveData<List<SubscribedSubredditData>> getAllSubscribedSubredditsWithSearchQuery(String accountName, String searchQuery);

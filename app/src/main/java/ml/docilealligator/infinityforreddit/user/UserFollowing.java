@@ -38,7 +38,6 @@ public class UserFollowing {
             @Override
             public void onFetchUserDataSuccess(UserData userData) {
                 executor.execute(() -> {
-                    redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
                     setFollowed(redditDataRoomDatabase.subscribedUserDao(), userData.getName(),
                             userData.getIconUrl(), Account.ANONYMOUS_ACCOUNT);
 

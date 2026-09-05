@@ -399,7 +399,6 @@
     <string name="settings_customize_dark_theme_title">"Тёмная тема"</string>
     <string name="settings_customize_amoled_theme_title">"Тема AMOLED"</string>
     <string name="settings_manage_themes_title">"Менеджер тем"</string>
-    <string name="settings_advanced_master_title">"Дополнительные"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Удалить все сабреддиты из базы данных"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Удалить всех пользователей из базы данных"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Удалить все типы сортировки из базы данных"</string>

@@ -55,6 +55,12 @@ class AccountScopedScreenKeysTest {
         "manage_themes",
         "copy_settings_from_account",
         "reset_account_settings",
+        "delete_account_subreddits",
+        "delete_account_users",
+        "delete_account_sort_types",
+        "delete_account_post_layouts",
+        "delete_account_front_page_scrolled_position",
+        "delete_account_read_posts",
     )
 
     /** The screens under "This account" whose settings live in the default preferences file. */
@@ -148,7 +154,7 @@ class AccountScopedScreenKeysTest {
     @Test
     fun `the screens really do declare rows`() {
         // Guards the tests above against passing because the XML was read as empty. Counted before
-        // the click targets are dropped: Account Settings Management is two actions and no setting,
+        // the click targets are dropped: Account Settings Management is eight actions and no setting,
         // which is a screen read correctly, not a screen read as nothing.
         for (screen in defaultFileScreens + ownFileScreens.keys) {
             if (keyedRowsIn(screen).isEmpty()) {

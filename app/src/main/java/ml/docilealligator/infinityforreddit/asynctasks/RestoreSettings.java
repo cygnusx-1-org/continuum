@@ -182,7 +182,15 @@ public class RestoreSettings {
                                     restoredDefaultPreferences = imported;
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {
-                                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
+                                // A backup taken before the anonymous account was renamed holds its
+                                // rows under "-", and every one of them has a foreign key onto an
+                                // accounts row of that name. Nothing creates it any more, so the
+                                // inserts below would fail the constraint; this gives them a parent
+                                // to land on, and renameAnonymousAccount() moves them off it and
+                                // drops it once they are all in.
+                                redditDataRoomDatabase.getOpenHelper().getWritableDatabase().execSQL(
+                                        "INSERT OR IGNORE INTO accounts (username, karma, is_current_user, is_mod)"
+                                                + " VALUES ('-', 0, 0, 0)");
 
                                 File anonymousSubscribedSubredditsFile = new File(f.getAbsolutePath() + "/anonymous_subscribed_subreddits.json");
                                 File anonymousSubscribedUsersFile = new File(f.getAbsolutePath() + "/anonymous_subscribed_users.json");
@@ -352,6 +360,14 @@ public class RestoreSettings {
                                         redditDataRoomDatabase.recentSearchQueryDao().insertAll(recentSearchQueries);
                                     }
                                 }
+
+                                // Everything is in. Move whatever landed on the placeholder above
+                                // onto the name the app actually reads, and drop the placeholder.
+                                // Here rather than at the end of the restore: it is these rows that
+                                // can carry the old spelling, and a backup with no database
+                                // directory has nothing to rename.
+                                RedditDataRoomDatabase.renameAnonymousAccount(
+                                        redditDataRoomDatabase.getOpenHelper().getWritableDatabase());
                             }
                         }
 

@@ -135,9 +135,9 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         android:icon="@drawable/ic_advanced_day_night_24dp"
-        app:title="@string/settings_advanced_master_title"
-        app:summary="@string/settings_advanced_master_summary"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.AdvancedPreferenceFragment"
+        app:title="@string/settings_global_settings_management_title"
+        app:summary="@string/settings_global_settings_management_summary"
+        app:fragment="ml.docilealligator.infinityforreddit.settings.GlobalSettingsManagementPreferenceFragment"
         app:bottom="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
@@ -163,7 +163,12 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_info_preference_day_night_24dp"
         app:title="@string/settings_debug_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.DebugPreferenceFragment"
+        app:fragment="ml.docilealligator.infinityforreddit.settings.DebugPreferenceFragment" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:icon="@drawable/ic_report_day_night_24dp"
+        app:title="@string/settings_crash_reports_title"
+        app:fragment="ml.docilealligator.infinityforreddit.settings.CrashReportsFragment"
         app:bottom="true" />
 
 </androidx.preference.PreferenceScreen>

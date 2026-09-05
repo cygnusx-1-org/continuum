@@ -10,16 +10,20 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 /**
  * One account's stored settings, moved or removed wholesale.
  *
- * Backs the two things a static classification makes possible: copying another account's settings
- * onto this one, and putting this one back where a newly added account starts. Both are exact
- * because [AccountScopedKeys] already answers, for every key, whether it belongs to an account.
+ * Backs the three things a static classification makes possible: copying another account's settings
+ * onto this one, putting this one back where a newly added account starts, and — through
+ * [AccountStoredData] — throwing away one kind of them on its own. All three are exact because
+ * [AccountScopedKeys] already answers, for every key, whether it belongs to an account.
  *
  * Like [AccountSettingsMigration] this opens the preference files itself rather than taking them
  * injected: the injected ones are [AccountScopedSharedPreferences], which show only the current
- * account's view of a file, and both operations here have to reach a second account's keys.
+ * account's view of a file, and both whole-account operations here have to reach a second account's
+ * keys.
  *
- * Both write with `commit()`. The caller restarts the app immediately afterwards, and `apply()`
- * only promises the write eventually reaches disk — the process is gone before then.
+ * Everything writes with `commit()`. [copyBetweenAccounts] and [reset] are followed immediately by
+ * an app restart, and `apply()` only promises the write eventually reaches disk — the process is
+ * gone before then. [resetFile] keeps it for a duller reason: it already runs off the main thread,
+ * so the write costs nothing there and has landed by the time its caller reports success.
  */
 object AccountSettings {
 
@@ -148,7 +152,6 @@ object AccountSettings {
      *
      * Blocking. Call it off the main thread.
      */
-    @SuppressLint("ApplySharedPref")
     @JvmStatic
     fun reset(
         context: Context,
@@ -162,23 +165,44 @@ object AccountSettings {
             redditDataRoomDatabase.commentFilterDao().deleteAllCommentFilters(account)
         }
 
-        val namespace = AccountScope.namespace(accountName)
-
         for (file in SCOPED_FILES) {
-            val preferences = open(context, file.name)
-            val editor = preferences.edit()
-            var changed = false
+            removeAccountKeys(context, file, accountName)
+        }
+    }
 
-            for (key in preferences.all.keys) {
-                if (belongsTo(namespace, key, file)) {
-                    editor.remove(key)
-                    changed = true
-                }
-            }
+    /**
+     * [reset] narrowed to the one file [fileName] names, which has to be one of [SCOPED_FILES].
+     *
+     * Backs the per-account delete actions, which offer one kind of setting on its own: someone who
+     * wants the sort order remembered for two hundred subreddits forgotten does not want the rest of
+     * the account reset along with it. Other accounts' keys and the file's global keys stay.
+     *
+     * Blocking. Call it off the main thread.
+     */
+    @JvmStatic
+    fun resetFile(context: Context, fileName: String, accountName: String?) {
+        val file = SCOPED_FILES.firstOrNull { it.name == fileName }
+            ?: throw IllegalArgumentException("$fileName holds no per-account keys")
+        removeAccountKeys(context, file, accountName)
+    }
 
-            if (changed) {
-                editor.commit()
+    /** Takes [accountName]'s keys out of one file, leaving every other account's in place. */
+    @SuppressLint("ApplySharedPref")
+    private fun removeAccountKeys(context: Context, file: ScopedFile, accountName: String?) {
+        val namespace = AccountScope.namespace(accountName)
+        val preferences = open(context, file.name)
+        val editor = preferences.edit()
+        var changed = false
+
+        for (key in preferences.all.keys) {
+            if (belongsTo(namespace, key, file)) {
+                editor.remove(key)
+                changed = true
             }
+        }
+
+        if (changed) {
+            editor.commit()
         }
     }
 

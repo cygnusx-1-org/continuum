@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.user
 import android.os.Handler
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
-import ml.docilealligator.infinityforreddit.account.Account
 
 /**
  * Saving a user: purely local, never a Reddit call, and available while logged out.
@@ -24,9 +23,6 @@ object UserSaving {
         listener: UserSavingListener
     ) {
         executor.execute {
-            if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount())
-            }
             val dao = redditDataRoomDatabase.subscribedUserDao()
             // The entity treats "no icon" as an empty string, not null.
             dao.insertIfAbsent(username, iconUrl ?: "", accountName)

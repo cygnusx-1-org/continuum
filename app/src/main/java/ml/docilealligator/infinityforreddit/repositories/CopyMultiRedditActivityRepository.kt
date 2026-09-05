@@ -80,8 +80,6 @@ class CopyMultiRedditActivityRepositoryImpl(
     }
 
     suspend fun copyMultiRedditAnonymous(name: String, description: String, subreddits: List<ExpandedSubredditInMultiReddit>): APIResult<MultiReddit?> {
-        redditDataRoomDatabase.accountDaoKt().insertIfNotExists(Account.getAnonymousAccount())
-
         if (redditDataRoomDatabase.multiRedditDaoKt().getMultiReddit("/user/-/m/$name", Account.ANONYMOUS_ACCOUNT) != null) {
             return APIResult.Error(APIError.MessageRes(R.string.duplicate_multi_reddit))
         } else {

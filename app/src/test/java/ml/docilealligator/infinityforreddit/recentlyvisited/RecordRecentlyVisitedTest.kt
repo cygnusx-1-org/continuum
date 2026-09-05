@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.TestInfinity
+import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountDao
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditDao
@@ -83,6 +84,33 @@ class RecordRecentlyVisitedTest {
         whenever(database.subscribedSubredditDao()).thenReturn(mock<SubscribedSubredditDao>())
         whenever(database.subscribedUserDao()).thenReturn(mock<SubscribedUserDao>())
         whenever(database.accountDao()).thenReturn(mock<AccountDao>())
+    }
+
+    /**
+     * The same recording, against a real database rather than the fake DAO above.
+     *
+     * `recently_visited` has a foreign key onto `accounts`, and this write used to create the
+     * anonymous row itself immediately beforehand. It does not any more -- the row is an invariant
+     * of an open database instead -- so nothing but a real schema can show that an anonymous visit
+     * still lands rather than failing the constraint. The fake DAO cannot: it collects rows into a
+     * list and never sees a key.
+     */
+    @Test
+    fun `an anonymous visit lands in a real database, with no row created on the way`() {
+        val real = RedditDataRoomDatabase.createInMemoryForTest(
+            ApplicationProvider.getApplicationContext())
+        try {
+            preferences.edit().putBoolean(AccountScope.key(Account.ANONYMOUS_ACCOUNT,
+                SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE), true).commit()
+
+            RecordRecentlyVisited.recordSubreddit(
+                directExecutor, real, preferences, Account.ANONYMOUS_ACCOUNT, "pics", null)
+
+            assertEquals(listOf("pics"), real.recentlyVisitedDao()
+                .getAllForBackup().map { it.name })
+        } finally {
+            real.close()
+        }
     }
 
     private fun turnTheSettingOn() {

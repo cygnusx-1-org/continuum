@@ -391,7 +391,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_customize_dark_theme_title">"Ciemny motyw"</string>
     <string name="settings_customize_amoled_theme_title">"Amoledowy motyw"</string>
     <string name="settings_manage_themes_title">"Zarządzaj motywami"</string>
-    <string name="settings_advanced_master_title">"Zaawansowane"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Usuń wszystkie Subreddity w bazie danych"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Usuń wszystkich użytkowników w bazie danych"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Usuń wszystkie rodzaje sortowanie w bazie danych"</string>

@@ -43,8 +43,13 @@ public interface ReadPostDao {
     @Query("DELETE FROM read_posts WHERE rowid IN (SELECT rowid FROM read_posts WHERE username = :username AND read_post_type = :readPostType ORDER BY time ASC LIMIT 100)")
     void deleteOldestReadPosts(String username, @ReadPostType int readPostType);
 
-    @Query("DELETE FROM read_posts")
-    void deleteAllReadPosts();
+    /**
+     * Every row of one kind belonging to one account. The type matters: anonymous browsing keeps
+     * its upvoted, downvoted, hidden and saved lists in this same table, and clearing a read
+     * history must not take those with it.
+     */
+    @Query("DELETE FROM read_posts WHERE username = :username AND read_post_type = :readPostType")
+    void deleteAllReadPosts(String username, @ReadPostType int readPostType);
 
     @Query("SELECT id FROM read_posts WHERE id IN (:ids) AND username = :username AND read_post_type = 0")
     List<String> getReadPostsIdsByIds(List<String> ids, String username);

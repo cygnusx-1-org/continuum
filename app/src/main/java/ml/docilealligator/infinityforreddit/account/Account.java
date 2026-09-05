@@ -14,7 +14,29 @@ import java.util.Objects;
 
 @Entity(tableName = "accounts")
 public class Account implements Parcelable {
-    public static final String ANONYMOUS_ACCOUNT = "-";
+    /**
+     * The account name browsing without credentials is stored under, in every {@code username}
+     * column and in the {@code ACCOUNT_NAME} preference.
+     *
+     * <p>Contains a {@code .}, which a Reddit username never can, so it cannot collide with a real
+     * account and is safe as an {@link AccountScope} namespace. It reads the same in the database
+     * and in a preference key, which is the point: before this it was {@code "-"} in one and
+     * {@code ".anonymous"} in the other.
+     */
+    public static final String ANONYMOUS_ACCOUNT = ".anonymous";
+
+    /**
+     * Whether {@code accountName} means "browsing without an account".
+     *
+     * <p>Accepts the shapes anonymity actually arrives in: {@link #ANONYMOUS_ACCOUNT}, {@code null}
+     * from a preferences file cleared on logout, and {@code ""} from the pre-{@link AccountScope}
+     * key spellings. Every one of those is anonymous, and testing the constant by hand -- which
+     * most of this codebase still does -- misses the last two.
+     */
+    public static boolean isAnonymous(@Nullable String accountName) {
+        return accountName == null || accountName.isEmpty()
+                || ANONYMOUS_ACCOUNT.equals(accountName);
+    }
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "username")
@@ -65,11 +87,6 @@ public class Account implements Parcelable {
             return new Account[size];
         }
     };
-
-    @Ignore
-    public static Account getAnonymousAccount() {
-        return new Account(Account.ANONYMOUS_ACCOUNT, null, null, null, null, null, 0, false, false);
-    }
 
     public Account(@NonNull String accountName, @Nullable String accessToken, @Nullable String refreshToken, @Nullable String code,
                    @Nullable String profileImageUrl, @Nullable String bannerImageUrl, int karma, boolean isCurrentUser, boolean isMod) {

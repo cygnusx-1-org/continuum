@@ -362,7 +362,6 @@ Tocca per riprovare."</string>
     <string name="settings_customize_dark_theme_title">"Tema Scuro"</string>
     <string name="settings_customize_amoled_theme_title">"Tema Amoled"</string>
     <string name="settings_manage_themes_title">"Gestisci i temi"</string>
-    <string name="settings_advanced_master_title">"Avanzate"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Elimina Tutti i Subreddit nel Database"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Elimina Tutti gli Utenti nel Database"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Elimina Tutti i Tipi di Ordinamento nel Database"</string>

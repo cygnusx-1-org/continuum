@@ -102,7 +102,6 @@ import ml.docilealligator.infinityforreddit.services.EditProfileService;
 import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.settings.APIKeysPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.AccountSettingsManagementPreferenceFragment;
-import ml.docilealligator.infinityforreddit.settings.AdvancedPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.BackupAndRestorePreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CommentPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.CrashReportsFragment;
@@ -111,6 +110,7 @@ import ml.docilealligator.infinityforreddit.settings.CustomizeMainPageTabsFragme
 import ml.docilealligator.infinityforreddit.settings.DownloadLocationPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.GesturesAndButtonsPreferenceFragment;
+import ml.docilealligator.infinityforreddit.settings.GlobalSettingsManagementPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MainPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.MiscellaneousPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.NotificationPreferenceFragment;
@@ -237,7 +237,7 @@ public interface AppComponent {
 
     void inject(SidebarFragment sidebarFragment);
 
-    void inject(AdvancedPreferenceFragment advancedPreferenceFragment);
+    void inject(GlobalSettingsManagementPreferenceFragment globalSettingsManagementPreferenceFragment);
 
     void inject(BackupAndRestorePreferenceFragment backupAndRestorePreferenceFragment);
 

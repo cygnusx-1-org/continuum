@@ -407,7 +407,6 @@
     <string name="settings_customize_dark_theme_title">"Tamna tema"</string>
     <string name="settings_customize_amoled_theme_title">"Amoled tema"</string>
     <string name="settings_manage_themes_title">"Upravljaj temama"</string>
-    <string name="settings_advanced_master_title">"Napredno"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Obriši sve podreddite u bazi podataka"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Obriši sve korisnike u bazi podataka"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Obriši sve vrste sortiranja u bazi podataka"</string>

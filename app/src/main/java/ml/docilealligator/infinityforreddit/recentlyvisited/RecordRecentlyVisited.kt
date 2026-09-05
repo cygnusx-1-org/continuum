@@ -110,10 +110,6 @@ object RecordRecentlyVisited {
         @RecentlyVisitedType type: Int,
         iconUrl: String?
     ) {
-        // The anonymous account row is created lazily elsewhere too; the foreign key needs it.
-        if (accountName == Account.ANONYMOUS_ACCOUNT) {
-            redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount())
-        }
         val dao = redditDataRoomDatabase.recentlyVisitedDao()
         dao.insert(RecentlyVisited(accountName, name, type, iconUrl, System.currentTimeMillis()))
         dao.trimToLimit(accountName, type, LIMIT_PER_TYPE)

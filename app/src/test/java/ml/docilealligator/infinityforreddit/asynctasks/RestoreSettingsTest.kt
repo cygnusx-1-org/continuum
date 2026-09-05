@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import net.lingala.zip4j.ZipFile
@@ -80,7 +81,20 @@ class RestoreSettingsTest {
     private fun key(accountName: String?, base: String) = AccountScope.key(accountName, base)
 
     /** Builds the zip a backup would have written, one entry per named preference file. */
-    private fun restore(vararg backedUpFiles: Pair<String, Map<String, Serializable>>) {
+    private fun restore(vararg backedUpFiles: Pair<String, Map<String, Serializable>>) =
+        restore(mock<RedditDataRoomDatabase>(), emptyList(), backedUpFiles.toList())
+
+    /**
+     * The same, against a real database and with entries in the backup's `database` directory.
+     *
+     * The preference-only form hands the restore a mock database, so nothing it does to a table is
+     * observable; the rows are the whole point of these two.
+     */
+    private fun restore(
+        database: RedditDataRoomDatabase,
+        databaseJson: List<Pair<String, String>>,
+        backedUpFiles: List<Pair<String, Map<String, Serializable>>> = emptyList(),
+    ) {
         val source = File(context.cacheDir, "backup-source")
         source.deleteRecursively()
         val versionDir = File(source, VERSION_DIR)
@@ -88,6 +102,13 @@ class RestoreSettingsTest {
         for ((name, contents) in backedUpFiles) {
             ObjectOutputStream(FileOutputStream(File(versionDir, name + ".txt"))).use {
                 it.writeObject(HashMap(contents))
+            }
+        }
+        if (databaseJson.isNotEmpty()) {
+            val databaseDir = File(versionDir, "database")
+            databaseDir.mkdirs()
+            for ((name, json) in databaseJson) {
+                File(databaseDir, name).writeText(json)
             }
         }
 
@@ -110,7 +131,7 @@ class RestoreSettingsTest {
             context.contentResolver,
             uri,
             PASSWORD,
-            mock<RedditDataRoomDatabase>(),
+            database,
             file("current_account_test"),
             file("light_theme_test"),
             file("dark_theme_test"),
@@ -200,6 +221,53 @@ class RestoreSettingsTest {
 
         assertEquals("matched by prefix, the second file would have overwritten the first",
             "top", sortType.getString(key("alice", "sort_type_best_post"), null))
+    }
+
+    /**
+     * A real database, built the way the app builds one so that the anonymous row it depends on is
+     * there.
+     */
+    private fun realDatabase(): RedditDataRoomDatabase =
+        RedditDataRoomDatabase.createInMemoryForTest(context)
+
+    private fun anonymousSubredditsJson(username: String) =
+        """[{"id":"t5_1","name":"pics","iconUrl":"","username":"$username","favorite":false}]"""
+
+    /**
+     * The case the rename created. Rows in a backup carry the account name they were saved under,
+     * so one taken before the rename says "-" however new the database restoring it is -- the Room
+     * migration ran on upgrade, long before these rows existed. Left alone they are an account
+     * named "-" holding the data anonymous browsing should have got back.
+     */
+    @Test
+    fun `anonymous rows from a backup taken before the rename come back under the new name`() {
+        val database = realDatabase()
+        try {
+            restore(database, listOf(
+                "anonymous_subscribed_subreddits.json" to anonymousSubredditsJson("-")))
+
+            val dao = database.subscribedSubredditDao()
+            assertEquals(1, dao.getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT).size)
+            assertTrue("nothing may be left under the old name",
+                dao.getAllSubscribedSubredditsList("-").isEmpty())
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun `anonymous rows from a backup taken after the rename are left where they are`() {
+        val database = realDatabase()
+        try {
+            restore(database, listOf(
+                "anonymous_subscribed_subreddits.json" to
+                    anonymousSubredditsJson(Account.ANONYMOUS_ACCOUNT)))
+
+            assertEquals(1, database.subscribedSubredditDao()
+                .getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT).size)
+        } finally {
+            database.close()
+        }
     }
 
     @Test

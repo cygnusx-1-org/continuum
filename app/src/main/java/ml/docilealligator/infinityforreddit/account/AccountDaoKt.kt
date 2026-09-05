@@ -16,7 +16,7 @@ interface AccountDaoKt {
     @Insert(onConflict = OnConflictStrategy.Companion.IGNORE)
     suspend fun insertIfNotExists(account: Account)
 
-    @Query("UPDATE accounts SET is_current_user = 0 WHERE is_current_user = 1 AND username != '-'")
+    @Query("UPDATE accounts SET is_current_user = 0 WHERE is_current_user = 1 AND username != '.anonymous'")
     suspend fun markAllAccountsNonCurrent()
 
     @Query(
@@ -31,9 +31,9 @@ interface AccountDaoKt {
         isMod: Boolean
     )
 
-    @Query("SELECT access_token FROM accounts WHERE username = '-'")
+    @Query("SELECT access_token FROM accounts WHERE username = '.anonymous'")
     fun getAnonymousAccessToken(): String?
 
-    @Query("UPDATE accounts SET access_token = :accessToken WHERE username = '-'")
+    @Query("UPDATE accounts SET access_token = :accessToken WHERE username = '.anonymous'")
     fun setAnonymousAccessToken(accessToken: String?)
 }

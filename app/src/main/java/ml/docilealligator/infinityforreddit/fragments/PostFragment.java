@@ -631,9 +631,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.HOME_TYPE;
             nameOfUsage = PostFilterUsage.NO_USAGE;
 
-            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + Account.ANONYMOUS_ACCOUNT, SortType.Type.HOT.name());
+            String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_ANONYMOUS_FRONT_PAGE_POST, SortType.Type.HOT.name());
             if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
-                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + Account.ANONYMOUS_ACCOUNT, SortType.Time.ALL.name());
+                String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_ANONYMOUS_FRONT_PAGE_POST, SortType.Time.ALL.name());
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
             } else {
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
@@ -1344,9 +1344,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         }
                         break;
                     case PostType.ANONYMOUS_FRONT_PAGE:
-                        mSortTypeSharedPreferences.edit().putString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + Account.ANONYMOUS_ACCOUNT, sortType.getType().name()).apply();
+                        mSortTypeSharedPreferences.edit().putString(SharedPreferencesUtils.SORT_TYPE_ANONYMOUS_FRONT_PAGE_POST, sortType.getType().name()).apply();
                         if (sortType.getTime() != null) {
-                            mSortTypeSharedPreferences.edit().putString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + Account.ANONYMOUS_ACCOUNT, sortType.getTime().name()).apply();
+                            mSortTypeSharedPreferences.edit().putString(SharedPreferencesUtils.SORT_TIME_ANONYMOUS_FRONT_PAGE_POST, sortType.getTime().name()).apply();
                         }
                         break;
                 }
@@ -1500,8 +1500,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         if (savePostFeedScrolledPosition && postType == PostType.FRONT_PAGE && sortType != null && sortType.getType() == SortType.Type.BEST && mAdapter != null) {
             Post currentPost = mAdapter.getItemByPosition(maxPosition);
             if (currentPost != null) {
-                String accountNameForCache = mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_ANONYMOUS : mActivity.accountName;
-                String key = accountNameForCache + SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE;
+                // The account name is the whole prefix, anonymous included: it is spelled
+                // ".anonymous", which is what this file used before account names agreed with it.
+                String key = mActivity.accountName + SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE;
                 String value = currentPost.getFullName();
                 mPostFeedScrolledPositionSharedPreferences.edit().putString(key, value).apply();
             }

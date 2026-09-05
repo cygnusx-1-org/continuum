@@ -6,18 +6,21 @@ import android.content.SharedPreferences
 import android.content.pm.ProviderInfo
 import android.provider.DocumentsContract
 import androidx.preference.PreferenceManager
-import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import java.io.File
 import java.io.ObjectInputStream
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.BuildConfig
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
+import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData
+import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import net.lingala.zip4j.ZipFile
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -73,9 +76,7 @@ class BackupSettingsTest {
             preferences.edit().clear().commit()
         }
 
-        database = Room.inMemoryDatabaseBuilder(context, RedditDataRoomDatabase::class.java)
-            .allowMainThreadQueries()
-            .build()
+        database = RedditDataRoomDatabase.createInMemoryForTest(context)
     }
 
     @After
@@ -166,6 +167,47 @@ class BackupSettingsTest {
             key("alice", "sort_type_best_post")])
         assertEquals(9, backedUpFile(zip, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)[
             key("bob", SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1)])
+    }
+
+    /** One backed up database table, read back out of the zip as the JSON it was written as. */
+    private fun backedUpTable(zip: ZipFile, name: String): String {
+        val entry = BuildConfig.VERSION_NAME + "/database/" + name
+        val header = zip.getFileHeader(entry)
+        assertNotNull("no entry named " + entry, header)
+        return zip.getInputStream(header).use { it.readBytes().decodeToString() }
+    }
+
+    /**
+     * The anonymous account's rows are exported by name, from three tables the backup asks for
+     * explicitly rather than wholesale. Nothing else in this suite reaches the database directory,
+     * so a change to that name would have gone unnoticed here.
+     */
+    @Test
+    fun `the anonymous account's own rows are in the backup`() {
+        database.subscribedSubredditDao().insert(SubscribedSubredditData(
+            "t5_1", "pics", "", Account.ANONYMOUS_ACCOUNT, false))
+        database.subscribedUserDao().insert(SubscribedUserData(
+            "someone", "", Account.ANONYMOUS_ACCOUNT, false))
+
+        val zip = backUp()
+
+        assertTrue("the anonymous subscription is missing from the backup",
+            backedUpTable(zip, "anonymous_subscribed_subreddits.json").contains("pics"))
+        assertTrue("the anonymous followed user is missing from the backup",
+            backedUpTable(zip, "anonymous_subscribed_users.json").contains("someone"))
+    }
+
+    @Test
+    fun `a signed-in account's rows are not in the anonymous entries`() {
+        database.accountDao().insert(
+            Account("alice", null, null, null, null, null, 0, true, false))
+        database.subscribedSubredditDao().insert(SubscribedSubredditData(
+            "t5_2", "news", "", "alice", false))
+
+        val zip = backUp()
+
+        assertFalse("alice's subscription is in the anonymous entry",
+            backedUpTable(zip, "anonymous_subscribed_subreddits.json").contains("news"))
     }
 
     @Test

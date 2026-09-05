@@ -336,7 +336,6 @@
     <string name="settings_customize_dark_theme_title">"இருண்ட தோற்றம்"</string>
     <string name="settings_customize_amoled_theme_title">"கருந்தோற்றம்"</string>
     <string name="settings_manage_themes_title">"தோற்றங்களை நிர்வகி"</string>
-    <string name="settings_advanced_master_title">"மேம்பட்ட"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"தரவுதளத்தில் அனைத்து துணைரெட்டிட்களை அழி"</string>
     <string name="settings_delete_all_users_data_in_database_title">"தரவுதளத்தில் அனைத்து பயனர்களை அழி"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"தரவுதளத்தில் அனைத்து வரிசை வகைகளை அழி"</string>

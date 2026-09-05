@@ -358,7 +358,6 @@
     <string name="settings_customize_dark_theme_title">"다크 테마"</string>
     <string name="settings_customize_amoled_theme_title">"아몰레드 테마"</string>
     <string name="settings_manage_themes_title">"테마 관리"</string>
-    <string name="settings_advanced_master_title">"고급"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"데이터베이스의 모든 서브레딧 삭제"</string>
     <string name="settings_delete_all_users_data_in_database_title">"데이터베이스의 모든 사용자 삭제"</string>
     <string name="settings_reset_all_settings_title">"모든 설정 초기화"</string>

@@ -6,6 +6,7 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import ml.docilealligator.infinityforreddit.TestInfinity
+import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity
 import ml.docilealligator.infinityforreddit.shadows.ShadowContextImplWithDisplay
@@ -48,9 +49,20 @@ class AccountScopedSettingsScreenTest {
     fun setUp() {
         defaultPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         defaultPreferences.edit().clear().commit()
-        context.getSharedPreferences(
+        signIn("alice")
+    }
+
+    /** Puts [accountName] in the current-account file, or takes the name out of it for null. */
+    private fun signIn(accountName: String?) {
+        val editor = context.getSharedPreferences(
             SharedPreferencesUtils.CURRENT_ACCOUNT_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-            .edit().putString(SharedPreferencesUtils.ACCOUNT_NAME, "alice").commit()
+            .edit()
+        if (accountName == null) {
+            editor.remove(SharedPreferencesUtils.ACCOUNT_NAME)
+        } else {
+            editor.putString(SharedPreferencesUtils.ACCOUNT_NAME, accountName)
+        }
+        editor.commit()
     }
 
     @After
@@ -125,6 +137,72 @@ class AccountScopedSettingsScreenTest {
 
         val fontSize = fragment.findPreference<ListPreference>(SharedPreferencesUtils.FONT_SIZE_KEY)
         assertEquals("XLarge", fontSize!!.value)
+    }
+
+    @Test
+    fun `an edit on the anonymous account's screen lands under the anonymous account`() {
+        signIn(Account.ANONYMOUS_ACCOUNT)
+        launch()
+
+        openFontScreen().findPreference<ListPreference>(SharedPreferencesUtils.FONT_SIZE_KEY)!!
+            .value = "Large"
+        idle()
+
+        assertEquals("Large", defaultPreferences.getString(
+            AccountScope.key(Account.ANONYMOUS_ACCOUNT, SharedPreferencesUtils.FONT_SIZE_KEY), null))
+        assertFalse("the bare key is where nothing reads",
+            defaultPreferences.contains(SharedPreferencesUtils.FONT_SIZE_KEY))
+    }
+
+    /**
+     * The shape that made this worth a test of its own: browsing anonymously reaches the settings
+     * screens like any account, and the current-account file can have no name in it at all -- after
+     * a logout clears it, or before the first sign-in. [AccountScope.namespace] folds that to the
+     * anonymous account, and a screen has to agree, or a logged-out user's settings land under a
+     * namespace nothing reads.
+     */
+    @Test
+    fun `a current-account file with no name in it is the anonymous account, not a nameless one`() {
+        signIn(null)
+        launch()
+
+        openFontScreen().findPreference<ListPreference>(SharedPreferencesUtils.FONT_SIZE_KEY)!!
+            .value = "Large"
+        idle()
+
+        assertEquals("Large", defaultPreferences.getString(
+            AccountScope.key(Account.ANONYMOUS_ACCOUNT, SharedPreferencesUtils.FONT_SIZE_KEY), null))
+    }
+
+    @Test
+    fun `the anonymous screen shows its own value, not a signed-in account's`() {
+        defaultPreferences.edit()
+            .putString(AccountScope.key("alice", SharedPreferencesUtils.FONT_SIZE_KEY), "XSmall")
+            .putString(AccountScope.key(Account.ANONYMOUS_ACCOUNT,
+                SharedPreferencesUtils.FONT_SIZE_KEY), "XLarge")
+            .commit()
+        signIn(Account.ANONYMOUS_ACCOUNT)
+
+        launch()
+
+        assertEquals("XLarge", openFontScreen()
+            .findPreference<ListPreference>(SharedPreferencesUtils.FONT_SIZE_KEY)!!.value)
+    }
+
+    @Test
+    fun `an anonymous edit leaves a signed-in account's alone`() {
+        defaultPreferences.edit()
+            .putString(AccountScope.key("alice", SharedPreferencesUtils.FONT_SIZE_KEY), "XSmall")
+            .commit()
+        signIn(Account.ANONYMOUS_ACCOUNT)
+
+        launch()
+        openFontScreen().findPreference<ListPreference>(SharedPreferencesUtils.FONT_SIZE_KEY)!!
+            .value = "Large"
+        idle()
+
+        assertEquals("XSmall", defaultPreferences.getString(
+            AccountScope.key("alice", SharedPreferencesUtils.FONT_SIZE_KEY), null))
     }
 
     @Test

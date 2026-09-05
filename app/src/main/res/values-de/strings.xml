@@ -400,7 +400,6 @@ Tippen für Neuversuch."</string>
     <string name="settings_customize_dark_theme_title">"Dunkles Thema"</string>
     <string name="settings_customize_amoled_theme_title">"AMOLED-Thema"</string>
     <string name="settings_manage_themes_title">"Themen verwalten"</string>
-    <string name="settings_advanced_master_title">"Erweitert"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Alle Subreddits aus der Datenbank löschen"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Alle Benutzer aus der Datenbank löschen"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"Alle Sortierungsarten aus der Datenbank löschen"</string>

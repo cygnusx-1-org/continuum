@@ -33,6 +33,14 @@ public interface SubscribedUserDao {
     void deleteSubscribedUser(String name, String accountName);
 
     /**
+     * One account's followed and saved users. A row means followed <em>or</em> saved, so this takes
+     * both. Only a signed-in account's follows sync back; saving a user is local, and so is
+     * following one while logged out.
+     */
+    @Query("DELETE FROM subscribed_users WHERE username = :accountName COLLATE NOCASE")
+    void deleteAllSubscribedUsers(String accountName);
+
+    /**
      * Creates the row only if it is not there yet, with both reasons cleared; the caller then sets
      * its own flag. Following and saving run on a shared thread pool and can therefore race, and a
      * read-then-REPLACE would let the later writer drop the other's flag -- this cannot.

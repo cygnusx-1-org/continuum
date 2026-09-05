@@ -29,6 +29,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.account.AccountSettingsMigration;
+import ml.docilealligator.infinityforreddit.account.AnonymousAccountRename;
 import ml.docilealligator.infinityforreddit.activities.LockScreenActivity;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.WallpaperChangeReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
@@ -132,6 +133,12 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
         // told, which is what keeps PostFilter.isPostAllowed callable from unit tests with no setup.
         PostFilterBlockRecorder.install(executor,
                 blocks -> redditDataRoomDatabase.postFilterBlockedSubredditDao().upsertAll(blocks));
+
+        // The anonymous account is stored as ".anonymous" rather than "-" now, so that a username
+        // column and a preference key spell it the same way. The rows are handled by a Room
+        // migration; this is the current-account name and the one key that encoded the old
+        // spelling. First, because everything below reads settings through the account name.
+        AnonymousAccountRename.migrate(this);
 
         // One-time migration: every per-account setting moves onto the single AccountScope key
         // scheme, retiring the five conventions that grew up around it. Also runs the removal of

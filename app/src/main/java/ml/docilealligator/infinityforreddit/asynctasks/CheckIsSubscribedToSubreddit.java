@@ -13,9 +13,6 @@ public class CheckIsSubscribedToSubreddit {
                                                     String subredditName, @NonNull String accountName,
                                                     CheckIsSubscribedToSubredditListener checkIsSubscribedToSubredditListener) {
         executor.execute(() -> {
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                redditDataRoomDatabase.accountDao().insertIfNotExists(Account.getAnonymousAccount());
-            }
             SubscribedSubredditData subscribedSubredditData = redditDataRoomDatabase.subscribedSubredditDao().getSubscribedSubreddit(subredditName, accountName.equals(Account.ANONYMOUS_ACCOUNT) ? Account.ANONYMOUS_ACCOUNT : accountName);
             handler.post(() -> {
                 if (subscribedSubredditData != null) {

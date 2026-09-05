@@ -18,9 +18,10 @@ import org.robolectric.annotation.Config
  * How many read posts are kept. `-1` means "no limit, keep them all"; anything else is the cap the
  * history is trimmed to.
  *
- * The anonymous account is the case worth pinning: it has no Settings screen of its own to switch
- * the limit off with, so its history is always capped and the per-account "limit enabled" flag does
- * not apply to it. Without the cap, a logged-out install grows its read-post table forever.
+ * The anonymous account is the case worth pinning. It reaches the same Post History screen as any
+ * other, so the "limit enabled" flag applies to it too -- it used not to, which left that switch
+ * doing nothing while logged out. The default is on, so a logged-out install is still capped unless
+ * someone turns the cap off deliberately.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestInfinity::class)
@@ -47,17 +48,25 @@ class ReadPostsLimitTest {
             .commit()
     }
 
+    /**
+     * Anonymous used to be capped whatever this flag said, which made the switch on its Post
+     * History screen -- a screen it can reach like any other -- do nothing.
+     */
     @Test
-    fun `the anonymous account is capped whatever the limit-enabled flag says`() {
-        setLimitEnabled(Account.ANONYMOUS_ACCOUNT, false)
-
-        assertEquals(
-            500,
-            ReadPostsUtils.GetReadPostsLimit(Account.ANONYMOUS_ACCOUNT, preferences)
-        )
-
+    fun `the anonymous account's limit-enabled flag is honoured like any other account's`() {
         setLimit(Account.ANONYMOUS_ACCOUNT, 42)
         assertEquals(42, ReadPostsUtils.GetReadPostsLimit(Account.ANONYMOUS_ACCOUNT, preferences))
+
+        setLimitEnabled(Account.ANONYMOUS_ACCOUNT, false)
+        assertEquals(-1, ReadPostsUtils.GetReadPostsLimit(Account.ANONYMOUS_ACCOUNT, preferences))
+
+        setLimitEnabled(Account.ANONYMOUS_ACCOUNT, true)
+        assertEquals(42, ReadPostsUtils.GetReadPostsLimit(Account.ANONYMOUS_ACCOUNT, preferences))
+    }
+
+    @Test
+    fun `the anonymous account is capped at five hundred by default`() {
+        assertEquals(500, ReadPostsUtils.GetReadPostsLimit(Account.ANONYMOUS_ACCOUNT, preferences))
     }
 
     @Test

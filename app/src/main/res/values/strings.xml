@@ -611,14 +611,14 @@
     <string name="settings_enable_material_you_summary">Personalize Continuum based on Your Wallpaper</string>
     <string name="settings_apply_material_you_title">Apply Material You</string>
     <string name="settings_apply_material_you_summary">In case Continuum did not change the theme</string>
-    <string name="settings_advanced_master_title">Advanced</string>
-    <string name="settings_delete_all_subreddits_data_in_database_title">Delete All Subreddits in Database</string>
-    <string name="settings_delete_all_users_data_in_database_title">Delete All Users in Database</string>
-    <string name="settings_delete_all_sort_type_data_in_database_title">Delete All Sort Types in Database</string>
-    <string name="settings_delete_all_post_layout_data_in_database_title">Delete All Post Layouts in Database</string>
-    <string name="settings_delete_all_themes_in_database_title">Delete All Themes in Database</string>
-    <string name="settings_delete_front_page_scrolled_positions_in_database_title">Delete All Front Page Scrolled Positions in Database</string>
-    <string name="settings_delete_read_posts_in_database_title">Delete All Read Posts in Database</string>
+    <string name="settings_global_settings_management_title">Global Settings Management</string>
+    <string name="settings_delete_all_subreddits_data_in_database_title">Delete All Subreddits</string>
+    <string name="settings_delete_all_users_data_in_database_title">Delete All Users</string>
+    <string name="settings_delete_all_sort_type_data_in_database_title">Delete All Sort Types</string>
+    <string name="settings_delete_all_post_layout_data_in_database_title">Delete All Post Layouts</string>
+    <string name="settings_delete_all_themes_in_database_title">Delete All Themes</string>
+    <string name="settings_delete_front_page_scrolled_positions_in_database_title">Delete All Front Page Scrolled Positions</string>
+    <string name="settings_delete_read_posts_in_database_title">Delete All Read Posts</string>
     <string name="settings_delete_all_legacy_settings_title">Delete All Legacy Settings</string>
     <string name="settings_reset_all_settings_title">Reset All Settings</string>
     <string name="restart_app_see_changes">Restart the app to see the changes</string>
@@ -693,15 +693,26 @@
     <string name="settings_group_all_accounts">All Accounts</string>
     <string name="settings_group_this_account">This Account</string>
     <string name="settings_account_settings_management_title">Account Settings Management</string>
-    <string name="settings_account_settings_management_summary">Copy another account\'s settings onto this one, or put this one back to defaults</string>
+    <string name="settings_account_settings_management_summary">Copy another account\'s settings onto this one, put this one back to defaults, or delete what it has accumulated</string>
     <string name="settings_group_other">Other</string>
     <string name="settings_copy_settings_from_account_title">Copy Settings from Another Account</string>
     <string name="settings_copy_settings_from_account_summary">Give this account the settings another one has</string>
     <string name="settings_copy_settings_from_account_no_other_summary">There is no other account to copy from</string>
-    <string name="settings_reset_account_settings_title">Reset This Account\'s Settings</string>
+    <string name="settings_reset_account_settings_title">Reset All Account Settings</string>
     <string name="settings_reset_account_settings_summary">Put this account back on the default settings</string>
     <string name="copy_account_settings_confirmation">%1$s\'s settings and filters replace %2$s\'s. Main page tabs are left alone, and %1$s itself is not changed.\n\nThere is no undo — All Accounts › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
     <string name="reset_account_settings_confirmation">%1$s goes back to the default settings, main page tabs and its post and comment filters included.\n\nThere is no undo — All Accounts › Backup and Restore keeps a copy first. The app restarts when this is done.</string>
+    <string name="settings_delete_account_subreddits_summary">Forget this account\'s subscribed subreddits and favourites</string>
+    <string name="settings_delete_account_users_summary">Forget the users this account follows or has saved</string>
+    <string name="settings_delete_account_sort_types_summary">Forget the sort order each feed remembers</string>
+    <string name="settings_delete_account_post_layouts_summary">Forget the layout each feed remembers</string>
+    <string name="settings_delete_account_front_page_scrolled_position_summary">Forget where Home had been read up to</string>
+    <string name="delete_account_subreddits_confirmation">%1$s forgets which subreddits it is subscribed to and which of them are favourites. A signed-in account\'s list is Reddit\'s and comes back the next time subscriptions are refreshed; subreddits subscribed to while logged out are kept only in the app, and do not. Every other account keeps its own.</string>
+    <string name="delete_account_users_confirmation">%1$s forgets the users it follows and the users it has saved. Follows made while signed in are Reddit\'s and come back the next time subscriptions are refreshed; follows made while logged out, and saved users, are kept only in the app and do not. Every other account keeps its own.</string>
+    <string name="delete_account_sort_types_confirmation">%1$s forgets the sort order it has remembered for every feed. Every other account keeps its own.</string>
+    <string name="delete_account_post_layouts_confirmation">%1$s forgets the layout it has remembered for every feed. Every other account keeps its own.</string>
+    <string name="delete_account_front_page_scrolled_position_confirmation">%1$s forgets where it had been read up to in Home, so the feed opens at the top next time. Every other account keeps its own.</string>
+    <string name="delete_account_read_posts_confirmation">%1$s forgets which posts it has read, so posts it has already seen stop being marked. Upvoted, downvoted, hidden and saved posts are left alone, and every other account keeps its own read history.</string>
     <string name="settings_device_title">Device</string>
     <string name="settings_device_summary">Foldable support, image decoding limit</string>
     <string name="settings_miscellaneous_title">Miscellaneous</string>
@@ -727,7 +738,10 @@
     <string name="settings_save_read_posts_title">Save Read Posts</string>
     <string name="settings_limit_history_size_title">Limit History Size</string>
     <string name="settings_limit_history_size_hint">History Limit</string>
-    <string name="settings_read_posts_db_summary">Read Posts DB Table \nSize: %1$d(KB) \nCount: %2$d</string>
+    <!-- One line, and the same shape before and after the count arrives: the row is the last in
+         its group, and a summary that grows from nothing once measured moves the group's edge. -->
+    <string name="settings_read_posts_size_measuring">Size: … · Count: …</string>
+    <string name="settings_read_posts_size_summary">Size: %1$d KB · Count: %2$d</string>
     <string name="settings_mark_posts_as_read_after_voting_title">Mark Posts as Read After Voting</string>
     <string name="settings_mark_posts_as_read_on_scroll_title">Mark Posts as Read on Scroll</string>
     <string name="settings_hide_read_posts_automatically_title">Hide Read Posts Automatically</string>
@@ -862,7 +876,7 @@
     <string name="settings_sort_type_summary">Default sort type and time range for subreddits, users, and comments</string>
     <string name="settings_download_location_summary">Choose folders for downloaded images, GIFs, videos, and NSFW media</string>
     <string name="settings_miscellaneous_summary">Link handling, browser, search history, and language</string>
-    <string name="settings_advanced_master_summary">Reset settings, clear cached data, and crash reports</string>
+    <string name="settings_global_settings_management_summary">Reset every account\'s settings, and clear the data that belongs to no account</string>
 
     <!-- API keys-->
     <string name="settings_api_keys_title">API Keys</string>

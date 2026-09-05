@@ -34,6 +34,15 @@ object AccountSettingsMigration {
      */
     private const val SEED_VERSION = 3
 
+    /**
+     * How the anonymous account was spelled in the key prefixes this migration reads.
+     *
+     * Deliberately a literal and not [Account.ANONYMOUS_ACCOUNT]: that constant has since become
+     * `".anonymous"`, while the keys on disk that this migration exists to find still carry the old
+     * `"-"`. Following the constant would make it silently stop finding them.
+     */
+    private const val LEGACY_ANONYMOUS_PREFIX = "-"
+
     /** Bases that live in a file, plus any pre-per-account key that held the same setting. */
     private class Scoped(val base: String, val legacyUnscoped: String? = null)
 
@@ -195,7 +204,7 @@ object AccountSettingsMigration {
                     continue
                 }
                 val old = if (accountName.isNullOrEmpty() || accountName == Account.ANONYMOUS_ACCOUNT) {
-                    Account.ANONYMOUS_ACCOUNT + base
+                    LEGACY_ANONYMOUS_PREFIX + base
                 } else {
                     base
                 }
@@ -209,8 +218,8 @@ object AccountSettingsMigration {
                 editor.remove(base)
                 changed = true
             }
-            if (existing.containsKey(Account.ANONYMOUS_ACCOUNT + base)) {
-                editor.remove(Account.ANONYMOUS_ACCOUNT + base)
+            if (existing.containsKey(LEGACY_ANONYMOUS_PREFIX + base)) {
+                editor.remove(LEGACY_ANONYMOUS_PREFIX + base)
                 changed = true
             }
         }
@@ -418,7 +427,7 @@ object AccountSettingsMigration {
         }
         // What the user chose outranks what was silently in force underneath it.
         return listOfNotNull(
-            Account.ANONYMOUS_ACCOUNT + entry.base,
+            LEGACY_ANONYMOUS_PREFIX + entry.base,
             entry.base,
             entry.legacyUnscoped,
         )

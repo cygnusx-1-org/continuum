@@ -60,6 +60,16 @@ public class SharedPreferencesUtils {
     public static final String SORT_TYPE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.sort_type";
     public static final String SORT_TYPE_BEST_POST = "sort_type_best_post";
     public static final String SORT_TIME_BEST_POST = "sort_time_best_post";
+    /**
+     * Home's sort while browsing anonymously, which is a different feed ({@code
+     * PostType.ANONYMOUS_FRONT_PAGE}) from the signed-in one and so remembers its own.
+     *
+     * <p>It used to be stored as {@code SORT_TYPE_SUBREDDIT_POST_BASE + ANONYMOUS_ACCOUNT} --
+     * anonymous encoded as a subreddit named {@code "-"}. That stopped working when the account
+     * name gained a {@code .}, since {@code AccountScope} splits a key on its last one.
+     */
+    public static final String SORT_TYPE_ANONYMOUS_FRONT_PAGE_POST = "sort_type_anonymous_front_page_post";
+    public static final String SORT_TIME_ANONYMOUS_FRONT_PAGE_POST = "sort_time_anonymous_front_page_post";
     public static final String SORT_TYPE_SEARCH_POST = "sort_type_search_post";
     public static final String SORT_TIME_SEARCH_POST = "sort_time_search_post";
     public static final String SORT_TYPE_SUBREDDIT_POST_BASE = "sort_type_subreddit_post_";
@@ -91,7 +101,6 @@ public class SharedPreferencesUtils {
 
     public static final String FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.front_page_scrolled_position";
     public static final String FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE = "_front_page";
-    public static final String FRONT_PAGE_SCROLLED_POSITION_ANONYMOUS = ".anonymous";
 
     public static final String PULL_NOTIFICATION_TIME = "pull_notification_time";
     public static final String SHOW_ELAPSED_TIME_KEY = "show_elapsed_time";
@@ -147,17 +156,17 @@ public class SharedPreferencesUtils {
     public static final String CUSTOMIZE_DARK_THEME = "customize_dark_theme";
     public static final String CUSTOMIZE_AMOLED_THEME = "customize_amoled_theme";
     public static final String MANAGE_THEMES = "manage_themes";
-    public static final String DELETE_ALL_SUBREDDITS_DATA_IN_DATABASE = "delete_all_subreddits_data_in_database";
-    public static final String DELETE_ALL_USERS_DATA_IN_DATABASE = "delete_all_users_data_in_database";
-    public static final String DELETE_ALL_SORT_TYPE_DATA_IN_DATABASE = "delete_all_sort_type_data_in_database";
-    public static final String DELETE_ALL_POST_LAYOUT_DATA_IN_DATABASE = "delete_all_post_layout_data_in_database";
     public static final String DELETE_ALL_THEMES_IN_DATABASE = "delete_all_themes_in_database";
-    public static final String DELETE_FRONT_PAGE_SCROLLED_POSITIONS_IN_DATABASE = "delete_front_page_scrolled_positions_in_database";
-    public static final String DELETE_READ_POSTS_IN_DATABASE = "delete_read_posts_in_database";
     public static final String DELETE_ALL_LEGACY_SETTINGS = "delete_all_legacy_settings";
     public static final String RESET_ALL_SETTINGS = "reset_all_settings";
     public static final String COPY_SETTINGS_FROM_ACCOUNT = "copy_settings_from_account";
     public static final String RESET_ACCOUNT_SETTINGS = "reset_account_settings";
+    public static final String DELETE_ACCOUNT_SUBREDDITS = "delete_account_subreddits";
+    public static final String DELETE_ACCOUNT_USERS = "delete_account_users";
+    public static final String DELETE_ACCOUNT_SORT_TYPES = "delete_account_sort_types";
+    public static final String DELETE_ACCOUNT_POST_LAYOUTS = "delete_account_post_layouts";
+    public static final String DELETE_ACCOUNT_FRONT_PAGE_SCROLLED_POSITION = "delete_account_front_page_scrolled_position";
+    public static final String DELETE_ACCOUNT_READ_POSTS = "delete_account_read_posts";
     public static final String IMAGE_DOWNLOAD_LOCATION = "image_download_location";
     public static final String GIF_DOWNLOAD_LOCATION = "gif_download_location";
     public static final String VIDEO_DOWNLOAD_LOCATION = "video_download_location";

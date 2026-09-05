@@ -440,7 +440,6 @@
     <string name="settings_customize_dark_theme_title">"ダークテーマ"</string>
     <string name="settings_customize_amoled_theme_title">"AMOLEDテーマ"</string>
     <string name="settings_manage_themes_title">"テーマの管理"</string>
-    <string name="settings_advanced_master_title">"高度な設定"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"データベース中の全てのSubreddit情報を削除"</string>
     <string name="settings_delete_all_users_data_in_database_title">"データベース中の全てのユーザー情報を削除"</string>
     <string name="settings_delete_all_sort_type_data_in_database_title">"データベース中の全ての並べ替え情報を削除"</string>

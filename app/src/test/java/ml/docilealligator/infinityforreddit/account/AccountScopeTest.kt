@@ -14,8 +14,9 @@ class AccountScopeTest {
 
     @Test
     fun `every spelling of anonymous reaches one namespace`() {
-        val expected = AccountScope.ANONYMOUS_NAMESPACE
-        // "-" from BaseActivity, "" from a cleared current-account file, null from a missing value.
+        val expected = Account.ANONYMOUS_ACCOUNT
+        // The constant from BaseActivity, "" from a cleared current-account file, null from a
+        // missing value.
         assertEquals(expected, AccountScope.namespace(Account.ANONYMOUS_ACCOUNT))
         assertEquals(expected, AccountScope.namespace(""))
         assertEquals(expected, AccountScope.namespace(null))
@@ -30,7 +31,7 @@ class AccountScopeTest {
     fun `the anonymous namespace cannot collide with a username`() {
         // Reddit usernames are letters, digits, underscores and hyphens, so no account can be
         // named ".anonymous" and take an anonymous user's settings.
-        assert(AccountScope.ANONYMOUS_NAMESPACE.contains('.'))
+        assert(Account.ANONYMOUS_ACCOUNT.contains('.'))
     }
 
     @Test
@@ -55,7 +56,7 @@ class AccountScopeTest {
     fun `an anonymous key splits on the separator before the base, not the one starting it`() {
         val key = AccountScope.key(null, "_nsfw")
         assertEquals(".anonymous._nsfw", key)
-        assertEquals(AccountScope.ANONYMOUS_NAMESPACE, AccountScope.namespaceOf(key))
+        assertEquals(Account.ANONYMOUS_ACCOUNT, AccountScope.namespaceOf(key))
         assertEquals("_nsfw", AccountScope.baseOf(key))
     }
 

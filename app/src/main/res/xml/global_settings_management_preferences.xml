@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:key="delete_all_themes_in_database"
+        app:title="@string/settings_delete_all_themes_in_database_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:key="delete_all_legacy_settings"
+        app:title="@string/settings_delete_all_legacy_settings_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:key="reset_all_settings"
+        app:title="@string/settings_reset_all_settings_title" />
+
+</PreferenceScreen>

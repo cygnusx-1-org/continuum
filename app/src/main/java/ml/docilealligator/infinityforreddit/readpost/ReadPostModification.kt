@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.readpost
 
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
-import ml.docilealligator.infinityforreddit.account.Account
 import kotlin.math.max
 
 suspend fun insertReadPost(
@@ -18,8 +17,6 @@ suspend fun insertReadPost(
         while (readPostDaoKt.getReadPostsCount(username, readPostType) > limit && isReadPostLimit) {
             readPostDaoKt.deleteOldestReadPosts(username, readPostType)
         }
-
-        redditDataRoomDatabase.accountDaoKt().insertIfNotExists(Account.getAnonymousAccount())
 
         readPostDaoKt.insert(ReadPost(username, postId, readPostType))
         if (readPostType == ReadPostType.ANONYMOUS_UPVOTED_POSTS) {
