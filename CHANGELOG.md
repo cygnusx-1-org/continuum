@@ -35,7 +35,7 @@ Backups and restores still include everything, including all accounts, as it was
 
 Advanced in Settings became "Global Settings Management"
 
-"Crash Reports" was moved to the bottom of Setnow tings under Debug.
+"Crash Reports" was moved to the bottom of Settings under Debug.
 
 8.3.0.2 / 2026-8-31
 ============
