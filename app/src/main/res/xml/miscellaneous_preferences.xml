@@ -7,6 +7,12 @@
         app:title="@string/settings_save_front_page_scrolled_position_title"
         app:summary="@string/settings_save_front_page_scrolled_position_summary" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="resume_where_i_left_off"
+        app:title="@string/settings_resume_where_i_left_off_title"
+        app:summary="@string/settings_resume_where_i_left_off_summary" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"
         app:entries="@array/link_handler"

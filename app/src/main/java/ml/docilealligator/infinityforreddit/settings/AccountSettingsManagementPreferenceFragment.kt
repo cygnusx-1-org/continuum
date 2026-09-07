@@ -136,6 +136,15 @@ class AccountSettingsManagementPreferenceFragment : CustomFontPreferenceFragment
             AccountStoredData.deleteFrontPageScrolledPosition(context, accountName)
         }
 
+        // The open feeds each hold their own resume record and write it again when they next come
+        // to rest, so there is nothing on screen to put right: what this deletes is on disk.
+        deleteAction(SharedPreferencesUtils.DELETE_ACCOUNT_RESUME_STATE,
+            R.string.delete_account_resume_state_confirmation,
+            R.string.delete_resume_state_success,
+            recreateActivities = false) { context, accountName ->
+            AccountStoredData.deleteResumeState(context, accountName)
+        }
+
         // The only row whose summary is a measurement, so the only one with anything to say once
         // it has been acted on. Nothing else here recreates this screen, so it re-reads it itself.
         deleteAction(SharedPreferencesUtils.DELETE_ACCOUNT_READ_POSTS,

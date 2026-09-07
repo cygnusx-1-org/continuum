@@ -60,6 +60,7 @@ class AccountScopedScreenKeysTest {
         "delete_account_sort_types",
         "delete_account_post_layouts",
         "delete_account_front_page_scrolled_position",
+        "delete_account_resume_state",
         "delete_account_read_posts",
     )
 

@@ -16,6 +16,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -101,6 +102,8 @@ import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent;
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
+import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -123,6 +126,13 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     public static final String EXTRA_CONTEXT_NUMBER = "ECN";
     public static final String EXTRA_MESSAGE_FULLNAME = "EMF";
     public static final String EXTRA_POST_LIST_POSITION = "EPLP";
+    // Resume where I left off: where in the thread the user was, and which threads they had
+    // collapsed. The comment tree is not cached anywhere, so unlike a feed this refetches and
+    // restores only the place.
+    public static final String EXTRA_RESUME_COMMENT_FULLNAME = "ERCF";
+    public static final String EXTRA_RESUME_COMMENT_POSITION = "ERCP";
+    public static final String EXTRA_RESUME_COMMENT_OFFSET = "ERCO";
+    public static final String EXTRA_RESUME_COLLAPSED = "ERCC";
     private static final int EDIT_POST_REQUEST_CODE = 2;
     private static final String SCROLL_POSITION_STATE = "SPS";
 
@@ -212,6 +222,26 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private float swipeActionThreshold;
     private boolean shouldSwipeBack;
     private int commentScrollPosition = -1;
+    // Resume where I left off. resumeScrollPending is spent by the first tree that can honour it.
+    @Nullable
+    private String resumeCommentFullname;
+    private int resumeCommentPosition = -1;
+    private int resumeCommentOffset;
+    @Nullable
+    private ArrayList<String> resumeCollapsed;
+    private boolean resumeScrollPending;
+    private int resumeCollapsePasses;
+    /**
+     * A ceiling on the collapse-and-re-read cycle below, so a tree that never settles -- a fullname
+     * that stays in the set because collapsing it does not take -- cannot spin forever.
+     */
+    private static final int MAX_RESUME_COLLAPSE_PASSES = 200;
+    /** How long the comment list may stay hidden waiting for a thread it has to refetch first. */
+    private static final long RESUME_COMMENT_REVEAL_TIMEOUT_MS = 8000L;
+    /** Least time between two snapshot writes while the user is reading. */
+    private static final long RESUME_CAPTURE_THROTTLE_MS = 5000L;
+    private long lastResumeCaptureAt;
+    private final Runnable resumeCaptureRunnable = this::captureResumeSnapshot;
     private FragmentViewPostDetailBinding binding;
     @Nullable
     private RecyclerView mCommentsRecyclerView;
@@ -289,6 +319,20 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         mSwipeUpToHideFab = mSharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_UP_TO_HIDE_JUMP_TO_NEXT_TOP_LEVEL_COMMENT_BUTTON, false);
         if (savedInstanceState == null) {
             viewPostDetailFragmentId = System.currentTimeMillis();
+            // Only on a fresh creation: across a rotation the fragment's own saved state holds a
+            // newer position than the arguments do.
+            if (getArguments() != null
+                    && getArguments().containsKey(EXTRA_RESUME_COMMENT_FULLNAME)) {
+                resumeCommentFullname = getArguments().getString(EXTRA_RESUME_COMMENT_FULLNAME);
+                resumeCommentPosition = getArguments().getInt(EXTRA_RESUME_COMMENT_POSITION, -1);
+                resumeCommentOffset = getArguments().getInt(EXTRA_RESUME_COMMENT_OFFSET, 0);
+                resumeCollapsed = getArguments().getStringArrayList(EXTRA_RESUME_COLLAPSED);
+                resumeScrollPending = true;
+                // Hidden until the thread has been fetched and put back: it arrives scrolled to the
+                // top, and showing that before jumping away from it is the flash this removes.
+                ScrollAnchor.hideUntilRestored(
+                        commentsRecyclerView(), RESUME_COMMENT_REVEAL_TIMEOUT_MS);
+            }
         } else {
             commentScrollPosition = savedInstanceState.getInt(SCROLL_POSITION_STATE);
         }
@@ -632,6 +676,27 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
             mCommentsFooterAdapter.setHasMoreChildren(dataState.getHasMoreChildren());
             mCommentsFooterAdapter.notifyIfStateChanged();
+
+            applyResume();
+        });
+
+        // Keep the snapshot current as the user reads, so a process killed without lifecycle
+        // callbacks -- dismissal from recents -- still leaves an accurate place on disk. Throttled,
+        // and trailing so the last time the list comes to rest is the one that counts.
+        commentsRecyclerView().addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState != RecyclerView.SCROLL_STATE_IDLE || mActivity == null) {
+                    return;
+                }
+                recyclerView.removeCallbacks(resumeCaptureRunnable);
+                long since = SystemClock.uptimeMillis() - lastResumeCaptureAt;
+                if (since >= RESUME_CAPTURE_THROTTLE_MS) {
+                    captureResumeSnapshot();
+                } else {
+                    recyclerView.postDelayed(resumeCaptureRunnable, RESUME_CAPTURE_THROTTLE_MS - since);
+                }
+            }
         });
 
         bindView(savedInstanceState);
@@ -818,6 +883,144 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         }
 
         return false;
+    }
+
+    private void captureResumeSnapshot() {
+        if (mActivity == null || binding == null) {
+            return;
+        }
+        commentsRecyclerView().removeCallbacks(resumeCaptureRunnable);
+        lastResumeCaptureAt = SystemClock.uptimeMillis();
+        ResumeState.capture(mActivity);
+    }
+
+    /** Whichever list the comments are actually in: their own pane on a wide screen, else the post's. */
+    private RecyclerView commentsRecyclerView() {
+        return mCommentsRecyclerView != null
+                ? mCommentsRecyclerView
+                : binding.postDetailRecyclerViewViewPostDetailFragment;
+    }
+
+    /**
+     * Put the thread back where the user left it, once it has been fetched.
+     *
+     * <p>Collapsing first and scrolling afterwards is the order that matters: a collapsed thread
+     * removes its descendants from the list, so a position recorded against the collapsed tree only
+     * means what it meant once the same threads are collapsed again.
+     */
+    private void applyResume() {
+        final ArrayList<Comment> current = comments;
+        if (current == null || current.isEmpty()) {
+            return;
+        }
+        if (applyResumeCollapsed()) {
+            // Collapsing re-emits the data state, which brings us straight back here for the next
+            // one. The scroll waits until the tree has stopped changing shape underneath it.
+            return;
+        }
+        applyResumeScroll();
+    }
+
+    /**
+     * Collapse one recorded thread, if any is still expanded. Returns whether it did, because
+     * collapsing hides that comment's descendants: every index below it shifts, so the list has to
+     * be re-read before the next one can be found.
+     */
+    private boolean applyResumeCollapsed() {
+        final ArrayList<Comment> current = comments;
+        if (resumeCollapsed == null || resumeCollapsed.isEmpty() || current == null) {
+            return false;
+        }
+        if (++resumeCollapsePasses > MAX_RESUME_COLLAPSE_PASSES) {
+            resumeCollapsed = null;
+            return false;
+        }
+        for (int i = 0; i < current.size(); i++) {
+            Comment comment = current.get(i);
+            if (comment != null && comment.hasReply() && comment.isExpanded()
+                    && resumeCollapsed.contains(comment.getFullName())) {
+                viewPostDetailFragmentViewModel.collapseComment(i);
+                return true;
+            }
+        }
+        // Nothing left to collapse: the rest of the set was deleted, or is inside a thread that is
+        // already collapsed above it, which comes to the same thing on screen.
+        resumeCollapsed = null;
+        return false;
+    }
+
+    private void applyResumeScroll() {
+        final ArrayList<Comment> current = comments;
+        if (!resumeScrollPending || current == null) {
+            return;
+        }
+        resumeScrollPending = false;
+        int target = -1;
+        if (resumeCommentFullname != null && !resumeCommentFullname.isEmpty()) {
+            for (int i = 0; i < current.size(); i++) {
+                Comment comment = current.get(i);
+                if (comment != null && resumeCommentFullname.equals(comment.getFullName())) {
+                    target = i;
+                    break;
+                }
+            }
+        }
+        if (target < 0) {
+            // The comment is gone -- deleted, or collapsed out of the tree by a different sort.
+            // The recorded row is the best remaining guess.
+            target = resumeCommentPosition;
+        }
+        RecyclerView recyclerView = commentsRecyclerView();
+        if (target < 0 || target >= current.size() || mConcatAdapter == null) {
+            recyclerView.setVisibility(View.VISIBLE);
+            return;
+        }
+        ScrollAnchor.applyHidden(
+                recyclerView,
+                ConcatAdapterKt.getAbsolutePosition(mConcatAdapter, mCommentsAdapter, target),
+                resumeCommentOffset);
+    }
+
+    /**
+     * Record where in the thread the user is and which threads they have collapsed, for a host
+     * building a resume snapshot. Returns false, writing nothing, when there is no thread on screen
+     * to describe.
+     */
+    public boolean captureResumeState(@NonNull Bundle out) {
+        final ArrayList<Comment> current = comments;
+        if (current == null || current.isEmpty() || mConcatAdapter == null || binding == null) {
+            return false;
+        }
+        ScrollAnchor.Anchor anchor = ScrollAnchor.captureTopmost(commentsRecyclerView());
+        if (!anchor.isValid()) {
+            return false;
+        }
+        int local = ConcatAdapterKt.getLocalPosition(mConcatAdapter, mCommentsAdapter, anchor.position);
+        if (local < 0 || local >= current.size()) {
+            // The top of the screen is the post itself, not a comment. There is a place here worth
+            // recording all the same, so anchor on the first comment at its natural offset.
+            local = 0;
+            anchor = new ScrollAnchor.Anchor(anchor.position, 0, anchor.position, 0);
+        }
+        Comment anchorComment = current.get(local);
+        if (anchorComment == null) {
+            return false;
+        }
+        out.putString(EXTRA_RESUME_COMMENT_FULLNAME, anchorComment.getFullName());
+        out.putInt(EXTRA_RESUME_COMMENT_POSITION, local);
+        out.putInt(EXTRA_RESUME_COMMENT_OFFSET, anchor.offset);
+        // hasReply as well as !isExpanded: a comment with no children is never expanded, so the
+        // flag on its own would call every leaf in the thread collapsed.
+        ArrayList<String> collapsed = new ArrayList<>();
+        for (Comment comment : current) {
+            if (comment != null && comment.hasReply() && !comment.isExpanded()) {
+                collapsed.add(comment.getFullName());
+            }
+        }
+        if (!collapsed.isEmpty()) {
+            out.putStringArrayList(EXTRA_RESUME_COLLAPSED, collapsed);
+        }
+        return true;
     }
 
     private void restoreCommentScrollPosition() {
@@ -1365,6 +1568,10 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
     @Override
     public void onDestroyView() {
+        // A trailing snapshot capture still pending would fire against a torn-down view.
+        if (binding != null) {
+            commentsRecyclerView().removeCallbacks(resumeCaptureRunnable);
+        }
         Bridge.clear(this);
         EventBus.getDefault().unregister(this);
         binding.postDetailRecyclerViewViewPostDetailFragment.addOnWindowFocusChangedListener(null);

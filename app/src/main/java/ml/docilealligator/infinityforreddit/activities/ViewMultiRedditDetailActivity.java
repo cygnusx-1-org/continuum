@@ -71,6 +71,8 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
@@ -89,7 +91,7 @@ import retrofit2.Retrofit;
 public class ViewMultiRedditDetailActivity extends BaseActivity implements SortTypeSelectionCallback,
         PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, ActivityToolbarInterface, MarkPostAsReadInterface,
         PostTypeBottomSheetFragment.PostTypeSelectionCallback, FABMoreOptionsBottomSheetFragment.FABOptionSelectionCallback,
-        RecyclerViewContentScrollingInterface {
+        RecyclerViewContentScrollingInterface, Restorable {
 
     public static final String EXTRA_MULTIREDDIT_DATA = "EMD";
     public static final String EXTRA_MULTIREDDIT_PATH = "EMP";
@@ -142,6 +144,9 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
     private String initialSortTime;
     @SuppressWarnings("NullAway.Init")
     private Fragment mFragment;
+    // Resume where I left off. The multireddit path travels in the intent extras, so only the
+    // feed's own record needs storing here.
+    private final FeedResumeState resumeFeed = new FeedResumeState();
     private int fabOption;
     private boolean hideFab;
     private boolean showBottomAppBar;
@@ -168,6 +173,9 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
 
         binding = ActivityViewMultiRedditDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Before the feed fragment is built, so the record it is given is the recorded one.
+        claimResumeState();
 
         EventBus.getDefault().register(this);
 
@@ -522,8 +530,25 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
             }
         }
+        // One-shot, so a fragment rebuilt later cannot replay the restore.
+        resumeFeed.applyTo(bundle);
         mFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        // Nothing at all rather than a record that cannot say where in the feed the user was: that
+        // would reopen this screen scrolled to the top and overwrite a good record from a moment
+        // ago.
+        if (mFragment instanceof PostFragment) {
+            ((PostFragment) mFragment).captureResumeState(out);
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeFeed.read(state);
     }
 
     private void bottomAppBarOptionAction(int option) {

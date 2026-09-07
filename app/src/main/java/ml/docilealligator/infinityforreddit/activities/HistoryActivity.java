@@ -35,13 +35,15 @@ import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.HistoryPostFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 public class HistoryActivity extends BaseActivity implements ActivityToolbarInterface,
-        PostLayoutBottomSheetFragment.PostLayoutSelectionCallback {
+        PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, Restorable {
 
     public static final String EXTRA_READ_POST_TYPE = "EHT";
 
@@ -56,6 +58,9 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
     SharedPreferences mCurrentAccountSharedPreferences;
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
+    // Resume where I left off. The list kind travels in the intent extras; only where in the list
+    // the user was needs storing, and the posts themselves are in Room already.
+    private final FeedResumeState resumeFeed = new FeedResumeState();
     @ReadPostType
     private int readPostType;
     private FragmentManager fragmentManager;
@@ -140,6 +145,9 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
         binding.toolbarHistoryActivity.setSubtitle(R.string.history_activity_subtitle);
 
         fragmentManager = getSupportFragmentManager();
+
+        // Before the fragment is built, so the record it is given is the recorded one.
+        claimResumeState();
 
         initializeViewPager();
     }
@@ -274,6 +282,19 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
         }
     }
 
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        Fragment fragment = fragmentManager == null ? null : fragmentManager.findFragmentByTag("f0");
+        if (fragment instanceof HistoryPostFragment) {
+            ((HistoryPostFragment) fragment).captureResumeState(out);
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeFeed.read(state);
+    }
+
     private class SectionsPagerAdapter extends FragmentStateAdapter {
 
         SectionsPagerAdapter(FragmentActivity fa) {
@@ -286,6 +307,8 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
             HistoryPostFragment fragment = new HistoryPostFragment();
             Bundle bundle = new Bundle();
             bundle.putInt(HistoryPostFragment.EXTRA_READ_POST_TYPE, readPostType);
+            // One-shot, so a fragment rebuilt later cannot replay the restore.
+            resumeFeed.applyTo(bundle);
             fragment.setArguments(bundle);
             return fragment;
         }

@@ -166,6 +166,7 @@ public class SharedPreferencesUtils {
     public static final String DELETE_ACCOUNT_SORT_TYPES = "delete_account_sort_types";
     public static final String DELETE_ACCOUNT_POST_LAYOUTS = "delete_account_post_layouts";
     public static final String DELETE_ACCOUNT_FRONT_PAGE_SCROLLED_POSITION = "delete_account_front_page_scrolled_position";
+    public static final String DELETE_ACCOUNT_RESUME_STATE = "delete_account_resume_state";
     public static final String DELETE_ACCOUNT_READ_POSTS = "delete_account_read_posts";
     public static final String IMAGE_DOWNLOAD_LOCATION = "image_download_location";
     public static final String GIF_DOWNLOAD_LOCATION = "gif_download_location";
@@ -186,6 +187,10 @@ public class SharedPreferencesUtils {
     public static final String MUTE_NSFW_VIDEO = "mute_nsfw_video";
     public static final String VIDEO_PLAYER_IGNORE_NAV_BAR = "video_player_ignore_nav_bar";
     public static final String SAVE_FRONT_PAGE_SCROLLED_POSITION = "save_front_page_scrolled_position";
+    // Reopen on the screen the user left, at the place they left it, showing the posts that were
+    // already loaded. Overrides SAVE_FRONT_PAGE_SCROLLED_POSITION on Home when both are on: that
+    // one skips past what was read, this one goes back to it.
+    public static final String RESUME_WHERE_I_LEFT_OFF = "resume_where_i_left_off";
     public static final String DATA_SAVING_MODE_PREFERENCE = "data_saving_mode_preference";
     public static final String DATA_SAVING_MODE = "data_saving_mode";
     public static final String DATA_SAVING_MODE_OFF = "0";
@@ -526,6 +531,7 @@ public class SharedPreferencesUtils {
     public static final String SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER = "show_theme_toggle_in_navigation_drawer";
     public static final String SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER = "show_nsfw_toggle_in_navigation_drawer";
     public static final String SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER = "show_thumbnail_on_the_left_toggle_in_navigation_drawer";
+    public static final String SHOW_RESUME_TOGGLE_IN_NAVIGATION_DRAWER = "show_resume_toggle_in_navigation_drawer";
 
     public static final String POST_DETAILS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.post_details";
     public static final String SEPARATE_POST_AND_COMMENTS_IN_PORTRAIT_MODE = "separate_post_and_comments_in_portrait_mode";

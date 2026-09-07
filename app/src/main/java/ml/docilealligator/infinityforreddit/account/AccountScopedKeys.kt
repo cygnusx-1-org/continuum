@@ -124,7 +124,7 @@ object AccountScopedKeys {
         // Miscellaneous. The link handler and browser pickers are absent on purpose: they are
         // already per-account through AccountScope keys of their own.
         "language", "use_old_reddit_domain", "main_page_back_button_action",
-        "save_front_page_scrolled_position", "enable_search_history",
+        "save_front_page_scrolled_position", "resume_where_i_left_off", "enable_search_history",
         "disable_profile_avatar_animation",
     )
 

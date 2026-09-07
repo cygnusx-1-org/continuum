@@ -27,11 +27,12 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
     private static final int ROW_THEME = 1;
     private static final int ROW_NSFW = 2;
     private static final int ROW_THUMBNAIL = 3;
-    private static final int ROW_SETTINGS = 4;
+    private static final int ROW_RESUME = 4;
+    private static final int ROW_SETTINGS = 5;
 
     // Canonical top-to-bottom order of the rows. visibleRows is always a subsequence of this,
     // which lets refreshVisibleRows() dispatch minimal insert/remove notifications.
-    private static final int[] ROW_ORDER = {ROW_REMINDERS, ROW_THEME, ROW_NSFW, ROW_THUMBNAIL, ROW_SETTINGS};
+    private static final int[] ROW_ORDER = {ROW_REMINDERS, ROW_THEME, ROW_NSFW, ROW_THUMBNAIL, ROW_RESUME, ROW_SETTINGS};
 
     private final BaseActivity baseActivity;
     private final Resources resources;
@@ -40,9 +41,11 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
     private final int primaryIconColor;
     private boolean isNSFWEnabled;
     private boolean showThumbnailOnTheLeft;
+    private boolean resumeWhereILeftOff;
     private boolean showThemeToggle;
     private boolean showNSFWToggle;
     private boolean showThumbnailToggle;
+    private boolean showResumeToggle;
     private boolean collapsePreferencesSection;
     private final List<Integer> visibleRows = new ArrayList<>();
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
@@ -59,9 +62,11 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         isNSFWEnabled = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.NSFW_BASE), false);
         showThumbnailOnTheLeft = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
+        resumeWhereILeftOff = sharedPreferences.getBoolean(SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false);
         showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);
+        showResumeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_RESUME_TOGGLE_IN_NAVIGATION_DRAWER, true);
         collapsePreferencesSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION, false);
         this.itemClickListener = itemClickListener;
         buildVisibleRows();
@@ -77,6 +82,8 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
                 return showNSFWToggle;
             case ROW_THUMBNAIL:
                 return showThumbnailToggle;
+            case ROW_RESUME:
+                return showResumeToggle;
             case ROW_SETTINGS:
                 return true;
             default:
@@ -190,6 +197,17 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
                     itemHolder.itemView.setOnClickListener(view ->
                             itemClickListener.onMenuClick(R.string.settings_show_thumbnail_on_the_left_in_compact_layout));
                     break;
+                case ROW_RESUME:
+                    drawableId = R.drawable.ic_resume_day_night_24dp;
+                    stringId = resumeWhereILeftOff
+                            ? R.string.disable_resume_where_i_left_off
+                            : R.string.enable_resume_where_i_left_off;
+                    // The label is refreshed via setResumeWhereILeftOff() when MainActivity's
+                    // observer of the setting delivers the new value back, so there is no inline
+                    // update here (a single, authoritative update path, as for the rows above).
+                    itemHolder.itemView.setOnClickListener(view ->
+                            itemClickListener.onMenuClick(R.string.enable_resume_where_i_left_off));
+                    break;
                 case ROW_SETTINGS:
                     stringId = R.string.settings;
                     drawableId = R.drawable.ic_settings_day_night_24dp;
@@ -229,10 +247,24 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         }
     }
 
+    public void setResumeWhereILeftOff(boolean resumeWhereILeftOff) {
+        if (this.resumeWhereILeftOff == resumeWhereILeftOff) {
+            // The observer feeding this emits on registration too, with the value the constructor
+            // already read.
+            return;
+        }
+        this.resumeWhereILeftOff = resumeWhereILeftOff;
+        int index = visibleRows.indexOf(ROW_RESUME);
+        if (index >= 0 && !collapsePreferencesSection) {
+            notifyItemChanged(index + 1);
+        }
+    }
+
     public void refreshVisibleRows(SharedPreferences navigationDrawerSharedPreferences) {
         showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);
+        showResumeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_RESUME_TOGGLE_IN_NAVIGATION_DRAWER, true);
 
         if (collapsePreferencesSection) {
             // Only the title is shown while collapsed (item count stays 1), so just rebuild the

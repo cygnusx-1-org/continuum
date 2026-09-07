@@ -43,6 +43,7 @@ import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder;
 import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditRepository;
 import ml.docilealligator.infinityforreddit.reminder.ReminderManager;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MaterialYouUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -167,6 +168,9 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
                 if (activity instanceof CustomFontReceiver) {
                     ((CustomFontReceiver) activity).setCustomFont(typeface, titleTypeface, contentTypeface);
                 }
+                // Pre-created where the platform has it: this runs before the activity's own
+                // onCreate, so a screen is on the recorded stack before anything it does there.
+                ResumeState.recordCreated(activity);
             }
 
             @Override
@@ -174,11 +178,17 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
                 if (isSecureMode) {
                     activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
                 }
+                // And again here, because the Pre callbacks above are API 29 and the framework
+                // simply never dispatches them below that -- minSdk is 24. Without this the live
+                // stack stayed empty on Android 7 through 9, so nothing was ever recorded and
+                // "Resume where I left off" did nothing at all on those releases, silently.
+                // recordCreated ignores an activity it already holds, so on 29+ this is a no-op.
+                ResumeState.recordCreated(activity);
             }
 
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
-
+                ResumeState.onActivityStarted();
             }
 
             @Override
@@ -194,12 +204,16 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
 
             @Override
             public void onActivityPaused(@NonNull Activity activity) {
-
+                // The earliest warning that the app may be going away. Dismissing from recents
+                // delivers pause, stop and destroy in one burst and then kills the process, so the
+                // snapshot is written here rather than waiting for onSaveInstanceState -- which
+                // that path never calls at all.
+                ResumeState.onActivityPaused(Infinity.this);
             }
 
             @Override
             public void onActivityStopped(@NonNull Activity activity) {
-
+                ResumeState.onActivityStopped(Infinity.this);
             }
 
             @Override
@@ -209,7 +223,7 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
-
+                ResumeState.recordDestroyed(activity);
             }
         });
 

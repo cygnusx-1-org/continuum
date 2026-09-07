@@ -482,6 +482,8 @@
     <string name="settings_gestures_and_buttons_title">Gestures &amp; Buttons</string>
     <string name="settings_save_front_page_scrolled_position_title">Save Scrolled Position in HOME</string>
     <string name="settings_save_front_page_scrolled_position_summary">Browse new posts after refreshing in HOME (Front Page, sort type: Best)</string>
+    <string name="settings_resume_where_i_left_off_title">Resume where I left off</string>
+    <string name="settings_resume_where_i_left_off_summary">Reopen on the same screen, at the same place, showing what was already loaded instead of refreshing. Takes precedence over Save Scrolled Position in HOME</string>
     <string name="settings_link_handler_title">Link Handler (Per-account)</string>
     <string name="settigns_video_title">Video</string>
     <string name="settings_video_autoplay_title">Video Autoplay</string>
@@ -618,6 +620,7 @@
     <string name="settings_delete_all_post_layout_data_in_database_title">Delete All Post Layouts</string>
     <string name="settings_delete_all_themes_in_database_title">Delete All Themes</string>
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">Delete All Front Page Scrolled Positions</string>
+    <string name="settings_delete_resume_state_title">Delete Resume Data</string>
     <string name="settings_delete_read_posts_in_database_title">Delete All Read Posts</string>
     <string name="settings_delete_all_legacy_settings_title">Delete All Legacy Settings</string>
     <string name="settings_reset_all_settings_title">Reset All Settings</string>
@@ -707,11 +710,13 @@
     <string name="settings_delete_account_sort_types_summary">Forget the sort order each feed remembers</string>
     <string name="settings_delete_account_post_layouts_summary">Forget the layout each feed remembers</string>
     <string name="settings_delete_account_front_page_scrolled_position_summary">Forget where Home had been read up to</string>
+    <string name="settings_delete_account_resume_state_summary">Forget the screens and posts saved for Resume where I left off</string>
     <string name="delete_account_subreddits_confirmation">%1$s forgets which subreddits it is subscribed to and which of them are favourites. A signed-in account\'s list is Reddit\'s and comes back the next time subscriptions are refreshed; subreddits subscribed to while logged out are kept only in the app, and do not. Every other account keeps its own.</string>
     <string name="delete_account_users_confirmation">%1$s forgets the users it follows and the users it has saved. Follows made while signed in are Reddit\'s and come back the next time subscriptions are refreshed; follows made while logged out, and saved users, are kept only in the app and do not. Every other account keeps its own.</string>
     <string name="delete_account_sort_types_confirmation">%1$s forgets the sort order it has remembered for every feed. Every other account keeps its own.</string>
     <string name="delete_account_post_layouts_confirmation">%1$s forgets the layout it has remembered for every feed. Every other account keeps its own.</string>
     <string name="delete_account_front_page_scrolled_position_confirmation">%1$s forgets where it had been read up to in Home, so the feed opens at the top next time. Every other account keeps its own.</string>
+    <string name="delete_account_resume_state_confirmation">%1$s forgets the screens it had open and the posts cached to put them back, so the next launch opens on Home. The setting stays on and starts recording again from here. Every other account keeps its own.</string>
     <string name="delete_account_read_posts_confirmation">%1$s forgets which posts it has read, so posts it has already seen stop being marked. Upvoted, downvoted, hidden and saved posts are left alone, and every other account keeps its own read history.</string>
     <string name="settings_device_title">Device</string>
     <string name="settings_device_summary">Foldable support, image decoding limit</string>
@@ -800,6 +805,7 @@
     <string name="settings_show_theme_toggle_in_navigation_drawer_title">Show Theme Toggle</string>
     <string name="settings_show_nsfw_toggle_in_navigation_drawer_title">Show NSFW Toggle</string>
     <string name="settings_show_thumbnail_on_the_left_toggle_in_navigation_drawer_title">Show Thumbnail on the Left Toggle</string>
+    <string name="settings_show_resume_toggle_in_navigation_drawer_title">Show Resume Toggle</string>
     <string name="settings_default_search_result_tab">Default Search Result Tab</string>
     <string name="settings_crash_reports_title">Crash Reports</string>
     <string name="settings_show_only_one_comment_level_indicator">Show Only One Comment Level Indicator</string>
@@ -1067,6 +1073,8 @@
 
     <string name="enable_nsfw">Enable NSFW</string>
     <string name="disable_nsfw">Disable NSFW</string>
+    <string name="enable_resume_where_i_left_off">Enable Resume</string>
+    <string name="disable_resume_where_i_left_off">Disable Resume</string>
 
     <string name="cannot_save_image">Cannot save the image</string>
     <string name="cannot_save_gif">Cannot save the gif</string>
@@ -1316,6 +1324,7 @@
     <string name="delete_all_post_layouts_success">Delete all post layouts successfully</string>
     <string name="delete_all_themes_success">Delete all themes successfully</string>
     <string name="delete_all_front_page_scrolled_positions_success">Delete all scrolled positions in front page successfully</string>
+    <string name="delete_resume_state_success">Resume data deleted</string>
     <string name="delete_all_read_posts_success">Delete all read posts successfully</string>
     <string name="delete_all_legacy_settings_success">Delete all legacy settings successfully</string>
     <string name="reset_all_settings_success">Reset all settings successfully</string>
@@ -1457,7 +1466,7 @@
     <string name="random_subscribed_subreddit">Random Subscribed Subreddit</string>
     <string name="random_post">Random Post</string>
     <string name="random_nsfw_post">Random NSFW Post</string>
-    <string name="random_subreddit_sfw_not_guaranteed">Safe for work is not guaranteed. Reddit\'s NSFW flag is set by each subreddit\'s own moderators, so a subreddit nobody flagged looks safe here.</string>
+    <string name="random_subreddit_sfw_not_guaranteed">Safe for work is not guaranteed. A subreddit can still have NSFW content without the NSFW flag on it.</string>
     <string name="fetch_random_thing_failed">Try again later</string>
 
     <string name="select_video_quality">Select Video Quality</string>

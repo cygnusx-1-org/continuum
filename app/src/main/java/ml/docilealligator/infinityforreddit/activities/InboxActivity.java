@@ -47,6 +47,8 @@ import ml.docilealligator.infinityforreddit.fragments.InboxFragment;
 import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.Message;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -58,10 +60,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class InboxActivity extends BaseActivity implements ActivityToolbarInterface, RecyclerViewContentScrollingInterface {
+public class InboxActivity extends BaseActivity implements ActivityToolbarInterface,
+        RecyclerViewContentScrollingInterface, Restorable, ResumeLaunchExtras {
 
     public static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
     public static final String EXTRA_VIEW_MESSAGE = "EVM";
+    private static final String STATE_RESUME_PAGE = "RP";
 
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
     private static final int SEARCH_USER_REQUEST_CODE = 1;
@@ -82,6 +86,9 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
     @Inject
     Executor mExecutor;
     private SectionsPagerAdapter sectionsPagerAdapter;
+    // Resume where I left off: which of Notifications / Messages the user was reading. The lists
+    // themselves are short and refetched, so the tab is the whole of it.
+    private int resumePage = -1;
     private FragmentManager fragmentManager;
     @Nullable
     private String mNewAccountName;
@@ -95,6 +102,9 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
 
         binding = ActivityInboxBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Before the pager is built: the page to open on is chosen there and never revisited.
+        claimResumeState();
 
         EventBus.getDefault().register(this);
 
@@ -297,6 +307,10 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
         }).attach();
         if (savedInstanceState == null && getIntent().getBooleanExtra(EXTRA_VIEW_MESSAGE, false)) {
             binding.viewPagerInboxActivity.setCurrentItem(1, false);
+        } else if (savedInstanceState == null && resumePage > 0) {
+            // A notification asking for Messages wins over a resume: that is what the user is
+            // acting on now, where the resume is where they were last time.
+            binding.viewPagerInboxActivity.setCurrentItem(resumePage, false);
         }
 
         fixViewPager2Sensitivity(binding.viewPagerInboxActivity);
@@ -422,6 +436,40 @@ public class InboxActivity extends BaseActivity implements ActivityToolbarInterf
     @Override
     public void contentScrollDown() {
         binding.fabInboxActivity.hide();
+    }
+
+    /**
+     * The launch extras with the one-shot navigation extras taken out.
+     *
+     * <p>These say "open showing this, just this once" -- a tab named by a link, a message to mark
+     * read, an account to switch to on the way in. They answer what the user did at the moment they
+     * arrived, and a replay is not that moment. Left in, every resume would reopen this screen the
+     * way a link opened it weeks ago, overriding the place actually recorded, and the account-switch
+     * extra would re-run its switch on each launch.
+     */
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        // An empty bundle, never null: this screen is opened from the drawer and the bottom bar with
+        // no extras at all, and null here means "cannot be relaunched", which would make the most
+        // ordinary way of reaching the inbox the one that truncates the snapshot.
+        Bundle extras = getIntent().getExtras();
+        Bundle out = extras == null ? new Bundle() : new Bundle(extras);
+        out.remove(EXTRA_VIEW_MESSAGE);
+        out.remove(EXTRA_NEW_ACCOUNT_NAME);
+        return out;
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (binding != null) {
+            out.putInt(STATE_RESUME_PAGE, binding.viewPagerInboxActivity.getCurrentItem());
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumePage = state.getInt(STATE_RESUME_PAGE, -1);
     }
 
     private class SectionsPagerAdapter extends FragmentStateAdapter {

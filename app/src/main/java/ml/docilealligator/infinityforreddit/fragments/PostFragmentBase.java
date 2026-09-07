@@ -31,7 +31,9 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.util.UnstableApi;
+import androidx.paging.CombinedLoadStates;
 import androidx.paging.ItemSnapshotList;
+import androidx.paging.LoadState;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,6 +48,8 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -95,6 +99,8 @@ import ml.docilealligator.infinityforreddit.events.ShowDividerInCompactLayoutPre
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -155,6 +161,9 @@ public abstract class PostFragmentBase extends Fragment {
     protected AdjustableTouchSlopItemTouchHelper touchHelper;
     private boolean shouldSwipeBack;
     protected final Map<String, String> subredditOrUserIcons = new HashMap<>();
+    /** The load-state listener waiting to apply a resume anchor. See {@link #cancelAnchorRestore()}. */
+    @Nullable
+    private Function1<CombinedLoadStates, Unit> pendingAnchorRestore;
     @Nullable
     private PostPositionUpdateEventToPostList pendingScrollToPostEvent;
     @Nullable
@@ -662,6 +671,132 @@ public abstract class PostFragmentBase extends Fragment {
 
     @Nullable
     protected abstract PostRecyclerViewAdapter getPostAdapter();
+
+    // ------------------------------------------------------------------ resume where I left off
+
+    /**
+     * Record where this feed is into {@code out}, under {@code feedKey}.
+     *
+     * <p>Returns false, writing nothing, when there is no anchor worth recording. That matters to
+     * the caller: a host writes the rest of its own state only if this succeeded, because a record
+     * naming a feed but unable to say where in it the user was would reopen that feed at the top and
+     * overwrite a good record from a moment ago.
+     */
+    protected final boolean captureAnchorInto(@NonNull Bundle out, @Nullable String feedKey) {
+        // getView() first, and before getPostRecyclerView(): that accessor reaches through the view
+        // binding, which does not exist until onCreateView. A host asks its fragments to describe
+        // themselves when the app is backgrounded, and a pager page created but not yet laid out
+        // would throw from there -- costing the snapshot everything above this screen.
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        if (feedKey == null || adapter == null || getView() == null) {
+            return false;
+        }
+        RecyclerView recyclerView = getPostRecyclerView();
+        ScrollAnchor.Anchor anchor = ScrollAnchor.captureTopmost(recyclerView);
+        Post post = anchor.isValid() ? adapter.getItemByPosition(anchor.position) : null;
+        return FeedResumeState.capture(out, feedKey, anchor,
+                post == null ? null : post.getFullName(), adapter.getItemCount());
+    }
+
+    /**
+     * Jump to a recorded anchor once Paging's refresh has landed, with the list hidden until it has.
+     *
+     * <p>The fullname is tried first and the recorded row is only a fallback, because the row is not
+     * stable: the cache window is trimmed from the front, and a post can be deleted or filtered
+     * away between the two runs.
+     */
+    protected final void restoreAnchorWhenLoaded(@Nullable String anchorFullName,
+                                                 int fallbackPosition, int offset,
+                                                 long revealTimeoutMs) {
+        // No getView() guard here, unlike the two capture helpers: this one is called from inside
+        // onCreateView, and the fragment manager assigns the fragment's view only after that
+        // returns. Guarding on it would return early every single time and silently disable the
+        // restore. The binding the accessor reaches through is already built by this point, which
+        // is what makes reaching for it safe here and not there.
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        if (adapter == null) {
+            return;
+        }
+        RecyclerView recyclerView = getPostRecyclerView();
+        // Hidden from here rather than from applyHidden alone: the feed arrives with the top of the
+        // listing already laid out, and showing that before jumping away from it is the flash this
+        // exists to remove.
+        ScrollAnchor.hideUntilRestored(recyclerView, revealTimeoutMs);
+        Function1<CombinedLoadStates, Unit> listener = new Function1<>() {
+            @Override
+            public Unit invoke(CombinedLoadStates combinedLoadStates) {
+                if (combinedLoadStates.getRefresh() instanceof LoadState.NotLoading
+                        && adapter.getItemCount() > 0) {
+                    adapter.removeLoadStateListener(this);
+                    pendingAnchorRestore = null;
+                    int target = positionOfFullName(anchorFullName);
+                    if (target == RecyclerView.NO_POSITION) {
+                        // The post is gone -- deleted, filtered out, or trimmed off the front of the
+                        // cache. The recorded row is the best remaining guess.
+                        target = fallbackPosition;
+                    }
+                    if (target >= adapter.getItemCount()) {
+                        target = RecyclerView.NO_POSITION;
+                    }
+                    ScrollAnchor.applyHidden(recyclerView, target, offset);
+                }
+                return Unit.INSTANCE;
+            }
+        };
+        pendingAnchorRestore = listener;
+        adapter.addLoadStateListener(listener);
+    }
+
+    /**
+     * Abandon a restore that has not landed yet, and show the list again.
+     *
+     * <p>For a refresh, which asks for the top of the listing and is the one thing a restore must
+     * not override. Dropping the pending flag is not enough on its own: the load-state listener
+     * above is already registered and would fire on the refresh's own load, hiding the list a
+     * second time and scrolling it back to where the user was before they asked not to be.
+     */
+    protected final void cancelAnchorRestore() {
+        Function1<CombinedLoadStates, Unit> listener = pendingAnchorRestore;
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        if (listener != null && adapter != null) {
+            adapter.removeLoadStateListener(listener);
+        }
+        pendingAnchorRestore = null;
+        if (getView() != null) {
+            getPostRecyclerView().setVisibility(View.VISIBLE);
+        }
+    }
+
+    /** The fullname of the post at the top of the viewport, or null if there is nothing rendered. */
+    @Nullable
+    protected final String currentAnchorFullName() {
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        if (adapter == null || getView() == null) {
+            return null;
+        }
+        ScrollAnchor.Anchor anchor = ScrollAnchor.captureTopmost(getPostRecyclerView());
+        if (!anchor.isValid()) {
+            return null;
+        }
+        Post post = adapter.getItemByPosition(anchor.position);
+        return post == null ? null : post.getFullName();
+    }
+
+    /** Adapter position of {@code fullName}, or {@link RecyclerView#NO_POSITION}. */
+    protected final int positionOfFullName(@Nullable String fullName) {
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        if (fullName == null || fullName.isEmpty() || adapter == null) {
+            return RecyclerView.NO_POSITION;
+        }
+        ItemSnapshotList<Post> snapshot = adapter.snapshot();
+        for (int i = 0; i < snapshot.size(); i++) {
+            Post post = snapshot.get(i);
+            if (post != null && fullName.equals(post.getFullName())) {
+                return i;
+            }
+        }
+        return RecyclerView.NO_POSITION;
+    }
 
     /**
      * Remembers which post the swipe-between-posts pager moved to, and scrolls there on the way back

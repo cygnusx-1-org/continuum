@@ -29,6 +29,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +68,9 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.recentsearchquery.InsertRecentSearchQuery;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
@@ -84,12 +89,21 @@ import retrofit2.Retrofit;
 public class SearchResultActivity extends BaseActivity implements SortTypeSelectionCallback,
         PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, ActivityToolbarInterface,
         FABMoreOptionsBottomSheetFragment.FABOptionSelectionCallback,
-        PostTypeBottomSheetFragment.PostTypeSelectionCallback, RecyclerViewContentScrollingInterface, MarkPostAsReadInterface {
+        PostTypeBottomSheetFragment.PostTypeSelectionCallback, RecyclerViewContentScrollingInterface,
+        MarkPostAsReadInterface, Restorable, ResumeLaunchExtras {
+
+    /** Which of Posts / Subreddits / Users the user was on. */
+    private static final String STATE_RESUME_TAB = "RTB";
 
     public static final String EXTRA_QUERY = "EQ";
     public static final String EXTRA_TRENDING_SOURCE = "ETS";
     public static final String EXTRA_SEARCH_IN_SUBREDDIT_OR_USER_NAME = "ESISOUN";
     public static final String EXTRA_SEARCH_IN_MULTIREDDIT = "ESIM";
+    /**
+     * The same multireddit as {@link #EXTRA_SEARCH_IN_MULTIREDDIT}, as JSON, for a resume replay.
+     * See {@link #resumeLaunchExtras()}.
+     */
+    public static final String EXTRA_SEARCH_IN_MULTIREDDIT_JSON = "ESIMJ";
     public static final String EXTRA_SEARCH_IN_THING_TYPE = "ESITT";
     public static final String EXTRA_SHOULD_RETURN_SUBREDDIT_AND_USER_NAME = "ESRSAUN";
     public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
@@ -154,6 +168,10 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
     private boolean mInsertSearchQuerySuccess;
     private boolean mReturnSubredditAndUserName;
     private FragmentManager fragmentManager;
+    // Resume where I left off. The query and what it searched travel in the intent extras; only the
+    // tab and the results feed's own record need storing.
+    private final FeedResumeState resumeFeed = new FeedResumeState();
+    private int resumeTab = -1;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private int fabOption;
     private ActivitySearchResultBinding binding;
@@ -238,6 +256,17 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
 
         mSearchInSubredditOrUserName = intent.getStringExtra(EXTRA_SEARCH_IN_SUBREDDIT_OR_USER_NAME);
         mSearchInMultiReddit = intent.getParcelableExtra(EXTRA_SEARCH_IN_MULTIREDDIT);
+        if (mSearchInMultiReddit == null) {
+            // A resume replay carries it as JSON, because the Parcelable cannot be stored.
+            String multiRedditJson = intent.getStringExtra(EXTRA_SEARCH_IN_MULTIREDDIT_JSON);
+            if (multiRedditJson != null) {
+                try {
+                    mSearchInMultiReddit = new Gson().fromJson(multiRedditJson, MultiReddit.class);
+                } catch (JsonSyntaxException e) {
+                    mSearchInMultiReddit = null;
+                }
+            }
+        }
         mSearchInThingType = intent.getIntExtra(EXTRA_SEARCH_IN_THING_TYPE, SelectThingReturnKey.THING_TYPE.SUBREDDIT);
         mReturnSubredditAndUserName = intent.getBooleanExtra(EXTRA_SHOULD_RETURN_SUBREDDIT_AND_USER_NAME, false);
         initialSortType = intent.getStringExtra(EXTRA_INITIAL_SORT_TYPE);
@@ -253,6 +282,10 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         if (savedInstanceState != null) {
             mInsertSearchQuerySuccess = savedInstanceState.getBoolean(INSERT_SEARCH_QUERY_SUCCESS_STATE);
         }
+
+        // Before bindView(), which chooses the tab to open on and never revisits it.
+        claimResumeState();
+
         bindView(savedInstanceState);
     }
 
@@ -287,6 +320,70 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutSearchResultActivity);
         applyTabLayoutTheme(binding.tabLayoutSearchResultActivity);
         applyFABTheme(binding.fabSearchResultActivity);
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (sectionsPagerAdapter == null || fragmentManager == null) {
+            return;
+        }
+        int tab = binding.viewPagerSearchResultActivity.getCurrentItem();
+        Fragment fragment = fragmentManager.findFragmentByTag("f" + tab);
+        // Only the posts tab can describe where it was; the subreddit and user tabs have no feed
+        // record, so a resume onto one of those restores the tab alone. Nothing is written when the
+        // posts tab is showing but cannot describe itself, rather than overwriting a good record
+        // with one that says nothing.
+        if (fragment instanceof PostFragment && !((PostFragment) fragment).captureResumeState(out)) {
+            return;
+        }
+        out.putInt(STATE_RESUME_TAB, tab);
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeTab = state.getInt(STATE_RESUME_TAB, -1);
+        resumeFeed.read(state);
+    }
+
+    /**
+     * The launch extras with the multireddit turned into JSON.
+     *
+     * <p>Searching inside a multireddit hands this screen the multireddit as a {@code Parcelable},
+     * and a marshalled {@code Parcel} must never be written to disk. {@link MultiReddit} is a plain
+     * record that Gson already round-trips for the settings backup, so it is swapped for its JSON
+     * rather than costing this screen its place in the snapshot.
+     */
+    /**
+     * The multireddit being searched inside, by name. Only the part of this screen's identity that
+     * is hidden inside a {@code Parcelable} -- the query, the thing type and the sort are primitive
+     * extras, and ResumeState adds those itself. Naming just this avoids the Gson call in
+     * {@link #resumeLaunchExtras()}, which serializes the whole multireddit.
+     */
+    @Nullable
+    @Override
+    public String resumeIdentity() {
+        MultiReddit searchInMultiReddit = getIntent().getParcelableExtra(EXTRA_SEARCH_IN_MULTIREDDIT);
+        return searchInMultiReddit == null ? null : searchInMultiReddit.getName();
+    }
+
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Bundle out = new Bundle(extras);
+        MultiReddit searchInMultiReddit = getIntent().getParcelableExtra(EXTRA_SEARCH_IN_MULTIREDDIT);
+        if (searchInMultiReddit != null) {
+            out.remove(EXTRA_SEARCH_IN_MULTIREDDIT);
+            out.putString(EXTRA_SEARCH_IN_MULTIREDDIT_JSON, new Gson().toJson(searchInMultiReddit));
+        }
+        // A tab named by an opening search link ("?type=sr") answers what the user asked for at the
+        // moment they arrived. A replay is not that moment, and left in it would override the tab
+        // actually recorded on every resume.
+        out.remove(EXTRA_INITIAL_TAB);
+        return out;
     }
 
     private void bindView(@Nullable Bundle savedInstanceState) {
@@ -329,11 +426,13 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         fixViewPager2Sensitivity(binding.viewPagerSearchResultActivity);
 
         if (savedInstanceState == null) {
-            // A search link naming a result kind (?type=sr) opens on that tab; everything else
-            // opens on the tab the user configured.
+            // A search link naming a result kind (?type=sr) opens on that tab; a resume opens on the
+            // tab the user left; everything else opens on the tab they configured.
             int initialTab = getIntent().getIntExtra(EXTRA_INITIAL_TAB, -1);
             if (initialTab < 0 || initialTab >= sectionsPagerAdapter.getItemCount()) {
-                initialTab = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_SEARCH_RESULT_TAB, "0");
+                initialTab = resumeTab >= 0 && resumeTab < sectionsPagerAdapter.getItemCount()
+                        ? resumeTab
+                        : SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_SEARCH_RESULT_TAB, "0");
             }
             binding.viewPagerSearchResultActivity.setCurrentItem(initialTab, false);
         }
@@ -872,6 +971,8 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
                 bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
                 bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
             }
+            // One-shot, so a fragment rebuilt later cannot replay the restore.
+            resumeFeed.applyTo(bundle);
             mFragment.setArguments(bundle);
             return mFragment;
         }

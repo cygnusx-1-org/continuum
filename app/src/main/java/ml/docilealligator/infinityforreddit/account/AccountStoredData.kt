@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType
+import ml.docilealligator.infinityforreddit.resume.ResumeState
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 
 /**
@@ -12,9 +13,9 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
  * These sit beside the whole-account operations in [AccountSettings] on the Account Settings
  * Management screen, and they are what used to be the Advanced screen's "Delete All" actions. Each
  * is deliberately narrow: this account's subscription list, its followed and saved users, the sort
- * order a feed remembers, the layout a feed remembers, where Home had reached, and which posts have
- * been read. None of them is a setting anyone chose on a settings screen, which is why they are
- * worth clearing without resetting the settings that were.
+ * order a feed remembers, the layout a feed remembers, where Home had reached, the screen stack it
+ * left behind, and which posts have been read. None of them is a setting anyone chose on a settings
+ * screen, which is why they are worth clearing without resetting the settings that were.
  *
  * Every function is scoped to one account and touches no other's, which is what separates them from
  * the actions left on Global Settings Management — the theme library and the legacy keys have no
@@ -97,6 +98,23 @@ object AccountStoredData {
             .remove(AccountScope.namespace(accountName) +
                 SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE)
             .commit()
+    }
+
+    /**
+     * The screen stack this account left behind, and the feeds cached to put it back.
+     *
+     * Both halves go together or neither does: the snapshot names posts in the cache, and the cache
+     * is only ever read through the snapshot, so half of the pair is worth nothing on its own. The
+     * setting itself is left switched on -- this row throws away what has accumulated, it does not
+     * turn the feature off.
+     *
+     * The snapshot file is shared between accounts, which is why the deletion is by name rather than
+     * wholesale: it is removed only if it is this account's, and the cached feeds live in a
+     * directory of their own per account.
+     */
+    @JvmStatic
+    fun deleteResumeState(context: Context, accountName: String?) {
+        ResumeState.clearAccount(context, accountName)
     }
 
     /**

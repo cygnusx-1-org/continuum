@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -46,8 +47,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.MenuItemCompat;
 import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.OneShotPreDrawListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.appbar.AppBarLayout;
@@ -55,6 +58,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import java.lang.reflect.Field;
+import java.util.ArrayDeque;
 import java.util.Locale;
 import java.util.Objects;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
@@ -70,18 +74,25 @@ import ml.docilealligator.infinityforreddit.font.FontFamily;
 import ml.docilealligator.infinityforreddit.font.FontStyle;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 
-public abstract class BaseActivity extends AppCompatActivity implements CustomFontReceiver {
+public abstract class BaseActivity extends AppCompatActivity implements CustomFontReceiver, Restorable {
+
+    /** How far down its scrolling view a plain screen was. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_SCROLL_Y = "RSY";
     public static final int IGNORE_MARGIN = -1;
     // Tag for refresh-rate diagnostics. Filter logcat with `RefreshRate:* *:S` to confirm whether
     // the "Force Maximum Refresh Rate" setting is actually taking effect on a given device.
     private static final String REFRESH_RATE_TAG = "RefreshRate";
 
+    /** Whether {@link #claimResumeState()} has already run. See its javadoc for the ordering. */
+    private boolean resumeStateClaimed;
     private boolean immersiveInterface;
     private boolean changeStatusBarIconColor;
     private boolean hasDrawerLayout = false;
@@ -280,6 +291,107 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         accountName = Objects.requireNonNull(getCurrentAccountSharedPreferences().getString(SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT));
 
         mHandler = new Handler(Looper.getMainLooper());
+
+        // Resume where I left off. Reopening from recents with the process dead recreates only the
+        // top screen, so the stack underneath it has to be rebuilt from the snapshot -- otherwise
+        // the next capture refuses it for not starting at MainActivity and the user loses it.
+        ResumeState.seedFromSnapshot(this);
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // The fallback, for every screen with nothing to decide from its recorded state while it is
+        // being built. The ones that do have something to decide call claimResumeState() themselves.
+        claimResumeState();
+    }
+
+    /**
+     * Take this screen's recorded state out of the resume snapshot and hand it to
+     * {@link #restoreResumeState(Bundle)}, at most once.
+     *
+     * <p>A screen that decides anything from that state while it is building -- which tab to open
+     * on, whether the toolbar starts collapsed -- must call this from its own {@code onCreate},
+     * after the content view exists and before it makes the decision. A pager's initial page is
+     * chosen once and never revisited, so a claim arriving after that choice restores nothing at
+     * all; that is the whole reason this is separate from {@link #onPostCreate}, which runs after
+     * {@code onCreate} has finished. Screens with nothing to decide that early need not call it.
+     *
+     * <p>Calling it twice is harmless and expected: {@link #onPostCreate} always calls it, and finds
+     * the claim already made.
+     */
+    protected final void claimResumeState() {
+        if (resumeStateClaimed) {
+            return;
+        }
+        resumeStateClaimed = true;
+        Bundle resumeState = ResumeState.claim(this);
+        if (resumeState != null) {
+            restoreResumeState(resumeState);
+        }
+    }
+
+    /**
+     * Record how far down its scrolling view this screen was.
+     *
+     * <p>Every screen inherits this, which is the point: the rules screen, the wiki, a sidebar, a
+     * settings page and everything else built on a {@code ScrollView} come back where the user left
+     * them without any of them knowing this feature exists. A screen with real state of its own --
+     * a feed, a comment thread -- overrides this and records that instead.
+     */
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        View scrollable = findFirstScrollable(findViewById(android.R.id.content));
+        if (scrollable != null && scrollable.getScrollY() > 0) {
+            out.putInt(STATE_RESUME_SCROLL_Y, scrollable.getScrollY());
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        final int scrollY = state.getInt(STATE_RESUME_SCROLL_Y, 0);
+        if (scrollY <= 0) {
+            return;
+        }
+        final View content = findViewById(android.R.id.content);
+        if (content == null) {
+            return;
+        }
+        // One layout pass and one posted tick: the pass gives the scrolling view its children, and
+        // scrolling to an offset before they exist is a no-op that silently loses the restore.
+        OneShotPreDrawListener.add(content, () -> content.post(() -> {
+            View scrollable = findFirstScrollable(content);
+            if (scrollable != null) {
+                scrollable.scrollTo(0, scrollY);
+            }
+        }));
+    }
+
+    /**
+     * The first {@link ScrollView} or {@link NestedScrollView} under {@code root}, breadth first so
+     * the outermost one wins -- an inner scroller nested inside the page's own is a component's
+     * business, not the page's position.
+     */
+    @Nullable
+    private static View findFirstScrollable(@Nullable View root) {
+        if (root == null) {
+            return null;
+        }
+        ArrayDeque<View> queue = new ArrayDeque<>();
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            View view = queue.removeFirst();
+            if (view instanceof ScrollView || view instanceof NestedScrollView) {
+                return view;
+            }
+            if (view instanceof ViewGroup) {
+                ViewGroup group = (ViewGroup) view;
+                for (int i = 0; i < group.getChildCount(); i++) {
+                    queue.addLast(group.getChildAt(i));
+                }
+            }
+        }
+        return null;
     }
 
     /**

@@ -1,11 +1,13 @@
 package ml.docilealligator.infinityforreddit.asynctasks;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountDao;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
 public class AccountManagement {
@@ -31,12 +33,20 @@ public class AccountManagement {
 
     }
 
-    public static void switchToAnonymousMode(RedditDataRoomDatabase redditDataRoomDatabase, SharedPreferences currentAccountSharedPreferences,
+    public static void switchToAnonymousMode(Context context, RedditDataRoomDatabase redditDataRoomDatabase,
+                                             SharedPreferences currentAccountSharedPreferences,
                                              Executor executor, Handler handler, boolean removeCurrentAccount,
                                              SwitchToAnonymousAccountAsyncTaskListener switchToAnonymousAccountAsyncTaskListener) {
+        Context appContext = context.getApplicationContext();
         executor.execute(() -> {
             AccountDao accountDao = redditDataRoomDatabase.accountDao();
             if (removeCurrentAccount) {
+                // Before the account row and the current-account file go: this account is about to
+                // stop existing, and its recorded screen stack and cached feeds have to go with it.
+                // Switching to anonymous WITHOUT removing the account is deliberately not cleared --
+                // that user is coming back, and their place is worth keeping.
+                ResumeState.clearAccount(appContext, currentAccountSharedPreferences.getString(
+                        SharedPreferencesUtils.ACCOUNT_NAME, Account.ANONYMOUS_ACCOUNT));
                 accountDao.deleteCurrentAccount();
             }
             accountDao.markAllAccountsNonCurrent();
@@ -55,10 +65,14 @@ public class AccountManagement {
         });
     }
 
-    public static void removeAccount(RedditDataRoomDatabase redditDataRoomDatabase,
+    public static void removeAccount(Context context, RedditDataRoomDatabase redditDataRoomDatabase,
                                              Executor executor, String accoutName) {
+        Context appContext = context.getApplicationContext();
         executor.execute(() -> {
             redditDataRoomDatabase.accountDao().deleteAccount(accoutName);
+            // The screens and cached feeds recorded for an account that no longer exists would
+            // otherwise sit on disk until something else happened to clear them.
+            ResumeState.clearAccount(appContext, accoutName);
         });
     }
 

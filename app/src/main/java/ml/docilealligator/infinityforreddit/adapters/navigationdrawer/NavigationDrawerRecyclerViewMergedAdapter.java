@@ -147,6 +147,10 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         preferenceSectionRecyclerViewAdapter.setShowThumbnailOnTheLeft(showThumbnailOnTheLeft);
     }
 
+    public void setResumeWhereILeftOff(boolean resumeWhereILeftOff) {
+        preferenceSectionRecyclerViewAdapter.setResumeWhereILeftOff(resumeWhereILeftOff);
+    }
+
     public void setFavoriteSubscribedSubreddits(List<SubscribedSubredditData> favoriteSubscribedSubreddits) {
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setFavoriteSubscribedSubreddits(favoriteSubscribedSubreddits);
     }

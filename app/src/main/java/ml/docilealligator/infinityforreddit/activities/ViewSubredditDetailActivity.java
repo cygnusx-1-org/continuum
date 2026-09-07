@@ -109,6 +109,9 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
 import ml.docilealligator.infinityforreddit.subreddit.FetchSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
@@ -132,9 +135,12 @@ import retrofit2.Retrofit;
 public class ViewSubredditDetailActivity extends BaseActivity implements SortTypeSelectionCallback,
         PostTypeBottomSheetFragment.PostTypeSelectionCallback, PostLayoutBottomSheetFragment.PostLayoutSelectionCallback,
         ActivityToolbarInterface, FABMoreOptionsBottomSheetFragment.FABOptionSelectionCallback,
-        MarkPostAsReadInterface, RecyclerViewContentScrollingInterface {
+        MarkPostAsReadInterface, RecyclerViewContentScrollingInterface, Restorable,
+        ResumeLaunchExtras {
 
     public static final String EXTRA_SUBREDDIT_NAME_KEY = "ESN";
+    private static final String STATE_RESUME_PAGE = "RP";
+    private static final String STATE_RESUME_APP_BAR_COLLAPSED = "RABC";
     public static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     public static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
     public static final String EXTRA_VIEW_SIDEBAR = "EVSB";
@@ -199,6 +205,10 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private FragmentManager fragmentManager;
     @SuppressWarnings("NullAway.Init") // See mSubredditViewModel above.
     private SectionsPagerAdapter sectionsPagerAdapter;
+    // Resume where I left off. The subreddit itself needs no recording: it travels in the intent
+    // extras, which the snapshot already replays.
+    private final FeedResumeState resumeFeed = new FeedResumeState();
+    private int resumePage = -1;
     private NavigationWrapper navigationWrapper;
     @Nullable
     private Runnable autoCompleteRunnable;
@@ -250,6 +260,10 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
         binding = ActivityViewSubredditDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // After the binding exists, because restoring the collapsed toolbar touches it, and
+        // before bindView() runs, because that is where the pager's initial page is chosen.
+        claimResumeState();
 
         hideFab = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAB_IN_POST_FEED, false);
         showBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_KEY, false);
@@ -1313,8 +1327,64 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         boolean viewSidebar = getIntent().getBooleanExtra(EXTRA_VIEW_SIDEBAR, false);
         if (viewSidebar) {
             binding.viewPagerViewSubredditDetailActivity.setCurrentItem(1, false);
+        } else if (resumePage > 0) {
+            // A deep link asking for the sidebar wins over a resume: it is what the user asked for
+            // just now, where the resume is what they asked for last time.
+            binding.viewPagerViewSubredditDetailActivity.setCurrentItem(resumePage, false);
         }
         InboxCount.liveData(mCurrentAccountSharedPreferences).observe(this, this::setInboxCount);
+    }
+
+    /**
+     * The launch extras with the one-shot navigation extras taken out.
+     *
+     * <p>These say "open showing this, just this once" -- a tab named by a link, a message to mark
+     * read, an account to switch to on the way in. They answer what the user did at the moment they
+     * arrived, and a replay is not that moment. Left in, every resume would reopen this screen the
+     * way a link opened it weeks ago, overriding the place actually recorded, and the account-switch
+     * extra would re-run its switch on each launch.
+     */
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Bundle out = new Bundle(extras);
+        out.remove(EXTRA_VIEW_SIDEBAR);
+        out.remove(EXTRA_MESSAGE_FULLNAME);
+        out.remove(EXTRA_NEW_ACCOUNT_NAME);
+        return out;
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (sectionsPagerAdapter == null || binding == null) {
+            return;
+        }
+        Fragment fragment = fragmentManager == null ? null : fragmentManager.findFragmentByTag("f0");
+        // Nothing at all rather than the page on its own: a record that cannot say where in the
+        // feed the user was would reopen this screen scrolled to the top, and writing it would
+        // overwrite a good record from a moment ago.
+        if (!(fragment instanceof PostFragment)
+                || !((PostFragment) fragment).captureResumeState(out)) {
+            return;
+        }
+        out.putInt(STATE_RESUME_PAGE, binding.viewPagerViewSubredditDetailActivity.getCurrentItem());
+        out.putBoolean(STATE_RESUME_APP_BAR_COLLAPSED, mAppBarCollapsed);
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumePage = state.getInt(STATE_RESUME_PAGE, -1);
+        resumeFeed.read(state);
+        if (state.getBoolean(STATE_RESUME_APP_BAR_COLLAPSED, false)) {
+            // A toolbar that comes back expanded pushes every row down by its height, which reads
+            // as a restore that missed by a constant.
+            mAppBarCollapsed = true;
+            binding.appbarLayoutViewSubredditDetailActivity.setExpanded(false, false);
+        }
     }
 
     private void displaySortTypeBottomSheetFragment() {
@@ -1804,6 +1874,8 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                         bundle.putString(PostFragment.EXTRA_INITIAL_SORT_TIME, initialSortTime);
                     }
                 }
+                // One-shot, so a rebuilt adapter cannot replay the restore onto a second fragment.
+                resumeFeed.applyTo(bundle);
                 fragment.setArguments(bundle);
                 return fragment;
             }

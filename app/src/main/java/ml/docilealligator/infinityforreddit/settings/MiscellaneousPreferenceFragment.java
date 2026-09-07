@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
@@ -28,6 +29,7 @@ import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import org.greenrobot.eventbus.EventBus;
 
@@ -39,6 +41,8 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
     @Inject
     @Named("post_feed_scrolled_position_cache")
     SharedPreferences cache;
+    @Inject
+    Executor executor;
 
     public MiscellaneousPreferenceFragment() {
         // Required empty public constructor
@@ -55,6 +59,7 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         ListPreference specificBrowserListPreference = findPreference(SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE);
         ListPreference mainPageBackButtonActionListPreference = findPreference(SharedPreferencesUtils.MAIN_PAGE_BACK_BUTTON_ACTION);
         SwitchPreference savePostFeedScrolledPositionSwitch = findPreference(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION);
+        SwitchPreference resumeWhereILeftOffSwitch = findPreference(SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF);
         ListPreference languageListPreference = findPreference(SharedPreferencesUtils.LANGUAGE);
 
         List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
@@ -136,6 +141,25 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
                     cache.edit().clear().apply();
                 }
                 EventBus.getDefault().post(new ChangeSavePostFeedScrolledPositionEvent((Boolean) newValue));
+                return true;
+            });
+        }
+
+        if (resumeWhereILeftOffSwitch != null) {
+            resumeWhereILeftOffSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (!(Boolean) newValue) {
+                    // Turning it off forgets the recorded stack and the posts it points at. Leaving
+                    // them would resume a session the user asked the app to stop remembering, if
+                    // the setting were ever turned back on.
+                    //
+                    // Off the main thread, because it reads and unlinks the snapshot file, and on
+                    // the application context, because backing out of Settings while it runs must
+                    // not leave it holding a destroyed activity. Nothing races the in-memory half:
+                    // every entry point into ResumeState checks the setting first, and the
+                    // preference is written the moment this listener returns true.
+                    Context context = mActivity.getApplicationContext();
+                    executor.execute(() -> ResumeState.clear(context));
+                }
                 return true;
             });
         }

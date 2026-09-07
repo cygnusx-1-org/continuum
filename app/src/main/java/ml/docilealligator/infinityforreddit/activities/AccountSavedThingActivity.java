@@ -52,6 +52,8 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -60,7 +62,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import retrofit2.Retrofit;
 
 public class AccountSavedThingActivity extends BaseActivity implements ActivityToolbarInterface,
-        PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, MarkPostAsReadInterface {
+        PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, MarkPostAsReadInterface,
+        Restorable {
+
+    /** Which of Saved / Comments / Local posts / Local comments the user was on. */
+    private static final String STATE_RESUME_TAB = "RTB";
 
     @Inject
     @Named("oauth")
@@ -84,6 +90,10 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
     @Inject
     Executor mExecutor;
     private FragmentManager fragmentManager;
+    // Resume where I left off. This screen takes no extras at all, so the tab and the list's own
+    // record are the whole of it.
+    private final FeedResumeState resumeFeed = new FeedResumeState();
+    private int resumeTab = -1;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private PostLayoutBottomSheetFragment postLayoutBottomSheetFragment;
     private ActivityAccountSavedThingBinding binding;
@@ -153,6 +163,9 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
         postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
 
         fragmentManager = getSupportFragmentManager();
+
+        // Before the pager is built: the tab to open on is chosen there and never revisited.
+        claimResumeState();
 
         initializeViewPager();
 
@@ -239,6 +252,10 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
         });
 
         fixViewPager2Sensitivity(binding.accountSavedThingViewPager2);
+
+        if (resumeTab > 0) {
+            binding.accountSavedThingViewPager2.setCurrentItem(resumeTab, false);
+        }
     }
 
     @Override
@@ -408,6 +425,33 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
         ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, accountName, post.getId(), ReadPostType.READ_POSTS, readPostsLimit);
     }
 
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (sectionsPagerAdapter == null || fragmentManager == null) {
+            return;
+        }
+        int tab = binding.accountSavedThingViewPager2.getCurrentItem();
+        Fragment fragment = fragmentManager.findFragmentByTag("f" + tab);
+        // Only the two post tabs can say where they were; the comment tabs have no record, so a
+        // resume onto one of those restores the tab alone. Nothing is written when a post tab is
+        // showing but cannot describe itself, rather than overwriting a good record with one that
+        // says nothing.
+        if (fragment instanceof PostFragment && !((PostFragment) fragment).captureResumeState(out)) {
+            return;
+        }
+        if (fragment instanceof HistoryPostFragment
+                && !((HistoryPostFragment) fragment).captureResumeState(out)) {
+            return;
+        }
+        out.putInt(STATE_RESUME_TAB, tab);
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeTab = state.getInt(STATE_RESUME_TAB, -1);
+        resumeFeed.read(state);
+    }
+
     private class SectionsPagerAdapter extends FragmentStateAdapter {
 
         SectionsPagerAdapter(FragmentActivity fa) {
@@ -424,12 +468,15 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
                 bundle.putString(PostFragment.EXTRA_USER_NAME, accountName);
                 bundle.putString(PostFragment.EXTRA_USER_WHERE, PostPagingSource.USER_WHERE_SAVED);
                 bundle.putBoolean(PostFragment.EXTRA_DISABLE_READ_POSTS, true);
+                // One-shot, so a fragment rebuilt later cannot replay the restore.
+                resumeFeed.applyTo(bundle);
                 fragment.setArguments(bundle);
                 return fragment;
             } else if (position == 2) {
                 HistoryPostFragment fragment = new HistoryPostFragment();
                 Bundle bundle = new Bundle();
                 bundle.putInt(HistoryPostFragment.EXTRA_READ_POST_TYPE, ReadPostType.LOCAL_SAVED_POSTS);
+                resumeFeed.applyTo(bundle);
                 fragment.setArguments(bundle);
                 return fragment;
             } else if (position == 3) {

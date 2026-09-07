@@ -104,6 +104,9 @@ import ml.docilealligator.infinityforreddit.font.FontStyle;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -119,7 +122,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import retrofit2.Retrofit;
 
 @UnstableApi
-public class ViewVideoActivity extends AppCompatActivity implements CustomFontReceiver {
+public class ViewVideoActivity extends AppCompatActivity
+        implements CustomFontReceiver, Restorable, ResumeLaunchExtras {
+
+    /** Where playback had reached. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_POSITION = "RVP";
 
     public static final int PLAYBACK_SPEED_25 = 25;
     public static final int PLAYBACK_SPEED_50 = 50;
@@ -167,6 +174,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
     public Typeface typeface;
 
     private ExoPlayer player;
+    // Resume where I left off: playback position carried across a cold launch. -1 means the
+    // snapshot had nothing to say, in which case the intent's own EXTRA_PROGRESS_SECONDS stands.
+    private long resumePositionFromSnapshot = -1;
     @UnstableApi
     private DefaultTrackSelector trackSelector;
     private DataSource.Factory dataSourceFactory;
@@ -405,6 +415,12 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
             }
         });
 
+        // Before the view model is built: the position it is created with is the one it seeks to.
+        Bundle resumeState = ResumeState.claim(this);
+        if (resumeState != null) {
+            restoreResumeState(resumeState);
+        }
+
         Intent intent = getIntent();
         Post post = intent.getParcelableExtra(EXTRA_POST);
         if (post != null) {
@@ -435,7 +451,9 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
                         fallbackDirectUrl,
                         intent.getStringExtra(EXTRA_SUBREDDIT), intent.getStringExtra(EXTRA_ID),
                         intent.getBooleanExtra(EXTRA_IS_NSFW, false),
-                        intent.getLongExtra(EXTRA_PROGRESS_SECONDS, -1),
+                        resumePositionFromSnapshot >= 0
+                                ? resumePositionFromSnapshot
+                                : intent.getLongExtra(EXTRA_PROGRESS_SECONDS, -1),
                         intentVideoType,
                         intent.getStringExtra(EXTRA_REDGIFS_ID),
                         intent.getStringExtra(EXTRA_V_REDD_IT_URL),
@@ -1639,5 +1657,43 @@ public class ViewVideoActivity extends AppCompatActivity implements CustomFontRe
         } catch (Exception e) {
             Toast.makeText(this, R.string.error_sharing_video, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (player != null) {
+            out.putLong(STATE_RESUME_POSITION, player.getCurrentPosition());
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumePositionFromSnapshot = state.getLong(STATE_RESUME_POSITION, -1);
+    }
+
+    /**
+     * The post is handed to this screen whole, and a marshalled Parcel must never be written to
+     * disk, so the replay carries the identifiers instead. Everything the player actually needs --
+     * the data URI, the download URL, the v.redd.it / RedGifs / Streamable ids -- is already a
+     * string, and the title is carried separately so the header still reads correctly. The one
+     * thing lost is the post's fallback direct URL, which only matters if the primary source fails.
+     */
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Bundle out = new Bundle(extras);
+        out.remove(EXTRA_POST);
+        if (!out.containsKey(EXTRA_POST_TITLE)) {
+            Post post = intent.getParcelableExtra(EXTRA_POST);
+            if (post != null) {
+                out.putString(EXTRA_POST_TITLE, post.getTitle());
+            }
+        }
+        return out;
     }
 }

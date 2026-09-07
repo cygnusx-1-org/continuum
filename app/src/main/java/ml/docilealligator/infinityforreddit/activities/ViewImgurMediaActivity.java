@@ -50,6 +50,8 @@ import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurImageFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurVideoFragment;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
@@ -64,7 +66,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWallpaperCallback, CustomFontReceiver {
+public class ViewImgurMediaActivity extends AppCompatActivity
+        implements SetAsWallpaperCallback, CustomFontReceiver, Restorable {
+
+    /** Which image of the album the user was on. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_PAGE = "RP";
 
     public static final String EXTRA_IMGUR_TYPE = "EIT";
     public static final String EXTRA_IMGUR_ID = "EII";
@@ -90,6 +96,10 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
     @Nullable
     private String title;
     private boolean isActionBarHidden = false;
+    // Resume where I left off. The album is refetched from Imgur -- every extra this screen takes is
+    // a string, an int or a boolean, so it replays as it was launched -- and this is the page of it
+    // the user was looking at, applied once the album lands.
+    private int resumePage = -1;
     @Inject
     @Named("imgur")
     Retrofit imgurRetrofit;
@@ -173,6 +183,11 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
 
         if (savedInstanceState != null) {
             mImages = savedInstanceState.getParcelableArrayList(IMGUR_IMAGES_STATE);
+        } else {
+            Bundle resumeState = ResumeState.claim(this);
+            if (resumeState != null) {
+                restoreResumeState(resumeState);
+            }
         }
 
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
@@ -306,6 +321,26 @@ public class ViewImgurMediaActivity extends AppCompatActivity implements SetAsWa
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewImgurMediaActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewImgurMediaActivity.setOffscreenPageLimit(3);
+        // Here rather than in onCreate: the album arrives from Imgur after the screen is built, and
+        // there is no page to move to until the adapter has one. A page past the end of a shortened
+        // album is dropped rather than clamped -- landing on a different image than the one the user
+        // left is worse than landing on the first.
+        if (resumePage > 0 && mImages != null && resumePage < mImages.size()) {
+            binding.viewPagerViewImgurMediaActivity.setCurrentItem(resumePage, false);
+        }
+        resumePage = -1;
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (mImages != null) {
+            out.putInt(STATE_RESUME_PAGE, binding.viewPagerViewImgurMediaActivity.getCurrentItem());
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumePage = state.getInt(STATE_RESUME_PAGE, -1);
     }
 
     @Override

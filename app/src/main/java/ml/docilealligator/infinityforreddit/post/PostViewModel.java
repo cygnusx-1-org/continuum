@@ -93,6 +93,18 @@ public class PostViewModel extends ViewModel {
     // pipeline while a slow load-all is still collecting — the rebuild race behind the paging CMEs).
     @Nullable
     private volatile PostPagingSource pagingSource;
+    // Resume where I left off. The key is sticky (every source this view model builds accumulates
+    // under it); the request to READ from the cache is one-shot, consumed by the first source, so a
+    // pull-to-refresh or a sort change goes to the network as it should.
+    //
+    // volatile for the same reason pagingSource above is: these are written by the fragment on the
+    // main thread and read in returnPagingSoruce(), which Paging calls on its fetch dispatcher. A
+    // source built from a stale null key accumulates nothing, so the feed silently stops caching
+    // itself and the next launch has nothing to resume onto.
+    @Nullable
+    private volatile String resumeFeedKey;
+    private volatile boolean resumeFromCache;
+    private volatile int resumeExpectedCount;
 
     private final MutableLiveData<SortType> sortTypeLiveData;
     private final MutableLiveData<PostFilter> postFilterLiveData;
@@ -438,8 +450,55 @@ public class PostViewModel extends ViewModel {
         // Pagination only: the source never drops a post for this, it just refuses to stop on a page
         // the feed would show nothing from. See PostPagingSource#loadFuture.
         paging3PagingSource.setMediaOnly(Boolean.TRUE.equals(mediaOnlyValue.getValue()));
+        // Not consumed here. Setting up the feed builds a source and then immediately invalidates
+        // it -- the sort/filter LiveData settles a moment after the first one is made -- so a
+        // request spent on creation would be spent on a source that never serves a load. The source
+        // itself clears the flag once a load has actually used it.
+        paging3PagingSource.setResumeRequest(resumeFeedKey, resumeFromCache, resumeExpectedCount);
         pagingSource = paging3PagingSource;
         return paging3PagingSource;
+    }
+
+    /**
+     * Ask the feed to be restored from the resume cache rather than fetched, and to keep writing
+     * itself back to {@code feedKey}. Call before the feed is first observed.
+     *
+     * @param fromCache      whether the first load should come from disk
+     * @param expectedCount  how many posts the feed held when it was recorded
+     */
+    public void setResumeRequest(@Nullable String feedKey, boolean fromCache, int expectedCount) {
+        this.resumeFeedKey = feedKey;
+        this.resumeFromCache = fromCache;
+        this.resumeExpectedCount = expectedCount;
+        PostPagingSource currentSource = pagingSource;
+        if (currentSource != null) {
+            // The source is built before the fragment reaches this point, so it needs the request
+            // too -- unless it has already served a load, past which a keyless load is a refresh,
+            // and a refresh is a request for the top of the listing rather than the cache.
+            currentSource.setResumeRequest(feedKey, fromCache && !currentSource.hasLoaded(),
+                    expectedCount);
+        }
+    }
+
+    /**
+     * Drop a pending restore without dropping the key. A refresh, a sort change or a filter change
+     * is a request for the top of the listing, which is the one thing the cached copy must not
+     * serve -- but the feed still records itself for next time.
+     */
+    public void cancelResumeRestore() {
+        resumeFromCache = false;
+        PostPagingSource currentSource = pagingSource;
+        if (currentSource != null) {
+            currentSource.setResumeRequest(resumeFeedKey, false, resumeExpectedCount);
+        }
+    }
+
+    /** Persist the loaded feed for a later resume, anchored on {@code anchorFullname}. */
+    public void storeFeedCache(@Nullable String anchorFullname, @Nullable List<Post> shownPosts) {
+        PostPagingSource currentSource = pagingSource;
+        if (currentSource != null) {
+            currentSource.storeFeedCache(anchorFullname, shownPosts);
+        }
     }
 
     // Called by the Saved screen's pull-to-refresh so a refresh while a search is active refetches
@@ -479,12 +538,14 @@ public class PostViewModel extends ViewModel {
     public void changeSortType(SortType sortType) {
         // A different sort reorders the saved listing, so the cached search copy is stale.
         savedSearchCache.invalidate();
+        cancelResumeRestore();
         sortTypeLiveData.postValue(sortType);
     }
 
     public void changePostFilter(PostFilter postFilter) {
         // A different filter changes which items pass, so the cached search copy is stale.
         savedSearchCache.invalidate();
+        cancelResumeRestore();
         postFilterLiveData.postValue(postFilter);
     }
 

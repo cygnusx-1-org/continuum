@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,6 +52,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeDefaultPostLayoutUnfold
 import ml.docilealligator.infinityforreddit.events.ChangeNColumnsEvent;
 import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragmentEvent;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
+import ml.docilealligator.infinityforreddit.post.FeedCache;
 import ml.docilealligator.infinityforreddit.post.HistoryPostViewModel;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
@@ -58,6 +60,8 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -79,8 +83,23 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     private static final String POST_FILTER_STATE = "PFS";
     private static final String POST_FRAGMENT_ID_STATE = "PFIS";
 
+    /** How long the list may stay hidden waiting for the Room query behind a resume. */
+    private static final long RESUME_REVEAL_TIMEOUT_MS = 4000L;
+    /** Shortest gap between two snapshot writes driven by scrolling. */
+    private static final long RESUME_STORE_THROTTLE_MS = 5000L;
+
     @SuppressWarnings("NullAway.Init")
     HistoryPostViewModel mHistoryPostViewModel;
+    // Resume where I left off. These lists come out of Room, so there is nothing to cache and no
+    // cursor to keep -- only where in them the user was. resumeFeedKey is non-null only while the
+    // setting is on, and naming the list kind is enough to tell the four of them apart.
+    private final FeedResumeState resumeState = new FeedResumeState();
+    private boolean resumePending;
+    @Nullable
+    private String resumeFeedKey;
+    private long lastResumeStoreAt;
+    @Nullable
+    private Runnable resumeStoreRunnable;
     @Inject
     @Named("redgifs")
     Retrofit mRedgifsRetrofit;
@@ -183,6 +202,15 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             postFragmentId = System.currentTimeMillis() + new Random().nextInt(1000);
         }
 
+        if (savedInstanceState == null
+                && mSharedPreferences.getBoolean(SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false)) {
+            // The record, unlike the key, is only right on a fresh creation: across a rotation the
+            // fragment's own saved state holds a newer position than the arguments do.
+            resumeState.read(getArguments());
+            resumePending = resumeState.isPending();
+            FeedResumeState.clearFrom(getArguments());
+        }
+
         if (mActivity instanceof RecyclerViewContentScrollingInterface) {
             binding.recyclerViewHistoryPostFragment.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -207,6 +235,16 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
                     SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0");
         }
         readPostType = getArguments().getInt(EXTRA_READ_POST_TYPE, ReadPostType.READ_POSTS);
+
+        // Observed rather than read once: this screen can outlive a trip to Settings, and reading
+        // the value at creation left it stale for the rest of the fragment's life -- so turning the
+        // setting on recorded nothing here until the app was next launched. The key is what makes
+        // this list record itself, so it follows the setting both ways.
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences,
+                        SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false)
+                .observe(getViewLifecycleOwner(), enabled -> resumeFeedKey =
+                        enabled ? FeedCache.key(mActivity.accountName, "history|" + readPostType)
+                                : null);
         Locale locale = getResources().getConfiguration().locale;
 
         postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout);
@@ -271,9 +309,36 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
             binding.recyclerViewHistoryPostFragment.addItemDecoration(itemDecoration);
         }
 
-        if (recyclerViewPosition > 0) {
+        if (resumePending) {
+            restoreAnchorWhenLoaded(resumeState.anchorFullname, resumeState.anchorPosition,
+                    resumeState.anchorOffset, RESUME_REVEAL_TIMEOUT_MS);
+            resumePending = false;
+        } else if (recyclerViewPosition > 0) {
             binding.recyclerViewHistoryPostFragment.scrollToPosition(recyclerViewPosition);
         }
+
+        // The snapshot has to be current before the process dies, and dismissing the app from
+        // recents delivers pause, stop and destroy in one burst with no time to do work. Writing on
+        // the trailing edge of a scroll keeps it current; the throttle keeps a long scroll from
+        // writing on every rest. No-op while the setting is off, since resumeFeedKey stays null.
+        binding.recyclerViewHistoryPostFragment.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState != RecyclerView.SCROLL_STATE_IDLE || resumeFeedKey == null) {
+                    return;
+                }
+                recyclerView.removeCallbacks(resumeStoreRunnable);
+                long since = SystemClock.uptimeMillis() - lastResumeStoreAt;
+                if (since >= RESUME_STORE_THROTTLE_MS) {
+                    storeResumeSnapshot();
+                } else {
+                    if (resumeStoreRunnable == null) {
+                        resumeStoreRunnable = HistoryPostFragment.this::storeResumeSnapshot;
+                    }
+                    recyclerView.postDelayed(resumeStoreRunnable, RESUME_STORE_THROTTLE_MS - since);
+                }
+            }
+        });
 
         if (postFilter == null) {
             FetchPostFilterAndConcatenatedSubredditNames.fetchPostFilter(mRedditDataRoomDatabase, mExecutor,
@@ -444,6 +509,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     public void refresh() {
         binding.fetchPostInfoLinearLayoutHistoryPostFragment.setVisibility(View.GONE);
         hasPost = false;
+        // A refresh asks for the top of the list, which a pending resume must not override.
+        resumePending = false;
+        cancelAnchorRestore();
         if (isInLazyMode) {
             stopLazyMode();
         }
@@ -625,9 +693,40 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        storeResumeSnapshot();
+    }
+
+    @Override
     public void onDestroy() {
+        binding.recyclerViewHistoryPostFragment.removeCallbacks(resumeStoreRunnable);
         binding.recyclerViewHistoryPostFragment.addOnWindowFocusChangedListener(null);
         super.onDestroy();
+    }
+
+    /**
+     * Record where this list is into {@code out}, for a host building a resume snapshot. Returns
+     * false, writing nothing, when there is no anchor worth recording.
+     */
+    public boolean captureResumeState(@NonNull Bundle out) {
+        return captureAnchorInto(out, resumeFeedKey);
+    }
+
+    /**
+     * Write the resume snapshot that points at this list.
+     *
+     * <p>There is no feed cache to go with it: these posts come out of Room and are still there on
+     * the next launch whatever happens to this process. Only the position needs saving, and it needs
+     * saving before the process dies rather than as it does.
+     */
+    private void storeResumeSnapshot() {
+        if (resumeFeedKey == null || mActivity == null) {
+            return;
+        }
+        binding.recyclerViewHistoryPostFragment.removeCallbacks(resumeStoreRunnable);
+        lastResumeStoreAt = SystemClock.uptimeMillis();
+        ResumeState.capture(mActivity);
     }
 
     private void onWindowFocusChanged(boolean hasWindowsFocus) {

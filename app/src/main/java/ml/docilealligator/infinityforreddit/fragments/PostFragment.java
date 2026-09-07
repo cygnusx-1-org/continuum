@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +25,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.CombinedLoadStates;
+import androidx.paging.ItemSnapshotList;
 import androidx.paging.LoadState;
 import androidx.paging.PagingData;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,6 +78,7 @@ import ml.docilealligator.infinityforreddit.events.NeedForPostListFromPostFragme
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.events.ProvidePostListToViewPostDetailActivityEvent;
+import ml.docilealligator.infinityforreddit.post.FeedCache;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.post.PostType;
@@ -87,6 +90,9 @@ import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditRepos
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
+import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -117,6 +123,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public static final String EXTRA_DISABLE_READ_POSTS = "EDRP";
     // Sort carried by an opening deep link (e.g. reddit.com/r/x/top), as SortType.Type/Time names.
     // Applied once on fresh creation; overrides the saved/default sort for that launch only.
+    /**
+     * Names the host when more than one shows the same listing. See {@link #buildFeedKey()}; hosts
+     * that are the only place a listing appears leave it unset.
+     */
+    public static final String EXTRA_RESUME_FEED_SCOPE = "ERFS";
     public static final String EXTRA_INITIAL_SORT_TYPE = "EIST";
     public static final String EXTRA_INITIAL_SORT_TIME = "EISTM";
 
@@ -130,6 +141,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private static final String POST_FILTER_STATE = "PFS";
     private static final String CONCATENATED_SUBREDDIT_NAMES_STATE = "CSNS";
     private static final String POST_FRAGMENT_ID_STATE = "PFIS";
+    // How long a resume may keep the list hidden waiting for its posts. Longer than the scroll
+    // backstop in ScrollAnchor because this one spans a disk read and a parse, and on a cache miss
+    // a whole network fetch.
+    private static final long RESUME_REVEAL_TIMEOUT_MS = 8000L;
+    // Least time between two writes of the resume cache while the user is scrolling. The write is a
+    // JSON serialization of every loaded post, so it is worth doing often enough to survive a kill
+    // and no oftener.
+    private static final long RESUME_STORE_THROTTLE_MS = 5000L;
 
     // The user's "intended" anchor position + offset, persisted across rotation round-trips.
     // The offset is sticky: it's only re-captured when the anchor item itself changes (the
@@ -201,6 +220,21 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Nullable
     private String concatenatedSubredditNames;
     private int maxPosition = -1;
+    // Resume where I left off. resumeFeedKey is non-null only while the setting is on, and is what
+    // makes this feed both readable from and writable to the resume cache; resumeState carries the
+    // pending restore handed down in the fragment arguments, and is spent by the first load.
+    private final FeedResumeState resumeState = new FeedResumeState();
+    // Whether a restore is still to be acted on. Separate from resumeState because the scroll
+    // restore is set up early in onCreateView and the view model is told much later in the same
+    // pass: one flag read by both, cleared only once both have had it.
+    private boolean resumePending;
+    private boolean resumeWhereILeftOff;
+    @Nullable
+    private String resumeFeedKey;
+    @Nullable
+    private String resumeFeedScope;
+    private long lastResumeStoreAt;
+    private final Runnable resumeStoreRunnable = this::storeResumeCache;
     private SortType sortType;
     @Nullable
     private PostFilter postFilter;
@@ -310,6 +344,28 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             });
         }
 
+        // Keep the resume cache current as the user reads, so that a process killed without
+        // lifecycle callbacks -- dismissal from recents -- still leaves an accurate position on
+        // disk. No-op while the setting is off, since resumeFeedKey stays null.
+        binding.recyclerViewPostFragment.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState != RecyclerView.SCROLL_STATE_IDLE || resumeFeedKey == null) {
+                    return;
+                }
+                recyclerView.removeCallbacks(resumeStoreRunnable);
+                long since = SystemClock.uptimeMillis() - lastResumeStoreAt;
+                if (since >= RESUME_STORE_THROTTLE_MS) {
+                    storeResumeCache();
+                } else {
+                    // Trailing edge, not just leading: the last time the list comes to rest is the
+                    // position worth having, and dropping it because a write happened three seconds
+                    // ago records where the user was passing through rather than where they stopped.
+                    recyclerView.postDelayed(resumeStoreRunnable, RESUME_STORE_THROTTLE_MS - since);
+                }
+            }
+        });
+
         postType = getArguments().getInt(EXTRA_POST_TYPE);
 
         int defaultPostLayout;
@@ -323,6 +379,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0");
         }
         savePostFeedScrolledPosition = mSharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION, false);
+        resumeWhereILeftOff = mSharedPreferences.getBoolean(SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false);
+        resumeFeedScope = getArguments().getString(EXTRA_RESUME_FEED_SCOPE);
+        if (resumeWhereILeftOff && savedInstanceState == null) {
+            // Only on a fresh creation: across a rotation the fragment's own saved state already
+            // holds a newer position than the arguments do.
+            resumeState.read(getArguments());
+            resumePending = resumeState.isPending();
+        }
         Locale locale = resources.getConfiguration().locale;
 
         int usage;
@@ -859,24 +923,20 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             binding.recyclerViewPostFragment.addItemDecoration(itemDecoration);
         }
 
-        if (recyclerViewPosition > 0) {
+        if (resumePending) {
+            restoreAnchorWhenLoaded(resumeState.anchorFullname, resumeState.anchorPosition,
+                    resumeState.anchorOffset, RESUME_REVEAL_TIMEOUT_MS);
+        } else if (recyclerViewPosition > 0) {
             final int restorePosition = recyclerViewPosition;
             final int restoreOffset = recyclerViewPositionOffset;
             mAdapter.addLoadStateListener(new Function1<>() {
                 @Override
                 public Unit invoke(CombinedLoadStates combinedLoadStates) {
                     if (combinedLoadStates.getRefresh() instanceof LoadState.NotLoading && mAdapter.getItemCount() > 0) {
-                        // Use scrollToPositionWithOffset to preserve the exact pixel offset
-                        // of the topmost visible item, not just scroll it into view.
-                        if (mLinearLayoutManager != null) {
-                            mLinearLayoutManager.scrollToPositionWithOffset(
-                                    restorePosition, restoreOffset);
-                        } else if (mStaggeredGridLayoutManager != null) {
-                            mStaggeredGridLayoutManager.scrollToPositionWithOffset(
-                                    restorePosition, restoreOffset);
-                        } else {
-                            binding.recyclerViewPostFragment.scrollToPosition(restorePosition);
-                        }
+                        // scrollToPositionWithOffset, not scrollToPosition: the exact pixel
+                        // offset of the anchor item is preserved, not just its visibility.
+                        ScrollAnchor.scrollTo(binding.recyclerViewPostFragment,
+                                restorePosition, restoreOffset);
                         mAdapter.removeLoadStateListener(this);
                     }
                     return Unit.INSTANCE;
@@ -1039,6 +1099,29 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             }
         });
 
+        // Observed rather than read once at onCreateView. MainActivity outlives a settings change,
+        // so this feed is exactly the thing that goes stale: turning the setting on left it holding
+        // a false for the rest of the process, so nothing was cached and the next launch had no
+        // posts to resume onto -- the stack came back but the feed opened at the top. The key is
+        // what makes a feed record itself, so it follows the setting both ways.
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences,
+                        SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false)
+                .observe(getViewLifecycleOwner(), enabled -> {
+                    if (enabled == resumeWhereILeftOff) {
+                        // Including the emission that arrives on registration, which is the value
+                        // onCreateView already read.
+                        return;
+                    }
+                    resumeWhereILeftOff = enabled;
+                    resumeFeedKey = buildFeedKey();
+                    if (mPostViewModel != null) {
+                        // The key alone, never a restore: there is nothing to come back to
+                        // mid-session, only a feed to start recording. Turning it off clears the
+                        // key, which is what stops the writes.
+                        mPostViewModel.setResumeRequest(resumeFeedKey, false, 0);
+                    }
+                });
+
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false).observe(getViewLifecycleOwner(), showGalleryMediaAsGrid -> {
             if (getPostAdapter() != null) {
                 if (getPostAdapter().setShowGalleryMediaAsGrid(showGalleryMediaAsGrid)) {
@@ -1186,6 +1269,18 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         // Before the first observe, so the initial value costs no pipeline rebuild. Both
         // initializeAndBindPostViewModel paths land here.
         applyMediaOnlyPosts();
+
+        // Also before the first observe: the source has to know whether its first load comes from
+        // disk before that load is asked for. The key is set even with nothing to restore, because
+        // that is what records this feed for next time.
+        resumeFeedKey = buildFeedKey();
+        if (resumeFeedKey != null) {
+            mPostViewModel.setResumeRequest(resumeFeedKey, resumePending, resumeState.expectedCount);
+        }
+        // Both halves have now had it. Strip it from the arguments as well, so a view rebuilt
+        // without its fragment does not restore a second time.
+        resumePending = false;
+        FeedResumeState.clearFrom(getArguments());
 
         mPostViewModel.getPosts().observe(getViewLifecycleOwner(), posts -> {
             mAdapter.submitData(getViewLifecycleOwner().getLifecycle(), posts);
@@ -1370,77 +1465,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         super.onSaveInstanceState(outState);
         outState.putBoolean(IS_IN_LAZY_MODE_STATE, isInLazyMode);
 
-        RecyclerView rv = binding.recyclerViewPostFragment;
-        int paddingTop = rv.getPaddingTop();
+        ScrollAnchor.Anchor anchor = ScrollAnchor.capture(
+                binding.recyclerViewPostFragment, userAnchorPos, userAnchorOffset);
+        userAnchorPos = anchor.stickyPosition;
+        userAnchorOffset = anchor.stickyOffset;
 
-        // Pick the anchor by scanning rendered children. We want the item the user
-        // perceives as their "main content" — the one that occupies the most of the
-        // viewport's vertical extent. Preferences:
-        //   1. userAnchorPos from a previous save, if still rendered. Preserves the user's
-        //      intended item AND its (sticky) offset across multi-col round-trips, where
-        //      StaggeredGridLayoutManager's gap-handling snaps the anchor to the top and
-        //      would otherwise overwrite the good offset with the snapped one.
-        //   2. The child with the largest visible height in the viewport. Ties → smaller
-        //      adapter position (preserves the "top of the row" feel in multi-col).
-        RecyclerView.LayoutManager lm = rv.getLayoutManager();
-        int viewportBottom = rv.getHeight() - rv.getPaddingBottom();
-        int bestAnchorPos = RecyclerView.NO_POSITION;
-        int bestAnchorOffset = 0;
-        int bestVisible = -1;
-        boolean userAnchorVisible = false;
-        for (int i = 0; i < rv.getChildCount(); i++) {
-            View child = rv.getChildAt(i);
-            if (child == null) continue;
-            int childTop = child.getTop();
-            int childBottom = child.getBottom();
-            if (childBottom <= paddingTop) continue;
-            int pos = rv.getChildAdapterPosition(child);
-            if (pos == RecyclerView.NO_POSITION) continue;
-            // The offset scrollToPositionWithOffset() restores against is measured to the
-            // item's decorated START (top decoration inset AND top margin removed), relative
-            // to paddingTop. Capturing exactly that makes the restore land pixel-exact instead
-            // of drifting by the decoration/margin inset on each cycle.
-            int topMargin = ((ViewGroup.MarginLayoutParams) child.getLayoutParams()).topMargin;
-            int decoratedStart = (lm != null ? lm.getDecoratedTop(child) : childTop) - topMargin;
-            int childOffset = decoratedStart - paddingTop;
-            int visibleBottom = Math.min(childBottom, viewportBottom);
-            int visible = Math.max(0, visibleBottom - Math.max(childTop, paddingTop));
-            if (visible <= 0) continue;
-            if (visible > bestVisible
-                    || (visible == bestVisible
-                            && (bestAnchorPos == RecyclerView.NO_POSITION
-                                    || pos < bestAnchorPos))) {
-                bestAnchorPos = pos;
-                bestAnchorOffset = childOffset;
-                bestVisible = visible;
-            }
-            if (pos == userAnchorPos) {
-                userAnchorVisible = true;
-            }
-        }
-
-        int anchorPos;
-        int anchorOffset;
-        if (userAnchorVisible) {
-            // Anchor unchanged: keep the sticky offset (the original, un-snapped one) so the
-            // lossy multi-col intermediate doesn't overwrite it.
-            anchorPos = userAnchorPos;
-            anchorOffset = userAnchorOffset;
-        } else if (bestAnchorPos != RecyclerView.NO_POSITION) {
-            // Anchor changed (user scrolled away): adopt the most-visible item and capture a
-            // fresh offset.
-            anchorPos = bestAnchorPos;
-            anchorOffset = bestAnchorOffset;
-            userAnchorPos = anchorPos;
-            userAnchorOffset = anchorOffset;
-        } else {
-            anchorPos = RecyclerView.NO_POSITION;
-            anchorOffset = 0;
-        }
-
-        if (anchorPos != RecyclerView.NO_POSITION) {
-            outState.putInt(RECYCLER_VIEW_POSITION_STATE, anchorPos);
-            outState.putInt(RECYCLER_VIEW_POSITION_OFFSET_STATE, anchorOffset);
+        if (anchor.isValid()) {
+            outState.putInt(RECYCLER_VIEW_POSITION_STATE, anchor.position);
+            outState.putInt(RECYCLER_VIEW_POSITION_OFFSET_STATE, anchor.offset);
             outState.putInt(RECYCLER_VIEW_USER_ANCHOR_STATE, userAnchorPos);
             outState.putInt(RECYCLER_VIEW_USER_ANCHOR_OFFSET_STATE, userAnchorOffset);
         }
@@ -1494,6 +1526,118 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void onStop() {
         super.onStop();
         saveCache();
+        storeResumeCache();
+    }
+
+    /**
+     * Persist the loaded feed for a later resume, anchored on the post in view.
+     *
+     * <p>Called from {@link #onStop()} and, throttled, when the list comes to rest. The second is
+     * not redundant: dismissing the app from recents delivers pause, stop and destroy in one short
+     * burst and then kills the process, so the position that reaches disk should already be current
+     * before the lifecycle callbacks arrive.
+     */
+    private void storeResumeCache() {
+        if (resumeFeedKey == null || mPostViewModel == null || binding == null) {
+            return;
+        }
+        binding.recyclerViewPostFragment.removeCallbacks(resumeStoreRunnable);
+        lastResumeStoreAt = SystemClock.uptimeMillis();
+        mPostViewModel.storeFeedCache(currentAnchorFullName(), shownPosts());
+        // And the snapshot that points at it, for the same reason: the two have to describe the
+        // same moment. Writing only the posts would leave the next launch restoring a fresh feed
+        // onto a stale anchor, which lands the user somewhere they never were.
+        if (mActivity != null) {
+            ResumeState.capture(mActivity);
+        }
+    }
+
+    /**
+     * The posts the feed is showing, as a plain list.
+     *
+     * <p>Read from the adapter rather than from the paging source: this runs on the main thread and
+     * the source builds its own list on the paging executor, where copying it would race a load.
+     * Paging's snapshot is made for exactly this. It is only wanted when the source has no raw
+     * listing JSON left to cache -- see {@link PostPagingSource#storeFeedCache}.
+     */
+    @Nullable
+    private List<Post> shownPosts() {
+        if (mAdapter == null) {
+            return null;
+        }
+        ItemSnapshotList<Post> snapshot = mAdapter.snapshot();
+        List<Post> out = new ArrayList<>(snapshot.size());
+        for (Post post : snapshot) {
+            if (post != null) {
+                out.add(post);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * The resume cache key for this feed, or null when the setting is off or the listing is not one
+     * worth resuming onto.
+     *
+     * <p>Deliberately not {@code MainPageTabsUtils.userKey}: that is keyed on the main page's own
+     * tab-type constants, which are a different enumeration from {@link PostType}, and this has to
+     * name feeds that never appear as a tab at all.
+     */
+    @Nullable
+    private String buildFeedKey() {
+        if (!resumeWhereILeftOff) {
+            return null;
+        }
+        String name;
+        switch (postType) {
+            case PostType.FRONT_PAGE:
+            case PostType.ANONYMOUS_FRONT_PAGE:
+                name = "";
+                break;
+            case PostType.SUBREDDIT:
+            case PostType.ANONYMOUS_MULTIREDDIT:
+                name = subredditName;
+                break;
+            case PostType.MULTIREDDIT:
+                name = multiRedditPath;
+                break;
+            case PostType.USER:
+                name = username + "/" + (where == null ? "" : where);
+                break;
+            case PostType.SEARCH:
+                // A global search names no subreddit, which is itself a listing worth naming.
+                name = subredditName == null ? "" : subredditName;
+                break;
+            default:
+                // A duplicates listing is reached from one post, is short, and leads nowhere: there
+                // is no place in it worth coming back to.
+                return null;
+        }
+        if (name == null) {
+            return null;
+        }
+        // A search is a listing in its own right, not a filter over the one it names: searching
+        // r/pics and browsing r/pics return different posts in a different order, and searching it
+        // for two different things returns two more. Subreddit, multireddit and search feeds can all
+        // carry a query, so this is appended for all of them rather than in one branch above.
+        if (query != null) {
+            name += "?" + query + (trendingSource == null ? "" : "&" + trendingSource);
+        }
+        // The scope keeps hosts that show the same listing through a different lens -- the filtered
+        // posts screen, above all -- out of each other's cache. Without it a subreddit filtered to
+        // images and the same subreddit unfiltered would write the same key with different windows
+        // and different cursors, and each would keep overwriting the other.
+        String scoped = resumeFeedScope == null ? "" : resumeFeedScope + "|";
+        return FeedCache.key(mActivity.accountName,
+                scoped + postType + "|" + name.toLowerCase(Locale.US));
+    }
+
+    /**
+     * Record where this feed is into {@code out}, for a host building a resume snapshot. Returns
+     * false, writing nothing, when there is no anchor worth recording.
+     */
+    public boolean captureResumeState(@NonNull Bundle out) {
+        return captureAnchorInto(out, resumeFeedKey);
     }
 
     private void saveCache() {
@@ -1537,6 +1681,14 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     public void refresh() {
         binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
         hasPost = false;
+        // A refresh is a request for the top of the listing, which is the one thing a resume must
+        // not serve. Dropped here rather than in the view model alone so the pull-to-refresh, the
+        // retry button and the random-tab roll below all take it.
+        resumePending = false;
+        if (mPostViewModel != null) {
+            mPostViewModel.cancelResumeRestore();
+        }
+        cancelAnchorRestore();
         if (isInLazyMode) {
             stopLazyMode();
         }
@@ -2043,6 +2195,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Override
     public void onDestroyView() {
         binding.recyclerViewPostFragment.addOnWindowFocusChangedListener(null);
+        // A trailing resume store still pending would fire against a torn-down view.
+        binding.recyclerViewPostFragment.removeCallbacks(resumeStoreRunnable);
         super.onDestroyView();
     }
 

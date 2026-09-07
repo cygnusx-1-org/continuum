@@ -39,6 +39,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.evernote.android.state.State;
 import com.github.piasy.biv.BigImageViewer;
 import com.github.piasy.biv.loader.glide.GlideImageLoader;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.Snackbar;
 import com.livefront.bridge.Bridge;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
@@ -78,11 +80,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Retrofit;
 
-public class ViewPostDetailActivity extends BaseActivity implements SortTypeSelectionCallback, ActivityToolbarInterface {
+public class ViewPostDetailActivity extends BaseActivity
+        implements SortTypeSelectionCallback, ActivityToolbarInterface, ResumeLaunchExtras {
 
     public static final String EXTRA_POST_DATA = "EPD";
     public static final String EXTRA_POST_ID = "EPI";
     public static final String EXTRA_POST_LIST_POSITION = "EPLP";
+    private static final String STATE_RESUME_APP_BAR_COLLAPSED = "RABC";
+    private static final String STATE_APP_BAR_COLLAPSED = "ABCS";
     public static final String EXTRA_SINGLE_COMMENT_ID = "ESCI";
     public static final String EXTRA_CONTEXT_NUMBER = "ECN";
     public static final String EXTRA_MESSAGE_FULLNAME = "ENI";
@@ -175,6 +180,14 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private long mPostFragmentId;
     private int mPostListPosition;
+    // Resume where I left off: the place in the thread, handed down to the fragment that shows it.
+    // The post itself is named by the replayed EXTRA_POST_ID, so nothing about it is recorded here.
+    @Nullable
+    private Bundle resumeCommentState;
+    // Whether the collapsing toolbar is scrolled away. Tracked here because nothing else did: this
+    // screen's app bar is scroll|enterAlways, and a toolbar that comes back expanded pushes every
+    // comment down by its height -- which reads as a restore that missed by a constant.
+    private boolean mAppBarCollapsed;
     private boolean mSwipedToAnotherPost;
     private int mPagerScrollState = ViewPager2.SCROLL_STATE_IDLE;
     private boolean mVolumeKeysNavigateComments;
@@ -196,6 +209,25 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
 
         binding = ActivityViewPostDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Unconditional, unlike the status-bar-icon listener below it, which only runs when that
+        // theme option is on: the toolbar's position has to be recorded whatever the theme.
+        binding.appbarLayoutViewPostDetailActivity.addOnOffsetChangedListener(
+                new AppBarStateChangeListener() {
+                    @Override
+                    public void onStateChanged(AppBarLayout appBarLayout, State state) {
+                        if (state == State.EXPANDED) {
+                            mAppBarCollapsed = false;
+                        } else if (state == State.COLLAPSED) {
+                            mAppBarCollapsed = true;
+                        }
+                    }
+                });
+
+        // After the offset listener, so the collapse a restore applies is seen by the same
+        // bookkeeping every other collapse is, and before the fragments are built, so the comment
+        // list is measured against the toolbar position it was recorded against.
+        claimResumeState();
 
         Bridge.restoreInstanceState(this, savedInstanceState);
 
@@ -319,6 +351,12 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
             viewPostDetailActivityViewModel.setPost(getIntent().getParcelableExtra(EXTRA_POST_DATA));
             mNewAccountName = getIntent().getStringExtra(EXTRA_NEW_ACCOUNT_NAME);
         } else {
+            if (savedInstanceState.getBoolean(STATE_APP_BAR_COLLAPSED, false)) {
+                // Same defect as the resume path, by another route: without this a rotation brings
+                // the toolbar back expanded and pushes the whole thread down by its height.
+                mAppBarCollapsed = true;
+                binding.appbarLayoutViewPostDetailActivity.setExpanded(false, false);
+            }
             if (viewPostDetailActivityViewModel.getPost() == null) {
                 viewPostDetailActivityViewModel.setPost(this.post);
             }
@@ -906,6 +944,7 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_APP_BAR_COLLAPSED, mAppBarCollapsed);
         this.post = viewPostDetailActivityViewModel.getPost();
         this.posts = viewPostDetailActivityViewModel.getPosts();
         Bridge.saveInstanceState(this, outState);
@@ -988,6 +1027,60 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
         viewPostDetailActivityViewModel.loadAuthorImages(comments, loadIconListener);
     }
 
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (mSectionsPagerAdapter == null) {
+            return;
+        }
+        ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
+        // Nothing at all rather than a record that cannot say where in the thread the user was:
+        // that would reopen it at the top and overwrite a good record from a moment ago.
+        if (fragment == null || !fragment.captureResumeState(out)) {
+            return;
+        }
+        out.putBoolean(STATE_RESUME_APP_BAR_COLLAPSED, mAppBarCollapsed);
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        if (!state.containsKey(ViewPostDetailFragmentNew.EXTRA_RESUME_COMMENT_FULLNAME)) {
+            return;
+        }
+        resumeCommentState = state;
+        if (state.getBoolean(STATE_RESUME_APP_BAR_COLLAPSED, false)) {
+            // Before the thread lands, so the offset the comment list is restored against is
+            // measured against the same toolbar position it was recorded against.
+            mAppBarCollapsed = true;
+            binding.appbarLayoutViewPostDetailActivity.setExpanded(false, false);
+        }
+    }
+
+    /**
+     * The post is handed to this screen as a Parcelable, and a marshalled Parcel must never be
+     * written to disk -- its layout is a private implementation detail that changes between
+     * releases. The replay carries the post's id instead, which is the path a link to a post
+     * already takes: the screen refetches it and the thread comes back the same.
+     */
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Bundle out = new Bundle(extras);
+        Post post = intent.getParcelableExtra(EXTRA_POST_DATA);
+        out.remove(EXTRA_POST_DATA);
+        if (!out.containsKey(EXTRA_POST_ID) && post != null) {
+            out.putString(EXTRA_POST_ID, post.getId());
+        }
+        // The list position indexes a feed this screen was opened from, which the replayed screen
+        // does not have. Left in, it would ask the pager for a page that is not there.
+        out.remove(EXTRA_POST_LIST_POSITION);
+        return out.containsKey(EXTRA_POST_ID) ? out : null;
+    }
+
     private class SectionsPagerAdapter extends FragmentStateAdapter {
 
         public SectionsPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
@@ -1025,6 +1118,12 @@ public class ViewPostDetailActivity extends BaseActivity implements SortTypeSele
                 bundle.putString(ViewPostDetailFragmentNew.EXTRA_SINGLE_COMMENT_ID, getIntent().getStringExtra(EXTRA_SINGLE_COMMENT_ID));
                 bundle.putString(ViewPostDetailFragmentNew.EXTRA_CONTEXT_NUMBER, getIntent().getStringExtra(EXTRA_CONTEXT_NUMBER));
                 bundle.putString(ViewPostDetailFragmentNew.EXTRA_MESSAGE_FULLNAME, getIntent().getStringExtra(EXTRA_MESSAGE_FULLNAME));
+            }
+            // One-shot: the pager builds its neighbouring pages too, and the recorded place belongs
+            // to one thread only.
+            if (resumeCommentState != null) {
+                bundle.putAll(resumeCommentState);
+                resumeCommentState = null;
             }
             fragment.setArguments(bundle);
             return fragment;

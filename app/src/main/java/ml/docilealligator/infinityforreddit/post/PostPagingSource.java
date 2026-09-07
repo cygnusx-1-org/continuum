@@ -62,6 +62,10 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // Reddit caps a user's saved listing at ~1000 items (100/page), so this bounds the load-all
     // saved search while comfortably covering the whole listing.
     private static final int SAVED_SEARCH_MAX_PAGES = 15;
+    // How much of a recorded feed must still be in the cache for a resume to be worth doing. A feed
+    // that has lost most of itself would restore onto a scroll offset that no longer means
+    // anything, which is worse than simply loading a fresh one.
+    private static final float MIN_RESUME_FRACTION = 0.5f;
 
     private final Executor executor;
     private final Retrofit retrofit;
@@ -92,10 +96,40 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // saved-search path).
     @Nullable
     private SavedSearchCache<Post> savedSearchCache;
-    // Accumulated raw t3 listing children for the persistent SavedPostCache (saved feed only), built
-    // as pages are walked so a later Saved tab open can be served from disk with no network call.
-    private final JSONArray savedCacheChildren = new JSONArray();
-    private final Set<String> savedCacheSeenFullnames = new HashSet<>();
+    // Accumulated raw t3 listing children, built as pages are walked. Feeds the persistent
+    // SavedPostCache (saved feed only) and the resume FeedCache (any feed, when the setting is on),
+    // so that a later open can be served from disk with no network call.
+    private final JSONArray cacheChildren = new JSONArray();
+    private final Set<String> cacheSeenFullnames = new HashSet<>();
+    // Resume where I left off. When resumeFeedKey is non-null this source accumulates its pages
+    // under that key; resumeFromCache additionally asks the first load to come from disk. Both are
+    // null/false when the setting is off, which is what makes the whole feature cost nothing.
+    //
+    // volatile for the same reason mediaOnly below is: the feed observes the setting now, so these
+    // are written from the main thread the moment the user toggles it, which can be in the middle
+    // of a load running on the paging executor. Without it that load reads a stale key, does not
+    // accumulate its page, and the feed silently keeps not caching itself -- intermittently, which
+    // is the worst way to have the bug this change exists to fix.
+    @Nullable
+    private volatile String resumeFeedKey;
+    private volatile boolean resumeFromCache;
+    private volatile int resumeExpectedCount;
+    // The `after` cursor of the most recent page -- the key Paging would continue from. Stored with
+    // the cache so a resumed feed pages onward instead of restarting at the top of the listing.
+    @Nullable
+    private String resumeAfterToken;
+    /**
+     * Whether this feed's cache holds parsed posts rather than raw listing children.
+     *
+     * Set when a restore came from that shape, and it has to stick. Paging on from a parsed restore
+     * accumulates raw children for the NEW pages only, and writing those would replace a cache of
+     * the whole feed with one holding just the tail -- so the next launch would find its anchor
+     * missing, fall back to the recorded index, and scroll that far into a feed that now starts a
+     * hundred posts later. Wrong content, silently.
+     */
+    private volatile boolean cacheIsParsed;
+    // Whether this source has served a load yet. Past the first one, a keyless load is a refresh.
+    private boolean hasLoaded;
     @Nullable
     private String multiRedditPath;
     private final List<Post> posts;
@@ -311,7 +345,133 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     @NonNull
     @Override
     public ListenableFuture<LoadResult<String, Post>> loadFuture(@NonNull LoadParams<String> loadParams) {
+        // A resume serves the posts the user already had, for the first load only and with no
+        // network call. The cache read touches disk and parses, so it MUST run on the executor:
+        // loadFuture() is invoked on the main thread (see loadUserPosts for the same constraint).
+        hasLoaded = true;
+        if (loadParams.getKey() == null && resumeFromCache && resumeFeedKey != null) {
+            resumeFromCache = false;
+            return Futures.submitAsync(() -> {
+                LoadResult<String, Post> restored = loadFromFeedCache();
+                if (restored != null) {
+                    return Futures.immediateFuture(restored);
+                }
+                // Too little of the recorded feed survived. Fetch it instead, and note that the
+                // fragment keys its scroll restore off the same cache, so it will not scroll.
+                return loadPastBarrenPages(loadParams, 0);
+            }, executor);
+        }
         return loadPastBarrenPages(loadParams, 0);
+    }
+
+    /**
+     * Point this source at a resume cache entry.
+     *
+     * <p>{@code fromCache} asks the first load to come from disk rather than the network.
+     * {@code expectedCount} is how many posts the feed held when it was recorded, against which
+     * {@link #MIN_RESUME_FRACTION} decides whether what survived is still worth restoring onto.
+     */
+    boolean hasLoaded() {
+        return hasLoaded;
+    }
+
+    void setResumeRequest(@Nullable String feedKey, boolean fromCache, int expectedCount) {
+        this.resumeFeedKey = feedKey;
+        this.resumeFromCache = fromCache && feedKey != null;
+        this.resumeExpectedCount = expectedCount;
+    }
+
+    /**
+     * Write what this source has accumulated to the resume cache, anchored on the post the user is
+     * looking at so a trimmed window keeps what is above it. No-op when the setting is off or
+     * nothing has been loaded yet.
+     */
+    void storeFeedCache(@Nullable String anchorFullname, @Nullable List<Post> shownPosts) {
+        final String feedKey = resumeFeedKey;
+        if (feedKey == null) {
+            return;
+        }
+        // A snapshot, taken under the same lock the paging thread appends under, and never the live
+        // accumulator. This runs on the main thread when the list comes to rest, which is exactly
+        // when a load for the next page is in flight on the executor -- and FeedCache walks what it
+        // is given on a third thread. Handing over the live JSONArray let all three touch one
+        // ArrayList at once, for a ConcurrentModificationException or a half-written cache file.
+        final JSONArray snapshot;
+        final String cursor;
+        synchronized (cacheChildren) {
+            if (cacheIsParsed || cacheChildren.length() == 0) {
+                // Nothing raw to write. That is the mid-session case: the setting was turned on
+                // after these pages had been fetched and parsed, so their JSON is long gone and
+                // this feed would otherwise record a position with nothing behind it. The posts
+                // themselves are still on screen, so they are what gets written -- handed in by the
+                // fragment from the adapter's own snapshot, which is safe to read from the main
+                // thread, unlike this source's list.
+                if (shownPosts != null && !shownPosts.isEmpty()) {
+                    cacheIsParsed = true;
+                    FeedCache.storeParsed(feedKey, shownPosts, resumeAfterToken, anchorFullname);
+                }
+                return;
+            }
+            snapshot = new JSONArray();
+            for (int i = 0; i < cacheChildren.length(); i++) {
+                snapshot.put(cacheChildren.opt(i));
+            }
+            cursor = resumeAfterToken;
+        }
+        FeedCache.store(feedKey, snapshot, cursor, anchorFullname);
+    }
+
+    /**
+     * The feed the user left, rebuilt from disk, or null when there is no usable cache -- in which
+     * case the caller falls through to the network.
+     */
+    @Nullable
+    private LoadResult<String, Post> loadFromFeedCache() {
+        final String feedKey = resumeFeedKey;
+        if (feedKey == null) {
+            return null;
+        }
+        FeedCache.Cached hit = FeedCache.load(feedKey, postFilter, readPostsList);
+        if (hit == null || hit.posts.isEmpty()) {
+            return null;
+        }
+        if (resumeExpectedCount > 0 && hit.posts.size() < resumeExpectedCount * MIN_RESUME_FRACTION) {
+            return null;
+        }
+        // Seed the dedup set and the accumulator from what came back: a page fetched after the
+        // resume then appends to the feed instead of repeating it, and storing the cache again
+        // writes the whole feed rather than only what arrived since the resume.
+        for (Post p : hit.posts) {
+            if (existingPostIds.add(p.getId())) {
+                posts.add(p);
+            }
+        }
+        // An empty children array alongside posts means the entry was written in the parsed shape.
+        // The feed has to keep writing it, or the next store would cover only what came after.
+        cacheIsParsed = hit.children.length() == 0;
+        seedCacheChildren(hit.children);
+        synchronized (cacheChildren) {
+            resumeAfterToken = hit.afterToken;
+        }
+        previousLastItem = hit.afterToken;
+        return new LoadResult.Page<>(new ArrayList<>(hit.posts), null, hit.afterToken);
+    }
+
+    private void seedCacheChildren(JSONArray children) {
+        synchronized (cacheChildren) {
+            for (int i = 0; i < children.length(); i++) {
+                JSONObject child = children.optJSONObject(i);
+                if (child == null) {
+                    continue;
+                }
+                JSONObject data = child.optJSONObject(JSONUtils.DATA_KEY);
+                String fullname = data == null ? "" : data.optString(JSONUtils.NAME_KEY);
+                if (fullname.isEmpty() || !cacheSeenFullnames.add(fullname)) {
+                    continue;
+                }
+                cacheChildren.put(child);
+            }
+        }
     }
 
     private ListenableFuture<LoadResult<String, Post>> loadPastBarrenPages(@NonNull LoadParams<String> loadParams,
@@ -447,6 +607,20 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             lastItem = null;
         }
         previousLastItem = lastItem;
+
+        // Every feed type reaches this one method, which makes it the place the resume cache is
+        // built from. Dedup by fullname means the saved feed accumulating here as well as in its
+        // own walk costs nothing.
+        if (resumeFeedKey != null) {
+            // Cursor and pages under one lock, so a reader can never pair this page's posts with
+            // the previous page's cursor. That mismatch would store posts sitting past their own
+            // cursor, and the next resume would re-fetch a page the user already had and show it
+            // twice.
+            synchronized (cacheChildren) {
+                resumeAfterToken = lastItem;
+            }
+            accumulateCacheChildren(json);
+        }
 
         if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
             setMetadataToAnonymousPosts(newPosts);
@@ -648,7 +822,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     // Collect this page's raw t3 children (deduped, in order) for the persistent SavedPostCache. The
     // whole unfiltered t3 listing is stored -- the current postFilter is re-applied on load -- so a
     // filter change needs no invalidation. Takes the already-parsed listing to avoid re-parsing.
-    private void accumulateSavedCacheChildren(@Nullable JSONObject json) {
+    private void accumulateCacheChildren(@Nullable JSONObject json) {
         if (json == null) {
             return;
         }
@@ -661,10 +835,12 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                     continue;
                 }
                 String fullname = child.getJSONObject(JSONUtils.DATA_KEY).optString(JSONUtils.NAME_KEY);
-                if (fullname.isEmpty() || !savedCacheSeenFullnames.add(fullname)) {
+                if (fullname.isEmpty() || !cacheSeenFullnames.add(fullname)) {
                     continue;
                 }
-                savedCacheChildren.put(child);
+                synchronized (cacheChildren) {
+                    cacheChildren.put(child);
+                }
             }
         } catch (JSONException e) {
             // A malformed page just means a smaller cache; never fail the load over it.
@@ -701,7 +877,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
 
             // Keep the raw t3 children so a complete walk can be persisted for the Saved tab cache.
             if (isSavedFeed()) {
-                accumulateSavedCacheChildren(json);
+                accumulateCacheChildren(json);
             }
 
             int nextPagesLoaded = pagesLoaded + 1;
@@ -721,7 +897,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             // Persist to disk so a later tab open is instant -- only when we truly reached the end
             // (a capped or repeated-cursor walk is not known to be the complete list).
             if (isSavedFeed() && genuineEnd) {
-                SavedPostCache.store(accountName, userWhere, savedCacheChildren, true);
+                SavedPostCache.store(accountName, userWhere, cacheChildren, true);
             }
             return Futures.immediateFuture(filterToPage(posts));
         }, executor);
@@ -746,7 +922,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             // Accumulate raw children as the user pages so that reaching the end via normal browsing
             // (not just search) warms the persistent Saved cache too.
             if (isSavedFeed()) {
-                accumulateSavedCacheChildren(json);
+                accumulateCacheChildren(json);
             }
             if (result instanceof LoadResult.Page) {
                 LoadResult.Page<String, Post> page = (LoadResult.Page<String, Post>) result;
@@ -759,7 +935,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 if (isSavedFeed() && page.getNextKey() == null) {
                     String after = ParsePost.getLastItem(json);
                     if (after == null || after.isEmpty()) {
-                        SavedPostCache.store(accountName, userWhere, savedCacheChildren, true);
+                        SavedPostCache.store(accountName, userWhere, cacheChildren, true);
                     }
                 }
             }

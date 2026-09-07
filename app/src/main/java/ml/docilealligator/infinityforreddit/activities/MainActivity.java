@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -124,6 +125,9 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.settings.MainPageTabInput;
 import ml.docilealligator.infinityforreddit.settings.MainPageTabsUtils;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
@@ -154,7 +158,7 @@ import retrofit2.Retrofit;
 public class MainActivity extends BaseActivity implements SortTypeSelectionCallback,
         PostTypeBottomSheetFragment.PostTypeSelectionCallback, PostLayoutBottomSheetFragment.PostLayoutSelectionCallback,
         ActivityToolbarInterface, FABMoreOptionsBottomSheetFragment.FABOptionSelectionCallback,
-        MarkPostAsReadInterface, RecyclerViewContentScrollingInterface {
+        MarkPostAsReadInterface, RecyclerViewContentScrollingInterface, Restorable {
 
     static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
@@ -168,6 +172,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private static final String NEW_ACCOUNT_NAME_STATE = "NANS";
     private static final String APP_BAR_COLLAPSED_STATE = "ABCS";
     private static final String BOTTOM_APP_BAR_HIDDEN_STATE = "BABH";
+    // Resume where I left off: the tab the user was on, as a MainPageTabsUtils user key rather than
+    // an index. The tab list is rebuilt from the subscription and multireddit data on every launch
+    // and its order is not stable, so an index can name a different subreddit next time.
+    private static final String STATE_RESUME_TAB_KEY = "RTK";
+    private static final String STATE_RESUME_APP_BAR_COLLAPSED = "RABC";
 
     @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel multiRedditViewModel;
@@ -255,6 +264,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private String mMessageFullname;
     @Nullable
     private String mNewAccountName;
+    private final FeedResumeState resumeFeed = new FeedResumeState();
+    @Nullable
+    private String resumeTabKey;
+    private boolean resumeTabApplied;
     private boolean hideFab;
     private boolean showBottomAppBar;
     private int mBackButtonAction;
@@ -282,8 +295,20 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         super.onCreate(savedInstanceState);
 
+        // Before anything builds the pager: the tab to open on has to be known by the time the
+        // adapter is created, and the screens that were above this one have to be launched before
+        // the user sees this one settle.
+        if (savedInstanceState == null && isPlainLaunch(getIntent())) {
+            // Before claiming, so the snapshot is still whole when it is read.
+            replayResumedStack();
+        }
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // After the binding exists, because restoring the app bar touches it, and before anything
+        // builds the pager, because the tab to open on has to be known by then.
+        claimResumeState();
 
         hideFab = mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_FAB_IN_POST_FEED, false);
         showBottomAppBar = mSharedPreferences.getBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_KEY, false);
@@ -1094,6 +1119,23 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                             boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, false);
                             mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT, newValue).apply();
                             EventBus.getDefault().post(new ShowThumbnailOnTheLeftInCompactLayoutEvent(newValue));
+                        } else if (stringId == R.string.enable_resume_where_i_left_off) {
+                            // The drawer row sends this one string id whichever way it is about to
+                            // flip; the stored value is what decides. Everything that cares about
+                            // the setting -- the feeds, and the drawer row's own label -- observes
+                            // it, so writing it is the whole of the toggle.
+                            boolean newValue = !mSharedPreferences.getBoolean(SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false);
+                            mSharedPreferences.edit().putBoolean(SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, newValue).apply();
+                            if (!newValue) {
+                                // Turning it off forgets the recorded stack and the posts it points
+                                // at, exactly as the Settings switch does -- otherwise the two ways
+                                // of turning the same setting off would leave different amounts of
+                                // it behind. Off the main thread because it reads and unlinks the
+                                // snapshot file, and on the application context because this
+                                // activity may be gone before it finishes.
+                                Context appContext = getApplicationContext();
+                                mExecutor.execute(() -> ResumeState.clear(appContext));
+                            }
                         } else if (stringId == R.string.settings) {
                             intent = new Intent(MainActivity.this, SettingsActivity.class);
                         } else if (stringId == R.string.add_account) {
@@ -1112,14 +1154,14 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                 intent = new Intent(MainActivity.this, LoginActivity.class);
                             }
                         } else if (stringId == R.string.anonymous_account) {
-                            AccountManagement.switchToAnonymousMode(mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
+                            AccountManagement.switchToAnonymousMode(MainActivity.this, mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
                                     mExecutor, new Handler(), false, () -> {
                                         Intent anonymousIntent = new Intent(MainActivity.this, MainActivity.class);
                                         startActivity(anonymousIntent);
                                         finish();
                                     });
                         } else if (stringId == R.string.log_out) {
-                            AccountManagement.switchToAnonymousMode(mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
+                            AccountManagement.switchToAnonymousMode(MainActivity.this, mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
                                     mExecutor, new Handler(), true,
                                     () -> {
                                         Intent logOutIntent = new Intent(MainActivity.this, MainActivity.class);
@@ -1156,7 +1198,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         .setTitle(R.string.log_out)
                         .setMessage(accountName)
                         .setPositiveButton(R.string.yes,
-                                (dialogInterface, i) -> AccountManagement.removeAccount(mRedditDataRoomDatabase, mExecutor, accountName))
+                                (dialogInterface, i) -> AccountManagement.removeAccount(MainActivity.this, mRedditDataRoomDatabase, mExecutor, accountName))
                         .setNegativeButton(R.string.no, null)
                         .show();
             }
@@ -1176,6 +1218,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         SharedPreferencesLiveDataKt.booleanLiveData(mRecentlyVisitedSharedPreferences,
                         AccountScope.key(accountName, SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE), false)
                 .observe(this, enabled -> adapter.setShowRecentlyVisited(enabled));
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences,
+                        SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false)
+                .observe(this, enabled -> adapter.setResumeWhereILeftOff(enabled));
         binding.navDrawerRecyclerViewMainActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
         binding.navDrawerRecyclerViewMainActivity.setAdapter(adapter.getConcatAdapter());
 
@@ -1188,6 +1233,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         sectionsPagerAdapter = new SectionsPagerAdapter(this,
                 MainPageTabsUtils.load(mMainActivityTabsSharedPreferences, accountName));
         binding.includedAppBar.viewPagerMainActivity.setAdapter(sectionsPagerAdapter);
+        applyResumeTab();
         binding.includedAppBar.viewPagerMainActivity.setUserInputEnabled(!mDisableSwipingBetweenTabs);
         if (mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), true)) {
             // Always scrollable so tabs render at their natural width and never wrap.
@@ -1877,6 +1923,91 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         handleGoHomeIntent(intent);
     }
 
+    /**
+     * Whether this launch is just "open the app", as opposed to a deep link, a notification tap or
+     * a shortcut. Only a plain launch replays the recorded stack: anything else is the user asking
+     * for something specific, and burying it under their browsing history would be wrong.
+     */
+    private boolean isPlainLaunch(@Nullable Intent intent) {
+        if (intent == null) {
+            return true;
+        }
+        String action = intent.getAction();
+        if (action != null && !Intent.ACTION_MAIN.equals(action)) {
+            return false;
+        }
+        Bundle extras = intent.getExtras();
+        return extras == null || extras.isEmpty();
+    }
+
+    /** Put back the screens that were above this one when the app was last closed. */
+    private void replayResumedStack() {
+        Intent[] above = ResumeState.buildRestoreIntents(this);
+        if (above == null || above.length == 0) {
+            return;
+        }
+        try {
+            startActivities(above);
+        } catch (RuntimeException e) {
+            // A screen that can no longer be launched is not worth failing the launch over: the
+            // user still gets their feed, just not what was on top of it.
+            Log.e("MainActivity", "could not replay the resumed stack", e);
+        }
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (sectionsPagerAdapter == null || binding == null) {
+            return;
+        }
+        String tabKey = sectionsPagerAdapter.userKeyAtPosition(
+                binding.includedAppBar.viewPagerMainActivity.getCurrentItem());
+        if (tabKey == null) {
+            return;
+        }
+        PostFragment currentFragment = sectionsPagerAdapter.getCurrentFragment();
+        // Nothing at all rather than the tab on its own. A record that names a feed but cannot say
+        // where in it the user was would reopen that feed scrolled to the top, which is not a
+        // resume -- and writing it would overwrite a good record from a moment ago.
+        if (currentFragment == null || !currentFragment.captureResumeState(out)) {
+            return;
+        }
+        out.putString(STATE_RESUME_TAB_KEY, tabKey);
+        out.putBoolean(STATE_RESUME_APP_BAR_COLLAPSED, mAppBarCollapsed);
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeTabKey = state.getString(STATE_RESUME_TAB_KEY);
+        resumeFeed.read(state);
+        if (state.getBoolean(STATE_RESUME_APP_BAR_COLLAPSED, false)) {
+            // Without this the feed comes back at the right adapter position but pushed down by the
+            // height of a toolbar that was collapsed when the user left -- every row off by the
+            // same constant, which is the same failure the rotation path guards against above.
+            mAppBarCollapsed = true;
+            binding.includedAppBar.appbarLayoutMainActivity.setExpanded(false, false);
+        }
+    }
+
+    /**
+     * Move to the tab a resume asked for, once it exists.
+     *
+     * Called after the adapter is built and again after every tab refresh: the dynamic tabs arrive
+     * asynchronously from the subscription and multireddit LiveData, so the tab the user left may
+     * not be in the list at the moment the pager is first populated.
+     */
+    private void applyResumeTab() {
+        if (resumeTabApplied || resumeTabKey == null || sectionsPagerAdapter == null) {
+            return;
+        }
+        int position = sectionsPagerAdapter.positionOfUserKey(resumeTabKey);
+        if (position < 0) {
+            return;
+        }
+        resumeTabApplied = true;
+        binding.includedAppBar.viewPagerMainActivity.setCurrentItem(position, false);
+    }
+
     private void handleGoHomeIntent(Intent intent) {
         if (intent.getBooleanExtra(EXTRA_GO_HOME, false)) {
             binding.includedAppBar.viewPagerMainActivity.setCurrentItem(0, false);
@@ -2150,6 +2281,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             }
             resolvedTabsCache = newResolved;
             notifyDataSetChanged();
+            // The tab a resume asked for may only now have arrived from the dynamic lists.
+            applyResumeTab();
         }
 
         private boolean sameResolvedTabs(List<ResolvedTab> a, List<ResolvedTab> b) {
@@ -2278,6 +2411,19 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
 
         private Fragment generatePostFragment(int postType, String name) {
+            Fragment fragment = buildPostFragment(postType, name);
+            // The tab being built is the one the user left, so hand it the feed record. applyTo is
+            // one-shot: the pager builds the neighbouring page as well, and a rebuilt adapter would
+            // otherwise replay the restore onto a feed the user never left.
+            if (resumeTabKey != null
+                    && resumeTabKey.equals(MainPageTabsUtils.userKey(postType, name))
+                    && fragment.getArguments() != null) {
+                resumeFeed.applyTo(fragment.getArguments());
+            }
+            return fragment;
+        }
+
+        private Fragment buildPostFragment(int postType, String name) {
             if (postType == SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_HOME) {
                 PostFragment fragment = new PostFragment();
                 Bundle bundle = new Bundle();
@@ -2385,6 +2531,29 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             }
             ResolvedTab tab = resolved.get(position);
             return idForKey(MainPageTabsUtils.userKey(tab.postType, tab.name));
+        }
+
+        /** The user key of the tab at {@code position}, or null if there is no such tab. */
+        @Nullable
+        String userKeyAtPosition(int position) {
+            List<ResolvedTab> resolved = resolvedTabs();
+            if (position < 0 || position >= resolved.size()) {
+                return null;
+            }
+            ResolvedTab tab = resolved.get(position);
+            return MainPageTabsUtils.userKey(tab.postType, tab.name);
+        }
+
+        /** Position of the tab with this user key, or -1 while it is not in the list. */
+        int positionOfUserKey(String userKey) {
+            List<ResolvedTab> resolved = resolvedTabs();
+            for (int i = 0; i < resolved.size(); i++) {
+                ResolvedTab tab = resolved.get(i);
+                if (userKey.equals(MainPageTabsUtils.userKey(tab.postType, tab.name))) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         @Override

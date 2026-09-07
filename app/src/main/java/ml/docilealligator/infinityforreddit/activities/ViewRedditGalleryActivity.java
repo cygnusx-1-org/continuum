@@ -33,6 +33,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
 import app.futured.hauler.DragDirection;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -54,6 +56,9 @@ import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryImageOrGifFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewRedditGalleryVideoFragment;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -61,10 +66,19 @@ import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-public class ViewRedditGalleryActivity extends AppCompatActivity implements SetAsWallpaperCallback, CustomFontReceiver {
+public class ViewRedditGalleryActivity extends AppCompatActivity
+        implements SetAsWallpaperCallback, CustomFontReceiver, Restorable, ResumeLaunchExtras {
 
     public static final String EXTRA_POST = "EP";
+    /**
+     * The same post as {@link #EXTRA_POST}, as JSON, for a resume replay. See
+     * {@link #resumeLaunchExtras()}.
+     */
+    public static final String EXTRA_POST_JSON = "EPJ";
     public static final String EXTRA_GALLERY_ITEM_INDEX = "EGII";
+
+    /** Which item of the gallery the user was on. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_PAGE = "RP";
 
     @Inject
     @Named("default")
@@ -84,6 +98,9 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
     private String subredditName;
     private boolean isNsfw;
     private boolean isActionBarHidden = false;
+    // Resume where I left off: which item of the gallery was open. The gallery itself replays in the
+    // extras, so this needs no network of its own.
+    private int resumePage = -1;
     private ActivityViewRedditGalleryBinding binding;
     ViewGalleryViewModel viewGalleryViewModel;
 
@@ -178,6 +195,20 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
 
         Post post = getIntent().getParcelableExtra(EXTRA_POST);
         if (post == null) {
+            // A resume replay carries the post as JSON, because a marshalled Parcel cannot be
+            // stored. It has to be the whole post and not just the gallery: downloading and sharing
+            // an item name the post they came from, and both would break on a restored screen if it
+            // came back holding only the media.
+            String postJson = getIntent().getStringExtra(EXTRA_POST_JSON);
+            if (postJson != null) {
+                try {
+                    post = new Gson().fromJson(postJson, Post.class);
+                } catch (JsonSyntaxException e) {
+                    post = null;
+                }
+            }
+        }
+        if (post == null) {
             finish();
             return;
         }
@@ -208,8 +239,79 @@ public class ViewRedditGalleryActivity extends AppCompatActivity implements SetA
         binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
         if (savedInstanceState == null) {
-            binding.viewPagerViewRedditGalleryActivity.setCurrentItem(getIntent().getIntExtra(EXTRA_GALLERY_ITEM_INDEX, 0), false);
+            Bundle resumeState = ResumeState.claim(this);
+            if (resumeState != null) {
+                restoreResumeState(resumeState);
+            }
+            // The item the opening intent names wins over a resume: it is what the user tapped just
+            // now, where the resume is what they were looking at last time.
+            int index = getIntent().getIntExtra(EXTRA_GALLERY_ITEM_INDEX, 0);
+            if (index == 0 && resumePage > 0 && resumePage < gallery.size()) {
+                index = resumePage;
+            }
+            binding.viewPagerViewRedditGalleryActivity.setCurrentItem(index, false);
         }
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        out.putInt(STATE_RESUME_PAGE, binding.viewPagerViewRedditGalleryActivity.getCurrentItem());
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumePage = state.getInt(STATE_RESUME_PAGE, -1);
+    }
+
+    /**
+     * The launch extras with the post turned into JSON.
+     *
+     * <p>This screen is handed the post whole, and a marshalled {@code Parcel} must never be written
+     * to disk -- its layout is a private implementation detail that changes between releases.
+     * Recording the post's id instead, as the comments screen does, would mean refetching it, and a
+     * media viewer that needs the network to reopen defeats the point of a resume that otherwise
+     * costs none. {@link Post} is a plain record, so its JSON round-trips, and a gallery's media URLs
+     * do not go stale the way a comment thread does.
+     */
+    /**
+     * The post's id, which is what makes one gallery a different screen from another. Only the part
+     * of this screen's identity hidden inside a {@code Parcelable}; ResumeState adds the primitive
+     * extras itself. Pulled out rather than serialized: unparcelling costs microseconds where
+     * {@link #resumeLaunchExtras()}'s Gson call was measured at 192.9 ms on a device.
+     */
+    @Nullable
+    @Override
+    public String resumeIdentity() {
+        Post post = getIntent().getParcelableExtra(EXTRA_POST);
+        if (post != null) {
+            return post.getId();
+        }
+        // A replayed launch carries the post as JSON instead; its id is not worth digging out of
+        // that, and a replay is not a rotation, so the full comparison can have this one.
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Post post = getIntent().getParcelableExtra(EXTRA_POST);
+        if (post == null) {
+            // Already a replayed launch: its extras are recordable as they stand.
+            return extras;
+        }
+        Bundle out = new Bundle(extras);
+        out.remove(EXTRA_POST);
+        out.putString(EXTRA_POST_JSON, new Gson().toJson(post));
+        // The index the user originally tapped is superseded by the item they were actually on when
+        // they left, so it must not travel with the replay. Left in, it would make the restored
+        // screen open on the tapped item and ignore the recorded one -- and it is precisely its
+        // absence that tells setupViewPager a launch is a replay rather than a fresh tap.
+        out.remove(EXTRA_GALLERY_ITEM_INDEX);
+        return out;
     }
 
     @Override

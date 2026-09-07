@@ -46,6 +46,12 @@
         app:summary="@string/settings_delete_account_front_page_scrolled_position_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_resume_state"
+        app:icon="@drawable/ic_access_time_day_night_24dp"
+        app:title="@string/settings_delete_resume_state_title"
+        app:summary="@string/settings_delete_account_resume_state_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:key="delete_account_read_posts"
         app:icon="@drawable/ic_history_day_night_24dp"
         app:title="@string/settings_delete_read_posts_in_database_title"

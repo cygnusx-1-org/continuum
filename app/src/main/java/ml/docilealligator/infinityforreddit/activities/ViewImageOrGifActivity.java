@@ -70,6 +70,8 @@ import ml.docilealligator.infinityforreddit.font.FontFamily;
 import ml.docilealligator.infinityforreddit.font.FontStyle;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -77,7 +79,11 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWallpaperCallback, CustomFontReceiver {
+public class ViewImageOrGifActivity extends AppCompatActivity
+        implements SetAsWallpaperCallback, CustomFontReceiver, Restorable {
+
+    /** How far the user had turned the image. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_ROTATION = "RRO";
 
     public static final String EXTRA_IMAGE_URL_KEY = "EIUK";
     public static final String EXTRA_GIF_URL_KEY = "EGUK";
@@ -160,6 +166,15 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
 
         if (savedInstanceState != null) {
             currentRotation = savedInstanceState.getInt("currentRotation", 0);
+        } else {
+            // Before the image is loaded: applyRotation() runs off the load callback, and a rotation
+            // arriving after that has nothing left to turn. Every extra this screen takes is a
+            // string, a boolean or an int, so it replays as it was launched and nothing else is
+            // recorded here.
+            Bundle resumeState = ResumeState.claim(this);
+            if (resumeState != null) {
+                restoreResumeState(resumeState);
+            }
         }
 
         Intent intent = getIntent();
@@ -397,6 +412,18 @@ public class ViewImageOrGifActivity extends AppCompatActivity implements SetAsWa
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("currentRotation", currentRotation);
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (currentRotation != 0) {
+            out.putInt(STATE_RESUME_ROTATION, currentRotation);
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        currentRotation = state.getInt(STATE_RESUME_ROTATION, 0);
     }
 
     private void rotateLeft() {

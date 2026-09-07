@@ -17,6 +17,8 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -48,6 +50,9 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
+import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditViewModel;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
@@ -57,6 +62,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 public class FilteredPostsActivity extends BaseActivity implements SortTypeSelectionCallback,
+        Restorable, ResumeLaunchExtras,
         PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, ActivityToolbarInterface,
         MarkPostAsReadInterface, FilteredThingFABMoreOptionsBottomSheetFragment.FABOptionSelectionCallback,
         RecyclerViewContentScrollingInterface {
@@ -66,6 +72,12 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     public static final String EXTRA_TRENDING_SOURCE = "ETS";
     public static final String EXTRA_POST_TYPE_FILTER = "EPTF";
     public static final String EXTRA_CONSTRUCTED_POST_FILTER = "ECPF";
+    /**
+     * The same filter as {@link #EXTRA_CONSTRUCTED_POST_FILTER}, as JSON, for a resume replay. A
+     * marshalled {@code Parcel} must never be written to disk, and this screen cannot be relaunched
+     * without knowing what it was filtering. See {@link #resumeLaunchExtras()}.
+     */
+    public static final String EXTRA_CONSTRUCTED_POST_FILTER_JSON = "ECPFJ";
     public static final String EXTRA_CONTAIN_FLAIR = "ECF";
     public static final String EXTRA_POST_TYPE = "EPT";
     public static final String EXTRA_USER_WHERE = "EUW";
@@ -107,6 +119,9 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
     @Nullable
     private Menu mMenu;
     private boolean isNsfwSubreddit = false;
+    // Resume where I left off. The listing this screen shows travels in the intent extras; only
+    // where in it the user was needs storing.
+    private final FeedResumeState resumeFeed = new FeedResumeState();
     private ActivityFilteredThingBinding binding;
 
     @Override
@@ -188,6 +203,17 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         int filter = getIntent().getIntExtra(EXTRA_POST_TYPE_FILTER, -1000);
         PostFilter postFilter = getIntent().getParcelableExtra(EXTRA_CONSTRUCTED_POST_FILTER);
         if (postFilter == null) {
+            // A resume replay carries the filter as JSON, because the Parcelable cannot be stored.
+            String postFilterJson = getIntent().getStringExtra(EXTRA_CONSTRUCTED_POST_FILTER_JSON);
+            if (postFilterJson != null) {
+                try {
+                    postFilter = new Gson().fromJson(postFilterJson, PostFilter.class);
+                } catch (JsonSyntaxException e) {
+                    postFilter = null;
+                }
+            }
+        }
+        if (postFilter == null) {
             postFilter = new PostFilter();
             switch (filter) {
                 case Post.NSFW_TYPE:
@@ -258,6 +284,9 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
             }
         }
 
+        // Before bindView(), which is where the feed fragment is built and given its record.
+        claimResumeState();
+
         if (savedInstanceState != null) {
             PostFragment restoredFragment = (PostFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
             if (restoredFragment != null) {
@@ -303,6 +332,85 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 binding.collapsingToolbarLayoutFilteredPostsActivity, binding.toolbarFilteredPostsActivity);
         applyAppBarScrollFlagsIfApplicable(binding.collapsingToolbarLayoutFilteredPostsActivity);
         applyFABTheme(binding.fabFilteredThingActivity);
+    }
+
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        // Nothing at all rather than a record that cannot say where in the feed the user was: that
+        // would reopen this screen scrolled to the top and overwrite a good record from a moment
+        // ago.
+        if (mFragment != null) {
+            mFragment.captureResumeState(out);
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeFeed.read(state);
+    }
+
+    /**
+     * The launch extras with the filter turned into JSON.
+     *
+     * <p>The filter arrives as a {@code Parcelable}, and a marshalled {@code Parcel} must never be
+     * written to disk -- its layout is a private implementation detail that changes between
+     * releases. Nothing else identifies what this screen was showing, so without the swap the whole
+     * entry would be unrecordable and the snapshot would stop here. {@link PostFilter} is already
+     * serialized this way for the settings backup, so it round-trips.
+     */
+    /**
+     * The filter's name. Only the part of this screen's identity that is hidden inside a
+     * {@code Parcelable} -- the listing it filters is a primitive extra, and ResumeState adds those
+     * itself. Naming just this avoids running the filter through Gson, which is what
+     * {@link #resumeLaunchExtras()} does.
+     */
+    @Nullable
+    @Override
+    public String resumeIdentity() {
+        PostFilter postFilter = getIntent().getParcelableExtra(EXTRA_CONSTRUCTED_POST_FILTER);
+        return postFilter == null ? null : postFilter.name;
+    }
+
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Bundle out = new Bundle(extras);
+        PostFilter postFilter = getIntent().getParcelableExtra(EXTRA_CONSTRUCTED_POST_FILTER);
+        if (postFilter != null) {
+            out.remove(EXTRA_CONSTRUCTED_POST_FILTER);
+            out.putString(EXTRA_CONSTRUCTED_POST_FILTER_JSON, new Gson().toJson(postFilter));
+        }
+        return out;
+    }
+
+    /**
+     * What separates this screen's cache from the unfiltered listing's, and from another filter's
+     * over the same listing.
+     *
+     * <p>Built from the launch extras rather than from the constructed filter, so it is the same on
+     * both runs: the constructed filter picks up {@code allowNSFW} from a preference that the user
+     * may have changed in between, and keying on that would silently strand the entry it wrote.
+     */
+    private String resumeFeedScope() {
+        PostFilter constructed = getIntent().getParcelableExtra(EXTRA_CONSTRUCTED_POST_FILTER);
+        if (constructed == null) {
+            String json = getIntent().getStringExtra(EXTRA_CONSTRUCTED_POST_FILTER_JSON);
+            if (json != null) {
+                try {
+                    constructed = new Gson().fromJson(json, PostFilter.class);
+                } catch (JsonSyntaxException e) {
+                    constructed = null;
+                }
+            }
+        }
+        String flair = getIntent().getStringExtra(EXTRA_CONTAIN_FLAIR);
+        return "filtered|" + getIntent().getIntExtra(EXTRA_POST_TYPE_FILTER, -1000)
+                + "|" + (flair == null ? "" : flair)
+                + "|" + (constructed == null ? "" : constructed.name);
     }
 
     private void bindView(PostFilter postFilter, boolean initializeFragment) {
@@ -379,6 +487,12 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 bundle.putString(PostFragment.EXTRA_QUERY, getIntent().getStringExtra(EXTRA_QUERY));
                 bundle.putString(PostFragment.EXTRA_TRENDING_SOURCE, getIntent().getStringExtra(EXTRA_TRENDING_SOURCE));
             }
+            // This screen shows a listing another screen also shows, through a filter that screen
+            // does not apply, so it needs a cache of its own -- and one filter's cache must not be
+            // another's, or two filters over the same subreddit would keep overwriting each other.
+            bundle.putString(PostFragment.EXTRA_RESUME_FEED_SCOPE, resumeFeedScope());
+            // One-shot, so a fragment rebuilt later cannot replay the restore.
+            resumeFeed.applyTo(bundle);
             mFragment.setArguments(bundle);
             getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_filtered_posts_activity, mFragment).commit();
         }

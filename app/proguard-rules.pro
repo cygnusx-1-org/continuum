@@ -64,6 +64,20 @@
 # Application classes that will be serialized/deserialized over Gson
 -keep class ml.docilealligator.infinityforreddit.customtheme.CustomTheme { <fields>; }
 -keep class ml.docilealligator.infinityforreddit.multireddit.MultiRedditJSONModel { <fields>; }
+
+# Kept for the same reason as the two above: Gson serializes these by field name into storage that
+# outlives an app update -- the resume feed cache (FeedCache's parsed shape) and the launch extras
+# recorded in the resume snapshot for the gallery, filtered-posts and search screens. Obfuscated,
+# the names change whenever the build does, so a cache written by the previous version would not
+# fail to load, it would load into an object of nulls: a feed of blank rows, or a gallery with no
+# media, with nothing to say why.
+-keep class ml.docilealligator.infinityforreddit.post.Post { <fields>; }
+-keep class ml.docilealligator.infinityforreddit.post.Post$* { <fields>; }
+# Reached through Post.mediaMetadataMap, so it is part of the same serialized shape even though it
+# lives in another package.
+-keep class ml.docilealligator.infinityforreddit.thing.MediaMetadata { <fields>; }
+# Reached through MultiReddit.subreddits, which is kept below for the same reason.
+-keep class ml.docilealligator.infinityforreddit.multireddit.ExpandedSubredditInMultiReddit { <fields>; }
 -keep class ml.docilealligator.infinityforreddit.multireddit.SubredditInMultiReddit { <fields>; }
 -keep class ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData { <fields>; }
 -keep class ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData { <fields>; }
