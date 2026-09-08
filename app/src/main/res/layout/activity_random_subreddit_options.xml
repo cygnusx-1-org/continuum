@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:application=".activities.RandomSubredditOptionsActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_layout_random_subreddit_options_activity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar_layout_random_subreddit_options_activity"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:titleEnabled="false"
+            app:toolbarId="@+id/toolbar_random_subreddit_options_activity">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_random_subreddit_options_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="?attr/actionBarSize"
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:navigationIcon="?attr/homeAsUpIndicator" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nested_scroll_view_random_subreddit_options_activity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/random_subreddit_text_view_random_subreddit_options_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/random_subreddit"
+                android:textColor="?attr/primaryTextColor"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family"
+                app:drawableStartCompat="@drawable/ic_random_day_night_24dp"
+                android:drawablePadding="32dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground" />
+
+            <TextView
+                android:id="@+id/random_subscribed_subreddit_text_view_random_subreddit_options_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/random_subscribed_subreddit"
+                android:textColor="?attr/primaryTextColor"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family"
+                app:drawableStartCompat="@drawable/ic_random_day_night_24dp"
+                android:drawablePadding="32dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground" />
+
+            <TextView
+                android:id="@+id/random_nsfw_subreddit_text_view_random_subreddit_options_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/random_nsfw_subreddit"
+                android:textColor="?attr/primaryTextColor"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family"
+                app:drawableStartCompat="@drawable/ic_random_day_night_24dp"
+                android:drawablePadding="32dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground" />
+
+            <TextView
+                android:id="@+id/note_text_view_random_subreddit_options_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="0dp"
+                android:paddingBottom="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/random_subreddit_sfw_not_guaranteed"
+                android:textColor="?attr/secondaryTextColor"
+                android:textSize="?attr/font_12"
+                android:fontFamily="?attr/font_family" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -193,14 +193,20 @@ class AccountScopedScreenKeysTest {
         return screens
     }
 
-    /** The fragments the settings root links to under the "This account" heading. */
+    /**
+     * The fragments the settings root links to under a heading whose screens are per-account.
+     *
+     * Two headings, not one: Theme sits under its own "Themes" heading now, but everything on it
+     * -- the theme mode, the amoled switch, Material You -- is still stored per account. A crawl
+     * that followed only "Account" would have stopped guarding those the moment they moved.
+     */
     private fun fragmentsUnderThisAccount(): List<String> {
+        val perAccountGroups = setOf(R.string.settings_group_account, R.string.settings_group_themes)
         val fragments = mutableListOf<String>()
         var underThisAccount = false
         forEachStartTag(R.xml.main_preferences) { tag, parser ->
             if (tag == "CustomFontPreferenceCategory") {
-                underThisAccount = attributeResourceOf(parser, "title") ==
-                    R.string.settings_group_account
+                underThisAccount = attributeResourceOf(parser, "title") in perAccountGroups
             } else if (underThisAccount) {
                 attributeOf(parser, "fragment")?.let(fragments::add)
             }

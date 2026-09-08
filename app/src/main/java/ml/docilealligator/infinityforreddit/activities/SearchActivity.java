@@ -26,7 +26,6 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
-import androidx.core.widget.TextViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,11 +49,12 @@ import ml.docilealligator.infinityforreddit.adapters.SubredditAutocompleteRecycl
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySearchBinding;
+import ml.docilealligator.infinityforreddit.events.RandomSubredditOpenedEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
-import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditNames;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQueryViewModel;
+import ml.docilealligator.infinityforreddit.search.IncognitoKeyboardState;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
@@ -85,7 +85,6 @@ public class SearchActivity extends BaseActivity {
     private static final String SEARCH_IN_SUBREDDIT_OR_NAME_STATE = "SNS";
     private static final String SEARCH_IN_THING_TYPE_STATE = "SITTS";
     private static final String SEARCH_IN_MULTIREDDIT_STATE = "SIMS";
-    private static final String INCOGNITO_KEYBOARD_STATE = "IKS";
 
     private static final int SUBREDDIT_SEARCH_REQUEST_CODE = 1;
     private static final int USER_SEARCH_REQUEST_CODE = 2;
@@ -122,9 +121,8 @@ public class SearchActivity extends BaseActivity {
     private boolean searchOnlySubreddits;
     private boolean searchOnlyUsers;
     private boolean searchSubredditsAndUsers;
-    private boolean incognitoKeyboard;
     /**
-     * The random rows open a subreddit outright, which is the wrong move when this screen was
+     * The random picks open a subreddit outright, which is the wrong move when this screen was
      * opened to hand a name back to whoever launched it.
      */
     private boolean canOpenRandomSubreddit;
@@ -213,14 +211,6 @@ public class SearchActivity extends BaseActivity {
 
         nsfw = mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.NSFW_BASE), false);
 
-        // Naming a NSFW subreddit picker is the kind of thing that makes the app awkward to open in
-        // public, so the row is not offered to anyone who has turned NSFW off. The note goes with
-        // it: it is about NSFW too, and it is the longest piece of text on the screen.
-        if (!nsfw) {
-            binding.randomNsfwSubredditTextViewSearchActivity.setVisibility(View.GONE);
-            binding.randomSubredditsNoteTextViewSearchActivity.setVisibility(View.GONE);
-        }
-
         subredditAutocompleteRecyclerViewAdapter = new SubredditAutocompleteRecyclerViewAdapter(this,
                 mCustomThemeWrapper, subredditData -> {
             if (searchOnlySubreddits || searchSubredditsAndUsers) {
@@ -243,14 +233,15 @@ public class SearchActivity extends BaseActivity {
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            setIncognitoKeyboard(savedInstanceState != null && savedInstanceState.getBoolean(INCOGNITO_KEYBOARD_STATE, false));
+            setIncognitoKeyboard(IncognitoKeyboardState.isEnabled());
 
             binding.incognitoKeyboardImageViewSearchActivity.setOnClickListener(view -> {
-                setIncognitoKeyboard(!incognitoKeyboard);
+                boolean incognito = !IncognitoKeyboardState.isEnabled();
+                setIncognitoKeyboard(incognito);
                 // A Snackbar would be drawn at the bottom of the root layout, which the keyboard
                 // covers for the whole life of this activity.
                 Toast.makeText(this,
-                        incognitoKeyboard ? R.string.incognito_keyboard_on : R.string.incognito_keyboard_off,
+                        incognito ? R.string.incognito_keyboard_on : R.string.incognito_keyboard_off,
                         Toast.LENGTH_SHORT).show();
             });
         } else {
@@ -301,7 +292,6 @@ public class SearchActivity extends BaseActivity {
                                                     public void onParseSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
                                                         binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.GONE);
                                                         binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
-                                                        showRandomSubredditOptions(false);
                                                         subredditAutocompleteRecyclerViewAdapter.setSubreddits(subredditData);
                                                     }
 
@@ -326,7 +316,6 @@ public class SearchActivity extends BaseActivity {
                     binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
                     binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.GONE);
                     binding.clearSearchEditViewSearchActivity.setVisibility(View.GONE);
-                    showRandomSubredditOptions(true);
                 }
             }
         });
@@ -354,14 +343,8 @@ public class SearchActivity extends BaseActivity {
             }
         });
 
-        binding.randomSubredditTextViewSearchActivity.setOnClickListener(
-                view -> openRandomSubreddit(RandomSubredditNames.RANDOM));
-
-        binding.randomSubscribedSubredditTextViewSearchActivity.setOnClickListener(
-                view -> openRandomSubreddit(RandomSubredditNames.MYRANDOM));
-
-        binding.randomNsfwSubredditTextViewSearchActivity.setOnClickListener(
-                view -> openRandomSubreddit(RandomSubredditNames.RANDNSFW));
+        binding.randomSubredditImageViewSearchActivity.setOnClickListener(view ->
+                startActivity(new Intent(this, RandomSubredditOptionsActivity.class)));
 
         binding.viewAllSearchHistoryButtonSearchActivity.setOnClickListener(view -> {
             Intent intent = new Intent(this, SearchHistoryActivity.class);
@@ -443,7 +426,10 @@ public class SearchActivity extends BaseActivity {
             });
         }
 
-        showRandomSubredditOptions(true);
+        // INVISIBLE rather than GONE: the toolbar icons keep the same positions whichever way this
+        // screen was opened, so the search field never changes width under them.
+        binding.randomSubredditImageViewSearchActivity.setVisibility(
+                canOpenRandomSubreddit ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void bindView() {
@@ -527,21 +513,6 @@ public class SearchActivity extends BaseActivity {
         }
     }
 
-    /**
-     * Follows the recent-search list: the fixed rows belong to the empty search screen, and step
-     * aside as soon as autocomplete has something to show.
-     */
-    private void showRandomSubredditOptions(boolean show) {
-        binding.randomSubredditsLinearLayoutSearchActivity.setVisibility(
-                show && canOpenRandomSubreddit ? View.VISIBLE : View.GONE);
-    }
-
-    private void openRandomSubreddit(String randomSubredditName) {
-        startActivity(Objects.requireNonNull(
-                FetchRandomSubredditActivity.intentFor(this, randomSubredditName)));
-        finish();
-    }
-
     private void search(String query) {
         if (query.equalsIgnoreCase("suicide") && mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_SUICIDE_PREVENTION_ACTIVITY, true)) {
             Intent intent = new Intent(this, SuicidePreventionActivity.class);
@@ -580,12 +551,12 @@ public class SearchActivity extends BaseActivity {
     }
 
     /**
-     * Turns the keyboard's incognito mode on or off for the search field. The state is deliberately
-     * not persisted: it lasts no longer than this activity, and starts off every time the screen is
-     * opened, whether the account is anonymous or logged in.
+     * Turns the keyboard's incognito mode on or off for the search field, and records the choice in
+     * {@link IncognitoKeyboardState} so the next visit to this screen starts where this one left
+     * off. Nothing reaches disk -- see that class.
      */
     private void setIncognitoKeyboard(boolean incognito) {
-        incognitoKeyboard = incognito;
+        IncognitoKeyboardState.setEnabled(incognito);
 
         int imeOptions = binding.searchEditTextSearchActivity.getImeOptions();
         binding.searchEditTextSearchActivity.setImeOptions(incognito
@@ -646,21 +617,13 @@ public class SearchActivity extends BaseActivity {
         binding.clearSearchEditViewSearchActivity.setColorFilter(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
         binding.linkHandlerImageViewSearchActivity.setColorFilter(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
         binding.incognitoKeyboardImageViewSearchActivity.setColorFilter(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+        binding.randomSubredditImageViewSearchActivity.setColorFilter(mCustomThemeWrapper.getToolbarPrimaryTextAndIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
         int colorAccent = mCustomThemeWrapper.getColorAccent();
         binding.searchInTextViewSearchActivity.setTextColor(colorAccent);
         binding.subredditNameTextViewSearchActivity.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
         binding.viewAllSearchHistoryButtonSearchActivity.setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor()));
         binding.deleteAllRecentSearchesButtonSearchActivity.setIconTint(ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor()));
         binding.dividerSearchActivity.setBackgroundColor(mCustomThemeWrapper.getDividerColor());
-        int primaryTextColor = mCustomThemeWrapper.getPrimaryTextColor();
-        ColorStateList primaryIconTint = ColorStateList.valueOf(mCustomThemeWrapper.getPrimaryIconColor());
-        binding.randomSubredditTextViewSearchActivity.setTextColor(primaryTextColor);
-        TextViewCompat.setCompoundDrawableTintList(binding.randomSubredditTextViewSearchActivity, primaryIconTint);
-        binding.randomSubscribedSubredditTextViewSearchActivity.setTextColor(primaryTextColor);
-        TextViewCompat.setCompoundDrawableTintList(binding.randomSubscribedSubredditTextViewSearchActivity, primaryIconTint);
-        binding.randomNsfwSubredditTextViewSearchActivity.setTextColor(primaryTextColor);
-        TextViewCompat.setCompoundDrawableTintList(binding.randomNsfwSubredditTextViewSearchActivity, primaryIconTint);
-        binding.randomSubredditsNoteTextViewSearchActivity.setTextColor(mCustomThemeWrapper.getSecondaryTextColor());
         if (typeface != null) {
             Utils.setFontToAllTextViews(binding.getRoot(), typeface);
         }
@@ -735,7 +698,6 @@ public class SearchActivity extends BaseActivity {
         outState.putString(SEARCH_IN_SUBREDDIT_OR_NAME_STATE, searchInSubredditOrUserName);
         outState.putInt(SEARCH_IN_THING_TYPE_STATE, searchInThingType);
         outState.putParcelable(SEARCH_IN_MULTIREDDIT_STATE, searchInMultiReddit);
-        outState.putBoolean(INCOGNITO_KEYBOARD_STATE, incognitoKeyboard);
     }
 
     @Override
@@ -746,6 +708,16 @@ public class SearchActivity extends BaseActivity {
 
     @Subscribe
     public void onAccountSwitchEvent(SwitchAccountEvent event) {
+        finish();
+    }
+
+    /**
+     * A random subreddit is a destination, not a search result: the picker has already handed off
+     * to it, so this screen has nothing left to show. It closed itself the same way when the random
+     * rows were part of it.
+     */
+    @Subscribe
+    public void onRandomSubredditOpened(RandomSubredditOpenedEvent event) {
         finish();
     }
 }

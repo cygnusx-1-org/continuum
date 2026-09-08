@@ -83,6 +83,14 @@ public class Post implements Parcelable {
     private boolean sendReplies;
     private final boolean isCrosspost;
     private boolean isRead;
+    /**
+     * Which image of a gallery post the user last swiped to in the feed, 0 for the first.
+     *
+     * <p>Kept on the post rather than on the view holder because the holder is recycled: scrolling
+     * a gallery post off screen and back used to bring it back on image one. It rides the feed
+     * cache too, so "Resume where I left off" reopens the gallery on the image that was showing.
+     */
+    private int galleryPageIndex;
     /** Set when this post's content came back from the archive rather than from Reddit. */
     private boolean isRecovered;
     @Nullable
@@ -244,6 +252,7 @@ public class Post implements Parcelable {
         this.sendReplies = postToBeCopied.sendReplies;
         this.isCrosspost = postToBeCopied.isCrosspost;
         this.isRead = postToBeCopied.isRead;
+        this.galleryPageIndex = postToBeCopied.galleryPageIndex;
         this.isRecovered = postToBeCopied.isRecovered;
         this.crosspostParentId = postToBeCopied.crosspostParentId;
         this.distinguished = postToBeCopied.distinguished;
@@ -322,6 +331,7 @@ public class Post implements Parcelable {
         mediaMetadataMap = (Map<String, MediaMetadata>) in.readValue(getClass().getClassLoader());
         ArrayList<Gallery> parsedGallery = in.createTypedArrayList(Gallery.CREATOR);
         gallery = parsedGallery != null ? parsedGallery : new ArrayList<>();
+        galleryPageIndex = in.readInt();
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
@@ -747,6 +757,7 @@ public class Post implements Parcelable {
         dest.writeTypedList(previews);
         dest.writeValue(mediaMetadataMap);
         dest.writeTypedList(gallery);
+        dest.writeInt(galleryPageIndex);
     }
 
     public boolean isStickied() {
@@ -845,6 +856,15 @@ public class Post implements Parcelable {
 
     public boolean isRead() {
         return isRead;
+    }
+
+    /** Which image of this gallery the feed is showing. See {@link #galleryPageIndex}. */
+    public int getGalleryPageIndex() {
+        return galleryPageIndex;
+    }
+
+    public void setGalleryPageIndex(int galleryPageIndex) {
+        this.galleryPageIndex = galleryPageIndex;
     }
 
     @Nullable

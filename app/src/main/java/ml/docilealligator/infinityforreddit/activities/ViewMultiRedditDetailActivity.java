@@ -73,6 +73,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
@@ -91,7 +92,7 @@ import retrofit2.Retrofit;
 public class ViewMultiRedditDetailActivity extends BaseActivity implements SortTypeSelectionCallback,
         PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, ActivityToolbarInterface, MarkPostAsReadInterface,
         PostTypeBottomSheetFragment.PostTypeSelectionCallback, FABMoreOptionsBottomSheetFragment.FABOptionSelectionCallback,
-        RecyclerViewContentScrollingInterface, Restorable {
+        RecyclerViewContentScrollingInterface, Restorable, ResumeLaunchExtras {
 
     public static final String EXTRA_MULTIREDDIT_DATA = "EMD";
     public static final String EXTRA_MULTIREDDIT_PATH = "EMP";
@@ -536,6 +537,47 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         resumeFeed.applyTo(bundle);
         mFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout_view_multi_reddit_detail_activity, mFragment).commit();
+    }
+
+    /**
+     * The launch extras with the multireddit itself swapped for its path.
+     *
+     * <p>{@link #EXTRA_MULTIREDDIT_DATA} is a {@code Parcelable}, and a marshalled {@code Parcel}
+     * is never written to disk -- so a multireddit opened from the drawer was unrecordable, the
+     * snapshot truncated at the screen below it, and a restart put the user back on the
+     * Multireddits tab of Subscriptions instead of in the feed they were reading.
+     *
+     * <p>Nothing has to be invented to replace it: this screen already accepts
+     * {@link #EXTRA_MULTIREDDIT_PATH} on its own and fetches the rest, which is the path a link
+     * into a multireddit takes. The cost of the swap is that one refetch.
+     */
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Bundle out = new Bundle(extras);
+        MultiReddit launchedWith = getIntent().getParcelableExtra(EXTRA_MULTIREDDIT_DATA);
+        if (launchedWith != null) {
+            out.remove(EXTRA_MULTIREDDIT_DATA);
+            out.putString(EXTRA_MULTIREDDIT_PATH, launchedWith.getPath());
+        }
+        return out;
+    }
+
+    /**
+     * The path, which is what tells one multireddit screen from another and is the one thing the
+     * codec cannot see inside the {@code Parcelable} above.
+     */
+    @Nullable
+    @Override
+    public String resumeIdentity() {
+        MultiReddit launchedWith = getIntent().getParcelableExtra(EXTRA_MULTIREDDIT_DATA);
+        return launchedWith != null
+                ? launchedWith.getPath()
+                : getIntent().getStringExtra(EXTRA_MULTIREDDIT_PATH);
     }
 
     @Override

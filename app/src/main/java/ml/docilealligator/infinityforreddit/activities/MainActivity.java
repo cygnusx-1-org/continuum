@@ -176,6 +176,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     // an index. The tab list is rebuilt from the subscription and multireddit data on every launch
     // and its order is not stable, so an index can name a different subreddit next time.
     private static final String STATE_RESUME_TAB_KEY = "RTK";
+    /** Whether the bottom app bar was scrolled away. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_BOTTOM_BAR_HIDDEN = "RBBH";
 
     @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel multiRedditViewModel;
@@ -266,6 +268,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private final FeedResumeState resumeFeed = new FeedResumeState();
     @Nullable
     private String resumeTabKey;
+    /**
+     * The tab named by the last record that also carried a position, so a later capture with
+     * nothing to say about the same tab can leave that record alone. See
+     * {@link #saveResumeState}.
+     */
+    @Nullable
+    private String lastCapturedTabKey;
     private boolean resumeTabApplied;
     private boolean hideFab;
     private boolean showBottomAppBar;
@@ -294,10 +303,19 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         super.onCreate(savedInstanceState);
 
+        // The skip flag describes one launch, not every rebuild of it: Android hands the task's
+        // original intent back each time this screen is recreated, so a restart's flag left in
+        // place would go on suppressing the resume for the life of the task.
+        Intent launchIntent = getIntent();
+        if (savedInstanceState != null && launchIntent != null) {
+            launchIntent.removeExtra(ResumeState.EXTRA_SKIP_RESUME);
+        }
+
         // Before anything builds the pager: the tab to open on has to be known by the time the
         // adapter is created, and the screens that were above this one have to be launched before
         // the user sees this one settle.
-        if (savedInstanceState == null && isPlainLaunch(getIntent())) {
+        if (savedInstanceState == null && isPlainLaunch(getIntent())
+                && !ResumeState.isSkipped(getIntent())) {
             // Before claiming, so the snapshot is still whole when it is read.
             replayResumedStack();
         }
@@ -510,17 +528,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                 // the scroll-restore's contentScrollUp don't re-show them, and re-hide once
                 // the views are laid out. In landscape (navigation rail) bottomAppBar is null
                 // and there's nothing to hide, but the flag/state still carry to portrait.
-                mKeepBottomBarHiddenOnRestore = true;
-                binding.getRoot().post(() -> {
-                    if (navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
-                        navigationWrapper.bottomAppBar.performHide(false);
-                    }
-                    if (navigationWrapper != null) {
-                        navigationWrapper.hideFab();
-                    }
-                });
-                binding.getRoot().postDelayed(
-                        () -> mKeepBottomBarHiddenOnRestore = false, 800);
+                reHideBottomBarAfterLayout();
             }
         } else {
             mMessageFullname = getIntent().getStringExtra(EXTRA_MESSAGE_FULLNAME);
@@ -1952,11 +1960,51 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             startActivities(above);
         } catch (RuntimeException e) {
             // A screen that can no longer be launched is not worth failing the launch over: the
-            // user still gets their feed, just not what was on top of it.
+            // user still gets their feed, just not what was on top of it. The screens it was
+            // waiting for are never coming, so let it start recording this stack instead.
+            ResumeState.endReplay();
             Log.e("MainActivity", "could not replay the resumed stack", e);
         }
     }
 
+    /**
+     * Put the bottom app bar and its FAB back out of sight, once the views exist.
+     *
+     * <p>Shared by the rotation restore and the resume: both rebuild a screen whose bar the user
+     * had already scrolled away, and both find it reset to shown. The suppression window is the
+     * reason this is not a plain {@code performHide} -- the ViewPager's {@code onPageSelected} and
+     * the scroll restore both call {@code contentScrollUp}, which would show it straight back.
+     *
+     * <p>In landscape the bar is a navigation rail and there is nothing to hide, but the flag still
+     * carries across to portrait.
+     */
+    private void reHideBottomBarAfterLayout() {
+        mKeepBottomBarHiddenOnRestore = true;
+        binding.getRoot().post(() -> {
+            if (navigationWrapper != null && navigationWrapper.bottomAppBar != null) {
+                navigationWrapper.bottomAppBar.performHide(false);
+            }
+            if (navigationWrapper != null) {
+                navigationWrapper.hideFab();
+            }
+        });
+        binding.getRoot().postDelayed(() -> mKeepBottomBarHiddenOnRestore = false, 800);
+    }
+
+    /**
+     * Record which tab the user was on, where in it they were, and whether the bottom bar was
+     * scrolled away.
+     *
+     * <p>The tab and the position are not the same kind of fact. The tab is one this screen always
+     * knows; the position depends on a feed that may still be loading. Requiring both used to lose
+     * the tab as well: switching to Popular and leaving before it finished loading wrote nothing,
+     * so the last good record -- Home -- stood, and the app reopened on Home.
+     *
+     * <p>So a tab with no position is recorded, but only when it is a different tab from the one
+     * the last good record named. Re-recording the same tab without its position is the case the
+     * old rule was really guarding: it would throw away a position that is still true, which is how
+     * a capture during startup used to scroll the user back to the top of the feed they left.
+     */
     @Override
     public void saveResumeState(@NonNull Bundle out) {
         if (sectionsPagerAdapter == null || binding == null) {
@@ -1968,20 +2016,38 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return;
         }
         PostFragment currentFragment = sectionsPagerAdapter.getCurrentFragment();
-        // Nothing at all rather than the tab on its own. A record that names a feed but cannot say
-        // where in it the user was would reopen that feed scrolled to the top, which is not a
-        // resume -- and writing it would overwrite a good record from a moment ago.
-        if (currentFragment == null || !currentFragment.captureResumeState(out)) {
+        boolean captured = currentFragment != null && currentFragment.captureResumeState(out);
+        if (!captured && tabKey.equals(lastCapturedTabKey)) {
             return;
         }
         out.putString(STATE_RESUME_TAB_KEY, tabKey);
-        saveResumeAppBarOffset(out);
+        out.putBoolean(STATE_RESUME_BOTTOM_BAR_HIDDEN, mBottomBarHidden);
+        if (captured) {
+            lastCapturedTabKey = tabKey;
+            saveResumeAppBarOffset(out);
+        } else {
+            // The record just written carries no position, so there is none left to protect. Left
+            // pointing at the tab it used to name, this would refuse the next tab-only capture and
+            // resume onto a tab the user had already moved away from.
+            lastCapturedTabKey = null;
+        }
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeTabKey = state.getString(STATE_RESUME_TAB_KEY);
         resumeFeed.read(state);
+        // The tab this record names is the one whose position it carries, so a capture that cannot
+        // describe that same tab must not overwrite it. Without this the first capture of the new
+        // session -- a pause before the restored feed has settled -- would do exactly that. A
+        // record that carried no position leaves this null: there is nothing to protect.
+        lastCapturedTabKey = resumeFeed.isPending() ? resumeTabKey : null;
+        if (state.getBoolean(STATE_RESUME_BOTTOM_BAR_HIDDEN, false)) {
+            // Left scrolled away, so it comes back scrolled away. Same window as the rotation path:
+            // the restore itself calls contentScrollUp, which would show it again.
+            mBottomBarHidden = true;
+            reHideBottomBarAfterLayout();
+        }
         // Without this the feed comes back at the right adapter position but pushed down by the
         // part of the toolbar that was scrolled off when the user left -- every row off by the same
         // constant, which is the same failure the rotation path guards against above.

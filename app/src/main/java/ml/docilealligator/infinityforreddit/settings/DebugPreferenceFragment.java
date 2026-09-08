@@ -1,11 +1,13 @@
 package ml.docilealligator.infinityforreddit.settings;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.activities.ApiStatisticsActivity;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
@@ -21,6 +23,7 @@ public class DebugPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         Preference screenWidthDpPreference = findPreference(SharedPreferencesUtils.SCREEN_WIDTH_DP_KEY);
         Preference smallestScreenWidthDpPreference = findPreference(SharedPreferencesUtils.SMALLEST_SCREEN_WIDTH_DP_KEY);
         Preference isTabletPreference = findPreference(SharedPreferencesUtils.IS_TABLET_KEY);
+        Preference apiStatisticsPreference = findPreference(SharedPreferencesUtils.API_STATISTICS);
 
         if (screenWidthDpPreference != null) {
             Configuration config = getResources().getConfiguration();
@@ -39,6 +42,13 @@ public class DebugPreferenceFragment extends CustomFontPreferenceFragmentCompat 
             isTabletPreference.setSummary(isTablet
                     ? getString(R.string.settings_is_tablet_summary_true)
                     : getString(R.string.settings_is_tablet_summary_false));
+        }
+
+        if (apiStatisticsPreference != null) {
+            apiStatisticsPreference.setOnPreferenceClickListener(preference -> {
+                startActivity(new Intent(requireContext(), ApiStatisticsActivity.class));
+                return true;
+            });
         }
     }
 }

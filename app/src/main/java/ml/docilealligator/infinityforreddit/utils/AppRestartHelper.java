@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 
 public class AppRestartHelper {
 
@@ -24,6 +25,10 @@ public class AppRestartHelper {
             if (intent != null) {
                 // Clear the activity stack and start the launch activity as a new task.
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                // A restart the app asked for itself is not the user reopening the app: they were
+                // in Settings, and "Resume where I left off" would put them back there instead of
+                // in the app they just finished configuring.
+                intent.putExtra(ResumeState.EXTRA_SKIP_RESUME, true);
                 appContext.startActivity(intent);
                 Log.i(TAG, "Triggering app restart via Intent.");
 

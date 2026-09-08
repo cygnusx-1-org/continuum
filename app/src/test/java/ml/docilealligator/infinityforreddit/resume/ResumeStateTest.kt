@@ -41,6 +41,9 @@ class ResumeStateTest {
     /** A stand-in for any screen the user could have had open above the feed. */
     class UpperScreenActivity : Activity()
 
+    /** A second one, for a stack that is three deep. */
+    class TopScreenActivity : Activity()
+
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val snapshot = File(context.filesDir, "resume_state.json")
 
@@ -121,6 +124,42 @@ class ResumeStateTest {
 
     private val mainActivity = MainActivity::class.java.name
     private val upperScreen = UpperScreenActivity::class.java.name
+    private val topScreen = TopScreenActivity::class.java.name
+
+    private fun stackOnDisk() = JSONObject(snapshot.readText()).getJSONArray("stack")
+
+    /**
+     * A live stack of the feed and one screen above it, the feed seeded from the snapshot.
+     *
+     * The only way to a live stack rooted at [MainActivity] without standing a real one up, which
+     * would drag the whole Dagger graph into a test about bookkeeping. [seedFromSnapshot] builds
+     * its entries from the document, so what comes back is exactly what a launch would hold part
+     * way through rebuilding one.
+     */
+    private fun seedFeedUnder(screen: UpperScreenActivity) {
+        ResumeState.recordCreated(screen)
+        ResumeState.seedFromSnapshot(screen)
+    }
+
+    /**
+     * A live stack holding the feed and nothing else, as a launcher launch holds it at the moment
+     * it asks for the screens that were above it.
+     *
+     * Seeded under a screen that is then dismissed, for the same reason [seedFeedUnder] exists at
+     * all: standing up a real [MainActivity] would drag the whole Dagger graph into a test about
+     * bookkeeping.
+     */
+    private fun feedAlone() {
+        val placeholder = upperScreenShowing("pics")
+        seedFeedUnder(placeholder)
+        placeholder.finish()
+        ResumeState.recordDestroyed(placeholder)
+    }
+
+    private fun upperScreenShowing(subreddit: String) =
+        Robolectric.buildActivity(
+            UpperScreenActivity::class.java,
+            Intent(context, UpperScreenActivity::class.java).putExtra("EN", subreddit)).get()
 
     // ------------------------------------------------------------------ replay
 
@@ -138,6 +177,54 @@ class ResumeStateTest {
         assertEquals(2, intents!!.size)
         assertEquals("pics", intents[0].getStringExtra("EN"))
         assertEquals("aww", intents[1].getStringExtra("EN"))
+    }
+
+    @Test
+    fun `a replay records the stack it asked for, not the order the screens arrive in`() {
+        // startActivities starts only the topmost intent; the screens beneath it are added to the
+        // task unstarted and created afterwards, when the visibility pass finds them showing
+        // through the translucent screen above. Recording the order they arrived in wrote the stack
+        // upside down -- the next launch replayed it inverted and recorded it the right way up
+        // again, so the app alternated between the top two screens on every restart, forever.
+        writeSnapshot(
+            stack = arrayOf(
+                entry(mainActivity),
+                entry(upperScreen, mapOf("EN" to "pics")),
+                entry(topScreen)))
+        feedAlone()
+        val intents = ResumeState.buildRestoreIntents(context)!!
+
+        // Top first and the one under it second, which is the order the platform creates them in.
+        ResumeState.recordCreated(
+            Robolectric.buildActivity(TopScreenActivity::class.java, intents[1]).get())
+        ResumeState.recordCreated(
+            Robolectric.buildActivity(UpperScreenActivity::class.java, intents[0]).get())
+        ResumeState.capture(context)
+
+        val stack = stackOnDisk()
+        assertEquals(3, stack.length())
+        assertEquals(mainActivity, stack.getJSONObject(0).getString("cls"))
+        assertEquals(upperScreen, stack.getJSONObject(1).getString("cls"))
+        assertEquals(topScreen, stack.getJSONObject(2).getString("cls"))
+    }
+
+    @Test
+    fun `the position a replay carries is not recorded as part of the screen`() {
+        // It says where the screen goes, not which screen it is. Recorded, it would be compared
+        // against extras that never had it -- so a rotation would not recognise the screen it had
+        // just rebuilt, and the next launch would replay a position on top of a position.
+        writeSnapshot(
+            stack = arrayOf(entry(mainActivity), entry(upperScreen, mapOf("EN" to "pics"))))
+        feedAlone()
+        val intents = ResumeState.buildRestoreIntents(context)!!
+
+        ResumeState.recordCreated(
+            Robolectric.buildActivity(UpperScreenActivity::class.java, intents[0]).get())
+        ResumeState.capture(context)
+
+        val extras = stackOnDisk().getJSONObject(1).getJSONObject("extras")
+        assertEquals(1, extras.length())
+        assertEquals("pics", extras.getJSONObject("EN").getString("v"))
     }
 
     @Test
@@ -230,6 +317,45 @@ class ResumeStateTest {
         assertTrue("alice still has it on", ResumeState.isEnabled(context))
     }
 
+    @Test
+    fun `a half-built replay does not overwrite the snapshot it came from`() {
+        // A replay launches its screens bottom first and each pauses as the next covers it, and
+        // pausing captures. Writing there would replace the three screens being restored with the
+        // two that exist so far -- and a process killed before the top screen ever pauses (an app
+        // restart from Settings, a force-stop, a crash) would then resume one screen back, with
+        // every restart after that peeling off another.
+        writeSnapshot(
+            stack = arrayOf(entry(mainActivity), entry(upperScreen), entry(topScreen)))
+        seedFeedUnder(upperScreenShowing("pics"))
+        assertNotNull(ResumeState.buildRestoreIntents(context))
+
+        ResumeState.capture(context)
+
+        assertEquals(3, stackOnDisk().length())
+    }
+
+    @Test
+    fun `the stack is recorded again once the last replayed screen arrives`() {
+        // The other half of the rule above: suppressing captures for the rest of the session would
+        // freeze the snapshot at the session before it.
+        writeSnapshot(
+            stack = arrayOf(entry(mainActivity), entry(upperScreen), entry(topScreen)))
+        seedFeedUnder(upperScreenShowing("pics"))
+        assertNotNull(ResumeState.buildRestoreIntents(context))
+        val top = Robolectric.buildActivity(
+            TopScreenActivity::class.java, Intent(context, TopScreenActivity::class.java)).get()
+
+        ResumeState.recordCreated(top)
+        ResumeState.capture(context)
+
+        // The recorded upper screen had no extras; the live one is showing r/pics, so an entry that
+        // says so is a write that happened rather than the document that was already there.
+        val stack = stackOnDisk()
+        assertEquals(3, stack.length())
+        assertEquals("pics",
+            stack.getJSONObject(1).getJSONObject("extras").getJSONObject("EN").getString("v"))
+    }
+
     // ------------------------------------------------------------------ claim
 
     @Test
@@ -283,6 +409,36 @@ class ResumeStateTest {
             UpperScreenActivity::class.java,
             Intent(context, UpperScreenActivity::class.java).putExtra("EN", "pics")).get()
         assertNotNull(ResumeState.claim(itsOwn))
+    }
+
+    @Test
+    fun `a relaunch the app asked for itself claims nothing`() {
+        // Changing an API key or restoring a backup restarts the app. The user was in Settings, not
+        // reopening the app, so putting them back where the restart interrupted them answers a
+        // question they did not ask.
+        writeSnapshot(
+            stack = arrayOf(entry(mainActivity), entry(upperScreen, state = mapOf("RP" to 2))))
+
+        val restarted = Robolectric.buildActivity(
+            UpperScreenActivity::class.java,
+            Intent(context, UpperScreenActivity::class.java)
+                .putExtra(ResumeState.EXTRA_SKIP_RESUME, true)).get()
+
+        assertNull(ResumeState.claim(restarted))
+    }
+
+    @Test
+    fun `an ordinary launch of the same screen still claims its state`() {
+        // The control for the test above: without the flag the entry matches and is handed over, so
+        // it is the flag doing the work and not the comparison failing.
+        writeSnapshot(
+            stack = arrayOf(entry(mainActivity), entry(upperScreen, state = mapOf("RP" to 2))))
+
+        val ordinary = Robolectric.buildActivity(
+            UpperScreenActivity::class.java,
+            Intent(context, UpperScreenActivity::class.java)).get()
+
+        assertNotNull(ResumeState.claim(ordinary))
     }
 
     // ------------------------------------------------------------------ clearing

@@ -75,6 +75,8 @@ import ml.docilealligator.infinityforreddit.multireddit.DeleteMultiReddit;
 import ml.docilealligator.infinityforreddit.multireddit.FetchMyMultiReddits;
 import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.network.AnyAccountAccessTokenAuthenticator;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
@@ -95,7 +97,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONObject;
 import retrofit2.Retrofit;
 
-public class SubscribedThingListingActivity extends BaseActivity implements ActivityToolbarInterface {
+public class SubscribedThingListingActivity extends BaseActivity
+        implements ActivityToolbarInterface, Restorable, ResumeLaunchExtras {
 
     public static final String EXTRA_SHOW_MULTIREDDITS = "ESM";
     public static final String EXTRA_THING_SELECTION_MODE = "ETSM";
@@ -108,6 +111,8 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     public static final int EXTRA_THING_SELECTION_TYPE_MULTIREDDIT = 3;
     private static final String INSERT_SUBSCRIBED_SUBREDDIT_STATE = "ISSS";
     private static final String INSERT_MULTIREDDIT_STATE = "IMS";
+    /** Which of the Subreddits / Users / Multireddits tabs was open. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_TAB = "RTB";
 
     @Inject
     @Named("no_oauth")
@@ -149,6 +154,8 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
     private Menu mMenu;
     private ActivityResultLauncher<Intent> requestSearchThingLauncher;
     private ActivitySubscribedThingListingBinding binding;
+    /** The tab a resume asked for, or -1. Applied once, as the pager is built. */
+    private int resumeTab = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -311,7 +318,51 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
             }
         });
 
+        // Before the pager is built: the tab it opens on is chosen there and never revisited.
+        claimResumeState();
+
         initializeViewPagerAndLoadSubscriptions();
+    }
+
+    /**
+     * The launch extras with the one-shot navigation extras taken out.
+     *
+     * <p>{@link #EXTRA_SHOW_MULTIREDDITS} says "open on Multireddits, just this once" -- it is how
+     * the user arrived, not where they are. Left in, every resume would put them back on the tab
+     * the drawer entry opened weeks ago however many times they had switched away from it since,
+     * because the recorded intent would go on overriding the recorded tab. The clear-selection flag
+     * goes for the same reason: it is an instruction to act on arrival, not a description of this
+     * screen.
+     *
+     * <p>An empty bundle, never null: this screen is opened from the drawer with no extras at all,
+     * and null here means "cannot be relaunched", which would make the most ordinary way of
+     * reaching it the one that truncates the snapshot.
+     */
+    @Nullable
+    @Override
+    public Bundle resumeLaunchExtras() {
+        Bundle extras = getIntent().getExtras();
+        Bundle out = extras == null ? new Bundle() : new Bundle(extras);
+        out.remove(EXTRA_SHOW_MULTIREDDITS);
+        out.remove(EXTRA_EXTRA_CLEAR_SELECTION);
+        return out;
+    }
+
+    /**
+     * Which tab the user was on. The lists come back from the database on their own, so the tab is
+     * the whole of what there is to record.
+     */
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (binding != null) {
+            out.putInt(STATE_RESUME_TAB,
+                    binding.viewPagerSubscribedThingListingActivity.getCurrentItem());
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeTab = state.getInt(STATE_RESUME_TAB, -1);
     }
 
     @Override
@@ -384,6 +435,13 @@ public class SubscribedThingListingActivity extends BaseActivity implements Acti
 
         if (showMultiReddits) {
             binding.viewPagerSubscribedThingListingActivity.setCurrentItem(2, false);
+        } else if (resumeTab > 0 && resumeTab < sectionsPagerAdapter.getCount()) {
+            // The drawer entry that opens straight onto Multireddits wins over a resume: that is
+            // what the user asked for just now, where the resume is where they were last time.
+            // Bounded by the adapter because the tab count depends on the account and on whether
+            // this screen was opened to pick something -- a recorded tab from a four-tab session
+            // must not be applied to a one-tab picker.
+            binding.viewPagerSubscribedThingListingActivity.setCurrentItem(resumeTab, false);
         }
 
         loadSubscriptions(false);

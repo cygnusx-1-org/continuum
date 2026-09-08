@@ -499,6 +499,11 @@
             android:parentActivityName=".activities.SearchActivity"
             android:theme="@style/AppTheme.Slidable" />
         <activity
+            android:name=".activities.RandomSubredditOptionsActivity"
+            android:label="@string/random_subreddits"
+            android:parentActivityName=".activities.SearchActivity"
+            android:theme="@style/AppTheme.Slidable" />
+        <activity
             android:name=".activities.ApiStatisticsActivity"
             android:label="@string/api_statistics_activity_label"
             android:parentActivityName=".activities.SettingsActivity"

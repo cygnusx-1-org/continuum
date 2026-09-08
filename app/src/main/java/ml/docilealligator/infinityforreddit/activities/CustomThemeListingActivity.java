@@ -52,6 +52,7 @@ import ml.docilealligator.infinityforreddit.customtheme.OnlineCustomThemeMetadat
 import ml.docilealligator.infinityforreddit.databinding.ActivityCustomThemeListingBinding;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.fragments.CustomThemeListingFragment;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -64,7 +65,12 @@ import retrofit2.Retrofit;
 public class CustomThemeListingActivity extends BaseActivity implements
         CustomThemeOptionsBottomSheetFragment.CustomThemeOptionsBottomSheetFragmentListener,
         CreateThemeBottomSheetFragment.SelectBaseThemeBottomSheetFragmentListener,
-        RecyclerViewContentScrollingInterface {
+        RecyclerViewContentScrollingInterface, Restorable {
+
+    /** How many tabs the pager has, so a recorded one can be checked against it. */
+    private static final int TAB_COUNT = 2;
+    /** Which of Local / Online was open. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_TAB = "RTB";
 
     @Inject
     @Named("online_custom_themes")
@@ -93,6 +99,8 @@ public class CustomThemeListingActivity extends BaseActivity implements
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ActivityCustomThemeListingBinding binding;
+    /** The tab a resume asked for, or -1. Applied once, as the pager is built. */
+    private int resumeTab = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -154,7 +162,27 @@ public class CustomThemeListingActivity extends BaseActivity implements
 
         fragmentManager = getSupportFragmentManager();
 
+        // Before the pager is built: the page it opens on is chosen there and never revisited.
+        claimResumeState();
+
         initializeViewPager();
+    }
+
+    /**
+     * Which tab the user was on. The two lists rebuild themselves from the database and the
+     * network, so the tab is the whole of what there is to come back to.
+     */
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (binding != null) {
+            out.putInt(STATE_RESUME_TAB,
+                    binding.viewPager2CustomizeThemeListingActivity.getCurrentItem());
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeTab = state.getInt(STATE_RESUME_TAB, -1);
     }
 
     private void initializeViewPager() {
@@ -183,6 +211,10 @@ public class CustomThemeListingActivity extends BaseActivity implements
                 }
             }
         });
+
+        if (resumeTab > 0 && resumeTab < TAB_COUNT) {
+            binding.viewPager2CustomizeThemeListingActivity.setCurrentItem(resumeTab, false);
+        }
 
         fixViewPager2Sensitivity(binding.viewPager2CustomizeThemeListingActivity);
     }
@@ -513,7 +545,7 @@ public class CustomThemeListingActivity extends BaseActivity implements
 
         @Override
         public int getItemCount() {
-            return 2;
+            return TAB_COUNT;
         }
     }
 }

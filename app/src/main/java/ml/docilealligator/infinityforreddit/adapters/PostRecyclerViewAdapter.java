@@ -1226,7 +1226,24 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostBaseGalleryTypeViewHolder) holder).noPreviewImageView.setImageResource(R.drawable.ic_gallery_day_night_24dp);
                     } else {
                         ((PostBaseGalleryTypeViewHolder) holder).frameLayout.setVisibility(View.VISIBLE);
-                        ((PostBaseGalleryTypeViewHolder) holder).imageIndexTextView.setText(mActivity.getString(R.string.image_index_in_gallery, 1, gallerySize));
+                        // The image the user swiped to, not image one. The holder is recycled and
+                        // the inner list comes back at whatever position the last post left it, so
+                        // this has to be set from the post either way -- and because the post
+                        // carries it into the feed cache, a resume reopens the gallery where it was.
+                        int galleryPage = Math.max(0, Math.min(post.getGalleryPageIndex(), gallerySize - 1));
+                        ((PostBaseGalleryTypeViewHolder) holder).imageIndexTextView.setText(
+                                mActivity.getString(R.string.image_index_in_gallery, galleryPage + 1, gallerySize));
+                        // Only when it is not already there. Every rebind runs this -- a vote, a
+                        // save, a post marked read all come through the one onBindViewHolder -- and
+                        // an unconditional scroll would drag the gallery back under a finger that
+                        // had just moved it.
+                        RecyclerView galleryList = ((PostBaseGalleryTypeViewHolder) holder).galleryRecyclerView;
+                        RecyclerView.LayoutManager galleryLayout = galleryList.getLayoutManager();
+                        if (!(galleryLayout instanceof LinearLayoutManagerBugFixed)
+                                || ((LinearLayoutManagerBugFixed) galleryLayout)
+                                        .findFirstVisibleItemPosition() != galleryPage) {
+                            galleryList.scrollToPosition(galleryPage);
+                        }
                         Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
                         if (preview != null) {
                             if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
@@ -4385,8 +4402,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
                     RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
                     if (layoutManager instanceof LinearLayoutManagerBugFixed) {
-                        toroPlayer.onGalleryPageSettled(
-                                ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition());
+                        int settled = ((LinearLayoutManagerBugFixed) layoutManager)
+                                .findFirstVisibleItemPosition();
+                        toroPlayer.onGalleryPageSettled(settled);
+                        // Written back to the post, which is what survives this holder being
+                        // recycled and what the feed cache records for the next launch.
+                        if (settled != RecyclerView.NO_POSITION && post != null) {
+                            post.setGalleryPageIndex(settled);
+                        }
                     }
                 }
 

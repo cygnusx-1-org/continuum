@@ -113,6 +113,44 @@ object ResumeState {
      */
     private const val EXTRA_REPLAY_STATE = "ml.docilealligator.infinityforreddit.resume.STATE"
 
+    /**
+     * Where in the stack being rebuilt a replayed screen belongs, carried on the intent that starts
+     * it.
+     *
+     * The live stack is otherwise in the order the screens were created, and a replay does not
+     * create them in stack order. `startActivities` resumes only the last intent; the ones beneath
+     * it are added to the task without being started, and are created afterwards, when the
+     * visibility pass finds them showing through the screen above -- which every screen on
+     * `AppTheme.Slidable` is translucent enough to allow. So a replay of a subscriptions screen
+     * with a user's profile over it created the profile first and the subscriptions screen second,
+     * and recording that order wrote the stack upside down. The next launch replayed it inverted
+     * and recorded it the right way up again, so the app alternated between the two screens on
+     * every restart, forever.
+     *
+     * Taken off the intent the moment it is read, before anything describes the screen, so it never
+     * reaches a recorded identity or a set of recorded extras: it says where the screen is, not
+     * which screen it is.
+     */
+    private const val EXTRA_REPLAY_INDEX = "ml.docilealligator.infinityforreddit.resume.INDEX"
+
+    /**
+     * Put on the launch intent of a relaunch the app asked for itself -- changing an API key or a
+     * tab, restoring a backup -- so that launch starts on the feed instead of replaying the stack.
+     *
+     * The stack a settings restart interrupts is the user in Settings, and putting them back there
+     * answers a question they did not ask: they changed a setting and the app went away and came
+     * back, so the app is what they expect to see. Suppressing rather than clearing, because the
+     * snapshot is still the record of a real session and the next capture is entitled to it.
+     */
+    const val EXTRA_SKIP_RESUME = "ml.docilealligator.infinityforreddit.resume.SKIP"
+
+    /**
+     * How long a replay may take to finish rebuilding its stack before captures resume anyway.
+     * The backstop for a screen that never arrives -- one that finishes itself on the way up, say
+     * -- which would otherwise leave the snapshot frozen for the rest of the session.
+     */
+    private const val REPLAY_SETTLE_TIMEOUT_MS = 10_000L
+
     private const val KEY_VERSION = "version"
     private const val KEY_SAVED_AT = "savedAt"
     private const val KEY_ACCOUNT = "account"
@@ -184,6 +222,13 @@ object ResumeState {
         var recordable = true
 
         /**
+         * Where a replay said this screen sits, or -1 for one the user opened for themselves. Kept
+         * so the screens of a replay can be put in their recorded order as they arrive, in whatever
+         * order that turns out to be. See [EXTRA_REPLAY_INDEX].
+         */
+        var replayIndex = -1
+
+        /**
          * What [ResumeLaunchExtras.resumeIdentity] said when this screen was created, or null if it
          * had no cheap answer. Recorded up front, before anything is described, because its only
          * use is deciding whether a rebuilt screen is this one -- and that decision has to be made
@@ -239,6 +284,23 @@ object ResumeState {
     private var replayed = false
 
     /**
+     * How many screens the live stack must hold before it describes the session the snapshot does,
+     * or 0 when no replay is in flight. Captures are suppressed until it gets there.
+     *
+     * A replay launches its screens bottom first, and each one pauses as the next covers it -- so
+     * the last capture a replay would take is of a stack one screen short of the one being
+     * restored, written over the very snapshot it came from. Nothing corrects that until something
+     * captures again, and the only things that do are a pause, a stop and a feed scrolled to rest
+     * by a finger. A process killed before any of those -- an app restart from Settings, a
+     * force-stop, a crash -- therefore resumed one screen back from where the user was, and each
+     * restart after that peeled off another.
+     */
+    private var replayTargetSize = 0
+
+    /** The pending [REPLAY_SETTLE_TIMEOUT_MS] backstop, so it can be taken off once it is moot. */
+    private var replayBackstop: Runnable? = null
+
+    /**
      * The key is scoped by hand here because this reads the raw default preferences rather than the
      * injected [AccountScopedSharedPreferences] wrapper -- there is no Dagger graph at an activity
      * lifecycle callback. The setting sits on a "This account" screen, so one account resuming does
@@ -254,6 +316,33 @@ object ResumeState {
                 ),
                 false,
             )
+
+    /** Whether [intent] asks this launch to start fresh. See [EXTRA_SKIP_RESUME]. */
+    @JvmStatic
+    fun isSkipped(intent: Intent?): Boolean =
+        intent != null && intent.getBooleanExtra(EXTRA_SKIP_RESUME, false)
+
+    /** Suppress captures until the live stack holds [targetSize] screens, or the backstop fires. */
+    private fun beginReplay(targetSize: Int) {
+        endReplay()
+        replayTargetSize = targetSize
+        val backstop = Runnable { endReplay() }
+        replayBackstop = backstop
+        mainHandler.postDelayed(backstop, REPLAY_SETTLE_TIMEOUT_MS)
+    }
+
+    /**
+     * Let captures resume: the replayed stack is up, or it never will be.
+     *
+     * Public for the launch path, which starts the replayed screens itself and is the only thing
+     * that can see the attempt fail outright.
+     */
+    @JvmStatic
+    fun endReplay() {
+        replayTargetSize = 0
+        replayBackstop?.let { mainHandler.removeCallbacks(it) }
+        replayBackstop = null
+    }
 
     private fun currentAccount(context: Context): String =
         context
@@ -278,6 +367,10 @@ object ResumeState {
         if (live.any { it.activity?.get() === activity }) {
             return
         }
+        // Read and taken off before anything else looks at this intent. The position belongs to the
+        // launch and not to the screen, and an identity or a set of extras that still carried it
+        // would not match the ones recorded for the same screen without it.
+        val replayIndex = takeReplayIndex(activity)
         // A configuration change destroys and rebuilds the screen in place. recordDestroyed leaves
         // the entry behind with a dead reference precisely so the replacement can adopt it, rather
         // than the stack losing its root on every rotation -- and adopting keeps whatever describe()
@@ -315,7 +408,8 @@ object ResumeState {
             }
         }
         val entry = Entry(cls, WeakReference(activity))
-        live.add(entry)
+        entry.replayIndex = replayIndex
+        addToLive(entry)
         // Both of the calls below ask the screen a question, so both are behind the setting and the
         // setting is read once. resumeIdentity is cheap next to a describe but it is not free --
         // the gallery's answer unparcels a whole Post to read one field off it -- and charging that
@@ -327,6 +421,51 @@ object ResumeState {
         if (isEnabled(activity)) {
             startDescribing(entry, activity)
         }
+        // The replayed screens are the only ones that can be arriving while one is in flight, and
+        // the last of them is the one the user ends up looking at.
+        if (replayTargetSize > 0 && live.size >= replayTargetSize) {
+            endReplay()
+        }
+    }
+
+    /**
+     * Put [entry] on the live stack where it belongs.
+     *
+     * Appended for a screen the user opened, which is by definition the new top. A replayed screen
+     * goes under the lowest replayed screen recorded above it instead, because it may well have
+     * been created after that one -- see [EXTRA_REPLAY_INDEX] for why it usually is.
+     */
+    private fun addToLive(entry: Entry) {
+        if (entry.replayIndex < 0) {
+            live.add(entry)
+            return
+        }
+        val above = live.indexOfFirst { it.replayIndex > entry.replayIndex }
+        if (above < 0) {
+            live.add(entry)
+        } else {
+            live.add(above, entry)
+        }
+    }
+
+    /**
+     * [EXTRA_REPLAY_INDEX] off [activity]'s intent, removed as it is read, or -1 for a screen
+     * carrying none.
+     *
+     * The intent is not touched at all unless a replay is in flight, which it only ever is while
+     * the setting is on -- so this costs a field read per activity creation to someone who has the
+     * feature off, and nothing at all to a screen the user opened themselves.
+     */
+    private fun takeReplayIndex(activity: Activity): Int {
+        if (replayTargetSize <= 0) {
+            return -1
+        }
+        val intent = activity.intent ?: return -1
+        val index = intent.getIntExtra(EXTRA_REPLAY_INDEX, -1)
+        if (index >= 0) {
+            intent.removeExtra(EXTRA_REPLAY_INDEX)
+        }
+        return index
     }
 
     /**
@@ -519,6 +658,11 @@ object ResumeState {
         if (!isEnabled(context)) {
             return
         }
+        if (replayTargetSize > 0) {
+            // Mid-replay the live stack is not the user's stack yet, and writing it would replace
+            // the snapshot being restored with a shorter version of itself. See [replayTargetSize].
+            return
+        }
         // Traced and timed because this is the whole main-thread cost of the feature being on, and
         // it lands on a screen transition, where an animation is already using the frame. The
         // section shows up on the main-thread track in a Perfetto capture; the log line below is
@@ -632,12 +776,18 @@ object ResumeState {
         if (!isEnabled(activity)) {
             return null
         }
+        if (isSkipped(activity.intent)) {
+            // A relaunch the app asked for itself starts fresh, all of it: replaying nothing but
+            // still dropping the feed where the interrupted session had it would be half a resume.
+            return null
+        }
         // A replayed screen was handed its state on its own intent, so it never consults the pool.
         // Removed as it is read: one screen, one restore.
         val intent = activity.intent
         val carried = intent?.getBundleExtra(EXTRA_REPLAY_STATE)
         if (carried != null) {
             intent.removeExtra(EXTRA_REPLAY_STATE)
+            rememberClaimed(activity, carried)
             return carried
         }
         load(activity)
@@ -658,10 +808,37 @@ object ResumeState {
             // the pool would otherwise pay the serializing comparison on the launch path.
             if (name == MainActivity::class.java.name || isSameScreen(entry, activity)) {
                 iterator.remove()
+                rememberClaimed(activity, entry.state)
                 return entry.state
             }
         }
         return null
+    }
+
+    /**
+     * Put the state a screen has just been handed onto its live entry.
+     *
+     * A fresh process starts every entry with no state of its own, and a capture asks each screen
+     * where it is -- which a feed still loading answers with nothing, deliberately, so an early
+     * capture cannot overwrite a good record. On a resumed launch there is no good record to keep:
+     * the entry is new and empty, so "nothing to say" is written as nothing at all and the position
+     * the launch just restored is gone. Measured on device: the first restart landed on the right
+     * row, and the one after it opened the same feed at the top.
+     *
+     * Holding the claimed state closes that window -- a capture before the screen can speak writes
+     * back what the screen was told, which is where the user is, and the screen's own answer
+     * replaces it the moment it has one.
+     */
+    private fun rememberClaimed(activity: Activity, state: Bundle?) {
+        if (state == null) {
+            return
+        }
+        for (entry in live) {
+            if (entry.activity?.get() === activity) {
+                entry.state = state
+                return
+            }
+        }
     }
 
     /**
@@ -687,7 +864,7 @@ object ResumeState {
             return null
         }
         val intents = ArrayList<Intent>(above.size)
-        for (entry in above) {
+        for ((index, entry) in above.withIndex()) {
             val cls =
                 try {
                     Class.forName(entry.cls)
@@ -703,11 +880,16 @@ object ResumeState {
                     // pausing writes a new snapshot -- which replaces the old one outright, pool
                     // included. Handing the state over here is what lets that stay true.
                     entry.state?.let { putExtra(EXTRA_REPLAY_STATE, it) }
+                    // Where this screen goes, because the order these are created in is not it.
+                    putExtra(EXTRA_REPLAY_INDEX, index)
                 }
             )
         }
         // Handed off, so nothing is left for them to claim and no screen can take one twice.
         pending.removeAll(above)
+        // This screen plus the ones about to be launched over it. Until the live stack is that
+        // deep again, what it holds is a half-built replay that must not reach disk.
+        beginReplay(intents.size + 1)
         return intents.toTypedArray()
     }
 
@@ -917,13 +1099,26 @@ object ResumeState {
                 // matches or is adopted.
                 null
             }
-        if (extras == null || !extras.containsKey(EXTRA_REPLAY_STATE)) {
+        if (extras == null ||
+            !(extras.containsKey(EXTRA_REPLAY_STATE) ||
+                extras.containsKey(EXTRA_REPLAY_INDEX) ||
+                extras.containsKey(EXTRA_SKIP_RESUME))
+        ) {
             return extras
         }
         // A replay carries the screen's recorded state on the same intent. It is not part of what
         // identifies the screen, and it is a nested Bundle, which the codec refuses -- left in, it
         // would make every replayed screen unrecordable and truncate the next snapshot there.
-        return Bundle(extras).apply { remove(EXTRA_REPLAY_STATE) }
+        //
+        // The skip flag and the replay position go the same way, and for the first of those
+        // reasons: they say how this launch came about and where in the stack it puts this screen,
+        // neither of which is which screen it is, and a screen recorded carrying one would be
+        // compared against one that is not.
+        return Bundle(extras).apply {
+            remove(EXTRA_REPLAY_STATE)
+            remove(EXTRA_REPLAY_INDEX)
+            remove(EXTRA_SKIP_RESUME)
+        }
     }
 
     /** [ResumeLaunchExtras.resumeIdentity], or null for a screen that does not offer one. */
@@ -1014,6 +1209,7 @@ object ResumeState {
         loadedAccount = null
         canSeed = true
         replayed = false
+        endReplay()
         // Restored too: these are process-global, so a class that swaps in a hand-driven executor
         // would otherwise hand it on to whichever class ran next, along with a queue nothing drains
         // any more.

@@ -17,4 +17,9 @@
         app:title="@string/settings_is_tablet_title"
         app:summary="@string/settings_is_tablet_summary_false" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        android:key="api_statistics"
+        app:title="@string/settings_api_statistics_title"
+        app:summary="@string/settings_api_statistics_summary" />
+
 </PreferenceScreen>

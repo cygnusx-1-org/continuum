@@ -34,6 +34,7 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityRecentlyVisitedB
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.fragments.RecentlyVisitedListingFragment;
 import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisitedType;
+import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -42,10 +43,13 @@ import org.greenrobot.eventbus.Subscribe;
  * The subreddits and users this account has opened lately, newest first. Reached from the
  * navigation drawer, which only shows the entry while the Recently Visited setting is on.
  */
-public class RecentlyVisitedActivity extends BaseActivity implements ActivityToolbarInterface {
+public class RecentlyVisitedActivity extends BaseActivity
+        implements ActivityToolbarInterface, Restorable {
 
     private static final int TAB_COUNT = 2;
     private static final String SEARCH_OPEN_STATE = "SOS";
+    /** Which of Subreddits / Users was open. See {@link #saveResumeState}. */
+    private static final String STATE_RESUME_TAB = "RTB";
 
     @Inject
     @Named("default")
@@ -59,6 +63,8 @@ public class RecentlyVisitedActivity extends BaseActivity implements ActivityToo
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ActivityRecentlyVisitedBinding binding;
+    /** The tab a resume asked for, or -1. Applied once, as the pager is built. */
+    private int resumeTab = -1;
     @Nullable
     private Menu mMenu;
 
@@ -154,7 +160,26 @@ public class RecentlyVisitedActivity extends BaseActivity implements ActivityToo
 
         fragmentManager = getSupportFragmentManager();
 
+        // Before the pager is built: the page it opens on is chosen there and never revisited.
+        claimResumeState();
+
         initializeViewPager();
+    }
+
+    /**
+     * Which tab the user was on. The lists themselves are short and read straight out of the
+     * database, so the tab is the whole of what there is to come back to.
+     */
+    @Override
+    public void saveResumeState(@NonNull Bundle out) {
+        if (binding != null) {
+            out.putInt(STATE_RESUME_TAB, binding.viewPagerRecentlyVisitedActivity.getCurrentItem());
+        }
+    }
+
+    @Override
+    public void restoreResumeState(@NonNull Bundle state) {
+        resumeTab = state.getInt(STATE_RESUME_TAB, -1);
     }
 
     @Override
@@ -204,6 +229,10 @@ public class RecentlyVisitedActivity extends BaseActivity implements ActivityToo
                 applySearchQuery(getSearchQuery());
             }
         });
+
+        if (resumeTab > 0 && resumeTab < TAB_COUNT) {
+            binding.viewPagerRecentlyVisitedActivity.setCurrentItem(resumeTab, false);
+        }
 
         fixViewPager2Sensitivity(binding.viewPagerRecentlyVisitedActivity);
     }

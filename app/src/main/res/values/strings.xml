@@ -697,6 +697,7 @@
     <string name="settings_group_account">Account</string>
     <string name="settings_account_settings_management_title">Account Settings Management</string>
     <string name="settings_account_settings_management_summary">Copy another account\'s settings onto this one, put this one back to defaults, or delete what it has accumulated</string>
+    <string name="settings_group_themes">Themes</string>
     <string name="settings_group_other">Other</string>
     <string name="settings_copy_settings_from_account_title">Copy Settings from Another Account</string>
     <string name="settings_copy_settings_from_account_summary">Give this account the settings another one has</string>
@@ -1461,6 +1462,7 @@
     <string name="go_to_thing_hint">Name</string>
     <string name="go_to_top">Go To Top</string>
     <string name="random">Random</string>
+    <string name="random_subreddits">Random Subreddits</string>
     <string name="random_subreddit">Random Subreddit</string>
     <string name="random_nsfw_subreddit">Random NSFW Subreddit</string>
     <string name="random_subscribed_subreddit">Random Subscribed Subreddit</string>

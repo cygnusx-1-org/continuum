@@ -1878,10 +1878,24 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         }
         int page = binding.viewPagerViewUserDetailActivity.getCurrentItem();
         Fragment fragment = fragmentManager.findFragmentByTag("f" + page);
-        // Only the posts tab can describe where it was; the comments tab has no feed record, so a
-        // resume onto it restores the tab alone. Nothing is written when even that is unavailable,
-        // rather than overwriting a good record with one that says nothing.
-        if (fragment instanceof PostFragment && !((PostFragment) fragment).captureResumeState(out)) {
+        // Whichever tab is open has to say where in it the user was, and both can. Asking only the
+        // posts tab used to let the comments tab through describing nothing: the tab was recorded,
+        // the position was not, and the app bar offset below was written anyway -- so a resume onto
+        // Comments put the header back collapsed over a list at the top, with every row that much
+        // higher than it was left.
+        //
+        // Nothing at all is written when the tab cannot answer, rather than a record that names a
+        // tab but not the place in it: that would reopen the screen scrolled to the top and
+        // overwrite a good record from a moment ago to do it.
+        boolean captured;
+        if (fragment instanceof PostFragment) {
+            captured = ((PostFragment) fragment).captureResumeState(out);
+        } else if (fragment instanceof CommentsListingFragment) {
+            captured = ((CommentsListingFragment) fragment).captureResumeState(out);
+        } else {
+            captured = false;
+        }
+        if (!captured) {
             return;
         }
         out.putInt(STATE_RESUME_TAB, page);
@@ -1902,6 +1916,19 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             super(fa);
         }
 
+        /**
+         * Hand the resume record down, but only to the tab it was written for.
+         *
+         * <p>The record is one-shot -- the first page to ask for it takes it -- so which page the
+         * pager happens to build first must not decide who gets it. The recorded tab does, and it
+         * is written alongside the record or not at all.
+         */
+        private void applyResumeFeedTo(Bundle bundle, int tab) {
+            if (resumeTab == tab) {
+                resumeFeed.applyTo(bundle);
+            }
+        }
+
         @NonNull
         @Override
         public Fragment createFragment(int position) {
@@ -1918,7 +1945,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     }
                 }
                 // One-shot, so a rebuilt adapter cannot replay the restore onto a second fragment.
-                resumeFeed.applyTo(bundle);
+                applyResumeFeedTo(bundle, TAB_POSTS);
                 fragment.setArguments(bundle);
                 return fragment;
             }
@@ -1926,6 +1953,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             Bundle bundle = new Bundle();
             bundle.putString(CommentsListingFragment.EXTRA_USERNAME, username);
             bundle.putBoolean(CommentsListingFragment.EXTRA_ARE_SAVED_COMMENTS, false);
+            applyResumeFeedTo(bundle, TAB_COMMENTS);
             if (initialSortType != null && initialTab == TAB_COMMENTS) {
                 bundle.putString(CommentsListingFragment.EXTRA_INITIAL_SORT_TYPE, initialSortType);
                 if (initialSortTime != null) {

@@ -13,12 +13,6 @@
         app:top="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:title="@string/settings_theme_title"
-        app:summary="@string/settings_theme_summary"
-        app:icon="@drawable/ic_color_lens_day_night_24dp"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.ThemePreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:title="@string/settigns_video_title"
         app:summary="@string/settings_video_summary"
         android:icon="@drawable/ic_video_day_night_24dp"
@@ -77,6 +71,17 @@
         app:title="@string/settings_account_settings_management_title"
         app:summary="@string/settings_account_settings_management_summary"
         app:fragment="ml.docilealligator.infinityforreddit.settings.AccountSettingsManagementPreferenceFragment"
+        app:bottom="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
+        app:title="@string/settings_group_themes" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:title="@string/settings_theme_title"
+        app:summary="@string/settings_theme_summary"
+        app:icon="@drawable/ic_color_lens_day_night_24dp"
+        app:fragment="ml.docilealligator.infinityforreddit.settings.ThemePreferenceFragment"
+        app:top="true"
         app:bottom="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
@@ -153,12 +158,6 @@
         android:key="privacy_policy"
         app:icon="@drawable/ic_privacy_policy_day_night_24dp"
         app:title="@string/settings_privacy_policy_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:key="api_statistics"
-        app:icon="@drawable/ic_history_day_night_24dp"
-        app:title="@string/settings_api_statistics_title"
-        app:summary="@string/settings_api_statistics_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_info_preference_day_night_24dp"

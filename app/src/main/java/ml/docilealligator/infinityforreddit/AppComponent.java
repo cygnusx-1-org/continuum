@@ -41,6 +41,7 @@ import ml.docilealligator.infinityforreddit.activities.PostLinkActivity;
 import ml.docilealligator.infinityforreddit.activities.PostPollActivity;
 import ml.docilealligator.infinityforreddit.activities.PostTextActivity;
 import ml.docilealligator.infinityforreddit.activities.PostVideoActivity;
+import ml.docilealligator.infinityforreddit.activities.RandomSubredditOptionsActivity;
 import ml.docilealligator.infinityforreddit.activities.RecentlyVisitedActivity;
 import ml.docilealligator.infinityforreddit.activities.ReminderListingActivity;
 import ml.docilealligator.infinityforreddit.activities.ReportActivity;
@@ -201,6 +202,8 @@ public interface AppComponent {
     void inject(LinkResolverActivity linkResolverActivity);
 
     void inject(SearchActivity searchActivity);
+
+    void inject(RandomSubredditOptionsActivity randomSubredditOptionsActivity);
 
     void inject(SearchHistoryActivity searchHistoryActivity);
 
