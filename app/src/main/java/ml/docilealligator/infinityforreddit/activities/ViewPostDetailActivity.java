@@ -86,7 +86,6 @@ public class ViewPostDetailActivity extends BaseActivity
     public static final String EXTRA_POST_DATA = "EPD";
     public static final String EXTRA_POST_ID = "EPI";
     public static final String EXTRA_POST_LIST_POSITION = "EPLP";
-    private static final String STATE_RESUME_APP_BAR_COLLAPSED = "RABC";
     private static final String STATE_APP_BAR_COLLAPSED = "ABCS";
     public static final String EXTRA_SINGLE_COMMENT_ID = "ESCI";
     public static final String EXTRA_CONTEXT_NUMBER = "ECN";
@@ -223,6 +222,7 @@ public class ViewPostDetailActivity extends BaseActivity
                         }
                     }
                 });
+        trackAppBarOffsetForResume(binding.appbarLayoutViewPostDetailActivity);
 
         // After the offset listener, so the collapse a restore applies is seen by the same
         // bookkeeping every other collapse is, and before the fragments are built, so the comment
@@ -1038,7 +1038,7 @@ public class ViewPostDetailActivity extends BaseActivity
         if (fragment == null || !fragment.captureResumeState(out)) {
             return;
         }
-        out.putBoolean(STATE_RESUME_APP_BAR_COLLAPSED, mAppBarCollapsed);
+        saveResumeAppBarOffset(out);
     }
 
     @Override
@@ -1047,12 +1047,10 @@ public class ViewPostDetailActivity extends BaseActivity
             return;
         }
         resumeCommentState = state;
-        if (state.getBoolean(STATE_RESUME_APP_BAR_COLLAPSED, false)) {
-            // Before the thread lands, so the offset the comment list is restored against is
-            // measured against the same toolbar position it was recorded against.
-            mAppBarCollapsed = true;
-            binding.appbarLayoutViewPostDetailActivity.setExpanded(false, false);
-        }
+        // A toolbar that comes back further down than it was pushes the whole comment list down
+        // with it, which reads as a restore that missed by a constant.
+        restoreResumeAppBarOffset(state, binding.appbarLayoutViewPostDetailActivity,
+                binding.viewPager2ViewPostDetailActivity);
     }
 
     /**

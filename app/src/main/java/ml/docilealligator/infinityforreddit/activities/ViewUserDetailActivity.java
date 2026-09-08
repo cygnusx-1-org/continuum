@@ -250,6 +250,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         binding = ActivityViewUserDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        trackAppBarOffsetForResume(binding.appbarLayoutViewUserDetail);
+
         // Before initializeViewPager() picks the tab to open on, which happens further down this
         // method and is never revisited.
         claimResumeState();
@@ -1883,12 +1885,15 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             return;
         }
         out.putInt(STATE_RESUME_TAB, page);
+        saveResumeAppBarOffset(out);
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeTab = state.getInt(STATE_RESUME_TAB, -1);
         resumeFeed.read(state);
+        restoreResumeAppBarOffset(state, binding.appbarLayoutViewUserDetail,
+                binding.viewPagerViewUserDetailActivity);
     }
 
     private class SectionsPagerAdapter extends FragmentStateAdapter {

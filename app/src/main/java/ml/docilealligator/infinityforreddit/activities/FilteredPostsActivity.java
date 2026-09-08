@@ -284,6 +284,8 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
             }
         }
 
+        trackAppBarOffsetForResume(binding.appbarLayoutFilteredPostsActivity);
+
         // Before bindView(), which is where the feed fragment is built and given its record.
         claimResumeState();
 
@@ -339,14 +341,16 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         // Nothing at all rather than a record that cannot say where in the feed the user was: that
         // would reopen this screen scrolled to the top and overwrite a good record from a moment
         // ago.
-        if (mFragment != null) {
-            mFragment.captureResumeState(out);
+        if (mFragment != null && mFragment.captureResumeState(out)) {
+            saveResumeAppBarOffset(out);
         }
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeFeed.read(state);
+        restoreResumeAppBarOffset(state, binding.appbarLayoutFilteredPostsActivity,
+                binding.frameLayoutFilteredPostsActivity);
     }
 
     /**

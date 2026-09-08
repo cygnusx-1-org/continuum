@@ -174,6 +174,8 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         binding = ActivityViewMultiRedditDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        trackAppBarOffsetForResume(binding.appbarLayoutViewMultiRedditDetailActivity);
+
         // Before the feed fragment is built, so the record it is given is the recorded one.
         claimResumeState();
 
@@ -541,14 +543,17 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
         // Nothing at all rather than a record that cannot say where in the feed the user was: that
         // would reopen this screen scrolled to the top and overwrite a good record from a moment
         // ago.
-        if (mFragment instanceof PostFragment) {
-            ((PostFragment) mFragment).captureResumeState(out);
+        if (mFragment instanceof PostFragment
+                && ((PostFragment) mFragment).captureResumeState(out)) {
+            saveResumeAppBarOffset(out);
         }
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeFeed.read(state);
+        restoreResumeAppBarOffset(state, binding.appbarLayoutViewMultiRedditDetailActivity,
+                binding.frameLayoutViewMultiRedditDetailActivity);
     }
 
     private void bottomAppBarOptionAction(int option) {

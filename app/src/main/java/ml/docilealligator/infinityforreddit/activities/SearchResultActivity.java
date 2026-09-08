@@ -283,6 +283,8 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
             mInsertSearchQuerySuccess = savedInstanceState.getBoolean(INSERT_SEARCH_QUERY_SUCCESS_STATE);
         }
 
+        trackAppBarOffsetForResume(binding.appbarLayoutSearchResultActivity);
+
         // Before bindView(), which chooses the tab to open on and never revisits it.
         claimResumeState();
 
@@ -337,12 +339,15 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
             return;
         }
         out.putInt(STATE_RESUME_TAB, tab);
+        saveResumeAppBarOffset(out);
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeTab = state.getInt(STATE_RESUME_TAB, -1);
         resumeFeed.read(state);
+        restoreResumeAppBarOffset(state, binding.appbarLayoutSearchResultActivity,
+                binding.viewPagerSearchResultActivity);
     }
 
     /**

@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -44,6 +45,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.menu.MenuItemImpl;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.MenuItemCompat;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -86,6 +88,8 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
 
     /** How far down its scrolling view a plain screen was. See {@link #saveResumeState}. */
     private static final String STATE_RESUME_SCROLL_Y = "RSY";
+    /** How far the app bar was scrolled off the top. See {@link #saveResumeAppBarOffset}. */
+    private static final String STATE_RESUME_APP_BAR_OFFSET = "RABO";
     public static final int IGNORE_MARGIN = -1;
     // Tag for refresh-rate diagnostics. Filter logcat with `RefreshRate:* *:S` to confirm whether
     // the "Force Maximum Refresh Rate" setting is actually taking effect on a given device.
@@ -93,6 +97,8 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
 
     /** Whether {@link #claimResumeState()} has already run. See its javadoc for the ordering. */
     private boolean resumeStateClaimed;
+    /** Live offset of the app bar handed to {@link #trackAppBarOffsetForResume}. Never positive. */
+    private int appBarVerticalOffset;
     private boolean immersiveInterface;
     private boolean changeStatusBarIconColor;
     private boolean hasDrawerLayout = false;
@@ -365,6 +371,122 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
                 scrollable.scrollTo(0, scrollY);
             }
         }));
+    }
+
+    /**
+     * Keep {@code appBar}'s offset current, so {@link #saveResumeAppBarOffset} can record where the
+     * toolbar actually was rather than which end of its travel it was nearest.
+     *
+     * <p>Call this once, from {@code onCreate}, on the app bar the feed scrolls under.
+     */
+    protected final void trackAppBarOffsetForResume(@NonNull AppBarLayout appBar) {
+        appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                appBarVerticalOffset = verticalOffset;
+            }
+        });
+    }
+
+    /**
+     * Record how far the app bar was scrolled off the top, in pixels.
+     *
+     * <p>Pixels and not a collapsed/expanded flag, because the app bar spends most of its life
+     * between those two ends: every one of these screens gives its toolbar {@code enterAlways}, so
+     * it tracks the feed one for one in both directions and comes to rest part way in whenever the
+     * user scrolls back up a little and stops. A flag cannot say "137px into a 224px travel", and a
+     * restore that rounds it to either end puts every row of the feed that far from where the user
+     * left it -- while the feed itself is restored to the pixel, which is what makes the miss look
+     * like a scroll-position bug rather than a toolbar one.
+     */
+    protected final void saveResumeAppBarOffset(@NonNull Bundle out) {
+        if (appBarVerticalOffset < 0) {
+            out.putInt(STATE_RESUME_APP_BAR_OFFSET, appBarVerticalOffset);
+        }
+    }
+
+    /**
+     * Put the app bar back at the offset {@link #saveResumeAppBarOffset} recorded.
+     *
+     * <p>Call this from {@code restoreResumeState}. The feed's own restore is independent of it --
+     * a row's offset is measured against the RecyclerView, which the app bar moves as a whole -- so
+     * the two can land in either order; what they must not do is disagree about the app bar.
+     *
+     * @param scrollingChild the view that scrolls under the app bar, used only to decide whether the
+     *                       bar draws itself lifted; the app bar itself is a fine stand-in.
+     */
+    protected final void restoreResumeAppBarOffset(@NonNull Bundle state, @NonNull AppBarLayout appBar,
+                                                   @Nullable View scrollingChild) {
+        final int offset = state.getInt(STATE_RESUME_APP_BAR_OFFSET, 0);
+        if (offset >= 0) {
+            return;
+        }
+        // Watched across layout passes, not applied once: some of these app bars grow after their
+        // first measure -- a subreddit's header and a user's fill in from the network seconds later
+        // -- and the travel a restore needs does not exist until they have. A global layout
+        // listener and not addOnLayoutChangeListener, because the growth that matters is a child's:
+        // it lengthens getTotalScrollRange() without necessarily moving the app bar's own bounds,
+        // which is the only thing that listener reports. It takes itself off as soon as the record
+        // has been honoured, or as soon as it can no longer be.
+        final ViewTreeObserver observer = appBar.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (applyAppBarOffset(appBar, scrollingChild, offset)) {
+                    return;
+                }
+                ViewTreeObserver current = appBar.getViewTreeObserver();
+                (current.isAlive() ? current : observer).removeOnGlobalLayoutListener(this);
+            }
+        });
+    }
+
+    /**
+     * Move {@code appBar} to {@code offset} through the behavior's own nested-scroll entry point.
+     *
+     * <p>Not by setting the offset on the behavior directly: that moves the bar and leaves
+     * everything that follows it behind -- the pinned toolbar, the elevation state, the tab colours
+     * driven from an offset listener. This is the path a finger takes, so all of it keeps up.
+     *
+     * @return whether it is worth trying again on the app bar's next layout.
+     */
+    private static boolean applyAppBarOffset(@NonNull AppBarLayout appBar,
+                                             @Nullable View scrollingChild, int offset) {
+        if (!(appBar.getParent() instanceof CoordinatorLayout)
+                || !(appBar.getLayoutParams() instanceof CoordinatorLayout.LayoutParams)) {
+            return false;
+        }
+        CoordinatorLayout parent = (CoordinatorLayout) appBar.getParent();
+        CoordinatorLayout.Behavior<?> behavior =
+                ((CoordinatorLayout.LayoutParams) appBar.getLayoutParams()).getBehavior();
+        if (!(behavior instanceof AppBarLayout.Behavior)) {
+            return false;
+        }
+        AppBarLayout.Behavior appBarBehavior = (AppBarLayout.Behavior) behavior;
+        int current = appBarBehavior.getTopAndBottomOffset();
+        if (appBar.getTotalScrollRange() < -offset) {
+            // The bar cannot travel that far yet. Collapsing it as far as it will go instead is
+            // worse than waiting: the bottom of the travel is where the AppBarLayout keeps it as
+            // the travel grows, so the bar ends up fully collapsed rather than the sliver short of
+            // it that was recorded. Keep waiting only while nothing has moved the bar -- once
+            // something has, that is the user scrolling, and their position beats the recorded one.
+            return current == 0;
+        }
+        // Collapsing only. The other direction is clamped to the bar's down-pre-scroll range, which
+        // an enterAlwaysCollapsed toolbar -- a subreddit's, a user's -- deliberately makes shorter
+        // than its travel, so asking to come back part way lands wherever that clamp falls instead
+        // of where the record says. A bar already further in than the record is left alone.
+        if (current <= offset) {
+            return false;
+        }
+        appBarBehavior.onNestedPreScroll(parent, appBar,
+                scrollingChild == null ? appBar : scrollingChild, 0, current - offset, new int[2],
+                ViewCompat.TYPE_TOUCH);
+        // The behavior leaves the views that sit under the app bar to CoordinatorLayout's own
+        // pre-draw pass. We may be inside one already, so ask for them now rather than betting on
+        // running before it.
+        parent.dispatchDependentViewsChanged(appBar);
+        return false;
     }
 
     /**

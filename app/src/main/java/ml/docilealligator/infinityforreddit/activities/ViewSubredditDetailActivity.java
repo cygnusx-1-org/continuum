@@ -140,7 +140,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
     public static final String EXTRA_SUBREDDIT_NAME_KEY = "ESN";
     private static final String STATE_RESUME_PAGE = "RP";
-    private static final String STATE_RESUME_APP_BAR_COLLAPSED = "RABC";
     public static final String EXTRA_MESSAGE_FULLNAME = "ENF";
     public static final String EXTRA_NEW_ACCOUNT_NAME = "ENAN";
     public static final String EXTRA_VIEW_SIDEBAR = "EVSB";
@@ -260,6 +259,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
         binding = ActivityViewSubredditDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Before the claim below, which reads the recorded offset back through the same field.
+        trackAppBarOffsetForResume(binding.appbarLayoutViewSubredditDetailActivity);
 
         // After the binding exists, because restoring the collapsed toolbar touches it, and
         // before bindView() runs, because that is where the pager's initial page is chosen.
@@ -1372,19 +1374,17 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
             return;
         }
         out.putInt(STATE_RESUME_PAGE, binding.viewPagerViewSubredditDetailActivity.getCurrentItem());
-        out.putBoolean(STATE_RESUME_APP_BAR_COLLAPSED, mAppBarCollapsed);
+        saveResumeAppBarOffset(out);
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumePage = state.getInt(STATE_RESUME_PAGE, -1);
         resumeFeed.read(state);
-        if (state.getBoolean(STATE_RESUME_APP_BAR_COLLAPSED, false)) {
-            // A toolbar that comes back expanded pushes every row down by its height, which reads
-            // as a restore that missed by a constant.
-            mAppBarCollapsed = true;
-            binding.appbarLayoutViewSubredditDetailActivity.setExpanded(false, false);
-        }
+        // A toolbar that comes back further down than it was pushes every row down with it, which
+        // reads as a restore that missed by a constant.
+        restoreResumeAppBarOffset(state, binding.appbarLayoutViewSubredditDetailActivity,
+                binding.viewPagerViewSubredditDetailActivity);
     }
 
     private void displaySortTypeBottomSheetFragment() {

@@ -164,6 +164,8 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
 
         fragmentManager = getSupportFragmentManager();
 
+        trackAppBarOffsetForResume(binding.accountSavedThingAppbarLayout);
+
         // Before the pager is built: the tab to open on is chosen there and never revisited.
         claimResumeState();
 
@@ -444,12 +446,15 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
             return;
         }
         out.putInt(STATE_RESUME_TAB, tab);
+        saveResumeAppBarOffset(out);
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeTab = state.getInt(STATE_RESUME_TAB, -1);
         resumeFeed.read(state);
+        restoreResumeAppBarOffset(state, binding.accountSavedThingAppbarLayout,
+                binding.accountSavedThingViewPager2);
     }
 
     private class SectionsPagerAdapter extends FragmentStateAdapter {

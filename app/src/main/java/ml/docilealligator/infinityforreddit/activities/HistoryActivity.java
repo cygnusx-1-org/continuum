@@ -146,6 +146,8 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
 
         fragmentManager = getSupportFragmentManager();
 
+        trackAppBarOffsetForResume(binding.appbarLayoutHistoryActivity);
+
         // Before the fragment is built, so the record it is given is the recorded one.
         claimResumeState();
 
@@ -285,14 +287,17 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
     @Override
     public void saveResumeState(@NonNull Bundle out) {
         Fragment fragment = fragmentManager == null ? null : fragmentManager.findFragmentByTag("f0");
-        if (fragment instanceof HistoryPostFragment) {
-            ((HistoryPostFragment) fragment).captureResumeState(out);
+        if (fragment instanceof HistoryPostFragment
+                && ((HistoryPostFragment) fragment).captureResumeState(out)) {
+            saveResumeAppBarOffset(out);
         }
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeFeed.read(state);
+        restoreResumeAppBarOffset(state, binding.appbarLayoutHistoryActivity,
+                binding.viewPagerHistoryActivity);
     }
 
     private class SectionsPagerAdapter extends FragmentStateAdapter {

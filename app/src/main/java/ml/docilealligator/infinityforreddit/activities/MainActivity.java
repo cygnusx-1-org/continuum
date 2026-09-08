@@ -176,7 +176,6 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     // an index. The tab list is rebuilt from the subscription and multireddit data on every launch
     // and its order is not stable, so an index can name a different subreddit next time.
     private static final String STATE_RESUME_TAB_KEY = "RTK";
-    private static final String STATE_RESUME_APP_BAR_COLLAPSED = "RABC";
 
     @SuppressWarnings("NullAway.Init")
     MultiRedditViewModel multiRedditViewModel;
@@ -305,6 +304,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Before the claim below, which reads the recorded offset back through the same field.
+        trackAppBarOffsetForResume(binding.includedAppBar.appbarLayoutMainActivity);
 
         // After the binding exists, because restoring the app bar touches it, and before anything
         // builds the pager, because the tab to open on has to be known by then.
@@ -1973,20 +1975,18 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return;
         }
         out.putString(STATE_RESUME_TAB_KEY, tabKey);
-        out.putBoolean(STATE_RESUME_APP_BAR_COLLAPSED, mAppBarCollapsed);
+        saveResumeAppBarOffset(out);
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
         resumeTabKey = state.getString(STATE_RESUME_TAB_KEY);
         resumeFeed.read(state);
-        if (state.getBoolean(STATE_RESUME_APP_BAR_COLLAPSED, false)) {
-            // Without this the feed comes back at the right adapter position but pushed down by the
-            // height of a toolbar that was collapsed when the user left -- every row off by the
-            // same constant, which is the same failure the rotation path guards against above.
-            mAppBarCollapsed = true;
-            binding.includedAppBar.appbarLayoutMainActivity.setExpanded(false, false);
-        }
+        // Without this the feed comes back at the right adapter position but pushed down by the
+        // part of the toolbar that was scrolled off when the user left -- every row off by the same
+        // constant, which is the same failure the rotation path guards against above.
+        restoreResumeAppBarOffset(state, binding.includedAppBar.appbarLayoutMainActivity,
+                binding.includedAppBar.viewPagerMainActivity);
     }
 
     /**

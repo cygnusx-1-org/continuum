@@ -66,7 +66,7 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);
-        showResumeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_RESUME_TOGGLE_IN_NAVIGATION_DRAWER, true);
+        showResumeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_RESUME_TOGGLE_IN_NAVIGATION_DRAWER, false);
         collapsePreferencesSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION, false);
         this.itemClickListener = itemClickListener;
         buildVisibleRows();
@@ -264,7 +264,7 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
         showThemeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THEME_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showNSFWToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_NSFW_TOGGLE_IN_NAVIGATION_DRAWER, true);
         showThumbnailToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_THUMBNAIL_ON_THE_LEFT_TOGGLE_IN_NAVIGATION_DRAWER, false);
-        showResumeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_RESUME_TOGGLE_IN_NAVIGATION_DRAWER, true);
+        showResumeToggle = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_RESUME_TOGGLE_IN_NAVIGATION_DRAWER, false);
 
         if (collapsePreferencesSection) {
             // Only the title is shown while collapsed (item count stays 1), so just rebuild the

@@ -70,7 +70,7 @@
         app:title="@string/settings_show_thumbnail_on_the_left_toggle_in_navigation_drawer_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="true"
+        app:defaultValue="false"
         app:key="show_resume_toggle_in_navigation_drawer"
         app:title="@string/settings_show_resume_toggle_in_navigation_drawer_title" />
 
