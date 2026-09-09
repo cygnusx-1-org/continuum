@@ -11,6 +11,7 @@ import android.os.Trace
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
+import androidx.core.view.OneShotPreDrawListener
 import androidx.preference.PreferenceManager
 import java.io.File
 import java.io.IOException
@@ -150,6 +151,24 @@ object ResumeState {
      * -- which would otherwise leave the snapshot frozen for the rest of the session.
      */
     private const val REPLAY_SETTLE_TIMEOUT_MS = 10_000L
+
+    /**
+     * How long the launcher's splash may be held over the feed before the feed is let through
+     * anyway. See [holdLaunchFrame].
+     *
+     * Its own budget rather than [REPLAY_SETTLE_TIMEOUT_MS]: ten seconds is a fine outer bound for
+     * a snapshot that must not be overwritten, and a terrible one to sit looking at a splash.
+     *
+     * Five seconds and not the two it started as. Two was picked as "long enough to outlast a cold
+     * start" and measured on a device it was not: a cold launch restoring one screen held it for
+     * 1.83 s of the 2.00 s, and anything slower -- a deeper stack, a colder process, a device
+     * further behind this one -- would have expired it and put the feed back on screen, which is
+     * the whole thing this exists to prevent. What it degrades to is that launch: the feed for a
+     * moment before the screen the user actually left. So the budget is the exception path's, not
+     * the normal path's, and it is set well clear of what a real launch takes while staying well
+     * inside the replay's own bound.
+     */
+    private const val LAUNCH_HOLD_TIMEOUT_MS = 5_000L
 
     private const val KEY_VERSION = "version"
     private const val KEY_SAVED_AT = "savedAt"
@@ -301,6 +320,43 @@ object ResumeState {
     private var replayBackstop: Runnable? = null
 
     /**
+     * Whether [MainActivity] must keep the launcher's splash up rather than draw its own first
+     * frame. See [holdLaunchFrame].
+     */
+    private var launchHold = false
+
+    /**
+     * Whether a replayed screen's first draw is already lined up to lower [launchHold], so the
+     * screens that arrive after it do not each line up another.
+     */
+    private var launchHoldArmed = false
+
+    /** The pending [LAUNCH_HOLD_TIMEOUT_MS] backstop, so it can be taken off once it is moot. */
+    private var launchHoldBackstop: Runnable? = null
+
+    /**
+     * How the hold learns that a replayed screen has actually put a frame on the screen.
+     *
+     * The pre-draw listener runs before the frame rather than after it, so what releases the hold
+     * is the message posted from inside it -- by which time the frame the user is waiting for has
+     * been drawn.
+     *
+     * A seam for the same reason [publishToMainThread] is one: a unit test has no draw pass to wait
+     * for, and this is the one step of the sequence that cannot be driven from a test looper.
+     */
+    private val defaultReleaseWhenDrawn: (Activity) -> Unit = { activity ->
+        val decor = activity.window?.decorView
+        if (decor == null) {
+            releaseLaunchFrame()
+        } else {
+            OneShotPreDrawListener.add(decor) { decor.post { releaseLaunchFrame() } }
+        }
+    }
+
+    @VisibleForTesting
+    var releaseWhenDrawn: (Activity) -> Unit = defaultReleaseWhenDrawn
+
+    /**
      * The key is scoped by hand here because this reads the raw default preferences rather than the
      * injected [AccountScopedSharedPreferences] wrapper -- there is no Dagger graph at an activity
      * lifecycle callback. The setting sits on a "This account" screen, so one account resuming does
@@ -342,6 +398,81 @@ object ResumeState {
         replayTargetSize = 0
         replayBackstop?.let { mainHandler.removeCallbacks(it) }
         replayBackstop = null
+    }
+
+    /**
+     * Keep [MainActivity] from drawing its first frame, so the launcher's splash stays up until the
+     * screen the user actually left has one of its own.
+     *
+     * [MainActivity] is what the launcher starts, so Android resumes and draws it and only then
+     * works through the [buildRestoreIntents] batch its `onCreate` queued. The feed was therefore
+     * on screen for about a quarter of a second before the restored screen replaced it -- long
+     * enough to read, and to leave the impression that the app had opened on the wrong screen and
+     * then corrected itself.
+     *
+     * A frame withheld and not a frame hidden: the splash is the launcher's own starting window,
+     * which the platform keeps up until the app draws. Nothing is composited over anything, and the
+     * screens of the replay are being built the whole time regardless -- so this costs the launch
+     * nothing and changes only what is on the screen while it happens.
+     *
+     * Raised by [MainActivity] only when a replay was actually started, and lowered by the first
+     * replayed screen to draw -- or by [LAUNCH_HOLD_TIMEOUT_MS] if none ever does.
+     */
+    @JvmStatic
+    fun holdLaunchFrame() {
+        releaseLaunchFrame()
+        launchHold = true
+        val backstop = Runnable { releaseLaunchFrame() }
+        launchHoldBackstop = backstop
+        mainHandler.postDelayed(backstop, LAUNCH_HOLD_TIMEOUT_MS)
+    }
+
+    /** Whether [MainActivity] must still hold its first frame back. See [holdLaunchFrame]. */
+    @JvmStatic
+    fun isHoldingLaunchFrame(): Boolean = launchHold
+
+    /**
+     * Let [MainActivity] draw.
+     *
+     * Not called from the launch path: the hold is raised on what the replay returns, so a replay
+     * that could not be launched never raises one. What lowers it is a replayed screen's first
+     * draw, or [LAUNCH_HOLD_TIMEOUT_MS] if that draw never comes.
+     */
+    @VisibleForTesting
+    fun releaseLaunchFrame() {
+        launchHold = false
+        launchHoldArmed = false
+        launchHoldBackstop?.let { mainHandler.removeCallbacks(it) }
+        launchHoldBackstop = null
+    }
+
+    /**
+     * [activity]'s own `onCreate` has finished, so its window can be asked to say when it draws.
+     *
+     * The one thing this is for is lowering the launch hold, and the screen that gets to lower it
+     * is the first replayed one to arrive. `startActivities` resumes only the last intent, so that
+     * is the top of the restored stack -- the screen the user ends up looking at -- and the ones
+     * beneath it are created afterwards, from the visibility pass. See [EXTRA_REPLAY_INDEX].
+     *
+     * A screen with no replay position is [MainActivity] itself or one the user opened, and neither
+     * is the frame the launch is waiting for.
+     *
+     * Called after `onCreate` rather than before it, and from the callback that fires on every
+     * release rather than the API 29 one: reading a window's decor view installs it, and doing that
+     * before BaseActivity's `onCreate` has applied the theme would settle the decor on the wrong
+     * one.
+     */
+    @JvmStatic
+    fun noteContentCreated(activity: Activity) {
+        if (!launchHold || launchHoldArmed) {
+            return
+        }
+        val entry = live.firstOrNull { it.activity?.get() === activity } ?: return
+        if (entry.replayIndex < 0) {
+            return
+        }
+        launchHoldArmed = true
+        releaseWhenDrawn(activity)
     }
 
     private fun currentAccount(context: Context): String =
@@ -1210,10 +1341,12 @@ object ResumeState {
         canSeed = true
         replayed = false
         endReplay()
+        releaseLaunchFrame()
         // Restored too: these are process-global, so a class that swaps in a hand-driven executor
         // would otherwise hand it on to whichever class ran next, along with a queue nothing drains
         // any more.
         describeExecutor = defaultDescribeExecutor
         publishToMainThread = defaultPublisher
+        releaseWhenDrawn = defaultReleaseWhenDrawn
     }
 }

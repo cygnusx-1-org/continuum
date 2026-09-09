@@ -3,9 +3,11 @@ package ml.docilealligator.infinityforreddit.resume
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Looper
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import java.io.File
+import java.time.Duration
 import ml.docilealligator.infinityforreddit.TestInfinity
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
@@ -24,6 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
@@ -354,6 +357,122 @@ class ResumeStateTest {
         assertEquals(3, stack.length())
         assertEquals("pics",
             stack.getJSONObject(1).getJSONObject("extras").getJSONObject("EN").getString("v"))
+    }
+
+    // ------------------------------------------------------------------ launch hold
+
+    /**
+     * A replay in flight, with the launch frame held exactly as MainActivity holds it.
+     *
+     * @return the intents the replay would start, so a test can build the screens they describe.
+     */
+    private fun replayInFlight(): Array<Intent> {
+        writeSnapshot(
+            stack = arrayOf(
+                entry(mainActivity),
+                entry(upperScreen, mapOf("EN" to "pics")),
+                entry(topScreen)))
+        feedAlone()
+        val intents = ResumeState.buildRestoreIntents(context)!!
+        ResumeState.holdLaunchFrame()
+        return intents
+    }
+
+    @Test
+    fun `nothing is held back when no replay was started`() {
+        writeSnapshot(stack = arrayOf(entry(mainActivity)))
+        feedAlone()
+
+        assertNull(ResumeState.buildRestoreIntents(context))
+
+        // The feed is the whole snapshot, so MainActivity never asks for the hold and never has to
+        // wait for a screen that is not coming.
+        assertFalse(ResumeState.isHoldingLaunchFrame())
+    }
+
+    @Test
+    fun `the launch frame is held while the replayed stack is on its way up`() {
+        replayInFlight()
+
+        assertTrue(ResumeState.isHoldingLaunchFrame())
+    }
+
+    @Test
+    fun `a screen with no replay position does not release the launch frame`() {
+        // The feed itself, and anything the user opens, arrive without a recorded position. Neither
+        // is the frame the launch is waiting for -- releasing on the feed's own creation would put
+        // it back on screen ahead of the screen it is being held back for, which is the flash this
+        // exists to remove.
+        replayInFlight()
+        val drawn = mutableListOf<Activity>()
+        ResumeState.releaseWhenDrawn = { drawn.add(it) }
+        val ordinary = upperScreenShowing("aww")
+
+        ResumeState.recordCreated(ordinary)
+        ResumeState.noteContentCreated(ordinary)
+
+        assertTrue(drawn.isEmpty())
+        assertTrue(ResumeState.isHoldingLaunchFrame())
+    }
+
+    @Test
+    fun `the first replayed screen to arrive releases the launch frame once it has drawn`() {
+        val intents = replayInFlight()
+        val drawn = mutableListOf<Activity>()
+        ResumeState.releaseWhenDrawn = { drawn.add(it) }
+        val top = Robolectric.buildActivity(TopScreenActivity::class.java, intents[1]).get()
+
+        ResumeState.recordCreated(top)
+        ResumeState.noteContentCreated(top)
+
+        // startActivities resumes only the topmost intent, so the first replayed screen to be
+        // created is the one the user ends up looking at. Its frame is the one worth waiting for.
+        assertEquals(listOf<Activity>(top), drawn)
+        // Still held: what lowers it is the draw, not the creation.
+        assertTrue(ResumeState.isHoldingLaunchFrame())
+
+        ResumeState.releaseLaunchFrame()
+
+        assertFalse(ResumeState.isHoldingLaunchFrame())
+    }
+
+    @Test
+    fun `only the first replayed screen lines up a release`() {
+        // The screens beneath the top one are created afterwards, from the visibility pass. Each
+        // lining up its own release would leave the hold at the mercy of whichever drew last.
+        val intents = replayInFlight()
+        val drawn = mutableListOf<Activity>()
+        ResumeState.releaseWhenDrawn = { drawn.add(it) }
+        val top = Robolectric.buildActivity(TopScreenActivity::class.java, intents[1]).get()
+        val under = Robolectric.buildActivity(UpperScreenActivity::class.java, intents[0]).get()
+
+        ResumeState.recordCreated(top)
+        ResumeState.noteContentCreated(top)
+        ResumeState.recordCreated(under)
+        ResumeState.noteContentCreated(under)
+
+        assertEquals(listOf<Activity>(top), drawn)
+    }
+
+    @Test
+    fun `the launch frame is let through even if no replayed screen ever draws`() {
+        // A screen that finishes itself on the way up, or a replay the platform drops. Without the
+        // backstop the launcher's splash would sit there for the rest of the launch.
+        replayInFlight()
+        ResumeState.releaseWhenDrawn = { }
+
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(6))
+
+        assertFalse(ResumeState.isHoldingLaunchFrame())
+    }
+
+    @Test
+    fun `a held launch frame does not outlive the process state it belongs to`() {
+        replayInFlight()
+
+        ResumeState.resetForTests()
+
+        assertFalse(ResumeState.isHoldingLaunchFrame())
     }
 
     // ------------------------------------------------------------------ claim

@@ -184,6 +184,10 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
                 // "Resume where I left off" did nothing at all on those releases, silently.
                 // recordCreated ignores an activity it already holds, so on 29+ this is a no-op.
                 ResumeState.recordCreated(activity);
+                // And this one only here: it reads the screen's window, which installs the decor,
+                // and doing that before the activity's own onCreate has applied the theme would
+                // settle the decor on the wrong one.
+                ResumeState.noteContentCreated(activity);
             }
 
             @Override

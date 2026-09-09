@@ -293,7 +293,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     @ExperimentalBadgeUtils
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        SplashScreen.installSplashScreen(this);
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
 
         ((Infinity) getApplication()).getAppComponent().inject(this);
 
@@ -314,14 +314,28 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         // Before anything builds the pager: the tab to open on has to be known by the time the
         // adapter is created, and the screens that were above this one have to be launched before
         // the user sees this one settle.
+        boolean replayingResumedStack = false;
         if (savedInstanceState == null && isPlainLaunch(getIntent())
                 && !ResumeState.isSkipped(getIntent())) {
             // Before claiming, so the snapshot is still whole when it is read.
-            replayResumedStack();
+            replayingResumedStack = replayResumedStack();
         }
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // The screens of the replay are on their way up, and this one is what the launcher started
+        // -- so without this the feed draws first and the user reads it for about a quarter of a
+        // second before the screen they actually left replaces it. Holding this frame back leaves
+        // the launcher's splash where it is until a replayed screen has drawn one of its own.
+        //
+        // After setContentView, because the condition is installed on android.R.id.content and
+        // resolving that installs the decor; by here it is installed anyway and the theme is
+        // settled. Still well before anything can draw.
+        if (replayingResumedStack) {
+            ResumeState.holdLaunchFrame();
+            splashScreen.setKeepOnScreenCondition(ResumeState::isHoldingLaunchFrame);
+        }
 
         // Before the claim below, which reads the recorded offset back through the same field.
         trackAppBarOffsetForResume(binding.includedAppBar.appbarLayoutMainActivity);
@@ -1950,20 +1964,28 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         return extras == null || extras.isEmpty();
     }
 
-    /** Put back the screens that were above this one when the app was last closed. */
-    private void replayResumedStack() {
+    /**
+     * Put back the screens that were above this one when the app was last closed.
+     *
+     * @return whether any were launched, which is what decides whether this screen holds its first
+     *         frame back for them. See {@link ResumeState#holdLaunchFrame()}.
+     */
+    private boolean replayResumedStack() {
         Intent[] above = ResumeState.buildRestoreIntents(this);
         if (above == null || above.length == 0) {
-            return;
+            return false;
         }
         try {
             startActivities(above);
+            return true;
         } catch (RuntimeException e) {
             // A screen that can no longer be launched is not worth failing the launch over: the
             // user still gets their feed, just not what was on top of it. The screens it was
-            // waiting for are never coming, so let it start recording this stack instead.
+            // waiting for are never coming, so let it start recording this stack instead. Nothing
+            // to release here: the hold is raised on what this returns, so a false leaves it down.
             ResumeState.endReplay();
             Log.e("MainActivity", "could not replay the resumed stack", e);
+            return false;
         }
     }
 
