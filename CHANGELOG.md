@@ -2,6 +2,28 @@
 
 ---
 
+8.3.0.4 / 2026-9-8
+===========
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Resume where I left off
+* Added a quicktoggle for Resume, and it defaults to off
+* Fixed Not able to set video quality in NSFW subs #388
+* Renamed This Account to Account, and All Accounts to Global in Settings
+* Moved Theme from the Account section of Settings to a new Themes section
+* Fixed the color of the Read Aloud icon
+* Moved the random subreddit options in search to their own screen behind the dice icon
+* The incognito button state in the search screen is now persistent till the app is restarted
+* Moved API Statistics into Debug within Settings
+
+Resume where I left off, when on(off by default), remembers exactly where you
+are at in the app when you close it. In a video, back to the video and at the
+same timestamp. Looking at a certain preview image in a feed, pixel perfect
+return to that position in the feed. Looking at a certain post in a subreddit,
+back to that position in that subreddit.
+
+Its location is `Settings | Miscellaneous | Resume where I left off`.
+
 8.3.0.3 / 2026-9-4
 ===========
 Note v8a is the 64-bit build, and should be considered the default choice.
