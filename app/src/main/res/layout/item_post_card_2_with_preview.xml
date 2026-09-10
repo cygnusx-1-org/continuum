@@ -41,7 +41,8 @@
             android:id="@+id/progress_bar_item_post_card_2_with_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/load_image_error_text_view_item_post_card_2_with_preview"

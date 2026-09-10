@@ -745,6 +745,19 @@
         <item>480</item>
     </string-array>
 
+    <!-- mlb-cuts-diamond publishes exactly two renditions of the same 1280x720 frame, so the
+         choice is a bitrate rather than a resolution. The low rung is roughly a quarter of the
+         bytes. -->
+    <string-array name="settings_mlb_video_default_bitrate">
+        <item>16 Mbps</item>
+        <item>4 Mbps</item>
+    </string-array>
+
+    <string-array name="settings_mlb_video_default_bitrate_values">
+        <item>16000</item>
+        <item>4000</item>
+    </string-array>
+
     <string-array name="settings_comment_divider_type">
         <item>Normal</item>
         <item>Only on top-level comments</item>

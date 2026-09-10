@@ -60,6 +60,7 @@ import ml.docilealligator.infinityforreddit.utils.DocumentTreeUtils;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -76,6 +77,9 @@ public class DownloadMediaService extends JobService {
     public static final String EXTRA_IS_NSFW = "EIN";
     public static final String EXTRA_REDGIFS_ID = "EGI";
     public static final String EXTRA_STREAMABLE_SHORT_CODE = "ESSC";
+    public static final String EXTRA_SHORT_CLIP_HOST = "ESCH";
+    public static final String EXTRA_SHORT_CLIP_ID = "ESCI";
+    public static final String EXTRA_SHORT_CLIP_PAGE_URL = "ESCPU";
     public static final String EXTRA_IS_ALL_GALLERY_MEDIA = "EIAGM";
     // When set, the media is written to the cache and shared instead of being saved to the
     // user's download folder.
@@ -98,6 +102,7 @@ public class DownloadMediaService extends JobService {
     private static final int ERROR_FILE_CANNOT_FETCH_REDGIFS_VIDEO_LINK = 3;
     private static final int ERROR_CANNOT_FETCH_STREAMABLE_VIDEO_LINK = 4;
     private static final int ERROR_INVALID_ARGUMENT = 5;
+    private static final int ERROR_CANNOT_FETCH_SHORT_CLIP_VIDEO_LINK = 6;
 
     private static int JOB_ID = 20000;
 
@@ -109,6 +114,9 @@ public class DownloadMediaService extends JobService {
     Retrofit mRedgifsRetrofit;
     @Inject
     Provider<StreamableAPI> mStreamableApiProvider;
+    @Inject
+    @Named("short_clip")
+    OkHttpClient mShortClipOkHttpClient;
     @Inject
     @Named("default")
     SharedPreferences mSharedPreferences;
@@ -158,6 +166,15 @@ public class DownloadMediaService extends JobService {
                     extras.putString(EXTRA_URL, post.getVideoUrl());
                 } else {
                     extras.putString(EXTRA_STREAMABLE_SHORT_CODE, post.getStreamableShortCode());
+                }
+            } else if (post.isShortClip()) {
+                if (post.isLoadedStreamableVideoAlready()) {
+                    extras.putString(EXTRA_URL, post.getVideoUrl());
+                } else {
+                    ShortClipHostUtils.Host shortClipHost = post.getShortClipHost();
+                    extras.putString(EXTRA_SHORT_CLIP_HOST, shortClipHost == null ? null : shortClipHost.name());
+                    extras.putString(EXTRA_SHORT_CLIP_ID, post.getShortClipId());
+                    extras.putString(EXTRA_SHORT_CLIP_PAGE_URL, post.getUrl());
                 }
             } else if (post.isRedgifs()) {
                 extras.putString(EXTRA_URL, post.getVideoUrl());
@@ -623,11 +640,15 @@ public class DownloadMediaService extends JobService {
         ", fileName=" + fileName + ", isNsfw=" + isNsfw);
 
         if (fileUrl == null) {
-            // Only Redgifs and Streamble video can go inside this if clause.
+            // Only video whose real URL is resolved lazily reaches here: Redgifs, Streamable and
+            // the short-clip hosts.
             String redgifsId = intent.getString(EXTRA_REDGIFS_ID, null);
             String streamableShortCode = intent.getString(EXTRA_STREAMABLE_SHORT_CODE, null);
+            String shortClipHost = intent.getString(EXTRA_SHORT_CLIP_HOST, null);
+            String shortClipId = intent.getString(EXTRA_SHORT_CLIP_ID, null);
+            String shortClipPageUrl = intent.getString(EXTRA_SHORT_CLIP_PAGE_URL, null);
 
-            if (redgifsId == null && streamableShortCode == null) {
+            if (redgifsId == null && streamableShortCode == null && shortClipHost == null) {
                 downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
                         null,
                         ERROR_INVALID_ARGUMENT,
@@ -635,14 +656,27 @@ public class DownloadMediaService extends JobService {
                 return false;
             }
 
-            fileUrl = VideoLinkFetcher.fetchVideoLinkSync(mRedgifsRetrofit, mStreamableApiProvider, mCurrentAccountSharedPreferences,
-                    redgifsId == null ? ViewVideoActivity.VIDEO_TYPE_STREAMABLE : ViewVideoActivity.VIDEO_TYPE_REDGIFS,
-                    redgifsId, streamableShortCode);
+            int videoType;
+            int fetchFailureError;
+            if (shortClipHost != null) {
+                videoType = ViewVideoActivity.VIDEO_TYPE_SHORT_CLIP;
+                fetchFailureError = ERROR_CANNOT_FETCH_SHORT_CLIP_VIDEO_LINK;
+            } else if (redgifsId != null) {
+                videoType = ViewVideoActivity.VIDEO_TYPE_REDGIFS;
+                fetchFailureError = ERROR_FILE_CANNOT_FETCH_REDGIFS_VIDEO_LINK;
+            } else {
+                videoType = ViewVideoActivity.VIDEO_TYPE_STREAMABLE;
+                fetchFailureError = ERROR_CANNOT_FETCH_STREAMABLE_VIDEO_LINK;
+            }
+
+            fileUrl = VideoLinkFetcher.fetchVideoLinkSync(mRedgifsRetrofit, mStreamableApiProvider,
+                    mShortClipOkHttpClient, mCurrentAccountSharedPreferences, videoType,
+                    redgifsId, streamableShortCode, shortClipHost, shortClipId, shortClipPageUrl);
 
             if (fileUrl == null) {
                 downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
                         null,
-                        redgifsId == null ? ERROR_CANNOT_FETCH_STREAMABLE_VIDEO_LINK : ERROR_FILE_CANNOT_FETCH_REDGIFS_VIDEO_LINK,
+                        fetchFailureError,
                         multipleDownloads);
                 return false;
             }
@@ -1181,6 +1215,10 @@ public class DownloadMediaService extends JobService {
                         break;
                     case ERROR_FILE_CANNOT_FETCH_REDGIFS_VIDEO_LINK:
                         updateNotification(builder, mediaType, R.string.download_media_failed_cannot_fetch_redgifs_url,
+                                -1, randomNotificationIdOffset, null, null);
+                        break;
+                    case ERROR_CANNOT_FETCH_SHORT_CLIP_VIDEO_LINK:
+                        updateNotification(builder, mediaType, R.string.download_media_failed_cannot_fetch_short_clip_url,
                                 -1, randomNotificationIdOffset, null, null);
                         break;
                     case ERROR_CANNOT_FETCH_STREAMABLE_VIDEO_LINK:

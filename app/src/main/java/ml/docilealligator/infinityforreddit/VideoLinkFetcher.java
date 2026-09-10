@@ -17,10 +17,13 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.apis.VReddIt;
 import ml.docilealligator.infinityforreddit.extensions.StringKt;
 import ml.docilealligator.infinityforreddit.post.FetchPost;
+import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.FetchRedgifsVideoLinks;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -52,9 +55,24 @@ public class VideoLinkFetcher {
     @WorkerThread
     @Nullable
     public static String fetchVideoLinkSync(Retrofit redgifsRetrofit, Provider<StreamableAPI> streamableApiProvider,
+                                      OkHttpClient shortClipOkHttpClient,
                                       SharedPreferences currentAccountSharedPreferences, int videoType,
-                                      @Nullable String redgifsId, @Nullable String shortCode) {
-        if (videoType == ViewVideoActivity.VIDEO_TYPE_STREAMABLE) {
+                                      @Nullable String redgifsId, @Nullable String shortCode,
+                                      @Nullable String shortClipHost, @Nullable String shortClipId,
+                                      @Nullable String shortClipPageUrl) {
+        if (videoType == ViewVideoActivity.VIDEO_TYPE_SHORT_CLIP) {
+            if (shortClipHost == null || shortClipId == null) {
+                return null;
+            }
+            ShortClipHostUtils.Host host;
+            try {
+                host = ShortClipHostUtils.Host.valueOf(shortClipHost);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+            return FetchShortClipVideo.fetchShortClipVideoSync(shortClipOkHttpClient, host,
+                    shortClipId, shortClipPageUrl);
+        } else if (videoType == ViewVideoActivity.VIDEO_TYPE_STREAMABLE) {
             StreamableVideo streamableVideo = FetchStreamableVideo.fetchStreamableVideoSync(streamableApiProvider, shortCode);
             return streamableVideo == null ? null : (streamableVideo.mp4 == null ? null : streamableVideo.mp4.url);
         } else if (videoType == ViewVideoActivity.VIDEO_TYPE_REDGIFS) {

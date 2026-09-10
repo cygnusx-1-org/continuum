@@ -47,6 +47,7 @@ import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MaterialYouUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -83,6 +84,9 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
     @Named("default")
     SharedPreferences mSharedPreferences;
     @Inject
+    @Named("current_account")
+    SharedPreferences mCurrentAccountSharedPreferences;
+    @Inject
     @Named("security")
     SharedPreferences mSecuritySharedPreferences;
     @Inject
@@ -108,6 +112,34 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
     @Inject
     ReminderManager reminderManager;
 
+    /**
+     * Held in fields on purpose: SharedPreferences keeps only a weak reference to its listeners, so
+     * a lambda passed inline would be collected and the mirror would quietly stop updating.
+     */
+    private final SharedPreferences.OnSharedPreferenceChangeListener shortClipPreferenceListener =
+            (sharedPreferences, key) -> {
+                if (SharedPreferencesUtils.PLAY_SHORT_CLIP_HOSTS_INLINE.equals(key)) {
+                    refreshShortClipPreference();
+                }
+            };
+
+    /**
+     * The setting is per-account, and switching accounts finishes the activities without restarting
+     * the process, so nothing else would re-read it: the mirror would keep answering with the
+     * previous account's choice until the app was killed.
+     */
+    private final SharedPreferences.OnSharedPreferenceChangeListener currentAccountListener =
+            (sharedPreferences, key) -> {
+                if (SharedPreferencesUtils.ACCOUNT_NAME.equals(key)) {
+                    refreshShortClipPreference();
+                }
+            };
+
+    private void refreshShortClipPreference() {
+        ShortClipHostUtils.setInlinePlaybackEnabled(mSharedPreferences.getBoolean(
+                SharedPreferencesUtils.PLAY_SHORT_CLIP_HOSTS_INLINE, true));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -125,6 +157,14 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
         // on the executor.
         DefaultTheme.applyOnFirstLaunch(this, mSharedPreferences, amoledThemeSharedPreferences,
                 mInternalSharedPreferences, executor, redditDataRoomDatabase);
+
+        // ParsePost is static and has no SharedPreferences of its own, so the one setting it needs
+        // is mirrored onto ShortClipHostUtils instead of threaded through its eleven call sites.
+        // Seeded here and kept current by a listener, so a change takes effect on the next parse
+        // without anything having to re-read the preference.
+        refreshShortClipPreference();
+        mSharedPreferences.registerOnSharedPreferenceChangeListener(shortClipPreferenceListener);
+        mCurrentAccountSharedPreferences.registerOnSharedPreferenceChangeListener(currentAccountListener);
 
         appLock = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.APP_LOCK, false);
         appLockTimeout = SharedPreferencesUtils.getLong(mSecuritySharedPreferences, SharedPreferencesUtils.APP_LOCK_TIMEOUT, "600000");

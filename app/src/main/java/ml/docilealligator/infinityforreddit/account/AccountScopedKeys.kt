@@ -97,6 +97,7 @@ object AccountScopedKeys {
         "simultaneous_autoplay_limit", "legacy_autoplay_video_controller_ui",
         "mute_autoplaying_videos", "remember_muting_option_in_post_feed", "autoplay_nsfw_videos",
         "autoplay_comment_gif", "easier_to_watch_in_full_screen",
+        "play_short_clip_hosts_inline",
         "start_autoplay_visible_area_offset_portrait",
         "start_autoplay_visible_area_offset_landscape",
 

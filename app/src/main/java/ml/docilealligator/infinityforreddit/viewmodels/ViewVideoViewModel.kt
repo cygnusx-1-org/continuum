@@ -22,8 +22,10 @@ import ml.docilealligator.infinityforreddit.extensions.getFileNameFromUrlString
 import ml.docilealligator.infinityforreddit.fetchVideoLink
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo
+import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils
 import ml.docilealligator.infinityforreddit.utils.RedgifsUrlUtils
 import ml.docilealligator.infinityforreddit.utils.getRandomString
+import okhttp3.OkHttpClient
 import org.apache.commons.io.FilenameUtils
 import retrofit2.Retrofit
 import javax.inject.Provider
@@ -42,10 +44,14 @@ class ViewVideoViewModel(
     private var redgifsId: String?,
     private val vReddItUrl: String?,
     private var streamableShortCode: String?,
+    private val shortClipHost: String?,
+    private val shortClipId: String?,
+    private val shortClipPageUrl: String?,
     var isDataSavingMode: Boolean = false,
     val dataSavingModeDefaultResolution: Int = 0,
     val nonDataSavingModeDefaultResolution: Int = 0,
     private val redgifsDefaultResolution: Int = 0,
+    private val mlbDefaultBitrate: Int = MlbUrlUtils.BITRATE_HIGH,
     var playbackSpeed: Int
 ) : ViewModel() {
     var wasPlaying: Boolean = false
@@ -61,7 +67,10 @@ class ViewVideoViewModel(
      */
     private var redgifsSdVariantFailed = false
 
-    private val _videoUri = MutableStateFlow(redgifsPlaybackUri(videoUri))
+    /** The MLB twin of [redgifsSdVariantFailed]; see [MlbUrlUtils.postedVariant]. */
+    private var mlbLowBitrateFailed = false
+
+    private val _videoUri = MutableStateFlow(dataSavingPlaybackUri(videoUri))
     val videoUriLiveData = _videoUri.asLiveData()
 
     private val _errorResId = MutableStateFlow<Int?>(null)
@@ -79,19 +88,25 @@ class ViewVideoViewModel(
 
 
     /**
-     * Redgifs' answer to the resolution preference, applied to every URI before it can reach the
-     * player. See [RedgifsUrlUtils.playbackUri] for why a Redgifs post needs a different *file*
-     * rather than a different track.
+     * The data-saving answer to the resolution preference, applied to every URI before it can
+     * reach the player. Two hosts publish a ladder of separate *files* rather than a track ladder
+     * inside one stream, so the preference can only be honoured by swapping the URL: see
+     * [RedgifsUrlUtils.playbackUri] and [MlbUrlUtils.playbackUri].
      *
      * Safe to call from the [_videoUri] initializer: it reads primary-constructor properties,
      * which are assigned before any class-body initializer runs, and [redgifsSdVariantFailed],
-     * which is declared above that initializer. Keep both true -- a body property read before its
-     * own declaration silently yields the JVM default instead of its initializer's value, with no
-     * compiler complaint.
+     * which is declared above that initializer, as is [mlbLowBitrateFailed]. Keep that true -- a
+     * body property read before its own declaration silently yields the JVM default instead of its
+     * initializer's value, with no compiler complaint.
      */
-    private fun redgifsPlaybackUri(uri: Uri?): Uri? =
-        if (redgifsSdVariantFailed) uri
-        else RedgifsUrlUtils.playbackUri(uri, isDataSavingMode, redgifsDefaultResolution)
+    private fun dataSavingPlaybackUri(uri: Uri?): Uri? {
+        val afterRedgifs =
+            if (redgifsSdVariantFailed) uri
+            else RedgifsUrlUtils.playbackUri(uri, isDataSavingMode, redgifsDefaultResolution)
+
+        return if (mlbLowBitrateFailed) afterRedgifs
+        else MlbUrlUtils.playbackUri(afterRedgifs, isDataSavingMode, mlbDefaultBitrate)
+    }
 
     /**
      * Single point where a resolved URI becomes available. Clearing [errorResId] here is what keeps
@@ -100,7 +115,7 @@ class ViewVideoViewModel(
      * observer hides it, so a stale error must not keep toasting over a working video.
      */
     private fun publishVideoUri(rawUri: Uri?) {
-        val uri = redgifsPlaybackUri(rawUri)
+        val uri = dataSavingPlaybackUri(rawUri)
 
         // A null URI means the fetch produced nothing playable. Recording an error here rather than
         // at each call site is what makes the invariant structural: every caller either publishes
@@ -129,6 +144,8 @@ class ViewVideoViewModel(
                 "Redgifs-$redgifsId.mp4"
             } else if (streamableShortCode != null) {
                 "Streamable-$streamableShortCode.mp4"
+            } else if (shortClipId != null) {
+                "${shortClipHost?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Clip"}-$shortClipId.mp4"
             } else {
                 post?.let {
                     if (it.isImgur) {
@@ -154,6 +171,7 @@ class ViewVideoViewModel(
         retrofit: Retrofit, vReddItRetrofit: Retrofit,
         redgifsRetrofit: Retrofit,
         streamableApiProvider: Provider<StreamableAPIKt>,
+        shortClipOkHttpClient: OkHttpClient,
         currentAccountSharedPreferences: SharedPreferences,
     ) {
         // ViewVideoActivity re-runs this whenever it observes a null URI, which includes every
@@ -168,8 +186,8 @@ class ViewVideoViewModel(
         viewModelScope.launch {
             val result = fetchVideoLink(
                 retrofit, vReddItRetrofit, redgifsRetrofit, streamableApiProvider,
-                currentAccountSharedPreferences, videoType, redgifsId, vReddItUrl,
-                streamableShortCode
+                shortClipOkHttpClient, currentAccountSharedPreferences, videoType, redgifsId,
+                vReddItUrl, streamableShortCode, shortClipHost, shortClipId, shortClipPageUrl
             )
 
             when (result) {
@@ -179,6 +197,13 @@ class ViewVideoViewModel(
                             videoDownloadUrl = data.mp4?.url ?: data.mp4Mobile?.url
                             publishVideoUri(videoDownloadUrl?.toUri())
                             //title =
+                        }
+
+                        // Short clip. The resolver returns the probed MP4 URL and nothing else,
+                        // since a clip host publishes no title or dimensions worth trusting.
+                        is String -> {
+                            videoDownloadUrl = data
+                            publishVideoUri(data.toUri())
                         }
 
                         is Pair<*, *> -> {
@@ -298,6 +323,17 @@ class ViewVideoViewModel(
             }
         }
 
+        // Same shape for MLB: the low-bitrate rendition is derived, and an MLB post carries no
+        // videoFallBackDirectUrl either, so walk back up to the URL the poster actually linked.
+        if (!mlbLowBitrateFailed) {
+            val postedUri = MlbUrlUtils.postedVariant(mediaItem?.localConfiguration?.uri)
+            if (postedUri != null) {
+                mlbLowBitrateFailed = true
+                publishVideoUri(postedUri)
+                return
+            }
+        }
+
         val fallbackUrl = videoFallbackDirectUrl
         val canRetryWithFallback = mediaItem == null ||
             (mediaItem.localConfiguration != null &&
@@ -337,10 +373,14 @@ class ViewVideoViewModel(
             redgifsId: String?,
             vReddItUrl: String?,
             streamableShortCode: String?,
+            shortClipHost: String?,
+            shortClipId: String?,
+            shortClipPageUrl: String?,
             isDataSavingMode: Boolean = false,
             dataSavingModeDefaultResolution: Int = 0,
             nonDataSavingModeDefaultResolution: Int = 0,
             redgifsDefaultResolution: Int = 0,
+            mlbDefaultBitrate: Int = MlbUrlUtils.BITRATE_HIGH,
             playbackSpeed: Int
         ): ViewModelProvider.Factory {
             return object: ViewModelProvider.Factory {
@@ -352,9 +392,10 @@ class ViewVideoViewModel(
                     return ViewVideoViewModel(post, videoUri,
                         videoDownloadUrl, videoFallbackDirectUrl, subredditName, id,
                         isNSFW, resumePosition, videoType, redgifsId, vReddItUrl, streamableShortCode,
+                        shortClipHost, shortClipId, shortClipPageUrl,
                         isDataSavingMode, dataSavingModeDefaultResolution,
                         nonDataSavingModeDefaultResolution, redgifsDefaultResolution,
-                        playbackSpeed) as T
+                        mlbDefaultBitrate, playbackSpeed) as T
                 }
             }
         }

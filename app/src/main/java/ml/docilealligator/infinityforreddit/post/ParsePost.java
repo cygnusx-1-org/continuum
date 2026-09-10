@@ -18,6 +18,8 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
+import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils;
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -495,44 +497,7 @@ public class ParsePost {
                             mediaMetadataMap = result.mediaMetadataMap;
                         }
 
-                        String authority = uri.getAuthority();
-
-                        if (authority != null) {
-                            if (authority.contains("redgifs.com")) {
-                                String redgifsId = getRedgifsId(data);
-                                if (redgifsId != null) {
-                                    post.setPostType(Post.VIDEO_TYPE);
-                                    post.setIsRedgifs(true);
-                                    post.setVideoUrl(getRedgifsVideoUrl(redgifsId));
-                                    post.setVideoDownloadUrl(post.getVideoUrl());
-                                    post.setRedgifsId(redgifsId);
-                                }
-                                /*try {
-                                    String redgifsId = data.getJSONObject(JSONUtils.MEDIA_KEY).getJSONObject(JSONUtils.O_EMBED_KEY).getString(JSONUtils.THUMBNAIL_URL_KEY);
-                                    redgifsId = redgifsId.substring(redgifsId.lastIndexOf("/") + 1);
-                                    int dashIndex = redgifsId.lastIndexOf("-");
-                                    if (dashIndex >= 0) {
-                                        redgifsId = redgifsId.substring(0, dashIndex);
-                                        post.setPostType(Post.VIDEO_TYPE);
-                                        post.setIsRedgifs(true);
-                                        post.setVideoUrl(url);
-                                        post.setRedgifsId(redgifsId);
-                                    }
-                                } catch (JSONException e) {
-
-                                }*/
-                            } else if (authority.equals("streamable.com")) {
-                                String shortCode = url.substring(url.lastIndexOf("/") + 1);
-                                post.setPostType(Post.VIDEO_TYPE);
-                                post.setIsStreamable(true);
-                                post.setVideoUrl(url);
-                                post.setStreamableShortCode(shortCode);
-                            } else if (authority.contains("tumblr.com") && path.endsWith(".mp4")) {
-                                post.setPostType(Post.VIDEO_TYPE);
-                                post.setIsTumblr(true);
-                                post.setVideoUrl(url);
-                            }
-                        }
+                        applyExternalVideoHost(post, data, url, uri, path, true);
                     }
                 }
             }
@@ -735,32 +700,7 @@ public class ParsePost {
 
                             post.setPreviews(previews);
 
-                            String authority = uri.getAuthority();
-
-                            if (authority != null) {
-                                if (authority.contains("redgifs.com")) {
-                                    String redgifsId = getRedgifsId(data);
-                                    if (redgifsId != null) {
-                                        post.setPostType(Post.VIDEO_TYPE);
-                                        post.setIsRedgifs(true);
-                                        post.setVideoUrl(getRedgifsVideoUrl(redgifsId));
-                                        post.setVideoDownloadUrl(post.getVideoUrl());
-                                        post.setRedgifsId(redgifsId);
-                                    }
-
-                                    /*String redgifsId = url.substring(url.lastIndexOf("/") + 1).toLowerCase();
-                                    post.setPostType(Post.VIDEO_TYPE);
-                                    post.setIsRedgifs(true);
-                                    post.setVideoUrl(url);
-                                    post.setRedgifsId(redgifsId);*/
-                                } else if (authority.equals("streamable.com")) {
-                                    String shortCode = url.substring(url.lastIndexOf("/") + 1);
-                                    post.setPostType(Post.VIDEO_TYPE);
-                                    post.setIsStreamable(true);
-                                    post.setVideoUrl(url);
-                                    post.setStreamableShortCode(shortCode);
-                                }
-                            }
+                            applyExternalVideoHost(post, data, url, uri, path, false);
                         }
                     }
                 }
@@ -825,66 +765,13 @@ public class ParsePost {
                         mediaMetadataMap = result.mediaMetadataMap;
                     }
 
-                    String authority = uri.getAuthority();
-
-                    if (authority != null) {
-                        if (authority.contains("redgifs.com")) {
-                            String redgifsId = getRedgifsId(data);
-                            if (redgifsId != null) {
-                                post.setPostType(Post.VIDEO_TYPE);
-                                post.setIsRedgifs(true);
-                                post.setVideoUrl(getRedgifsVideoUrl(redgifsId));
-                                post.setVideoDownloadUrl(post.getVideoUrl());
-                                post.setRedgifsId(redgifsId);
-                            }
-                            /*String redgifsId = url.substring(url.lastIndexOf("/") + 1).toLowerCase();
-                            post.setPostType(Post.VIDEO_TYPE);
-                            post.setIsRedgifs(true);
-                            post.setVideoUrl(url);
-                            post.setRedgifsId(redgifsId);*/
-                        } else if (authority.equals("streamable.com")) {
-                            String shortCode = url.substring(url.lastIndexOf("/") + 1);
-                            post.setPostType(Post.VIDEO_TYPE);
-                            post.setIsStreamable(true);
-                            post.setVideoUrl(url);
-                            post.setStreamableShortCode(shortCode);
-                        }
-                    }
+                    applyExternalVideoHost(post, data, url, uri, path, false);
                 }
             }
         }
 
         if (post.getPostType() == Post.VIDEO_TYPE) {
-            try {
-                String authority = uri.getAuthority();
-
-                if (authority != null) {
-                    if (authority.contains("redgifs.com")) {
-                        String redgifsId = getRedgifsId(data);
-                        if (redgifsId != null) {
-                            post.setIsRedgifs(true);
-                            post.setVideoUrl(getRedgifsVideoUrl(redgifsId));
-                            post.setVideoDownloadUrl(post.getVideoUrl());
-                            post.setRedgifsId(redgifsId);
-                        }
-                        /*String redgifsId = url.substring(url.lastIndexOf("/") + 1);
-                        if (redgifsId.contains("-")) {
-                            redgifsId = redgifsId.substring(0, redgifsId.indexOf('-'));
-                        }
-                        post.setIsRedgifs(true);
-                        post.setVideoUrl(url);
-                        post.setRedgifsId(redgifsId.toLowerCase());*/
-                    } else if (authority.equals("streamable.com")) {
-                        String shortCode = url.substring(url.lastIndexOf("/") + 1);
-                        post.setPostType(Post.VIDEO_TYPE);
-                        post.setIsStreamable(true);
-                        post.setVideoUrl(url);
-                        post.setStreamableShortCode(shortCode);
-                    }
-                }
-            } catch (IllegalArgumentException ignore) {
-                Log.d("ParsePost", "parseData: ignoring IllegalArgumentException", ignore);
-            }
+            applyExternalVideoHost(post, data, url, uri, path, false);
         } else if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
             if (!data.isNull(JSONUtils.GALLERY_DATA_KEY)) {
                 try {
@@ -1025,31 +912,7 @@ public class ParsePost {
                     resolvedThumbnailUrl = "";
                 }
             } else if (post.getPostType() == Post.LINK_TYPE) {
-                String authority = uri.getAuthority();
-
-                if (authority != null) {
-                    if (authority.contains("redgifs.com")) {
-                        String redgifsId = getRedgifsId(data);
-                        if (redgifsId != null) {
-                            post.setPostType(Post.VIDEO_TYPE);
-                            post.setIsRedgifs(true);
-                            post.setVideoUrl(getRedgifsVideoUrl(redgifsId));
-                            post.setVideoDownloadUrl(post.getVideoUrl());
-                            post.setRedgifsId(redgifsId);
-                        }
-                        /*String redgifsId = url.substring(url.lastIndexOf("/") + 1).toLowerCase();
-                        post.setPostType(Post.VIDEO_TYPE);
-                        post.setIsRedgifs(true);
-                        post.setVideoUrl(url);
-                        post.setRedgifsId(redgifsId);*/
-                    } else if (authority.equals("streamable.com")) {
-                        String shortCode = url.substring(url.lastIndexOf("/") + 1);
-                        post.setPostType(Post.VIDEO_TYPE);
-                        post.setIsStreamable(true);
-                        post.setVideoUrl(url);
-                        post.setStreamableShortCode(shortCode);
-                    }
-                }
+                applyExternalVideoHost(post, data, url, uri, path, false);
             }
         }
 
@@ -1100,6 +963,93 @@ public class ParsePost {
         post.setMediaMetadataMap(mediaMetadataMap);
         post.setSubredditIconUrl(subredditIconUrl);
         return post;
+    }
+
+    /**
+     * Promotes a link post to {@link Post#VIDEO_TYPE} when its URL is one this app can play, and
+     * records whatever the player will need to resolve it later.
+     *
+     * <p>Five parse paths reach this: the no-preview link, the link with a preview, the crosspost,
+     * the late pass over a post that already came out as video, and the late upgrade from
+     * {@code LINK_TYPE}. They used to hold five copies of the same host chain, which drifted -- a
+     * host added to only some of them classified differently depending on which listing shape the
+     * post arrived in. One copy now, so a new host is one edit.
+     *
+     * <p>{@code allowTumblr} exists because the tumblr arm only ever ran on the no-preview path. A
+     * tumblr .mp4 that has a preview is already caught by the generic .mp4 branch above, and
+     * running the arm on every path would change how those render.
+     *
+     * <p>{@link Post#setVideoUrl} is left pointing at the share page for hosts that need a network
+     * round trip to find their MP4. The post's own {@code url} is never rewritten, so copy link,
+     * open in browser and share keep naming the page the poster linked.
+     */
+    private static void applyExternalVideoHost(Post post, JSONObject data, String url, Uri uri,
+                                               String path, boolean allowTumblr) {
+        String authority;
+        try {
+            authority = uri.getAuthority();
+        } catch (IllegalArgumentException e) {
+            // Uri parses lazily, so a malformed URL throws on the first accessor rather than at
+            // Uri.parse(). Only the already-video path used to guard this; all five want it.
+            Log.d("ParsePost", "applyExternalVideoHost: ignoring IllegalArgumentException", e);
+            return;
+        }
+
+        if (authority == null) {
+            return;
+        }
+
+        if (authority.contains("redgifs.com")) {
+            String redgifsId = getRedgifsId(data);
+            if (redgifsId != null) {
+                post.setPostType(Post.VIDEO_TYPE);
+                post.setIsRedgifs(true);
+                post.setVideoUrl(getRedgifsVideoUrl(redgifsId));
+                post.setVideoDownloadUrl(post.getVideoUrl());
+                post.setRedgifsId(redgifsId);
+            }
+            return;
+        }
+
+        if (authority.equals("streamable.com")) {
+            post.setPostType(Post.VIDEO_TYPE);
+            post.setIsStreamable(true);
+            post.setVideoUrl(url);
+            post.setStreamableShortCode(url.substring(url.lastIndexOf("/") + 1));
+            return;
+        }
+
+        if (allowTumblr && authority.contains("tumblr.com") && path.endsWith(".mp4")) {
+            post.setPostType(Post.VIDEO_TYPE);
+            post.setIsTumblr(true);
+            post.setVideoUrl(url);
+            return;
+        }
+
+        if (ShortClipHostUtils.getInlinePlaybackEnabled()) {
+            ShortClipHostUtils.Host shortClipHost = ShortClipHostUtils.hostOf(uri);
+            if (shortClipHost != null) {
+                String clipId = ShortClipHostUtils.clipIdOf(shortClipHost, uri);
+                if (clipId != null) {
+                    post.setPostType(Post.VIDEO_TYPE);
+                    post.setShortClipHost(shortClipHost);
+                    post.setShortClipId(clipId);
+                    post.setVideoUrl(url);
+                    return;
+                }
+            }
+        }
+
+        if (MlbUrlUtils.isMlbClip(uri)) {
+            // Already a direct MP4, so there is nothing to resolve. This arm exists because Reddit
+            // generates no preview for these links, and the generic .mp4 promotion above only runs
+            // on the branch for posts that have one -- so r/baseball highlights arrived as link
+            // cards.
+            post.setPostType(Post.VIDEO_TYPE);
+            post.setIsMlbClip(true);
+            post.setVideoUrl(url);
+            post.setVideoDownloadUrl(url);
+        }
     }
 
     // Package-private so FetchRemovedPost can rebuild a recovered redgifs post the same way a live

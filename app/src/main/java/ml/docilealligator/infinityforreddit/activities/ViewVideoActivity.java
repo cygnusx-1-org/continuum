@@ -150,8 +150,18 @@ public class ViewVideoActivity extends AppCompatActivity
     public static final String EXTRA_REDGIFS_ID = "EGI";
     public static final String EXTRA_V_REDD_IT_URL = "EVRIU";
     public static final String EXTRA_STREAMABLE_SHORT_CODE = "ESSC";
+    public static final String EXTRA_SHORT_CLIP_HOST = "ESCH";
+    public static final String EXTRA_SHORT_CLIP_ID = "ESCI";
+    // The share page the clip was linked from. Carried separately because a link opened from
+    // outside the feed -- pasted, shared in, tapped in a comment -- has no Post to read it off, and
+    // the resolver needs it: it picks dubz's CDN from the URL shape and reads streamin's and
+    // dropr's share page when the derived candidates miss.
+    public static final String EXTRA_SHORT_CLIP_PAGE_URL = "ESCPU";
     public static final String EXTRA_IS_NSFW = "EIN";
     public static final String EXTRA_VIDEO_TYPE = "EVT";
+    // Only VIDEO_TYPE_NORMAL and VIDEO_TYPE_MARKDOWN_PARSED play HLS; every other value takes the
+    // ProgressiveMediaSource branch, which is what a single-file MP4 needs.
+    public static final int VIDEO_TYPE_SHORT_CLIP = 9;
     public static final int VIDEO_TYPE_MARKDOWN_PARSED = 8;
     public static final int VIDEO_TYPE_IMGUR = 7;
     public static final int VIDEO_TYPE_STREAMABLE = 5;
@@ -245,6 +255,9 @@ public class ViewVideoActivity extends AppCompatActivity
     @Inject
     @Named("media3")
     OkHttpClient mOkHttpClient;
+    @Inject
+    @Named("short_clip")
+    OkHttpClient mShortClipOkHttpClient;
 
     @Inject
     @Named("no_oauth")
@@ -458,9 +471,13 @@ public class ViewVideoActivity extends AppCompatActivity
                         intent.getStringExtra(EXTRA_REDGIFS_ID),
                         intent.getStringExtra(EXTRA_V_REDD_IT_URL),
                         intent.getStringExtra(EXTRA_STREAMABLE_SHORT_CODE),
+                        intent.getStringExtra(EXTRA_SHORT_CLIP_HOST),
+                        intent.getStringExtra(EXTRA_SHORT_CLIP_ID),
+                        post != null ? post.getUrl() : intent.getStringExtra(EXTRA_SHORT_CLIP_PAGE_URL),
                         isDataSavingMode, SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360"),
                         SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0"),
                         SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDGIFS_VIDEO_DEFAULT_RESOLUTION, "480"),
+                        SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.MLB_VIDEO_DEFAULT_BITRATE, "4000"),
                         SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100")
                 )
         ).get(ViewVideoViewModel.class);
@@ -938,7 +955,7 @@ public class ViewVideoActivity extends AppCompatActivity
                 binding.getLoadingIndicator().setVisibility(View.VISIBLE);
 
                 viewVideoViewModel.loadVideoLink(mRetrofit, mVReddItRetrofit, mRedgifsRetrofit,
-                        mStreamableApiProvider, mCurrentAccountSharedPreferences);
+                        mStreamableApiProvider, mShortClipOkHttpClient, mCurrentAccountSharedPreferences);
             } else {
                 binding.getLoadingIndicator().setVisibility(View.GONE);
                 if (viewVideoViewModel.getVideoType() == VIDEO_TYPE_NORMAL || viewVideoViewModel.getVideoType() == VIDEO_TYPE_MARKDOWN_PARSED) {

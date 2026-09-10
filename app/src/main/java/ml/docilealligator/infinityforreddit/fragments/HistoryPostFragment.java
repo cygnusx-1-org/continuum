@@ -69,6 +69,7 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
+import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import retrofit2.Retrofit;
@@ -105,6 +106,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     Retrofit mRedgifsRetrofit;
     @Inject
     Provider<StreamableAPI> mStreamableApiProvider;
+    @Inject
+    @Named("short_clip")
+    OkHttpClient mShortClipOkHttpClient;
     @Inject
     @Named("current_account")
     SharedPreferences mCurrentAccountSharedPreferences;
@@ -250,7 +254,8 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.HISTORY_POST_LAYOUT_READ_POST, defaultPostLayout);
 
         mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
-                mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mCustomThemeWrapper, locale,
+                mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                mCustomThemeWrapper, locale,
                 mActivity.accessToken, mActivity.accountName, PostType.READ_POSTS, postLayout, true,
                 mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences,
                 null, mExoCreator, new PostRecyclerViewAdapter.Callback() {

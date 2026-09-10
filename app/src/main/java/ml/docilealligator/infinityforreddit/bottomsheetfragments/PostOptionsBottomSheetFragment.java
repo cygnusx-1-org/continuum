@@ -617,7 +617,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
         Toast.makeText(mBaseActivity, R.string.download_started, Toast.LENGTH_SHORT).show();
         if (mPost.getPostType() == Post.VIDEO_TYPE) {
-            if (!mPost.isRedgifs() && !mPost.isStreamable() && !mPost.isImgur()) {
+            if (mPost.isNormalVideo()) {
                 PersistableBundle extras = new PersistableBundle();
                 extras.putString(DownloadRedditVideoService.EXTRA_VIDEO_URL, mPost.getVideoDownloadUrl());
                 extras.putString(DownloadRedditVideoService.EXTRA_POST_ID, mPost.getId());

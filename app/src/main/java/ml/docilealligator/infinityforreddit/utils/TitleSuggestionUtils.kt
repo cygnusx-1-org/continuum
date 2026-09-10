@@ -3,13 +3,10 @@ package ml.docilealligator.infinityforreddit.utils
 import androidx.core.text.HtmlCompat
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.MediaType
 import okhttp3.ResponseBody
-import okio.Buffer
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.nio.charset.Charset
 
 /**
  * Resolves the title to suggest for a link post.
@@ -41,17 +38,6 @@ object TitleSuggestionUtils {
 
     /** `/embed/videoseries?list=…` addresses a playlist rather than a video with this id. */
     private const val EMBED_PLAYLIST_ID = "videoseries"
-
-    /**
-     * The link field accepts any URL, including direct links to videos and disk images, so the body
-     * is never read whole. The deepest `<title>` seen on a real page is ~636 KB in (the desktop
-     * youtube.com watch page), which this comfortably clears.
-     */
-    private const val MAX_BODY_BYTES = 1L * 1024 * 1024
-
-    private const val CHARSET_SNIFF_BYTES = 4096
-
-    private val META_CHARSET = Regex("charset\\s*=\\s*[\"']?([A-Za-z0-9_:.+-]+)", RegexOption.IGNORE_CASE)
 
     /** The attribute list must start on whitespace, otherwise `<titlecase>` would match too. */
     private val TITLE_OPEN = Regex("<title(?:\\s[^>]*)?>", RegexOption.IGNORE_CASE)
@@ -150,72 +136,23 @@ object TitleSuggestionUtils {
 
     /**
      * Consumes and closes [body], returning the suggested title or null. Blocks on the network, so
-     * it must not run on the main thread. At most [MAX_BODY_BYTES] are read, and a body that is not
-     * markup is rejected before any of it is downloaded.
+     * it must not run on the main thread. At most [HtmlBodyUtils.MAX_BODY_BYTES] are read, and a
+     * body that is not markup is rejected before any of it is downloaded.
      */
     @JvmStatic
     fun readTitle(body: ResponseBody, oEmbed: Boolean): String? {
         body.use {
-            if (!oEmbed && !isMarkup(it.contentType())) {
+            if (!oEmbed && !HtmlBodyUtils.isMarkup(it.contentType())) {
                 return null
             }
 
             val text = try {
-                readBoundedText(it)
+                HtmlBodyUtils.readBoundedText(it)
             } catch (e: IOException) {
                 return null
             }
 
             return if (oEmbed) parseOEmbedTitle(text) else parseHtmlTitle(text)
-        }
-    }
-
-    /**
-     * A missing Content-Type is given the benefit of the doubt; `video/mp4` is not. The `+xml`
-     * family covers RSS and Atom feeds (e.g. Reddit's `application/atom+xml` .rss endpoints), which
-     * carry a `<title>` the old unconditional scraper picked up.
-     */
-    private fun isMarkup(contentType: MediaType?): Boolean {
-        if (contentType == null) {
-            return true
-        }
-        val subtype = contentType.subtype.lowercase()
-        return contentType.type.lowercase() == "text" ||
-            subtype == "html" || subtype == "xml" || subtype.endsWith("+xml")
-    }
-
-    @Throws(IOException::class)
-    private fun readBoundedText(body: ResponseBody): String {
-        val source = body.source()
-        val buffer = Buffer()
-        var read = 0L
-        while (read < MAX_BODY_BYTES) {
-            val count = source.read(buffer, MAX_BODY_BYTES - read)
-            if (count == -1L) {
-                break
-            }
-            read += count
-        }
-
-        val bytes = buffer.readByteArray()
-        return String(bytes, charsetOf(body.contentType(), bytes))
-    }
-
-    /**
-     * Prefers the charset from the Content-Type header, then a `<meta charset>` declaration near the
-     * top of the document. Without the sniff, pages that only declare their encoding in markup —
-     * still common on older Shift_JIS and ISO-8859-1 sites — decode to mojibake.
-     */
-    private fun charsetOf(contentType: MediaType?, bytes: ByteArray): Charset {
-        contentType?.charset()?.let { return it }
-
-        val head = String(bytes, 0, minOf(bytes.size, CHARSET_SNIFF_BYTES), Charsets.ISO_8859_1)
-        val name = META_CHARSET.find(head)?.groupValues?.get(1) ?: return Charsets.UTF_8
-
-        return try {
-            if (Charset.isSupported(name)) Charset.forName(name) else Charsets.UTF_8
-        } catch (e: IllegalArgumentException) {
-            Charsets.UTF_8
         }
     }
 

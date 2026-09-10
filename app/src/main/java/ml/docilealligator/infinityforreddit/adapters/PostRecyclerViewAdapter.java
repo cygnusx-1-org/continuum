@@ -121,6 +121,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostWithPreviewBindi
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
+import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -134,6 +135,7 @@ import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
@@ -145,6 +147,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
+import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
 import pl.droidsonroids.gif.GifImageView;
 import retrofit2.Call;
@@ -201,6 +204,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private Executor mExecutor;
     private Retrofit mOauthRetrofit;
     private Provider<StreamableAPI> mStreamableApiProvider;
+    private OkHttpClient mShortClipOkHttpClient;
     @Nullable
     private String mAccessToken;
     private String mAccountName;
@@ -311,6 +315,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public PostRecyclerViewAdapter(BaseActivity activity, PostFragmentBase fragment, RedditDataRoomDatabase redditDataRoomDatabase,
                                 Executor executor, Retrofit oauthRetrofit,
                                 Retrofit redgifsRetrofit, Provider<StreamableAPI> streamableApiProvider,
+                                OkHttpClient shortClipOkHttpClient,
                                 CustomThemeWrapper customThemeWrapper, Locale locale,
                                 @Nullable String accessToken, @NonNull String accountName, int postType,
                                 int postLayout, boolean displaySubredditName,
@@ -327,6 +332,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mExecutor = executor;
             mOauthRetrofit = oauthRetrofit;
             mStreamableApiProvider = streamableApiProvider;
+            mShortClipOkHttpClient = shortClipOkHttpClient;
             mAccessToken = accessToken;
             mAccountName = accountName;
             mPostType = postType;
@@ -1097,6 +1103,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     if (!mFixedHeightPreviewInCard && preview != null) {
                         toroPlayer.previewFrameLayout.setSquarePreview(false);
                         toroPlayer.aspectRatioFrameLayout.setAspectRatio((float) preview.getPreviewWidth() / preview.getPreviewHeight());
+                        // Restated because a recycled holder may carry the centred scale type the
+                        // placeholder below sets, which would crop a real preview.
+                        toroPlayer.previewImageView.setScaleType(ImageView.ScaleType.FIT_START);
                         mGlide.load(preview.getPreviewUrl()).centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(toroPlayer.previewImageView);
                     } else {
                         // The square is the wrapper's to impose, so that it can bound the height;
@@ -1104,6 +1113,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         toroPlayer.aspectRatioFrameLayout.setAspectRatio(0);
                         toroPlayer.previewFrameLayout.setMaxHeight(getMaxPreviewHeight());
                         toroPlayer.previewFrameLayout.setSquarePreview(true);
+                        if (preview == null) {
+                            showNoPreviewPlaceholder(toroPlayer.previewImageView);
+                        }
                     }
                     if (!((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.isManuallyPaused) {
                         if (mFragment.getMasterMutingOption() == null) {
@@ -1383,14 +1395,20 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 if (((post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE) || textPostWithPreview)
                         && !(mDataSavingMode && mDisableImagePreview)) {
                     ((PostCompactBaseViewHolder) holder).relativeLayout.setVisibility(View.VISIBLE);
-                    if (post.getPostType() == Post.GALLERY_TYPE && post.getPreviews() != null && post.getPreviews().isEmpty()) {
-                        ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.VISIBLE);
-                        ((PostCompactBaseViewHolder) holder).noPreviewPostImageView.setImageResource(R.drawable.ic_gallery_day_night_24dp);
-                    }
                     if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
                         ((PostCompactBaseViewHolder) holder).imageView.setVisibility(View.VISIBLE);
                         ((PostCompactBaseViewHolder) holder).loadingIndicator.setVisibility(View.VISIBLE);
                         loadImage(holder);
+                    } else {
+                        // Nothing to load. The indicator only ever goes away in loadImage's
+                        // success and failure callbacks, which never run when there is no image, so
+                        // a recycled holder that still carries a previous post's spinner would sit
+                        // here spinning forever. Reddit generates no preview at all for some posts,
+                        // such as the direct MP4 links r/baseball posts its highlights as.
+                        ((PostCompactBaseViewHolder) holder).loadingIndicator.setVisibility(View.GONE);
+                        ((PostCompactBaseViewHolder) holder).noPreviewPostImageFrameLayout.setVisibility(View.VISIBLE);
+                        ((PostCompactBaseViewHolder) holder).noPreviewPostImageView.setImageResource(
+                                noPreviewIconFor(post.getPostType()));
                     }
                 }
 
@@ -1764,6 +1782,42 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * screenfuls. Deriving the ceiling from the viewport instead of the width keeps a post's header
      * and the top of the next post on screen at any column count and any orientation.
      */
+    /**
+     * Draws the standing "video, no preview" glyph where the still would go.
+     *
+     * <p>Reddit does not generate a preview for every video post -- MLB highlights on r/baseball
+     * are posted as direct MP4 links and have none -- and the autoplay card makes its preview view
+     * visible whether or not there is anything to put in it. Left empty it is a black rectangle
+     * with the player's buffering spinner turning on top of it, which reads as a card stuck
+     * loading. This is the same placeholder the no-preview link and gallery cards already use.
+     */
+    private void showNoPreviewPlaceholder(ImageView previewImageView) {
+        mGlide.clear(previewImageView);
+        previewImageView.setScaleType(ImageView.ScaleType.CENTER);
+        previewImageView.setImageResource(R.drawable.ic_video_day_night_24dp);
+    }
+
+    /**
+     * The glyph a card shows where a preview would go when the post has none.
+     *
+     * <p>Mirrors what the compact and card layouts already draw for a post whose preview is
+     * suppressed by data saving, so a post with no preview and one with a hidden preview look the
+     * same rather than each having its own empty state.
+     */
+    private int noPreviewIconFor(int postType) {
+        switch (postType) {
+            case Post.VIDEO_TYPE:
+                return R.drawable.ic_video_day_night_24dp;
+            case Post.IMAGE_TYPE:
+            case Post.GIF_TYPE:
+                return R.drawable.ic_image_day_night_24dp;
+            case Post.GALLERY_TYPE:
+                return R.drawable.ic_gallery_day_night_24dp;
+            default:
+                return R.drawable.ic_link_day_night_24dp;
+        }
+    }
+
     private int getMaxPreviewHeight() {
         return mActivity.getResources().getDisplayMetrics().heightPixels / 2;
     }
@@ -2258,6 +2312,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.fetchRedgifsOrStreamableVideoCall.cancel();
                         ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.fetchRedgifsOrStreamableVideoCall = null;
                     }
+                    if (((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.fetchShortClipVideoCancellable != null) {
+                        ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.fetchShortClipVideoCancellable.cancel();
+                        ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.fetchShortClipVideoCancellable = null;
+                    }
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.errorLoadingRedgifsImageView.setVisibility(View.GONE);
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.videoQualityButton.setVisibility(View.GONE);
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.muteButton.setVisibility(View.GONE);
@@ -2468,6 +2526,24 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         intent.setData(Uri.parse(post.getVideoUrl()));
                         intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, post.getVideoDownloadUrl());
                     }
+                } else if (post.isShortClip()) {
+                    ShortClipHostUtils.Host shortClipHost = post.getShortClipHost();
+                    intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_SHORT_CLIP);
+                    intent.putExtra(ViewVideoActivity.EXTRA_SHORT_CLIP_HOST, shortClipHost == null ? null : shortClipHost.name());
+                    intent.putExtra(ViewVideoActivity.EXTRA_SHORT_CLIP_ID, post.getShortClipId());
+                    // Without a data URI the player resolves for itself; with one it reuses what
+                    // the feed already resolved and skips a second round trip.
+                    if (post.isLoadedStreamableVideoAlready()) {
+                        intent.setData(Uri.parse(post.getVideoUrl()));
+                        intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, post.getVideoDownloadUrl());
+                    }
+                } else if (post.isMlbClip()) {
+                    // A direct single-file MP4. Without this it would fall into the branch below,
+                    // which means VIDEO_TYPE_NORMAL, and the player builds an HlsMediaSource for
+                    // that -- an HLS parser handed an MP4. Tumblr needed the same override.
+                    intent.setData(Uri.parse(post.getVideoUrl()));
+                    intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_DIRECT);
+                    intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_DOWNLOAD_URL, post.getVideoDownloadUrl());
                 } else {
                     intent.setData(Uri.parse(post.getVideoUrl()));
                     intent.putExtra(ViewVideoActivity.EXTRA_SUBREDDIT, post.getSubredditName());
@@ -3228,6 +3304,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         private float volume;
         @Nullable
         public Call<String> fetchRedgifsOrStreamableVideoCall;
+        @Nullable
+        public FetchShortClipVideo.Cancellable fetchShortClipVideoCancellable;
         private boolean isManuallyPaused;
         private Drawable playDrawable;
         private Drawable pauseDrawable;
@@ -3397,7 +3475,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     post.setVideoUrl(media.url);
                                     post.setLoadedStreamableVideoAlready(true);
                                     if (post == getPost()) {
-                                        bindVideoUri(Uri.parse(post.getVideoUrl()));
+                                        rebindResolvedVideo();
                                     }
                                 }
 
@@ -3410,8 +3488,73 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 }
                             });
                 }
+            } else if (post.isShortClip() && !post.isLoadedStreamableVideoAlready()) {
+                ShortClipHostUtils.Host shortClipHost = post.getShortClipHost();
+                String shortClipId = post.getShortClipId();
+                if (shortClipHost != null && shortClipId != null) {
+                    fetchShortClipVideoCancellable = new FetchShortClipVideo.Cancellable();
+                    FetchShortClipVideo.fetchShortClipVideoInRecyclerViewAdapter(mExecutor, new Handler(),
+                            mShortClipOkHttpClient, shortClipHost, shortClipId, post.getUrl(),
+                            fetchShortClipVideoCancellable,
+                            new FetchVideoLinkListener() {
+                                @SuppressWarnings("ReferenceEquality") // Same holder-identity check as above.
+                                @Override
+                                public void onFetchShortClipVideoLinkSuccess(String videoUrl) {
+                                    post.setVideoDownloadUrl(videoUrl);
+                                    post.setVideoUrl(videoUrl);
+                                    post.setLoadedStreamableVideoAlready(true);
+                                    if (post == getPost()) {
+                                        rebindResolvedVideo();
+                                    }
+                                }
+
+                                @SuppressWarnings("ReferenceEquality") // Same holder-identity check as above.
+                                @Override
+                                public void failed(@Nullable Integer messageRes) {
+                                    if (post == getPost()) {
+                                        demoteToLinkPost(post);
+                                    }
+                                }
+                            });
+                }
             } else {
                 bindVideoUri(Uri.parse(post.getVideoUrl()));
+            }
+        }
+
+        /**
+         * Rebinds the row now that its video URL is known.
+         *
+         * <p>Rebinding rather than writing the URI onto the holder the fetch was dispatched from,
+         * which may since have been recycled or rebound. A rebind runs the same branch that serves
+         * a post whose URL was already known, so a resolved clip and a cached one take one code
+         * path, and Toro starts playback the way it does for every other row. It also matches the
+         * failure path, which rebinds to swap in the link card.
+         */
+        void rebindResolvedVideo() {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                notifyItemChanged(position);
+            }
+        }
+
+        /**
+         * Renders {@code post} as the link card it was parsed from, after its video could not
+         * be resolved.
+         *
+         * <p>Runs from a fetch callback, which is a later main-loop turn than the bind that started
+         * it -- notifyItemChanged during a layout pass throws. getItemViewType reads the post type
+         * live, so re-binding is all it takes to swap in the link holder.
+         *
+         * <p>The feed is a paging adapter, so this lasts until the next PagingData submission and
+         * then has to happen again. That is the right trade: making it durable would mean writing a
+         * host's outage into the post cache.
+         */
+        void demoteToLinkPost(Post post) {
+            post.demoteToLinkPost();
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                notifyItemChanged(position);
             }
         }
 

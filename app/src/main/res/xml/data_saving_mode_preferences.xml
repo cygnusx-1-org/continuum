@@ -41,4 +41,12 @@
         app:entryValues="@array/settings_redgifs_video_default_resolution_values"
         app:useSimpleSummaryProvider="true" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="4000"
+        app:key="mlb_video_default_bitrate"
+        android:title="@string/settings_mlb_video_default_bitrate"
+        app:entries="@array/settings_mlb_video_default_bitrate"
+        app:entryValues="@array/settings_mlb_video_default_bitrate_values"
+        app:useSimpleSummaryProvider="true" />
+
 </PreferenceScreen>

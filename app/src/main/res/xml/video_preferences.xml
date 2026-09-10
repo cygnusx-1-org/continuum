@@ -27,6 +27,12 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
+        app:key="play_short_clip_hosts_inline"
+        app:title="@string/settings_play_short_clip_hosts_inline_title"
+        app:summary="@string/settings_play_short_clip_hosts_inline_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
         app:key="loop_video"
         app:title="@string/settings_loop_video_title"
         app:summary="@string/settings_loop_video_summary" />

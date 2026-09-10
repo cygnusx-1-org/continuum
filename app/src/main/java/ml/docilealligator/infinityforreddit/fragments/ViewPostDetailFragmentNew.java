@@ -114,6 +114,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailFragmentViewModelNew;
+import okhttp3.OkHttpClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.jetbrains.annotations.NotNull;
@@ -150,6 +151,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     Retrofit mArcticShiftRetrofit;
     @Inject
     Provider<StreamableAPI> mStreamableApiProvider;
+    @Inject
+    @Named("short_clip")
+    OkHttpClient mShortClipOkHttpClient;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -549,7 +553,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
         mPostAdapter = new PostDetailRecyclerViewAdapterNew(mActivity,
                 this, mExecutor, mCustomThemeWrapper, mOauthRetrofit, mRetrofit,
-                mRedgifsRetrofit, mStreamableApiProvider, mRedditDataRoomDatabase, mGlide,
+                mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                mRedditDataRoomDatabase, mGlide,
                 mVideoMuteManager, mSeparatePostAndComments, mActivity.accessToken,
                 mActivity.accountName, mPost, locale, mSharedPreferences, mCurrentAccountSharedPreferences,
                 mNsfwAndSpoilerSharedPreferences, mPostDetailsSharedPreferences,

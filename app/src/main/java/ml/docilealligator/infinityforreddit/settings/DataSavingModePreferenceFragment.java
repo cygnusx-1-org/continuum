@@ -23,6 +23,7 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
         SwitchPreference onlyDisablePreviewInVideoAndGifPostsPreference = findPreference(SharedPreferencesUtils.ONLY_DISABLE_PREVIEW_IN_VIDEO_AND_GIF_POSTS);
         ListPreference redditVideoDefaultResolutionListPreference = findPreference(SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION);
         ListPreference redgifsVideoDefaultResolutionListPreference = findPreference(SharedPreferencesUtils.REDGIFS_VIDEO_DEFAULT_RESOLUTION);
+        ListPreference mlbVideoDefaultBitrateListPreference = findPreference(SharedPreferencesUtils.MLB_VIDEO_DEFAULT_BITRATE);
 
         if (dataSavingModeListPreference != null) {
             if (dataSavingModeListPreference.getValue().equals("0")) {
@@ -37,6 +38,9 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
                 }
                 if (redgifsVideoDefaultResolutionListPreference != null) {
                     redgifsVideoDefaultResolutionListPreference.setVisible(false);
+                }
+                if (mlbVideoDefaultBitrateListPreference != null) {
+                    mlbVideoDefaultBitrateListPreference.setVisible(false);
                 }
             }
             dataSavingModeListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -54,6 +58,9 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
                     if (redgifsVideoDefaultResolutionListPreference != null) {
                         redgifsVideoDefaultResolutionListPreference.setVisible(false);
                     }
+                    if (mlbVideoDefaultBitrateListPreference != null) {
+                        mlbVideoDefaultBitrateListPreference.setVisible(false);
+                    }
                 } else {
                     if (onlyDisablePreviewInVideoAndGifPostsPreference != null) {
                         onlyDisablePreviewInVideoAndGifPostsPreference.setVisible(true);
@@ -66,6 +73,9 @@ public class DataSavingModePreferenceFragment extends CustomFontPreferenceFragme
                     }
                     if (redgifsVideoDefaultResolutionListPreference != null) {
                         redgifsVideoDefaultResolutionListPreference.setVisible(true);
+                    }
+                    if (mlbVideoDefaultBitrateListPreference != null) {
+                        mlbVideoDefaultBitrateListPreference.setVisible(true);
                     }
                 }
                 return true;

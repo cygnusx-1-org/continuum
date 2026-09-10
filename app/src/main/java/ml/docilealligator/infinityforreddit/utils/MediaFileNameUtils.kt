@@ -170,8 +170,9 @@ object MediaFileNameUtils {
             }
             Post.VIDEO_TYPE -> {
                 mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO
-                // Streamable/Redgifs URLs are fetched later, so fall back to the media-type extension.
-                if (!post.isStreamable) {
+                // Streamable, Redgifs and short-clip URLs are fetched later, so fall back to the
+                // media-type extension.
+                if (!post.isStreamable && !post.isShortClip) {
                     url = post.videoUrl ?: ""
                 }
             }

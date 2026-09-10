@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 
 /**
  * Created by alex on 3/1/18.
@@ -59,10 +60,16 @@ public class Post implements Parcelable {
     private String redgifsId;
     @Nullable
     private String streamableShortCode;
+    /** A {@link ShortClipHostUtils.Host} name, or null when the post is not on a clip host. */
+    @Nullable
+    private String shortClipHost;
+    @Nullable
+    private String shortClipId;
     private boolean isImgur;
     private boolean isRedgifs;
     private boolean isStreamable;
     private boolean isTumblr;
+    private boolean isMlbClip;
     private boolean loadedStreamableVideoAlready;
     private final String permalink;
     private String flair;
@@ -227,11 +234,16 @@ public class Post implements Parcelable {
         this.videoUrl = postToBeCopied.videoUrl;
         this.videoDownloadUrl = postToBeCopied.videoDownloadUrl;
         this.videoFallBackDirectUrl = postToBeCopied.videoFallBackDirectUrl;
+        this.thumbnailUrl = postToBeCopied.thumbnailUrl;
         this.redgifsId = postToBeCopied.redgifsId;
         this.streamableShortCode = postToBeCopied.streamableShortCode;
+        this.shortClipHost = postToBeCopied.shortClipHost;
+        this.shortClipId = postToBeCopied.shortClipId;
         this.isImgur = postToBeCopied.isImgur;
         this.isRedgifs = postToBeCopied.isRedgifs;
         this.isStreamable = postToBeCopied.isStreamable;
+        this.isTumblr = postToBeCopied.isTumblr;
+        this.isMlbClip = postToBeCopied.isMlbClip;
         this.loadedStreamableVideoAlready = postToBeCopied.loadedStreamableVideoAlready;
         this.permalink = postToBeCopied.permalink;
         this.flair = postToBeCopied.flair;
@@ -292,10 +304,13 @@ public class Post implements Parcelable {
         thumbnailUrl = in.readString();
         redgifsId = in.readString();
         streamableShortCode = in.readString();
+        shortClipHost = in.readString();
+        shortClipId = in.readString();
         isImgur = in.readByte() != 0;
         isRedgifs = in.readByte() != 0;
         isStreamable = in.readByte() != 0;
         isTumblr = in.readByte() != 0;
+        isMlbClip = in.readByte() != 0;
         loadedStreamableVideoAlready = in.readByte() != 0;
         permalink = Objects.requireNonNull(in.readString());
         flair = Objects.requireNonNull(in.readString());
@@ -538,6 +553,43 @@ public class Post implements Parcelable {
         this.streamableShortCode = shortCode;
     }
 
+    /**
+     * The {@link ShortClipHostUtils.Host} this post's link belongs to, by name, or null when it is
+     * not on one of those hosts.
+     *
+     * <p>Stored as a name rather than an ordinal so a reordered enum cannot silently re-point a
+     * parcelled post at the wrong host.
+     */
+    @Nullable
+    public ShortClipHostUtils.Host getShortClipHost() {
+        if (shortClipHost == null) {
+            return null;
+        }
+        try {
+            return ShortClipHostUtils.Host.valueOf(shortClipHost);
+        } catch (IllegalArgumentException e) {
+            // A host dropped from the enum after a post was cached. Renders as a link card.
+            return null;
+        }
+    }
+
+    public void setShortClipHost(@Nullable ShortClipHostUtils.Host host) {
+        this.shortClipHost = host == null ? null : host.name();
+    }
+
+    public boolean isShortClip() {
+        return shortClipHost != null;
+    }
+
+    @Nullable
+    public String getShortClipId() {
+        return shortClipId;
+    }
+
+    public void setShortClipId(@Nullable String shortClipId) {
+        this.shortClipId = shortClipId;
+    }
+
     public void setIsImgur(boolean isImgur) {
         this.isImgur = isImgur;
     }
@@ -570,8 +622,51 @@ public class Post implements Parcelable {
         this.isTumblr = isTumblr;
     }
 
+    /**
+     * Whether this post plays an MLB highlight, which is a direct single-file MP4 rather than
+     * anything Reddit hosts.
+     *
+     * <p>Recorded at parse time rather than re-derived from the URL because three separate
+     * decisions read it -- the quality selector, which download service handles it, and which
+     * media source the fullscreen player builds -- and every one of them would otherwise treat
+     * these as Reddit video and get it wrong.
+     */
+    public boolean isMlbClip() {
+        return isMlbClip;
+    }
+
+    public void setIsMlbClip(boolean isMlbClip) {
+        this.isMlbClip = isMlbClip;
+    }
+
+    /**
+     * Whether this is a Reddit-hosted video, the only kind that carries an HLS track ladder.
+     *
+     * <p>Everything excluded here plays a progressive MP4 with a single video track, so offering
+     * the quality selector for one would show a dialog that cannot change anything.
+     */
     public boolean isNormalVideo() {
-        return postType == Post.VIDEO_TYPE && !isImgur && !isRedgifs && !isStreamable;
+        return postType == Post.VIDEO_TYPE && !isImgur && !isRedgifs && !isStreamable && !isShortClip()
+                && !isMlbClip;
+    }
+
+    /**
+     * Turns this back into the link post it was parsed from, after the media it was promoted for
+     * turned out to be unreachable.
+     *
+     * <p>Clip hosts purge aggressively and rotate CDNs without notice, so a dead clip is ordinary
+     * rather than exceptional. Post type is mutable data, so the row can fall back to exactly the
+     * link card the app showed before inline playback existed instead of a permanently empty
+     * player. The URL is untouched, so tapping the card still opens the clip page.
+     *
+     * <p>Which of the two link types depends on whether Reddit gave the post a preview, matching
+     * how {@code ParsePost} chose in the first place: the plain link holder leaves an empty image
+     * slot when there is nothing to put in it.
+     */
+    public void demoteToLinkPost() {
+        setShortClipHost(null);
+        setShortClipId(null);
+        setPostType(previews.isEmpty() ? NO_PREVIEW_LINK_TYPE : LINK_TYPE);
     }
 
     public boolean isLoadedStreamableVideoAlready() {
@@ -719,10 +814,13 @@ public class Post implements Parcelable {
         dest.writeString(thumbnailUrl);
         dest.writeString(redgifsId);
         dest.writeString(streamableShortCode);
+        dest.writeString(shortClipHost);
+        dest.writeString(shortClipId);
         dest.writeByte((byte) (isImgur ? 1 : 0));
         dest.writeByte((byte) (isRedgifs ? 1 : 0));
         dest.writeByte((byte) (isStreamable ? 1 : 0));
         dest.writeByte((byte) (isTumblr ? 1 : 0));
+        dest.writeByte((byte) (isMlbClip ? 1 : 0));
         dest.writeByte((byte) (loadedStreamableVideoAlready ? 1 : 0));
         dest.writeString(permalink);
         dest.writeString(flair);

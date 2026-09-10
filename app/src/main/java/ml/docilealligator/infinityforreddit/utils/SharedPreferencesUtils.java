@@ -129,6 +129,7 @@ public class SharedPreferencesUtils {
     public static final String SPECIFIC_BROWSER_PACKAGE = "specific_browser_package";
     public static final String SPECIFIC_BROWSER_PACKAGE_BASE = "_specific_browser_package";
     public static final String USE_OLD_REDDIT_DOMAIN = "use_old_reddit_domain";
+    public static final String PLAY_SHORT_CLIP_HOSTS_INLINE = "play_short_clip_hosts_inline";
     public static final String VIDEO_AUTOPLAY = "video_autoplay";
     public static final String VIDEO_AUTOPLAY_VALUE_ALWAYS_ON = "2";
     public static final String VIDEO_AUTOPLAY_VALUE_ON_WIFI = "1";
@@ -259,6 +260,7 @@ public class SharedPreferencesUtils {
     public static final String POST_FEED_MAX_RESOLUTION = "post_feed_max_resolution";
     public static final String REDDIT_VIDEO_DEFAULT_RESOLUTION = "reddit_video_default_resolution";
     public static final String REDGIFS_VIDEO_DEFAULT_RESOLUTION = "redgifs_video_default_resolution";
+    public static final String MLB_VIDEO_DEFAULT_BITRATE = "mlb_video_default_bitrate";
     public static final String EASIER_TO_WATCH_IN_FULL_SCREEN = "easier_to_watch_in_full_screen";
     public static final String HIDE_THE_NUMBER_OF_VOTES_IN_COMMENTS = "hide_the_number_of_votes_in_comments";
     public static final String COMMENT_DIVIDER_TYPE = "comment_divider_type";

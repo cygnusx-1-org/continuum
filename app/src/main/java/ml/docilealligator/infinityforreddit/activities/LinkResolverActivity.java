@@ -34,6 +34,7 @@ import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -476,6 +477,8 @@ public class LinkResolverActivity extends AppCompatActivity {
 
                     String authority = uri.getAuthority();
                     List<String> segments = uri.getPathSegments();
+                    ShortClipHostUtils.Host shortClipHost =
+                            ShortClipHostUtils.getInlinePlaybackEnabled() ? ShortClipHostUtils.hostOf(uri) : null;
 
                     if (authority != null) {
                         if (authority.equals("sh.reddit.com")) {
@@ -766,6 +769,22 @@ public class LinkResolverActivity extends AppCompatActivity {
                                 Intent intent = new Intent(this, ViewVideoActivity.class);
                                 intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_STREAMABLE);
                                 intent.putExtra(ViewVideoActivity.EXTRA_STREAMABLE_SHORT_CODE, shortCode);
+                                startActivity(intent);
+                            } else {
+                                deepLinkError(uri);
+                            }
+                        } else if (shortClipHost != null) {
+                            // A clip link pasted, shared into the app, or tapped in a comment. The
+                            // player resolves it for itself, exactly as it does from a feed row.
+                            String clipId = ShortClipHostUtils.clipIdOf(shortClipHost, uri);
+                            if (clipId != null) {
+                                Intent intent = new Intent(this, ViewVideoActivity.class);
+                                intent.putExtra(ViewVideoActivity.EXTRA_VIDEO_TYPE, ViewVideoActivity.VIDEO_TYPE_SHORT_CLIP);
+                                intent.putExtra(ViewVideoActivity.EXTRA_SHORT_CLIP_HOST, shortClipHost.name());
+                                intent.putExtra(ViewVideoActivity.EXTRA_SHORT_CLIP_ID, clipId);
+                                // There is no Post here, so this is the only way the resolver
+                                // learns which URL shape and which domain the link used.
+                                intent.putExtra(ViewVideoActivity.EXTRA_SHORT_CLIP_PAGE_URL, uri.toString());
                                 startActivity(intent);
                             } else {
                                 deepLinkError(uri);

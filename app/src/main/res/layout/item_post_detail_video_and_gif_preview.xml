@@ -222,6 +222,13 @@
                 android:adjustViewBounds="true" />
 
             <ImageView
+                android:id="@+id/image_view_no_preview_item_post_detail_video_and_gif_preview"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:scaleType="center"
+                android:visibility="gone" />
+
+            <ImageView
                 android:id="@+id/video_or_gif_indicator_image_view_item_post_detail"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
@@ -242,7 +249,8 @@
                 android:id="@+id/progress_bar_item_post_detail_video_and_gif_preview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true" />
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/load_image_error_text_view_item_post_detail_video_and_gif_preview"

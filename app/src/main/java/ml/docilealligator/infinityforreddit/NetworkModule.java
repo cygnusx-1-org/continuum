@@ -212,6 +212,19 @@ abstract class NetworkModule {
     }
 
     @Provides
+    @Named("short_clip")
+    @Singleton
+    static OkHttpClient provideShortClipOkHttpClient(@Named("base") OkHttpClient httpClient) {
+        // The short-clip resolver reads pages and probes MP4s on five third-party clip hosts. Same
+        // reasoning as provideTitleSuggestionRetrofit below: the bare base client keeps Reddit
+        // credentials off hosts that have no business seeing them, and detaching the event listener
+        // keeps their traffic out of the API monitor's stats.
+        return httpClient.newBuilder()
+                .eventListenerFactory(call -> EventListener.NONE)
+                .build();
+    }
+
+    @Provides
     @Named("title_suggestion")
     @Singleton
     static Retrofit provideTitleSuggestionRetrofit(@Named("base") Retrofit retrofit,

@@ -812,6 +812,8 @@
     <string name="settings_show_only_one_comment_level_indicator">Show Only One Comment Level Indicator</string>
     <string name="settings_video_player_automatic_landscape_orientation">Switch to Landscape Orientation in Video Player Automatically</string>
     <string name="settings_loop_video_title">Loop Video</string>
+    <string name="settings_play_short_clip_hosts_inline_title">Play clip host links inline</string>
+    <string name="settings_play_short_clip_hosts_inline_summary">Play links from streamain, streamin, streamff, dubz and dropr as videos in the feed and in post details, instead of opening them in a browser. Sports subreddits post highlights to these sites. A clip that has been deleted falls back to a link card.</string>
     <string name="settings_loop_video_summary">Restart the app to apply this setting to autoplaying videos</string>
     <string name="settings_remember_mute">Remember Mute</string>
     <string name="settings_post_details_title">Post Details</string>
@@ -855,6 +857,7 @@
     <string name="settings_post_feed_max_resolution_title">Post Feed Preview Max Resolution (Width * Height)</string>
     <string name="settings_reddit_video_default_resolution">Reddit Video Default Resolution</string>
     <string name="settings_redgifs_video_default_resolution">Redgifs Video Default Resolution</string>
+    <string name="settings_mlb_video_default_bitrate">MLB video default bitrate</string>
     <string name="settings_comment_thread_continuity_capacity_title">Comment Thread Continuity Capacity</string>
     <string name="settings_comment_thread_continuity_capacity_summary">%1$s comment thread(s) will be cached for seamless continuity.</string>
     <string name="settings_easier_to_watch_in_full_screen_title">Easier to Watch in Full Screen</string>
@@ -1389,6 +1392,7 @@
     <string name="downloading_media_failed_cannot_save_to_destination_directory">Download failed: cannot save the file to destination directory. Please reselect your preferred download location in Settings->Download Location.</string>
     <string name="download_media_failed_cannot_fetch_redgifs_url">Download failed: cannot fetch Redgifs video url</string>
     <string name="download_media_failed_cannot_fetch_streamable_url">Download failed: cannot fetch Streamable video url</string>
+    <string name="download_media_failed_cannot_fetch_short_clip_url">Download failed: cannot fetch the video URL. The clip may have been deleted.</string>
     <string name="download_media_failed_invalid_argument">Invalid argument</string>
     <string name="download_all_gallery_media_notification_title">All Gallery Media</string>
     <string name="download_all_imgur_album_media_notification_title">All Imgur Album Media</string>

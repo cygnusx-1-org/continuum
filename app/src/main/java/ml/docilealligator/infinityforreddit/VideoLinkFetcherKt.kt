@@ -12,6 +12,7 @@ import ml.docilealligator.infinityforreddit.apis.RedgifsAPI
 import ml.docilealligator.infinityforreddit.apis.RedgifsAPIKt
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt
 import ml.docilealligator.infinityforreddit.apis.VReddItKt
+import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo
@@ -19,6 +20,8 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.APIUtils.RedgifsAuthToken
 import ml.docilealligator.infinityforreddit.utils.JSONUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
+import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils
+import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Retrofit
@@ -30,14 +33,19 @@ import androidx.core.content.edit
 suspend fun fetchVideoLink(
     retrofit: Retrofit, vReddItRetrofit: Retrofit,
     redgifsRetrofit: Retrofit, streamableApiProvider: Provider<StreamableAPIKt>,
+    shortClipOkHttpClient: OkHttpClient,
     currentAccountSharedPreferences: SharedPreferences, videoType: Int,
     redgifsId: String?, vRedditItUrl: String?,
-    shortCode: String?
+    shortCode: String?, shortClipHost: String?, shortClipId: String?, shortClipPageUrl: String?
 ): AppResult<*, *> {
     return when (videoType) {
         ViewVideoActivity.VIDEO_TYPE_STREAMABLE -> fetchStreamableVideo(
             streamableApiProvider,
             shortCode
+        )
+
+        ViewVideoActivity.VIDEO_TYPE_SHORT_CLIP -> fetchShortClipVideo(
+            shortClipOkHttpClient, shortClipHost, shortClipId, shortClipPageUrl
         )
 
         ViewVideoActivity.VIDEO_TYPE_REDGIFS -> fetchRedgifsVideoLinks(
@@ -278,6 +286,36 @@ private suspend fun parseRedgifsVideoLinks(
             AppResult.Error(null)
         }
     }
+}
+
+/**
+ * The MP4 behind a clip-host share page, for the fullscreen player.
+ *
+ * A thin suspend wrapper over [FetchShortClipVideo.fetchShortClipVideoSync], which is where the
+ * per-host recipes and the probing live. Runs on [Dispatchers.IO] because that call blocks on a
+ * short chain of network requests.
+ */
+suspend fun fetchShortClipVideo(
+    okHttpClient: OkHttpClient,
+    hostName: String?,
+    clipId: String?,
+    pageUrl: String?
+): AppResult<String, Int?> {
+    if (hostName == null || clipId == null) {
+        return AppResult.Error(null)
+    }
+
+    val host = try {
+        ShortClipHostUtils.Host.valueOf(hostName)
+    } catch (e: IllegalArgumentException) {
+        return AppResult.Error(null)
+    }
+
+    val videoUrl = withContext(Dispatchers.IO) {
+        FetchShortClipVideo.fetchShortClipVideoSync(okHttpClient, host, clipId, pageUrl)
+    }
+
+    return if (videoUrl == null) AppResult.Error(null) else AppResult.Success(videoUrl)
 }
 
 suspend fun fetchStreamableVideo(

@@ -9,6 +9,7 @@ public interface FetchVideoLinkListener {
     default void onFetchImgurVideoLinkSuccess(@Nullable String videoUrl, @Nullable String videoDownloadUrl, String fileName) {}
     default void onFetchRedgifsVideoLinkSuccess(String webm, String mp4) {}
     default void onFetchStreamableVideoLinkSuccess(StreamableVideo streamableVideo) {}
+    default void onFetchShortClipVideoLinkSuccess(String videoUrl) {}
     default void onChangeFileName(String fileName) {}
     default void onFetchVideoFallbackDirectUrlSuccess(@Nullable String videoFallbackDirectUrl) {}
     default void failed(@Nullable Integer messageRes) {}
