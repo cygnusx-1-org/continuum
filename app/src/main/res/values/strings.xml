@@ -857,7 +857,7 @@
     <string name="settings_post_feed_max_resolution_title">Post Feed Preview Max Resolution (Width * Height)</string>
     <string name="settings_reddit_video_default_resolution">Reddit Video Default Resolution</string>
     <string name="settings_redgifs_video_default_resolution">Redgifs Video Default Resolution</string>
-    <string name="settings_mlb_video_default_bitrate">MLB video default bitrate</string>
+    <string name="settings_mlb_video_default_bitrate">MLB Video Default Bitrate</string>
     <string name="settings_comment_thread_continuity_capacity_title">Comment Thread Continuity Capacity</string>
     <string name="settings_comment_thread_continuity_capacity_summary">%1$s comment thread(s) will be cached for seamless continuity.</string>
     <string name="settings_easier_to_watch_in_full_screen_title">Easier to Watch in Full Screen</string>
