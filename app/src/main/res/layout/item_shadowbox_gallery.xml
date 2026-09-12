@@ -20,6 +20,19 @@
             android:scaleType="fitCenter"
             android:contentDescription="@null" />
 
+        <!-- Shown when an item has no still to load, or its load failed. The row keeps the
+             height the ratio reserved for it either way, so nothing in the list moves. -->
+        <ImageView
+            android:id="@+id/error_image_view_item_shadowbox_gallery"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:padding="12dp"
+            android:src="@drawable/ic_error_outline_white_24dp"
+            android:visibility="gone"
+            android:contentDescription="@string/shadowbox_gallery_item_error"
+            app:tint="@android:color/white" />
+
         <ImageView
             android:id="@+id/play_badge_image_view_item_shadowbox_gallery"
             android:layout_width="72dp"

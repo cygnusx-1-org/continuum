@@ -17,6 +17,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.SimpleCache
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import jp.wasabeef.glide.transformations.BlurTransformation
 import ml.docilealligator.infinityforreddit.Infinity
@@ -119,13 +120,8 @@ abstract class ShadowboxPageFragment : Fragment() {
         super.onCreate(savedInstanceState)
         position = requireArguments().getInt(ARG_POSITION)
         blur = requireArguments().getBoolean(ARG_BLUR, false)
-        maxResolution = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")
-        dataSavingMode = when (sharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF)) {
-            SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS -> true
-            SharedPreferencesUtils.DATA_SAVING_MODE_ONLY_ON_CELLULAR_DATA ->
-                Utils.getConnectedNetwork(requireContext()) == Utils.NETWORK_TYPE_CELLULAR
-            else -> false
-        }
+        maxResolution = ShadowboxPreviews.maxResolution(sharedPreferences)
+        dataSavingMode = ShadowboxPreviews.dataSavingMode(requireContext(), sharedPreferences)
     }
 
     final override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -208,6 +204,7 @@ abstract class ShadowboxPageFragment : Fragment() {
         if (preview != null) {
             glide.load(preview.previewUrl)
                 .apply(RequestOptions.bitmapTransform(BlurTransformation(50, 10)))
+                .transition(DrawableTransitionOptions.withCrossFade(ShadowboxPreviews.CROSS_FADE_MS))
                 .into(binding.blurImageViewShadowboxPageFragment)
         }
         overlay.setOnClickListener {
@@ -226,6 +223,30 @@ abstract class ShadowboxPageFragment : Fragment() {
             left = insets.left, right = insets.right, bottom = insets.bottom
         )
         onInsetsChanged(insets)
+    }
+
+    /**
+     * The app's autoplay rule, the one the feed applies in PostRecyclerViewAdapter: "Video
+     * Autoplay" set to Never, or to Wi-Fi only while on mobile data, means nothing starts by
+     * itself, and "Autoplay NSFW Videos" excludes NSFW posts on top of that.
+     *
+     * Read after [post] is set, which is anywhere from [onCreateMediaView] onwards. A blurred page
+     * needs no rule of its own: it loads no media at all until the overlay is tapped away.
+     */
+    protected fun shouldAutoplay(): Boolean {
+        val setting = sharedPreferences.getString(
+            SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER
+        )
+        val autoplayAllowed = when (setting) {
+            SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON -> true
+            SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI ->
+                Utils.getConnectedNetwork(requireContext()) == Utils.NETWORK_TYPE_WIFI
+            else -> false
+        }
+        if (!autoplayAllowed) {
+            return false
+        }
+        return !post.isNSFW || sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true)
     }
 
     /** Redraws the panel from the post after something outside this page changed it. */

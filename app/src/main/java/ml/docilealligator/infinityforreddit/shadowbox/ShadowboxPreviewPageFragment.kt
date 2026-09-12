@@ -71,7 +71,8 @@ class ShadowboxPreviewPageFragment : ShadowboxPageFragment() {
 
     override fun loadMedia() {
         val preview = ShadowboxPreviews.bestPreview(post, maxResolution, dataSavingMode) ?: return
-        glide.load(preview.previewUrl).into(binding.imageViewShadowboxMediaPreview)
+        ShadowboxPreviews.previewRequest(glide, preview.previewUrl)
+            .into(binding.imageViewShadowboxMediaPreview)
     }
 
     override fun openFullViewer() {

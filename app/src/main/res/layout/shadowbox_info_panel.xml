@@ -28,8 +28,8 @@
 
         <ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView
             android:id="@+id/icon_image_view_shadowbox_info_panel"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/shadowbox_panel_icon_size"
+            android:layout_height="@dimen/shadowbox_panel_icon_size"
             android:contentDescription="@null" />
 
         <LinearLayout

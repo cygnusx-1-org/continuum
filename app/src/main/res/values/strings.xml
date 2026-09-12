@@ -242,6 +242,7 @@
     <string name="shadowbox_more_options">More options</string>
     <string name="shadowbox_mute">Mute</string>
     <string name="shadowbox_play_pause">Play or pause</string>
+    <string name="shadowbox_gallery_item_error">Error loading this gallery item</string>
 
     <string name="write_comment_hint">Your interesting thoughts here</string>
     <string name="comment_content_required">Where is your interesting thought?</string>

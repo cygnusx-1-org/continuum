@@ -32,7 +32,6 @@ import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils
 import ml.docilealligator.infinityforreddit.utils.RedgifsUrlUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
-import ml.docilealligator.infinityforreddit.utils.Utils
 import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer
 
 /**
@@ -75,6 +74,12 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     private var appliedDefaultResolution = false
     private var appliedStereoAudioTrack = false
 
+    /** Whether the player has put a frame on the surface; the preview only goes once it has. */
+    private var firstFrameRendered = false
+
+    /** Whether the preview has been taken down, which happens once and never comes back. */
+    private var posterHidden = false
+
     /** Whether this is the page in front. Nothing plays on any other page. */
     private var pageActive = false
 
@@ -108,28 +113,8 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         binding.playButtonShadowboxMediaVideo.setOnClickListener { togglePlayback() }
     }
 
-    /**
-     * The same rule the feed applies in PostRecyclerViewAdapter: "Video Autoplay" set to Never, or
-     * to Wi-Fi only while on mobile data, means nothing starts by itself, and "Autoplay NSFW
-     * Videos" excludes NSFW posts on top of that.
-     */
-    private fun shouldAutoplay(): Boolean {
-        val setting = sharedPreferences.getString(
-            SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER
-        )
-        val autoplayAllowed = when (setting) {
-            SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON -> true
-            SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI ->
-                Utils.getConnectedNetwork(requireContext()) == Utils.NETWORK_TYPE_WIFI
-            else -> false
-        }
-        if (!autoplayAllowed) {
-            return false
-        }
-        return !post.isNSFW || sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true)
-    }
-
     override fun loadMedia() {
+        showPoster()
         val trackSelector = DefaultTrackSelector(host)
         this.trackSelector = trackSelector
         val player = ExoPlayer.Builder(host)
@@ -180,7 +165,13 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
                 }
             }
 
+            override fun onRenderedFirstFrame() {
+                firstFrameRendered = true
+                hidePosterIfPlaying()
+            }
+
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                hidePosterIfPlaying()
                 if (isPlaying) {
                     host.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 } else {
@@ -201,6 +192,43 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         player.addListener(listener)
         player.prepare()
         applyPlayback()
+    }
+
+    /**
+     * Puts the post's preview over the player.
+     *
+     * It is the still the feed showed, fetched when the page is built -- a page ahead of being
+     * swiped to -- so the page comes up on the picture instead of on the player's black surface.
+     * It stays there until the video is really running: a page sitting behind its play button
+     * shows the preview, not whichever frame the decoder happened to leave on the surface when it
+     * prepared.
+     */
+    private fun showPoster() {
+        val binding = _binding ?: return
+        val preview = ShadowboxPreviews.bestPreview(post, maxResolution, dataSavingMode)
+        if (preview == null) {
+            posterHidden = true
+            binding.previewImageViewShadowboxMediaVideo.visibility = View.GONE
+            return
+        }
+        ShadowboxPreviews.previewRequest(glide, preview.previewUrl)
+            .into(binding.previewImageViewShadowboxMediaVideo)
+    }
+
+    /**
+     * Takes the preview down once the video is both playing and has a frame on the surface, so
+     * the picture never goes from preview to black and back. It fades rather than disappears:
+     * the first frame is drawn one frame after the player reports it, and a fade covers that.
+     */
+    private fun hidePosterIfPlaying() {
+        if (posterHidden || !firstFrameRendered || player?.isPlaying != true) {
+            return
+        }
+        val poster = _binding?.previewImageViewShadowboxMediaVideo ?: return
+        posterHidden = true
+        poster.animate().alpha(0f).setDuration(POSTER_FADE_MS).withEndAction {
+            _binding?.previewImageViewShadowboxMediaVideo?.visibility = View.GONE
+        }.start()
     }
 
     private fun buildMediaSource(source: Uri): MediaSource {
@@ -468,6 +496,7 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         player = null
         trackSelector = null
         playerListener = null
+        _binding?.let { glide.clear(it.previewImageViewShadowboxMediaVideo) }
         // Only if this page was the one playing: the pager destroys off-screen pages while the
         // page in front keeps playing, and clearing the host's flag from one of those would let
         // the screen sleep during playback.
@@ -479,6 +508,7 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     }
 
     companion object {
+        private const val POSTER_FADE_MS = 150L
         private const val ARG_URI = "AU"
         private const val ARG_IS_GIF_MP4 = "AIGM"
 

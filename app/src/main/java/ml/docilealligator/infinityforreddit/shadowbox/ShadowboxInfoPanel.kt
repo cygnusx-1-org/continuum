@@ -4,13 +4,16 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentManager
+import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import ml.docilealligator.infinityforreddit.R
@@ -192,8 +195,7 @@ class ShadowboxInfoPanel(
             loadDefaultSubredditIcon()
             return
         }
-        glide.load(iconUrl)
-            .apply(RequestOptions.bitmapTransform(RoundedCornersTransformation(72, 0)))
+        iconRequest(glide, iconUrl)
             .error(
                 glide.load(R.drawable.subreddit_default_icon)
                     .apply(RequestOptions.bitmapTransform(RoundedCornersTransformation(72, 0)))
@@ -482,5 +484,13 @@ class ShadowboxInfoPanel(
         val post = this.post ?: return
         val sheet = PostOptionsBottomSheetFragment.newInstance(post, position, true)
         sheet.show(fragmentManager, sheet.tag)
+    }
+
+    companion object {
+        /** The one request the panel makes for a subreddit icon. */
+        fun iconRequest(glide: RequestManager, url: String): RequestBuilder<Drawable> =
+            glide.load(url)
+                .apply(RequestOptions.bitmapTransform(RoundedCornersTransformation(72, 0)))
+                .transition(DrawableTransitionOptions.withCrossFade(ShadowboxPreviews.CROSS_FADE_MS))
     }
 }

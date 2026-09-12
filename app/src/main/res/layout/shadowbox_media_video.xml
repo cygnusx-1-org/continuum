@@ -13,6 +13,15 @@
         app:surface_type="texture_view"
         app:resize_mode="fit" />
 
+    <!-- The post's preview, over the player rather than under it: the picture is what a page
+         shows until the video is really running, so nothing appears out of a black surface. -->
+    <ImageView
+        android:id="@+id/preview_image_view_shadowbox_media_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null" />
+
     <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progress_bar_shadowbox_media_video"
         android:layout_width="wrap_content"

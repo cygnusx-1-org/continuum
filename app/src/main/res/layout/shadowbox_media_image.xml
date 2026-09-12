@@ -5,6 +5,16 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
+    <!-- The post's preview under the real image: the feed has already loaded it, so the page
+         comes up on the picture instead of on black, and the full-size image lands on the same
+         rectangle over it. -->
+    <ImageView
+        android:id="@+id/preview_image_view_shadowbox_media_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null" />
+
     <com.google.android.material.loadingindicator.LoadingIndicator
         android:id="@+id/progress_bar_shadowbox_media_image"
         android:layout_width="wrap_content"

@@ -221,6 +221,16 @@ class ShadowboxActivity : BaseActivity() {
         }
         this.adapter = adapter
         binding.viewPager2ShadowboxActivity.adapter = adapter
+        // Build the page either side of the one in front, rather than when the swipe starts.
+        //
+        // This is what stops a page from drawing its picture in place after the swipe has landed.
+        // A pager left at its default builds the next page during the drag, so its images are
+        // fetched with a frame or two to spare, and a gallery -- three full-width tiles, fifteen
+        // megabytes decoded -- cannot be held in Glide's memory cache across two neighbours to
+        // make up for it. A page built early has its pictures in its own views, which no cache
+        // evicts. The cost is that a video page either side prepares its player, the same trade
+        // the feed makes for autoplay.
+        binding.viewPager2ShadowboxActivity.offscreenPageLimit = 1
         launchPosition = launchPosition.coerceIn(0, posts.size - 1)
         val launchPage = adapter.pageForPostIndex(launchPosition)
         // The post the feed was on may itself be filtered out; the page the pager opens on is the
