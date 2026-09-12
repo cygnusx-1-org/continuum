@@ -6,15 +6,15 @@
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
 
-* Updated to upstream version 8.3.1
-* Added "Shadowbox Mode"
-* Fixed "Settings | Video | Autoplay GIFs in Comments"
-* Added inline playback for dropr, dubz, mlb, streamain, streamff, and streamin links
-* Added mlb to the Data Saving default list
+* Updated to `upstream` version `8.3.1`
+* Added `Shadowbox Mode`
+* Fixed `Settings | Video | Autoplay GIFs in Comments`
+* Added inline playback for `dropr`, `dubz`, `mlb`, `streamain`, `streamff`, and `streamin` links
+* Added `mlb` to the `Data Saving` default list
 
-"Shadowbox Mode" is a new choice in the `overflow`/`...` menus of various feeds. It is a fullscreen video with a hidable bottom bar. It lets you horizontally swipe to other posts. For `Reddit` galleries it lets you swipe down to see the images.
+`Shadowbox Mode` is a new choice in the `overflow`/`...` menus of various feeds. It is a fullscreen mode with a hidable bottom bar. It lets you horizontally swipe to other posts. For `Reddit` galleries it lets you swipe down to see the images.
 
-There is a new setting "Settings | Interface | Hide Text Posts and Posts with No Preview" to make it more like a fullscreen version of the `Gallery Layout`.
+There is a new setting `Settings | Interface | Hide Text Posts and Posts with No Preview` to make it more like a fullscreen version of the `Gallery Layout`.
 
 8.3.0.4 / 2026-9-8
 ===========
