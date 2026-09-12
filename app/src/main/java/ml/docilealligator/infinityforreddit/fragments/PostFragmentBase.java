@@ -383,6 +383,12 @@ public abstract class PostFragmentBase extends Fragment {
 
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT, true).observe(getViewLifecycleOwner(), mediaOnly -> applyMediaOnlyPosts());
 
+        SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE, SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE).observe(getViewLifecycleOwner(), s -> {
+            if (getPostAdapter() != null && getPostAdapter().setCompactThumbnailSizeDp(Integer.parseInt(s))) {
+                refreshAdapter();
+            }
+        });
+
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 

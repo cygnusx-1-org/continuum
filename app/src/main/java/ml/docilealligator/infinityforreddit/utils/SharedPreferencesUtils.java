@@ -110,6 +110,9 @@ public class SharedPreferencesUtils {
     public static final String DEFAULT_POST_LAYOUT_KEY = "default_post_layout";
     public static final String SHOW_DIVIDER_IN_COMPACT_LAYOUT = "show_divider_in_compact_layout";
     public static final String SHOW_THUMBNAIL_ON_THE_LEFT_IN_COMPACT_LAYOUT = "show_thumbnail_on_the_left_in_compact_layout";
+    public static final String POST_COMPACT_THUMBNAIL_SIZE = "post_compact_thumbnail_size";
+    /** Matches @dimen/post_compact_thumbnail_size, which is what the compact layouts inflate with. */
+    public static final String POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE = "112";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT = "number_of_columns_in_post_feed_portrait";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE = "number_of_columns_in_post_feed_landscape";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED = "number_of_columns_in_post_feed_portrait_unfolded";

@@ -259,6 +259,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private int mPostIconAndInfoColor;
     private int mDividerColor;
     private float mScale;
+    private int mCompactThumbnailSizeDp;
     private int mCompactThumbnailBoxSizePx;
     private boolean mDisplaySubredditName;
     private boolean mVoteButtonsOnTheRight;
@@ -448,7 +449,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mDividerColor = customThemeWrapper.getDividerColor();
 
             mScale = resources.getDisplayMetrics().density;
-            mCompactThumbnailBoxSizePx = resources.getDimensionPixelSize(R.dimen.post_compact_thumbnail_size);
+            mCompactThumbnailSizeDp = SharedPreferencesUtils.getInt(sharedPreferences,
+                    SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE,
+                    SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE);
+            mCompactThumbnailBoxSizePx = Math.round(mCompactThumbnailSizeDp * mScale);
             mGlide = Glide.with(mActivity);
             mMaxResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000");
             mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
@@ -2020,9 +2024,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * side still covers the box, so Glide down-scales it (crisp) instead of up-scaling a tiny rung
      * (the blur in issue #339). When no rung is large enough (e.g. wide/short banners) we fall back
      * to the largest available rung rather than the source, keeping the download bounded (Reddit
-     * rungs cap at 1080px wide) instead of pulling the uncapped original. The box size comes from a
-     * layout dimen, so it tracks the device density (and any screen-size override) without a
-     * hardcoded pixel value.
+     * rungs cap at 1080px wide) instead of pulling the uncapped original. The box size comes from the
+     * Thumbnail size preference at the device's density, so shrinking the box also shrinks the rung
+     * we download rather than leaving it pinned to the largest size the setting offers.
      */
     private Post.Preview getBestPreviewForCompactThumbnail(ArrayList<Post.Preview> previews) {
         // Largest available rung (or the source itself when it's the only entry, e.g. galleries).
@@ -2234,6 +2238,21 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public void setSimultaneousAutoplayLimit(int limit) {
         mSimultaneousAutoplayLimit = limit;
         multiPlayPlayerSelector.setSimultaneousAutoplayLimit(limit);
+    }
+
+    /**
+     * The compact/card-2 thumbnail box edge, in dp. Returns true if it changed, in which case the
+     * caller must rebuild the view holders -- the size is written into layout params in
+     * PostCompactBaseViewHolder.setBaseView, so holders already in the pool keep the old one.
+     */
+    public boolean setCompactThumbnailSizeDp(int compactThumbnailSizeDp) {
+        if (mCompactThumbnailSizeDp != compactThumbnailSizeDp) {
+            mCompactThumbnailSizeDp = compactThumbnailSizeDp;
+            mCompactThumbnailBoxSizePx = Math.round(compactThumbnailSizeDp * mScale);
+            return true;
+        }
+
+        return false;
     }
 
     // return true if the current value is not the same as the new value
@@ -4989,6 +5008,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             this.noPreviewPostImageView = noPreviewLinkImageView;
             this.bottomConstraintLayout = bottomConstraintLayout;
             this.divider = divider;
+
+            // The layouts inflate at @dimen/post_compact_thumbnail_size; the preference overrides it
+            // here so all six compact variants follow one setting. Both boxes are sized: the preview
+            // wrapper and the no-preview link fallback, exactly one of which is ever shown.
+            ViewGroup.LayoutParams imageParams = relativeLayout.getLayoutParams();
+            imageParams.width = mCompactThumbnailBoxSizePx;
+            imageParams.height = mCompactThumbnailBoxSizePx;
+            relativeLayout.setLayoutParams(imageParams);
+            ViewGroup.LayoutParams noPreviewParams = noPreviewLinkImageView.getLayoutParams();
+            noPreviewParams.width = mCompactThumbnailBoxSizePx;
+            noPreviewParams.height = mCompactThumbnailBoxSizePx;
+            noPreviewLinkImageView.setLayoutParams(noPreviewParams);
 
             if (mVoteButtonsOnTheRight && saveButton != null && shareButton != null && commentsCountButton != null) {
                 if (bottomConstraintLayout != null) {

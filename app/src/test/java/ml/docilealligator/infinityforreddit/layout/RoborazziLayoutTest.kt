@@ -27,6 +27,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.loadingindicator.LoadingIndicator
+import kotlin.math.roundToInt
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily
@@ -115,16 +116,20 @@ class RoborazziLayoutTest(private val case: Case) {
         val fontScale: FontScale,
         val reveal: List<Int> = emptyList(),
         val recoveredFlair: Boolean = false,
+        val thumbnailSizeDp: Int? = null,
     ) {
         /**
-         * `{layout}_{theme}_sw{n}dp[_land][_xlarge]` — the pre-existing scheme with a suffix per new
-         * axis, so portrait/normal-font goldens keep the filenames they have always had and a
-         * re-record diff shows which images genuinely changed pixels rather than a mass rename.
+         * `{layout}_{theme}_sw{n}dp[_land][_xlarge][_thumb{n}]` — the pre-existing scheme with a
+         * suffix per new axis, so portrait/normal-font goldens keep the filenames they have always
+         * had and a re-record diff shows which images genuinely changed pixels rather than a mass
+         * rename. A null [thumbnailSizeDp] adds no suffix: that is the layout inflating at its own
+         * `@dimen/post_compact_thumbnail_size`, which is what every pre-existing golden captures.
          */
         val goldenName: String = buildString {
             append(layoutName).append('_').append(themeLabel).append("_sw").append(swDp).append("dp")
             if (orientation == Orientation.LANDSCAPE) append("_land")
             if (fontScale == FontScale.XLARGE) append("_xlarge")
+            if (thumbnailSizeDp != null) append("_thumb").append(thumbnailSizeDp)
         }
 
         override fun toString(): String = goldenName
@@ -321,6 +326,27 @@ class RoborazziLayoutTest(private val case: Case) {
             ),
         )
 
+        /**
+         * The six layouts the Thumbnail size preference (issue #355) resizes. Every compact family
+         * plus both card_2 compact-link variants share one square box, sized in
+         * PostCompactBaseViewHolder.setBaseView from the pref rather than left at the dimen the XML
+         * inflates with. Derived from [FEED_LAYOUTS] so a family added there is picked up by name.
+         */
+        private val COMPACT_THUMBNAIL_LAYOUT_NAMES = setOf(
+            "compact", "compactRight", "compact2", "compact2Right",
+            "card2CompactLink", "card2CompactLinkRight",
+        )
+        private val COMPACT_THUMBNAIL_LAYOUTS: List<LayoutSpec> =
+            FEED_LAYOUTS.filter { it.name in COMPACT_THUMBNAIL_LAYOUT_NAMES }
+
+        /**
+         * Every value the preference offers (@array/settings_post_compact_thumbnail_size_values).
+         * 112 is the default, so its `_thumb112` goldens double as the control: they must match the
+         * unsuffixed core goldens pixel for pixel, which is what proves the adapter's runtime
+         * override reproduces what the layouts inflate on their own.
+         */
+        private val COMPACT_THUMBNAIL_SIZES = listOf(72, 96, 112)
+
         /** Common phones (320/360/411/443/448), this dev's phone (527), tablets (600/934). */
         private val FEED_CORE_WIDTHS = listOf(320, 360, 411, 443, 448, 527, 600, 934)
         private val SECONDARY_CORE_WIDTHS = listOf(320, 411, 527, 600)
@@ -329,6 +355,8 @@ class RoborazziLayoutTest(private val case: Case) {
         private val FEED_LANDSCAPE_WIDTHS = listOf(360, 411, 600)
         private val SECONDARY_LANDSCAPE_WIDTHS = listOf(411)
         private val FEED_FONT_WIDTHS = listOf(320, 411)
+        /** Narrow phone, common phone, tablet: the box competes with the title column at each. */
+        private val COMPACT_THUMBNAIL_WIDTHS = listOf(320, 411, 600)
         private val SECONDARY_FONT_WIDTHS = listOf(320)
 
         /**
@@ -362,6 +390,16 @@ class RoborazziLayoutTest(private val case: Case) {
             // Recovery markers: the core widths, plus the same font-scale stressor.
             addAll(tier(RECOVERED_LAYOUTS, LIGHT_DARK, SECONDARY_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             addAll(tier(RECOVERED_LAYOUTS, LIGHT_ONLY, SECONDARY_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
+            // Thumbnail size: a measurement axis, so it crosses widths against every compact layout
+            // but samples one theme — resizing the box cannot change a palette.
+            COMPACT_THUMBNAIL_SIZES.forEach { sizeDp ->
+                addAll(
+                    tier(
+                        COMPACT_THUMBNAIL_LAYOUTS, LIGHT_ONLY, COMPACT_THUMBNAIL_WIDTHS,
+                        Orientation.PORTRAIT, FontScale.NORMAL, thumbnailSizeDp = sizeDp,
+                    ),
+                )
+            }
         }
 
         private fun tier(
@@ -370,6 +408,7 @@ class RoborazziLayoutTest(private val case: Case) {
             widths: List<Int>,
             orientation: Orientation,
             fontScale: FontScale,
+            thumbnailSizeDp: Int? = null,
         ): List<Array<Any>> =
             layouts.flatMap { spec ->
                 themes.flatMap { (themeLabel, themeType) ->
@@ -378,6 +417,7 @@ class RoborazziLayoutTest(private val case: Case) {
                             Case(
                                 spec.name, spec.res, spec.family, swDp, orientation, themeLabel,
                                 themeType, fontScale, spec.reveal, spec.recoveredFlair,
+                                thumbnailSizeDp,
                             ),
                         )
                     }
@@ -582,7 +622,9 @@ class RoborazziLayoutTest(private val case: Case) {
      *     labels/counters are left empty so they don't balloon vertically;
      *   - empty image slots show a generated sample image; pre-set icons are tinted the icon colour;
      *   - compact thumbnail boxes, which the XML leaves GONE for the adapter to reveal per post, are
-     *     shown so the goldens cover the thumbnail slot and the spacing around it.
+     *     shown so the goldens cover the thumbnail slot and the spacing around it, and resized to
+     *     [Case.thumbnailSizeDp] when the case sets one, the way the adapter resizes them from the
+     *     Thumbnail size preference.
      * Generic (no per-layout view-id coupling) so it survives layout changes; a future refinement
      * could bind real Post/Comment fixtures through the adapters for pixel-exact fidelity.
      */
@@ -600,6 +642,20 @@ class RoborazziLayoutTest(private val case: Case) {
         // no-preview link fallback stays GONE, so exactly one of the two shows, as in the app.
         if (view.visibility == View.GONE && view.isCompactThumbnailBox()) {
             view.visibility = View.VISIBLE
+        }
+        // Thumbnail size preference (issue #355). PostCompactBaseViewHolder.setBaseView overwrites
+        // the box's layout params at bind time, so the rendered size is the pref's, not the dimen's;
+        // reproduce that here. Must run after the reveal above, which still matches on the dimen.
+        // Both boxes are resized, the same two the adapter writes to: the preview wrapper and the
+        // no-preview link fallback.
+        case.thumbnailSizeDp?.let { sizeDp ->
+            if (view.isCompactThumbnailBox()) {
+                val px = (sizeDp * view.resources.displayMetrics.density).roundToInt()
+                view.layoutParams = view.layoutParams.apply {
+                    width = px
+                    height = px
+                }
+            }
         }
         // The *_gallery_type layouts gate their media block behind a GONE container holding a
         // horizontal RecyclerView of gallery pages, which the adapter reveals for a gallery post. In

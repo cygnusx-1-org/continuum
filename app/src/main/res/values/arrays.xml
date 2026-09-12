@@ -893,4 +893,16 @@
         <item>500</item>
     </string-array>
 
+    <string-array name="settings_post_compact_thumbnail_size">
+        <item>72dp</item>
+        <item>96dp</item>
+        <item>112dp</item>
+    </string-array>
+
+    <string-array name="settings_post_compact_thumbnail_size_values">
+        <item>72</item>
+        <item>96</item>
+        <item>112</item>
+    </string-array>
+
 </resources>

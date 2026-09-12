@@ -50,6 +50,7 @@ object AccountScopedKeys {
         "hide_image_count_in_gallery", "hide_post_flair", "hide_subreddit_and_user_prefix",
         "hide_the_number_of_votes", "hide_the_number_of_comments", "hide_text_post_content",
         "fixed_height_preview_in_card", "show_gallery_media_as_grid",
+        "post_compact_thumbnail_size",
         "show_divider_in_compact_layout", "show_thumbnail_on_the_left_in_compact_layout",
         "long_press_to_hide_toolbar_in_compact_layout",
         "post_compact_layout_toolbar_hidden_by_default",

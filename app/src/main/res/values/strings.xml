@@ -542,6 +542,7 @@
     <string name="settings_default_post_layout_unfolded">Default Post Layout for a Foldable Unfolded</string>
     <string name="settings_default_link_post_layout">Default Link Post Layout</string>
     <string name="settings_show_divider_in_compact_layout">Show Divider</string>
+    <string name="settings_post_compact_thumbnail_size">Thumbnail size</string>
     <string name="settings_show_thumbnail_on_the_left_in_compact_layout">Show Thumbnail on the Left</string>
     <string name="settings_show_thumbnail_on_the_right_in_compact_layout">Show Thumbnail on the Right</string>
     <string name="bottom_app_bar_option_toggle_thumbnail_side">Toggle Thumbnail Side</string>

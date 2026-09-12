@@ -91,6 +91,14 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
         app:title="@string/post_layout_compact" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="112"
+        android:entries="@array/settings_post_compact_thumbnail_size"
+        app:entryValues="@array/settings_post_compact_thumbnail_size_values"
+        app:key="post_compact_thumbnail_size"
+        app:title="@string/settings_post_compact_thumbnail_size"
+        app:useSimpleSummaryProvider="true" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="show_divider_in_compact_layout"
