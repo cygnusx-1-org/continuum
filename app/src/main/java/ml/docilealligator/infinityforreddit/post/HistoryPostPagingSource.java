@@ -40,6 +40,9 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
     private final String username;
     private final int readPostType;
     private final PostFilter postFilter;
+    // See PostPagingSource#refreshPrewarmer.
+    @Nullable
+    private volatile RefreshPrewarmer<Post> refreshPrewarmer;
 
     public HistoryPostPagingSource(Retrofit retrofit, Executor executor, RedditDataRoomDatabase redditDataRoomDatabase,
                                    @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
@@ -63,7 +66,12 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
     @NonNull
     @Override
     public ListenableFuture<LoadResult<String, Post>> loadFuture(@NonNull LoadParams<String> loadParams) {
-        return loadReadPosts(loadParams, redditDataRoomDatabase);
+        return RefreshPrewarm.wrap(loadParams, loadReadPosts(loadParams, redditDataRoomDatabase),
+                refreshPrewarmer, executor);
+    }
+
+    void setRefreshPrewarmer(@Nullable RefreshPrewarmer<Post> refreshPrewarmer) {
+        this.refreshPrewarmer = refreshPrewarmer;
     }
 
     public LoadResult<String, Post> transformData(List<ReadPost> readPosts) {

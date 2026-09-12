@@ -57,6 +57,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -471,8 +472,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     @Override
     public int getItemViewType(int position) {
+        return viewTypeFor(getItem(position));
+    }
+
+    /**
+     * The view type a row showing {@code post} gets, or the layout's default while the post is not
+     * loaded. Separate from {@link #getItemViewType} so {@link CompactThumbnailPreloader} can ask what
+     * a post will be drawn as without going through a position, which would ask Paging to load it.
+     */
+    private int viewTypeFor(@Nullable Post post) {
         if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD) {
-            Post post = getItem(position);
             if (post != null) {
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
@@ -533,7 +542,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             return VIEW_TYPE_POST_CARD_TEXT_TYPE;
         } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_COMPACT) {
-            Post post = getItem(position);
             if (post != null) {
                 if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
                     switch (mDefaultLinkPostLayout) {
@@ -550,7 +558,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             return VIEW_TYPE_POST_COMPACT;
         } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_COMPACT_2) {
-            Post post = getItem(position);
             if (post != null) {
                 if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
                     switch (mDefaultLinkPostLayout) {
@@ -569,7 +576,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             return VIEW_TYPE_POST_COMPACT_2;
         } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_GALLERY) {
-            Post post = getItem(position);
             if (post != null) {
                 if (post.getPostType() == Post.GALLERY_TYPE) {
                     return VIEW_TYPE_POST_GALLERY_GALLERY_TYPE;
@@ -580,7 +586,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 return VIEW_TYPE_POST_GALLERY;
             }
         } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2) {
-            Post post = getItem(position);
             if (post != null) {
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
@@ -641,7 +646,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             return VIEW_TYPE_POST_CARD_2_TEXT_TYPE;
         } else {
-            Post post = getItem(position);
             if (post != null) {
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
@@ -1392,15 +1396,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostCompactBaseViewHolder) holder).divider.setVisibility(View.GONE);
                 }
 
-                boolean textPostWithPreview = post.getPostType() == Post.TEXT_TYPE
-                        && post.getPreviews() != null && !post.getPreviews().isEmpty()
-                        && !post.embedsInlineBodyMedia();
-                if (((post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE) || textPostWithPreview)
-                        && !(mDataSavingMode && mDisableImagePreview)) {
+                if (showsCompactThumbnailBox(post)) {
                     ((PostCompactBaseViewHolder) holder).relativeLayout.setVisibility(View.VISIBLE);
-                    if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
+                    if (postHasPreviews(post)) {
                         ((PostCompactBaseViewHolder) holder).imageView.setVisibility(View.VISIBLE);
-                        ((PostCompactBaseViewHolder) holder).loadingIndicator.setVisibility(View.VISIBLE);
+                        // loadImage decides on the loading indicator: a thumbnail already in memory
+                        // must not show one, even for the frame before the listener hides it.
                         loadImage(holder);
                     } else {
                         // Nothing to load. The indicator only ever goes away in loadImage's
@@ -1969,27 +1970,20 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ContextCompat.getDrawable(mActivity, R.drawable.thumbnail_compact_layout_rounded_edge);
             }
             compactHolder.imageView.setBackground(compactHolder.thumbnailRoundedEdgeBackground);
-            String postCompactThumbnailPreviewUrl = null;
-            ArrayList<Post.Preview> previews = post.getPreviews();
-            if (previews != null && !previews.isEmpty()) {
-                postCompactThumbnailPreviewUrl = getBestPreviewForCompactThumbnail(previews).getPreviewUrl();
+            RequestBuilder<Drawable> thumbnailRequest = compactThumbnailRequest(post);
+            if (thumbnailRequest != null) {
+                Request request = thumbnailRequest
+                        .error(R.drawable.ic_error_outline_black_day_night_24dp)
+                        .listener(compactHolder.requestListener)
+                        .into(compactHolder.imageView)
+                        .getRequest();
+                // A thumbnail Glide already holds in memory -- which CompactThumbnailPreloader sees to
+                // for rows about to scroll in -- is set, and reported to the listener, inside into()
+                // itself. Only one still on its way gets the spinner.
+                compactHolder.loadingIndicator.setVisibility(
+                        request != null && request.isRunning() ? View.VISIBLE : View.GONE);
             } else {
-                // Use thumbnail as fallback for compact view
-                String thumbnailUrl = post.getThumbnailUrl();
-                if (thumbnailUrl != null && !thumbnailUrl.isEmpty() && !thumbnailUrl.equals("self") && !thumbnailUrl.equals("default") && !thumbnailUrl.equals("nsfw") && !thumbnailUrl.equals("spoiler") && !thumbnailUrl.equals("image") && thumbnailUrl.startsWith("http")) {
-                    postCompactThumbnailPreviewUrl = thumbnailUrl;
-                }
-            }
-
-            if (postCompactThumbnailPreviewUrl != null) {
-                RequestBuilder<Drawable> imageRequestBuilder = mGlide.load(postCompactThumbnailPreviewUrl)
-                        .error(R.drawable.ic_error_outline_black_day_night_24dp).listener(compactHolder.requestListener);
-                if ((post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler)) {
-                    imageRequestBuilder
-                            .transform(new BlurTransformation(50, 2)).into(compactHolder.imageView);
-                } else {
-                    imageRequestBuilder.into(compactHolder.imageView);
-                }
+                compactHolder.loadingIndicator.setVisibility(View.GONE);
             }
         } else if (holder instanceof PostGalleryViewHolder) {
             ((PostGalleryViewHolder) holder).binding.progressBarItemPostGallery.setVisibility(View.VISIBLE);
@@ -2039,6 +2033,82 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
         }
         return best;
+    }
+
+    /**
+     * The request a compact row makes for {@code post}'s thumbnail, or null when there is no url to
+     * load. The row and {@link CompactThumbnailPreloader} both build from this, which is what makes a
+     * warmed thumbnail the one the row asks for: Glide's memory cache is keyed on the url, the size
+     * and the transformation, and a request that differed in any of them would decode a second copy.
+     *
+     * <p>So two things the row used to leave to Glide are spelled out. The size is the box's, which
+     * the ImageView fills exactly in every compact layout; naming it also lets the load start as the
+     * row binds, off screen during a prefetch, instead of waiting for the view to be measured. And
+     * the center crop is the one into() derived from the view's scaleType, which a preload has no view
+     * to derive from.
+     */
+    @Nullable
+    private RequestBuilder<Drawable> compactThumbnailRequest(Post post) {
+        String url = null;
+        ArrayList<Post.Preview> previews = post.getPreviews();
+        if (previews != null && !previews.isEmpty()) {
+            url = getBestPreviewForCompactThumbnail(previews).getPreviewUrl();
+        } else {
+            // Use thumbnail as fallback for compact view
+            String thumbnailUrl = post.getThumbnailUrl();
+            if (hasValidThumbnailFallback(thumbnailUrl)) {
+                url = thumbnailUrl;
+            }
+        }
+        if (url == null) {
+            return null;
+        }
+
+        RequestBuilder<Drawable> request = mGlide.load(url).override(mCompactThumbnailBoxSizePx);
+        if ((post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler)) {
+            return request.transform(new BlurTransformation(50, 2));
+        }
+        return request.optionalCenterCrop();
+    }
+
+    /**
+     * Whether a compact row shows its thumbnail box for {@code post}, holding either the thumbnail or,
+     * for a post with no preview, the no-preview glyph.
+     */
+    private boolean showsCompactThumbnailBox(Post post) {
+        boolean textPostWithPreview = post.getPostType() == Post.TEXT_TYPE
+                && postHasPreviews(post)
+                && !post.embedsInlineBodyMedia();
+        return ((post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE) || textPostWithPreview)
+                && !(mDataSavingMode && mDisableImagePreview);
+    }
+
+    private static boolean postHasPreviews(Post post) {
+        return post.getPreviews() != null && !post.getPreviews().isEmpty();
+    }
+
+    /**
+     * The request the compact row for {@code post} will make for its thumbnail, for warming it before
+     * the row binds. Null when the post is not drawn as a compact row, or its row loads no thumbnail
+     * -- the same decisions {@link #getItemViewType} and the bind make, so nothing is fetched that the
+     * row would not fetch itself. Main thread only: it reads the adapter's settings as they stand.
+     */
+    @Nullable
+    public RequestBuilder<Drawable> compactThumbnailPreloadRequest(Post post) {
+        int viewType = viewTypeFor(post);
+        if (viewType != VIEW_TYPE_POST_COMPACT && viewType != VIEW_TYPE_POST_COMPACT_2
+                && viewType != VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
+            return null;
+        }
+        if (!showsCompactThumbnailBox(post) || !postHasPreviews(post)) {
+            return null;
+        }
+        return compactThumbnailRequest(post);
+    }
+
+    /** Edge of the square compact thumbnail box in pixels, which every thumbnail is decoded to. */
+    public int getCompactThumbnailBoxSizePx() {
+        return mCompactThumbnailBoxSizePx;
     }
 
     private void shareLink(Post post) {

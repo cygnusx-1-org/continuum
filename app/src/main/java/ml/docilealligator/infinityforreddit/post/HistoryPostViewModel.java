@@ -25,6 +25,9 @@ import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
 import retrofit2.Retrofit;
 
 public class HistoryPostViewModel extends ViewModel {
+    // Most of a 25-post page, for the reason PostViewModel#PREFETCH_DISTANCE gives.
+    private static final int PREFETCH_DISTANCE = 20;
+
     private final Executor executor;
     private final Retrofit retrofit;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
@@ -58,6 +61,9 @@ public class HistoryPostViewModel extends ViewModel {
     // reposting a LiveData (which would tear down and rebuild the pager mid-load).
     @Nullable
     private volatile PagingSource<String, Post> pagingSource;
+    // Handed to every source this view model builds; see PostPagingSource#refreshPrewarmer.
+    @Nullable
+    private volatile RefreshPrewarmer<Post> refreshPrewarmer;
 
     public HistoryPostViewModel(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                                 @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
@@ -75,7 +81,7 @@ public class HistoryPostViewModel extends ViewModel {
 
         postFilterLiveData = new MutableLiveData<>(postFilter);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(25, 4, false, 10), this::returnPagingSource);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(25, PREFETCH_DISTANCE, false, 10), this::returnPagingSource);
 
         posts = Transformations.switchMap(postFilterLiveData, postFilterValue -> PagingLiveData.cachedIn(PagingLiveData.getLiveData(pager), ViewModelKt.getViewModelScope(this)));
 
@@ -130,14 +136,33 @@ public class HistoryPostViewModel extends ViewModel {
     public PagingSource<String, Post> returnPagingSource() {
         PagingSource<String, Post> source;
         if (readPostType == ReadPostType.LOCAL_SAVED_POSTS) {
-            source = new LocalSavedPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken,
-                    accountName, postFilter, searchQuery, savedSearchCache);
+            LocalSavedPostPagingSource localSavedSource = new LocalSavedPostPagingSource(retrofit, executor,
+                    redditDataRoomDatabase, accessToken, accountName, postFilter, searchQuery, savedSearchCache);
+            localSavedSource.setRefreshPrewarmer(refreshPrewarmer);
+            source = localSavedSource;
         } else {
-            source = new HistoryPostPagingSource(retrofit, executor, redditDataRoomDatabase, accessToken, accountName,
-                    sharedPreferences, accountName, readPostType, postFilter);
+            HistoryPostPagingSource historySource = new HistoryPostPagingSource(retrofit, executor,
+                    redditDataRoomDatabase, accessToken, accountName, sharedPreferences, accountName,
+                    readPostType, postFilter);
+            historySource.setRefreshPrewarmer(refreshPrewarmer);
+            source = historySource;
         }
         pagingSource = source;
         return source;
+    }
+
+    /**
+     * Have every refreshed page warmed by {@code refreshPrewarmer} before the feed shows it, or stop
+     * with null. See PostViewModel#setRefreshPrewarmer.
+     */
+    public void setRefreshPrewarmer(@Nullable RefreshPrewarmer<Post> refreshPrewarmer) {
+        this.refreshPrewarmer = refreshPrewarmer;
+        PagingSource<String, Post> currentSource = pagingSource;
+        if (currentSource instanceof LocalSavedPostPagingSource) {
+            ((LocalSavedPostPagingSource) currentSource).setRefreshPrewarmer(refreshPrewarmer);
+        } else if (currentSource instanceof HistoryPostPagingSource) {
+            ((HistoryPostPagingSource) currentSource).setRefreshPrewarmer(refreshPrewarmer);
+        }
     }
 
     // Called by the Saved screen's pull-to-refresh so a refresh while a search is active refetches

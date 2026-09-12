@@ -43,6 +43,9 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
     // it in memory instead of re-hydrating every post again (null when not searching).
     @Nullable
     private final SavedSearchCache<Post> savedSearchCache;
+    // See PostPagingSource#refreshPrewarmer.
+    @Nullable
+    private volatile RefreshPrewarmer<Post> refreshPrewarmer;
 
     // /api/info accepts up to 100 fullnames per call; the load-all search path hydrates in batches
     // of this size.
@@ -83,7 +86,9 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
                     Futures.submit(this::loadAllFiltered, executor);
             ListenableFuture<LoadResult<String, Post>> partial =
                     Futures.catching(searchFuture, HttpException.class, LoadResult.Error::new, executor);
-            return Futures.catching(partial, IOException.class, LoadResult.Error::new, executor);
+            ListenableFuture<LoadResult<String, Post>> searchResult =
+                    Futures.catching(partial, IOException.class, LoadResult.Error::new, executor);
+            return RefreshPrewarm.wrap(loadParams, searchResult, refreshPrewarmer, executor);
         }
 
         Long before = loadParams.getKey() != null ? Long.parseLong(loadParams.getKey()) : null;
@@ -96,7 +101,13 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
         ListenableFuture<LoadResult<String, Post>> partialLoadResultFuture =
                 Futures.catching(pageFuture, HttpException.class, LoadResult.Error::new, executor);
 
-        return Futures.catching(partialLoadResultFuture, IOException.class, LoadResult.Error::new, executor);
+        ListenableFuture<LoadResult<String, Post>> pageResult =
+                Futures.catching(partialLoadResultFuture, IOException.class, LoadResult.Error::new, executor);
+        return RefreshPrewarm.wrap(loadParams, pageResult, refreshPrewarmer, executor);
+    }
+
+    void setRefreshPrewarmer(@Nullable RefreshPrewarmer<Post> refreshPrewarmer) {
+        this.refreshPrewarmer = refreshPrewarmer;
     }
 
     private LoadResult<String, Post> loadAllFiltered() throws IOException {

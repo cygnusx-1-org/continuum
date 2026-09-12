@@ -1295,6 +1295,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         resumePending = false;
         FeedResumeState.clearFrom(getArguments());
 
+        // Before the first observe, which is what starts the first load.
+        mPostViewModel.setRefreshPrewarmer(compactThumbnailPreloader);
+
         mPostViewModel.getPosts().observe(getViewLifecycleOwner(), posts -> {
             mAdapter.submitData(getViewLifecycleOwner().getLifecycle(), posts);
         });
@@ -2187,6 +2190,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         binding.recyclerViewPostFragment.setLayoutManager(null);
         binding.recyclerViewPostFragment.setAdapter(mAdapter);
         binding.recyclerViewPostFragment.setLayoutManager(layoutManager);
+        if (compactThumbnailPreloader != null) {
+            // The rows are rebuilt under whatever setting changed, which may change their requests.
+            compactThumbnailPreloader.reset();
+        }
         if (previousPosition > 0) {
             binding.recyclerViewPostFragment.scrollToPosition(previousPosition);
         }
@@ -2231,6 +2238,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         binding.recyclerViewPostFragment.addOnWindowFocusChangedListener(null);
         // A trailing resume store still pending would fire against a torn-down view.
         binding.recyclerViewPostFragment.removeCallbacks(resumeStoreRunnable);
+        if (mPostViewModel != null) {
+            // The view model outlives this view, and must not hold on to its preloader.
+            mPostViewModel.setRefreshPrewarmer(null);
+        }
         super.onDestroyView();
     }
 

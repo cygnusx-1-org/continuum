@@ -405,6 +405,15 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        if (mHistoryPostViewModel != null) {
+            // The view model outlives this view, and must not hold on to its preloader.
+            mHistoryPostViewModel.setRefreshPrewarmer(null);
+        }
+        super.onDestroyView();
+    }
+
     private void initializeAndBindPostViewModel() {
         mHistoryPostViewModel = new ViewModelProvider(HistoryPostFragment.this, new HistoryPostViewModel.Factory(mExecutor,
                 mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT) ? mRetrofit : mOauthRetrofit, mRedditDataRoomDatabase, mActivity.accessToken,
@@ -416,6 +425,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     private void bindPostViewModel() {
         // Before the first observe, so the initial value costs no pipeline rebuild.
         applyMediaOnlyPosts();
+
+        // Before the first observe, which is what starts the first load.
+        mHistoryPostViewModel.setRefreshPrewarmer(compactThumbnailPreloader);
 
         mHistoryPostViewModel.getPosts().observe(getViewLifecycleOwner(), posts -> mAdapter.submitData(getViewLifecycleOwner().getLifecycle(), posts));
 
@@ -652,6 +664,10 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         binding.recyclerViewHistoryPostFragment.setLayoutManager(null);
         binding.recyclerViewHistoryPostFragment.setAdapter(mAdapter);
         binding.recyclerViewHistoryPostFragment.setLayoutManager(layoutManager);
+        if (compactThumbnailPreloader != null) {
+            // The rows are rebuilt under whatever setting changed, which may change their requests.
+            compactThumbnailPreloader.reset();
+        }
         if (previousPosition > 0) {
             binding.recyclerViewHistoryPostFragment.scrollToPosition(previousPosition);
         }

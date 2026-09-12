@@ -53,6 +53,7 @@ import kotlin.jvm.functions.Function1;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
+import ml.docilealligator.infinityforreddit.adapters.CompactThumbnailPreloader;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadUserData;
@@ -169,6 +170,12 @@ public abstract class PostFragmentBase extends Fragment {
     @Nullable
     private View.OnLayoutChangeListener onLayoutChangeListener;
     private int recyclerViewWidth;
+    /**
+     * Warms compact thumbnails ahead of the scroll and before a refresh is shown. The subclass hands
+     * it to its view model as the refresh prewarmer. Null outside the view's lifetime.
+     */
+    @Nullable
+    protected CompactThumbnailPreloader compactThumbnailPreloader;
 
     public PostFragmentBase() {
         // Required empty public constructor
@@ -357,6 +364,10 @@ public abstract class PostFragmentBase extends Fragment {
         };
         getPostRecyclerView().addOnLayoutChangeListener(onLayoutChangeListener);
 
+        // Through getPostAdapter rather than the adapter itself, which the subclass has yet to build.
+        compactThumbnailPreloader = new CompactThumbnailPreloader(getPostRecyclerView(), this::getPostAdapter, mGlide);
+        getPostRecyclerView().addOnScrollListener(compactThumbnailPreloader);
+
         SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.LONG_PRESS_POST_NON_MEDIA_AREA, SharedPreferencesUtils.LONG_PRESS_POST_VALUE_SHOW_POST_OPTIONS).observe(getViewLifecycleOwner(), s -> {
             if (getPostAdapter() != null) {
                 getPostAdapter().setLongPressPostNonMediaAreaAction(s);
@@ -410,6 +421,11 @@ public abstract class PostFragmentBase extends Fragment {
         if (onLayoutChangeListener != null) {
             getPostRecyclerView().removeOnLayoutChangeListener(onLayoutChangeListener);
             onLayoutChangeListener = null;
+        }
+        if (compactThumbnailPreloader != null) {
+            getPostRecyclerView().removeOnScrollListener(compactThumbnailPreloader);
+            compactThumbnailPreloader.release();
+            compactThumbnailPreloader = null;
         }
     }
 
@@ -728,6 +744,10 @@ public abstract class PostFragmentBase extends Fragment {
         // listing already laid out, and showing that before jumping away from it is the flash this
         // exists to remove.
         ScrollAnchor.hideUntilRestored(recyclerView, revealTimeoutMs);
+        if (compactThumbnailPreloader != null) {
+            // The refresh that serves this restore then warms the screen it lands on, not the top.
+            compactThumbnailPreloader.setAnchorHint(anchorFullName, fallbackPosition);
+        }
         Function1<CombinedLoadStates, Unit> listener = new Function1<>() {
             @Override
             public Unit invoke(CombinedLoadStates combinedLoadStates) {
@@ -735,6 +755,9 @@ public abstract class PostFragmentBase extends Fragment {
                         && adapter.getItemCount() > 0) {
                     adapter.removeLoadStateListener(this);
                     pendingAnchorRestore = null;
+                    if (compactThumbnailPreloader != null) {
+                        compactThumbnailPreloader.clearAnchorHint();
+                    }
                     int target = positionOfFullName(anchorFullName);
                     if (target == RecyclerView.NO_POSITION) {
                         // The post is gone -- deleted, filtered out, or trimmed off the front of the
@@ -768,6 +791,9 @@ public abstract class PostFragmentBase extends Fragment {
             adapter.removeLoadStateListener(listener);
         }
         pendingAnchorRestore = null;
+        if (compactThumbnailPreloader != null) {
+            compactThumbnailPreloader.clearAnchorHint();
+        }
         if (getView() != null) {
             getPostRecyclerView().setVisibility(View.VISIBLE);
         }

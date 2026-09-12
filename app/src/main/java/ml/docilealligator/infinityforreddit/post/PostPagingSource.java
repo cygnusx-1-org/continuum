@@ -157,6 +157,16 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private volatile boolean mediaOnly;
 
     /**
+     * Gets a refreshed page's first screen ready to draw before the feed shows it; see
+     * {@link RefreshPrewarm#wrap}. Null while no feed is listening.
+     *
+     * <p>Written from the main thread as the feed's view comes and goes, read when a load starts on
+     * the paging executor, hence volatile.
+     */
+    @Nullable
+    private volatile RefreshPrewarmer<Post> refreshPrewarmer;
+
+    /**
      * How many further pages one load may pull while every page so far has come back with nothing
      * the feed can show, and how large those extra pages are.
      *
@@ -349,9 +359,10 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         // network call. The cache read touches disk and parses, so it MUST run on the executor:
         // loadFuture() is invoked on the main thread (see loadUserPosts for the same constraint).
         hasLoaded = true;
+        RefreshPrewarmer<Post> prewarmer = refreshPrewarmer;
         if (loadParams.getKey() == null && resumeFromCache && resumeFeedKey != null) {
             resumeFromCache = false;
-            return Futures.submitAsync(() -> {
+            ListenableFuture<LoadResult<String, Post>> resumed = Futures.submitAsync(() -> {
                 LoadResult<String, Post> restored = loadFromFeedCache();
                 if (restored != null) {
                     return Futures.immediateFuture(restored);
@@ -360,8 +371,9 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
                 // fragment keys its scroll restore off the same cache, so it will not scroll.
                 return loadPastBarrenPages(loadParams, 0);
             }, executor);
+            return RefreshPrewarm.wrap(loadParams, resumed, prewarmer, executor);
         }
-        return loadPastBarrenPages(loadParams, 0);
+        return RefreshPrewarm.wrap(loadParams, loadPastBarrenPages(loadParams, 0), prewarmer, executor);
     }
 
     /**
@@ -379,6 +391,10 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
         this.resumeFeedKey = feedKey;
         this.resumeFromCache = fromCache && feedKey != null;
         this.resumeExpectedCount = expectedCount;
+    }
+
+    void setRefreshPrewarmer(@Nullable RefreshPrewarmer<Post> refreshPrewarmer) {
+        this.refreshPrewarmer = refreshPrewarmer;
     }
 
     /**

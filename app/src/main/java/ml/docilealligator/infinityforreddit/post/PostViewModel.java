@@ -42,6 +42,13 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class PostViewModel extends ViewModel {
+    /**
+     * How close to the end of the loaded posts the next page is asked for. Far enough out that the
+     * page lands while the rows it adds are still below the viewport, so their thumbnails can be
+     * decoded before they scroll in instead of the page arriving under the user's thumb.
+     */
+    private static final int PREFETCH_DISTANCE = 30;
+
     private final Executor executor;
     private final Retrofit retrofit;
     private final RedditDataRoomDatabase redditDataRoomDatabase;
@@ -105,6 +112,10 @@ public class PostViewModel extends ViewModel {
     private volatile String resumeFeedKey;
     private volatile boolean resumeFromCache;
     private volatile int resumeExpectedCount;
+    // Handed to every source this view model builds, for the same reason and with the same threading
+    // as the resume fields above. See PostPagingSource#refreshPrewarmer.
+    @Nullable
+    private volatile RefreshPrewarmer<Post> refreshPrewarmer;
 
     private final MutableLiveData<SortType> sortTypeLiveData;
     private final MutableLiveData<PostFilter> postFilterLiveData;
@@ -137,7 +148,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, PREFETCH_DISTANCE, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -177,7 +188,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, PREFETCH_DISTANCE, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -219,7 +230,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, PREFETCH_DISTANCE, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -261,7 +272,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, PREFETCH_DISTANCE, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -304,7 +315,7 @@ public class PostViewModel extends ViewModel {
 
         sortTypeAndPostFilterLiveData = new SortTypeAndPostFilterLiveData(sortTypeLiveData, postFilterLiveData);
 
-        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, 4, false, 10), this::returnPagingSoruce);
+        Pager<String, Post> pager = new Pager<>(new PagingConfig(100, PREFETCH_DISTANCE, false, 10), this::returnPagingSoruce);
 
         posts = Transformations.switchMap(sortTypeAndPostFilterLiveData, sortAndPostFilter -> {
             changeSortTypeAndPostFilter(
@@ -455,6 +466,7 @@ public class PostViewModel extends ViewModel {
         // request spent on creation would be spent on a source that never serves a load. The source
         // itself clears the flag once a load has actually used it.
         paging3PagingSource.setResumeRequest(resumeFeedKey, resumeFromCache, resumeExpectedCount);
+        paging3PagingSource.setRefreshPrewarmer(refreshPrewarmer);
         pagingSource = paging3PagingSource;
         return paging3PagingSource;
     }
@@ -490,6 +502,19 @@ public class PostViewModel extends ViewModel {
         PostPagingSource currentSource = pagingSource;
         if (currentSource != null) {
             currentSource.setResumeRequest(resumeFeedKey, false, resumeExpectedCount);
+        }
+    }
+
+    /**
+     * Have every refreshed page warmed by {@code refreshPrewarmer} before the feed shows it, or stop
+     * with null. The fragment sets it while it has a view and clears it when the view goes, because
+     * this view model outlives the view and must not keep it.
+     */
+    public void setRefreshPrewarmer(@Nullable RefreshPrewarmer<Post> refreshPrewarmer) {
+        this.refreshPrewarmer = refreshPrewarmer;
+        PostPagingSource currentSource = pagingSource;
+        if (currentSource != null) {
+            currentSource.setRefreshPrewarmer(refreshPrewarmer);
         }
     }
 
