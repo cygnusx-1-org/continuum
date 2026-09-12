@@ -492,6 +492,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
         mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
+        mEmotePlugin.setAutoplayCommentGif(autoplayCommentGif);
     }
 
     public interface RetryLoadingMoreCallback {

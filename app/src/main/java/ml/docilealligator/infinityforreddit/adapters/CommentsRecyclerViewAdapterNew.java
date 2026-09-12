@@ -898,6 +898,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
         mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
+        mEmotePlugin.setAutoplayCommentGif(autoplayCommentGif);
     }
 
     public void updatePost(@NonNull Post post) {

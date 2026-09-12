@@ -47,7 +47,7 @@ public class ImageAndGifBlockParser extends AbstractBlockParser {
 
             String line = state.getLine().toString();
             Matcher matcher = redditPreviewPattern.matcher(line);
-            if (matcher.find() && matcher.end() == line.length()) {
+            if (matcher.find() && matchedToEndOfLine(matcher, line)) {
                 String id = matcher.group(1);
                 if (id != null) {
                     return mediaMetadataMap.containsKey(id) ? BlockStart.of(new ImageAndGifBlockParser(mediaMetadataMap.get(id))) : BlockStart.none();
@@ -55,7 +55,7 @@ public class ImageAndGifBlockParser extends AbstractBlockParser {
             }
 
             matcher = iRedditPattern.matcher(line);
-            if (matcher.find() && matcher.end() == line.length()) {
+            if (matcher.find() && matchedToEndOfLine(matcher, line)) {
                 String id = matcher.group(1);
                 if (id != null) {
                     return mediaMetadataMap.containsKey(id) ? BlockStart.of(new ImageAndGifBlockParser(mediaMetadataMap.get(id))) : BlockStart.none();
@@ -63,11 +63,29 @@ public class ImageAndGifBlockParser extends AbstractBlockParser {
             }
 
             matcher = gifPattern.matcher(line);
-            if (matcher.find() && matcher.end() == line.length()) {
+            if (matcher.find() && matchedToEndOfLine(matcher, line)) {
                 String id = matcher.group(1);
                 return mediaMetadataMap.containsKey(id) ? BlockStart.of(new ImageAndGifBlockParser(mediaMetadataMap.get(id))) : BlockStart.none();
             }
             return BlockStart.none();
+        }
+
+        /**
+         * Whether {@code matcher} ran to the end of {@code line}, disregarding trailing whitespace.
+         *
+         * Reddit's editor ends an embedded image or gif with two spaces -- a markdown hard break --
+         * whenever the author typed anything after it. Demanding the match end at the last character
+         * of the line missed every one of those, leaving the media to the inline emote renderer,
+         * which sizes it as a text glyph and animates gifs regardless of the comment-gif autoplay
+         * setting.
+         */
+        private static boolean matchedToEndOfLine(Matcher matcher, String line) {
+            for (int i = matcher.end(); i < line.length(); i++) {
+                if (!Character.isWhitespace(line.charAt(i))) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void setMediaMetadataMap(@Nullable Map<String, MediaMetadata> mediaMetadataMap) {

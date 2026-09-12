@@ -1464,6 +1464,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
         mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
+        mEmotePlugin.setAutoplayCommentGif(autoplayCommentGif);
     }
 
     public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int direction, int swipeLeftAction, int swipeRightAction) {

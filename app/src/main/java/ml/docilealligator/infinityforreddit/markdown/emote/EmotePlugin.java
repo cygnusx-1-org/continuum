@@ -29,6 +29,7 @@ import io.noties.markwon.image.ImageProps;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -41,6 +42,7 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
     private boolean dataSavingMode;
     private final boolean disableImagePreview;
     private final boolean canShowEmote;
+    private boolean autoplayCommentGif;
     private final OnEmoteClickListener onEmoteClickListener;
 
     public interface GlideStore {
@@ -94,6 +96,8 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
         }
 
         RequestManager requestManager = Glide.with(baseActivity);
+        boolean autoplayCommentGif = baseActivity.getDefaultSharedPreferences()
+                .getBoolean(SharedPreferencesUtils.AUTOPLAY_COMMENT_GIF, true);
         return new EmotePlugin(new GlideStore() {
             @NonNull
             @Override
@@ -105,14 +109,15 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
             public void cancel(@NonNull Target<?> target) {
                 requestManager.clear(target);
             }
-        }, embeddedMediaType, dataSavingMode, disableImagePreview, onEmoteClickListener);
+        }, embeddedMediaType, dataSavingMode, disableImagePreview, autoplayCommentGif,
+                onEmoteClickListener);
     }
 
     @SuppressWarnings("WeakerAccess")
     EmotePlugin(@NonNull final BaseActivity baseActivity,
                 @NonNull GlideStore glideStore, int embeddedMediaType,
                 @NonNull final OnEmoteClickListener onEmoteClickListener) {
-        this.asyncDrawableLoader = new GlideAsyncDrawableLoader(glideStore);
+        this.asyncDrawableLoader = new GlideAsyncDrawableLoader(glideStore, () -> autoplayCommentGif);
         String dataSavingModeString = Objects.requireNonNull(baseActivity.getDefaultSharedPreferences().getString(SharedPreferencesUtils.DATA_SAVING_MODE, SharedPreferencesUtils.DATA_SAVING_MODE_OFF));
         if (dataSavingModeString.equals(SharedPreferencesUtils.DATA_SAVING_MODE_ALWAYS)) {
             dataSavingMode = true;
@@ -121,17 +126,21 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
         }
         disableImagePreview = baseActivity.getDefaultSharedPreferences().getBoolean(SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW, false);
         canShowEmote = SharedPreferencesUtils.canShowEmote(embeddedMediaType);
+        autoplayCommentGif = baseActivity.getDefaultSharedPreferences()
+                .getBoolean(SharedPreferencesUtils.AUTOPLAY_COMMENT_GIF, true);
         this.onEmoteClickListener = onEmoteClickListener;
     }
 
     @SuppressWarnings("WeakerAccess")
     EmotePlugin(@NonNull GlideStore glideStore,
                 int embeddedMediaType, boolean dataSavingMode, boolean disableImagePreview,
+                boolean autoplayCommentGif,
                 @NonNull final OnEmoteClickListener onEmoteClickListener) {
-        this.asyncDrawableLoader = new GlideAsyncDrawableLoader(glideStore);
+        this.asyncDrawableLoader = new GlideAsyncDrawableLoader(glideStore, () -> this.autoplayCommentGif);
         this.dataSavingMode = dataSavingMode;
         this.disableImagePreview = disableImagePreview;
         canShowEmote = SharedPreferencesUtils.canShowEmote(embeddedMediaType);
+        this.autoplayCommentGif = autoplayCommentGif;
         this.onEmoteClickListener = onEmoteClickListener;
     }
 
@@ -140,6 +149,7 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
         this.asyncDrawableLoader = AsyncDrawableLoader.noOp();
         this.disableImagePreview = false;
         this.canShowEmote = false;
+        this.autoplayCommentGif = true;
         this.onEmoteClickListener = mediaMetadata -> {};
     }
 
@@ -231,21 +241,34 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
         return false;
     }
 
+    public void setAutoplayCommentGif(boolean autoplayCommentGif) {
+        this.autoplayCommentGif = autoplayCommentGif;
+    }
+
     private static class GlideAsyncDrawableLoader extends AsyncDrawableLoader {
 
         private final GlideStore glideStore;
+        private final BooleanSupplier autoplayCommentGif;
         private final Map<AsyncDrawable, Target<?>> cache = new HashMap<>(2);
 
-        GlideAsyncDrawableLoader(@NonNull GlideStore glideStore) {
+        GlideAsyncDrawableLoader(@NonNull GlideStore glideStore,
+                                 @NonNull BooleanSupplier autoplayCommentGif) {
             this.glideStore = glideStore;
+            this.autoplayCommentGif = autoplayCommentGif;
         }
 
         @Override
         public void load(@NonNull AsyncDrawable drawable) {
             final Target<Drawable> target = new AsyncDrawableTarget(drawable);
             cache.put(drawable, target);
-            glideStore.load(drawable)
-                    .into(target);
+            RequestBuilder<Drawable> request = glideStore.load(drawable);
+            if (!autoplayCommentGif.getAsBoolean()) {
+                // Decode the first frame only, so a gif sits still. Not enough on its own: the
+                // animated-image decoder ignores this, which is why AsyncDrawableTarget also leaves
+                // an Animatable unstarted.
+                request = request.dontAnimate();
+            }
+            request.into(target);
         }
 
         @Override
@@ -276,7 +299,7 @@ public class EmotePlugin extends AbstractMarkwonPlugin {
                     if (drawable.isAttached()) {
                         DrawableUtils.applyIntrinsicBoundsIfEmpty(resource);
                         drawable.setResult(resource);
-                        if (resource instanceof Animatable) {
+                        if (resource instanceof Animatable && autoplayCommentGif.getAsBoolean()) {
                             ((Animatable) resource).start();
                         }
                     }
