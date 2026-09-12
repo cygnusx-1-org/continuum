@@ -20,7 +20,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -2732,16 +2731,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 } else {
                     helper.play();
                 }
-                mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
         }
 
         @Override
         public void pause() {
-            if (helper != null) {
-                helper.pause();
-                mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            }
+            if (helper != null) helper.pause();
         }
 
         @Override
