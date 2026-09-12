@@ -216,6 +216,9 @@ object ResumeState {
             "ShareDataResolverActivity",
             "LinkResolverActivity",
             "QRCodeScannerActivity",
+            // Its only input is a feed-fragment id that is regenerated on every fragment creation,
+            // so a replayed instance would get no post list and finish itself.
+            "ShadowboxActivity",
         )
 
     /**

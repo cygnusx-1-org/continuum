@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The one info panel every Shadowbox page includes. Shared so that the header, title, tags and
+     action row land on exactly the same pixels whatever the page shows; it is hidden by alpha,
+     never by visibility, and pref-hidden counts go INVISIBLE, so nothing around them moves.
+
+     Laid out after the feed card (item_post_card_3_with_preview): subreddit avatar, coloured
+     subreddit and author, time on the right, then title, type and flair tags, and the link's
+     domain. Text that is not theme-coloured is white, because this sits over media rather than
+     over a card background. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/panel_shadowbox_info_panel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#80000000"
+    android:orientation="vertical"
+    android:paddingTop="8dp">
+
+    <LinearLayout
+        android:id="@+id/header_shadowbox_info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView
+            android:id="@+id/icon_image_view_shadowbox_info_panel"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@null" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/subreddit_name_text_view_shadowbox_info_panel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+            <TextView
+                android:id="@+id/user_text_view_shadowbox_info_panel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/post_time_text_view_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:maxLines="1"
+            android:textColor="#CCFFFFFF"
+            android:textSize="?attr/font_default"
+            android:fontFamily="?attr/font_family" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/title_text_view_shadowbox_info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:textColor="@android:color/white"
+        android:textSize="?attr/title_font_18"
+        android:fontFamily="?attr/title_font_family" />
+
+    <LinearLayout
+        android:id="@+id/tags_row_shadowbox_info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <com.libRG.CustomTextView
+            android:id="@+id/type_text_view_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:textSize="?attr/font_12"
+            android:fontFamily="?attr/font_family"
+            app:lib_setRadius="6dp"
+            app:lib_setRoundedView="true"
+            app:lib_setShape="rectangle" />
+
+        <com.libRG.CustomTextView
+            android:id="@+id/flair_custom_text_view_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:padding="4dp"
+            android:textSize="?attr/font_12"
+            android:fontFamily="?attr/font_family"
+            android:visibility="gone"
+            app:lib_setRadius="6dp"
+            app:lib_setRoundedView="true"
+            app:lib_setShape="rectangle" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <!-- Only a video page has anything to mute. INVISIBLE elsewhere rather than GONE, so the
+             row is the same height and the tags sit on the same pixels on every page. -->
+        <com.google.android.material.button.MaterialButton
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:id="@+id/mute_button_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="4dp"
+            android:contentDescription="@string/shadowbox_mute"
+            android:visibility="invisible"
+            app:strokeWidth="0dp"
+            app:icon="@drawable/ic_unmute_24dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/link_text_view_shadowbox_info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="#CCFFFFFF"
+        android:textSize="?attr/font_12"
+        android:fontFamily="?attr/font_family"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/action_row_shadowbox_info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <com.google.android.material.button.MaterialButton
+            style="?attr/materialIconButtonStyle"
+            android:id="@+id/upvote_button_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:minWidth="0dp"
+            android:backgroundTint="#00000000"
+            android:contentDescription="@string/upvote"
+            app:strokeWidth="0dp"
+            app:icon="@drawable/ic_upvote_24dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp" />
+
+        <TextView
+            android:id="@+id/score_text_view_shadowbox_info_panel"
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="?attr/font_12"
+            android:textStyle="bold"
+            android:fontFamily="?attr/font_family" />
+
+        <com.google.android.material.button.MaterialButton
+            style="?attr/materialIconButtonStyle"
+            android:id="@+id/downvote_button_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:minWidth="0dp"
+            android:backgroundTint="#00000000"
+            android:contentDescription="@string/downvote"
+            app:strokeWidth="0dp"
+            app:icon="@drawable/ic_downvote_24dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:id="@+id/comments_count_button_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:minWidth="0dp"
+            android:textColor="@android:color/white"
+            android:textSize="?attr/font_12"
+            android:textStyle="bold"
+            android:fontFamily="?attr/font_family"
+            android:contentDescription="@string/shadowbox_open_comments"
+            app:strokeWidth="0dp"
+            app:icon="@drawable/ic_comment_grey_24dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp"
+            app:iconPadding="12dp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <com.google.android.material.button.MaterialButton
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:id="@+id/save_button_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/save"
+            app:strokeWidth="0dp"
+            app:icon="@drawable/ic_bookmark_border_grey_24dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:id="@+id/fullscreen_button_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/shadowbox_open_full_viewer"
+            app:strokeWidth="0dp"
+            app:icon="@drawable/ic_fullscreen_white_rounded_24dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            style="?attr/materialIconButtonOutlinedStyle"
+            android:id="@+id/more_button_shadowbox_info_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/shadowbox_more_options"
+            app:strokeWidth="0dp"
+            app:icon="@drawable/ic_more_vert_white_24dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="24dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/player_view_shadowbox_media_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:use_controller="false"
+        app:surface_type="texture_view"
+        app:resize_mode="fit" />
+
+    <com.google.android.material.loadingindicator.LoadingIndicator
+        android:id="@+id/progress_bar_shadowbox_media_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <!-- This page's play/pause control: shown while the video is paused, and whenever the bar is
+         up, so the same spot starts and stops playback. -->
+    <com.google.android.material.button.MaterialButton
+        style="?attr/materialIconButtonOutlinedStyle"
+        android:id="@+id/play_button_shadowbox_media_video"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/shadowbox_play_pause"
+        android:visibility="gone"
+        app:strokeWidth="0dp"
+        app:backgroundTint="#80000000"
+        app:icon="@drawable/ic_play_arrow_24dp"
+        app:iconTint="@android:color/white"
+        app:iconSize="48dp"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp" />
+
+</FrameLayout>

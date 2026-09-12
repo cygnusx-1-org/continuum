@@ -14,6 +14,7 @@ public class SharedPreferencesUtils {
     public static final String ENABLE_NOTIFICATION_KEY = "enable_notification";
     public static final String NOTIFICATION_INTERVAL_KEY = "notificaiton_interval";
     public static final String LAZY_MODE_INTERVAL_KEY = "lazy_mode_interval";
+    public static final String SHADOWBOX_HIDE_TEXT_AND_PREVIEWLESS_POSTS = "shadowbox_hide_text_and_previewless_posts";
     public static final String THEME_KEY = "theme";
     // Values of THEME_KEY, matching R.array.settings_theme_values.
     public static final String THEME_LIGHT = "0";

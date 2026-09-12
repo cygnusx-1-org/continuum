@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_shadowbox_media_preview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <ImageView
+        android:id="@+id/image_view_shadowbox_media_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null" />
+
+    <!-- Only a video that the full player has to resolve gets a badge. A link post shows its
+         preview alone: the info panel already names the domain. -->
+    <ImageView
+        android:id="@+id/badge_image_view_shadowbox_media_preview"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center"
+        android:padding="12dp"
+        android:visibility="gone"
+        android:contentDescription="@null"
+        app:tint="@android:color/white" />
+
+</FrameLayout>

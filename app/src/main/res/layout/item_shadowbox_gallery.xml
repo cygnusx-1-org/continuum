@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Aspect-ratio view, not a plain ImageView: a tile with no intrinsic height measures to
+             nothing until Glide delivers a drawable, and a failed load then leaves a 0px row. -->
+        <ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView
+            android:id="@+id/image_view_item_shadowbox_gallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/play_badge_image_view_item_shadowbox_gallery"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:padding="12dp"
+            android:src="@drawable/ic_play_circle_36dp"
+            android:visibility="gone"
+            android:contentDescription="@null"
+            app:tint="@android:color/white" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/caption_text_view_item_shadowbox_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="4dp"
+        android:textColor="#CCFFFFFF"
+        android:textSize="?attr/font_default"
+        android:fontFamily="?attr/font_family"
+        android:visibility="gone" />
+
+</LinearLayout>

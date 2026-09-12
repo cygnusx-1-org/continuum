@@ -93,6 +93,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
+import ml.docilealligator.infinityforreddit.shadowbox.ShadowboxActivity;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -1374,7 +1375,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_lazy_mode_post_fragment) {
+        if (item.getItemId() == R.id.action_shadowbox_mode_post_fragment) {
+            startShadowboxMode();
+            return true;
+        } else if (item.getItemId() == R.id.action_lazy_mode_post_fragment) {
             if (isInLazyMode) {
                 stopLazyMode();
             } else {
@@ -1393,6 +1397,24 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             return true;
         }
         return false;
+    }
+
+    /**
+     * Opens Shadowbox Mode on this feed, starting from the post at the top of the screen. The
+     * activity asks this fragment for the loaded posts over EventBus (the list is far too big for
+     * an Intent), so it only gets the fragment's id and where to start.
+     */
+    private void startShadowboxMode() {
+        if (!hasPost || mAdapter == null) {
+            Toast.makeText(mActivity, R.string.no_posts_no_lazy_mode, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int position = ScrollAnchor.captureTopmost(binding.recyclerViewPostFragment).position;
+        Intent intent = new Intent(mActivity, ShadowboxActivity.class);
+        intent.putExtra(ShadowboxActivity.EXTRA_POST_FRAGMENT_ID, getPostFragmentId());
+        intent.putExtra(ShadowboxActivity.EXTRA_POST_LIST_POSITION, Math.max(position, 0));
+        intent.putExtra(ShadowboxActivity.EXTRA_IS_NSFW_SUBREDDIT, getIsNsfwSubreddit());
+        mActivity.startActivity(intent);
     }
 
     private void noPostFound() {

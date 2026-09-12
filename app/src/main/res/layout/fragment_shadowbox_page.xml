@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_shadowbox_page_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <FrameLayout
+        android:id="@+id/media_container_shadowbox_page_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/blur_overlay_shadowbox_page_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/blur_image_view_shadowbox_page_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/blur_label_text_view_shadowbox_page_fragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="?attr/font_20"
+                android:textStyle="bold"
+                android:fontFamily="?attr/font_family" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/shadowbox_tap_to_reveal"
+                android:textColor="#CCFFFFFF"
+                android:textSize="?attr/font_default"
+                android:fontFamily="?attr/font_family" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <include
+        android:id="@+id/info_panel_shadowbox_page_fragment"
+        layout="@layout/shadowbox_info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
+</FrameLayout>

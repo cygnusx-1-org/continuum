@@ -71,7 +71,8 @@ object AccountScopedKeys {
         // another account switch the bar off for everyone.
         "bottom_app_bar",
         "hide_fab_in_post_feed", "hide_subreddit_description", "default_search_result_tab",
-        "lazy_mode_interval", "vote_buttons_on_the_right", "show_absolute_number_of_votes",
+        "lazy_mode_interval", "shadowbox_hide_text_and_previewless_posts",
+        "vote_buttons_on_the_right", "show_absolute_number_of_votes",
         "show_post_and_comment_toolbar_items_based_on_space", "force_max_refresh_rate",
 
         // Immersive interface, and time format

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A text post's page. The body starts at the top of the frame whatever its length, so a post
+     reads the same however much of it there is and a long one has the whole page to scroll
+     through. A post with no selftext shows its title in the body's place. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_shadowbox_media_text"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <TextView
+        android:id="@+id/title_text_view_shadowbox_media_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone"
+        android:textColor="@android:color/white"
+        android:textSize="?attr/title_font_20"
+        android:fontFamily="?attr/title_font_family" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/content_recycler_view_shadowbox_media_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:clipToPadding="false" />
+
+</FrameLayout>

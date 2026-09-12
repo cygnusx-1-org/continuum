@@ -581,6 +581,11 @@
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.Draggable" />
         <activity
+            android:name=".shadowbox.ShadowboxActivity"
+            android:configChanges="orientation|screenSize|layoutDirection"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.Shadowbox" />
+        <activity
             android:name=".activities.ViewPostDetailActivity"
             android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.Slidable"

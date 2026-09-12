@@ -50,6 +50,13 @@
         <item name="android:fontFamily">?attr/font_family</item>
     </style>
 
+    <!-- Shadowbox Mode: opaque black, no action bar. Not translucent on purpose: Draggable's
+         translucency exists only for drag-to-dismiss, which the shadowbox does not do. -->
+    <style name="AppTheme.Shadowbox" parent="AppTheme.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:fontFamily">?attr/font_family</item>
+    </style>
+
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
         <item name="android:fontFamily">?attr/font_family</item>
     </style>

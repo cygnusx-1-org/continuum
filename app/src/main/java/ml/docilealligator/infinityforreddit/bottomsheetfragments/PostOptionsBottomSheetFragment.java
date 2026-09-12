@@ -149,6 +149,25 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
         return true;
     }
 
+    /**
+     * The screen that will carry out a moderation action, or null when there is none.
+     *
+     * <p>The reply-notification toggle and everything behind Mod are not done by this sheet: it
+     * hands them to the fragment it was opened from, which is the screen holding the post list
+     * those actions report back to. A sheet shown on an <em>activity's</em> fragment manager has
+     * no such fragment, and a screen whose fragment does not implement the interface has no such
+     * handler either; in both cases the entries below used to appear, dismiss the sheet and do
+     * nothing. They are hidden instead, since the post's own comments screen can still do all of
+     * it.
+     */
+    @Nullable
+    private PostModerationActionHandler moderationActionHandler() {
+        Fragment parentFragment = getParentFragment();
+        return parentFragment instanceof PostModerationActionHandler
+                ? (PostModerationActionHandler) parentFragment
+                : null;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -362,12 +381,13 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                     dismiss();
                 });
 
-                if (mPost.getAuthor().equals(mBaseActivity.accountName)) {
+                if (mPost.getAuthor().equals(mBaseActivity.accountName) && moderationActionHandler() != null) {
                     binding.notificationTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
                     binding.notificationTextViewPostOptionsBottomSheetFragment.setText(mPost.isSendReplies() ? R.string.disable_reply_notifications : R.string.enable_reply_notifications);
                     binding.notificationTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
-                        if (getParentFragment() instanceof PostModerationActionHandler) {
-                            ((PostModerationActionHandler) getParentFragment()).toggleNotification(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0));
+                        PostModerationActionHandler handler = moderationActionHandler();
+                        if (handler != null) {
+                            handler.toggleNotification(mPost, getArguments().getInt(EXTRA_POST_LIST_POSITION, 0));
                         }
                         dismiss();
                     });
@@ -387,20 +407,22 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                     dismiss();
                 });
 
-                if (mPost.isCanModPost()) {
+                if (mPost.isCanModPost() && moderationActionHandler() != null) {
                     binding.modTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
                     binding.modTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                        Fragment parentFragment = getParentFragment();
+                        if (parentFragment == null) {
+                            return;
+                        }
                         PostModerationActionBottomSheetFragment postModerationActionBottomSheetFragment =
                                 PostModerationActionBottomSheetFragment.newInstance(
                                         mPost, getArguments().getBoolean(EXTRA_HIDE_CHANGE_FLAIR_OPTION, false),
                                         getArguments().getInt(EXTRA_POST_LIST_POSITION, 0)
                                 );
-                        Fragment parentFragment = getParentFragment();
-                        if (parentFragment != null) {
-                            postModerationActionBottomSheetFragment.show(parentFragment.getChildFragmentManager(), postModerationActionBottomSheetFragment.getTag());
-                        } else {
-                            postModerationActionBottomSheetFragment.show(mBaseActivity.getSupportFragmentManager(), postModerationActionBottomSheetFragment.getTag());
-                        }
+                        // Its own child fragment manager, so the moderation sheet's parent is the
+                        // handler as well -- that is how it reaches one. Never the activity's:
+                        // shown there its every action would be the silent no-op this hides.
+                        postModerationActionBottomSheetFragment.show(parentFragment.getChildFragmentManager(), postModerationActionBottomSheetFragment.getTag());
                         dismiss();
                     });
                 }

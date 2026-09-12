@@ -73,6 +73,13 @@
         app:title="@string/settings_lazy_mode_interval_title"
         app:useSimpleSummaryProvider="true" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="shadowbox_hide_text_and_previewless_posts"
+        app:icon="@drawable/ic_image_day_night_24dp"
+        app:title="@string/settings_shadowbox_hide_text_and_previewless_posts_title"
+        app:summary="@string/settings_shadowbox_hide_text_and_previewless_posts_summary" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
         app:title="@string/settings_category_post_and_comment_title" />
 
