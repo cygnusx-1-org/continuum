@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    简体中文翻译（Continuum）
+    术语与 Infinity-For-Reddit 简中版保持一致（同一译者参与），
+    并补齐 Continuum 独有功能（Shadowbox 模式、API 统计、帖子过滤器等）的翻译。
+    术语对照：Subreddit=版块, Multireddit=聚合版块, Flair=标签。
+-->
 <resources>
     <string name="login_activity_label">"登录"</string>
     <string name="comment_activity_label">"发送评论"</string>
@@ -25,14 +31,11 @@
     <string name="selected_subeddits_activity_label">"被选中的版块"</string>
     <string name="report_activity_label">"举报"</string>
 
-    <!-- Fuzzy -->
     <string name="view_imgur_media_activity_image_label">"图片 %1$d/%2$d"</string>
 
-    <!-- Fuzzy -->
     <string name="view_imgur_media_activity_video_label">"视频 %1$d/%2$d"</string>
     <string name="send_private_message_activity_label">"私信"</string>
 
-    <!-- Fuzzy -->
     <string name="view_reddit_gallery_activity_image_label">"图片 %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_gif_label">"动图 %1$d/%2$d"</string>
     <string name="view_reddit_gallery_activity_video_label">"视频 %1$d/%2$d"</string>
@@ -67,7 +70,6 @@
     <string name="parse_json_response_error">"解析 JSON 响应错误"</string>
     <string name="retrieve_token_error">"获取 Token 错误"</string>
 
-    <!-- remove redundant symbols "。" -->
     <string name="something_went_wrong">"发生了一些错误。请稍后重试。"</string>
     <string name="access_denied">"访问被拒绝"</string>
     <string name="parse_user_info_error">"解析用户信息错误"</string>
@@ -99,12 +101,10 @@
 点击以重试。"</string>
     <string name="no_messages">"空"</string>
 
-    <!-- Fuzzy -->
-    <string name="karma_info">"声望：%1$d"</string>
+    <string name="karma_info">"声望：%1$,d"</string>
 
-    <!-- Fuzzy -->
     <string name="karma_info_user_detail">"声望：
-%1$d (%2$d + %3$d)"</string>
+%1$,d (%2$d + %3$d)"</string>
     <string name="cakeday_info">"注册日：
 %1$s"</string>
     <string name="since_info">"创建于：
@@ -118,8 +118,8 @@
     <string name="hidden">"已隐藏"</string>
     <string name="saved">"已保存"</string>
     <string name="settings">"设置"</string>
-    <string name="subscribers_number_detail">"关注者：%1$d"</string>
-    <string name="online_subscribers_number_detail">"在线：%1$d"</string>
+    <string name="subscribers_number_detail">"关注者：%1$,d"</string>
+    <string name="online_subscribers_number_detail">"在线：%1$,d"</string>
     <string name="cannot_fetch_subreddit_info">"无法获取版块信息"</string>
     <string name="cannot_fetch_user_info">"无法获取用户信息"</string>
     <string name="cannot_fetch_sidebar">"无法获取侧边栏"</string>
@@ -137,9 +137,7 @@
     <string name="unfollowed">"已取消关注"</string>
     <string name="unfollow_failed">"取消关注失败"</string>
 
-    <!-- 参考国内一些评论，将“Subreddit”翻译为“社区” -->
 
-    <!-- 这个感觉不必翻译 -->
     <string name="app_label">"Continuum"</string>
     <string name="search_hint">"搜索您要找的"</string>
     <string name="no_posts_no_lazy_mode">"暂无可用帖子"</string>
@@ -163,7 +161,6 @@
     <string name="send_message_failed">"无法发送此消息"</string>
     <string name="select_a_subreddit">"请先选择一个版块"</string>
 
-    <!-- Fuzzy -->
     <string name="title_required">"帖子需要有标题"</string>
     <string name="link_required">"嘿！链接在哪呢？"</string>
     <string name="select_an_image">"请先选择一张图片"</string>
@@ -181,7 +178,6 @@
     <string name="rules">"规则"</string>
     <string name="post_link_hint">"链接"</string>
 
-    <!-- reddit的“板块”和“子板块”是怎么翻译的，我分辨不了，reddit有“子板块”的概念吗？我全都翻译为“板块”了。 -->
     <string name="subreddits">"版块"</string>
     <string name="users">"用户"</string>
     <string name="multi_reddits">"聚合版块"</string>
@@ -246,7 +242,6 @@
     <string name="posting_video">"视频发布中"</string>
     <string name="posting_image">"图片发布中"</string>
 
-    <!-- Fuzzy -->
     <string name="please_wait">"请稍等。"</string>
     <string name="add_account">"添加帐户"</string>
     <string name="anonymous_account">"匿名"</string>
@@ -305,16 +300,13 @@
     <string name="settings_mute_autoplaying_videos_title">"静音自动播放的视频"</string>
     <string name="settings_start_autoplay_visible_area_offset_portrait_title">"自动播放视频可视区域偏移（竖屏）"</string>
 
-    <!-- Fuzzy -->
     <string name="settings_start_autoplay_visible_area_offset_portrait_summary">"当 %1$d%% 个视频可见时，开始自动播放"</string>
     <string name="settings_start_autoplay_visible_area_offset_landscape_title">"自动播放视频可视区域偏移（横屏）"</string>
 
-    <!-- Fuzzy -->
     <string name="settings_start_autoplay_visible_area_offset_landscape_summary">"当 %1$d%% 个视频可见时，开始自动播放"</string>
     <string name="settings_immersive_interface_title">"沉浸式界面"</string>
     <string name="settings_immersive_interface_summary">"不应用到所有页面"</string>
 
-    <!-- 请问这个是怎么回事？“Padding”没有翻译，是有特殊的用词吗？ -->
     <string name="settings_customize_tabs_in_main_page_title">"自定义主界面标签页"</string>
     <string name="settings_enable_bottom_app_bar_title">"开启底部导航栏"</string>
     <string name="settings_category_post_and_comment_title">"帖子和评论"</string>
@@ -323,15 +315,12 @@
     <string name="settings_volume_keys_navigate_posts_title">"使用音量键浏览帖子"</string>
     <string name="settings_mute_video_title">"静音视频"</string>
 
-    <!-- Fuzzy -->
     <string name="settings_video_player_ignore_nav_bar_title">"视频播放器中忽略导航栏"</string>
 
-    <!-- Fuzzy -->
     <string name="settings_video_player_ignore_nav_bar_summary">"防止视频控制栏有额外的外边距"</string>
     <string name="settings_confirm_to_exit">"确认退出"</string>
     <string name="settings_category_comment_title">"评论"</string>
 
-    <!-- Fuzzy -->
     <string name="settings_show_top_level_comments_first_title">"优先显示顶层评论"</string>
     <string name="settings_show_comment_divider_title">"显示评论分隔线"</string>
     <string name="settings_comment_toolbar_hide_on_click">"点击以显示/隐藏评论工具栏"</string>
@@ -387,7 +376,6 @@
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"版块"</string>
 
-    <!-- 这个应该不做翻译为好，它是指示社continuum区位置的。在关于界面 -->
     <string name="settings_subreddit_summary">"r/continuumreddit"</string>
     <string name="settings_share_title">"分享"</string>
     <string name="settings_share_summary">"如果您喜欢此应用，可以分享给其他人"</string>
@@ -412,7 +400,6 @@
     <string name="settings_tab_post_type">"类型"</string>
     <string name="settings_tab_subreddit_name">"版块名称（不带 r/ 前缀）"</string>
 
-    <!-- Fuzzy -->
     <string name="settings_tab_multi_reddit_name">"聚合版块名称（/user/您的用户名/m/您的聚合版块名称）"</string>
     <string name="settings_tab_username">"用户名（不带 u/ 前缀）"</string>
     <string name="no_developer_easter_egg">"这里没有开发者选项"</string>
@@ -485,7 +472,6 @@
     <string name="duplicate_multi_reddit">"此聚合版块已存在"</string>
     <string name="edit_multi_reddit_failed">"无法编辑此聚合版块"</string>
 
-    <!-- Fuzzy -->
     <string name="delete_multi_reddit_success">"删除成功"</string>
     <string name="delete_multi_reddit_failed">"删除失败"</string>
     <string name="delete_multi_reddit_dialog_message">"您确定吗？"</string>
@@ -509,16 +495,12 @@
     <string name="theme_item_color_primary_light_theme">"明亮主题主色调"</string>
     <string name="theme_item_color_primary_light_theme_detail">"应用于：悬浮动作按钮和按钮的背景"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_primary_text_color">"主要文字颜色"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_primary_text_color_detail">"应用于：主要文字"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_secondary_text_color">"次要文字颜色"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_secondary_text_color_detail">"应用于：次要文字"</string>
     <string name="theme_item_post_title_color">"帖子标题颜色"</string>
     <string name="theme_item_post_title_color_detail">"应用于：帖子标题"</string>
@@ -533,29 +515,22 @@
     <string name="theme_item_link_color">"链接颜色"</string>
     <string name="theme_item_link_color_detail">"应用于：链接"</string>
 
-    <!-- 是不是翻译为“已读消息文字颜色”更好一点？ -->
-    <!-- Fuzzy -->
     <string name="theme_item_received_message_text_color">"已接受消息文字颜色"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_received_message_text_color_detail">"应用于：已接收私人消息"</string>
     <string name="theme_item_sent_message_text_color">"已发送消息文字颜色"</string>
     <string name="theme_item_sent_message_text_color_detail">"应用于：已发送私人消息"</string>
     <string name="theme_item_background_color">"背景颜色"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_background_color_detail">"应用于：每页背景和导航抽屉"</string>
     <string name="theme_item_card_view_background_color">"卡片视图背景颜色"</string>
     <string name="theme_item_card_view_background_color_detail">"应用于：帖子背景和消息背景"</string>
     <string name="theme_item_comment_background_color">"评论背景颜色"</string>
     <string name="theme_item_comment_background_color_detail">"应用于：评论背景"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_fully_collapsed_comment_background_color">"完全折叠的评论背景颜色"</string>
     <string name="theme_item_fully_collapsed_comment_background_color_detail">"应用于：完全折叠的评论背景"</string>
 
-    <!-- “Awarded”暂时翻译为“被赞赏的” -->
-    <!-- Fuzzy -->
     <string name="theme_item_received_message_background_color">"已接收消息的背景颜色"</string>
     <string name="theme_item_received_message_background_color_detail">"应用于：已接收私人消息的背景"</string>
     <string name="theme_item_sent_message_background_color">"已发送消息的背景色"</string>
@@ -571,10 +546,8 @@
     <string name="theme_item_comment_icon_and_info_color">"评论图标和信息颜色"</string>
     <string name="theme_item_comment_icon_and_info_color_detail">"应用于：评论图标与分数"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_fab_icon_color">"悬浮动作按钮图标颜色"</string>
 
-    <!-- Fuzzy -->
     <string name="theme_item_fab_icon_color_detail">"应用于：悬浮动作按钮图标"</string>
     <string name="theme_item_send_message_icon_color">"发送消息图标颜色"</string>
     <string name="theme_item_send_message_icon_color_detail">"应用于：发送私人消息图标"</string>
@@ -629,7 +602,6 @@
     <string name="theme_item_subreddit_color">"版块颜色"</string>
     <string name="theme_item_subreddit_color_detail">"应用于：版块名称"</string>
 
-    <!-- What is “Author Flair”？ -->
     <string name="theme_item_author_flair_text_color">"作者头衔颜色"</string>
     <string name="theme_item_author_flair_text_color_detail">"应用于：评论中的作者头衔"</string>
     <string name="theme_item_submitter_color">"楼主"</string>
@@ -712,8 +684,7 @@
     <string name="reset_all_settings_success">"成功重置所有设置"</string>
     <string name="username_preview">"u/edgan"</string>
 
-    <!-- 此项也建议不要翻译，它大概是主题界面预览时显示社区位置的 -->
-    <string name="subreddit_preview">"r/continuumeddit"</string>
+    <string name="subreddit_preview">"r/continuumreddit"</string>
     <string name="primary_text_preview">"主要文字"</string>
     <string name="secondary_text_preview">"次要文字"</string>
     <string name="post_title_preview">"这是一个帖子"</string>
@@ -761,7 +732,6 @@
     <string name="default_font_font_preview">"默认字体"</string>
     <string name="load_video_in_redgifs">"尝试加载 Redgifs 上的视频"</string>
 
-    <!-- Don't know how to translate it, never seen this before. -->
     <string name="top_score">"%1$s 分"</string>
     <string name="login_activity_2fa_prompt">"如果您启用了两步验证，请按如下格式输入密码（使用英文的冒号）：&lt;密码&gt;:&lt;两步验证代码&gt;。
 范例：yourpass:123456"</string>
@@ -796,7 +766,6 @@
     <string name="settings_pull_to_refresh_title">"下拉刷新"</string>
     <string name="settings_security_title">"安全"</string>
 
-    <!-- Fuzzy -->
     <string name="settings_long_press_to_hide_toolbar_in_compact_layout_title">"在紧凑布局下长按隐藏工具栏"</string>
     <string name="settings_post_compact_layout_toolbar_hidden_by_default_title">"默认隐藏紧凑布局中的工具栏"</string>
     <string name="settings_customize_bottom_app_bar_title">"自定义底部导航栏"</string>
@@ -838,7 +807,6 @@ Reddit 视频分辨率较低。
     <string name="change_sort_type">"更改排序类型"</string>
     <string name="change_post_layout">"更改帖子布局"</string>
 
-    <!-- Fuzzy -->
     <string name="warning">"警告"</string>
     <string name="dismiss">"忽略"</string>
     <string name="leave">"离开"</string>
@@ -890,7 +858,6 @@ Reddit 视频分辨率较低。
     <string name="settings_mark_posts_as_read_on_scroll_title">"滚动后标记帖子为已读"</string>
     <string name="settings_hide_read_posts_automatically_title">"自动隐藏已读帖子"</string>
 
-    <!-- Sort by type? -->
     <string name="settings_sort_type_title">"排序类型"</string>
     <string name="settings_save_sort_type_title">"保存排序类型"</string>
     <string name="settings_subreddit_default_sort_type_title">"版块默认排序类型"</string>
@@ -967,7 +934,6 @@ Reddit 视频分辨率较低。
     <string name="theme_item_current_user_color_detail">"应用于：评论中的当前用户"</string>
     <string name="anonymous_front_page_no_subscriptions">"立刻加入一个版块并开始浏览！"</string>
 
-    <!-- Fuzzy -->
     <string name="backup_settings_success">"成功将设置导出到目标文件夹。"</string>
     <string name="create_zip_in_destination_directory_failed">"无法在目标文件夹创建备份压缩包"</string>
     <string name="backup_some_settings_failed">"部分设置无法备份，但其他设置已成功导出到目标文件夹"</string>
@@ -1001,7 +967,7 @@ Reddit 视频分辨率较低。
     <string name="suggest_title">"推荐标题"</string>
     <string name="suggest_title_failed">"推荐标题失败"</string>
     <string name="action_delete_logs">"删除日志"</string>
-    <string name="inbox_with_count">"收件箱 (%1$d)"</string>
+    <string name="inbox_with_count">"收件箱 (%1$,d)"</string>
     <string name="comment_continue_thread">"继续帖子"</string>
     <string name="settings_swipe_vertically_to_go_back_from_media_title">"垂直滑动退出图片和动图界面"</string>
     <string name="settings_hide_post_flair">"隐藏帖子头衔"</string>
@@ -1027,7 +993,7 @@ Reddit 视频分辨率较低。
 “Material You Amoled”。
 否则，您需要在启用 Material You 之前先为它们重命名。"</string>
     <string name="settings_enable_material_you_title">"启用 Material You"</string>
-    <string name="settings_enable_material_you_summary">"根据 Your Wallpaper 个性化 Continuum"</string>
+    <string name="settings_enable_material_you_summary">"根据壁纸个性化 Continuum"</string>
     <string name="settings_apply_material_you_title">"应用 Material You"</string>
     <string name="settings_apply_material_you_summary">"如果 Continuum 未更改主题"</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">"显示收藏的聚合版块"</string>
@@ -1079,7 +1045,6 @@ Reddit 视频分辨率较低。
     <string name="settings_default_playback_speed_title">"默认播放速度"</string>
     <string name="settings_link_handler_value_external_browser">"外部浏览器"</string>
 
-    <!-- 应该指的是 Chrome 等浏览器的一个功能，属于术语不翻译 -->
     <string name="settings_link_handler_value_custom_tab">"Custom Tab"</string>
     <string name="settings_link_handler_value_internal_browser">"内部浏览器"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"旧版视频控制栏界面"</string>
@@ -1112,12 +1077,10 @@ Reddit 视频分辨率较低。
     <string name="action_contact_mods">"联系管理员"</string>
     <string name="fetch_streamable_video_failed">"获取流式传输视频失败"</string>
 
-    <!-- EditProfileService Notification -->
     <string name="submit_change_avatar">"提供修改头像"</string>
     <string name="submit_change_banner">"提交修改横幅"</string>
     <string name="submit_save_profile">"提交保存档案"</string>
 
-    <!-- EditProfileActivity -->
     <string name="action_edit_profile">"编辑档案"</string>
     <string name="remove_avatar">"删除头像"</string>
     <string name="remove_banner">"删除横幅"</string>
@@ -1149,7 +1112,6 @@ Reddit 视频分辨率较低。
     <string name="settings_fixed_height_preview_in_card_title">"卡片固定高度"</string>
     <string name="settings_hide_text_post_content">"隐藏文字帖内容"</string>
 
-    <!-- What is the "Starting form" -->
     <string name="settings_show_fewer_toolbar_options_threshold_title">"自何处开始显示更少的工具栏选项"</string>
     <string name="settings_show_fewer_toolbar_options_threshold_summary">"层级 %1$d"</string>
     <string name="settings_show_author_avatar_title">"显示作者头像"</string>
@@ -1173,7 +1135,6 @@ Reddit 视频分辨率较低。
     <string name="option_5_hint">"选项 5"</string>
     <string name="option_6_hint">"选项 6"</string>
 
-    <!-- The number means the number in the math or the phone number? -->
     <string name="not_a_valid_number">"不是有效的数字"</string>
     <string name="post_karma">"帖子声望："</string>
     <string name="comment_karma">"评论声望："</string>
@@ -1187,7 +1148,6 @@ Reddit 视频分辨率较低。
     <string name="handle_link">"处理链接"</string>
     <string name="invalid_link">"无效链接"</string>
 
-    <!-- Fuzzy -->
     <string name="error_unsupported_video">"媒体中包含视频轨，但此设备无法播放"</string>
     <string name="error_unsupported_audio">"媒体中包含音频轨，但此设备无法播放"</string>
     <string name="exo_controls_volume_up_description">"增大音量"</string>
@@ -1214,7 +1174,6 @@ Reddit 视频分辨率较低。
     <string name="edited_time">"编辑于 %s"</string>
     <string name="welcome_to_continuum">"欢迎使用 Continuum，浏览 Reddit 社区的全新方式！"</string>
 
-    <!-- Fuzzy -->
     <string name="subscription_prompt">"在您深入了解此应用提供的无数可能性之前，我想坦率且透明地说明我已实施的一项重大变更，以确保为您提供最佳服务。
 
 从现在开始，您将需要按月订阅才能在 Continuum 中使用 Reddit API，这是因为 Reddit 自 2023 年 7 月 1 日起开始对 API 访问收费。"</string>
