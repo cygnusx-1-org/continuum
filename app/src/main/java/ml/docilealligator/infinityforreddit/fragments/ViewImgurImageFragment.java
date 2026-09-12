@@ -374,7 +374,7 @@ public class ViewImgurImageFragment extends Fragment {
                 File cacheDir = Utils.getCacheDir(activity);
                 if (cacheDir != null) {
                     Toast.makeText(activity, R.string.save_image_first, Toast.LENGTH_SHORT).show();
-                    SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, new Handler(), resource, cacheDir.getPath(),
+                    SaveBitmapImageToFile.saveBitmapImageToFile(mExecutor, new Handler(), resource, cacheDir.getPath(),
                             MediaFileNameUtils.getDownloadFileName(imgurMedia, postTitle),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override

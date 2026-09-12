@@ -548,7 +548,7 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                 File cacheDir = Utils.getCacheDir(activity);
                 if (cacheDir != null) {
                     Toast.makeText(activity, R.string.save_image_first, Toast.LENGTH_SHORT).show();
-                    SaveBitmapImageToFile.SaveBitmapImageToFile(mExecutor, handler, resource, cacheDir.getPath(),
+                    SaveBitmapImageToFile.saveBitmapImageToFile(mExecutor, handler, resource, cacheDir.getPath(),
                             getShareFileName(),
                             new SaveBitmapImageToFile.SaveBitmapImageToFileListener() {
                                 @Override

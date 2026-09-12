@@ -10,16 +10,17 @@ import java.util.concurrent.Executor;
 
 public class SaveBitmapImageToFile {
 
-    public static void SaveBitmapImageToFile(Executor executor, Handler handler, Bitmap resource, String cacheDirPath, String fileName,
+    public static void saveBitmapImageToFile(Executor executor, Handler handler, Bitmap resource, String cacheDirPath, String fileName,
                                              SaveBitmapImageToFileListener saveBitmapImageToFileListener) {
         executor.execute(() -> {
+            File imageFile = new File(cacheDirPath, fileName);
             try {
-                File imageFile = new File(cacheDirPath, fileName);
-                OutputStream outputStream = new FileOutputStream(imageFile);
-                resource.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                outputStream.flush();
-                outputStream.close();
-
+                // Reported successful only once the stream is closed: compress() writes through a
+                // buffer, so a full disk surfaces from close(), and posting success inside the
+                // try would hand the listener a truncated file and then fail it as well.
+                try (OutputStream outputStream = new FileOutputStream(imageFile)) {
+                    resource.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                }
                 handler.post(() -> saveBitmapImageToFileListener.saveSuccess(imageFile));
             } catch (IOException e) {
                 handler.post(saveBitmapImageToFileListener::saveFailed);

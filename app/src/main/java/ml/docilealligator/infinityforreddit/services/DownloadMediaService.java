@@ -773,16 +773,25 @@ public class DownloadMediaService extends JobService {
             }
         }
 
-        Response<ResponseBody> response;
-        String destinationFileUriString = null;
-        boolean isDefaultDestination = true;
+        String destinationFileUriString;
+        boolean isDefaultDestination;
         try {
-            response = downloadRetrofit.create(DownloadFile.class).downloadFile(fileUrl).execute();
-            if (response.isSuccessful() && response.body() != null) {
+            Response<ResponseBody> response = downloadRetrofit.create(DownloadFile.class).downloadFile(fileUrl).execute();
+            // OkHttp keeps the connection checked out until the body is read to its end or closed,
+            // and most of the paths below leave it part-read or untouched, so close it on the way
+            // out however this method returns.
+            try (ResponseBody responseBody = response.body()) {
+                if (!response.isSuccessful() || responseBody == null) {
+                    Log.e("ImgurDownload", "Download response not successful: " + response.code());
+                    downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType, null,
+                            ERROR_FILE_CANNOT_DOWNLOAD, multipleDownloads);
+                    return false;
+                }
+
                 if (isShare) {
                     // Share-only: write to the cache and hand the file to the requesting activity.
                     return shareMediaFromCache(params, builder, mediaType, randomNotificationIdOffset,
-                            response.body(), fileName, mimeType);
+                            responseBody, fileName, mimeType);
                 }
 
                 if (destinationDirUri == null && subredditDirParentUri != null && subredditDirName != null) {
@@ -808,32 +817,28 @@ public class DownloadMediaService extends JobService {
                     destinationFileUriString = getDefaultDownloadPath(mediaType,
                             separateDownloadFolder ? subredditName : null, fileName);
                 }
-            } else {
-                Log.e("ImgurDownload", "Download response not successful: " + response.code());
-                downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType, null,
-                        ERROR_FILE_CANNOT_DOWNLOAD, multipleDownloads);
-                return false;
+
+                try {
+                    Uri destinationFileUri = writeResponseBodyToDisk(responseBody, isDefaultDestination,
+                            destinationFileUriString, fileName, mediaType);
+                    Log.d("ImgurDownload", "File written successfully");
+                    downloadFinished(params, builder, mediaType, randomNotificationIdOffset,
+                            mimeType, destinationFileUri, NO_ERROR, multipleDownloads);
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e("ImgurDownload", "IOException writing to disk: " + e.getMessage());
+                    downloadFinished(params, builder, mediaType, randomNotificationIdOffset,
+                            mimeType, null, ERROR_FILE_CANNOT_SAVE, multipleDownloads);
+
+                    return false;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("ImgurDownload", "IOException during download: " + e.getMessage());
             downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType, null,
                     ERROR_FILE_CANNOT_DOWNLOAD, multipleDownloads);
-            return false;
-        }
-
-        try {
-            Uri destinationFileUri = writeResponseBodyToDisk(Objects.requireNonNull(response.body()), isDefaultDestination, destinationFileUriString, fileName, mediaType);
-            Log.d("ImgurDownload", "File written successfully");
-            downloadFinished(params, builder, mediaType, randomNotificationIdOffset,
-                    mimeType, destinationFileUri, NO_ERROR, multipleDownloads);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e("ImgurDownload", "IOException writing to disk: " + e.getMessage());
-            downloadFinished(params, builder, mediaType, randomNotificationIdOffset,
-                    mimeType, null, ERROR_FILE_CANNOT_SAVE, multipleDownloads);
-
             return false;
         }
     }
@@ -979,26 +984,24 @@ public class DownloadMediaService extends JobService {
         ContentResolver contentResolver = getContentResolver();
         if (isDefaultDestination) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                InputStream inputStream = body.byteStream();
-                OutputStream outputStream = new FileOutputStream(destinationFileUriString);
-                byte[] fileReader = new byte[4096];
+                try (InputStream inputStream = body.byteStream();
+                     OutputStream outputStream = new FileOutputStream(destinationFileUriString)) {
+                    byte[] fileReader = new byte[4096];
 
+                    while (true) {
+                        int read = inputStream.read(fileReader);
 
-                while (true) {
-                    int read = inputStream.read(fileReader);
+                        if (read == -1) {
+                            break;
+                        }
 
-                    if (read == -1) {
-                        break;
+                        outputStream.write(fileReader, 0, read);
                     }
 
-                    outputStream.write(fileReader, 0, read);
-
+                    outputStream.flush();
                 }
-
-                outputStream.flush();
             } else {
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, destinationFileName);
                 String mimeType;
 
                 switch (mediaType) {
@@ -1026,11 +1029,22 @@ public class DownloadMediaService extends JobService {
                 // audio/ or anything else would have nowhere to go, so the mediaType guess stands.
                 String extensionMimeType = DocumentTreeUtils.mimeTypeMatchingExtension(destinationFileName);
 
+                if (mediaType == EXTRA_MEDIA_TYPE_VIDEO
+                        && (extensionMimeType == null || extensionMimeType.startsWith("image/"))) {
+                    // A video post whose URL carried an image extension, or none this maps: the
+                    // name is lying about the bytes. The name has to be corrected along with the
+                    // type, or MediaStore appends its own ".mp4" and the file lands as
+                    // "name.jpg.mp4".
+                    destinationFileName = replaceExtension(destinationFileName, "mp4");
+                    extensionMimeType = "video/mp4";
+                }
+
                 if (extensionMimeType != null
                         && (extensionMimeType.startsWith("image/") || extensionMimeType.startsWith("video/"))) {
                     mimeType = extensionMimeType;
                 }
 
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, destinationFileName);
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, destinationFileUriString);
                 contentValues.put(MediaStore.MediaColumns.IS_PENDING, 1);
@@ -1058,24 +1072,31 @@ public class DownloadMediaService extends JobService {
                     throw new IOException("Failed to create new MediaStore record.");
                 }
 
-                OutputStream stream = contentResolver.openOutputStream(uri);
+                try (OutputStream stream = contentResolver.openOutputStream(uri)) {
+                    if (stream == null) {
+                        throw new IOException("Failed to get output stream.");
+                    }
 
-                if (stream == null) {
-                    throw new IOException("Failed to get output stream.");
+                    InputStream in = body.byteStream();
+                    byte[] buf = new byte[1024];
+                    int len;
+
+                    while ((len = in.read(buf)) > 0) {
+                        stream.write(buf, 0, len);
+                    }
+
+                    contentValues.clear();
+                    contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
+                    try {
+                        contentResolver.update(uri, contentValues, null, null);
+                        destinationFileUriString = uri.toString();
+                    } catch (RuntimeException e) {
+                        // A record left IS_PENDING is invisible to the gallery, so a failure to
+                        // clear the flag is a failed download however well the bytes went.
+                        e.printStackTrace();
+                        throw new IOException("Failed to update content at the specified URI.");
+                    }
                 }
-
-                InputStream in = body.byteStream();
-                byte[] buf = new byte[1024];
-                int len;
-
-                while ((len = in.read(buf)) > 0) {
-                    stream.write(buf, 0, len);
-                }
-
-                contentValues.clear();
-                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
-                contentResolver.update(uri, contentValues, null, null);
-                destinationFileUriString = uri.toString();
             }
         } else {
             try (OutputStream stream = contentResolver.openOutputStream(Uri.parse(destinationFileUriString))) {
@@ -1094,6 +1115,16 @@ public class DownloadMediaService extends JobService {
             }
         }
         return Uri.parse(destinationFileUriString);
+    }
+
+    /**
+     * Replaces the name's extension, or appends one when it has none. A corrected MIME type has to
+     * correct the name with it: MediaStore appends an extension of its own whenever the declared
+     * type disagrees with the name.
+     */
+    private static String replaceExtension(String fileName, String extension) {
+        int dot = fileName.lastIndexOf('.');
+        return (dot <= 0 ? fileName : fileName.substring(0, dot)) + "." + extension;
     }
 
     /**

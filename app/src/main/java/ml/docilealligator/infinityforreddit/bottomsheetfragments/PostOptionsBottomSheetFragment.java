@@ -73,6 +73,9 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
     private Post mPost;
     private boolean isDownloading = false;
     private boolean isDownloadingGallery = false;
+    // Set when the "Download Video" row of a GIF post was the one tapped, so download() saves the
+    // post's mp4 variant instead of the GIF itself. Survives the permission round trip.
+    private boolean isDownloadingMp4Variant = false;
 
     @Inject
     @Named("oauth")
@@ -234,6 +237,10 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 case Post.GIF_TYPE:
                     binding.downloadTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
                     binding.downloadTextViewPostOptionsBottomSheetFragment.setText(R.string.download_gif);
+                    if (mPost.getMp4Variant() != null) {
+                        binding.downloadMp4VariantTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                        binding.downloadMp4VariantTextViewPostOptionsBottomSheetFragment.setText(R.string.download_video);
+                    }
                     break;
                 case Post.VIDEO_TYPE:
                     binding.downloadTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
@@ -247,6 +254,21 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                         return;
                     }
 
+                    isDownloading = true;
+                    requestPermissionAndDownload();
+                });
+            }
+
+            if (binding.downloadMp4VariantTextViewPostOptionsBottomSheetFragment.getVisibility() == View.VISIBLE) {
+                binding.downloadMp4VariantTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                    if (isDownloading) {
+                        return;
+                    }
+
+                    // Goes through the same permission request, download-location check and
+                    // filename scheme as every other download here; only the URL and media type
+                    // differ, which is what this flag carries into download().
+                    isDownloadingMp4Variant = true;
                     isDownloading = true;
                     requestPermissionAndDownload();
                 });
@@ -588,6 +610,7 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 Toast.makeText(mBaseActivity, R.string.no_storage_permission, Toast.LENGTH_SHORT).show();
                 isDownloading = false;
                 isDownloadingGallery = false;
+                isDownloadingMp4Variant = false;
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (isDownloading) {
                     download();
@@ -600,6 +623,10 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
 
     private void download() {
         isDownloading = false;
+        // Read once: every return below has to leave the flag clear, or the next plain download
+        // would save the mp4 variant instead.
+        boolean downloadMp4Variant = isDownloadingMp4Variant;
+        isDownloadingMp4Variant = false;
 
         // Check if download location is set
         SharedPreferences sharedPreferences = mSharedPreferences;
@@ -607,16 +634,21 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
         boolean isNsfw = mPost.isNSFW();
 
         int mediaType;
-        switch (mPost.getPostType()) {
-            case Post.VIDEO_TYPE:
-                mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO;
-                break;
-            case Post.GIF_TYPE:
-                mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_GIF;
-                break;
-            default:
-                mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE;
-                break;
+        if (downloadMp4Variant) {
+            // The variant is a plain mp4 whatever the post type, so it picks the video folder.
+            mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO;
+        } else {
+            switch (mPost.getPostType()) {
+                case Post.VIDEO_TYPE:
+                    mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO;
+                    break;
+                case Post.GIF_TYPE:
+                    mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_GIF;
+                    break;
+                default:
+                    mediaType = DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE;
+                    break;
+            }
         }
 
         if (isNsfw && sharedPreferences.getBoolean(SharedPreferencesUtils.SAVE_NSFW_MEDIA_IN_DIFFERENT_FOLDER, false)) {
@@ -638,6 +670,30 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
         }
 
         Toast.makeText(mBaseActivity, R.string.download_started, Toast.LENGTH_SHORT).show();
+
+        String mp4Variant = mPost.getMp4Variant();
+        if (downloadMp4Variant && mp4Variant != null) {
+            // A complete, silent mp4 -- not a DASH stream -- so it goes straight to
+            // DownloadMediaService rather than through DownloadRedditVideoService's audio-ladder
+            // and mux path, which has nothing to find and nothing to mux.
+            PersistableBundle extras = new PersistableBundle();
+            extras.putString(DownloadMediaService.EXTRA_URL, mp4Variant);
+            extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO);
+            // Same base name as the GIF download of this post; only the extension differs.
+            extras.putString(DownloadMediaService.EXTRA_FILE_NAME,
+                    MediaFileNameUtils.getEmbeddedMediaFileName(mPost.getTitle(), mPost.getId(), null,
+                            mp4Variant, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO));
+            extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, mPost.getSubredditName());
+            extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, mPost.isNSFW() ? 1 : 0);
+
+            //TODO: contentEstimatedBytes
+            JobInfo jobInfo = DownloadMediaService.constructJobInfo(mBaseActivity, 5000000, extras);
+            ((JobScheduler) mBaseActivity.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+            dismiss();
+            return;
+        }
+
         if (mPost.getPostType() == Post.VIDEO_TYPE) {
             if (mPost.isNormalVideo()) {
                 PersistableBundle extras = new PersistableBundle();

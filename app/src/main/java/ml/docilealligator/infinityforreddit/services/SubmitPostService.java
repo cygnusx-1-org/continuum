@@ -354,16 +354,21 @@ public class SubmitPostService extends JobService {
         @Nullable String subredditName, @Nullable String title, String content, Flair flair,
         boolean isSpoiler, boolean isNSFW, boolean receivePostReplyNotifications) {
 
-        try {
-            InputStream in = getContentResolver().openInputStream(mediaUri);
+        try (InputStream in = getContentResolver().openInputStream(mediaUri)) {
             if (in == null) {
-                handler.post(() -> EventBus.getDefault().post(new SubmitVideoOrGifPostEvent(false, true, null)));
+                // Not a processing failure: the file could not be opened at all, so say that
+                // rather than blaming the encoder.
+                handler.post(() -> EventBus.getDefault().post(new SubmitVideoOrGifPostEvent(false, false, getString(R.string.submit_video_or_gif_post_failed_cannot_access_file))));
+                // Every other exit from this method ends the job; returning without it leaves the
+                // "Posting video" notification up and the JobScheduler job never finished.
+                stopJob(parameters, manager, randomNotificationIdOffset);
                 return;
             }
             String type = getContentResolver().getType(mediaUri);
             File cacheDir = Utils.getCacheDir(this);
             if (cacheDir == null) {
                 handler.post(() -> EventBus.getDefault().post(new SubmitVideoOrGifPostEvent(false, false, getString(R.string.submit_video_or_gif_post_failed_cannot_get_cache_directory))));
+                stopJob(parameters, manager, randomNotificationIdOffset);
                 return;
             }
             String cacheFilePath;
@@ -506,12 +511,13 @@ public class SubmitPostService extends JobService {
     }
 
     private static void copyFileToCache(InputStream fileInputStream, String destinationFilePath) throws IOException {
-        OutputStream out = new FileOutputStream(destinationFilePath);
-        byte[] buf = new byte[2048];
-        int len;
+        try (OutputStream out = new FileOutputStream(destinationFilePath)) {
+            byte[] buf = new byte[2048];
+            int len;
 
-        while ((len = fileInputStream.read(buf)) > 0) {
-            out.write(buf, 0, len);
+            while ((len = fileInputStream.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
         }
     }
 

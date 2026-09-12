@@ -17,12 +17,12 @@ import android.view.View
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
@@ -331,7 +331,7 @@ private fun measureView(rootView: View) {
 }
 
 private fun getBitmapFromView(rootView: View): Bitmap {
-    val bitmap = Bitmap.createBitmap(rootView.width, rootView.height, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(rootView.width, rootView.height)
     val canvas = Canvas(bitmap)
     val bgDrawable = rootView.background
     if (bgDrawable != null) bgDrawable.draw(canvas)
@@ -381,9 +381,9 @@ private fun shareScreenshot(context: Context, bitmap: Bitmap, fileName: String) 
         }
 
         val file = File(cachePath, fileName)
-        val stream = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        stream.close()
+        FileOutputStream(file).use { stream ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        }
 
         val uri = FileProvider.getUriForFile(
             context,

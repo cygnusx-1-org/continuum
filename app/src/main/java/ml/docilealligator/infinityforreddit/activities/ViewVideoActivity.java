@@ -80,6 +80,7 @@ import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerControlView;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
 import app.futured.hauler.DragDirection;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.util.Objects;
@@ -1596,6 +1597,27 @@ public class ViewVideoActivity extends AppCompatActivity
 
             if (viewVideoViewModel.getVideoType() != VIDEO_TYPE_NORMAL || post.isTumblr()) {
                 if (post.getPostType() == Post.GIF_TYPE) {
+                    String mp4Variant = post.getMp4Variant();
+                    if (mp4Variant != null) {
+                        // The post carries both renditions, so ask instead of guessing. Scheduling
+                        // happens in the dialog's callback, hence the early return.
+                        String[] choices = {getString(R.string.download_gif), getString(R.string.download_video)};
+                        final int[] selectedOption = {0};
+                        new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                                .setTitle(R.string.action_download)
+                                .setSingleChoiceItems(choices, 0, (dialog, which) -> selectedOption[0] = which)
+                                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+                                    if (selectedOption[0] == 1) {
+                                        downloadGifPostAsVideo(post, mp4Variant);
+                                    } else {
+                                        downloadGifPostAsGif(post);
+                                    }
+                                })
+                                .setNegativeButton(R.string.cancel, null)
+                                .show();
+                        return;
+                    }
+
                     extras.putString(DownloadMediaService.EXTRA_URL, post.getVideoUrl());
                     extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, DownloadMediaService.EXTRA_MEDIA_TYPE_GIF);
                     extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
@@ -1626,6 +1648,42 @@ public class ViewVideoActivity extends AppCompatActivity
 
             Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /** Saves a GIF post as the GIF itself, the behaviour for a post with no mp4 variant. */
+    private void downloadGifPostAsGif(Post post) {
+        scheduleGifPostJob(post.getVideoUrl(), DownloadMediaService.EXTRA_MEDIA_TYPE_GIF,
+                MediaFileNameUtils.getDownloadFileName(post, 0));
+    }
+
+    /**
+     * Saves a GIF post's mp4 variant instead of the GIF. The variant is a complete, silent mp4
+     * rather than a DASH stream, so it goes through {@link DownloadMediaService} like the GIF does
+     * rather than through {@link DownloadRedditVideoService}, which would hunt for an audio track
+     * that does not exist and mux nothing.
+     */
+    private void downloadGifPostAsVideo(Post post, String mp4Variant) {
+        // Shares the base name getDownloadFileName gives the GIF; only the extension differs, and
+        // it has to come from the URL actually being saved, which getDownloadFileName's post-type
+        // switch cannot do.
+        scheduleGifPostJob(mp4Variant, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO,
+                MediaFileNameUtils.getEmbeddedMediaFileName(post.getTitle(), post.getId(), null,
+                        mp4Variant, DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO));
+    }
+
+    private void scheduleGifPostJob(@Nullable String url, int mediaType, String fileName) {
+        PersistableBundle extras = new PersistableBundle();
+        extras.putString(DownloadMediaService.EXTRA_URL, url);
+        extras.putInt(DownloadMediaService.EXTRA_MEDIA_TYPE, mediaType);
+        extras.putString(DownloadMediaService.EXTRA_FILE_NAME, fileName);
+        extras.putString(DownloadMediaService.EXTRA_SUBREDDIT_NAME, viewVideoViewModel.getSubredditName());
+        extras.putInt(DownloadMediaService.EXTRA_IS_NSFW, viewVideoViewModel.isNSFW() ? 1 : 0);
+
+        //TODO: contentEstimatedBytes
+        JobInfo jobInfo = DownloadMediaService.constructJobInfo(this, 5000000, extras);
+        ((JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
+
+        Toast.makeText(this, R.string.download_started, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -91,6 +91,11 @@ public class UploadImageUtils {
         if (uploadImageResponse.isSuccessful()) {
             Map<String, RequestBody> nameValuePairsMap = parseJSONResponseFromAWS(uploadImageResponse.body());
             try (InputStream inputStream = contentResolver.openInputStream(imageUri)) {
+                if (inputStream == null) {
+                    // Every other failure here throws; returning a sentinel would be handed on as
+                    // the uploaded image's address and submitted as the post's URL.
+                    throw new MediaUploadException("Cannot open the image to upload");
+                }
                 byte[] buf = IOUtils.toByteArray(inputStream);
                 RequestBody fileBody = RequestBody.create(buf, MediaType.parse("application/octet-stream"));
                 MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("file", "post_image." + extension, fileBody);

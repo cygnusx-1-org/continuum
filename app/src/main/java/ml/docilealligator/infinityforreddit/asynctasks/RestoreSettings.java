@@ -82,8 +82,7 @@ public class RestoreSettings {
                                 SharedPreferences recentlyVisitedSharedPreferences,
                                 RestoreSettingsListener restoreSettingsListener) {
         executor.execute(() -> {
-            try {
-                InputStream zipFileInputStream = contentResolver.openInputStream(zipFileUri);
+            try (InputStream zipFileInputStream = contentResolver.openInputStream(zipFileUri)) {
                 if (zipFileInputStream == null) {
                     handler.post(() -> restoreSettingsListener.failed(context.getString(R.string.restore_settings_failed_cannot_get_file)));
                     return;
@@ -99,21 +98,26 @@ public class RestoreSettings {
                     FileUtils.deleteDirectory(new File(cachePath));
                 }
                 new File(cachePath).mkdir();
-                FileOutputStream zipCacheOutputStream = new FileOutputStream(new File(cachePath + "restore.zip"));
 
-                byte[] fileReader = new byte[1024];
+                // Both the copy target and the archive are closed as soon as they are done with:
+                // the restore below is long, and a half-written cache file would be extracted.
+                try (FileOutputStream zipCacheOutputStream = new FileOutputStream(cachePath + "restore.zip")) {
+                    byte[] fileReader = new byte[1024];
 
-                while (true) {
-                    int read = zipFileInputStream.read(fileReader);
+                    while (true) {
+                        int read = zipFileInputStream.read(fileReader);
 
-                    if (read == -1) {
-                        break;
+                        if (read == -1) {
+                            break;
+                        }
+
+                        zipCacheOutputStream.write(fileReader, 0, read);
                     }
-
-                    zipCacheOutputStream.write(fileReader, 0, read);
                 }
 
-                new ZipFile(cachePath + "restore.zip", password.toCharArray()).extractAll(cachePath);
+                try (ZipFile zipFile = new ZipFile(cachePath + "restore.zip", password.toCharArray())) {
+                    zipFile.extractAll(cachePath);
+                }
                 new File(cachePath + "restore.zip").delete();
                 File[] files = new File(cachePath).listFiles();
                 if (files == null || files.length <= 0) {

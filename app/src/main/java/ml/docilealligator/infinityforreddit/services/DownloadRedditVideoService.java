@@ -535,44 +535,24 @@ public class DownloadRedditVideoService extends JobService {
 
     @Nullable
     private String writeResponseBodyToDisk(ResponseBody body, String filePath) {
-        try {
-            File file = new File(filePath);
+        File file = new File(filePath);
+        byte[] fileReader = new byte[4096];
 
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
+        try (InputStream inputStream = body.byteStream();
+             OutputStream outputStream = new FileOutputStream(file)) {
+            while (true) {
+                int read = inputStream.read(fileReader);
 
-            try {
-                byte[] fileReader = new byte[4096];
-
-
-                inputStream = body.byteStream();
-                outputStream = new FileOutputStream(file);
-
-                while (true) {
-                    int read = inputStream.read(fileReader);
-
-                    if (read == -1) {
-                        break;
-                    }
-
-                    outputStream.write(fileReader, 0, read);
-
+                if (read == -1) {
+                    break;
                 }
 
-                outputStream.flush();
-
-                return file.getPath();
-            } catch (IOException e) {
-                return null;
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-
-                if (outputStream != null) {
-                    outputStream.close();
-                }
+                outputStream.write(fileReader, 0, read);
             }
+
+            outputStream.flush();
+
+            return file.getPath();
         } catch (IOException e) {
             return null;
         }
@@ -675,13 +655,14 @@ public class DownloadRedditVideoService extends JobService {
         ContentResolver contentResolver = getContentResolver();
         if (isDefaultDestination) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                InputStream in = new FileInputStream(srcPath);
-                OutputStream out = new FileOutputStream(destinationFileUriString);
-                byte[] buf = new byte[1024];
-                int len;
+                try (InputStream in = new FileInputStream(srcPath);
+                     OutputStream out = new FileOutputStream(destinationFileUriString)) {
+                    byte[] buf = new byte[1024];
+                    int len;
 
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
                 }
 
                 new File(srcPath).delete();
@@ -698,7 +679,6 @@ public class DownloadRedditVideoService extends JobService {
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, destinationFileUriString);
                 contentValues.put(MediaStore.Video.Media.IS_PENDING, 1);
 
-                OutputStream stream = null;
                 Uri uri = null;
 
                 try {
@@ -718,25 +698,24 @@ public class DownloadRedditVideoService extends JobService {
                         throw new IOException("Failed to create new MediaStore record.");
                     }
 
-                    stream = contentResolver.openOutputStream(uri);
+                    try (OutputStream stream = contentResolver.openOutputStream(uri);
+                         InputStream in = new FileInputStream(srcPath)) {
+                        if (stream == null) {
+                            throw new IOException("Failed to get output stream.");
+                        }
 
-                    if (stream == null) {
-                        throw new IOException("Failed to get output stream.");
+                        byte[] buf = new byte[1024];
+                        int len;
+                        while ((len = in.read(buf)) > 0) {
+                            stream.write(buf, 0, len);
+                        }
+
+                        contentValues.clear();
+                        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
+                        contentResolver.update(uri, contentValues, null, null);
+                        return uri;
                     }
 
-                    InputStream in = new FileInputStream(srcPath);
-
-                    byte[] buf = new byte[1024];
-                    int len;
-
-                    while ((len = in.read(buf)) > 0) {
-                        stream.write(buf, 0, len);
-                    }
-
-                    contentValues.clear();
-                    contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
-                    contentResolver.update(uri, contentValues, null, null);
-                    return uri;
                 } catch (IOException e) {
                     if (uri != null) {
                         // Don't leave an orphan entry in the MediaStore
@@ -744,25 +723,20 @@ public class DownloadRedditVideoService extends JobService {
                     }
 
                     throw e;
-                } finally {
-                    if (stream != null) {
-                        stream.close();
-                    }
                 }
             }
         } else {
-            OutputStream stream = contentResolver.openOutputStream(Uri.parse(destinationFileUriString));
-            if (stream == null) {
-                throw new IOException("Failed to get output stream.");
-            }
+            try (OutputStream stream = contentResolver.openOutputStream(Uri.parse(destinationFileUriString));
+                 InputStream in = new FileInputStream(srcPath)) {
+                if (stream == null) {
+                    throw new IOException("Failed to get output stream.");
+                }
 
-            InputStream in = new FileInputStream(srcPath);
-
-            byte[] buf = new byte[1024];
-            int len;
-
-            while ((len = in.read(buf)) > 0) {
-                stream.write(buf, 0, len);
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    stream.write(buf, 0, len);
+                }
             }
         }
 

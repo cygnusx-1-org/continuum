@@ -100,6 +100,24 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
                     binding.copyMediaLinkTextViewShareLinkBottomSheetFragment.setText(R.string.copy_gif_link);
                     binding.shareMediaLinkTextViewShareLinkBottomSheetFragment.setCompoundDrawablesWithIntrinsicBounds(
                             activity.getDrawable(R.drawable.ic_image_day_night_24dp), null, null, null);
+                    // Read once into a local: the rows below share whatever value passed the null
+                    // check here, rather than each re-reading the getter.
+                    String mp4Variant = post == null ? null : post.getMp4Variant();
+                    if (mp4Variant != null) {
+                        binding.mp4VariantMediaLinkTextViewShareLinkBottomSheetFragment.setText(mp4Variant);
+                        binding.mp4VariantMediaLinkTextViewShareLinkBottomSheetFragment.setVisibility(View.VISIBLE);
+                        binding.shareMp4VariantMediaLinkTextViewShareLinkBottomSheetFragment.setVisibility(View.VISIBLE);
+                        binding.copyMp4VariantMediaLinkTextViewShareLinkBottomSheetFragment.setVisibility(View.VISIBLE);
+
+                        binding.shareMp4VariantMediaLinkTextViewShareLinkBottomSheetFragment.setOnClickListener(view -> {
+                            shareLink(mp4Variant);
+                            dismiss();
+                        });
+                        binding.copyMp4VariantMediaLinkTextViewShareLinkBottomSheetFragment.setOnClickListener(view -> {
+                            copyLink(mp4Variant);
+                            dismiss();
+                        });
+                    }
                     break;
                 case Post.VIDEO_TYPE:
                     binding.shareMediaLinkTextViewShareLinkBottomSheetFragment.setText(R.string.share_video_link);
