@@ -1,5 +1,5 @@
 name: Bug report
-description: Create a report to help us improve
+description: Create a report to help us improve. **DO NOT REPORT MORE THAN ONE BUG PER ISSUE**
 labels: ['bug']
 
 body:
@@ -7,7 +7,7 @@ body:
     id: description
     attributes:
       label: Describe the bug
-      description: A clear and concise description of what the bug is.
+      description: A clear and concise description of what the bug is. **DO NOT REPORT MORE THAN ONE BUG PER ISSUE**
     validations:
       required: true
 
@@ -61,8 +61,8 @@ body:
     attributes:
       label: Continuum version
       description: >-
-        The exact version number found on the settings screen. Do not write "latest" or "current" —
-        state the actual version number.
+        The exact version number found on the settings screen. Do not write "latest" or "current".
+        State the actual version number.
       placeholder: e.g. 8.2.5.9.1
     validations:
       required: true

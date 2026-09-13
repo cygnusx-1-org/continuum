@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest an idea for this project. **DO NOT REPORT MORE THAN ONE FEATURE REQUEST PER ISSUE**
 title: ''
 labels: 'enhancement'
 assignees: ''
