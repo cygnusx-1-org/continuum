@@ -244,7 +244,21 @@ class PlayableImpl implements Playable {
 
     @Override
     public boolean isPlaying() {
-        return player != null && player.getPlayer().getPlayWhenReady();
+        // getPlayWhenReady() states an intent, not progress. ExoPlayer leaves the flag set when a
+        // failed load drops the player to STATE_IDLE, and again when a clip runs out at
+        // STATE_ENDED, so on its own it reported a dead row and a finished one as still playing
+        // forever. Container gates its re-initialize, its re-play and its bookkeeping on this
+        // answer, so neither row was touched again until it scrolled off and back, which is what
+        // made autoplay look intermittent (issue #403).
+        return player != null
+                && player.getPlayer().getPlayWhenReady()
+                && player.getPlayer().getPlaybackState() != Player.STATE_IDLE
+                && player.getPlayer().getPlaybackState() != Player.STATE_ENDED;
+    }
+
+    @Override
+    public boolean isEnded() {
+        return player != null && player.getPlayer().getPlaybackState() == Player.STATE_ENDED;
     }
 
     @Override
@@ -273,6 +287,19 @@ class PlayableImpl implements Playable {
 
     // TODO [20180822] Double check this.
     private void ensureMediaSource() {
+        // A player whose load failed sits in STATE_IDLE, and one that ran out sits in STATE_ENDED;
+        // both keep their source marked prepared, and setPlayWhenReady() cannot move either out of
+        // that state -- only another prepare() can. Drop the spent source so the next play() builds
+        // a fresh one rather than re-arming the one that is finished with. Without this, unblocking
+        // isPlaying() above would let a caller ask for the row again and still get nothing: a dead
+        // row would stay dead (issue #403) and the play button on a finished clip would do nothing.
+        if (sourcePrepared && player != null
+                && (player.getPlayer().getPlaybackState() == Player.STATE_IDLE
+                || player.getPlayer().getPlaybackState() == Player.STATE_ENDED)) {
+            mediaSource = null;
+            sourcePrepared = false;
+        }
+
         if (mediaSource == null) {  // Only actually prepare the source when play() is called.
             sourcePrepared = false;
             mediaSource = creator.createMediaSource(mediaUri, fileExt);

@@ -2575,6 +2575,14 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             if (this.container == null) {
                 this.container = container;
             }
+            // A finished clip is already set up and resting on its last frame, and re-initializing it
+            // does harm: onCompleted() leaves SCRAP in the playback cache, so the PlaybackInfo passed
+            // here is the fragment initializer's, which is muted. Since a finished clip no longer
+            // counts as playing, the Container re-initializes it on every selection pass, so a clip
+            // the reader had unmuted would come back silent when they pressed play.
+            if (helper != null && helper.isEnded()) {
+                return;
+            }
             if (helper == null) {
                 helper = new ExoPlayerViewHelper(this, mediaUri, null, mExoCreator);
                 helper.addEventListener(new Playable.DefaultEventListener() {
@@ -2755,6 +2763,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
         @Override
         public boolean wantsToPlay() {
+            // A clip that has run out stops asking for the slot. The detail page shows one post, so
+            // there is rarely another Container player to hand it to; this is here so that a finished
+            // clip is treated the same way as in the feed -- it keeps its last frame, is not
+            // re-initialized behind the reader's back, and the play button restarts it.
+            if (helper != null && helper.isEnded()) {
+                return false;
+            }
             return canPlayVideo && mediaUri != null && ToroUtil.visibleAreaOffset(this, itemView.getParent()) >= mStartAutoplayVisibleAreaOffset;
         }
 

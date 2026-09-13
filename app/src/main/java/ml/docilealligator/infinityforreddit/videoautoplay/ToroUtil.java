@@ -50,21 +50,61 @@ public final class ToroUtil {
     @FloatRange(from = 0.0, to = 1.0) //
     public static float visibleAreaOffset(@NonNull ToroPlayer player, ViewParent container) {
         if (container == null) return 0.0f;
+        return visibleAreaOffset(player.getPlayerView(), container);
+    }
 
-        View playerView = player.getPlayerView();
+    /**
+     * Get the ratio in range of 0.0 ~ 1.0 of {@code view} that is visible inside {@code container}.
+     *
+     * <p>Measured against the part of the container the reader can actually see, not the window.
+     * {@link View#getGlobalVisibleRect} clips only to the window, so on its own it counts pixels
+     * that are inside the window but covered: a feed drawn with {@code clipToPadding="false"}
+     * spills into its own inset padding, and its host may paint a bar over the result. Both are
+     * taken off here -- the padding directly, and whatever covers the list through
+     * {@link Container#clipToViewport}. Without that the visible-area setting meant "visible in the
+     * window" rather than "visible in the feed", and a card whose last stretch sat behind a bar
+     * reported itself fully visible.
+     *
+     * @param view      the view to measure.
+     * @param container the {@link ViewParent} that holds it; a null one, or one that is not a
+     *                  {@link View}, gives 0.0f since there is no viewport to measure against.
+     */
+    @FloatRange(from = 0.0, to = 1.0) //
+    public static float visibleAreaOffset(@NonNull View view, ViewParent container) {
+        if (!(container instanceof View)) return 0.0f;
+
         Rect drawRect = new Rect();
-        playerView.getDrawingRect(drawRect);
+        view.getDrawingRect(drawRect);
         int drawArea = drawRect.width() * drawRect.height();
+        if (drawArea <= 0) return 0.0f;
 
-        Rect playerRect = new Rect();
-        boolean visible = playerView.getGlobalVisibleRect(playerRect, new Point());
+        Rect viewRect = new Rect();
+        if (!view.getGlobalVisibleRect(viewRect, new Point())) return 0.0f;
 
-        float offset = 0.f;
-        if (visible && drawArea > 0) {
-            int visibleArea = playerRect.height() * playerRect.width();
-            offset = visibleArea / (float) drawArea;
+        View containerView = (View) container;
+        Rect contentRect = new Rect();
+        if (!containerView.getGlobalVisibleRect(contentRect, new Point())) return 0.0f;
+
+        // Take the tighter of what the window shows of the container and the container's own
+        // content box. Padding is in the container's coordinates, so it is applied to the
+        // container's real edges -- deriving it from the visible rect would over-inset a container
+        // that is itself partly outside the window.
+        int[] location = new int[2];
+        containerView.getLocationInWindow(location);
+        contentRect.left = Math.max(contentRect.left, location[0] + containerView.getPaddingLeft());
+        contentRect.top = Math.max(contentRect.top, location[1] + containerView.getPaddingTop());
+        contentRect.right = Math.min(contentRect.right,
+                location[0] + containerView.getWidth() - containerView.getPaddingRight());
+        contentRect.bottom = Math.min(contentRect.bottom,
+                location[1] + containerView.getHeight() - containerView.getPaddingBottom());
+
+        // Finally let the container remove whatever its host paints over it.
+        if (containerView instanceof Container) {
+            ((Container) containerView).clipToViewport(contentRect);
         }
-        return offset;
+
+        if (!viewRect.intersect(contentRect)) return 0.0f;
+        return (viewRect.width() * viewRect.height()) / (float) drawArea;
     }
 
     /**

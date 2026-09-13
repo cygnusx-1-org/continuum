@@ -66,7 +66,11 @@ import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.common.collect.ImmutableList;
 import com.libRG.CustomTextView;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Provider;
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -462,7 +466,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mCallback = callback;
 
             mGalleryRecycledViewPool = new RecyclerView.RecycledViewPool();
-            multiPlayPlayerSelector = new MultiPlayPlayerSelector(mSimultaneousAutoplayLimit);
+            multiPlayPlayerSelector = new MultiPlayPlayerSelector(mSimultaneousAutoplayLimit,
+                    this::unifiedAutoplaySelection);
         }
     }
 
@@ -1883,6 +1888,261 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 && post.hasGalleryGif();
     }
 
+    /**
+     * The scroll-idle hook that decides which gif cards animate.
+     *
+     * <p>Registered on whatever RecyclerView hosts this adapter, so every feed gets the behaviour
+     * without its fragment wiring anything.
+     */
+    private final RecyclerView.OnScrollListener gifAutoplayScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                updateAnimatedGifs(recyclerView);
+            }
+        }
+    };
+
+    @Nullable
+    private RecyclerView attachedRecyclerView;
+
+    private final Runnable gifAutoplayUpdate = () -> {
+        if (attachedRecyclerView != null) {
+            updateAnimatedGifs(attachedRecyclerView);
+        }
+    };
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        attachedRecyclerView = recyclerView;
+        recyclerView.addOnScrollListener(gifAutoplayScrollListener);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        recyclerView.removeOnScrollListener(gifAutoplayScrollListener);
+        recyclerView.removeCallbacks(gifAutoplayUpdate);
+        attachedRecyclerView = null;
+    }
+
+    /**
+     * Re-runs the gif selection once the current burst of binds has settled.
+     *
+     * <p>{@link #gifAutoplayScrollListener} only hears genuine scroll-state transitions, so a feed
+     * that has just loaded -- or one whose rows resized under a late-arriving preview -- would sit
+     * on stills until the user scrolled. Debounced because a screenful of rows binds at once.
+     */
+    private void scheduleGifAutoplayUpdate() {
+        if (attachedRecyclerView == null) {
+            return;
+        }
+        attachedRecyclerView.removeCallbacks(gifAutoplayUpdate);
+        attachedRecyclerView.postDelayed(gifAutoplayUpdate, 100);
+    }
+
+    /**
+     * Swaps gif cards between their still and their animation so that only the card being
+     * autoplayed pulls the gif down.
+     *
+     * <p>Every gif card used to start loading its full-size original the moment it bound, so a
+     * screenful of them fetched several multi-megabyte files at once and each card sat blank until
+     * its own finished -- Glide cannot decode a gif frame until the whole file has arrived. The
+     * preview is a small still that is already on its way, so binding to that first gives the card
+     * something to show immediately, and the animation is fetched only for the card the same rule
+     * would have autoplayed a video on.
+     *
+     * <p>That rule is deliberately the video one: Settings -&gt; Video -&gt; "Autoplay Videos
+     * Visible Area Offset" and "Simultaneous Autoplay Limit", the nsfw/spoiler blur, and the data
+     * saving switches that suppress a gif preview outright. The limit is one budget across both --
+     * see {@link #unifiedAutoplaySelection}.
+     */
+    private void updateAnimatedGifs(@NonNull RecyclerView recyclerView) {
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (layoutManager == null) {
+            return;
+        }
+
+        // null means no limit, in which case every card that is visible enough animates.
+        Set<Integer> selected = mSimultaneousAutoplayLimit < 0 ? null
+                : unifiedAutoplaySelection(recyclerView);
+
+        for (int i = 0; i < layoutManager.getChildCount(); i++) {
+            View child = layoutManager.getChildAt(i);
+            if (child == null) {
+                continue;
+            }
+            RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(child);
+            View mediaView = gifMediaView(holder);
+            if (mediaView == null) {
+                continue;
+            }
+            // Every gif card on screen is visited, not just the winners: one that has dropped below
+            // the threshold has to be put back to its still.
+            boolean animate = ToroUtil.visibleAreaOffset(mediaView, recyclerView) >= mStartAutoplayVisibleAreaOffset
+                    && (selected == null || selected.contains(holder.getBindingAdapterPosition()));
+            setGifAnimating(holder, animate);
+        }
+    }
+
+    /**
+     * The adapter positions allowed to autoplay right now -- video rows and gif cards ranked
+     * against one another by position and handed the same
+     * {@link SharedPreferencesUtils#SIMULTANEOUS_AUTOPLAY_LIMIT} budget -- or null for a container
+     * the budget does not cover.
+     *
+     * <p>Videos are selected by Toro and gifs here, so without a shared ranking each population
+     * would spend the limit separately and a setting of one would autoplay one of each. Both sides
+     * call this and act on the same answer: {@link MultiPlayPlayerSelector} keeps only the players
+     * named here, and {@link #updateAnimatedGifs} animates only the gif cards named here.
+     *
+     * <p>Null for the gallery containers nested inside a card, whose player order is an index
+     * within that gallery and so means nothing next to a feed position; those keep the old
+     * first-N-candidates behaviour.
+     */
+    @Nullable
+    @OptIn(markerClass = UnstableApi.class)
+    private Set<Integer> unifiedAutoplaySelection(@NonNull RecyclerView recyclerView) {
+        if (recyclerView != attachedRecyclerView || mSimultaneousAutoplayLimit < 0) {
+            return null;
+        }
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (layoutManager == null) {
+            return Collections.emptySet();
+        }
+
+        List<Integer> candidates = new ArrayList<>();
+        for (int i = 0; i < layoutManager.getChildCount(); i++) {
+            View child = layoutManager.getChildAt(i);
+            if (child == null) {
+                continue;
+            }
+            RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(child);
+            int position = holder.getBindingAdapterPosition();
+            if (position == RecyclerView.NO_POSITION) {
+                continue;
+            }
+            if (holder instanceof PostBaseVideoAutoplayViewHolder) {
+                // The same question Toro asks of its own candidates.
+                if (((PostBaseVideoAutoplayViewHolder) holder).wantsToPlay()) {
+                    candidates.add(position);
+                }
+            } else {
+                View mediaView = gifMediaView(holder);
+                if (mediaView != null
+                        && ToroUtil.visibleAreaOffset(mediaView, recyclerView) >= mStartAutoplayVisibleAreaOffset) {
+                    candidates.add(position);
+                }
+            }
+        }
+
+        Collections.sort(candidates);
+        Set<Integer> selected = new HashSet<>();
+        for (int i = 0; i < Math.min(candidates.size(), mSimultaneousAutoplayLimit); i++) {
+            selected.add(candidates.get(i));
+        }
+        return selected;
+    }
+
+    /**
+     * The media view of a card that may animate a gif, or null when this holder is not one -- not a
+     * gif post, blurred, preview-suppressed by data saving, or autoplay off. Video posts are
+     * excluded because Toro already drives those.
+     */
+    @Nullable
+    private View gifMediaView(RecyclerView.ViewHolder holder) {
+        Post post;
+        View mediaView;
+        if (holder instanceof PostWithPreviewTypeViewHolder) {
+            post = ((PostWithPreviewTypeViewHolder) holder).post;
+            mediaView = ((PostWithPreviewTypeViewHolder) holder).imageView;
+        } else if (holder instanceof PostGalleryViewHolder) {
+            post = ((PostGalleryViewHolder) holder).post;
+            mediaView = ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery;
+        } else {
+            return null;
+        }
+
+        if (post == null || post.getPostType() != Post.GIF_TYPE || !mAutoplay) {
+            return null;
+        }
+        if (mDataSavingMode && (mDisableImagePreview || mOnlyDisablePreviewInVideoAndGifPosts)) {
+            return null;
+        }
+        boolean blurImage = (post.isNSFW() && mNeedBlurNsfw
+                && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())
+                && !(mAutoplay && mAutoplayNsfwVideos))
+                || (post.isSpoiler() && mNeedBlurSpoiler);
+        return blurImage ? null : mediaView;
+    }
+
+    /** Loads the animation or the still into {@code holder}, if it is not already showing it. */
+    private void setGifAnimating(RecyclerView.ViewHolder holder, boolean animating) {
+        Post post;
+        Post.Preview preview;
+        ImageView imageView;
+        RequestListener<Drawable> listener;
+        boolean showing;
+        if (holder instanceof PostWithPreviewTypeViewHolder) {
+            PostWithPreviewTypeViewHolder previewHolder = (PostWithPreviewTypeViewHolder) holder;
+            showing = previewHolder.animatingGif;
+            post = previewHolder.post;
+            preview = previewHolder.preview;
+            imageView = previewHolder.imageView;
+            listener = previewHolder.glideRequestListener;
+        } else if (holder instanceof PostGalleryViewHolder) {
+            PostGalleryViewHolder galleryHolder = (PostGalleryViewHolder) holder;
+            showing = galleryHolder.animatingGif;
+            post = galleryHolder.post;
+            preview = galleryHolder.preview;
+            imageView = galleryHolder.binding.imageViewItemPostGallery;
+            listener = galleryHolder.requestListener;
+        } else {
+            return;
+        }
+
+        if (showing == animating) {
+            return;
+        }
+        // Every reason to do nothing is settled before the flag moves. Recording a swap that was
+        // then skipped would latch the card into a state it never entered, and the guard above
+        // would keep it there once the missing piece arrived.
+        if (preview == null) {
+            return;
+        }
+        String gifUrl = post.getUrl();
+        if (animating && gifUrl == null) {
+            // Glide clears the view for a null model, which would drop the still the card is
+            // already showing in exchange for nothing.
+            return;
+        }
+
+        if (holder instanceof PostWithPreviewTypeViewHolder) {
+            ((PostWithPreviewTypeViewHolder) holder).animatingGif = animating;
+        } else {
+            ((PostGalleryViewHolder) holder).animatingGif = animating;
+        }
+
+        if (animating) {
+            // The still rides along as the thumbnail so the card keeps showing something for the
+            // seconds the original takes to arrive, instead of blanking back to the placeholder.
+            mGlide.load(gifUrl)
+                    .listener(listener)
+                    .thumbnail(mGlide.load(preview.getPreviewUrl()).centerInside()
+                            .downsample(mSaveMemoryCenterInsideDownsampleStrategy))
+                    .centerInside()
+                    .downsample(mSaveMemoryCenterInsideDownsampleStrategy)
+                    .into(imageView);
+        } else {
+            mGlide.load(preview.getPreviewUrl())
+                    .listener(listener)
+                    .centerInside()
+                    .downsample(mSaveMemoryCenterInsideDownsampleStrategy)
+                    .into(imageView);
+        }
+    }
+
     private int getTypeColor(int postType) {
         switch (postType) {
             case Post.VIDEO_TYPE:
@@ -1942,19 +2202,23 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             Post post = ((PostWithPreviewTypeViewHolder) holder).post;
             Post.Preview preview = ((PostWithPreviewTypeViewHolder) holder).preview;
             if (preview != null) {
-                String url;
                 boolean blurImage = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()) && !(post.getPostType() == Post.GIF_TYPE && mAutoplay && mAutoplayNsfwVideos)) || (post.isSpoiler() && mNeedBlurSpoiler);
-                if (post.getPostType() == Post.GIF_TYPE && mAutoplay && !blurImage) {
-                    url = post.getUrl();
-                } else {
-                    url = preview.getPreviewUrl();
-                }
-                RequestBuilder<Drawable> imageRequestBuilder = mGlide.load(url).listener(((PostWithPreviewTypeViewHolder) holder).glideRequestListener);
+                // The still, always -- a gif card starts on its preview even with autoplay on, and
+                // only swaps to the animation once it is the card being autoplayed. See
+                // updateAnimatedGifs. The flag has to follow, because this runs on an in-place
+                // rebind too (a vote, a save, the read-state recolour) where the holder is not
+                // recycled: leaving it set would have setGifAnimating believe the card was already
+                // animating and decline to swap the animation back in.
+                ((PostWithPreviewTypeViewHolder) holder).animatingGif = false;
+                RequestBuilder<Drawable> imageRequestBuilder = mGlide.load(preview.getPreviewUrl()).listener(((PostWithPreviewTypeViewHolder) holder).glideRequestListener);
                 if (blurImage) {
                     imageRequestBuilder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)))
                             .into(((PostWithPreviewTypeViewHolder) holder).imageView);
                 } else {
                     imageRequestBuilder.centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(((PostWithPreviewTypeViewHolder) holder).imageView);
+                }
+                if (post.getPostType() == Post.GIF_TYPE) {
+                    scheduleGifAutoplayUpdate();
                 }
             }
         } else if (holder instanceof PostCompactBaseViewHolder) {
@@ -1991,20 +2255,20 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             Post post = ((PostGalleryViewHolder) holder).post;
             Post.Preview preview = ((PostGalleryViewHolder) holder).preview;
             if (preview != null) {
-                String url;
                 boolean blurImage = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()) && !(post.getPostType() == Post.GIF_TYPE && mAutoplay && mAutoplayNsfwVideos)) || (post.isSpoiler() && mNeedBlurSpoiler);
-                if (post.getPostType() == Post.GIF_TYPE && mAutoplay && !blurImage) {
-                    url = post.getUrl();
-                } else {
-                    url = preview.getPreviewUrl();
-                }
-                RequestBuilder<Drawable> imageRequestBuilder = mGlide.load(url).listener(((PostGalleryViewHolder) holder).requestListener);
+                // The still, always; updateAnimatedGifs swaps in the animation for the card that is
+                // being autoplayed. The flag follows the load for the same reason as above.
+                ((PostGalleryViewHolder) holder).animatingGif = false;
+                RequestBuilder<Drawable> imageRequestBuilder = mGlide.load(preview.getPreviewUrl()).listener(((PostGalleryViewHolder) holder).requestListener);
 
                 if (blurImage) {
                     imageRequestBuilder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)))
                             .into(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
                 } else {
                     imageRequestBuilder.centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
+                }
+                if (post.getPostType() == Post.GIF_TYPE) {
+                    scheduleGifAutoplayUpdate();
                 }
             }
         }
@@ -2307,6 +2571,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public void setSimultaneousAutoplayLimit(int limit) {
         mSimultaneousAutoplayLimit = limit;
         multiPlayPlayerSelector.setSimultaneousAutoplayLimit(limit);
+        // Toro re-selects on its next dispatch; the gif cards need telling.
+        scheduleGifAutoplayUpdate();
     }
 
     /**
@@ -2415,6 +2681,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.setDefaultResolutionAlready = false;
                 } else if (holder instanceof PostWithPreviewTypeViewHolder) {
                     mGlide.clear(((PostWithPreviewTypeViewHolder) holder).imageView);
+                    // The next post bound here starts on its still like any other.
+                    ((PostWithPreviewTypeViewHolder) holder).animatingGif = false;
                     ((PostWithPreviewTypeViewHolder) holder).imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                     if (((PostWithPreviewTypeViewHolder) holder).imageWrapperFrameLayout != null) {
                         ((PostWithPreviewTypeViewHolder) holder).imageWrapperFrameLayout.setVisibility(View.GONE);
@@ -2471,6 +2739,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             ((PostGalleryViewHolder) holder).binding.titleTextViewItemPostGallery.setText("");
             ((PostGalleryViewHolder) holder).binding.titleTextViewItemPostGallery.setVisibility(View.GONE);
             mGlide.clear(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
+            // The next post bound here starts on its still like any other.
+            ((PostGalleryViewHolder) holder).animatingGif = false;
             ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setScaleType(ImageView.ScaleType.FIT_CENTER);
             ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setVisibility(View.GONE);
             ((PostGalleryViewHolder) holder).binding.progressBarItemPostGallery.setVisibility(View.GONE);
@@ -3681,6 +3951,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (mediaUri == null) {
                 return;
             }
+            // A finished clip is already set up and resting on its last frame, and re-initializing it
+            // does harm: onCompleted() leaves SCRAP in the playback cache, so the PlaybackInfo passed
+            // here is the fragment initializer's, which is muted. Since a finished clip no longer
+            // counts as playing, the Container re-initializes it on every selection pass -- including
+            // the one onPlaybackFinished() triggers -- so a clip the reader had unmuted would come back
+            // silent when they pressed play.
+            if (helper != null && helper.isEnded()) {
+                return;
+            }
             if (helper == null) {
                 helper = new ExoPlayerViewHelper(this, mediaUri, null, mExoCreator);
                 helper.addEventListener(new Playable.DefaultEventListener() {
@@ -3691,6 +3970,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 Player.EVENT_PLAYBACK_STATE_CHANGED,
                                 Player.EVENT_PLAYBACK_SUPPRESSION_REASON_CHANGED)) {
                             playPauseButton.setImageDrawable(Util.shouldShowPlayButton(player) ? playDrawable : pauseDrawable);
+                        }
+                        if (events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED)
+                                && player.getPlaybackState() == Player.STATE_ENDED) {
+                            onPlaybackFinished();
                         }
                     }
 
@@ -3839,6 +4122,33 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (helper != null) helper.pause();
         }
 
+        /**
+         * Hands the autoplay slot on once this clip has run out.
+         *
+         * <p>Finishing releases the slot -- wantsToPlay() stops asking for it -- but nothing
+         * re-runs the selection, and the Container only re-selects when the feed scrolls. Without
+         * this the reader who sits still after a video ends is left with a feed where nothing
+         * plays at all, which is no better than the finished clip holding the slot.
+         *
+         * <p>Posted rather than called here: this arrives inside an ExoPlayer callback, and the
+         * re-selection starts and stops other players. Only while the feed is at rest, because a
+         * forced idle pass during a fling would start a player that is on its way off screen.
+         */
+        private void onPlaybackFinished() {
+            Container settled = container;
+            if (settled == null) {
+                return;
+            }
+            settled.post(() -> {
+                if (settled.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
+                    settled.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
+                    // The Container's own dispatch does not reach the adapter's scroll listener,
+                    // so the gif cards are told separately.
+                    scheduleGifAutoplayUpdate();
+                }
+            });
+        }
+
         @Override
         public boolean isPlaying() {
             return helper != null && helper.isPlaying();
@@ -3860,6 +4170,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
         @Override
         public boolean wantsToPlay() {
+            // A clip that has run out stops asking for the slot, so the next card down gets it.
+            // Otherwise, with looping off, one finished video at the top of the screen held the
+            // only autoplay slot and nothing below it ever started. It keeps its last frame -- the
+            // Container leaves a player it did not select alone -- and the play button restarts it,
+            // because play() re-prepares a finished player.
+            if (helper != null && helper.isEnded()) {
+                return false;
+            }
             return canPlayVideo && mediaUri != null && ToroUtil.visibleAreaOffset(this, itemView.getParent()) >= mStartAutoplayVisibleAreaOffset;
         }
 
@@ -4305,6 +4623,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Nullable
         TextView contentTextView;
         RequestListener<Drawable> glideRequestListener;
+        /** Whether this card is currently showing the animation rather than the still. */
+        boolean animatingGif;
 
         PostWithPreviewTypeViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -5592,6 +5912,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         Post post;
         @Nullable
         Post.Preview preview;
+        /** Whether this card is currently showing the animation rather than the still. */
+        boolean animatingGif;
 
         public PostGalleryViewHolder(@NonNull ItemPostGalleryBinding binding) {
             super(binding.getRoot());

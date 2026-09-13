@@ -152,7 +152,18 @@ android {
             useJUnitPlatform()
             // JDK 21+ warns (and a future JDK will refuse) when Mockito's inline maker self-attaches
             // its agent at runtime; allow it explicitly. byte-buddy 1.18.11 already reads Java 25.
-            jvmArgs "-XX:+EnableDynamicAgentLoading"
+            //
+            // The second flag is the same shape of deadline, from JEP 472. Roborazzi renders through
+            // Robolectric's native graphics, which reaches it via System::load -- a restricted method
+            // -- so on JDK 24+ the worker prints "java.lang.System::load has been called by
+            // org.robolectric.nativeruntime.DefaultNativeRuntimeLoader in an unnamed module". Today
+            // that is only a warning; once a JDK enforces JEP 472 the call throws, the native runtime
+            // fails to initialise, and the screenshot tests go down with it. Granting native access
+            // here rather than silencing the warning is what keeps that from becoming a surprise.
+            //
+            // It has to be set on this block: org.gradle.jvmargs configures the daemon, and Gradle's
+            // test workers are forked with the arguments from the Test task instead.
+            jvmArgs "-XX:+EnableDynamicAgentLoading", "--enable-native-access=ALL-UNNAMED"
             // Gradle's 512m default is not enough for the Robolectric/Roborazzi screenshot tests:
             // the executor dies with an OutOfMemoryError partway through a full-suite run, which
             // surfaces as unrelated-looking test failures rather than as an obvious memory problem.

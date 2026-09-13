@@ -160,6 +160,14 @@ public interface Playable {
     boolean isPlaying();
 
     /**
+     * Check if current Playable has played to its end and is resting on the last frame.
+     *
+     * @return {@code true} if playback has finished, {@code false} otherwise. Always
+     * {@code false} for a looping playback, which never reaches an end.
+     */
+    boolean isEnded();
+
+    /**
      * Change the volume of current playback.
      *
      * @param volume the volume value to be set. Must be a {@code float} of range from 0 to 1.

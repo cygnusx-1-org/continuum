@@ -189,6 +189,19 @@ public class Container extends RecyclerView {
   }
 
   /**
+   * Narrow {@code contentRect} -- this container's content box, in window coordinates -- to the
+   * part of it the user can actually see.
+   *
+   * <p>The default is the whole of it. A subclass whose host paints something over the list, a
+   * bottom bar say, narrows it here so that the visible-area measurement in
+   * {@link ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil#visibleAreaOffset} does not
+   * count pixels hidden behind that.
+   */
+  public void clipToViewport(@NonNull Rect contentRect) {
+    // No-op: nothing is assumed to cover a plain Container.
+  }
+
+  /**
    * Filter current managed {@link ToroPlayer}s using {@link Filter}. Result is sorted by Player
    * order obtained from {@link ToroPlayer#getPlayerOrder()}.
    *

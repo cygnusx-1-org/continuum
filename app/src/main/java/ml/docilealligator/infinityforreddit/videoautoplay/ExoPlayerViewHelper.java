@@ -132,6 +132,11 @@ public class ExoPlayerViewHelper extends ToroPlayerHelper {
         return playable.isPlaying();
     }
 
+    /** Whether playback ran out and is resting on the last frame; never true while looping. */
+    public boolean isEnded() {
+        return playable.isEnded();
+    }
+
     @Override
     public void setVolume(float volume) {
         playable.setVolume(volume);
