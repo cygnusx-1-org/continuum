@@ -22,7 +22,7 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 object AnonymousAccountRename {
 
     /** How the anonymous account was spelled before the rename. */
-    private const val LEGACY_ANONYMOUS_ACCOUNT = "-"
+    const val LEGACY_ANONYMOUS_ACCOUNT = "-"
 
     /**
      * Both steps, on the calling thread.

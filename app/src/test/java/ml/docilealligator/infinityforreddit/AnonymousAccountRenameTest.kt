@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
@@ -9,6 +10,7 @@ import ml.docilealligator.infinityforreddit.account.AnonymousAccountRename
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
@@ -52,13 +54,28 @@ class AnonymousAccountRenameTest {
                 + " VALUES (?, 0, 0, 0, ?)", arrayOf(name, token))
     }
 
-    private fun usernamesIn(table: String): List<String> {
+    private fun postFilter(name: String, username: String, maxVote: Int = -1, on: SupportSQLiteDatabase = db()) {
+        on.execSQL(
+            "INSERT INTO post_filter (username, name, max_vote, min_vote, max_comments, min_comments,"
+                + " max_awards, min_awards, only_nsfw, only_spoiler, contain_text_type, contain_link_type,"
+                + " contain_image_type, contain_gif_type, contain_video_type, contain_gallery_type)"
+                + " VALUES (?, ?, ?, -1, -1, -1, -1, -1, 0, 0, 1, 1, 1, 1, 1, 1)",
+            arrayOf<Any>(username, name, maxVote))
+    }
+
+    private fun usernamesIn(table: String, on: SupportSQLiteDatabase = db()): List<String> {
         val names = mutableListOf<String>()
-        db().query("SELECT username FROM $table ORDER BY username").use {
+        on.query("SELECT username FROM $table ORDER BY username").use {
             while (it.moveToNext()) names.add(it.getString(0))
         }
         return names
     }
+
+    private fun longOf(sql: String): Long =
+        db().query(sql).use {
+            it.moveToNext()
+            it.getLong(0)
+        }
 
     private fun tokenOf(name: String): String? {
         db().query("SELECT access_token FROM accounts WHERE username = ?", arrayOf(name)).use {
@@ -139,6 +156,56 @@ class AnonymousAccountRenameTest {
         assertEquals(listOf(".anonymous"), usernamesIn("accounts"))
     }
 
+    /**
+     * The same, where a child is already there under both names. Every child key includes the
+     * account name, so moving the old one across would duplicate the new one's key: a plain update
+     * fails there, and that failure is what crashed a restore of an older backup.
+     */
+    @Test
+    fun `a row already under the new name is kept over its twin under the old one`() {
+        account("-")
+        postFilter("NSFW", "-", maxVote = 1)
+        postFilter("NSFW", ".anonymous", maxVote = 2)
+        db().execSQL("INSERT INTO read_posts (username, id, read_post_type, time)"
+            + " VALUES ('-', 't3_1', 0, 1)")
+        db().execSQL("INSERT INTO read_posts (username, id, read_post_type, time)"
+            + " VALUES ('.anonymous', 't3_1', 0, 2)")
+
+        RedditDataRoomDatabase.renameAnonymousAccount(db())
+
+        assertEquals(listOf(".anonymous"), usernamesIn("post_filter"))
+        assertEquals("the copy the app was reading", 2L, longOf("SELECT max_vote FROM post_filter"))
+        assertEquals(listOf(".anonymous"), usernamesIn("read_posts"))
+        assertEquals(2L, longOf("SELECT time FROM read_posts"))
+        assertEquals(listOf(".anonymous"), usernamesIn("accounts"))
+    }
+
+    /**
+     * Replacing the kept filter with its twin would also have ended the clash, and taken everything
+     * that hangs off the filter with it by cascade -- the subreddits it was seen blocking included,
+     * and the exceptions among those are the user's own.
+     */
+    @Test
+    fun `a kept filter keeps its usages and blocked subreddits`() {
+        account("-")
+        postFilter("NSFW", ".anonymous")
+        db().execSQL("INSERT INTO post_filter_usage (name, username, usage, name_of_usage)"
+            + " VALUES ('NSFW', '.anonymous', 2, 'pics')")
+        db().execSQL("INSERT INTO post_filter_blocked_subreddit (filter_name, username, rule_value,"
+            + " subreddit_name, first_blocked, block_count, excepted)"
+            + " VALUES ('NSFW', '.anonymous', '*irl*', 'hairloss', 1, 3, 1)")
+        postFilter("NSFW", "-")
+        db().execSQL("INSERT INTO post_filter_usage (name, username, usage, name_of_usage)"
+            + " VALUES ('NSFW', '-', 2, 'pics')")
+
+        RedditDataRoomDatabase.renameAnonymousAccount(db())
+
+        assertEquals(listOf(".anonymous"), usernamesIn("post_filter_usage"))
+        assertEquals(listOf(".anonymous"), usernamesIn("post_filter_blocked_subreddit"))
+        assertEquals("the exception survives", 1L,
+            longOf("SELECT excepted FROM post_filter_blocked_subreddit"))
+    }
+
     @Test
     fun `dropping the old parent does not cascade away the rows that just moved`() {
         asDatabaseBeingMigrated()
@@ -205,6 +272,40 @@ class AnonymousAccountRenameTest {
         RedditDataRoomDatabase.renameAnonymousAccount(db())
 
         assertEquals(listOf(".anonymous", "alice"), usernamesIn("accounts"))
+    }
+
+    /**
+     * The 42 → 43 migration, on an install a restore crashed on: the placeholder account is still
+     * there, with a twin under it of what the app has under the new name. Opened through
+     * [RedditDataRoomDatabase.create] rather than migrated by hand, so it runs the way Room runs it --
+     * and a migration missing from the builder fails this open rather than an upgrading user's.
+     */
+    @Test
+    fun `an install a crashed restore left behind opens without the leftovers`() {
+        val crashed = RedditDataRoomDatabase.create(context)
+        crashed.openHelper.writableDatabase.apply {
+            execSQL("INSERT INTO accounts (username, karma, is_current_user, is_mod)"
+                + " VALUES ('-', 0, 0, 0)")
+            postFilter("NSFW", ".anonymous", on = this)
+            postFilter("NSFW", "-", on = this)
+            execSQL("INSERT INTO read_posts (username, id, read_post_type, time)"
+                + " VALUES ('-', 't3_1', 0, 1)")
+            version = 42
+        }
+        crashed.close()
+
+        val upgraded = RedditDataRoomDatabase.create(context)
+        try {
+            val upgradedDb = upgraded.openHelper.writableDatabase
+            assertEquals(43, upgradedDb.version)
+            for (table in RedditDataRoomDatabase.ACCOUNT_NAME_TABLES + "accounts") {
+                assertFalse("left under the old name in $table", "-" in usernamesIn(table, upgradedDb))
+            }
+            assertEquals(listOf(".anonymous"), usernamesIn("post_filter", upgradedDb))
+            assertEquals(listOf(".anonymous"), usernamesIn("read_posts", upgradedDb))
+        } finally {
+            upgraded.close()
+        }
     }
 
     @Test

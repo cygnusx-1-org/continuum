@@ -50,6 +50,7 @@ class RestoreSettingsTest {
     private companion object {
         const val PASSWORD = "restore-test"
         const val VERSION_DIR = "8.3.0.2"
+        const val CURRENT_ACCOUNT_FILE = "current_account_test"
     }
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -58,6 +59,7 @@ class RestoreSettingsTest {
     private lateinit var sortType: SharedPreferences
     private lateinit var nsfwAndSpoiler: SharedPreferences
     private lateinit var internal: SharedPreferences
+    private lateinit var currentAccount: SharedPreferences
 
     @Before
     fun setUp() {
@@ -65,8 +67,9 @@ class RestoreSettingsTest {
         sortType = file(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE)
         nsfwAndSpoiler = file(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE)
         internal = file(SharedPreferencesUtils.INTERNAL_SHARED_PREFERENCES_FILE)
+        currentAccount = file(CURRENT_ACCOUNT_FILE)
 
-        for (preferences in listOf(defaultPreferences, sortType, nsfwAndSpoiler, internal)) {
+        for (preferences in listOf(defaultPreferences, sortType, nsfwAndSpoiler, internal, currentAccount)) {
             preferences.edit().clear().commit()
         }
         internal.edit()
@@ -132,7 +135,7 @@ class RestoreSettingsTest {
             uri,
             PASSWORD,
             database,
-            file("current_account_test"),
+            currentAccount,
             file("light_theme_test"),
             file("dark_theme_test"),
             file("amoled_theme_test"),
@@ -233,6 +236,19 @@ class RestoreSettingsTest {
     private fun anonymousSubredditsJson(username: String) =
         """[{"id":"t5_1","name":"pics","iconUrl":"","username":"$username","favorite":false}]"""
 
+    /** An accounts.json as a backup writes it, none of them marked current. */
+    private fun accountsJson(vararg names: String) = names.joinToString(",", "[", "]") {
+        """{"accountName":"$it","karma":0,"isCurrentUser":false,"isMod":false}"""
+    }
+
+    private fun usernamesIn(database: RedditDataRoomDatabase, table: String): List<String> {
+        val names = mutableListOf<String>()
+        database.openHelper.writableDatabase.query("SELECT username FROM $table ORDER BY username").use {
+            while (it.moveToNext()) names.add(it.getString(0))
+        }
+        return names
+    }
+
     /**
      * The case the rename created. Rows in a backup carry the account name they were saved under,
      * so one taken before the rename says "-" however new the database restoring it is -- the Room
@@ -265,6 +281,90 @@ class RestoreSettingsTest {
 
             assertEquals(1, database.subscribedSubredditDao()
                 .getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT).size)
+        } finally {
+            database.close()
+        }
+    }
+
+    /**
+     * A backup taken before filters had owners shares each one out among the accounts, and the
+     * placeholder a restore parks old-spelling rows on used to be counted among them. Every filter
+     * then had a copy under "-" beside the one under ".anonymous", and folding the two together
+     * crashed the restore.
+     */
+    @Test
+    fun `filters from a backup taken before they had owners are shared out without the placeholder`() {
+        val database = realDatabase()
+        try {
+            restore(database, listOf(
+                "accounts.json" to accountsJson("alice"),
+                "post_filters.json" to """[{"name":"NSFW"}]""",
+                "post_filter_usage.json" to """[{"name":"NSFW","usage":2,"nameOfUsage":"pics"}]""",
+            ))
+
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT, "alice"), usernamesIn(database, "post_filter"))
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT, "alice"), usernamesIn(database, "post_filter_usage"))
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT, "alice"), usernamesIn(database, "accounts"))
+        } finally {
+            database.close()
+        }
+    }
+
+    /**
+     * A backup taken from an install that restore had crashed on: the placeholder is among its
+     * accounts, and a filter is in it twice, once under each name. The copy under the new name is
+     * the one the user was looking at when they took it.
+     */
+    @Test
+    fun `a backup taken after a restore had crashed comes back without the leftovers`() {
+        val database = realDatabase()
+        try {
+            restore(database, listOf(
+                "accounts.json" to accountsJson("-", "alice"),
+                "post_filters.json" to """[
+                    {"name":"NSFW","username":"-","maxVote":1},
+                    {"name":"NSFW","username":".anonymous","maxVote":2},
+                    {"name":"NSFW","username":"alice","maxVote":1}]""",
+            ))
+
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT, "alice"), usernamesIn(database, "post_filter"))
+            database.openHelper.writableDatabase
+                .query("SELECT max_vote FROM post_filter WHERE username = ?", arrayOf(Account.ANONYMOUS_ACCOUNT))
+                .use {
+                    it.moveToNext()
+                    assertEquals(2, it.getInt(0))
+                }
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT, "alice"), usernamesIn(database, "accounts"))
+            assertEquals("the placeholder is not an account to make current",
+                "alice", currentAccount.getString(SharedPreferencesUtils.ACCOUNT_NAME, null))
+        } finally {
+            database.close()
+        }
+    }
+
+    /**
+     * A restore that fails part of the way through takes back what it had written. It used to keep
+     * it -- the local accounts already deleted, the placeholder and whatever was on it left for the
+     * next backup to carry -- and the exception, escaping the executor, crashed the app.
+     */
+    @Test
+    fun `a restore that fails part of the way through leaves the database as it was`() {
+        val database = realDatabase()
+        try {
+            database.openHelper.writableDatabase.execSQL(
+                "INSERT INTO accounts (username, karma, is_current_user, is_mod) VALUES ('alice', 0, 1, 0)")
+
+            restore(database, listOf(
+                "accounts.json" to accountsJson("bob"),
+                "post_filters.json" to """[{"name":"NSFW"}]""",
+                // Read after both of the above. An object where Gson expects a list throws.
+                "read_posts.json" to """{"not":"a list"}""",
+            ))
+
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT, "alice"), usernamesIn(database, "accounts"))
+            assertTrue(usernamesIn(database, "post_filter").isEmpty())
+            assertNull("nothing may name the account the rollback took back out",
+                currentAccount.getString(SharedPreferencesUtils.ACCOUNT_NAME, null))
         } finally {
             database.close()
         }

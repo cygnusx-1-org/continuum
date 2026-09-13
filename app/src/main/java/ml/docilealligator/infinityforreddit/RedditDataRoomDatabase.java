@@ -63,7 +63,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
         LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class,
-        Reminder.class}, version = 42, exportSchema = false)
+        Reminder.class}, version = 43, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -82,7 +82,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
                         MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40,
-                        MIGRATION_40_41, MIGRATION_41_42)
+                        MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43)
                 .addCallback(ANONYMOUS_ACCOUNT_ROW)
                 .build();
     }
@@ -316,6 +316,24 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
         }
     };
 
+    /**
+     * Runs the rename again, for installs a restore crashed on.
+     *
+     * <p>Restoring a backup from before the rename could fail inside {@link #renameAnonymousAccount},
+     * on a row already under the new name, and nothing around the restore took back what it had
+     * written by then. That left an accounts row named {@code "-"} -- which every account query,
+     * excluding only {@code ".anonymous"}, takes for a signed-in account -- with rows under it that
+     * nothing reads, and a backup taken from such an install carries them along. The rename now gets
+     * past those clashes and finds nothing to do where the old name is gone, so running it once more
+     * is the whole migration.
+     */
+    private static final Migration MIGRATION_42_43 = new Migration(42, 43) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            renameAnonymousAccount(database);
+        }
+    };
+
     /** Every table with a {@code username} column that means "which account". */
     @VisibleForTesting
     static final String[] ACCOUNT_NAME_TABLES = {
@@ -338,15 +356,26 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     /**
      * Moves anonymous rows from the old {@code "-"} account name onto {@code ".anonymous"}.
      *
-     * <p>Called from {@link #MIGRATION_41_42} for a database being upgraded, and from
+     * <p>Called from {@link #MIGRATION_41_42} for a database being upgraded, from
+     * {@link #MIGRATION_42_43} for one a crashed restore left behind, and from
      * {@code RestoreSettings} for rows read out of a backup taken before the rename -- which arrive
-     * as {@code "-"} however new the database is, so the migration alone does not cover them.
+     * as {@code "-"} however new the database is, so the migrations alone do not cover them.
      *
      * <p>Written to be correct whether or not a {@code ".anonymous"} row already exists, because on
      * the two paths it differs: an upgrading database has only the old row, while a restore happens
      * long after {@link #ANONYMOUS_ACCOUNT_ROW} has created the new one. Hence the ordering --
      * rename the parent if the name is free, move the children either way, then drop the old parent
      * if it is still there.
+     *
+     * <p>A child can already be there under both names too. Its key includes the account name, and
+     * a restore puts old-spelling rows back on top of what the app has written under the new name
+     * since -- the same subreddit subscribed to, the same post read -- so a plain update fails the
+     * key. The row under the new name is the one kept, being the one the app has been reading: each
+     * update ignores a clash, and what is still under the old name once they have all run is
+     * deleted. Replacing instead would cascade away what hangs off the row it displaced, a filter's
+     * blocked subreddits and the user's exceptions among them. Every update runs before any delete,
+     * so the result depends neither on the order of {@link #ACCOUNT_NAME_TABLES} nor on foreign keys
+     * being enforced, which a migration cannot count on.
      *
      * <p>Renaming rather than recreating matters: the anonymous row carries the application-only
      * access token, which {@code AccountDaoKt} reads back by name, and inserting a fresh row and
@@ -355,10 +384,9 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
      * <p>The rename is also the one statement that leaves the foreign keys briefly unsatisfied --
      * the children still name the old parent until the next statement -- which is what
      * {@code defer_foreign_keys} is for. That pragma only has effect inside a transaction, so this
-     * opens its own rather than depending on the caller having one: a migration does, having been
-     * handed one by Room, and a restore does not. Nesting is safe, the inner one being counted
-     * rather than opened again. Dropping the old parent last is what leaves
-     * {@code ON DELETE CASCADE} nothing to take.
+     * opens its own rather than depending on the caller having one. Nesting inside the caller's, as
+     * both a migration and a restore do, is safe, the inner one being counted rather than opened
+     * again. Dropping the old parent last is what leaves {@code ON DELETE CASCADE} nothing to take.
      *
      * <p>{@code custom_themes} is deliberately absent: its {@code username} column is an
      * {@code int} holding a theme colour, not an account name.
@@ -370,8 +398,11 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
             database.execSQL("UPDATE OR IGNORE accounts SET username = '.anonymous'"
                     + " WHERE username = '-'");
             for (String table : ACCOUNT_NAME_TABLES) {
-                database.execSQL("UPDATE " + table
+                database.execSQL("UPDATE OR IGNORE " + table
                         + " SET username = '.anonymous' WHERE username = '-'");
+            }
+            for (String table : ACCOUNT_NAME_TABLES) {
+                database.execSQL("DELETE FROM " + table + " WHERE username = '-'");
             }
             database.execSQL("DELETE FROM accounts WHERE username = '-'");
             database.execSQL("INSERT OR IGNORE INTO accounts"

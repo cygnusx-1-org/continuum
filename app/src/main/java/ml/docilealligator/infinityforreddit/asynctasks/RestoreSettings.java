@@ -34,6 +34,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountSettingsMigration;
+import ml.docilealligator.infinityforreddit.account.AnonymousAccountRename;
 import ml.docilealligator.infinityforreddit.comment.CommentDraft;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
@@ -186,192 +187,30 @@ public class RestoreSettings {
                                     restoredDefaultPreferences = imported;
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {
-                                // A backup taken before the anonymous account was renamed holds its
-                                // rows under "-", and every one of them has a foreign key onto an
-                                // accounts row of that name. Nothing creates it any more, so the
-                                // inserts below would fail the constraint; this gives them a parent
-                                // to land on, and renameAnonymousAccount() moves them off it and
-                                // drops it once they are all in.
-                                redditDataRoomDatabase.getOpenHelper().getWritableDatabase().execSQL(
-                                        "INSERT OR IGNORE INTO accounts (username, karma, is_current_user, is_mod)"
-                                                + " VALUES ('-', 0, 0, 0)");
-
-                                File anonymousSubscribedSubredditsFile = new File(f.getAbsolutePath() + "/anonymous_subscribed_subreddits.json");
-                                File anonymousSubscribedUsersFile = new File(f.getAbsolutePath() + "/anonymous_subscribed_users.json");
-                                File anonymousMultiredditsFile = new File(f.getAbsolutePath() + "/anonymous_multireddits.json");
-                                File anonymousMultiredditSubredditsFile = new File(f.getAbsolutePath() + "/anonymous_multireddit_subreddits.json");
-                                File customThemesFile = new File(f.getAbsolutePath() + "/custom_themes.json");
-                                File postFiltersFile = new File(f.getAbsolutePath() + "/post_filters.json");
-                                File postFilterUsageFile = new File(f.getAbsolutePath() + "/post_filter_usage.json");
-                                File commentFiltersFile = new File(f.getAbsolutePath() + "/comment_filters.json");
-                                File commentFilterUsageFile = new File(f.getAbsolutePath() + "/comment_filter_usage.json");
-                                File accountsFile = new File(f.getAbsolutePath() + "/accounts.json");
-                                File readPostsFile = new File(f.getAbsolutePath() + "/read_posts.json");
-                                File localSavedFile = new File(f.getAbsolutePath() + "/local_saved.json");
-                                File commentDraftsFile = new File(f.getAbsolutePath() + "/comment_drafts.json");
-                                File remindersFile = new File(f.getAbsolutePath() + "/reminders.json");
-                                File recentlyVisitedFile = new File(f.getAbsolutePath() + "/recently_visited.json");
-                                File recentSearchQueriesFile = new File(f.getAbsolutePath() + "/recent_search_queries.json");
-
-                                if (anonymousSubscribedSubredditsFile.exists()) {
-                                    List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
-                                    redditDataRoomDatabase.subscribedSubredditDao().insertAll(anonymousSubscribedSubreddits);
-                                }
-                                if (anonymousSubscribedUsersFile.exists()) {
-                                    List<SubscribedUserData> anonymousSubscribedUsers = getListFromFile(anonymousSubscribedUsersFile, new TypeToken<List<SubscribedUserData>>() {}.getType());
-                                    redditDataRoomDatabase.subscribedUserDao().insertAll(anonymousSubscribedUsers);
-                                }
-                                if (anonymousMultiredditsFile.exists()) {
-                                    List<MultiReddit> anonymousMultireddits = getListFromFile(anonymousMultiredditsFile, new TypeToken<List<MultiReddit>>() {}.getType());
-                                    redditDataRoomDatabase.multiRedditDao().insertAll(anonymousMultireddits);
-
-                                    if (anonymousMultiredditSubredditsFile.exists()) {
-                                        List<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits = getListFromFile(anonymousMultiredditSubredditsFile, new TypeToken<List<AnonymousMultiredditSubreddit>>() {}.getType());
-                                        redditDataRoomDatabase.anonymousMultiredditSubredditDao().insertAll(anonymousMultiredditSubreddits);
+                                // All of it or none of it. Written table by table with nothing
+                                // around it, a restore that failed part of the way through kept
+                                // whatever it had reached -- the local accounts already deleted,
+                                // rows parked on the placeholder account -- and a backup taken
+                                // afterwards carried that along. Caught for the same reason: a
+                                // constraint or a malformed file escaping the executor was a crash.
+                                try {
+                                    Account currentAccount = redditDataRoomDatabase.runInTransaction(
+                                            () -> restoreDatabase(context, redditDataRoomDatabase, f));
+                                    if (currentAccount != null) {
+                                        // Also update the current account shared preferences for
+                                        // immediate effect. Only once committed: written inside the
+                                        // transaction, a rollback would leave them naming an
+                                        // account that is not there.
+                                        currentAccountSharedPreferences.edit()
+                                            .putString(SharedPreferencesUtils.ACCOUNT_NAME, currentAccount.getAccountName())
+                                            .putString(SharedPreferencesUtils.ACCESS_TOKEN, currentAccount.getAccessToken())
+                                            .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, currentAccount.getProfileImageUrl())
+                                            .apply();
                                     }
+                                } catch (RuntimeException e) {
+                                    Log.e("RestoreSettings", "restoring the database failed", e);
+                                    result = false;
                                 }
-                                if (customThemesFile.exists()) {
-                                    List<CustomTheme> customThemes = getListFromFile(customThemesFile, new TypeToken<List<CustomTheme>>() {}.getType());
-                                    restoreCustomThemes(context, redditDataRoomDatabase, customThemes);
-                                }
-                                if (accountsFile.exists()) {
-                                    List<Account> accounts = getListFromFile(accountsFile, new TypeToken<List<Account>>() {}.getType());
-                                    // Only replace local accounts when the backup actually has some; an empty
-                                    // or unreadable accounts.json (now an empty list, not null) must not wipe them.
-                                    if (!accounts.isEmpty()) {
-                                        // Clear existing accounts before inserting restored ones
-                                        redditDataRoomDatabase.accountDao().deleteAllAccounts();
-                                        // Inserted rows keep the is_current_user flag from the backup, so more
-                                        // than one account can come in marked current. Track which account should
-                                        // be the current one, preferring the backed-up current user.
-                                        Account currentAccount = null;
-                                        for (Account account : accounts) {
-                                            redditDataRoomDatabase.accountDao().insert(account);
-                                            if (account.isCurrentUser()) {
-                                                currentAccount = account;
-                                            }
-                                        }
-                                        if (currentAccount == null && !accounts.isEmpty()) {
-                                            currentAccount = accounts.get(0);
-                                        }
-                                        if (currentAccount != null) {
-                                            // Reset every account's flag first so exactly one stays current;
-                                            // otherwise non-current accounts are hidden from the account switcher.
-                                            redditDataRoomDatabase.accountDao().markAllAccountsNonCurrent();
-                                            redditDataRoomDatabase.accountDao().markAccountCurrent(currentAccount.getAccountName());
-                                            // Also update the current account shared preferences for immediate effect
-                                            currentAccountSharedPreferences.edit()
-                                                .putString(SharedPreferencesUtils.ACCOUNT_NAME, currentAccount.getAccountName())
-                                                .putString(SharedPreferencesUtils.ACCESS_TOKEN, currentAccount.getAccessToken())
-                                                .putString(SharedPreferencesUtils.ACCOUNT_IMAGE_URL, currentAccount.getProfileImageUrl())
-                                                .apply();
-                                        }
-                                    }
-                                }
-                                // Filters after accounts, though nothing here has a foreign key on
-                                // one: a backup taken before a filter had an owner has to be shared
-                                // out among the accounts, and that list is only right once the block
-                                // above has restored them.
-                                if (postFiltersFile.exists()) {
-                                    List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
-                                    List<PostFilterUsage> postFilterUsage = postFilterUsageFile.exists()
-                                            ? getListFromFile(postFilterUsageFile, new TypeToken<List<PostFilterUsage>>() {}.getType())
-                                            : Collections.emptyList();
-                                    if (namesAccounts(postFiltersFile)) {
-                                        redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
-                                        redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
-                                    } else {
-                                        for (String username : accountNames(redditDataRoomDatabase)) {
-                                            for (PostFilter postFilter : postFilters) {
-                                                postFilter.username = username;
-                                            }
-                                            redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
-                                            for (PostFilterUsage usage : postFilterUsage) {
-                                                usage.username = username;
-                                            }
-                                            redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
-                                        }
-                                    }
-                                }
-                                if (commentFiltersFile.exists()) {
-                                    List<CommentFilter> commentFilters = getListFromFile(commentFiltersFile, new TypeToken<List<CommentFilter>>() {}.getType());
-                                    List<CommentFilterUsage> commentFilterUsage = commentFilterUsageFile.exists()
-                                            ? getListFromFile(commentFilterUsageFile, new TypeToken<List<CommentFilterUsage>>() {}.getType())
-                                            : Collections.emptyList();
-                                    if (namesAccounts(commentFiltersFile)) {
-                                        redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
-                                        redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
-                                    } else {
-                                        for (String username : accountNames(redditDataRoomDatabase)) {
-                                            for (CommentFilter commentFilter : commentFilters) {
-                                                commentFilter.username = username;
-                                            }
-                                            redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
-                                            for (CommentFilterUsage usage : commentFilterUsage) {
-                                                usage.username = username;
-                                            }
-                                            redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
-                                        }
-                                    }
-                                }
-                                // Restore read_posts after accounts so the FK on username is satisfied.
-                                if (readPostsFile.exists()) {
-                                    List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
-                                    if (!readPosts.isEmpty()) {
-                                        redditDataRoomDatabase.readPostDao().insertAll(readPosts);
-                                    }
-                                }
-
-                                // Restore local_saved after accounts so the FK on username is satisfied.
-                                if (localSavedFile.exists()) {
-                                    List<LocalSavedThing> localSaved = getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType());
-                                    if (!localSaved.isEmpty()) {
-                                        redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
-                                    }
-                                }
-
-                                // Restore comment_drafts after accounts so the FK on username is satisfied.
-                                if (commentDraftsFile.exists()) {
-                                    List<CommentDraft> commentDrafts = getListFromFile(commentDraftsFile, new TypeToken<List<CommentDraft>>() {}.getType());
-                                    if (!commentDrafts.isEmpty()) {
-                                        redditDataRoomDatabase.commentDraftDao().insertAll(commentDrafts);
-                                    }
-                                }
-
-                                // Restore reminders after accounts so the FK on username is satisfied.
-                                if (remindersFile.exists()) {
-                                    List<Reminder> reminders = getListFromFile(remindersFile, new TypeToken<List<Reminder>>() {}.getType());
-                                    if (!reminders.isEmpty()) {
-                                        redditDataRoomDatabase.reminderDao().insertAll(reminders);
-                                    }
-                                }
-
-                                // Recently visited and search history hang off accounts by an
-                                // ON DELETE CASCADE, so clearing the accounts above wiped whatever
-                                // was here. They have to come back from the backup -- nothing on
-                                // Reddit can re-sync them -- and, like the tables above, only after
-                                // the accounts they reference exist again.
-                                if (recentlyVisitedFile.exists()) {
-                                    List<RecentlyVisited> recentlyVisited = getListFromFile(recentlyVisitedFile, new TypeToken<List<RecentlyVisited>>() {}.getType());
-                                    if (!recentlyVisited.isEmpty()) {
-                                        redditDataRoomDatabase.recentlyVisitedDao().insertAll(recentlyVisited);
-                                    }
-                                }
-
-                                if (recentSearchQueriesFile.exists()) {
-                                    List<RecentSearchQuery> recentSearchQueries = getListFromFile(recentSearchQueriesFile, new TypeToken<List<RecentSearchQuery>>() {}.getType());
-                                    if (!recentSearchQueries.isEmpty()) {
-                                        redditDataRoomDatabase.recentSearchQueryDao().insertAll(recentSearchQueries);
-                                    }
-                                }
-
-                                // Everything is in. Move whatever landed on the placeholder above
-                                // onto the name the app actually reads, and drop the placeholder.
-                                // Here rather than at the end of the restore: it is these rows that
-                                // can carry the old spelling, and a backup with no database
-                                // directory has nothing to rename.
-                                RedditDataRoomDatabase.renameAnonymousAccount(
-                                        redditDataRoomDatabase.getOpenHelper().getWritableDatabase());
                             }
                         }
 
@@ -417,6 +256,208 @@ public class RestoreSettings {
                 }
             }
         });
+    }
+
+    /**
+     * Puts the backup's {@code database} directory back, table by table.
+     *
+     * Runs inside the caller's transaction, so it writes nothing the transaction cannot take back:
+     * the account the backup makes current is returned rather than stored, for the caller to store
+     * once the rows are committed. Null when the backup names no accounts, which leaves the current
+     * one as it is.
+     */
+    @Nullable
+    private static Account restoreDatabase(Context context, RedditDataRoomDatabase redditDataRoomDatabase,
+                                           File databaseDir) {
+        // A backup taken before the anonymous account was renamed holds its rows under "-", and
+        // every one of them has a foreign key onto an accounts row of that name. Nothing creates it
+        // any more, so the inserts below would fail the constraint; this gives them a parent to land
+        // on, and renameAnonymousAccount() moves them off it and drops it once they are all in.
+        redditDataRoomDatabase.getOpenHelper().getWritableDatabase().execSQL(
+                "INSERT OR IGNORE INTO accounts (username, karma, is_current_user, is_mod)"
+                        + " VALUES ('-', 0, 0, 0)");
+
+        File anonymousSubscribedSubredditsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_subscribed_subreddits.json");
+        File anonymousSubscribedUsersFile = new File(databaseDir.getAbsolutePath() + "/anonymous_subscribed_users.json");
+        File anonymousMultiredditsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_multireddits.json");
+        File anonymousMultiredditSubredditsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_multireddit_subreddits.json");
+        File customThemesFile = new File(databaseDir.getAbsolutePath() + "/custom_themes.json");
+        File postFiltersFile = new File(databaseDir.getAbsolutePath() + "/post_filters.json");
+        File postFilterUsageFile = new File(databaseDir.getAbsolutePath() + "/post_filter_usage.json");
+        File commentFiltersFile = new File(databaseDir.getAbsolutePath() + "/comment_filters.json");
+        File commentFilterUsageFile = new File(databaseDir.getAbsolutePath() + "/comment_filter_usage.json");
+        File accountsFile = new File(databaseDir.getAbsolutePath() + "/accounts.json");
+        File readPostsFile = new File(databaseDir.getAbsolutePath() + "/read_posts.json");
+        File localSavedFile = new File(databaseDir.getAbsolutePath() + "/local_saved.json");
+        File commentDraftsFile = new File(databaseDir.getAbsolutePath() + "/comment_drafts.json");
+        File remindersFile = new File(databaseDir.getAbsolutePath() + "/reminders.json");
+        File recentlyVisitedFile = new File(databaseDir.getAbsolutePath() + "/recently_visited.json");
+        File recentSearchQueriesFile = new File(databaseDir.getAbsolutePath() + "/recent_search_queries.json");
+
+        if (anonymousSubscribedSubredditsFile.exists()) {
+            List<SubscribedSubredditData> anonymousSubscribedSubreddits = getListFromFile(anonymousSubscribedSubredditsFile, new TypeToken<List<SubscribedSubredditData>>() {}.getType());
+            redditDataRoomDatabase.subscribedSubredditDao().insertAll(anonymousSubscribedSubreddits);
+        }
+        if (anonymousSubscribedUsersFile.exists()) {
+            List<SubscribedUserData> anonymousSubscribedUsers = getListFromFile(anonymousSubscribedUsersFile, new TypeToken<List<SubscribedUserData>>() {}.getType());
+            redditDataRoomDatabase.subscribedUserDao().insertAll(anonymousSubscribedUsers);
+        }
+        if (anonymousMultiredditsFile.exists()) {
+            List<MultiReddit> anonymousMultireddits = getListFromFile(anonymousMultiredditsFile, new TypeToken<List<MultiReddit>>() {}.getType());
+            redditDataRoomDatabase.multiRedditDao().insertAll(anonymousMultireddits);
+
+            if (anonymousMultiredditSubredditsFile.exists()) {
+                List<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits = getListFromFile(anonymousMultiredditSubredditsFile, new TypeToken<List<AnonymousMultiredditSubreddit>>() {}.getType());
+                redditDataRoomDatabase.anonymousMultiredditSubredditDao().insertAll(anonymousMultiredditSubreddits);
+            }
+        }
+        if (customThemesFile.exists()) {
+            List<CustomTheme> customThemes = getListFromFile(customThemesFile, new TypeToken<List<CustomTheme>>() {}.getType());
+            restoreCustomThemes(context, redditDataRoomDatabase, customThemes);
+        }
+        Account currentAccount = null;
+        if (accountsFile.exists()) {
+            List<Account> backedUpAccounts = getListFromFile(accountsFile, new TypeToken<List<Account>>() {}.getType());
+            // A backup taken after a restore had crashed carries that restore's placeholder as if
+            // it were an account. It is not one -- this restore has made its own -- and let through
+            // it could be the one made current.
+            List<Account> accounts = new ArrayList<>();
+            for (Account account : backedUpAccounts) {
+                if (!AnonymousAccountRename.LEGACY_ANONYMOUS_ACCOUNT.equals(account.getAccountName())) {
+                    accounts.add(account);
+                }
+            }
+            // Only replace local accounts when the backup actually has some; an empty
+            // or unreadable accounts.json (now an empty list, not null) must not wipe them.
+            if (!accounts.isEmpty()) {
+                // Clear existing accounts before inserting restored ones
+                redditDataRoomDatabase.accountDao().deleteAllAccounts();
+                // Inserted rows keep the is_current_user flag from the backup, so more
+                // than one account can come in marked current. Track which account should
+                // be the current one, preferring the backed-up current user.
+                for (Account account : accounts) {
+                    redditDataRoomDatabase.accountDao().insert(account);
+                    if (account.isCurrentUser()) {
+                        currentAccount = account;
+                    }
+                }
+                if (currentAccount == null && !accounts.isEmpty()) {
+                    currentAccount = accounts.get(0);
+                }
+                if (currentAccount != null) {
+                    // Reset every account's flag first so exactly one stays current;
+                    // otherwise non-current accounts are hidden from the account switcher.
+                    redditDataRoomDatabase.accountDao().markAllAccountsNonCurrent();
+                    redditDataRoomDatabase.accountDao().markAccountCurrent(currentAccount.getAccountName());
+                }
+            }
+        }
+        // Filters after accounts, though nothing here has a foreign key on
+        // one: a backup taken before a filter had an owner has to be shared
+        // out among the accounts, and that list is only right once the block
+        // above has restored them.
+        if (postFiltersFile.exists()) {
+            List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
+            List<PostFilterUsage> postFilterUsage = postFilterUsageFile.exists()
+                    ? getListFromFile(postFilterUsageFile, new TypeToken<List<PostFilterUsage>>() {}.getType())
+                    : Collections.emptyList();
+            if (namesAccounts(postFiltersFile)) {
+                redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
+                redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
+            } else {
+                for (String username : accountNames(redditDataRoomDatabase)) {
+                    for (PostFilter postFilter : postFilters) {
+                        postFilter.username = username;
+                    }
+                    redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
+                    for (PostFilterUsage usage : postFilterUsage) {
+                        usage.username = username;
+                    }
+                    redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
+                }
+            }
+        }
+        if (commentFiltersFile.exists()) {
+            List<CommentFilter> commentFilters = getListFromFile(commentFiltersFile, new TypeToken<List<CommentFilter>>() {}.getType());
+            List<CommentFilterUsage> commentFilterUsage = commentFilterUsageFile.exists()
+                    ? getListFromFile(commentFilterUsageFile, new TypeToken<List<CommentFilterUsage>>() {}.getType())
+                    : Collections.emptyList();
+            if (namesAccounts(commentFiltersFile)) {
+                redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
+                redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
+            } else {
+                for (String username : accountNames(redditDataRoomDatabase)) {
+                    for (CommentFilter commentFilter : commentFilters) {
+                        commentFilter.username = username;
+                    }
+                    redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
+                    for (CommentFilterUsage usage : commentFilterUsage) {
+                        usage.username = username;
+                    }
+                    redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
+                }
+            }
+        }
+        // Restore read_posts after accounts so the FK on username is satisfied.
+        if (readPostsFile.exists()) {
+            List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
+            if (!readPosts.isEmpty()) {
+                redditDataRoomDatabase.readPostDao().insertAll(readPosts);
+            }
+        }
+
+        // Restore local_saved after accounts so the FK on username is satisfied.
+        if (localSavedFile.exists()) {
+            List<LocalSavedThing> localSaved = getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType());
+            if (!localSaved.isEmpty()) {
+                redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
+            }
+        }
+
+        // Restore comment_drafts after accounts so the FK on username is satisfied.
+        if (commentDraftsFile.exists()) {
+            List<CommentDraft> commentDrafts = getListFromFile(commentDraftsFile, new TypeToken<List<CommentDraft>>() {}.getType());
+            if (!commentDrafts.isEmpty()) {
+                redditDataRoomDatabase.commentDraftDao().insertAll(commentDrafts);
+            }
+        }
+
+        // Restore reminders after accounts so the FK on username is satisfied.
+        if (remindersFile.exists()) {
+            List<Reminder> reminders = getListFromFile(remindersFile, new TypeToken<List<Reminder>>() {}.getType());
+            if (!reminders.isEmpty()) {
+                redditDataRoomDatabase.reminderDao().insertAll(reminders);
+            }
+        }
+
+        // Recently visited and search history hang off accounts by an
+        // ON DELETE CASCADE, so clearing the accounts above wiped whatever
+        // was here. They have to come back from the backup -- nothing on
+        // Reddit can re-sync them -- and, like the tables above, only after
+        // the accounts they reference exist again.
+        if (recentlyVisitedFile.exists()) {
+            List<RecentlyVisited> recentlyVisited = getListFromFile(recentlyVisitedFile, new TypeToken<List<RecentlyVisited>>() {}.getType());
+            if (!recentlyVisited.isEmpty()) {
+                redditDataRoomDatabase.recentlyVisitedDao().insertAll(recentlyVisited);
+            }
+        }
+
+        if (recentSearchQueriesFile.exists()) {
+            List<RecentSearchQuery> recentSearchQueries = getListFromFile(recentSearchQueriesFile, new TypeToken<List<RecentSearchQuery>>() {}.getType());
+            if (!recentSearchQueries.isEmpty()) {
+                redditDataRoomDatabase.recentSearchQueryDao().insertAll(recentSearchQueries);
+            }
+        }
+
+        // Everything is in. Move whatever landed on the placeholder above
+        // onto the name the app actually reads, and drop the placeholder.
+        // Here rather than at the end of the restore: it is these rows that
+        // can carry the old spelling, and a backup with no database
+        // directory has nothing to rename.
+        RedditDataRoomDatabase.renameAnonymousAccount(
+                redditDataRoomDatabase.getOpenHelper().getWritableDatabase());
+
+        return currentAccount;
     }
 
     /**
@@ -557,12 +598,20 @@ public class RestoreSettings {
         }
     }
 
-    /** Every account the database holds, anonymous included. */
+    /**
+     * Every account the database holds, anonymous included.
+     *
+     * Not the placeholder a restore parks old-spelling rows on, which sits in the accounts table
+     * like one: a copy of every filter would go to it as well, only for the rename to find each
+     * copy already under the new name and drop it.
+     */
     private static List<String> accountNames(RedditDataRoomDatabase redditDataRoomDatabase) {
         List<String> names = new ArrayList<>();
         names.add(Account.ANONYMOUS_ACCOUNT);
         for (Account account : redditDataRoomDatabase.accountDao().getAllAccounts()) {
-            names.add(account.getAccountName());
+            if (!AnonymousAccountRename.LEGACY_ANONYMOUS_ACCOUNT.equals(account.getAccountName())) {
+                names.add(account.getAccountName());
+            }
         }
         return names;
     }
