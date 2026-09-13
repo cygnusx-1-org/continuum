@@ -2,6 +2,15 @@
 
 ---
 
+8.3.1.2 / 2026-9-12
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Bug: Crashes on setting restoration #401
+* Preloaded compact thumbnails so they appear without pop-in
+* Reverted "Keep screen on when autoplaying videos." from upstream
+* Implemented Configurable thumbnail size for compact layout #355
+
 8.3.1.1 / 2026-9-11
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
