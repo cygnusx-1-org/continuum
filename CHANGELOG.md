@@ -2,6 +2,12 @@
 
 ---
 
+8.3.1.3 / 2026-9-13
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Inline video autoplay intermittently fails until the post is scrolled off and back; GIFs load much slower than videos #403
+
 8.3.1.2 / 2026-9-12
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
