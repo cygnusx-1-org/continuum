@@ -164,11 +164,8 @@ import retrofit2.Retrofit;
 
 @SuppressWarnings("NullAway.Init")
 public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerView.ViewHolder> implements CacheManager {
-    /**
-     * Height-to-width ratio of a "Fixed Height in Card" preview: square, so every preview in the
-     * feed is the same height as every other one. See {@link #setSquarePreview}.
-     */
-    private static final float SQUARE_PREVIEW_RATIO = 1f;
+    /** @see PostCardPreviewStyle#SQUARE_PREVIEW_RATIO */
+    private static final float SQUARE_PREVIEW_RATIO = PostCardPreviewStyle.SQUARE_PREVIEW_RATIO;
 
     private static final int VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE = 1;
     private static final int VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE = 2;
@@ -536,11 +533,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                     default:
-                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
-                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
-                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
-                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
-                                && !post.embedsInlineBodyMedia()) {
+                        // Self/text posts can carry a preview: one Reddit generated from a link in
+                        // the body (an OpenGraph image), or the first image the body embeds (see
+                        // ParsePost). Show it in the feed like Slide and reddit.com do. Unlike the
+                        // post detail (issue #317), the feed renders no body inline, so the preview
+                        // duplicates nothing here.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
                             return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                         }
                         return VIEW_TYPE_POST_CARD_TEXT_TYPE;
@@ -640,11 +638,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                     default:
-                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
-                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
-                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
-                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
-                                && !post.embedsInlineBodyMedia()) {
+                        // Self/text posts can carry a preview: one Reddit generated from a link in
+                        // the body (an OpenGraph image), or the first image the body embeds (see
+                        // ParsePost). Show it in the feed like Slide and reddit.com do. Unlike the
+                        // post detail (issue #317), the feed renders no body inline, so the preview
+                        // duplicates nothing here.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
                             return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                         }
                         return VIEW_TYPE_POST_CARD_2_TEXT_TYPE;
@@ -700,11 +699,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                     default:
-                        // Self/text posts can carry a Reddit-generated preview (e.g. a link in the
-                        // body with an OpenGraph image). Show it in the feed like Slide does, unless
-                        // the body already embeds the image inline (issue #317) — then it'd duplicate.
-                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()
-                                && !post.embedsInlineBodyMedia()) {
+                        // Self/text posts can carry a preview: one Reddit generated from a link in
+                        // the body (an OpenGraph image), or the first image the body embeds (see
+                        // ParsePost). Show it in the feed like Slide and reddit.com do. Unlike the
+                        // post detail (issue #317), the feed renders no body inline, so the preview
+                        // duplicates nothing here.
+                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
                             return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                         }
                         return VIEW_TYPE_POST_CARD_3_TEXT_TYPE;
@@ -1141,6 +1141,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.loadVideo();
                     applyTypeColor(((PostBaseVideoAutoplayViewHolder) holder).typeTextView, post.getPostType());
                 } else if (holder instanceof PostWithPreviewTypeViewHolder) {
+                    // Both snippet slots start hidden on every bind, not only on a recycle: a
+                    // holder pulled off the scrap list is rebound without onViewRecycled, so the
+                    // snippet of the text post this card last held would otherwise stay on screen
+                    // under the next one -- a link post, which sets no snippet at all, or a text
+                    // post whose body wants it on the other side of the image.
+                    hideSnippetSlots((PostWithPreviewTypeViewHolder) holder);
+                    // The play badge starts hidden for the same reason, and only the video and gif
+                    // branches below ever show it: without this, the badge of the gif card this
+                    // holder last carried stays over a text post's image -- a pairing the feed now
+                    // makes routine, since a text post with a body image shares this card with an
+                    // autoplay-off gif post.
+                    ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.GONE);
                     if (post.getPostType() == Post.VIDEO_TYPE) {
                         ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(mHidePostTypeIndicator ? View.GONE : View.VISIBLE);
                         ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
@@ -1176,27 +1188,39 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                         // Text post that also has a preview: keep the selftext snippet alongside the
                         // image, honouring the "Hide Text Post Content" setting like the text holder.
-                        TextView contentTextView = ((PostWithPreviewTypeViewHolder) holder).contentTextView;
-                        if (contentTextView != null && !mHideTextPostContent && !post.isSpoiler()
-                                && post.getSelfTextPlainTrimmed() != null && !post.getSelfTextPlainTrimmed().isEmpty()) {
-                            contentTextView.setTextColor(mHandleReadPost && post.isRead() ? mReadPostContentColor : mPostContentColor);
-                            contentTextView.setText(post.getSelfTextPlainTrimmed());
-                            contentTextView.setVisibility(View.VISIBLE);
+                        // The card reads in the same order the post detail does -- an image out of
+                        // the body keeps its place in the body, so a body of text, image, text does
+                        // not come out as text, text, image, and a preview Reddit built from a link
+                        // leads the card the way the detail's link holder leads with it. Both slots
+                        // were hidden on the way into this bind, so the one this post has nothing
+                        // for stays hidden.
+                        if (!mHideTextPostContent && !post.isSpoiler()) {
+                            boolean hasBelowSlot =
+                                    ((PostWithPreviewTypeViewHolder) holder).contentTextViewBelowPreview != null;
+                            bindSnippet(((PostWithPreviewTypeViewHolder) holder).contentTextView,
+                                    PostCardPreviewStyle.snippetAbovePreview(post, hasBelowSlot), post);
+                            bindSnippet(((PostWithPreviewTypeViewHolder) holder).contentTextViewBelowPreview,
+                                    PostCardPreviewStyle.snippetBelowPreview(post, hasBelowSlot), post);
                         }
                     }
                     applyTypeColor(((PostWithPreviewTypeViewHolder) holder).typeTextView, post.getPostType());
 
                     if (mDataSavingMode && mDisableImagePreview) {
                         ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
-                        if (post.getPostType() == Post.VIDEO_TYPE) {
-                            ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(R.drawable.ic_video_day_night_24dp);
-                            ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.GONE);
-                        } else if (post.getPostType() == Post.IMAGE_TYPE || post.getPostType() == Post.GIF_TYPE) {
-                            ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(R.drawable.ic_image_day_night_24dp);
-                            ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.GONE);
-                        } else if (post.getPostType() == Post.LINK_TYPE) {
-                            ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(R.drawable.ic_link_day_night_24dp);
-                        }
+                        // Every post type that reaches this card gets a glyph. A text post whose
+                        // preview came out of its own body reaches it too, and had no branch here:
+                        // its box was left empty, or showing the glyph of whatever post this
+                        // holder carried before, since onViewRecycled only hides the box and never
+                        // clears what is in it. The suppressed preview of a text post is an image,
+                        // which is not what the no-preview fallback says for a text post -- there
+                        // the post has no image at all.
+                        ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(
+                                post.getPostType() == Post.TEXT_TYPE
+                                        ? R.drawable.ic_image_day_night_24dp
+                                        : noPreviewIconFor(post.getPostType()));
+                        // There is no still here to badge, whatever the video and gif branches
+                        // above decided.
+                        ((PostWithPreviewTypeViewHolder) holder).videoOrGifIndicator.setVisibility(View.GONE);
                     } else if (mDataSavingMode && mOnlyDisablePreviewInVideoAndGifPosts && (post.getPostType() == Post.VIDEO_TYPE || post.getPostType() == Post.GIF_TYPE)) {
                         ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setVisibility(View.VISIBLE);
                         ((PostWithPreviewTypeViewHolder) holder).imageViewNoPreviewGallery.setImageResource(R.drawable.ic_video_day_night_24dp);
@@ -1214,11 +1238,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     ((PostWithPreviewTypeViewHolder) holder).imageWrapperFrameLayout.setVisibility(View.VISIBLE);
                                 }
                                 ((PostWithPreviewTypeViewHolder) holder).imageView.setVisibility(View.VISIBLE);
-                                if (isSquarePreview(preview)) {
-                                    setSquarePreview(((PostWithPreviewTypeViewHolder) holder).imageView, letterboxSquarePreview(post));
-                                } else {
-                                    setPreviewRatio(((PostWithPreviewTypeViewHolder) holder).imageView, preview);
-                                }
+                                PostCardPreviewStyle.applyPreviewShape(
+                                        ((PostWithPreviewTypeViewHolder) holder).imageView, preview, post,
+                                        mFixedHeightPreviewInCard, mAutoplay, getMaxPreviewHeight());
                                 ((PostWithPreviewTypeViewHolder) holder).imageView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                                     @Override
                                     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -1754,57 +1776,64 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /**
-     * Size a preview to a square, so that it is as tall as the column it sits in is wide.
-     *
-     * <p>This is what Settings -&gt; Interface -&gt; Post -&gt; "Fixed Height in Card" gives you:
-     * every preview in the feed ends up the same height as every other one, because every column is
-     * the same width. It is also the fallback for a post whose preview metadata carries no usable
-     * dimensions to size from.
-     *
-     * <p>It has to be expressed as a ratio rather than as a layout height.
-     * {@link AspectRatioGifImageView#onMeasure} replaces the measured height with
-     * {@code width * ratio} for any positive ratio, so a height written to the layout params is
-     * silently discarded -- which is what the flat 400dp height that used to be here always
-     * was (#373).
-     *
-     * <p>A still fills the square, cropped to its centre. An autoplaying gif is fitted inside it
-     * instead ({@code letterbox}), the way an autoplaying video card shows its clip: the
-     * {@code PlayerView} in that card keeps media3's default fit mode, so a 16:9 video in a square
-     * is shown whole between black bars, while the same clip posted as a gif went through the
-     * still's centre crop and lost its sides.
+     * Size a preview to a square, as tall as the column it sits in is wide. See
+     * {@link PostCardPreviewStyle#squareShape}, which holds this rule and the reasons for it.
      */
     private void setSquarePreview(AspectRatioGifImageView imageView, boolean letterbox) {
-        imageView.setScaleType(letterbox ? ImageView.ScaleType.FIT_CENTER : ImageView.ScaleType.CENTER_CROP);
-        imageView.setRatioMaxHeight(getMaxPreviewHeight());
-        imageView.setRatio(SQUARE_PREVIEW_RATIO);
+        PostCardPreviewStyle.squareShape(imageView, letterbox, getMaxPreviewHeight());
     }
 
     /**
-     * Whether {@code post}'s card, when squared by {@link #setSquarePreview}, letterboxes its
-     * media rather than cropping it: a gif post that autoplays. With autoplay off a gif card is a
-     * still with a play badge, exactly like a video card is then, and crops like one.
+     * Shows {@code text} in one of a card's selftext snippet slots, or leaves that slot hidden when
+     * the body has nothing for it -- a card whose image opens the body has no words above it, one
+     * whose body ends with its image has none below, and a card led by Reddit's own preview of a
+     * link has none above at all.
      */
-    private boolean letterboxSquarePreview(Post post) {
-        return post.getPostType() == Post.GIF_TYPE && mAutoplay;
+    private void bindSnippet(@Nullable TextView slot, @Nullable String text, Post post) {
+        if (slot == null || text == null || text.isEmpty()) {
+            return;
+        }
+        slot.setTextColor(mHandleReadPost && post.isRead() ? mReadPostContentColor : mPostContentColor);
+        slot.setText(text);
+        slot.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Hides both of a card's selftext snippet slots, the one above the preview and the one below
+     * it. Called at the top of every bind of this holder, so only the slot the bound post asks for
+     * is made visible again.
+     */
+    private static void hideSnippetSlots(PostWithPreviewTypeViewHolder holder) {
+        if (holder.contentTextView != null) {
+            holder.contentTextView.setVisibility(View.GONE);
+        }
+        if (holder.contentTextViewBelowPreview != null) {
+            holder.contentTextViewBelowPreview.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Whether {@code post}'s letterboxed square gets an autoplaying video card's black bars rather
+     * than the card colour. See {@link PostCardPreviewStyle#letterboxWithVideoBars}.
+     */
+    private boolean letterboxWithVideoBars(Post post) {
+        return PostCardPreviewStyle.letterboxWithVideoBars(post, mAutoplay);
     }
 
     /**
      * Whether {@code preview} is drawn by {@link #setSquarePreview} rather than
-     * {@link #setPreviewRatio}: "Fixed Height in Card" is on, or the preview carries no
-     * dimensions to size a ratio from.
+     * {@link #setPreviewRatio}. See {@link PostCardPreviewStyle#squarePreview}.
      */
     private boolean isSquarePreview(Post.Preview preview) {
-        return mFixedHeightPreviewInCard || preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0;
+        return PostCardPreviewStyle.squarePreview(preview, mFixedHeightPreviewInCard);
     }
 
     /**
      * Size a preview from the dimensions Reddit reported for it, the behaviour when "Fixed Height
-     * in Card" is off. Clears the square preview's height cap, which would otherwise crop whatever
-     * post this recycled view holds next.
+     * in Card" is off. See {@link PostCardPreviewStyle#ratioShape}.
      */
     private static void setPreviewRatio(AspectRatioGifImageView imageView, Post.Preview preview) {
-        imageView.setRatioMaxHeight(0);
-        imageView.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
+        PostCardPreviewStyle.ratioShape(imageView, preview);
     }
 
     /**
@@ -2229,7 +2258,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             // around its clip (the #000000 behind that card's PlayerView); every other card keeps
             // the card colour behind its still. Cleared rather than left, because this holder may
             // have carried the bars, or the transparent-image backdrop, for the post before.
-            if (preview != null && isSquarePreview(preview) && letterboxSquarePreview(post)) {
+            if (preview != null && isSquarePreview(preview) && letterboxWithVideoBars(post)) {
                 ((PostWithPreviewTypeViewHolder) holder).imageView.setBackgroundColor(Color.BLACK);
             } else {
                 ((PostWithPreviewTypeViewHolder) holder).imageView.setBackground(null);
@@ -2373,9 +2402,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * for a post with no preview, the no-preview glyph.
      */
     private boolean showsCompactThumbnailBox(Post post) {
-        boolean textPostWithPreview = post.getPostType() == Post.TEXT_TYPE
-                && postHasPreviews(post)
-                && !post.embedsInlineBodyMedia();
+        boolean textPostWithPreview = post.getPostType() == Post.TEXT_TYPE && postHasPreviews(post);
         return ((post.getPostType() != Post.TEXT_TYPE && post.getPostType() != Post.NO_PREVIEW_LINK_TYPE) || textPostWithPreview)
                 && !(mDataSavingMode && mDisableImagePreview);
     }
@@ -2729,6 +2756,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     if (((PostWithPreviewTypeViewHolder) holder).contentTextView != null) {
                         ((PostWithPreviewTypeViewHolder) holder).contentTextView.setText("");
                         ((PostWithPreviewTypeViewHolder) holder).contentTextView.setVisibility(View.GONE);
+                    }
+                    if (((PostWithPreviewTypeViewHolder) holder).contentTextViewBelowPreview != null) {
+                        ((PostWithPreviewTypeViewHolder) holder).contentTextViewBelowPreview.setText("");
+                        ((PostWithPreviewTypeViewHolder) holder).contentTextViewBelowPreview.setVisibility(View.GONE);
                     }
                 } else if (holder instanceof PostBaseGalleryTypeViewHolder) {
                     ((PostBaseGalleryTypeViewHolder) holder).frameLayout.setVisibility(View.GONE);
@@ -4652,9 +4683,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Nullable
         FrameLayout imageWrapperFrameLayout;
         AspectRatioGifImageView imageView;
-        // Selftext snippet, shown only for text posts that also carry a preview image.
+        // Selftext snippet, shown only for text posts that also carry a preview image: the words
+        // before the image, with contentTextViewBelowPreview holding the ones after it. A preview
+        // Reddit made out of a link in the body has no words before it -- it is not in the body --
+        // so that snippet goes in the slot below and this one stays hidden.
         @Nullable
         TextView contentTextView;
+        // The words that follow the image, below the preview. Card 1 only: cards 2 and 3 draw the
+        // preview at the top of the card, above the title, so there is nothing "before the image"
+        // for them to hold and their one slot takes the whole snippet.
+        @Nullable
+        TextView contentTextViewBelowPreview;
         RequestListener<Drawable> glideRequestListener;
         /** Whether this card is currently showing the animation rather than the still. */
         boolean animatingGif;
@@ -4694,6 +4733,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     binding.imageWrapperRelativeLayoutItemPostWithPreview,
                     binding.imageViewItemPostWithPreview);
             contentTextView = binding.contentTextViewItemPostWithPreview;
+            contentTextViewBelowPreview = binding.contentTextViewBelowPreviewItemPostWithPreview;
         }
 
         void setBaseView(AspectRatioGifImageView iconGifImageView,

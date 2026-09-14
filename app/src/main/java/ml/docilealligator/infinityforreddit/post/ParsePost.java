@@ -932,6 +932,11 @@ public class ParsePost {
                 mediaMetadataMap = result.mediaMetadataMap;
                 post.setSelfText(selfText);
 
+                String inlineBodyImageId = null;
+                if (post.getPostType() == Post.TEXT_TYPE) {
+                    inlineBodyImageId = applyInlineBodyImagePreview(post, selfText, mediaMetadataMap);
+                }
+
                 if (data.isNull(JSONUtils.SELFTEXT_HTML_KEY)) {
                     post.setSelfTextPlainTrimmed("");
                 } else {
@@ -939,21 +944,21 @@ public class ParsePost {
                             Html.fromHtml(data.getString(JSONUtils.SELFTEXT_HTML_KEY))).toString();
                     post.setSelfTextPlain(selfTextPlain);
 
-                    if (selfTextPlain.length() > 250) {
-                        selfTextPlain = selfTextPlain.substring(0, 250);
-                    }
-
+                    boolean spoilerInBody = false;
                     if (!selfText.equals("")) {
                         Pattern p = Pattern.compile(">!.+!<");
-                        Matcher m = p.matcher(selfText.substring(0, Math.min(selfText.length(), 400)));
+                        spoilerInBody = p.matcher(
+                                selfText.substring(0, Math.min(selfText.length(), 400))).find();
+                    }
 
-                        if (m.find()) {
-                            post.setSelfTextPlainTrimmed("");
-                        } else {
-                            post.setSelfTextPlainTrimmed(selfTextPlain);
-                        }
+                    if (spoilerInBody) {
+                        post.setSelfTextPlainTrimmed("");
                     } else {
-                        post.setSelfTextPlainTrimmed(selfTextPlain);
+                        post.setSelfTextPlainTrimmed(snippet(selfTextPlain, mediaMetadataMap));
+                        if (inlineBodyImageId != null) {
+                            applyInlineImageSnippetSplit(post, selfTextPlain, inlineBodyImageId,
+                                    mediaMetadataMap);
+                        }
                     }
                 }
             }
@@ -963,6 +968,147 @@ public class ParsePost {
         post.setMediaMetadataMap(mediaMetadataMap);
         post.setSubredditIconUrl(subredditIconUrl);
         return post;
+    }
+
+    /**
+     * An image the body embeds from {@code preview.redd.it} or {@code i.redd.it}, as
+     * {@link Utils#parseRedditImagesBlock} leaves it: markdown image syntax around the URL, whose
+     * {@code (\w+)} id is the key {@code media_metadata} describes it under. A bare URL the author
+     * typed has been rewritten into this form by the time this runs, and only for an id
+     * {@code media_metadata} carries -- the same ids the body renders inline.
+     */
+    private static final Pattern INLINE_BODY_IMAGE_PATTERN = Pattern.compile(
+            "!\\[[^\\]]*]\\((https://(?:preview|i)\\.redd\\.it/(\\w+)\\.(?:jpg|jpeg|png)[^)\\s]*)\\)");
+
+    /** Any Reddit-hosted image or gif URL, in the plain selftext where no markdown survives. */
+    private static final Pattern INLINE_MEDIA_URL_PATTERN = Pattern.compile(
+            "https://(?:preview|i)\\.redd\\.it/(\\w+)\\.(?:jpg|jpeg|png|gif)(?:\\?\\S*)?");
+
+    /** A run of blank lines, left where a stripped URL had a paragraph to itself. */
+    private static final Pattern BLANK_LINE_RUN_PATTERN = Pattern.compile("\\n[ \\t]*(?:\\n[ \\t]*){2,}");
+
+    /**
+     * Gives a text post Reddit built no {@code preview} for the first image its body embeds, at the
+     * sizes {@code media_metadata} lists for it, and records where in the body that image sits.
+     *
+     * <p>Reddit derives a text post's {@code preview} from the first link in the body, not from the
+     * images uploaded into it, so a post that leads with an uploaded image (the markdown editor
+     * writes one as a bare {@code preview.redd.it} URL) can arrive with {@code media_metadata} and
+     * no {@code preview} at all. With nothing in {@code previews} the feed drew such a post as
+     * plain text, its image reduced to a URL in the snippet, while reddit.com's feed shows the
+     * image. A post that does have a {@code preview} keeps it, and is not marked as showing an
+     * inline body image -- Reddit's preview is a separate image that the body does not render.
+     *
+     * <p>The post detail is unaffected either way: it renders the image inline from the body and,
+     * because the post embeds inline media, never stacks a preview above it (issue #317).
+     *
+     * @return the {@code media_metadata} id of the image the card will show, or {@code null} when
+     *         this post gets no preview out of its body. The snippet is split around that image,
+     *         so the caller needs to know which one it was.
+     */
+    @Nullable
+    private static String applyInlineBodyImagePreview(Post post, String selfText,
+                                                      @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
+        if (!post.getPreviews().isEmpty() || mediaMetadataMap == null || mediaMetadataMap.isEmpty()) {
+            return null;
+        }
+
+        Matcher matcher = INLINE_BODY_IMAGE_PATTERN.matcher(selfText);
+        while (matcher.find()) {
+            String id = matcher.group(2);
+            MediaMetadata mediaMetadata = id == null ? null : mediaMetadataMap.get(id);
+            if (mediaMetadata == null || !"Image".equalsIgnoreCase(mediaMetadata.e)) {
+                continue;
+            }
+
+            // Largest first, like a parsed `preview` block, so the feed's size selection applies.
+            ArrayList<Post.Preview> previews = new ArrayList<>();
+            MediaMetadata.MediaItem original = mediaMetadata.original;
+            previews.add(new Post.Preview(original.url, original.x, original.y, "", ""));
+            MediaMetadata.MediaItem downscaled = mediaMetadata.downscaled;
+            if (downscaled != original) {
+                previews.add(new Post.Preview(downscaled.url, downscaled.x, downscaled.y, "", ""));
+            }
+
+            post.setPreviews(previews);
+            post.setInlineBodyImagePreview(true);
+            return id;
+        }
+
+        return null;
+    }
+
+    /**
+     * Splits the feed snippet around the image the card shows, so the card reads in the body's own
+     * order: the words that come before that image go above it and the words that follow it go
+     * below, the way the post detail renders them and the way reddit.com does.
+     *
+     * <p>The split is made on the plain text before anything is cleaned out of it, because the
+     * image arrives there as the bare URL the author typed -- the same URL {@link #snippet} then
+     * removes from each half. A body whose image was written as {@code [caption](url)} carries no
+     * URL in its plain text at all (the anchor renders as its caption), so nothing is found and
+     * both halves are left unset; the card then shows the whole snippet above the image, which is
+     * what it did before this existed.
+     */
+    private static void applyInlineImageSnippetSplit(Post post, String selfTextPlain, String imageId,
+                                                     @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
+        Matcher matcher = INLINE_MEDIA_URL_PATTERN.matcher(selfTextPlain);
+        while (matcher.find()) {
+            if (imageId.equals(matcher.group(1))) {
+                post.setSelfTextPlainTrimmedBeforeInlineImage(
+                        snippet(selfTextPlain.substring(0, matcher.start()), mediaMetadataMap));
+                post.setSelfTextPlainTrimmedAfterInlineImage(
+                        snippet(selfTextPlain.substring(matcher.end()), mediaMetadataMap));
+                return;
+            }
+        }
+    }
+
+    /**
+     * A feed snippet: the plain body without the URLs of the media it renders inline, with the
+     * blank lines those URLs left behind closed up, and cut to the 250 characters a card has room
+     * for.
+     */
+    private static String snippet(String selfTextPlain,
+                                  @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
+        // The feed snippet is plain text, so an image the body embeds arrives in it as the bare URL
+        // the author typed -- a line of `preview.redd.it/...?s=<signature>` among the words,
+        // crowding out the little room a card has. The card draws that image; the URL is what the
+        // reader already sees.
+        String kept = withoutInlineMediaUrls(selfTextPlain, mediaMetadataMap);
+        // A URL on a line of its own leaves the blank line above it and the one below it touching.
+        kept = BLANK_LINE_RUN_PATTERN.matcher(kept).replaceAll("\n\n").trim();
+        return kept.length() > 250 ? kept.substring(0, 250) : kept;
+    }
+
+    /**
+     * {@code selfTextPlain} without the URLs of the media the body renders inline -- the ones
+     * {@code media_metadata} describes. Everything else, including a link to an image this post
+     * does not host, is left alone: only media the reader is already being shown is dropped.
+     */
+    private static String withoutInlineMediaUrls(String selfTextPlain,
+                                                 @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
+        if (selfTextPlain.isEmpty() || mediaMetadataMap == null || mediaMetadataMap.isEmpty()) {
+            return selfTextPlain;
+        }
+
+        Matcher matcher = INLINE_MEDIA_URL_PATTERN.matcher(selfTextPlain);
+        StringBuilder kept = new StringBuilder(selfTextPlain.length());
+        int copied = -1;
+        while (matcher.find()) {
+            String id = matcher.group(1);
+            if (id == null || !mediaMetadataMap.containsKey(id)) {
+                continue;
+            }
+            kept.append(selfTextPlain, Math.max(copied, 0), matcher.start());
+            copied = matcher.end();
+        }
+        if (copied < 0) {
+            return selfTextPlain;
+        }
+
+        kept.append(selfTextPlain, copied, selfTextPlain.length());
+        return kept.toString();
     }
 
     /**

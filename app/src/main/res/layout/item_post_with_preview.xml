@@ -194,6 +194,14 @@
             android:fontFamily="?attr/font_family"
             android:visibility="gone" />
 
+        <!-- The words a text post's body puts before the image below, so the card reads in the
+             body's own order; the twin below the preview holds the words that follow it, and
+             either is left hidden when the body has no such half. A preview Reddit made out of a
+             link is not in the body at all, and leads the card as it leads the post detail, so
+             that snippet goes in the twin and this one stays hidden. The two carry the same
+             padding, line limit and text appearance, and 16dp of space on every side that has a
+             neighbour. The space above this one comes from the flair row's own 16dp padding, so
+             only the twin spells a top margin out. -->
         <TextView
             android:id="@+id/content_text_view_item_post_with_preview"
             android:layout_width="match_parent"
@@ -255,6 +263,21 @@
             android:layout_height="150dp"
             android:scaleType="center"
             android:visibility="gone" />
+
+        <!-- The words that follow the image. See the twin above. -->
+        <TextView
+            android:id="@+id/content_text_view_below_preview_item_post_with_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:maxLines="4"
+            android:visibility="gone"
+            android:textSize="?attr/content_font_default"
+            android:fontFamily="?attr/content_font_family"
+            android:ellipsize="end" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottom_constraint_layout_item_post_with_preview"

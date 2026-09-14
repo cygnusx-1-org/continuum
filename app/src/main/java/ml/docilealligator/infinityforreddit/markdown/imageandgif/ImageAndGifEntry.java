@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.RequestBuilder;
@@ -55,13 +54,14 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     private final int linkColor;
     private final boolean canShowImage;
     private final boolean canShowGif;
+    private final SharedPreferences sharedPreferences;
     private boolean autoplayCommentGif;
 
     public ImageAndGifEntry(BaseActivity baseActivity, RequestManager glide, int embeddedMediaType,
                             OnItemClickListener onItemClickListener) {
         this.baseActivity = baseActivity;
         this.glide = glide;
-        SharedPreferences sharedPreferences = baseActivity.getDefaultSharedPreferences();
+        this.sharedPreferences = baseActivity.getDefaultSharedPreferences();
         this.saveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(
                 SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
         this.onItemClickListener = onItemClickListener;
@@ -96,7 +96,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         this.dataSavingMode = dataSavingMode;
         this.disableImagePreview = disableImagePreview;
         this.blurImage = blurImage;
-        SharedPreferences sharedPreferences = baseActivity.getDefaultSharedPreferences();
+        this.sharedPreferences = baseActivity.getDefaultSharedPreferences();
         this.saveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(
                 SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
         this.onItemClickListener = onItemClickListener;
@@ -145,9 +145,9 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
             srcHeight = node.mediaMetadata.original.y;
         }
 
-        // Size images and gifs to a uniform on-screen area (preserving aspect ratio); the box is
+        // Size the image to the width of the block at its own aspect ratio; the shape is
         // re-corrected from the real drawable in onResourceReady. See issue #4.
-        applyBoundedSize(holder.binding.imageViewMarkdownImageAndGifBlock, srcWidth, srcHeight);
+        applyFullWidthSize(holder.binding.imageViewMarkdownImageAndGifBlock, srcWidth, srcHeight);
 
         if (node.mediaMetadata.isGIF && !autoplayCommentGif) {
             // Autoplay-gifs-in-comments is off: load only the first frame so the gif stays still.
@@ -182,51 +182,40 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
     }
 
     /**
-     * Target rendered area for embedded comment media, expressed as a reference box in dp. Each
-     * image/gif is scaled (keeping its aspect ratio) so its area roughly matches this box's area,
-     * so a wide image and a tall image take up about the same amount of space. See issue #4.
+     * Sizes an embedded image or gif to the full width of its block, or to the fixed square, per
+     * {@link MarkdownMediaSize} -- which is where the rule and the reasons for it live, so that a
+     * unit test and a layout golden can hold the same code the app runs.
+     *
+     * <p>The two inputs are read here rather than there: the preference per image (see
+     * {@link #fixedHeightPreviewInCard()}) and the ceiling from this activity's display.
      */
-    private static final int COMMENT_MEDIA_TARGET_WIDTH_DP = 270;
-    private static final int COMMENT_MEDIA_TARGET_HEIGHT_DP = 165;
-
-    private void applyBoundedSize(AspectRatioGifImageView imageView, int srcWidth, int srcHeight) {
-        int[] size = boundedSize(srcWidth, srcHeight);
-        // Disable the aspect-ratio-derived measurement so the explicit pixel size below is used.
-        imageView.setRatio(0);
-        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) imageView.getLayoutParams();
-        if (params.width != size[0] || params.height != size[1] || params.gravity != Gravity.NO_GRAVITY) {
-            params.width = size[0];
-            params.height = size[1];
-            params.gravity = Gravity.NO_GRAVITY;
-            imageView.setLayoutParams(params);
-        }
+    private void applyFullWidthSize(AspectRatioGifImageView imageView, int srcWidth, int srcHeight) {
+        MarkdownMediaSize.applyTo(imageView, srcWidth, srcHeight, fixedHeightPreviewInCard(),
+                maxFixedMediaHeight());
     }
 
     /**
-     * Display size for media: scaled (preserving aspect ratio) so the rendered area roughly matches
-     * the target box's area, so every image/gif occupies about the same amount of space regardless
-     * of shape. Small sources are upscaled and large ones downscaled to hit that area; the width is
-     * then capped at the screen width so very wide images don't overflow.
+     * Settings -&gt; Interface -&gt; Post -&gt; "Fixed Height in Card", read per image rather than
+     * held from construction.
+     *
+     * <p>A MainActivity tab can be Saved comments, which renders these blocks, and MainActivity is
+     * the one screen that outlives a trip to Settings -- a held copy would leave that tab sizing
+     * images the old way while the post feed beside it, which listens for the change, had already
+     * moved. The key is per-account as well, so a held copy would also outlast an account switch,
+     * which the scoped preferences are built to make invisible. The read is two map lookups
+     * against an already-loaded file, next to a Glide load.
      */
-    private int[] boundedSize(int width, int height) {
-        float targetWidthPx = Utils.convertDpToPixel(COMMENT_MEDIA_TARGET_WIDTH_DP, baseActivity);
-        float targetHeightPx = Utils.convertDpToPixel(COMMENT_MEDIA_TARGET_HEIGHT_DP, baseActivity);
-        double targetArea = (double) targetWidthPx * targetHeightPx;
-        if (width <= 0 || height <= 0) {
-            return new int[]{(int) targetWidthPx, (int) targetHeightPx};
-        }
-        // scale^2 * (width * height) == targetArea  ->  same rendered area, aspect ratio preserved.
-        double scale = Math.sqrt(targetArea / ((double) width * height));
-        int w = (int) (width * scale);
-        int h = (int) (height * scale);
-        // A wide image can still exceed the screen width; cap it (keeping ratio).
-        int screen = baseActivity.getResources().getDisplayMetrics().widthPixels;
-        if (screen > 0 && w > screen) {
-            h = (int) ((long) h * screen / w);
-            w = screen;
-        }
-        return new int[]{Math.max(1, w), Math.max(1, h)};
+    private boolean fixedHeightPreviewInCard() {
+        return sharedPreferences.getBoolean(SharedPreferencesUtils.FIXED_HEIGHT_PREVIEW_IN_CARD, false);
+    }
+
+    /**
+     * Ceiling for a fixed-height image: half the viewport, the ceiling the feed's cards use. A
+     * square is as tall as it is wide, and a full-width block in landscape is wider than the screen
+     * is tall.
+     */
+    private int maxFixedMediaHeight() {
+        return baseActivity.getResources().getDisplayMetrics().heightPixels / 2;
     }
 
     private void showImageAsUrl(@NonNull Holder holder, @NonNull ImageAndGifBlock node) {
@@ -247,11 +236,10 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.gravity = Gravity.NO_GRAVITY;
         holder.binding.imageViewMarkdownImageAndGifBlock.setLayoutParams(params);
-
-        FrameLayout.LayoutParams progressBarParams = (FrameLayout.LayoutParams) holder.binding.progressBarMarkdownImageAndGifBlock.getLayoutParams();
-        progressBarParams.gravity = Gravity.CENTER;
-        progressBarParams.leftMargin = (int) Utils.convertDpToPixel(8, baseActivity);
-        holder.binding.progressBarMarkdownImageAndGifBlock.setLayoutParams(progressBarParams);
+        // The shape goes with the image, not with the holder: left set, the next block measured
+        // here would reserve the height of the one this view last showed.
+        holder.binding.imageViewMarkdownImageAndGifBlock.setRatioMaxHeight(0);
+        holder.binding.imageViewMarkdownImageAndGifBlock.setRatio(0);
 
         glide.clear(holder.binding.imageViewMarkdownImageAndGifBlock);
         holder.binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.GONE);
@@ -349,11 +337,11 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
                     binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.GONE);
                     AspectRatioGifImageView iv = binding.imageViewMarkdownImageAndGifBlock;
                     // The media metadata is unreliable (giphy gifs report a square 480x480 even when
-                    // they're 16:9), which makes the box the wrong shape and the media fill only part
-                    // of it. Re-size from the real drawable so every image/gif fills its box at the
-                    // same target area. See issue #4.
+                    // they're 16:9), which would leave the block reserving the wrong height and the
+                    // image fitted inside only part of it. Re-shape from the real drawable, which is
+                    // the only source that cannot be wrong about it. See issue #4.
                     if (resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
-                        applyBoundedSize(iv, resource.getIntrinsicWidth(), resource.getIntrinsicHeight());
+                        applyFullWidthSize(iv, resource.getIntrinsicWidth(), resource.getIntrinsicHeight());
                     }
                     return false;
                 }
@@ -373,7 +361,7 @@ public class ImageAndGifEntry extends MarkwonAdapter.Entry<ImageAndGifBlock, Ima
                 public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
                     binding.progressBarMarkdownImageAndGifBlock.setVisibility(View.GONE);
                     if (resource.getWidth() > 0 && resource.getHeight() > 0) {
-                        applyBoundedSize(binding.imageViewMarkdownImageAndGifBlock, resource.getWidth(), resource.getHeight());
+                        applyFullWidthSize(binding.imageViewMarkdownImageAndGifBlock, resource.getWidth(), resource.getHeight());
                     }
                     return false;
                 }

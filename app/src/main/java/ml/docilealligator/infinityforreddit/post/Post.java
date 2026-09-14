@@ -109,6 +109,21 @@ public class Post implements Parcelable {
     @Nullable
     private String mp4Variant;
     private ArrayList<Preview> previews = new ArrayList<>();
+    /**
+     * Whether {@link #previews} was built from an image the body embeds rather than sent by Reddit
+     * as a {@code preview}. Such an image is also rendered inline by the body itself, so the feed
+     * shows it where the body puts it and sizes it to be read rather than cropped to a square.
+     */
+    private boolean inlineBodyImagePreview;
+    /**
+     * The feed snippet split around that image: the words the body puts before it, and the words
+     * that follow it. Both are {@code null} unless the snippet could be split, which is the signal
+     * to fall back to the whole of {@link #selfTextPlainTrimmed} above the image.
+     */
+    @Nullable
+    private String selfTextPlainTrimmedBeforeInlineImage;
+    @Nullable
+    private String selfTextPlainTrimmedAfterInlineImage;
     @Nullable
     private Map<String, MediaMetadata> mediaMetadataMap;
     private ArrayList<Gallery> gallery = new ArrayList<>();
@@ -271,6 +286,9 @@ public class Post implements Parcelable {
         this.suggestedSort = postToBeCopied.suggestedSort;
         this.mp4Variant = postToBeCopied.mp4Variant;
         this.previews = postToBeCopied.previews;
+        this.inlineBodyImagePreview = postToBeCopied.inlineBodyImagePreview;
+        this.selfTextPlainTrimmedBeforeInlineImage = postToBeCopied.selfTextPlainTrimmedBeforeInlineImage;
+        this.selfTextPlainTrimmedAfterInlineImage = postToBeCopied.selfTextPlainTrimmedAfterInlineImage;
         this.mediaMetadataMap = postToBeCopied.mediaMetadataMap;
         this.gallery = postToBeCopied.gallery;
         this.canModPost = postToBeCopied.canModPost;
@@ -347,6 +365,9 @@ public class Post implements Parcelable {
         ArrayList<Gallery> parsedGallery = in.createTypedArrayList(Gallery.CREATOR);
         gallery = parsedGallery != null ? parsedGallery : new ArrayList<>();
         galleryPageIndex = in.readInt();
+        inlineBodyImagePreview = in.readByte() != 0;
+        selfTextPlainTrimmedBeforeInlineImage = in.readString();
+        selfTextPlainTrimmedAfterInlineImage = in.readString();
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
@@ -856,6 +877,9 @@ public class Post implements Parcelable {
         dest.writeValue(mediaMetadataMap);
         dest.writeTypedList(gallery);
         dest.writeInt(galleryPageIndex);
+        dest.writeByte((byte) (inlineBodyImagePreview ? 1 : 0));
+        dest.writeString(selfTextPlainTrimmedBeforeInlineImage);
+        dest.writeString(selfTextPlainTrimmedAfterInlineImage);
     }
 
     public boolean isStickied() {
@@ -980,6 +1004,41 @@ public class Post implements Parcelable {
 
     public void setPreviews(ArrayList<Preview> previews) {
         this.previews = previews;
+    }
+
+    /** See {@link #inlineBodyImagePreview}. */
+    public boolean isInlineBodyImagePreview() {
+        return inlineBodyImagePreview;
+    }
+
+    public void setInlineBodyImagePreview(boolean inlineBodyImagePreview) {
+        this.inlineBodyImagePreview = inlineBodyImagePreview;
+    }
+
+    /** See {@link #selfTextPlainTrimmedBeforeInlineImage}. */
+    @Nullable
+    public String getSelfTextPlainTrimmedBeforeInlineImage() {
+        return selfTextPlainTrimmedBeforeInlineImage;
+    }
+
+    public void setSelfTextPlainTrimmedBeforeInlineImage(@Nullable String selfTextPlainTrimmedBeforeInlineImage) {
+        this.selfTextPlainTrimmedBeforeInlineImage = selfTextPlainTrimmedBeforeInlineImage;
+    }
+
+    /** See {@link #selfTextPlainTrimmedBeforeInlineImage}. */
+    @Nullable
+    public String getSelfTextPlainTrimmedAfterInlineImage() {
+        return selfTextPlainTrimmedAfterInlineImage;
+    }
+
+    public void setSelfTextPlainTrimmedAfterInlineImage(@Nullable String selfTextPlainTrimmedAfterInlineImage) {
+        this.selfTextPlainTrimmedAfterInlineImage = selfTextPlainTrimmedAfterInlineImage;
+    }
+
+    /** Whether the snippet could be split around the image the card shows. */
+    public boolean hasInlineImageSnippetSplit() {
+        return selfTextPlainTrimmedBeforeInlineImage != null
+                || selfTextPlainTrimmedAfterInlineImage != null;
     }
 
     @Nullable

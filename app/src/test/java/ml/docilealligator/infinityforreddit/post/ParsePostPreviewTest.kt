@@ -21,7 +21,10 @@ import org.robolectric.annotation.Config
  *    keeps its own host;
  *  * a crosspost of a post that embeds its images inline in the body must not also surface a
  *    Reddit-generated preview or the parent's 140px thumbnail — both render as a blurry duplicate of
- *    an image the body already shows (issue #317).
+ *    an image the body already shows (issue #317);
+ *  * a text post that embeds an image but has no Reddit-generated `preview` (Reddit builds one
+ *    from the first link in a body, not from uploaded images) gets that image as its preview, so
+ *    the feed shows it instead of the bare URL.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestInfinity::class)
@@ -38,14 +41,25 @@ class ParsePostPreviewTest {
         }))
     }
 
-    private fun mediaMetadataBlock(id: String, url: String) = JSONObject().apply {
+    private fun mediaMetadataBlock(id: String, url: String, downscaledUrl: String? = null) = JSONObject().apply {
         put(id, JSONObject().apply {
             put("status", "valid")
             put("e", "Image")
             put("id", id)
             put("s", JSONObject().apply { put("x", 1200); put("y", 800); put("u", url) })
+            if (downscaledUrl != null) {
+                put("p", JSONArray().put(JSONObject().apply {
+                    put("x", 320); put("y", 213); put("u", downscaledUrl)
+                }))
+            }
         })
     }
+
+    /**
+     * A self post's own permalink, which is what Reddit puts in its `url` -- how [ParsePost] tells a
+     * text post from a link post.
+     */
+    private val selfUrl = "https://www.reddit.com/r/bestof/comments/abc123/a_title/"
 
     /** A listing entry with every field [ParsePost.parseBasicData] reads unconditionally. */
     private fun postJson(
@@ -56,7 +70,9 @@ class ParsePostPreviewTest {
         thumbnail: String = "self",
         preview: JSONObject? = null,
         mediaMetadata: JSONObject? = null,
-        crosspostParent: JSONObject? = null
+        crosspostParent: JSONObject? = null,
+        selftext: String = "",
+        selftextHtml: String? = null
     ) = JSONObject().apply {
         put("id", id)
         put("name", "t3_$id")
@@ -84,8 +100,8 @@ class ParsePostPreviewTest {
         put("domain", domain)
         put("is_video", false)
         put("url", url)
-        put("selftext", "")
-        put("selftext_html", JSONObject.NULL)
+        put("selftext", selftext)
+        put("selftext_html", selftextHtml ?: JSONObject.NULL)
         if (preview != null) put("preview", preview)
         if (mediaMetadata != null) put("media_metadata", mediaMetadata)
         if (crosspostParent != null) put("crosspost_parent_list", JSONArray().put(crosspostParent))
@@ -211,5 +227,181 @@ class ParsePostPreviewTest {
         assertFalse(post.embedsInlineBodyMedia())
         assertEquals("https://preview.redd.it/parentfull.jpg", post.previews[0].previewUrl)
         assertEquals("https://b.thumbs.redditmedia.com/parent140.jpg", post.thumbnailUrl)
+    }
+
+    @Test
+    fun `a text post without a preview shows the first image its body embeds`() {
+        val full = "https://preview.redd.it/img1.png?width=576&format=png&auto=webp&s=abc"
+        val small = "https://preview.redd.it/img1.png?width=320&crop=smart&auto=webp&s=def"
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                thumbnail = "https://external-preview.redd.it/og140.png?width=140&height=70",
+                mediaMetadata = mediaMetadataBlock("img1", full, downscaledUrl = small),
+                selftext = "$full\n\nSome words about it."
+            )
+        )
+
+        assertEquals(Post.TEXT_TYPE, post.postType)
+        assertTrue("the body still renders the image itself", post.embedsInlineBodyMedia())
+        assertEquals(listOf(full, small), post.previews.map { it.previewUrl })
+        assertEquals(1200, post.previews[0].previewWidth)
+        assertEquals(800, post.previews[0].previewHeight)
+        assertTrue(post.isInlineBodyImagePreview)
+    }
+
+    @Test
+    fun `the snippet is split around the image the card shows`() {
+        val full = "https://preview.redd.it/img1.png?width=576&s=x"
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                mediaMetadata = mediaMetadataBlock("img1", full),
+                selftext = "Here is what I mean:\n\n$full\n\nAnd that is that.",
+                selftextHtml = "<!-- SC_OFF --><div class=\"md\"><p>Here is what I mean:</p>\n\n" +
+                        "<p>$full</p>\n\n<p>And that is that.</p>\n</div><!-- SC_ON -->"
+            )
+        )
+
+        assertTrue(post.isInlineBodyImagePreview)
+        assertTrue(post.hasInlineImageSnippetSplit())
+        assertEquals("Here is what I mean:", post.selfTextPlainTrimmedBeforeInlineImage)
+        assertEquals("And that is that.", post.selfTextPlainTrimmedAfterInlineImage)
+        assertEquals(
+            "the whole snippet is still there for the cards with one slot",
+            "Here is what I mean:\n\nAnd that is that.",
+            post.selfTextPlainTrimmed,
+        )
+    }
+
+    @Test
+    fun `a body whose image is written with a caption leaves the snippet unsplit`() {
+        // Reddit renders [caption](url) as an anchor, so the URL never appears in the plain text
+        // the snippet is built from and there is nothing to split on.
+        val full = "https://preview.redd.it/img1.png?width=576&s=x"
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                mediaMetadata = mediaMetadataBlock("img1", full),
+                selftext = "[a lime]($full)\n\nWords.",
+                selftextHtml = "<!-- SC_OFF --><div class=\"md\"><p><a href=\"$full\">a lime</a></p>\n\n" +
+                        "<p>Words.</p>\n</div><!-- SC_ON -->"
+            )
+        )
+
+        assertTrue(post.isInlineBodyImagePreview)
+        assertFalse(post.hasInlineImageSnippetSplit())
+        assertEquals("a lime\n\nWords.", post.selfTextPlainTrimmed)
+    }
+
+    @Test
+    fun `a reddit-generated preview is not an inline body image`() {
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                preview = previewBlock(
+                    "https://preview.redd.it/ogfull.jpg",
+                    "https://preview.redd.it/ogsmall.jpg"
+                ),
+                selftext = "A link to somewhere else."
+            )
+        )
+
+        assertEquals("https://preview.redd.it/ogfull.jpg", post.previews[0].previewUrl)
+        assertFalse(post.isInlineBodyImagePreview)
+    }
+
+    @Test
+    fun `the snippet drops the URL of an image the body renders`() {
+        val full = "https://preview.redd.it/img1.png?width=576&format=png&auto=webp&s=abc"
+        val other = "https://example.com/img1.png"
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                mediaMetadata = mediaMetadataBlock("img1", full),
+                selftext = "$full\n\nWords about it. Also $other",
+                selftextHtml = "<!-- SC_OFF --><div class=\"md\"><p>$full</p>\n\n" +
+                        "<p>Words about it. Also $other</p>\n</div><!-- SC_ON -->"
+            )
+        )
+
+        assertEquals("Words about it. Also $other", post.selfTextPlainTrimmed)
+        assertTrue("the full body keeps it", post.selfTextPlain!!.contains(full))
+    }
+
+    @Test
+    fun `the embedded image is taken in body order, not media_metadata order`() {
+        val first = "https://i.redd.it/first1.jpg"
+        val second = "https://preview.redd.it/second2.png?width=576&s=x"
+        val metadata = mediaMetadataBlock("second2", second)
+        mediaMetadataBlock("first1", first).let { metadata.put("first1", it.getJSONObject("first1")) }
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                mediaMetadata = metadata,
+                selftext = "![img]($first)\n\n![img]($second)"
+            )
+        )
+
+        assertEquals(first, post.previews[0].previewUrl)
+    }
+
+    @Test
+    fun `a text post with a reddit-generated preview keeps it over the embedded image`() {
+        val embedded = "https://preview.redd.it/img1.png?width=576&s=x"
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                preview = previewBlock(
+                    "https://preview.redd.it/ogfull.jpg",
+                    "https://preview.redd.it/ogsmall.jpg"
+                ),
+                mediaMetadata = mediaMetadataBlock("img1", embedded),
+                selftext = embedded
+            )
+        )
+
+        assertEquals("https://preview.redd.it/ogfull.jpg", post.previews[0].previewUrl)
+    }
+
+    @Test
+    fun `an embedded gif or a URL media_metadata does not describe yields no preview`() {
+        val gif = "https://i.redd.it/anim1.gif"
+        val metadata = JSONObject().put("anim1", JSONObject().apply {
+            put("status", "valid")
+            put("e", "AnimatedImage")
+            put("id", "anim1")
+            put("s", JSONObject().apply {
+                put("x", 480); put("y", 270); put("gif", gif); put("mp4", "https://i.redd.it/anim1.mp4")
+            })
+        })
+        val post = ParsePost.parseBasicData(
+            postJson(
+                url = selfUrl,
+                domain = "self.bestof",
+                mediaMetadata = metadata,
+                selftext = "![gif]($gif)\n\nhttps://preview.redd.it/unknown9.png?width=1&s=y"
+            )
+        )
+
+        assertTrue("the gif is inline media", post.embedsInlineBodyMedia())
+        assertTrue(post.previews.isEmpty())
+    }
+
+    @Test
+    fun `a text post that embeds nothing has no preview`() {
+        val post = ParsePost.parseBasicData(
+            postJson(url = selfUrl, domain = "self.bestof", selftext = "Just words.")
+        )
+
+        assertFalse(post.embedsInlineBodyMedia())
+        assertTrue(post.previews.isEmpty())
     }
 }

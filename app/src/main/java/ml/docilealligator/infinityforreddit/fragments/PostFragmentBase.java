@@ -936,6 +936,15 @@ public abstract class PostFragmentBase extends Fragment {
                 post.setSelfText(event.post.getSelfText());
                 post.setSelfTextPlain(event.post.getSelfTextPlain());
                 post.setSelfTextPlainTrimmed(event.post.getSelfTextPlainTrimmed());
+                // The snippet's two halves are that same body text divided around the image the
+                // card shows, so they travel with it rather than with the preview below: an update
+                // that carried the new snippet but left the old halves behind would have the card
+                // draw text the post no longer has. Cleared to null by an update with no body
+                // image, which is what makes the card fall back to the whole snippet.
+                post.setSelfTextPlainTrimmedBeforeInlineImage(
+                        event.post.getSelfTextPlainTrimmedBeforeInlineImage());
+                post.setSelfTextPlainTrimmedAfterInlineImage(
+                        event.post.getSelfTextPlainTrimmedAfterInlineImage());
                 // Recovering a removed post can turn it into a link/image/gif/redgifs-video post,
                 // changing the url, the post type and the backing media; propagate them so the feed
                 // row matches the recovered detail view (which rebuilds from a full Post copy). This
@@ -946,6 +955,11 @@ public abstract class PostFragmentBase extends Fragment {
                 post.setPostType(event.post.getPostType());
                 if (event.post.getPreviews() != null && !event.post.getPreviews().isEmpty()) {
                     post.setPreviews(event.post.getPreviews());
+                    // Where that preview came from travels with it: a preview taken out of the body
+                    // is drawn in the body's own order and fitted rather than cropped, and an edit
+                    // that moves the image, or replaces it with a Reddit-generated preview, moves
+                    // the card with it.
+                    post.setInlineBodyImagePreview(event.post.isInlineBodyImagePreview());
                 }
                 if (event.post.getThumbnailUrl() != null) {
                     post.setThumbnailUrl(event.post.getThumbnailUrl());
