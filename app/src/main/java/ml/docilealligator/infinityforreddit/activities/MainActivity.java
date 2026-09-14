@@ -2367,9 +2367,31 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             if (resolvedTabsCache != null && sameResolvedTabs(resolvedTabsCache, newResolved)) {
                 return;
             }
+            // ViewPager2 keeps its index across a data set change, not its page: the content-based
+            // ids below only decide which fragment lands in each slot. So when a tab before the
+            // current one drops out (an unsubscribed subreddit arriving from Room), the pager
+            // stays at the same index and shows the tab that slid into it -- on a cold start with
+            // a resume tab applied before the subscriptions loaded, that put the user one tab
+            // past the one they left. Read the current tab's key from the old list, then put the
+            // pager back on that tab wherever it is now; if it is the tab that went, the first
+            // tab, not whatever took its slot.
+            int currentItem = binding.includedAppBar.viewPagerMainActivity.getCurrentItem();
+            // Only an existing list can say which tab the pager was on; before the first build
+            // userKeyAtPosition would build (and answer from) the new one.
+            String currentKey = resolvedTabsCache == null ? null : userKeyAtPosition(currentItem);
             resolvedTabsCache = newResolved;
             notifyDataSetChanged();
-            // The tab a resume asked for may only now have arrived from the dynamic lists.
+            if (currentKey != null) {
+                int newPosition = positionOfUserKey(currentKey);
+                if (newPosition < 0) {
+                    newPosition = 0;
+                }
+                if (newPosition != currentItem) {
+                    binding.includedAppBar.viewPagerMainActivity.setCurrentItem(newPosition, false);
+                }
+            }
+            // The tab a resume asked for may only now have arrived from the dynamic lists. After
+            // the re-seat so a pending resume wins over it.
             applyResumeTab();
         }
 
