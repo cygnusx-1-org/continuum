@@ -141,6 +141,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.ExoPlayerViewHelper;
 import ml.docilealligator.infinityforreddit.videoautoplay.Playable;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
+import ml.docilealligator.infinityforreddit.videoautoplay.VideoScrubHelper;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 import okhttp3.OkHttpClient;
@@ -2523,6 +2524,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     fullscreenButton.performClick();
                 }
             });
+
+            VideoScrubHelper.attach(playerView, aspectRatioFrameLayout, () -> helper);
         }
 
         void bindVideoUri(Uri videoUri) {
