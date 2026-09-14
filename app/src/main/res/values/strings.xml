@@ -16,14 +16,14 @@
     <string name="view_message_activity_label">Inbox</string>
     <string name="settings_activity_label">Settings</string>
     <string name="account_saved_thing_activity_label">Saved</string>
-    <string name="create_multi_reddit_activity_label">Create Multireddit</string>
+    <string name="create_multi_reddit_activity_label">Create MultiReddit</string>
     <string name="subreddit_multiselection_activity_label">Select Subreddits</string>
     <string name="user_multiselection_activity_label">Select Users</string>
     <string name="custom_theme_listing_activity_label">Custom Themes</string>
     <string name="customize_theme_activity_label">Customize Theme</string>
     <string name="customize_theme_activity_create_theme_label">Create Theme</string>
     <string name="theme_preview_activity_label">Theme Preview</string>
-    <string name="edit_multi_reddit_activity_label">Edit Multireddit</string>
+    <string name="edit_multi_reddit_activity_label">Edit MultiReddit</string>
     <string name="selected_subeddits_activity_label">Selected Subreddits</string>
     <string name="report_activity_label">Report</string>
     <string name="view_imgur_media_activity_image_label">Image %1$d/%2$d</string>
@@ -39,7 +39,7 @@
     <string name="filtered_posts_activity_subtitle">Filtered Posts</string>
     <string name="post_filter_preference_activity_label">Post Filter</string>
     <string name="search_users_result_activity_label">Users</string>
-    <string name="multireddit_selection_activity_label">Select a Multireddit</string>
+    <string name="multireddit_selection_activity_label">Select a MultiReddit</string>
     <string name="post_gallery_activity_label">Gallery Post</string>
     <string name="wiki_activity_label">Wiki</string>
     <string name="edit_profile_activity_label">Edit Profile</string>
@@ -49,7 +49,7 @@
     <string name="subscription_activity_label">Subscription</string>
     <string name="comment_filter_preference_activity_label">Comment Filter</string>
     <string name="customize_comment_filter_activity_label">Customize Comment Filter</string>
-    <string name="copy_multireddit_activity_label">Copy Multireddit</string>
+    <string name="copy_multireddit_activity_label">Copy MultiReddit</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -79,8 +79,8 @@
     <string name="action_change_post_layout">Change Post Layout</string>
     <string name="action_save">Save</string>
     <string name="action_edit_multi_reddit">Edit MultiReddit</string>
-    <string name="action_delete_multi_reddit">Delete Multireddit</string>
-    <string name="action_copy_multi_reddit">Copy Multireddit</string>
+    <string name="action_delete_multi_reddit">Delete MultiReddit</string>
+    <string name="action_copy_multi_reddit">Copy MultiReddit</string>
     <string name="action_list_subreddits">MultiReddit\'s Subreddits</string>
     <string name="action_share">Share</string>
     <string name="action_preview">Preview</string>
@@ -93,7 +93,7 @@
     <string name="action_give_award">Give Award</string>
     <string name="action_save_to_database">Save to Database</string>
     <string name="action_read_all_messages">Read All Messages</string>
-    <string name="action_add_to_multireddit">Add to Multireddit</string>
+    <string name="action_add_to_multireddit">Add to MultiReddit</string>
     <string name="action_share_link">Share Link</string>
     <string name="action_copy_link">Copy Link</string>
     <string name="action_open_external_browser">Open in browser</string>
@@ -153,7 +153,7 @@
     <string name="no_comments">No comments found</string>
     <string name="no_subreddits">No subreddits found</string>
     <string name="no_users">No users found</string>
-    <string name="no_multi_reddits">No Multireddits found</string>
+    <string name="no_multi_reddits">No MultiReddits found</string>
     <string name="no_storage_permission">No storage permission to save this file</string>
 
     <string name="load_comments_failed">Error loading comments.\nTap to retry.</string>
@@ -173,8 +173,8 @@
 
     <string name="profile">Profile</string>
     <string name="subscriptions">Subscriptions</string>
-    <string name="multi_reddit">Multireddit</string>
-    <string name="user_multi_reddit">User Multireddit</string>
+    <string name="multi_reddit">MultiReddit</string>
+    <string name="user_multi_reddit">User MultiReddit</string>
     <string name="subscribed_subreddits">Subscribed Subreddits</string>
     <string name="history">History</string>
     <string name="recently_visited">Recently Visited</string>
@@ -660,7 +660,7 @@
     <string name="settings_tab_5_summary">Tab 5</string>
     <string name="settings_tab_6_summary">Tab 6</string>
     <string name="settings_more_tabs_summary">More Tabs</string>
-    <string name="settings_more_tabs_info_summary">Changing these effects the list above</string>
+    <string name="settings_more_tabs_info_summary">Changing these affects the list above</string>
     <string name="settings_more_tabs_show_favorite_multireddits_title">Show Favorite MultiReddits</string>
     <string name="settings_more_tabs_show_multireddits_title">Show MultiReddits</string>
     <string name="settings_more_tabs_show_favorite_users_multireddits_title">Show Favorite Users MultiReddits</string>
@@ -1069,7 +1069,7 @@
     <string name="delete_multi_reddit_failed">Delete failed</string>
     <string name="delete_multi_reddit_dialog_message">Are you sure?</string>
     <string name="copy_multi_reddit_failed">Cannot copy this multireddit.</string>
-    <string name="action_save_multi_reddit_locally">Save Multireddit locally</string>
+    <string name="action_save_multi_reddit_locally">Save MultiReddit locally</string>
     <string name="save_multi_reddit_locally_success">Saved to Users MultiReddits</string>
     <string name="remove_followed_multi_reddit">Remove from Users MultiReddits</string>
     <string name="remove_followed_multi_reddit_dialog_message">Remove this saved multireddit? The original is not affected.</string>
@@ -1357,10 +1357,10 @@
     <string name="author_flair_preview">Author Flair</string>
     <string name="comment_content_preview">I got my girlfriend a "Get better soon" card.\nShe\'s not ill or anything, but she could definitely get better.</string>
 
-    <string name="copy_multi_reddit_path">Copy Multireddit\'s Path</string>
+    <string name="copy_multi_reddit_path">Copy MultiReddit\'s Path</string>
     <string name="copy_multi_reddit_path_failed">Unable to copy multireddit\'s path</string>
-    <string name="edit_multi_reddit">Edit Multireddit</string>
-    <string name="delete_multi_reddit">Delete Multireddit</string>
+    <string name="edit_multi_reddit">Edit MultiReddit</string>
+    <string name="delete_multi_reddit">Delete MultiReddit</string>
 
     <string name="report">Report</string>
     <string name="reporting">Reporting</string>
@@ -1518,7 +1518,7 @@
     <string name="post_filter_usage_embedded_user_all">All users</string>
     <string name="post_filter_usage_multireddit">MultiReddit: %1$s</string>
     <string name="post_filter_usage_multireddit_all">MultiReddit</string>
-    <string name="post_filter_usage_embedded_multireddit_all">All Multireddits</string>
+    <string name="post_filter_usage_embedded_multireddit_all">All MultiReddits</string>
     <string name="post_filter_usage_search">Search</string>
     <string name="subreddit">Subreddit</string>
     <string name="user">User</string>
@@ -1943,7 +1943,7 @@
     <string name="content_description_subscriptions">Subscriptions</string>
     <string name="content_description_inbox">Inbox</string>
     <string name="content_description_profile">Profile</string>
-    <string name="content_description_multireddits">Multireddits</string>
+    <string name="content_description_multireddits">MultiReddits</string>
     <string name="content_description_upvoted">Upvoted</string>
     <string name="content_description_downvoted">Downvoted</string>
     <string name="content_description_hidden">Hidden</string>
