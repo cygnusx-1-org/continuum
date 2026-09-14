@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -1213,8 +1214,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     ((PostWithPreviewTypeViewHolder) holder).imageWrapperFrameLayout.setVisibility(View.VISIBLE);
                                 }
                                 ((PostWithPreviewTypeViewHolder) holder).imageView.setVisibility(View.VISIBLE);
-                                if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    setSquarePreview(((PostWithPreviewTypeViewHolder) holder).imageView);
+                                if (isSquarePreview(preview)) {
+                                    setSquarePreview(((PostWithPreviewTypeViewHolder) holder).imageView, letterboxSquarePreview(post));
                                 } else {
                                     setPreviewRatio(((PostWithPreviewTypeViewHolder) holder).imageView, preview);
                                 }
@@ -1595,7 +1596,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery.setVisibility(View.VISIBLE);
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
+                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, false);
                                 } else {
                                     setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                 }
@@ -1627,7 +1628,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                     ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
 
                                     if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                        setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
+                                        setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, false);
                                     } else {
                                         setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                     }
@@ -1654,7 +1655,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_play_circle_36dp));
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
+                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, false);
                                 } else {
                                     setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                 }
@@ -1682,7 +1683,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_link_post_type_indicator_day_night_24dp));
 
                                 if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery);
+                                    setSquarePreview(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, false);
                                 } else {
                                     setPreviewRatio(((PostGalleryViewHolder) holder).binding.imageViewItemPostGallery, preview);
                                 }
@@ -1765,11 +1766,35 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * {@code width * ratio} for any positive ratio, so a height written to the layout params is
      * silently discarded -- which is what the flat 400dp height that used to be here always
      * was (#373).
+     *
+     * <p>A still fills the square, cropped to its centre. An autoplaying gif is fitted inside it
+     * instead ({@code letterbox}), the way an autoplaying video card shows its clip: the
+     * {@code PlayerView} in that card keeps media3's default fit mode, so a 16:9 video in a square
+     * is shown whole between black bars, while the same clip posted as a gif went through the
+     * still's centre crop and lost its sides.
      */
-    private void setSquarePreview(AspectRatioGifImageView imageView) {
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+    private void setSquarePreview(AspectRatioGifImageView imageView, boolean letterbox) {
+        imageView.setScaleType(letterbox ? ImageView.ScaleType.FIT_CENTER : ImageView.ScaleType.CENTER_CROP);
         imageView.setRatioMaxHeight(getMaxPreviewHeight());
         imageView.setRatio(SQUARE_PREVIEW_RATIO);
+    }
+
+    /**
+     * Whether {@code post}'s card, when squared by {@link #setSquarePreview}, letterboxes its
+     * media rather than cropping it: a gif post that autoplays. With autoplay off a gif card is a
+     * still with a play badge, exactly like a video card is then, and crops like one.
+     */
+    private boolean letterboxSquarePreview(Post post) {
+        return post.getPostType() == Post.GIF_TYPE && mAutoplay;
+    }
+
+    /**
+     * Whether {@code preview} is drawn by {@link #setSquarePreview} rather than
+     * {@link #setPreviewRatio}: "Fixed Height in Card" is on, or the preview carries no
+     * dimensions to size a ratio from.
+     */
+    private boolean isSquarePreview(Post.Preview preview) {
+        return mFixedHeightPreviewInCard || preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0;
     }
 
     /**
@@ -2198,9 +2223,17 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private void loadImage(final RecyclerView.ViewHolder holder) {
         if (holder instanceof PostWithPreviewTypeViewHolder) {
             ((PostWithPreviewTypeViewHolder) holder).loadingIndicator.setVisibility(View.VISIBLE);
-            ((PostWithPreviewTypeViewHolder) holder).imageView.setBackground(null);
             Post post = ((PostWithPreviewTypeViewHolder) holder).post;
             Post.Preview preview = ((PostWithPreviewTypeViewHolder) holder).preview;
+            // A gif letterboxed in its square gets the black bars an autoplaying video card draws
+            // around its clip (the #000000 behind that card's PlayerView); every other card keeps
+            // the card colour behind its still. Cleared rather than left, because this holder may
+            // have carried the bars, or the transparent-image backdrop, for the post before.
+            if (preview != null && isSquarePreview(preview) && letterboxSquarePreview(post)) {
+                ((PostWithPreviewTypeViewHolder) holder).imageView.setBackgroundColor(Color.BLACK);
+            } else {
+                ((PostWithPreviewTypeViewHolder) holder).imageView.setBackground(null);
+            }
             if (preview != null) {
                 boolean blurImage = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()) && !(post.getPostType() == Post.GIF_TYPE && mAutoplay && mAutoplayNsfwVideos)) || (post.isSpoiler() && mNeedBlurSpoiler);
                 // The still, always -- a gif card starts on its preview even with autoplay on, and
@@ -4798,7 +4831,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     // otherwise letterbox the image with black against the card background. Only do
                     // this when the preview was sized from its own dimensions; a square
                     // fixed-height preview is deliberately not the drawable's shape, and
-                    // center-crops to fill instead.
+                    // center-crops to fill instead (or, for an autoplaying gif, sits letterboxed in
+                    // it -- see setSquarePreview).
                     boolean ratioMode = !mFixedHeightPreviewInCard && preview != null
                             && preview.getPreviewWidth() > 0 && preview.getPreviewHeight() > 0;
                     if (ratioMode && resource.getIntrinsicWidth() > 0 && resource.getIntrinsicHeight() > 0) {
