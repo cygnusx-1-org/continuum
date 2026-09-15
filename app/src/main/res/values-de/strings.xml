@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Ein Fehler trat beim Abruf der Benutzerinformationen auf"</string>
     <string name="no_system_webview_error">"Fehler beim Öffnen des System-WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Fehler beim Laden des Bildes. Tippen für Neuversuch."</string>
+    <string name="video_error_tap_to_retry">"Fehler beim Abspielen des Videos. Tippen für Neuversuch."</string>
     <string name="load_posts_error">"Fehler beim Laden der Beiträge.
 Tippen für Neuversuch."</string>
     <string name="load_posts_error_anonymous_403">"Aufgrund von Plattformeinschränkungen können Inhalte derzeit nicht geladen werden.\n \n\nDu kannst es in Kürze noch einmal versuchen oder dich für ein zuverlässigeres Erlebnis anmelden."</string>

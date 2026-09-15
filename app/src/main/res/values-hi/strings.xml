@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"यूजर की जानकारी प्राप्ति में त्रुटि"</string>
     <string name="no_system_webview_error">"सिस्टम WebView खोलने में त्रुटि"</string>
     <string name="error_loading_image_tap_to_retry">"चित्र खुलने में त्रुटि। पुनः प्रयास के लिए यहां दबाएं।"</string>
+    <string name="video_error_tap_to_retry">"वीडियो चलाने में त्रुटि। पुनः प्रयास के लिए यहां दबाएं।"</string>
     <string name="load_posts_error">"पोस्ट लोड करने में त्रुटि।\nपुनः प्रयास करने के लिए टैप करें।"</string>
     <string name="load_posts_error_anonymous_403">"प्लेटफ़ॉर्म सीमाओं के कारण, सामग्री अभी लोड नहीं की जा सकती।\n \n\nआप शीघ्र ही पुनः प्रयास कर सकते हैं या अधिक विश्वसनीय अनुभव के लिए सदस्यता ले सकते हैं।"</string>
     <string name="load_posts_error_with_reason">"पोस्ट लोड करने में त्रुटि। कारण: %1$s.\nपुनः प्रयास करने के लिए टैप करें।"</string>

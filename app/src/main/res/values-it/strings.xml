@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Si è verificato un errore durante l'analisi delle informazioni dell'utente"</string>
     <string name="no_system_webview_error">"Errore apertura del System WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Errore durante il caricamento dell'immagine. Tocca per riprovare."</string>
+    <string name="video_error_tap_to_retry">"Errore durante la riproduzione del video. Tocca per riprovare."</string>
     <string name="load_posts_error">"Errore durante il caricamento dei post.
 Tocca per riprovare."</string>
     <string name="load_posts_error_anonymous_403">"A causa delle limitazioni della piattaforma, al momento non è possibile caricare i contenuti.\n \n\nPuoi riprovare a breve o iscriverti per un'esperienza più affidabile."</string>

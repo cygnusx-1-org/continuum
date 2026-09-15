@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Помилка відбулася під час аналізу інформації користувача"</string>
     <string name="no_system_webview_error">"Помилка відкривання системного вебперегляду"</string>
     <string name="error_loading_image_tap_to_retry">"Помилка завантаження зображення. Натисни, щоб повторити."</string>
+    <string name="video_error_tap_to_retry">"Помилка відтворення відео. Натисни, щоб повторити."</string>
     <string name="load_posts_error">"Помилка завантаження дописів.
 Натисни, щоб повторити."</string>
     <string name="load_posts_error_anonymous_403">"Через обмеження платформи зараз неможливо завантажити вміст.\n \n\nти можеш спробувати ще раз незабаром або підписатися, щоб отримати більш надійний досвід."</string>

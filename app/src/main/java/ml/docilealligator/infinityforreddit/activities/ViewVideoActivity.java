@@ -4,6 +4,7 @@ import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
 import static androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
+import static ml.docilealligator.infinityforreddit.Constants.VIDEO_CONTROLS_SHOW_TIMEOUT_MS;
 import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_BACK_INCREMENT_MS;
 import static ml.docilealligator.infinityforreddit.Constants.VIDEO_SEEK_FORWARD_INCREMENT_MS;
 
@@ -235,9 +236,6 @@ public class ViewVideoActivity extends AppCompatActivity
     private float lastTouchY;
     private int originalVideoWidth = 0; // Video dimensions (with embedded rotation applied)
     private int originalVideoHeight = 0;
-
-    // Default auto-hide delay for the controls, restored after a scrub keeps them pinned open.
-    private static final int CONTROLS_SHOW_TIMEOUT_MS = 5000;
 
     // Horizontal swipe-to-scrub gesture state.
     private int scrubTouchSlop;
@@ -1305,7 +1303,7 @@ public class ViewVideoActivity extends AppCompatActivity
         isScrubbing = false;
         // Restore the normal auto-hide behaviour for the controls.
         if (playerControlView != null) {
-            playerControlView.setShowTimeoutMs(CONTROLS_SHOW_TIMEOUT_MS);
+            playerControlView.setShowTimeoutMs(VIDEO_CONTROLS_SHOW_TIMEOUT_MS);
             playerControlView.show();
         }
         setSwipeToDismissEnabled(scaleFactor <= 1.0f);

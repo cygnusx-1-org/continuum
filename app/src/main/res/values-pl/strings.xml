@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Wystąpił błąd podczas analizy informacji o użytkowniku"</string>
     <string name="no_system_webview_error">"Wystąpił błąd podczas otwierania WebView systemu"</string>
     <string name="error_loading_image_tap_to_retry">"Wystąpił błąd podczas ładowania obrazu. Naciśnij, aby spróbować ponownie."</string>
+    <string name="video_error_tap_to_retry">"Wystąpił błąd podczas odtwarzania wideo. Naciśnij, aby spróbować ponownie."</string>
     <string name="load_posts_error">"Błąd podczas ładowania postów.\nDotknij, aby spróbować ponownie."</string>
     <string name="load_posts_error_anonymous_403">"Ze względu na ograniczenia platformy nie można teraz załadować treści.\n \n\nMożesz wkrótce spróbować ponownie lub zasubskrybować, aby zapewnić bardziej niezawodne działanie."</string>
     <string name="load_posts_error_with_reason">"Błąd podczas ładowania postów. Powód: %1$s.\nDotknij, aby spróbować ponownie."</string>

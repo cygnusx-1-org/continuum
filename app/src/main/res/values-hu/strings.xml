@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Hiba történt a felhasználói információk értelmezése során"</string>
     <string name="no_system_webview_error">"Hiba a rendszer WebView szolgáltatásának megnyitása során"</string>
     <string name="error_loading_image_tap_to_retry">"Hiba a kép betöltése során. Koppints az újrapróbálkozáshoz."</string>
+    <string name="video_error_tap_to_retry">"Hiba a videó lejátszása során. Koppints az újrapróbálkozáshoz."</string>
     <string name="load_posts_error">"Hiba történt a bejegyzések betöltésekor.\nKoppints az újrapróbálkozáshoz."</string>
     <string name="load_posts_error_anonymous_403">"A platform korlátai miatt a tartalom jelenleg nem tölthető be.\n \n\nHamarosan újrapróbálhatja, vagy előfizethet a megbízhatóbb élmény érdekében."</string>
     <string name="load_posts_error_with_reason">"Hiba a bejegyzések betöltésekor. Ok: %1$s.\nKoppints az újrapróbálkozáshoz."</string>

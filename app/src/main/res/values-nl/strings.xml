@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"De gebruikersinformatie kan niet worden verwerkt"</string>
     <string name="no_system_webview_error">"WebView kan niet worden geopend"</string>
     <string name="error_loading_image_tap_to_retry">"De afbeelding kan niet worden geladen. Druk om opnieuw te proberen."</string>
+    <string name="video_error_tap_to_retry">"De video kan niet worden afgespeeld. Druk om opnieuw te proberen."</string>
     <string name="load_posts_error">"Fout bij het laden van berichten.\nTik om het opnieuw te proberen."</string>
     <string name="load_posts_error_anonymous_403">"Vanwege platformbeperkingen kan de inhoud momenteel niet worden geladen.\n \n\nJe kunt het binnenkort opnieuw proberen of je abonneren voor een betrouwbaardere ervaring."</string>
     <string name="load_posts_error_with_reason">"Fout bij het laden van berichten. Reden: %1$s.\nTik om het opnieuw te proberen."</string>

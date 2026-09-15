@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Σφάλμα κατά την ανάλυση πληροφοριών χρήστη"</string>
     <string name="no_system_webview_error">"Σφάλμα κατα το άνοιγμα System's WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Σφάλμα κατά τη φόρτωση της εικόνας. Πάτα για επανάληψη."</string>
+    <string name="video_error_tap_to_retry">"Σφάλμα κατά την αναπαραγωγή του βίντεο. Πάτα για επανάληψη."</string>
     <string name="load_posts_error">"Σφάλμα φόρτωσης αναρτήσεων.\nΠάτα για να προσπαθήσεις ξανά."</string>
     <string name="load_posts_error_anonymous_403">"Λόγω περιορισμών πλατφόρμας, το περιεχόμενο δεν μπορεί να φορτωθεί αυτήν τη στιγμή.\n \n\nΜπορείς να δοκιμάσεις ξανά σύντομα ή να εγγραφείς για μια πιο αξιόπιστη εμπειρία."</string>
     <string name="load_posts_error_with_reason">"Σφάλμα φόρτωσης αναρτήσεων. Αιτία: %1$s.\nΠάτα για να προσπαθήσεις ξανά."</string>

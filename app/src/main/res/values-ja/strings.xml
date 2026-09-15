@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"ユーザー情報を解析中にエラーが発生しました"</string>
     <string name="no_system_webview_error">"システムのWebViewを起動中にエラーが発生しました"</string>
     <string name="error_loading_image_tap_to_retry">"画像をロード中にエラーが発生しました。タップでリトライします。"</string>
+    <string name="video_error_tap_to_retry">"ビデオの再生中にエラーが発生しました。タップでリトライします。"</string>
     <string name="load_posts_error">"投稿をロード中にエラーが発生しました。
 タップでリトライします。"</string>
     <string name="load_posts_error_anonymous_403">"プラットフォームの制限により、現在コンテンツを読み込むことができません。\n \n\n すぐにもう一度試すか、より信頼性の高いエクスペリエンスを購読することができます。"</string>

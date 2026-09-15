@@ -8,6 +8,12 @@ public class Constants {
     public static final long VIDEO_SEEK_BACK_INCREMENT_MS = 10000;
     public static final long VIDEO_SEEK_FORWARD_INCREMENT_MS = 10000;
     public static final long VIDEO_SHORT_DURATION_THRESHOLD_MS = 19000;
+    /**
+     * How long a video's on-screen controls stay up after playback starts or the last touch, before
+     * they go. The same 5 s media3 gives a PlayerView by default, so every player in the app hides
+     * its controls on one clock.
+     */
+    public static final int VIDEO_CONTROLS_SHOW_TIMEOUT_MS = 5000;
 
     /**
      * In-app name of the virtual subreddit that shows r/all's listing while carrying an identity of

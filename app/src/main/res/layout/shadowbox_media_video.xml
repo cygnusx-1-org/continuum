@@ -29,21 +29,56 @@
         android:layout_gravity="center" />
 
     <!-- This page's play/pause control: shown while the video is paused, and whenever the bar is
-         up, so the same spot starts and stops playback. -->
+         up, so the same spot starts and stops playback. Sized and tinted as the feed's exo_play
+         button is (exo_autoplay_playback_control_view: a 24dp icon with 8dp of padding, 40dp
+         across, on exo_player_control_button_circular_background's #40000000). -->
     <com.google.android.material.button.MaterialButton
         style="?attr/materialIconButtonOutlinedStyle"
         android:id="@+id/play_button_shadowbox_media_video"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="center"
+        android:padding="8dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:insetLeft="0dp"
+        android:insetRight="0dp"
         android:contentDescription="@string/shadowbox_play_pause"
         android:visibility="gone"
         app:strokeWidth="0dp"
-        app:backgroundTint="#80000000"
+        app:backgroundTint="#40000000"
         app:icon="@drawable/ic_play_arrow_24dp"
         app:iconTint="@android:color/white"
-        app:iconSize="48dp"
+        app:iconSize="24dp"
         app:iconGravity="textStart"
         app:iconPadding="0dp" />
+
+    <!-- Shown once the player has given up on the file, over everything else so the play button
+         cannot be pressed on a dead player; laid out the way the image page's error is. A tap on
+         it starts the video over. Black of its own rather than borrowing the root's: a video that
+         failed part-way through has already put frames on the texture view, which keeps the last
+         one, and white text with no background is not readable over a video frame. The image page
+         needs none because nothing there draws before its error. -->
+    <LinearLayout
+        android:id="@+id/playback_error_linear_layout_shadowbox_media_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:drawableTopCompat="@drawable/ic_error_outline_white_24dp"
+            android:fontFamily="?attr/font_family"
+            android:gravity="center"
+            android:text="@string/video_error_tap_to_retry"
+            android:textColor="@android:color/white"
+            android:textSize="?attr/font_default" />
+
+    </LinearLayout>
 
 </FrameLayout>

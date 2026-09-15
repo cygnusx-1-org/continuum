@@ -1119,16 +1119,30 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         // Restated because a recycled holder may carry the centred scale type the
                         // placeholder below sets, which would crop a real preview.
                         toroPlayer.previewImageView.setScaleType(ImageView.ScaleType.FIT_START);
-                        mGlide.load(preview.getPreviewUrl()).centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(toroPlayer.previewImageView);
                     } else {
                         // The square is the wrapper's to impose, so that it can bound the height;
                         // clearing the media3 frame's own ratio makes it honour that measurement.
                         toroPlayer.aspectRatioFrameLayout.setAspectRatio(0);
                         toroPlayer.previewFrameLayout.setMaxHeight(getMaxPreviewHeight());
                         toroPlayer.previewFrameLayout.setSquarePreview(true);
-                        if (preview == null) {
-                            showNoPreviewPlaceholder(toroPlayer.previewImageView);
-                        }
+                        // Fitted rather than cropped, because the clip this still stands in for is
+                        // fitted: the PlayerView keeps media3's default fit mode, so a 16:9 video
+                        // in the square is shown whole between black bars. Cropping the still
+                        // would show the card one picture and then replace it with a smaller one.
+                        toroPlayer.previewImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    }
+                    // Outside the branch above, because a squared card has a preview to draw as
+                    // often as a ratio-sized one does. Loading it only on the ratio path left
+                    // every video card in the feed blank under "Fixed Height in Card" until the
+                    // clip's first frame landed -- and permanently, for a card that never played.
+                    if (preview == null) {
+                        showNoPreviewPlaceholder(toroPlayer.previewImageView);
+                    } else {
+                        mGlide.load(preview.getPreviewUrl())
+                                .centerInside()
+                                .downsample(mSaveMemoryCenterInsideDownsampleStrategy)
+                                .listener(toroPlayer.previewRequestListener)
+                                .into(toroPlayer.previewImageView);
                     }
                     if (!((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.isManuallyPaused) {
                         if (mFragment.getMasterMutingOption() == null) {
@@ -1856,6 +1870,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      */
     private void showNoPreviewPlaceholder(ImageView previewImageView) {
         mGlide.clear(previewImageView);
+        applyNoPreviewPlaceholder(previewImageView);
+    }
+
+    /**
+     * The placeholder's appearance on its own, without cancelling any request.
+     *
+     * <p>Separate because a load that has just failed reports it from inside Glide's own callback,
+     * where clearing the request it is reporting on is not allowed.
+     */
+    private void applyNoPreviewPlaceholder(ImageView previewImageView) {
         previewImageView.setScaleType(ImageView.ScaleType.CENTER);
         previewImageView.setImageResource(R.drawable.ic_video_day_night_24dp);
     }
@@ -3723,6 +3747,31 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         ExoPlayerViewHelper helper;
         @Nullable
         private Uri mediaUri;
+        /**
+         * The URI {@link #helper} was built for, which is not always the one this card shows now:
+         * a helper is created once and goes on rendering into this surface until it is released.
+         */
+        @Nullable
+        private Uri initializedUri;
+        /**
+         * Puts the no-preview glyph up when a still fails to load, so a card whose preview could
+         * not be fetched shows what a card with no preview at all shows, rather than a blank box
+         * that stays blank until the clip's first frame.
+         */
+        private final RequestListener<Drawable> previewRequestListener = new RequestListener<>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                applyNoPreviewPlaceholder(previewImageView);
+                // Handled here: returning false lets Glide put its own error drawable up instead,
+                // and there is none, which is the blank box this exists to replace.
+                return true;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                return false;
+            }
+        };
         private float volume;
         @Nullable
         public Call<String> fetchRedgifsOrStreamableVideoCall;
@@ -3823,6 +3872,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
 
         void bindVideoUri(Uri videoUri) {
+            // A helper is built once, for one URI, and keeps rendering into this card's surface
+            // until something releases it. A holder rebound off the scrap list never passes
+            // through onViewRecycled, so without this the clip of the post this card last held
+            // plays on under the new post's still -- and takes that still down with its next
+            // frame. Letting it go here is also what makes a switch to the direct-URL fallback
+            // take effect, since the old helper would otherwise keep the source that just failed.
+            if (helper != null && initializedUri != null && !initializedUri.equals(videoUri)) {
+                release();
+            }
             mediaUri = videoUri;
         }
 
@@ -3983,12 +4041,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         void loadFallbackDirectVideo() {
             Post post = getPost();
             if (post.getVideoFallBackDirectUrl() != null) {
-                mediaUri = Uri.parse(post.getVideoFallBackDirectUrl());
+                // Held across the rebind below: binding a different URI lets go of the player that
+                // just failed, and a released player has no container to ask for the pass that
+                // starts the replacement.
+                Container settled = container;
+                bindVideoUri(Uri.parse(post.getVideoFallBackDirectUrl()));
                 post.setVideoDownloadUrl(post.getVideoFallBackDirectUrl());
                 post.setVideoUrl(post.getVideoFallBackDirectUrl());
                 post.setLoadedStreamableVideoAlready(true);
-                if (container != null) {
-                    container.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
+                if (settled != null) {
+                    settled.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE);
                 }
             }
         }
@@ -4026,6 +4088,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             if (helper == null) {
                 helper = new ExoPlayerViewHelper(this, mediaUri, null, mExoCreator);
+                initializedUri = mediaUri;
                 helper.addEventListener(new Playable.DefaultEventListener() {
                     @Override
                     public void onEvents(@NonNull Player player, @NonNull Player.Events events) {
@@ -4149,6 +4212,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                     @Override
                     public void onRenderedFirstFrame() {
+                        // Only the clip this card is bound to now may take its still down. This
+                        // listener outlives the post it was made for: a player released on a
+                        // posted pass, or one under a holder rebound off the scrap list, can put
+                        // a frame of the previous post's video up after the card has moved on,
+                        // and hiding the still for it leaves a video card showing nothing until
+                        // the new clip starts -- the blank preview that came and went while
+                        // scrolling a feed of videos.
+                        if (mediaUri == null || !mediaUri.equals(initializedUri)) {
+                            return;
+                        }
                         // Don't clear the preview image - just hide it
                         // This allows it to be shown again if the player is released while scrolling
                         previewImageView.setVisibility(View.GONE);
@@ -4224,6 +4297,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 helper.release();
                 helper = null;
             }
+            initializedUri = null;
             // Show the preview image again when player is released
             if (previewImageView != null) {
                 previewImageView.setVisibility(View.VISIBLE);

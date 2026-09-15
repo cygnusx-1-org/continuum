@@ -2,11 +2,13 @@ package ml.docilealligator.infinityforreddit.shadowbox
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -58,6 +60,28 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     /** Set once a downgraded file has failed, so the walk back up to the posted one happens once. */
     private var downgradeFailed = false
 
+    /**
+     * Set once the post's direct-URL fallback has been tried, so a failure on it ends in the error
+     * state rather than in the same file again. The feed's row makes the same single attempt.
+     */
+    private var fallbackTried = false
+
+    /** Whether the error overlay is up: the player gave up on every file it had. */
+    private var playbackFailed = false
+
+    /**
+     * Where a released player was, so the one built in its place carries on from there rather
+     * than from the start. [C.TIME_UNSET] when there is nothing to carry on from.
+     */
+    private var resumePositionMs = C.TIME_UNSET
+
+    /**
+     * Set by [releaseMedia] when it let a player go, so [restoreMedia] knows to build one back.
+     * A page whose media has never been loaded -- one still behind its blur overlay -- has no
+     * player to release and must not get one on the way back either.
+     */
+    private var playerReleased = false
+
     private var isGifMp4 = false
     private var player: ExoPlayer? = null
     private var trackSelector: DefaultTrackSelector? = null
@@ -77,7 +101,11 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     /** Whether the player has put a frame on the surface; the preview only goes once it has. */
     private var firstFrameRendered = false
 
-    /** Whether the preview has been taken down, which happens once and never comes back. */
+    /**
+     * Whether the preview has been taken down. Once per player: nothing brings it back under a
+     * running one, but [showPoster] puts it back for the next one -- a rebuild, or a retry -- so
+     * this is not a one-way flag over the life of the page.
+     */
     private var posterHidden = false
 
     /** Whether this is the page in front. Nothing plays on any other page. */
@@ -96,6 +124,22 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     /** Set when the user presses pause, so autoplay does not start it up again behind their back. */
     private var userPaused = false
 
+    /**
+     * Set when the play button's time is up, cleared by whatever brings it back. Kept apart from
+     * the rule in [updatePlayButton] so a passive refresh -- a rebuffer, say -- never revives a
+     * button that has already gone: only a touch or a change of playback state does.
+     */
+    private var playButtonTimedOut = false
+
+    /**
+     * Takes the play button down, [Constants.VIDEO_CONTROLS_SHOW_TIMEOUT_MS] after it came up on a
+     * playing video.
+     */
+    private val hidePlayButton = Runnable {
+        playButtonTimedOut = true
+        updatePlayButton()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         uri = Uri.parse(requireArguments().getString(ARG_URI) ?: "")
@@ -111,10 +155,31 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         binding.playerViewShadowboxMediaVideo.setOnClickListener { toggleChrome() }
         binding.progressBarShadowboxMediaVideo.visibility = View.INVISIBLE
         binding.playButtonShadowboxMediaVideo.setOnClickListener { togglePlayback() }
+        binding.playbackErrorLinearLayoutShadowboxMediaVideo.setOnClickListener { retryPlayback() }
     }
 
     override fun loadMedia() {
         showPoster()
+        isMute = initialMuteState()
+        buildPlayer()
+    }
+
+    /**
+     * Builds this page's player and starts it on the file the resolution preference points at --
+     * the posted one, or the smaller file data saving asks for -- at [resumePositionMs] if there
+     * is one. Everything the page decides per player -- the media source, the track overrides,
+     * the fallback walks -- starts over here; what the user decided -- mute, pause, play -- is
+     * kept, so a player rebuilt by [restoreMedia] behaves like the one it replaces.
+     */
+    private fun buildPlayer() {
+        val binding = _binding ?: return
+        playbackFailed = false
+        binding.playbackErrorLinearLayoutShadowboxMediaVideo.visibility = View.GONE
+        downgradeFailed = false
+        fallbackTried = false
+        appliedDefaultResolution = false
+        appliedStereoAudioTrack = false
+        firstFrameRendered = false
         val trackSelector = DefaultTrackSelector(host)
         this.trackSelector = trackSelector
         val player = ExoPlayer.Builder(host)
@@ -142,7 +207,6 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
             sharedPreferences, SharedPreferencesUtils.DEFAULT_PLAYBACK_SPEED, "100"
         )
         player.playbackParameters = PlaybackParameters(if (playbackSpeed <= 0) 1f else playbackSpeed / 100f)
-        isMute = initialMuteState()
         applyMute()
 
         val listener = object : Player.Listener {
@@ -181,17 +245,76 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
             }
 
             override fun onPlayerError(error: PlaybackException) {
+                // The code and the file, since this is the only record of a failure that the
+                // device, not the post, decided: a decoder that would not open, say.
+                Log.e(
+                    TAG, "onPlayerError: errorCode=" + error.errorCode + " (" +
+                        error.errorCodeName + ") uri=" + playbackUri, error
+                )
                 _binding?.progressBarShadowboxMediaVideo?.visibility = View.INVISIBLE
                 // A downgraded URL is derived rather than confirmed, so it can name a file the
                 // host never transcoded. Walking back up to the posted one keeps a data-saving
-                // 404 from showing an error where the full-size file would have played.
-                retryAtPostedQuality()
+                // 404 from showing an error where the full-size file would have played. Failing
+                // that, the post's direct-URL fallback, the way the feed's row does; failing that
+                // too, say so -- a page left on its poster with a pause button up looked like a
+                // video that was playing.
+                if (!retryAtPostedQuality() && !retryAtFallbackUrl()) {
+                    showPlaybackError()
+                }
             }
         }
         playerListener = listener
         player.addListener(listener)
         player.prepare()
+        if (resumePositionMs != C.TIME_UNSET) {
+            player.seekTo(resumePositionMs)
+            resumePositionMs = C.TIME_UNSET
+        }
         applyPlayback()
+    }
+
+    /** Stops and releases this page's player, remembering where it was for the next one. */
+    private fun releasePlayer() {
+        // Ahead of the early return: a page whose player is already gone can still have a pending
+        // hide posted on its button, and onDestroyView comes through here.
+        _binding?.playButtonShadowboxMediaVideo?.removeCallbacks(hidePlayButton)
+        val player = player ?: return
+        if (!playbackFailed) {
+            resumePositionMs = player.currentPosition
+        }
+        playerListener?.let { player.removeListener(it) }
+        // Detached before the release: PlayerView clears its surface off the player it is losing,
+        // and a released player only logs that it ignored the message.
+        _binding?.playerViewShadowboxMediaVideo?.player = null
+        player.stop()
+        player.release()
+        this.player = null
+        trackSelector = null
+        playerListener = null
+        // Only if this page was the one playing: clearing the host's flag from any other page
+        // would let the screen sleep during playback.
+        if (pageActive) {
+            host.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    override fun releaseMedia() {
+        if (player == null) {
+            return
+        }
+        releasePlayer()
+        playerReleased = true
+        // The poster goes back up over the surface: the player built on the way back has nothing
+        // to show until its first frame, and the page was designed never to sit on black.
+        showPoster()
+    }
+
+    override fun restoreMedia() {
+        if (!playerReleased) {
+            return
+        }
+        playerReleased = false
+        buildPlayer()
     }
 
     /**
@@ -205,14 +328,22 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
      */
     private fun showPoster() {
         val binding = _binding ?: return
+        val poster = binding.previewImageViewShadowboxMediaVideo
         val preview = ShadowboxPreviews.bestPreview(post, maxResolution, dataSavingMode)
         if (preview == null) {
             posterHidden = true
-            binding.previewImageViewShadowboxMediaVideo.visibility = View.GONE
+            poster.visibility = View.GONE
             return
         }
+        // Put back explicitly rather than assumed fresh: a poster that has already faded out
+        // once -- before a rebuild, or a retry -- is GONE at alpha 0, and its fade may still be
+        // running.
+        poster.animate().cancel()
+        poster.alpha = 1f
+        poster.visibility = View.VISIBLE
+        posterHidden = false
         ShadowboxPreviews.previewRequest(glide, preview.previewUrl)
-            .into(binding.previewImageViewShadowboxMediaVideo)
+            .into(poster)
     }
 
     /**
@@ -384,23 +515,86 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     private fun applyPlayback() {
         val player = player ?: return
         player.playWhenReady = pageActive && !userPaused && (autoplay || startedByUser)
+        showPlayButton()
+    }
+
+    /** Brings the play button back and, if the video is playing, starts its clock again. */
+    private fun showPlayButton() {
+        playButtonTimedOut = false
         updatePlayButton()
     }
 
-    /** Re-prepares on the file the post actually carries, once, after a downgrade failed. */
-    private fun retryAtPostedQuality() {
+    /**
+     * Re-prepares on the file the post actually carries, once, after a downgrade failed. Returns
+     * whether it did.
+     */
+    private fun retryAtPostedQuality(): Boolean {
         if (downgradeFailed) {
-            return
+            return false
         }
         val postedUri = RedgifsUrlUtils.hdVariant(playbackUri)
             ?: MlbUrlUtils.postedVariant(playbackUri)
-            ?: return
-        val player = player ?: return
+            ?: return false
         downgradeFailed = true
-        playbackUri = postedUri
-        isRedditHls = Util.inferContentType(postedUri) == C.CONTENT_TYPE_HLS
-        player.setMediaSource(buildMediaSource(postedUri))
+        return prepareAgain(postedUri)
+    }
+
+    /**
+     * Re-prepares on the post's direct-URL fallback, once, after the posted file failed. Returns
+     * whether it did. The post itself is left alone: the feed's row rewrites the post's video URL
+     * when it does this, but these pages share Post objects with the feed, and what the full
+     * player is handed should stay what was posted.
+     */
+    private fun retryAtFallbackUrl(): Boolean {
+        if (fallbackTried) {
+            return false
+        }
+        val fallbackUri = post.videoFallBackDirectUrl?.toUri() ?: return false
+        if (fallbackUri == playbackUri) {
+            return false
+        }
+        fallbackTried = true
+        return prepareAgain(fallbackUri)
+    }
+
+    /** Points the existing player at [source] and prepares it again. False with no player. */
+    private fun prepareAgain(source: Uri): Boolean {
+        val player = player ?: return false
+        playbackUri = source
+        isRedditHls = Util.inferContentType(source) == C.CONTENT_TYPE_HLS
+        player.setMediaSource(buildMediaSource(source))
         player.prepare()
+        return true
+    }
+
+    /**
+     * Puts the error overlay up. Black behind it, as on the image page: the message is white text
+     * with no background of its own and has to stay readable. The play button goes with the
+     * poster -- pressing play on a player that has given up would do nothing.
+     */
+    private fun showPlaybackError() {
+        val binding = _binding ?: return
+        playbackFailed = true
+        binding.previewImageViewShadowboxMediaVideo.animate().cancel()
+        binding.previewImageViewShadowboxMediaVideo.visibility = View.GONE
+        posterHidden = true
+        binding.playbackErrorLinearLayoutShadowboxMediaVideo.visibility = View.VISIBLE
+        updatePlayButton()
+    }
+
+    /**
+     * The tap on the error overlay: a fresh player on the file the page started from, from the
+     * start. The tap is also a request to watch, so with autoplay off it counts as pressing play.
+     * The failure was as likely the device's as the file's -- a decoder that was busy elsewhere --
+     * so both fallback walks get another go.
+     */
+    private fun retryPlayback() {
+        startedByUser = true
+        userPaused = false
+        releasePlayer()
+        resumePositionMs = C.TIME_UNSET
+        showPoster()
+        buildPlayer()
     }
 
     private fun togglePlayback() {
@@ -418,22 +612,32 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     /**
      * The centre button is this page's play/pause control, the way the controller is on the video
      * viewer: always there while the video is paused, so a page autoplay left alone says how to
-     * start it, and there whenever the bar is up, so a playing video can be paused from the same
-     * spot. It gets out of the way only in the state meant for watching -- playing, bar hidden.
+     * start it, and there when the bar comes up, so a playing video can be paused from the same
+     * spot. On a playing video it goes on the viewer's clock -- 5 s after it came up, cut rather
+     * than faded, the way every other player in the app drops its controls -- and comes back with
+     * the next tap or the next change of playback state. It gets out of the way at once in the
+     * state meant for watching -- playing, bar hidden.
      */
     private fun updatePlayButton() {
         val binding = _binding ?: return
+        val button = binding.playButtonShadowboxMediaVideo
         val playing = player?.playWhenReady ?: false
-        binding.playButtonShadowboxMediaVideo.setIconResource(
+        button.setIconResource(
             if (playing) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp
         )
         val chromeVisible = host.panelVisible.value != false
-        binding.playButtonShadowboxMediaVideo.visibility =
-            if (!playing || chromeVisible) View.VISIBLE else View.GONE
+        val visible = !playbackFailed && (!playing || (chromeVisible && !playButtonTimedOut))
+        button.visibility = if (visible) View.VISIBLE else View.GONE
+        // One clock, restarted by whatever shows the button on a playing video; a paused video's
+        // button is not on it.
+        button.removeCallbacks(hidePlayButton)
+        if (visible && playing) {
+            button.postDelayed(hidePlayButton, Constants.VIDEO_CONTROLS_SHOW_TIMEOUT_MS.toLong())
+        }
     }
 
     override fun onChromeVisibilityChanged(visible: Boolean) {
-        updatePlayButton()
+        showPlayButton()
     }
 
     private fun applyMute() {
@@ -464,20 +668,6 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
         applyPlayback()
     }
 
-    override fun onResume() {
-        super.onResume()
-        applyPlayback()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // Nothing plays while the screen is away. The flags are left alone, so coming back to the
-        // same page restores exactly what the rule in applyPlayback says it should be.
-        val player = player ?: return
-        player.playWhenReady = false
-        updatePlayButton()
-    }
-
     override fun openFullViewer() {
         val progress = player?.currentPosition ?: 0L
         if (isGifMp4) {
@@ -488,26 +678,14 @@ class ShadowboxVideoPageFragment : ShadowboxPageFragment() {
     }
 
     override fun onDestroyView() {
-        player?.let { player ->
-            playerListener?.let { player.removeListener(it) }
-            player.stop()
-            player.release()
-        }
-        player = null
-        trackSelector = null
-        playerListener = null
+        releasePlayer()
         _binding?.let { glide.clear(it.previewImageViewShadowboxMediaVideo) }
-        // Only if this page was the one playing: the pager destroys off-screen pages while the
-        // page in front keeps playing, and clearing the host's flag from one of those would let
-        // the screen sleep during playback.
-        if (pageActive) {
-            host.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
         _binding = null
         super.onDestroyView()
     }
 
     companion object {
+        private const val TAG = "ShadowboxVideoPage"
         private const val POSTER_FADE_MS = 150L
         private const val ARG_URI = "AU"
         private const val ARG_IS_GIF_MP4 = "AIGM"

@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Произошла ошибка во время обработки информации о пользователе"</string>
     <string name="no_system_webview_error">"Ошибка открытия системного WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Произошла ошибка при загрузке изображения. Нажми, чтобы повторить попытку."</string>
+    <string name="video_error_tap_to_retry">"Произошла ошибка при воспроизведении видео. Нажми, чтобы повторить попытку."</string>
     <string name="load_posts_error">"Ошибка при загрузке публикаций.\nНажми, чтобы повторить попытку."</string>
     <string name="load_posts_error_anonymous_403">"Из-за ограничений платформы контент не может быть загружен прямо сейчас.\n \n\nты можешь попробовать еще раз в ближайшее время или подписаться, чтобы получить более надежный опыт."</string>
     <string name="load_posts_error_with_reason">"Ошибка при загрузке сообщений. Причина: %1$s.\nНажми, чтобы повторить попытку."</string>

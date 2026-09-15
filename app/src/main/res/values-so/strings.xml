@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Cilad ayaa dhacday markii la kala saarayay macluumaadka isticmaalaha"</string>
     <string name="no_system_webview_error">"Cilad furitaanka Nidaamka WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Cilad soo rarista sawirka Taabo si aad dib isugu daydo"</string>
+    <string name="video_error_tap_to_retry">"Cilad ciyaarista fiidyaha. Taabo si aad dib isugu daydo."</string>
     <string name="load_posts_error">"Cilad soo rarista qoraalada\nTaabo si aad dib isugu daydo"</string>
     <string name="load_posts_error_anonymous_403">"Sababtoo ah xaddidaadyada goobta, waxa ku jira lama rari karo hadda.\n        \n\nWaxaad isku dayi kartaa mar labaad wax yar ka dib ama waxaad isku qori kartaa waayo-aragnimo la isku halayn karo"</string>
     <string name="load_posts_error_with_reason">"cilad soo dejinta posts Sababta: %1$s.\nTaabo si aad dib isugu daydo."</string>

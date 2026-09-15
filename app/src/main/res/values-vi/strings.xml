@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Lỗi khi phân tích thông tin người dùng"</string>
     <string name="no_system_webview_error">"Lỗi khi mở WebView của hệ thống"</string>
     <string name="error_loading_image_tap_to_retry">"Lỗi khi tải hình ảnh. Chạm để thử lại."</string>
+    <string name="video_error_tap_to_retry">"Lỗi khi phát video. Chạm để thử lại."</string>
     <string name="load_posts_error">"Lỗi khi tải bài đăng.\nNhấn để thử lại."</string>
     <string name="load_posts_error_anonymous_403">"Do hạn chế về nền tảng, không thể tải nội dung ngay bây giờ.\n \n\nBạn có thể thử lại ngay hoặc đăng ký để có trải nghiệm đáng tin cậy hơn."</string>
     <string name="load_posts_error_with_reason">"Lỗi tải bài viết. Lý do: %1$s.\nNhấn để thử lại."</string>

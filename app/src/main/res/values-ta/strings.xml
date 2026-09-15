@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"பயனர் தகவலைக் கூறாக்கும்போது பிழை ஏற்பட்டது"</string>
     <string name="no_system_webview_error">"இயங்குதளத்தின் வலைப்பார்வையைத் திறப்பதில் பிழை"</string>
     <string name="error_loading_image_tap_to_retry">"படத்தை ஏற்றுவதில் பிழை. மறுமுயல தட்டுக."</string>
+    <string name="video_error_tap_to_retry">"வீடியோவை இயக்குவதில் பிழை. மறுமுயல தட்டுக."</string>
     <string name="load_posts_error">"இடுகைகளை ஏற்றுவதில் பிழை.
 மறுமுயல தட்டுக."</string>
     <string name="load_posts_error_anonymous_403">"இயங்குதள வரம்புகள் காரணமாக, இப்போது உள்ளடக்கத்தை ஏற்ற முடியாது.\n        \n\nநீங்கள் விரைவில் மீண்டும் முயற்சிக்கலாம் அல்லது மிகவும் நம்பகமான அனுபவத்திற்கு குழுசேரலாம்."</string>

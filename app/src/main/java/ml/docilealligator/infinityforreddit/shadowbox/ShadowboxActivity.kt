@@ -527,12 +527,27 @@ class ShadowboxActivity : BaseActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
+    override fun onResume() {
+        super.onResume()
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment is ShadowboxPageFragment) {
+                fragment.restoreMedia()
+            }
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         // Leaving the screen -- the full viewer, the comments, anywhere -- silences the pages that
-        // are not in front. The page in front pauses itself, and remembers to resume on the way
-        // back; these have nothing to come back to.
+        // are not in front: the page in front remembers to resume on the way back; these have
+        // nothing to come back to. Then every page lets go of its player, so the screen opening
+        // on top finds the decoders free; see ShadowboxPageFragment.releaseMedia.
         stopPlaybackExcept(currentPage.value ?: -1)
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment is ShadowboxPageFragment) {
+                fragment.releaseMedia()
+            }
+        }
     }
 
     override fun onDestroy() {

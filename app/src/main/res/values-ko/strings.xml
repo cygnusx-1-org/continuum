@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"사용자 정보를 파싱하는데 오류가 발생했습니다"</string>
     <string name="no_system_webview_error">"시스템의 웹뷰를 여는데 오류가 발생했습니다"</string>
     <string name="error_loading_image_tap_to_retry">"사진을 로드하는데 오류가 발생했습니다. 재시도하려면 탭하세요."</string>
+    <string name="video_error_tap_to_retry">"비디오를 재생하는데 오류가 발생했습니다. 재시도하려면 탭하세요."</string>
     <string name="load_posts_error">"글들을 불러오는데 오류가 발생했습니다.
 재시도하려면 탭하세요."</string>
     <string name="load_posts_error_anonymous_403">"플랫폼 제한으로 인해 지금은 콘텐츠를 로드할 수 없습니다.\n \n\n곧 다시 시도하거나 구독하여 더욱 안정적인 환경을 경험할 수 있습니다."</string>

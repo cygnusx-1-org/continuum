@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Kullanıcı bilgileri ayrıştırılırken hata oluştu"</string>
     <string name="no_system_webview_error">"Sistem Web Görünümü açılırken hata oluştu"</string>
     <string name="error_loading_image_tap_to_retry">"Görüntü yüklenirken hata oluştu. Tekrar denemek için tıklayın."</string>
+    <string name="video_error_tap_to_retry">"Video oynatılırken hata oluştu. Tekrar denemek için tıklayın."</string>
     <string name="load_posts_error">"Gönderiler yüklenirken hata oluştu.
 Tekrar denemek için tıklayın."</string>
     <string name="load_posts_error_anonymous_403">"Platform sınırlamaları nedeniyle içerik şu anda yüklenemiyor.\n \n\nKısa bir süre sonra tekrar deneyebilir veya daha güvenilir bir deneyim için abone olabilirsin."</string>

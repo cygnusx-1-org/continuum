@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Eroare la afișarea informației utilizatorului"</string>
     <string name="no_system_webview_error">"Eroare la deschiderea WebView-ului sistemului"</string>
     <string name="error_loading_image_tap_to_retry">"Eroare la încărcarea imaginii. Apasă pentru reîncercare."</string>
+    <string name="video_error_tap_to_retry">"Eroare la redarea videoclipului. Apasă pentru reîncercare."</string>
     <string name="load_posts_error">"Eroare la încărcarea postărilor.
 Apasă pentru reîncercare."</string>
     <string name="load_posts_error_anonymous_403">"Din cauza limitărilor platformei, conținutul nu poate fi încărcat acum.\n \n\nPoți încerca din nou în scurt timp sau te poți abona pentru o experiență mai fiabilă."</string>

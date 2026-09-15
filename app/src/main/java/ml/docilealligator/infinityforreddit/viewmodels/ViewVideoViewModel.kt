@@ -122,19 +122,27 @@ class ViewVideoViewModel(
         // something the player can use, or surfaces a failure. Publishing null silently is what
         // stranded callers on the loading indicator with no explanation.
         //
-        // Order matters. The URI has to go first: ViewVideoActivity's URI observer *shows* the
-        // loading indicator for a null URI, and its error observer hides it. Setting the error
-        // first would let that re-show win, leaving the indicator up with the error already
-        // consumed. This way the final state is correct whichever value _videoUri held before.
-        _videoUri.value = uri
+        // Order matters, twice over.
+        //
+        // The guard has to go before the URI. A null URI makes the observer's null-branch re-call
+        // loadVideoLink. That is a no-op once a fetch has been attempted, but loadFallbackVideo
+        // can publish null for a normal video that started from a non-null intent URI and so
+        // never ran loadVideoLink — the guard would be unset and the re-entry would fetch with an
+        // unsupported videoType. And that re-entry is not deferred: the StateFlow's LiveData
+        // collector runs on Main.immediate, so when the caller is a plain main-thread callback —
+        // onPlayerError is — the observer runs synchronously inside the assignment below. A guard
+        // set after it was read too late, and a video whose playback failed twice toasted "Invalid
+        // type" over the real failure. A null publish always means "nothing playable", so close
+        // the fetch cycle first.
+        //
+        // The URI has to go before the error: ViewVideoActivity's URI observer *shows* the loading
+        // indicator for a null URI, and its error observer hides it. Setting the error first would
+        // let that re-show win, leaving the indicator up with the error already consumed. This way
+        // the final state is correct whichever value _videoUri held before.
         if (uri == null) {
-            // A null URI makes the observer's null-branch re-call loadVideoLink. That is a no-op
-            // once a fetch has been attempted, but loadFallbackVideo can publish null for a normal
-            // video that started from a non-null intent URI and so never ran loadVideoLink — the
-            // guard would be unset and the re-entry would fetch with an unsupported videoType. A
-            // null publish always means "nothing playable", so close the fetch cycle here.
             videoLinkRequested = true
         }
+        _videoUri.value = uri
         _errorResId.value = if (uri == null) R.string.error_fetching_video else null
     }
 

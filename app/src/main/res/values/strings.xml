@@ -134,6 +134,7 @@
     <string name="no_system_webview_error">Error opening System\'s WebView</string>
 
     <string name="error_loading_image_tap_to_retry">Error loading the image. Tap to retry.</string>
+    <string name="video_error_tap_to_retry">Error playing the video. Tap to retry.</string>
     <string name="load_posts_error">Error loading posts.\nTap to retry.</string>
     <string name="load_posts_error_anonymous_403">Due to platform limitations, content cannot be loaded right now.
         \n\nYou can try again shortly or subscribe for a more reliable experience.</string>

@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Při parsování informací o uživateli se vyskytla chyba"</string>
     <string name="no_system_webview_error">"Chyba při otevírání systémového WebView"</string>
     <string name="error_loading_image_tap_to_retry">"Chyba při načítání obrázku. Ťukni pro opakování."</string>
+    <string name="video_error_tap_to_retry">"Chyba při přehrávání videa. Ťukni pro opakování."</string>
     <string name="load_posts_error">"Chyba při načítání příspěvků.
 Ťukni pro opakování."</string>
     <string name="load_posts_error_anonymous_403">"Kvůli omezením platformy nelze nyní načíst obsah.\n \n\nZa chvíli to můžeš zkusit znovu nebo se přihlásit k odběru pro spolehlivější zážitek."</string>

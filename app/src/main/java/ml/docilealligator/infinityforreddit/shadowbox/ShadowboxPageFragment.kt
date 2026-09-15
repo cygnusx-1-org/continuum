@@ -314,6 +314,22 @@ abstract class ShadowboxPageFragment : Fragment() {
      */
     open fun pausePlayback() {}
 
+    /**
+     * The screen is going behind another one: let go of whatever this page holds that the screen
+     * in front will want, right now.
+     *
+     * Public and called by the host from its own onPause, for every page it has, rather than
+     * left to each page's lifecycle: the pager caps the pages either side of the one in front at
+     * STARTED, so they never see onPause at all, and the full viewer opening over this screen
+     * builds its player before this screen's onStop. A prepared player holds a hardware decoder
+     * whether or not it is playing, and low-end devices have few; three pages' worth sitting
+     * underneath is what made the full viewer's own player fail to open on those.
+     */
+    open fun releaseMedia() {}
+
+    /** The screen is back in front: build back whatever [releaseMedia] let go of. */
+    open fun restoreMedia() {}
+
     /** The page's panel has been built and bound; a page can add its own controls to it here. */
     protected open fun onPanelReady(panel: ShadowboxInfoPanel) {}
 

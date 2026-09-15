@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"Došlo je do pogreške prilikom rasčlanjivanja korisničkih podataka"</string>
     <string name="no_system_webview_error">"Pogreška pri otvaranju Sistemskog WebViewa"</string>
     <string name="error_loading_image_tap_to_retry">"Pogreška pri učitavanju slike. Dodirni za ponovni pokušaj."</string>
+    <string name="video_error_tap_to_retry">"Pogreška pri reprodukciji videa. Dodirni za ponovni pokušaj."</string>
     <string name="load_posts_error">"Pogreška pri učitavanju objava.\nDodirni za ponovni pokušaj."</string>
     <string name="load_posts_error_anonymous_403">"Zbog ograničenja platforme, sadržaj se trenutno ne može učitati.\n \n\nMožete pokušati ponovo uskoro ili se pretplatiti za pouzdanije iskustvo."</string>
     <string name="load_posts_error_with_reason">"Pogreška pri učitavanju objava. Razlog: %1$s.\nDodirni za ponovni pokušaj."</string>

@@ -129,6 +129,7 @@
     <string name="parse_user_info_error">"解析用户信息错误"</string>
     <string name="no_system_webview_error">"打开系统 WebView 错误"</string>
     <string name="error_loading_image_tap_to_retry">"加载图片错误。点击以重试。"</string>
+    <string name="video_error_tap_to_retry">"播放视频错误。点击以重试。"</string>
     <string name="load_posts_error">"加载帖子错误。
 点击以重试。"</string>
     <string name="load_posts_error_anonymous_403">"由于平台限制，目前无法加载内容。\n\n\n您可以稍后重试或订阅以获得更可靠的体验。"</string>
