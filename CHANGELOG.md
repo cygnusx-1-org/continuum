@@ -7,11 +7,8 @@
 Note v8a is the 64-bit build, and should be considered the default choice.
 
 * Implemented Update all the translations #404
-
 * Selftext posts with no preview image use the first image in the post as the preview image
-
 * Sized body images in post details and comments to the width of their block
-
 * Letterboxed autoplaying GIF cards in Fixed Height in Card mode to match video cards
 
 8.3.1.3 / 2026-9-13
