@@ -2,4 +2,5 @@
 <resources>
     <item name="slidable_panel" type="id" />
     <item name="slidable_content" type="id" />
+    <item name="spoiler_mask_drawable" type="id" />
 </resources>

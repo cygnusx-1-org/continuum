@@ -117,6 +117,10 @@ public class SpoilerParserPlugin extends AbstractMarkwonPlugin {
                 spannableStringBuilder.setSpan(info.span, info.start, info.end, info.flags);
             }
             textView.setText(spannableStringBuilder);
+
+            // Reordering only fixes spans that draw with the TextPaint. Colour emoji and
+            // replacement spans ignore it, so hidden spoilers also need covering after the fact.
+            SpoilerMaskDrawable.attachTo(textView);
         }
     }
 

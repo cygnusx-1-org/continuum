@@ -56,6 +56,19 @@ public class SpoilerSpan extends ClickableSpan {
         return isShowing;
     }
 
+    /**
+     * The colour of the block drawn behind a hidden spoiler, so {@link SpoilerMaskDrawable} can
+     * repaint it over the text.
+     */
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    /**
+     * Note that painting the glyphs in the block's colour is not on its own enough to hide a
+     * spoiler: colour emoji and replacement spans do not draw with this paint's colour. They are
+     * covered afterwards by {@link SpoilerMaskDrawable}.
+     */
     @Override
     public void updateDrawState(@NonNull TextPaint ds) {
         if (isShowing) {
