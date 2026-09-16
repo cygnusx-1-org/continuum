@@ -2,6 +2,16 @@
 
 ---
 
+8.3.1.5 / 2026-9-16
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Support for more image embeds in comments #412
+* Preloaded feed card previews at their bound size to remove pop-in
+* Fixed Emojis shown in spoilered comments even when not pressed #416
+* Fixed Videos in Shadowbox Mode Failing Randomly #407
+* Fixed Tab strip jumps to last tabs after unsubscribing a middle subreddit tab #405
+
 8.3.1.4 / 2026-9-14
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
