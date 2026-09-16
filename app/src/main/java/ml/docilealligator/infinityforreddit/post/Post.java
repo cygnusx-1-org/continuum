@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
 
 /**
@@ -65,6 +66,20 @@ public class Post implements Parcelable {
     private String shortClipHost;
     @Nullable
     private String shortClipId;
+    /** An {@link ImageHostUtils.Host} name, or null when the post is not on an image host. */
+    @Nullable
+    private String imageHost;
+    @Nullable
+    private String imageHostId;
+    /**
+     * Whether {@link #gallery} holds the album's real images rather than the single placeholder tile
+     * {@code ParsePost} seeds it with.
+     *
+     * An image host names an album in its URL but says nothing about what is in it, so the card is
+     * built from Reddit's preview of the cover and the rest arrives when the page has been scraped.
+     * This is what tells a bind which of those two it is holding.
+     */
+    private boolean imageHostGalleryResolved;
     private boolean isImgur;
     private boolean isRedgifs;
     private boolean isStreamable;
@@ -254,6 +269,9 @@ public class Post implements Parcelable {
         this.streamableShortCode = postToBeCopied.streamableShortCode;
         this.shortClipHost = postToBeCopied.shortClipHost;
         this.shortClipId = postToBeCopied.shortClipId;
+        this.imageHost = postToBeCopied.imageHost;
+        this.imageHostId = postToBeCopied.imageHostId;
+        this.imageHostGalleryResolved = postToBeCopied.imageHostGalleryResolved;
         this.isImgur = postToBeCopied.isImgur;
         this.isRedgifs = postToBeCopied.isRedgifs;
         this.isStreamable = postToBeCopied.isStreamable;
@@ -324,6 +342,9 @@ public class Post implements Parcelable {
         streamableShortCode = in.readString();
         shortClipHost = in.readString();
         shortClipId = in.readString();
+        imageHost = in.readString();
+        imageHostId = in.readString();
+        imageHostGalleryResolved = in.readByte() != 0;
         isImgur = in.readByte() != 0;
         isRedgifs = in.readByte() != 0;
         isStreamable = in.readByte() != 0;
@@ -611,6 +632,69 @@ public class Post implements Parcelable {
         this.shortClipId = shortClipId;
     }
 
+    /**
+     * The {@link ImageHostUtils.Host} this post's link belongs to, by name, or null when it is not
+     * on one of those hosts.
+     *
+     * <p>Stored as a name rather than an ordinal for the same reason as
+     * {@link #getShortClipHost()}: a reordered enum must not silently re-point a parcelled post at
+     * the wrong host.
+     */
+    @Nullable
+    public ImageHostUtils.Host getImageHost() {
+        if (imageHost == null) {
+            return null;
+        }
+        try {
+            return ImageHostUtils.Host.valueOf(imageHost);
+        } catch (IllegalArgumentException e) {
+            // A host dropped from the enum after a post was cached. Renders as a link card.
+            return null;
+        }
+    }
+
+    public void setImageHost(@Nullable ImageHostUtils.Host host) {
+        this.imageHost = host == null ? null : host.name();
+    }
+
+    public boolean isImageHostAlbum() {
+        return imageHost != null;
+    }
+
+    /**
+     * The album id parsed out of the post's URL.
+     *
+     * <p>Nothing resolving an album needs it -- {@link FetchImageHostMedia} scrapes the page at
+     * {@link #getUrl()}, because neither host has an anonymous API to ask by id. It is kept because
+     * its presence is what {@code ParsePost} promoted the post on: a URL these hosts do not address
+     * an album with never becomes an image post, and having the id on hand says which album a
+     * failed scrape was for.
+     */
+    @Nullable
+    public String getImageHostId() {
+        return imageHostId;
+    }
+
+    public void setImageHostId(@Nullable String imageHostId) {
+        this.imageHostId = imageHostId;
+    }
+
+    /** See {@link #imageHostGalleryResolved}. */
+    public boolean isImageHostGalleryResolved() {
+        return imageHostGalleryResolved;
+    }
+
+    /**
+     * Replaces the placeholder tile with the album's real images, once scraped.
+     *
+     * Kept on the post rather than on the view holder because the holder is recycled: scrolling an
+     * album off screen and back would otherwise put it back to one tile and scrape again.
+     */
+    public void setResolvedImageHostGallery(ArrayList<Gallery> resolved) {
+        this.gallery = resolved;
+        this.imageHostGalleryResolved = true;
+    }
+
     public void setIsImgur(boolean isImgur) {
         this.isImgur = isImgur;
     }
@@ -687,6 +771,9 @@ public class Post implements Parcelable {
     public void demoteToLinkPost() {
         setShortClipHost(null);
         setShortClipId(null);
+        setImageHost(null);
+        setImageHostId(null);
+        imageHostGalleryResolved = false;
         setPostType(previews.isEmpty() ? NO_PREVIEW_LINK_TYPE : LINK_TYPE);
     }
 
@@ -837,6 +924,9 @@ public class Post implements Parcelable {
         dest.writeString(streamableShortCode);
         dest.writeString(shortClipHost);
         dest.writeString(shortClipId);
+        dest.writeString(imageHost);
+        dest.writeString(imageHostId);
+        dest.writeByte((byte) (imageHostGalleryResolved ? 1 : 0));
         dest.writeByte((byte) (isImgur ? 1 : 0));
         dest.writeByte((byte) (isRedgifs ? 1 : 0));
         dest.writeByte((byte) (isStreamable ? 1 : 0));
@@ -1147,9 +1237,14 @@ public class Post implements Parcelable {
             this.url = url;
             this.fallbackUrl = fallbackUrl;
             this.fileName = fileName;
+            // Anything under image/ is a still, rather than the two spellings Reddit happens to
+            // use. Reddit's `m` field only ever says image/jpg, image/png, image/gif or video/mp4,
+            // so listing the first two was enough until an image host started supplying the type --
+            // and imgchest serves .jpeg, which matched neither and fell through to video. A whole
+            // album of stills then opened in the video player.
             if (mimeType.contains("gif")) {
                 mediaType = TYPE_GIF;
-            } else if (mimeType.contains("jpg") || mimeType.contains("png")) {
+            } else if (mimeType.startsWith("image/")) {
                 mediaType = TYPE_IMAGE;
             } else {
                 mediaType = TYPE_VIDEO;

@@ -109,6 +109,7 @@
     <string name="action_reset_fab_position">Reset FAB position</string>
     <string name="action_download_all_gallery_media">Download All Gallery Media</string>
     <string name="action_download_all_imgur_album_media">Download All Imgur Album Media</string>
+    <string name="action_download_all_album_media">Download All Album Media</string>
     <string name="action_next_parent_comment">Next Top-Level Comment</string>
     <string name="action_previous_parent_comment">Previous Top-Level Comment</string>
     <string name="action_back_content_description">Back</string>
@@ -1407,6 +1408,7 @@
     <string name="download_media_failed_cannot_fetch_redgifs_url">Download failed: cannot fetch Redgifs video url</string>
     <string name="download_media_failed_cannot_fetch_streamable_url">Download failed: cannot fetch Streamable video url</string>
     <string name="download_media_failed_cannot_fetch_short_clip_url">Download failed: cannot fetch the video URL. The clip may have been deleted.</string>
+    <string name="download_media_failed_cannot_fetch_image_host_url">Download failed: cannot fetch the image URL. The album may have been deleted.</string>
     <string name="download_media_failed_invalid_argument">Invalid argument</string>
     <string name="download_all_gallery_media_notification_title">All Gallery Media</string>
     <string name="download_all_imgur_album_media_notification_title">All Imgur Album Media</string>

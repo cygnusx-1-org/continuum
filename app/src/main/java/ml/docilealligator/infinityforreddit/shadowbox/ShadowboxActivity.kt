@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.github.piasy.biv.BigImageViewer
 import com.github.piasy.biv.loader.glide.GlideImageLoader
+import ml.docilealligator.infinityforreddit.ImageOkHttpClient
 import ml.docilealligator.infinityforreddit.Infinity
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
@@ -154,7 +155,9 @@ class ShadowboxActivity : BaseActivity() {
         setUpWindow()
 
         // Image pages inflate a BigImageView, which takes the loader installed here.
-        BigImageViewer.initialize(GlideImageLoader.with(applicationContext))
+        BigImageViewer.initialize(
+            GlideImageLoader.with(applicationContext, ImageOkHttpClient.get(applicationContext))
+        )
 
         binding = ActivityShadowboxBinding.inflate(layoutInflater)
         setContentView(binding.root)

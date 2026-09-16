@@ -102,6 +102,8 @@ import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent;
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost;
 import ml.docilealligator.infinityforreddit.post.Post;
+import ml.docilealligator.infinityforreddit.resume.PostDetailResumeAnchor;
+import ml.docilealligator.infinityforreddit.resume.ResumeGalleryPage;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.thing.SortType;
@@ -134,6 +136,31 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     public static final String EXTRA_RESUME_COMMENT_POSITION = "ERCP";
     public static final String EXTRA_RESUME_COMMENT_OFFSET = "ERCO";
     public static final String EXTRA_RESUME_COLLAPSED = "ERCC";
+    /**
+     * Which image of a gallery post was showing when the app was last put down.
+     *
+     * Part of this screen's resume state and nothing more. The page is deliberately not remembered
+     * against the post itself: coming back to the screen the user left is the feature, and a post
+     * that reopened on image four every time it was seen again, on any screen, for the rest of the
+     * day, is a different and unwanted one.
+     *
+     * It travels here rather than on the post because this screen does not come back with the post
+     * it was given: {@code ViewPostDetailActivity.resumeLaunchExtras} strips the Parcelable and
+     * relaunches by id -- a marshalled Parcel must never be written to disk -- so the post is
+     * refetched, and a refetched one is on image zero like any other.
+     */
+    public static final String EXTRA_RESUME_GALLERY_PAGE = ResumeGalleryPage.KEY_POST_DETAIL;
+    /**
+     * Set when the user left this screen above the comments -- reading the post itself.
+     *
+     * The rest of the snapshot says where they were as a comment plus an offset, which cannot
+     * express the top of the thread at all: the row up there is the post, not a comment. Forging
+     * the first comment for it reopened the screen with the post scrolled off above, which is the
+     * one place a reader is most likely to leave a thread from. When this is set,
+     * {@link #EXTRA_RESUME_COMMENT_POSITION} is an absolute row in the concatenated list rather
+     * than an index into the comments.
+     */
+    public static final String EXTRA_RESUME_ABOVE_COMMENTS = "ERAC";
     private static final int EDIT_POST_REQUEST_CODE = 2;
     private static final String SCROLL_POSITION_STATE = "SPS";
 
@@ -154,6 +181,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     @Inject
     @Named("short_clip")
     OkHttpClient mShortClipOkHttpClient;
+    @Inject
+    @Named("image_host")
+    OkHttpClient mImageHostOkHttpClient;
     @Inject
     RedditDataRoomDatabase mRedditDataRoomDatabase;
     @Inject
@@ -231,6 +261,36 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private String resumeCommentFullname;
     private int resumeCommentPosition = -1;
     private int resumeCommentOffset;
+    /** See {@link #EXTRA_RESUME_ABOVE_COMMENTS}. */
+    private boolean resumeAboveComments;
+    /** See {@link #EXTRA_RESUME_GALLERY_PAGE}. Negative when the snapshot recorded none. */
+    private int resumeGalleryPage = -1;
+    /**
+     * Which image of the gallery is showing.
+     *
+     * Held here rather than read off the post at capture time, because the post is not stable: the
+     * data-state observer replaces it outright on any update -- a vote, a save, a refresh -- with a
+     * freshly parsed one whose page index is zero. The swipe's value lived on the object that was
+     * thrown away, so the snapshot recorded zero however recently the user had swiped.
+     */
+    private int currentGalleryPage;
+    /**
+     * Whether {@link #currentGalleryPage} has taken its starting value from the post yet.
+     *
+     * Only the first post to arrive is adopted from. Every later one is a replacement carrying a
+     * zero, and adopting that would undo a swipe the user had just made.
+     */
+    private boolean galleryPageAdopted;
+    /**
+     * Whether the resumed thread has been shown yet.
+     *
+     * The reveal waits on the jump landing and on nothing else. It used to wait on the header
+     * picture as well, through a Glide callback on the gallery tile -- and that callback only ever
+     * fires when a tile is (re)bound, so once the carousel stopped rebinding itself on every update
+     * there was nothing left to fire it. The screen then stayed blank until a backstop, which is far
+     * worse than the one-frame pop-in the wait existed to remove.
+     */
+    private boolean resumeRevealed;
     @Nullable
     private ArrayList<String> resumeCollapsed;
     private boolean resumeScrollPending;
@@ -240,8 +300,15 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
      * that stays in the set because collapsing it does not take -- cannot spin forever.
      */
     private static final int MAX_RESUME_COLLAPSE_PASSES = 200;
-    /** How long the comment list may stay hidden waiting for a thread it has to refetch first. */
-    private static final long RESUME_COMMENT_REVEAL_TIMEOUT_MS = 8000L;
+    /**
+     * How long the comment list may stay hidden waiting for a thread it has to refetch first.
+     *
+     * Short, because this is time the user spends looking at a toolbar and nothing else: the post
+     * itself is in this list, so hiding it to spare them a scroll flash hides the thing they opened.
+     * A thread slower than this shows the post at the top and jumps when it lands, which is a blink
+     * rather than a wait.
+     */
+    private static final long RESUME_COMMENT_REVEAL_TIMEOUT_MS = 1500L;
     /** Least time between two snapshot writes while the user is reading. */
     private static final long RESUME_CAPTURE_THROTTLE_MS = 5000L;
     private long lastResumeCaptureAt;
@@ -325,17 +392,38 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             viewPostDetailFragmentId = System.currentTimeMillis();
             // Only on a fresh creation: across a rotation the fragment's own saved state holds a
             // newer position than the arguments do.
+            // Either shape of anchor: a comment, or the flag that says the user was above them.
             if (getArguments() != null
-                    && getArguments().containsKey(EXTRA_RESUME_COMMENT_FULLNAME)) {
+                    && (getArguments().containsKey(EXTRA_RESUME_COMMENT_FULLNAME)
+                    || getArguments().containsKey(EXTRA_RESUME_ABOVE_COMMENTS)
+                    || getArguments().containsKey(EXTRA_RESUME_GALLERY_PAGE))) {
                 resumeCommentFullname = getArguments().getString(EXTRA_RESUME_COMMENT_FULLNAME);
                 resumeCommentPosition = getArguments().getInt(EXTRA_RESUME_COMMENT_POSITION, -1);
                 resumeCommentOffset = getArguments().getInt(EXTRA_RESUME_COMMENT_OFFSET, 0);
+                resumeAboveComments = getArguments().getBoolean(EXTRA_RESUME_ABOVE_COMMENTS, false);
+                resumeGalleryPage = getArguments().getInt(EXTRA_RESUME_GALLERY_PAGE, -1);
+                if (resumeGalleryPage >= 0) {
+                    // Taken now rather than when the post arrives. The header is bound from the
+                    // uiState observer, which fires before the dataState one that adopts the page
+                    // off the post -- so a page adopted only there binds image one, and the user
+                    // watches it shift to the right image a frame later.
+                    currentGalleryPage = resumeGalleryPage;
+                    galleryPageAdopted = true;
+                }
                 resumeCollapsed = getArguments().getStringArrayList(EXTRA_RESUME_COLLAPSED);
                 resumeScrollPending = true;
                 // Hidden until the thread has been fetched and put back: it arrives scrolled to the
                 // top, and showing that before jumping away from it is the flash this removes.
-                ScrollAnchor.hideUntilRestored(
-                        commentsRecyclerView(), RESUME_COMMENT_REVEAL_TIMEOUT_MS);
+                //
+                // Only when there is a thread position to jump to. A snapshot that recorded nothing
+                // but the gallery page has nothing to hide for -- the page is applied when the
+                // header binds -- and hiding anyway costs the user a blank screen for no gain.
+                if (resumeCommentFullname != null || resumeAboveComments) {
+                    ScrollAnchor.hideUntilRestored(commentsRecyclerView(),
+                            RESUME_COMMENT_REVEAL_TIMEOUT_MS, this::revealResumedThread);
+                } else {
+                    resumeRevealed = true;
+                }
             }
         } else {
             commentScrollPosition = savedInstanceState.getInt(SCROLL_POSITION_STATE);
@@ -554,6 +642,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         mPostAdapter = new PostDetailRecyclerViewAdapterNew(mActivity,
                 this, mExecutor, mCustomThemeWrapper, mOauthRetrofit, mRetrofit,
                 mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                mImageHostOkHttpClient,
                 mRedditDataRoomDatabase, mGlide,
                 mVideoMuteManager, mSeparatePostAndComments, mActivity.accessToken,
                 mActivity.accountName, mPost, locale, mSharedPreferences, mCurrentAccountSharedPreferences,
@@ -662,6 +751,10 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         viewPostDetailFragmentViewModel.getDataState().observe(getViewLifecycleOwner(), dataState -> {
             if (dataState.getPost() != null) {
                 mPost = dataState.getPost();
+                // Before the adapter is handed it. A resumed screen is relaunched by post id and
+                // refetched, so the post reaches this screen here rather than through the render
+                // path below -- and a post that arrives here is the only one a resume ever sees.
+                adoptGalleryPage(dataState.getPost());
                 mActivity.displayToolbarSortAndTitle(this);
                 if (mPostAdapter != null) {
                     mPostAdapter.updatePost(dataState.getPost());
@@ -753,6 +846,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 }
 
                 mPost = postToRender;
+                // Onto the post the fetch produced, before the adapter is handed it: the page came
+                // from the resume bundle because the post itself could not carry it here.
+                adoptGalleryPage(postToRender);
                 // Handed to the adapter directly rather than left to the dataState observer: that
                 // observer is bound to the *view* lifecycle, which is not STARTED yet while bindView
                 // runs, so a recovery landing in this window would be held back until onStart and the
@@ -960,6 +1056,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
         resumeScrollPending = false;
+        if (resumeAboveComments) {
+            // An absolute row, so it is applied without mapping through the comment adapter -- the
+            // row it names is the post, which that adapter does not hold.
+            applyResumeScroll(commentsRecyclerView(), resumeCommentPosition, resumeCommentOffset);
+            return;
+        }
         int target = -1;
         if (resumeCommentFullname != null && !resumeCommentFullname.isEmpty()) {
             for (int i = 0; i < current.size(); i++) {
@@ -977,13 +1079,88 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         }
         RecyclerView recyclerView = commentsRecyclerView();
         if (target < 0 || target >= current.size() || mConcatAdapter == null) {
-            recyclerView.setVisibility(View.VISIBLE);
+            revealResumedThread();
             return;
         }
-        ScrollAnchor.applyHidden(
-                recyclerView,
+        applyResumeScroll(recyclerView,
                 ConcatAdapterKt.getAbsolutePosition(mConcatAdapter, mCommentsAdapter, target),
                 resumeCommentOffset);
+    }
+
+    /**
+     * Puts the recorded gallery page onto a freshly fetched post, once, so the card binds on the
+     * image the user was looking at rather than on image one.
+     */
+    private void adoptGalleryPage(@Nullable Post post) {
+        if (post == null) {
+            return;
+        }
+        if (resumeGalleryPage >= 0) {
+            // A resume outranks whatever the post arrived carrying: the snapshot is the record of
+            // where the user actually was, and a refetched post is always on image zero.
+            post.setGalleryPageIndex(resumeGalleryPage);
+            currentGalleryPage = resumeGalleryPage;
+            galleryPageAdopted = true;
+            resumeGalleryPage = -1;
+            return;
+        }
+        if (!galleryPageAdopted) {
+            // Opened from a feed card that was on image five: the post carries that, and this
+            // screen should open there too.
+            currentGalleryPage = Math.max(0, post.getGalleryPageIndex());
+            galleryPageAdopted = true;
+        }
+    }
+
+    /**
+     * The gallery settled on [page], reported by the adapter that owns the carousel.
+     *
+     * Kept on the fragment as well as on the post: the post is replaced on every update, and this
+     * is what the resume snapshot reads.
+     */
+    /** The image the carousel should be on. See {@link #currentGalleryPage}. */
+    public int getCurrentGalleryPage() {
+        return currentGalleryPage;
+    }
+
+    public void onGalleryPageSettled(int page) {
+        if (page < 0) {
+            return;
+        }
+        currentGalleryPage = page;
+        if (mPost != null) {
+            mPost.setGalleryPageIndex(page);
+        }
+    }
+
+    /**
+     * Show the thread. Safe to call repeatedly, and it really does show it every time.
+     *
+     * It used to return early once it had revealed, which made it useless as a way back from the
+     * second hide: the restore hides the list again to jump it into place, and if the reveal had
+     * already happened by then this was the only thing that would have undone it. The list stayed
+     * invisible with nothing left to show it, which reads as a screen that will not respond until
+     * something unrelated redraws it.
+     */
+    private void revealResumedThread() {
+        resumeRevealed = true;
+        commentsRecyclerView().setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Jump the thread to its recorded place, hiding it for the jump only while it has never been
+     * shown -- once the user is looking at it, taking it away to move it is worse than the move.
+     */
+    private void applyResumeScroll(@NonNull RecyclerView rv, int position, int offset) {
+        if (position == ScrollAnchor.NO_POSITION) {
+            revealResumedThread();
+            return;
+        }
+        if (resumeRevealed) {
+            ScrollAnchor.scrollTo(rv, position, offset);
+            return;
+        }
+        ScrollAnchor.applyHiddenAwaitingCaller(rv, position, offset, this::revealResumedThread);
     }
 
     /**
@@ -992,30 +1169,59 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
      * to describe.
      */
     public boolean captureResumeState(@NonNull Bundle out) {
-        final ArrayList<Comment> current = comments;
-        if (current == null || current.isEmpty() || mConcatAdapter == null || binding == null) {
+        if (binding == null) {
             return false;
+        }
+        // Recorded first, and independently of the thread anchor below: which image the user was on
+        // is known whether or not the thread can say where they were in it, and every early return
+        // below used to take the page with it.
+        putGalleryPage(out);
+        final ArrayList<Comment> current = comments;
+        if (current == null || current.isEmpty() || mConcatAdapter == null) {
+            return !out.isEmpty();
         }
         ScrollAnchor.Anchor anchor = ScrollAnchor.captureTopmost(commentsRecyclerView());
         if (!anchor.isValid()) {
-            return false;
+            return !out.isEmpty();
         }
         int local = ConcatAdapterKt.getLocalPosition(mConcatAdapter, mCommentsAdapter, anchor.position);
-        if (local < 0 || local >= current.size()) {
-            // The top of the screen is the post itself, not a comment. There is a place here worth
-            // recording all the same, so anchor on the first comment at its natural offset.
-            local = 0;
-            anchor = new ScrollAnchor.Anchor(anchor.position, 0, anchor.position, 0);
+        PostDetailResumeAnchor.Anchor recorded = PostDetailResumeAnchor.forTopRow(
+                local, current.size(), anchor.position, anchor.offset);
+        if (recorded.aboveComments) {
+            // The top of the screen is the post itself, so there is no comment to anchor to. See
+            // PostDetailResumeAnchor for why this is not written as the first comment.
+            out.putBoolean(EXTRA_RESUME_ABOVE_COMMENTS, true);
+            out.putInt(EXTRA_RESUME_COMMENT_POSITION, recorded.position);
+            out.putInt(EXTRA_RESUME_COMMENT_OFFSET, recorded.offset);
+            putCollapsedThreads(out, current);
+            return true;
         }
-        Comment anchorComment = current.get(local);
+        Comment anchorComment = current.get(recorded.commentIndex);
         if (anchorComment == null) {
-            return false;
+            return !out.isEmpty();
         }
         out.putString(EXTRA_RESUME_COMMENT_FULLNAME, anchorComment.getFullName());
-        out.putInt(EXTRA_RESUME_COMMENT_POSITION, local);
-        out.putInt(EXTRA_RESUME_COMMENT_OFFSET, anchor.offset);
-        // hasReply as well as !isExpanded: a comment with no children is never expanded, so the
-        // flag on its own would call every leaf in the thread collapsed.
+        out.putInt(EXTRA_RESUME_COMMENT_POSITION, recorded.commentIndex);
+        out.putInt(EXTRA_RESUME_COMMENT_OFFSET, recorded.offset);
+        putCollapsedThreads(out, current);
+        return true;
+    }
+
+    /** The gallery page, when this post has a gallery and is not on its first image. */
+    private void putGalleryPage(@NonNull Bundle out) {
+        if (currentGalleryPage > 0) {
+            out.putInt(EXTRA_RESUME_GALLERY_PAGE, currentGalleryPage);
+        }
+    }
+
+    /**
+     * Records which threads the user has collapsed, which is worth keeping wherever in the thread
+     * they were -- including above it, where there is no comment anchor to hang it off.
+     *
+     * <p>hasReply as well as !isExpanded: a comment with no children is never expanded, so the flag
+     * on its own would call every leaf in the thread collapsed.
+     */
+    private void putCollapsedThreads(@NonNull Bundle out, @NonNull ArrayList<Comment> current) {
         ArrayList<String> collapsed = new ArrayList<>();
         for (Comment comment : current) {
             if (comment != null && comment.hasReply() && !comment.isExpanded()) {
@@ -1025,7 +1231,6 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         if (!collapsed.isEmpty()) {
             out.putStringArrayList(EXTRA_RESUME_COLLAPSED, collapsed);
         }
-        return true;
     }
 
     private void restoreCommentScrollPosition() {

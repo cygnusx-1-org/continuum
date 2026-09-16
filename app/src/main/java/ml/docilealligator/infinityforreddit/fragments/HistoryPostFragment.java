@@ -110,6 +110,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
     @Named("short_clip")
     OkHttpClient mShortClipOkHttpClient;
     @Inject
+    @Named("image_host")
+    OkHttpClient mImageHostOkHttpClient;
+    @Inject
     @Named("current_account")
     SharedPreferences mCurrentAccountSharedPreferences;
     @Inject
@@ -255,6 +258,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
 
         mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                 mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                 mCustomThemeWrapper, locale,
                 mActivity.accessToken, mActivity.accountName, PostType.READ_POSTS, postLayout, true,
                 mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences,
@@ -316,7 +320,8 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
 
         if (resumePending) {
             restoreAnchorWhenLoaded(resumeState.anchorFullname, resumeState.anchorPosition,
-                    resumeState.anchorOffset, RESUME_REVEAL_TIMEOUT_MS);
+                    resumeState.anchorOffset, RESUME_REVEAL_TIMEOUT_MS,
+                    resumeState.galleryPages);
             resumePending = false;
         } else if (recyclerViewPosition > 0) {
             binding.recyclerViewHistoryPostFragment.scrollToPosition(recyclerViewPosition);

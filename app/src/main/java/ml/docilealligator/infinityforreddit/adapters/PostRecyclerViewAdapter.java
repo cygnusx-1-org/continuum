@@ -87,6 +87,7 @@ import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.FilteredPostsActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
+import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewSubredditDetailActivity;
@@ -126,6 +127,7 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostWithPreviewBindi
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
+import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
 import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
@@ -138,6 +140,7 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
@@ -207,6 +210,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private Retrofit mOauthRetrofit;
     private Provider<StreamableAPI> mStreamableApiProvider;
     private OkHttpClient mShortClipOkHttpClient;
+    private OkHttpClient mImageHostOkHttpClient;
     @Nullable
     private String mAccessToken;
     private String mAccountName;
@@ -319,6 +323,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 Executor executor, Retrofit oauthRetrofit,
                                 Retrofit redgifsRetrofit, Provider<StreamableAPI> streamableApiProvider,
                                 OkHttpClient shortClipOkHttpClient,
+                                OkHttpClient imageHostOkHttpClient,
                                 CustomThemeWrapper customThemeWrapper, Locale locale,
                                 @Nullable String accessToken, @NonNull String accountName, int postType,
                                 int postLayout, boolean displaySubredditName,
@@ -336,6 +341,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mOauthRetrofit = oauthRetrofit;
             mStreamableApiProvider = streamableApiProvider;
             mShortClipOkHttpClient = shortClipOkHttpClient;
+            mImageHostOkHttpClient = imageHostOkHttpClient;
             mAccessToken = accessToken;
             mAccountName = accountName;
             mPostType = postType;
@@ -1294,16 +1300,29 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         int galleryPage = Math.max(0, Math.min(post.getGalleryPageIndex(), gallerySize - 1));
                         ((PostBaseGalleryTypeViewHolder) holder).imageIndexTextView.setText(
                                 mActivity.getString(R.string.image_index_in_gallery, galleryPage + 1, gallerySize));
-                        // Only when it is not already there. Every rebind runs this -- a vote, a
-                        // save, a post marked read all come through the one onBindViewHolder -- and
-                        // an unconditional scroll would drag the gallery back under a finger that
-                        // had just moved it.
                         RecyclerView galleryList = ((PostBaseGalleryTypeViewHolder) holder).galleryRecyclerView;
                         RecyclerView.LayoutManager galleryLayout = galleryList.getLayoutManager();
-                        if (!(galleryLayout instanceof LinearLayoutManagerBugFixed)
-                                || ((LinearLayoutManagerBugFixed) galleryLayout)
-                                        .findFirstVisibleItemPosition() != galleryPage) {
-                            galleryList.scrollToPosition(galleryPage);
+                        // One rule for this and the post-detail header, in GalleryPagePlacement:
+                        // they draw the same carousel from the same recorded page, and while the
+                        // condition lived inline in both binds it drifted apart.
+                        boolean sameImages = ((PostBaseGalleryTypeViewHolder) holder).adapter
+                                .showsImages(post.getGallery());
+                        boolean atRightPage = galleryLayout instanceof LinearLayoutManagerBugFixed
+                                && ((LinearLayoutManagerBugFixed) galleryLayout)
+                                        .findFirstVisibleItemPosition() == galleryPage;
+                        if (GalleryPagePlacement.shouldApplyPage(
+                                !sameImages, atRightPage,
+                                ((PostBaseGalleryTypeViewHolder) holder).galleryTouchedByUser,
+                                galleryList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE)) {
+                            if (galleryLayout instanceof LinearLayoutManagerBugFixed) {
+                                // Offset zero, so the tile lands flush at the leading edge rather
+                                // than merely visible and left for PagerSnapHelper to settle --
+                                // that settle is a card that shows one image and shifts to another.
+                                ((LinearLayoutManagerBugFixed) galleryLayout)
+                                        .scrollToPositionWithOffset(galleryPage, 0);
+                            } else {
+                                galleryList.scrollToPosition(galleryPage);
+                            }
                         }
                         Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
                         if (preview != null) {
@@ -1322,6 +1341,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(blurGallery);
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setAutoplayGif(shouldAutoplayGalleryGif(post, blurGallery));
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
+                        resolveImageHostGallery((PostBaseGalleryTypeViewHolder) holder, post);
                     }
                     applyTypeColor(((PostBaseGalleryTypeViewHolder) holder).typeTextView, post.getPostType());
 
@@ -1784,6 +1804,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(blurGallery);
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setAutoplayGif(shouldAutoplayGalleryGif(post, blurGallery));
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
+                    resolveImageHostGallery((PostGalleryBaseGalleryTypeViewHolder) holder, post);
                 }
             }
         }
@@ -1903,6 +1924,114 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             default:
                 return R.drawable.ic_link_day_night_24dp;
         }
+    }
+
+    /**
+     * Fills a seeded image-host album in with its real images, once the album page has been read.
+     *
+     * The card is already a gallery card showing the cover Reddit previewed, so this only ever adds
+     * tiles: nothing blanks, and the index badge goes from 1/1 to 1/N in place. Resolved albums are
+     * cached, so scrolling back to a card, or opening the post, costs nothing and shows the full
+     * count in the first frame.
+     *
+     * A scrape that fails leaves the cover tile, which is a card that still shows the post and still
+     * opens the album on tap -- the same outcome the row would have had without any of this.
+     */
+    @SuppressWarnings("ReferenceEquality") // Holder identity, the same check the clip resolver makes.
+    private void resolveImageHostGallery(PostBaseGalleryTypeViewHolder holder, Post post) {
+        if (holder.fetchAlbumCancellable != null) {
+            holder.fetchAlbumCancellable.cancel();
+            holder.fetchAlbumCancellable = null;
+        }
+        ImageHostUtils.Host imageHost = post.getImageHost();
+        String pageUrl = post.getUrl();
+        if (post.isImageHostGalleryResolved() || imageHost == null || pageUrl == null) {
+            return;
+        }
+
+        FetchImageHostMedia.Cancellable cancellable = new FetchImageHostMedia.Cancellable();
+        holder.fetchAlbumCancellable = cancellable;
+        FetchImageHostMedia.fetchAlbumInRecyclerViewAdapter(mExecutor, new Handler(),
+                mImageHostOkHttpClient, imageHost, pageUrl, cancellable,
+                media -> {
+                    post.setResolvedImageHostGallery(FetchImageHostMedia.toGallery(
+                            media, post.getSubredditName(), post.getId()));
+                    // Only when this holder is still the one that asked: a fling rebinds it to
+                    // another post while the page is still being read.
+                    if (holder.fetchAlbumCancellable == cancellable) {
+                        holder.fetchAlbumCancellable = null;
+                        holder.adapter.setGalleryImages(post.getGallery());
+                        // The page the user is on, not page one. The seeded card held a single
+                        // tile, so a resume that reopened on image nine put the carousel back at
+                        // the cover the moment the album arrived and overwrote nine with zero.
+                        int gallerySize = post.getGallery().size();
+                        int galleryPage = Math.max(0, Math.min(post.getGalleryPageIndex(), gallerySize - 1));
+                        holder.imageIndexTextView.setText(mActivity.getString(
+                                R.string.image_index_in_gallery, galleryPage + 1, gallerySize));
+                        // Not under a finger: the album landing while the user is already swiping
+                        // the cover must not pull the carousel back.
+                        if (galleryPage > 0
+                                && holder.galleryRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
+                            holder.galleryRecyclerView.scrollToPosition(galleryPage);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * The same fill-in for the Gallery post layout, whose rows are a separate holder.
+     *
+     * Without it an image-host album in that layout keeps the single cover tile it was seeded with
+     * for good -- nothing else ever reads the page -- so the card reads 1/1 and its carousel has
+     * nothing to swipe to. Shorter than the card version because this layout's badge is a fixed
+     * "1 of N" and it restores no page, so there is only the tile list to put back.
+     */
+    @SuppressWarnings("ReferenceEquality") // Holder identity, the same check the card resolver makes.
+    private void resolveImageHostGallery(PostGalleryBaseGalleryTypeViewHolder holder, Post post) {
+        if (holder.fetchAlbumCancellable != null) {
+            holder.fetchAlbumCancellable.cancel();
+            holder.fetchAlbumCancellable = null;
+        }
+        ImageHostUtils.Host imageHost = post.getImageHost();
+        String pageUrl = post.getUrl();
+        if (post.isImageHostGalleryResolved() || imageHost == null || pageUrl == null) {
+            return;
+        }
+
+        FetchImageHostMedia.Cancellable cancellable = new FetchImageHostMedia.Cancellable();
+        holder.fetchAlbumCancellable = cancellable;
+        FetchImageHostMedia.fetchAlbumInRecyclerViewAdapter(mExecutor, new Handler(),
+                mImageHostOkHttpClient, imageHost, pageUrl, cancellable,
+                media -> {
+                    post.setResolvedImageHostGallery(FetchImageHostMedia.toGallery(
+                            media, post.getSubredditName(), post.getId()));
+                    // Only when this holder is still the one that asked: a fling rebinds it to
+                    // another post while the page is still being read.
+                    if (holder.fetchAlbumCancellable == cancellable) {
+                        holder.fetchAlbumCancellable = null;
+                        holder.adapter.setGalleryImages(post.getGallery());
+                        holder.imageIndexTextView.setText(mActivity.getString(
+                                R.string.image_index_in_gallery, 1, post.getGallery().size()));
+                    }
+                });
+    }
+
+    /**
+     * Reads {@code post}'s album page ahead of the row that will draw it, for the preloader warming
+     * the rows the feed is about to reach.
+     *
+     * An album is seeded with one tile until its page has been read, and a one-tile carousel cannot
+     * be swiped and reads 1/1. Resolving on bind means every card wears that for the length of a
+     * page load; resolving ahead of the viewport means the card is a real carousel in its first
+     * frame -- and so is the post opened from it, which shares the cache.
+     */
+    public void prefetchImageHostAlbum(Post post) {
+        ImageHostUtils.Host imageHost = post.getImageHost();
+        String pageUrl = post.getUrl();
+        if (imageHost == null || pageUrl == null || post.isImageHostGalleryResolved()) {
+            return;
+        }
+        FetchImageHostMedia.prefetch(mImageHostOkHttpClient, imageHost, pageUrl);
     }
 
     private int getMaxPreviewHeight() {
@@ -2221,6 +2350,53 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
     }
 
+    /**
+     * The request a with-preview card draws its picture with, sized to the box that card will
+     * measure to. One builder for the row's own load and for the preload that warms it; Glide keys
+     * its memory cache on url, size and transformation, so anything that differs between the two
+     * costs a second decode and leaves the pop-in in place.
+     */
+    private RequestBuilder<Drawable> cardPreviewRequest(Post.Preview preview, boolean blurImage) {
+        int width = cardPreviewWidthPx();
+        int height = PostCardPreviewStyle.previewHeightPx(preview, mFixedHeightPreviewInCard,
+                getMaxPreviewHeight(), width);
+        RequestBuilder<Drawable> builder = mGlide.load(preview.getPreviewUrl());
+        if (blurImage) {
+            builder = builder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)));
+        } else {
+            builder = builder.centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy);
+        }
+        // Only when both are known: override(0, 0) is not a size, and Glide would rather wait for
+        // the view than be told that.
+        return width > 0 && height > 0 ? builder.override(width, height) : builder;
+    }
+
+    /**
+     * Width in pixels of the image a with-preview card draws.
+     *
+     * {@code itemWidth} is the column in dp, which is the whole card in the card-1 layout; cards 2
+     * and 3 inset theirs by 16dp on each side. Zero until the feed has been laid out once, which is
+     * the signal to leave the size to the view.
+     */
+    private int cardPreviewWidthPx() {
+        if (itemWidth <= 0) {
+            return 0;
+        }
+        int insetDp = (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2
+                || mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3) ? 32 : 0;
+        return Math.max(0, Math.round((itemWidth - insetDp) * mScale));
+    }
+
+    /**
+     * Whether {@code post}'s card blurs its preview, which is part of the request's cache key.
+     */
+    private boolean shouldBlurPreview(Post post) {
+        return (post.isNSFW() && mNeedBlurNsfw
+                && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())
+                && !(post.getPostType() == Post.GIF_TYPE && mAutoplay && mAutoplayNsfwVideos))
+                || (post.isSpoiler() && mNeedBlurSpoiler);
+    }
+
     private int getTypeColor(int postType) {
         switch (postType) {
             case Post.VIDEO_TYPE:
@@ -2288,7 +2464,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 ((PostWithPreviewTypeViewHolder) holder).imageView.setBackground(null);
             }
             if (preview != null) {
-                boolean blurImage = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()) && !(post.getPostType() == Post.GIF_TYPE && mAutoplay && mAutoplayNsfwVideos)) || (post.isSpoiler() && mNeedBlurSpoiler);
+                boolean blurImage = shouldBlurPreview(post);
                 // The still, always -- a gif card starts on its preview even with autoplay on, and
                 // only swaps to the animation once it is the card being autoplayed. See
                 // updateAnimatedGifs. The flag has to follow, because this runs on an in-place
@@ -2296,13 +2472,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 // recycled: leaving it set would have setGifAnimating believe the card was already
                 // animating and decline to swap the animation back in.
                 ((PostWithPreviewTypeViewHolder) holder).animatingGif = false;
-                RequestBuilder<Drawable> imageRequestBuilder = mGlide.load(preview.getPreviewUrl()).listener(((PostWithPreviewTypeViewHolder) holder).glideRequestListener);
-                if (blurImage) {
-                    imageRequestBuilder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)))
-                            .into(((PostWithPreviewTypeViewHolder) holder).imageView);
-                } else {
-                    imageRequestBuilder.centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(((PostWithPreviewTypeViewHolder) holder).imageView);
-                }
+                // Sized through cardPreviewRequest rather than by the view, so that the preloader
+                // warming this row ahead of the scroll asks Glide for the same box and the bitmap
+                // it decoded is the one this load finds in the memory cache.
+                RequestBuilder<Drawable> imageRequestBuilder =
+                        cardPreviewRequest(preview, blurImage)
+                                .listener(((PostWithPreviewTypeViewHolder) holder).glideRequestListener);
+                imageRequestBuilder.into(((PostWithPreviewTypeViewHolder) holder).imageView);
                 if (post.getPostType() == Post.GIF_TYPE) {
                     scheduleGifAutoplayUpdate();
                 }
@@ -2435,23 +2611,87 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return post.getPreviews() != null && !post.getPreviews().isEmpty();
     }
 
+
     /**
-     * The request the compact row for {@code post} will make for its thumbnail, for warming it before
-     * the row binds. Null when the post is not drawn as a compact row, or its row loads no thumbnail
-     * -- the same decisions {@link #getItemViewType} and the bind make, so nothing is fetched that the
-     * row would not fetch itself. Main thread only: it reads the adapter's settings as they stand.
+     * The request and box that warming [post]'s row would need, or null when that row draws no
+     * picture this preloader can get ahead of.
+     *
+     * Covers both families, because the pop-in is the same on either: a compact row's square
+     * thumbnail, and a card's full-width preview. Everything comes from the builders the rows
+     * themselves use, which is what makes the warmed bitmap the one they find.
      */
     @Nullable
-    public RequestBuilder<Drawable> compactThumbnailPreloadRequest(Post post) {
+    public PreloadRequest previewPreloadRequest(Post post) {
         int viewType = viewTypeFor(post);
-        if (viewType != VIEW_TYPE_POST_COMPACT && viewType != VIEW_TYPE_POST_COMPACT_2
-                && viewType != VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
+        if (viewType == VIEW_TYPE_POST_COMPACT || viewType == VIEW_TYPE_POST_COMPACT_2
+                || viewType == VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
+            if (!showsCompactThumbnailBox(post) || !postHasPreviews(post)) {
+                return null;
+            }
+            RequestBuilder<Drawable> request = compactThumbnailRequest(post);
+            return request == null ? null
+                    : new PreloadRequest(request, mCompactThumbnailBoxSizePx, mCompactThumbnailBoxSizePx);
+        }
+
+        if (viewType != VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE
+                && viewType != VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE
+                && viewType != VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE) {
             return null;
         }
-        if (!showsCompactThumbnailBox(post) || !postHasPreviews(post)) {
+        // A blurred gif card draws the no-preview icon instead of its picture, so there is nothing
+        // to warm; the same exclusion the bind makes.
+        if (post.getPostType() == Post.GIF_TYPE && shouldBlurPreview(post)
+                && !(mAutoplay && mAutoplayNsfwVideos && post.isNSFW())) {
             return null;
         }
-        return compactThumbnailRequest(post);
+        // The same preview the card picks, so the url matches too.
+        Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
+        if (preview == null) {
+            return null;
+        }
+        int width = cardPreviewWidthPx();
+        int height = PostCardPreviewStyle.previewHeightPx(preview, mFixedHeightPreviewInCard,
+                getMaxPreviewHeight(), width);
+        if (width <= 0 || height <= 0) {
+            // The feed has not been laid out yet, so the row would not decode to a known box
+            // either and a preload could only miss.
+            return null;
+        }
+        return new PreloadRequest(cardPreviewRequest(preview, shouldBlurPreview(post)), width, height);
+    }
+
+    /** A warmable image: the row's own request, and the box the row will decode it to. */
+    public static final class PreloadRequest {
+        public final RequestBuilder<Drawable> request;
+        public final int width;
+        public final int height;
+
+        PreloadRequest(RequestBuilder<Drawable> request, int width, int height) {
+            this.request = request;
+            this.width = width;
+            this.height = height;
+        }
+    }
+
+    /**
+     * How many rows ahead of the viewport are worth warming, which depends entirely on how big each
+     * row's picture is.
+     *
+     * Glide's default memory cache is about two screens of pixels. A compact row's thumbnail is a
+     * 70dp square, so dozens fit and warming a couple of screens of them costs nothing. A card's
+     * preview is the full column and can be 6MB decoded, so only a handful fit at once -- warming
+     * the same count would evict the previews the user is about to reach to make room for ones they
+     * have not got to yet, which is slower than not preloading at all.
+     */
+    public int preloadRowsAhead() {
+        switch (mPostLayout) {
+            case SharedPreferencesUtils.POST_LAYOUT_CARD:
+            case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
+            case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
+                return PostCardPreviewStyle.CARD_PRELOAD_ROWS_AHEAD;
+            default:
+                return PreloadWindow.MAX_AHEAD;
+        }
     }
 
     /** Edge of the square compact thumbnail box in pixels, which every thumbnail is decoded to. */
@@ -2786,6 +3026,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostWithPreviewTypeViewHolder) holder).contentTextViewBelowPreview.setVisibility(View.GONE);
                     }
                 } else if (holder instanceof PostBaseGalleryTypeViewHolder) {
+                    if (((PostBaseGalleryTypeViewHolder) holder).fetchAlbumCancellable != null) {
+                        ((PostBaseGalleryTypeViewHolder) holder).fetchAlbumCancellable.cancel();
+                        ((PostBaseGalleryTypeViewHolder) holder).fetchAlbumCancellable = null;
+                    }
                     ((PostBaseGalleryTypeViewHolder) holder).frameLayout.setVisibility(View.GONE);
                     ((PostBaseGalleryTypeViewHolder) holder).noPreviewImageView.setVisibility(View.GONE);
                     ((PostBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(null);
@@ -2836,6 +3080,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             ((PostGalleryViewHolder) holder).binding.videoOrGifIndicatorImageViewItemPostGallery.setVisibility(View.GONE);
             ((PostGalleryViewHolder) holder).binding.imageViewNoPreviewItemPostGallery.setVisibility(View.GONE);
         } else if (holder instanceof PostGalleryBaseGalleryTypeViewHolder) {
+            // The album scrape this row started is of no use to whatever post binds here next.
+            if (((PostGalleryBaseGalleryTypeViewHolder) holder).fetchAlbumCancellable != null) {
+                ((PostGalleryBaseGalleryTypeViewHolder) holder).fetchAlbumCancellable.cancel();
+                ((PostGalleryBaseGalleryTypeViewHolder) holder).fetchAlbumCancellable = null;
+            }
             if (mHandleReadPost && mMarkPostsAsReadOnScroll) {
                 // Read from the holder's own bound post, not from a position captured at bind
                 // time: by the time a holder is recycled the list may have shifted, and
@@ -3007,15 +3256,23 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     mActivity.setShouldTrackFullscreenMediaPeekTouchEvent(true);
                 }
 
-                Intent intent = new Intent(mActivity, ViewImageOrGifActivity.class);
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_IMAGE_URL_KEY, post.getUrl());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, post.getSubredditName()
-                        + "-" + post.getId() + ".jpg");
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
-                mActivity.startActivity(intent);
+                // An imgchest or imgbb post's url is the album's landing page rather than an image,
+                // and it can address twenty of them, so it goes to the album pager. Handing that
+                // url to the single-image viewer would hand Glide an HTML document.
+                Intent albumIntent = ViewImgurMediaActivity.newImageHostAlbumIntent(mActivity, post);
+                if (albumIntent == null) {
+                    Intent intent = new Intent(mActivity, ViewImageOrGifActivity.class);
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_IMAGE_URL_KEY, post.getUrl());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, post.getSubredditName()
+                            + "-" + post.getId() + ".jpg");
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
+                    mActivity.startActivity(intent);
+                } else {
+                    mActivity.startActivity(albumIntent);
+                }
             } else if (post.getPostType() == Post.GIF_TYPE) {
                 if (peekMedia) {
                     mActivity.setShouldTrackFullscreenMediaPeekTouchEvent(true);
@@ -3059,6 +3316,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     mActivity.setShouldTrackFullscreenMediaPeekTouchEvent(true);
                 }
 
+                // An image-host album whose page has not been read yet has only its cover tile, so the
+                // gallery viewer would show one picture and call it the album. The album viewer reads
+                // the page itself, which is the whole point of it.
+                if (post.isImageHostAlbum() && !post.isImageHostGalleryResolved()) {
+                    Intent albumIntent = ViewImgurMediaActivity.newImageHostAlbumIntent(mActivity, post);
+                    if (albumIntent != null) {
+                        mActivity.startActivity(albumIntent);
+                        return;
+                    }
+                }
                 Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
@@ -4979,6 +5246,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     public abstract class PostBaseGalleryTypeViewHolder extends PostBaseViewHolder implements ToroPlayer {
+        /** The album scrape behind an image-host gallery, so a recycled row stops paying for it. */
+        @Nullable
+        FetchImageHostMedia.Cancellable fetchAlbumCancellable;
+        /**
+         * Whether the user has moved this carousel themselves. A rebind must not drag one out from
+         * under a finger, but a carousel that is merely settling after a programmatic scroll or a
+         * layout is not under anyone's finger -- it is just not where it has been told to be yet.
+         */
+        boolean galleryTouchedByUser;
+
         FrameLayout frameLayout;
         RecyclerView galleryRecyclerView;
         CustomTextView imageIndexTextView;
@@ -5103,8 +5380,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                                 .findFirstVisibleItemPosition();
                         toroPlayer.onGalleryPageSettled(settled);
                         // Written back to the post, which is what survives this holder being
-                        // recycled and what the feed cache records for the next launch.
-                        if (settled != RecyclerView.NO_POSITION && post != null) {
+                        // recycled and what the feed cache records for the next launch. Not while
+                        // the card is drawing the single placeholder tile an unread image-host
+                        // album is seeded with: a one-tile carousel settles on tile zero the moment
+                        // it is laid out, which is not the user moving it and must not overwrite
+                        // the image they had swiped to.
+                        if (settled != RecyclerView.NO_POSITION && post != null
+                                && !(post.isImageHostAlbum() && !post.isImageHostGalleryResolved())) {
                             post.setGalleryPageIndex(settled);
                         }
                     }
@@ -5137,6 +5419,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             downX = e.getRawX();
                             downY = e.getRawY();
                             downTime = System.currentTimeMillis();
+                            galleryTouchedByUser = true;
 
                             if (mActivity.mSliderPanel != null) {
                                 mActivity.mSliderPanel.requestDisallowInterceptTouchEvent(true);
@@ -6164,6 +6447,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         RecyclerView recyclerView;
         CustomTextView imageIndexTextView;
         ImageView noPreviewImageView;
+        /** The album scrape behind an image-host gallery, so a recycled row stops paying for it. */
+        @Nullable
+        FetchImageHostMedia.Cancellable fetchAlbumCancellable;
 
         PostGalleryTypeImageRecyclerViewAdapter adapter;
         GalleryGifAutoplay toroPlayer;

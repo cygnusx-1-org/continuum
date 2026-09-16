@@ -10,9 +10,10 @@ import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.databinding.ShadowboxMediaPreviewBinding
 
 /**
- * A page that stands in for content the pager does not render itself: a link post, or a video the
- * full player has to resolve first. Shows the post's preview; a video gets a play badge over it,
- * and the panel's fullscreen button is what opens the link or hands the video to the player.
+ * A page that stands in for content the pager does not render itself: a link post, a video the full
+ * player has to resolve first, or an image-host album whose images are only known after a page
+ * scrape. Shows the post's preview; a video gets a play badge over it, and the panel's fullscreen
+ * button is what opens the link, hands the video to the player, or opens the album.
  */
 class ShadowboxPreviewPageFragment : ShadowboxPageFragment() {
 
@@ -76,10 +77,10 @@ class ShadowboxPreviewPageFragment : ShadowboxPageFragment() {
     }
 
     override fun openFullViewer() {
-        if (kind == KIND_VIDEO) {
-            ShadowboxMediaIntents.openVideo(host, post, 0L)
-        } else {
-            ShadowboxMediaIntents.openLink(host, post)
+        when (kind) {
+            KIND_VIDEO -> ShadowboxMediaIntents.openVideo(host, post, 0L)
+            KIND_ALBUM -> ShadowboxMediaIntents.openImageHostAlbum(host, post)
+            else -> ShadowboxMediaIntents.openLink(host, post)
         }
     }
 
@@ -92,6 +93,12 @@ class ShadowboxPreviewPageFragment : ShadowboxPageFragment() {
     companion object {
         const val KIND_LINK = 0
         const val KIND_VIDEO = 1
+
+        /**
+         * An imgchest or imgbb album. No badge: the preview is the album's cover, and nothing here
+         * knows how many images are behind it without the scrape the full viewer does.
+         */
+        const val KIND_ALBUM = 2
         private const val ARG_KIND = "AK"
 
         fun newInstance(position: Int, blur: Boolean, kind: Int): ShadowboxPreviewPageFragment {

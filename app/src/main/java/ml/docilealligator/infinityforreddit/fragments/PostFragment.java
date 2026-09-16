@@ -185,6 +185,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Named("short_clip")
     OkHttpClient mShortClipOkHttpClient;
     @Inject
+    @Named("image_host")
+    OkHttpClient mImageHostOkHttpClient;
+    @Inject
     @Named("current_account")
     SharedPreferences mCurrentAccountSharedPreferences;
     @Inject
@@ -420,6 +423,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -505,6 +509,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, displaySubredditName,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -580,6 +585,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -654,6 +660,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -716,6 +723,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -782,6 +790,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -842,6 +851,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -882,6 +892,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
+                    mImageHostOkHttpClient,
                     mCustomThemeWrapper, locale,
                     mActivity.accessToken, mActivity.accountName, postType, postLayout, true,
                     mSharedPreferences, mCurrentAccountSharedPreferences, mNsfwAndSpoilerSharedPreferences, mPostHistorySharedPreferences,
@@ -938,7 +949,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
         if (resumePending) {
             restoreAnchorWhenLoaded(resumeState.anchorFullname, resumeState.anchorPosition,
-                    resumeState.anchorOffset, RESUME_REVEAL_TIMEOUT_MS);
+                    resumeState.anchorOffset, RESUME_REVEAL_TIMEOUT_MS,
+                    resumeState.galleryPages);
         } else if (recyclerViewPosition > 0) {
             final int restorePosition = recyclerViewPosition;
             final int restoreOffset = recyclerViewPositionOffset;

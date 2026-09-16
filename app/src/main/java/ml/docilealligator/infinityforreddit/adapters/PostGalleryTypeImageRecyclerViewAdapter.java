@@ -25,6 +25,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import io.noties.markwon.Markwon;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -418,10 +419,54 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     }
 
     public void setGalleryImages(@Nullable ArrayList<Post.Gallery> galleryImages) {
-        this.galleryImages = galleryImages != null ? galleryImages : new java.util.ArrayList<>();
+        ArrayList<Post.Gallery> incoming = galleryImages != null ? galleryImages : new ArrayList<>();
+        if (showsSameImages(incoming)) {
+            // Same pictures in the same order, so there is nothing to redraw. Keeping the newer list
+            // is still right -- it belongs to the post object the screen now holds -- but the
+            // notify below must not run.
+            //
+            // This is called from every bind, and a post's header is rebound on every update the
+            // screen receives: the thread arriving, more children, a vote, a read mark. A
+            // notifyDataSetChanged is a structural change, and a horizontal LinearLayoutManager
+            // answers one by discarding its anchor and laying out from item zero again -- so a
+            // carousel the user was dragging away from the first image was pulled back to it, and
+            // the swipe looked like it had simply not registered. It came right once the updates
+            // stopped, which is the "it needs a trigger to unlock" this removes.
+            this.galleryImages = incoming;
+            return;
+        }
+        this.galleryImages = incoming;
         // A recycled holder is showing a different post now, so its pager starts back at page one.
         currentPosition = 0;
         notifyDataSetChanged();
+    }
+
+    /**
+     * Whether {@code incoming} is the set of pictures already being drawn.
+     *
+     * Compared by url and order, which is what this adapter draws from; {@link Post.Gallery} has no
+     * equality of its own, and a re-parsed post carries equal tiles in a different list.
+     *
+     * <p>Public because a binding holder has to know the answer <em>before</em> it decides whether to
+     * reposition the carousel: a set that is about to change is about to be laid out from item zero,
+     * so the position has to be re-applied whatever the carousel is doing, while an unchanged one
+     * must be left alone if it is moving under a finger.
+     */
+    public boolean showsImages(@Nullable ArrayList<Post.Gallery> images) {
+        return showsSameImages(images != null ? images : new ArrayList<>());
+    }
+
+    private boolean showsSameImages(@NonNull ArrayList<Post.Gallery> incoming) {
+        ArrayList<Post.Gallery> current = galleryImages;
+        if (current == null || current.size() != incoming.size()) {
+            return false;
+        }
+        for (int i = 0; i < current.size(); i++) {
+            if (!Objects.equals(current.get(i).url, incoming.get(i).url)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void setBlurImage(boolean blurImage) {

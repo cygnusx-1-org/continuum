@@ -225,6 +225,20 @@ abstract class NetworkModule {
     }
 
     @Provides
+    @Named("image_host")
+    @Singleton
+    static OkHttpClient provideImageHostOkHttpClient(@Named("base") OkHttpClient httpClient) {
+        // The image-host resolver scrapes imgchest and imgbb landing pages for the CDN links behind
+        // them. Same reasoning as provideShortClipOkHttpClient above: the bare base client keeps
+        // Reddit credentials off hosts that have no business seeing them, and detaching the event
+        // listener keeps their traffic out of the API monitor's stats. Separate from the short-clip
+        // client so that neither feature's timeouts or interceptors can drift into the other's.
+        return httpClient.newBuilder()
+                .eventListenerFactory(call -> EventListener.NONE)
+                .build();
+    }
+
+    @Provides
     @Named("title_suggestion")
     @Singleton
     static Retrofit provideTitleSuggestionRetrofit(@Named("base") Retrofit retrofit,

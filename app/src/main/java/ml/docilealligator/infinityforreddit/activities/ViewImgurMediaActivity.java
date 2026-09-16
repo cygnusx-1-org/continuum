@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.activities;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -49,15 +50,19 @@ import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontStyle;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurImageFragment;
 import ml.docilealligator.infinityforreddit.fragments.ViewImgurVideoFragment;
+import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
+import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewGalleryViewModel;
+import okhttp3.OkHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +79,14 @@ public class ViewImgurMediaActivity extends AppCompatActivity
 
     public static final String EXTRA_IMGUR_TYPE = "EIT";
     public static final String EXTRA_IMGUR_ID = "EII";
+    /**
+     * An {@link ImageHostUtils.Host} name. Present instead of {@link #EXTRA_IMGUR_ID} when this
+     * screen is showing an imgchest or imgbb album rather than an Imgur one; see
+     * {@link #newImageHostAlbumIntent}.
+     */
+    public static final String EXTRA_IMAGE_HOST = "EIH_VIMA";
+    /** The landing page {@link #EXTRA_IMAGE_HOST}'s album is scraped from. */
+    public static final String EXTRA_IMAGE_HOST_PAGE_URL = "EIHPU_VIMA";
     public static final String EXTRA_SUBREDDIT_NAME = "ESN_VIMA";
     public static final String EXTRA_POST_TITLE_KEY = "ET_VIMA";
     public static final String EXTRA_IS_NSFW = "EIN_VIMA";
@@ -93,6 +106,12 @@ public class ViewImgurMediaActivity extends AppCompatActivity
     @Nullable
     private String postTitle;
     private boolean isNsfw;
+    /**
+     * Whether this screen is showing an imgchest/imgbb album rather than an Imgur one. Only the
+     * "download all" label reads it -- everything past {@link #setupViewPager()} is the same list of
+     * {@link ImgurMedia} either way.
+     */
+    private boolean isImageHostAlbum;
     @Nullable
     private String title;
     private boolean isActionBarHidden = false;
@@ -103,6 +122,9 @@ public class ViewImgurMediaActivity extends AppCompatActivity
     @Inject
     @Named("imgur")
     Retrofit imgurRetrofit;
+    @Inject
+    @Named("image_host")
+    OkHttpClient imageHostOkHttpClient;
     @Inject
     @Named("default")
     SharedPreferences sharedPreferences;
@@ -170,11 +192,17 @@ public class ViewImgurMediaActivity extends AppCompatActivity
             }
         });
 
+        // Exactly one of these identifies the album: an Imgur id read through Imgur's API, or an
+        // image-host page scraped by FetchImageHostMedia. Both are plain strings, so either way the
+        // screen still replays from its extras for Restorable.
+        ImageHostUtils.Host imageHost = imageHostFromIntent();
+        String imageHostPageUrl = getIntent().getStringExtra(EXTRA_IMAGE_HOST_PAGE_URL);
         String imgurId = getIntent().getStringExtra(EXTRA_IMGUR_ID);
-        if (imgurId == null) {
+        if ((imageHost == null || imageHostPageUrl == null) && imgurId == null) {
             finish();
             return;
         }
+        isImageHostAlbum = imageHost != null && imageHostPageUrl != null;
 
         subredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
         isNsfw = getIntent().getBooleanExtra(EXTRA_IS_NSFW, false);
@@ -201,13 +229,107 @@ public class ViewImgurMediaActivity extends AppCompatActivity
         }
 
         if (mImages == null) {
-            fetchImgurMedia(imgurId);
+            fetchMedia(imageHost, imageHostPageUrl, imgurId);
         } else {
             binding.progressBarViewImgurMediaActivity.setVisibility(View.GONE);
             setupViewPager();
         }
 
-        binding.loadImageErrorLinearLayoutViewImgurMediaActivity.setOnClickListener(view -> fetchImgurMedia(imgurId));
+        binding.loadImageErrorLinearLayoutViewImgurMediaActivity.setOnClickListener(
+                view -> fetchMedia(imageHost, imageHostPageUrl, imgurId));
+    }
+
+    /**
+     * The {@link ImageHostUtils.Host} named by {@link #EXTRA_IMAGE_HOST}, or null when the extra is
+     * absent or names a host this build no longer knows -- which leaves the Imgur path, and that
+     * one finishes the screen if it has no id either.
+     */
+    @Nullable
+    private ImageHostUtils.Host imageHostFromIntent() {
+        String name = getIntent().getStringExtra(EXTRA_IMAGE_HOST);
+        if (name == null) {
+            return null;
+        }
+        try {
+            return ImageHostUtils.Host.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Whether the album came from an image host rather than from Imgur. The overflow menu is
+     * inflated by the page fragments, which use this to keep "Download All Imgur Album Media" off a
+     * screen showing an imgchest or imgbb album.
+     */
+    public boolean isImageHostAlbum() {
+        return isImageHostAlbum;
+    }
+
+    /** Dispatches to whichever of the two sources this screen was launched for. */
+    private void fetchMedia(@Nullable ImageHostUtils.Host imageHost,
+                            @Nullable String imageHostPageUrl, @Nullable String imgurId) {
+        if (imageHost != null && imageHostPageUrl != null) {
+            fetchImageHostMedia(imageHost, imageHostPageUrl);
+        } else if (imgurId != null) {
+            fetchImgurMedia(imgurId);
+        }
+    }
+
+    /**
+     * Scrapes an imgchest or imgbb album off its landing page.
+     *
+     * <p>Resolution failure is ordinary rather than exceptional -- these are third-party pages whose
+     * markup can change any day -- so it lands on the same error view the Imgur branches use, which
+     * is a retry button rather than a dead end.
+     */
+    private void fetchImageHostMedia(ImageHostUtils.Host imageHost, String pageUrl) {
+        binding.loadImageErrorLinearLayoutViewImgurMediaActivity.setVisibility(View.GONE);
+        binding.progressBarViewImgurMediaActivity.setVisibility(View.VISIBLE);
+        executor.execute(() -> {
+            ArrayList<ImgurMedia> images =
+                    FetchImageHostMedia.fetchSync(imageHostOkHttpClient, imageHost, pageUrl);
+            handler.post(() -> {
+                // setupViewPager commits a fragment transaction, so a result that arrives after the
+                // screen is gone has to be dropped rather than applied.
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                binding.progressBarViewImgurMediaActivity.setVisibility(View.GONE);
+                if (images == null) {
+                    binding.loadImageErrorLinearLayoutViewImgurMediaActivity.setVisibility(View.VISIBLE);
+                } else {
+                    mImages = images;
+                    binding.loadImageErrorLinearLayoutViewImgurMediaActivity.setVisibility(View.GONE);
+                    setupViewPager();
+                }
+            });
+        });
+    }
+
+    /**
+     * The intent that opens {@code post}'s imgchest or imgbb album here, or null when the post is
+     * not on one of those hosts.
+     *
+     * <p>Every launch site builds it through this rather than inline: the album is not addressed the
+     * way an Imgur one is, and a site that filled in {@link #EXTRA_IMGUR_ID} instead would send the
+     * page id to Imgur's API and get a 404 back.
+     */
+    @Nullable
+    public static Intent newImageHostAlbumIntent(Context context, Post post) {
+        ImageHostUtils.Host host = post.getImageHost();
+        String pageUrl = post.getUrl();
+        if (host == null || pageUrl == null) {
+            return null;
+        }
+
+        Intent intent = new Intent(context, ViewImgurMediaActivity.class);
+        intent.putExtra(EXTRA_IMAGE_HOST, host.name());
+        intent.putExtra(EXTRA_IMAGE_HOST_PAGE_URL, pageUrl);
+        intent.putExtra(EXTRA_SUBREDDIT_NAME, post.getSubredditName());
+        intent.putExtra(EXTRA_POST_TITLE_KEY, post.getTitle());
+        intent.putExtra(EXTRA_IS_NSFW, post.isNSFW());
+        return intent;
     }
 
     private void fetchImgurMedia(String imgurId) {

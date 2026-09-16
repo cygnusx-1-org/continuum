@@ -30,25 +30,27 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+import com.github.piasy.biv.BigImageViewer;
+import com.github.piasy.biv.loader.ImageLoader;
+import com.github.piasy.biv.loader.glide.GlideImageLoader;
 import java.io.File;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.BuildConfig;
+import ml.docilealligator.infinityforreddit.ImageOkHttpClient;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.SetAsWallpaperCallback;
 import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity;
 import ml.docilealligator.infinityforreddit.asynctasks.SaveBitmapImageToFile;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.SetAsWallpaperBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.customviews.GlideGifImageViewFactory;
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewImgurImageBinding;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
@@ -86,6 +88,12 @@ public class ViewImgurImageFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // ViewImgurMediaActivity does not install a loader of its own, and BigImageView cannot load
+        // without one. The two-argument overload is required: see ImageOkHttpClient for what the
+        // one-argument one silently throws away.
+        BigImageViewer.initialize(GlideImageLoader.with(activity.getApplicationContext(),
+                ImageOkHttpClient.get(activity.getApplicationContext())));
+
         binding = FragmentViewImgurImageBinding.inflate(inflater, container, false);
 
         ((Infinity) activity.getApplication()).getAppComponent().inject(this);
@@ -98,6 +106,73 @@ public class ViewImgurImageFragment extends Fragment {
         if (savedInstanceState != null) {
             currentRotation = savedInstanceState.getInt(ROTATION_STATE, 0);
         }
+
+        // An Imgur album item can be an animated GIF, which BigImageView renders through this
+        // factory rather than through the subsampling view; the strategy is what keeps that decode
+        // down to the same resolution budget the feed uses.
+        binding.imageViewViewImgurImageFragment.setImageViewFactory(new GlideGifImageViewFactory(
+                new SaveMemoryCenterInisdeDownsampleStrategy(SharedPreferencesUtils.getInt(
+                        mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"))));
+
+        binding.imageViewViewImgurImageFragment.setImageLoaderCallback(new ImageLoader.Callback() {
+            @Override
+            public void onCacheHit(int imageType, File image) {
+
+            }
+
+            @Override
+            public void onCacheMiss(int imageType, File image) {
+
+            }
+
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onProgress(int progress) {
+
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+
+            @Override
+            public void onSuccess(File image) {
+                binding.progressBarViewImgurImageFragment.setVisibility(View.GONE);
+
+                final SubsamplingScaleImageView view = binding.imageViewViewImgurImageFragment.getSSIV();
+
+                // Null for an animated page, which BigImageView renders through the image-view
+                // factory instead; that one is already carrying the right rotation, because with no
+                // subsampling view to put it on applyRotation has been rotating the widget.
+                //
+                // The zoom settings have to wait for onImageLoaded rather than being applied at
+                // inflation time: until the image is decoded the view has no dimensions to scale
+                // against.
+                if (view != null) {
+                    view.setOnImageEventListener(new SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                        @Override
+                        public void onImageLoaded() {
+                            view.setMinimumDpi(80);
+                            view.setDoubleTapZoomDpi(240);
+                            view.setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_FIXED);
+                            view.setQuickScaleEnabled(true);
+                            applyRotation();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFail(Exception error) {
+                binding.progressBarViewImgurImageFragment.setVisibility(View.GONE);
+                binding.loadImageErrorLinearLayoutViewImgurImageFragment.setVisibility(View.VISIBLE);
+            }
+        });
 
         loadImage();
 
@@ -121,9 +196,6 @@ public class ViewImgurImageFragment extends Fragment {
                 binding.bottomNavigationViewImgurImageFragment.setVisibility(View.GONE);
             }
         });
-        binding.imageViewViewImgurImageFragment.setMinimumDpi(80);
-        binding.imageViewViewImgurImageFragment.setDoubleTapZoomDpi(240);
-        binding.imageViewViewImgurImageFragment.resetScaleAndCenter();
 
         binding.loadImageErrorLinearLayoutViewImgurImageFragment.setOnClickListener(view -> {
             binding.progressBarViewImgurImageFragment.setVisibility(View.VISIBLE);
@@ -184,39 +256,42 @@ public class ViewImgurImageFragment extends Fragment {
         applyRotation();
     }
 
+    /**
+     * Puts {@link #currentRotation} on whichever view BigImageView ended up building, and is the
+     * only place that decides which.
+     *
+     * <p>Keyed off the subsampling view being absent rather than off a media type: unlike a Reddit
+     * gallery item, an {@link ImgurMedia} has no GIF type -- it calls a .gif an image -- so which of
+     * the two views exists is the only honest answer, and it is one only BigImageView has.
+     *
+     * <p>The two are mutually exclusive and the widget rotation has to be cleared when the
+     * subsampling view takes over. Rotation is reachable while the image is still downloading, when
+     * there is no subsampling view yet and the press therefore lands on the widget; left there, it
+     * would compound with the orientation applied once the image arrives.
+     */
     private void applyRotation() {
-        binding.imageViewViewImgurImageFragment.setOrientation(currentRotation);
-        binding.imageViewViewImgurImageFragment.resetScaleAndCenter();
+        SubsamplingScaleImageView ssiv = binding.imageViewViewImgurImageFragment.getSSIV();
+        if (ssiv == null) {
+            binding.imageViewViewImgurImageFragment.setRotation(currentRotation);
+        } else {
+            // View.setRotation no-ops when the value is unchanged, so this costs nothing on the
+            // usual path where the widget was never rotated.
+            binding.imageViewViewImgurImageFragment.setRotation(0);
+            // Guarded, because setOrientation is not free even when the orientation is unchanged:
+            // it calls reset(false), which recycles every loaded tile and nulls the tile map, and
+            // then requestLayout, which decodes them all again. Calling it unconditionally from
+            // the image-loaded callback would make every page decode twice.
+            if (ssiv.getOrientation() != currentRotation) {
+                ssiv.setOrientation(currentRotation);
+            }
+            ssiv.resetScaleAndCenter();
+        }
     }
 
     private void loadImage() {
-        glide.asBitmap().load(imgurMedia.getLink()).listener(new RequestListener<Bitmap>() {
-            @Override
-            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                binding.progressBarViewImgurImageFragment.setVisibility(View.GONE);
-                binding.loadImageErrorLinearLayoutViewImgurImageFragment.setVisibility(View.VISIBLE);
-                return false;
-            }
-
-            @Override
-            public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                binding.progressBarViewImgurImageFragment.setVisibility(View.GONE);
-                return false;
-            }
-        }).into(new CustomTarget<Bitmap>() {
-            @Override
-            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                binding.imageViewViewImgurImageFragment.setImage(ImageSource.bitmap(resource));
-                if (currentRotation != 0) {
-                    binding.imageViewViewImgurImageFragment.setOrientation(currentRotation);
-                }
-            }
-
-            @Override
-            public void onLoadCleared(@Nullable Drawable placeholder) {
-
-            }
-        });
+        // Rotation is re-applied from the image-loaded callback, which is the first moment the
+        // subsampling view exists to carry it.
+        binding.imageViewViewImgurImageFragment.showImage(Uri.parse(imgurMedia.getLink()));
     }
 
     @Override
@@ -254,8 +329,15 @@ public class ViewImgurImageFragment extends Fragment {
         PopupMenu popupMenu = new PopupMenu(activity, anchor);
         popupMenu.getMenuInflater().inflate(R.menu.view_imgur_media_activity, popupMenu.getMenu());
         Menu menu = popupMenu.getMenu();
+        // The menu resource is Imgur's, but this screen also shows imgchest and imgbb albums, so
+        // the one item on it gets a host-neutral title there rather than naming the wrong site.
+        String downloadAllTitle = activity.isImageHostAlbum()
+                ? getString(R.string.action_download_all_album_media) : null;
         for (int i = 0; i < menu.size(); i++) {
-            Utils.setTitleWithCustomFontToMenuItem(activity.typeface, menu.getItem(i), null);
+            MenuItem menuItem = menu.getItem(i);
+            Utils.setTitleWithCustomFontToMenuItem(activity.typeface, menuItem,
+                    menuItem.getItemId() == R.id.action_download_all_imgur_album_media_view_imgur_media_activity
+                            ? downloadAllTitle : null);
         }
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_download_all_imgur_album_media_view_imgur_media_activity) {
@@ -441,6 +523,12 @@ public class ViewImgurImageFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        glide.clear(binding.imageViewViewImgurImageFragment);
+        // Not glide.clear: BigImageView is not a Glide target, and the tiles it holds are the
+        // subsampling view's rather than Glide's. Same teardown as the Reddit gallery page.
+        binding.imageViewViewImgurImageFragment.cancel();
+        SubsamplingScaleImageView ssiv = binding.imageViewViewImgurImageFragment.getSSIV();
+        if (ssiv != null) {
+            ssiv.recycle();
+        }
     }
 }

@@ -17,6 +17,16 @@ import ml.docilealligator.infinityforreddit.post.Post
 object PostCardPreviewStyle {
 
     /**
+     * Rows warmed ahead of the viewport in a card layout.
+     *
+     * Small on purpose. A card preview is the width of the column, which decodes to megabytes, and
+     * Glide's memory cache holds only a handful of those; warming the compact layout's dozens would
+     * evict the ones about to be shown. Three covers the next card and the one after it on a phone,
+     * which is as far ahead as a flick reaches before the cache turns over.
+     */
+    const val CARD_PRELOAD_ROWS_AHEAD = 3
+
+    /**
      * Height-to-width ratio of a "Fixed Height in Card" preview: square, so every preview in the
      * feed is the same height as every other one.
      */
@@ -93,6 +103,35 @@ object PostCardPreviewStyle {
     @JvmStatic
     fun letterboxWithVideoBars(post: Post, autoplay: Boolean): Boolean =
         post.postType == Post.GIF_TYPE && autoplay
+
+    /**
+     * The height in pixels a preview of [widthPx] will measure to, which is what
+     * `AspectRatioGifImageView.onMeasure` computes from the ratio [applyPreviewShape] gives it.
+     *
+     * It exists so a row's own load and the preloader that warms it ask Glide for the same box.
+     * Glide's memory cache is keyed on the size, so a preload that guessed even a pixel differently
+     * would decode a second bitmap the row never uses -- the work done twice, and the pop-in it was
+     * meant to remove still there. Deriving it in one place is what stops the two drifting.
+     *
+     * Only the shape matters here, not how the bitmap sits inside it: [letterboxSquare] changes the
+     * scale type, never the measured box.
+     */
+    @JvmStatic
+    fun previewHeightPx(
+        preview: Post.Preview,
+        fixedHeightInCard: Boolean,
+        maxPreviewHeight: Int,
+        widthPx: Int,
+    ): Int {
+        if (widthPx <= 0) {
+            return 0
+        }
+        val square = squarePreview(preview, fixedHeightInCard)
+        val ratio = if (square) SQUARE_PREVIEW_RATIO else preview.previewHeight.toFloat() / preview.previewWidth
+        val height = (widthPx * ratio).toInt()
+        // Only a squared preview carries the cap; ratioShape clears it. Mirrors setRatioMaxHeight.
+        return if (square && maxPreviewHeight > 0) minOf(height, maxPreviewHeight) else height
+    }
 
     /**
      * Shapes a card's preview image view for [post]: squared or at its own aspect ratio, fitted or

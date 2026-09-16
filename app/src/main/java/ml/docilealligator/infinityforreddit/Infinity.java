@@ -40,6 +40,7 @@ import ml.docilealligator.infinityforreddit.events.ToggleSecureModeEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.FontFamily;
 import ml.docilealligator.infinityforreddit.font.TitleFontFamily;
+import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder;
 import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditRepository;
 import ml.docilealligator.infinityforreddit.reminder.ReminderManager;
@@ -286,6 +287,10 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
         });
 
         EventBus.builder().addIndex(new EventBusIndex()).installDefaultEventBus();
+
+        // Where resolved imgchest/imgbb albums are remembered between runs, so a post that is one
+        // comes back as a full gallery rather than the single-tile placeholder it is parsed as.
+        FetchImageHostMedia.init(getFilesDir());
 
         EventBus.getDefault().register(this);
 

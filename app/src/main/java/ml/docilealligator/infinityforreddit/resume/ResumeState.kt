@@ -1046,7 +1046,22 @@ object ResumeState {
         load(activity)
         val pending = restoring ?: return
         val name = activity.javaClass.name
-        val index = (1 until pending.size).firstOrNull { pending[it].cls == name } ?: return
+        // The topmost entry that is really this screen, not the lowest one that shares its class.
+        //
+        // The activity being recreated is by definition the top of the stack, so when a class
+        // appears more than once -- a post opened from a gallery opened from a post, the shape this
+        // feature makes routine -- the lowest match is the wrong one, and seeding from it drops
+        // every screen above it. The next capture then writes that shortened stack over the
+        // snapshot, so the session the user comes back to alternates between two depths depending
+        // on which launch path ran.
+        //
+        // isSameScreen is what tells two screens of one class apart: the identity the screen
+        // provides where it has one, and its extras where it does not. That is the same rule a
+        // rotation uses to decide whether a rebuilt screen is the one a destroyed entry belonged to.
+        val index =
+            (pending.size - 1 downTo 1).firstOrNull {
+                pending[it].cls == name && isSameScreen(pending[it], activity)
+            } ?: (pending.size - 1 downTo 1).firstOrNull { pending[it].cls == name } ?: return
         val below =
             pending.subList(0, index).map { recorded ->
                 // The identity travels with the copy. Without it a seeded entry has none, and the
@@ -1151,7 +1166,8 @@ object ResumeState {
     private fun toJson(snapshot: List<Entry>, account: String): JSONObject? {
         return try {
             val stack = JSONArray()
-            for (entry in snapshot) {
+            val topIndex = snapshot.size - 1
+            for ((index, entry) in snapshot.withIndex()) {
                 val obj = JSONObject()
                 obj.put(KEY_CLASS, entry.cls)
                 entry.data?.let { obj.put(KEY_DATA, it) }
@@ -1159,7 +1175,22 @@ object ResumeState {
                 entry.extras?.let { extras ->
                     obj.put(KEY_EXTRAS, BundleJson.toJson(extras, lenient = false) ?: return null)
                 }
-                entry.state?.let { state -> obj.put(KEY_STATE, BundleJson.toJson(state, lenient = true)) }
+                entry.state?.let { state ->
+                    val encoded = BundleJson.toJson(state, lenient = true)
+                    // Only the screen that was on top keeps its gallery page; see ResumeGalleryPage
+                    // for why the screens under it must not. The stack is ordered bottom to top, so
+                    // the last entry is the screen the user was looking at and every earlier one was
+                    // behind it.
+                    //
+                    // Stripped from the encoded document rather than from `entry.state`, which is a
+                    // live screen's own bundle: that screen may be the top one the next time a
+                    // snapshot is taken, and it must not have been made to forget where it is
+                    // merely by having been described while something else was in front of it.
+                    if (index != topIndex) {
+                        ResumeGalleryPage.stripFrom(encoded)
+                    }
+                    obj.put(KEY_STATE, encoded)
+                }
                 stack.put(obj)
             }
             JSONObject()

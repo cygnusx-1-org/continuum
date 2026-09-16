@@ -32,6 +32,20 @@ class FeedResumeState {
     /** How many posts the feed held, against which a shrunken cache is rejected. */
     @JvmField var expectedCount: Int = 0
 
+    /**
+     * Which image each gallery card on screen was showing, as `fullname:page` entries.
+     *
+     * Every visible card, not just the anchor: the anchor is the row at the top EDGE of the
+     * viewport, which is normally the post above the one being read and partly scrolled off it --
+     * the recorded offset is negative for exactly that reason. Reading the page off the anchor
+     * therefore reads it off the wrong post nearly every time.
+     *
+     * Only for this one restore, and only for the screen being restored. The page is not a property
+     * of the post: a card scrolled back to later, or opened from somewhere else, starts on its first
+     * image like any other.
+     */
+    @JvmField var galleryPages: ArrayList<String>? = null
+
     fun isPending(): Boolean = feedKey != null
 
     /** Read a record out of [bundle]. A bundle with no record leaves this one empty. */
@@ -44,6 +58,7 @@ class FeedResumeState {
         anchorPosition = bundle.getInt(KEY_ANCHOR_POSITION, ScrollAnchor.NO_POSITION)
         anchorOffset = bundle.getInt(KEY_ANCHOR_OFFSET, 0)
         expectedCount = bundle.getInt(KEY_EXPECTED_COUNT, 0)
+        galleryPages = bundle.getStringArrayList(KEY_GALLERY_PAGES)
     }
 
     /** Write this record into [bundle]. A record with no feed key writes nothing. */
@@ -54,6 +69,11 @@ class FeedResumeState {
         bundle.putInt(KEY_ANCHOR_POSITION, anchorPosition)
         bundle.putInt(KEY_ANCHOR_OFFSET, anchorOffset)
         bundle.putInt(KEY_EXPECTED_COUNT, expectedCount)
+        // Only when there is one, so an ordinary feed's record is unchanged.
+        val pages = galleryPages
+        if (pages != null && pages.isNotEmpty()) {
+            bundle.putStringArrayList(KEY_GALLERY_PAGES, pages)
+        }
     }
 
     /**
@@ -82,6 +102,22 @@ class FeedResumeState {
             args.remove(KEY_ANCHOR_POSITION)
             args.remove(KEY_ANCHOR_OFFSET)
             args.remove(KEY_EXPECTED_COUNT)
+            args.remove(KEY_GALLERY_PAGES)
+        }
+
+        /** `fullname:page`, which is all [BundleJson] can carry -- it has string lists, not maps. */
+        @JvmStatic
+        fun encodePage(fullName: String, page: Int): String = "$fullName:$page"
+
+        /** The fullname and page in [entry], or null when it is not one this wrote. */
+        @JvmStatic
+        fun decodePage(entry: String): Pair<String, Int>? {
+            val split = entry.lastIndexOf(':')
+            if (split <= 0 || split == entry.length - 1) {
+                return null
+            }
+            val page = entry.substring(split + 1).toIntOrNull() ?: return null
+            return if (page < 0) null else entry.substring(0, split) to page
         }
 
         const val KEY_FEED = "resumeFeedKey"
@@ -89,6 +125,7 @@ class FeedResumeState {
         const val KEY_ANCHOR_POSITION = "resumeAnchorPosition"
         const val KEY_ANCHOR_OFFSET = "resumeAnchorOffset"
         const val KEY_EXPECTED_COUNT = "resumeExpectedCount"
+        const val KEY_GALLERY_PAGES = ResumeGalleryPage.KEY_FEED
 
         /**
          * Record a feed into [out].
@@ -98,12 +135,14 @@ class FeedResumeState {
          * in it the user was would reopen that feed scrolled to the top, which is not a resume.
          */
         @JvmStatic
+        @JvmOverloads
         fun capture(
             out: Bundle,
             feedKey: String,
             anchor: ScrollAnchor.Anchor,
             anchorFullname: String?,
             loadedCount: Int,
+            galleryPages: ArrayList<String>? = null,
         ): Boolean {
             if (!anchor.isValid) {
                 return false
@@ -114,6 +153,7 @@ class FeedResumeState {
             state.anchorPosition = anchor.position
             state.anchorOffset = anchor.offset
             state.expectedCount = loadedCount
+            state.galleryPages = galleryPages
             state.writeTo(out)
             return true
         }

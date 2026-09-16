@@ -169,9 +169,18 @@ object ScrollAnchor {
      * because an empty feed the user can pull to refresh beats a blank screen with no explanation.
      */
     @JvmStatic
-    fun hideUntilRestored(rv: RecyclerView, timeoutMs: Long) {
+    @JvmOverloads
+    fun hideUntilRestored(rv: RecyclerView, timeoutMs: Long, onTimeout: Runnable? = null) {
         rv.visibility = View.INVISIBLE
-        rv.postDelayed({ rv.visibility = View.VISIBLE }, timeoutMs)
+        rv.postDelayed(
+            {
+                // Through the caller when it has a reveal of its own, so that its own record of
+                // having revealed agrees with what is on screen. A caller whose bookkeeping says
+                // "still hidden" can hide the list again later, with nothing left to un-hide it.
+                if (onTimeout != null) onTimeout.run() else rv.visibility = View.VISIBLE
+            },
+            timeoutMs,
+        )
     }
 
     /**
@@ -214,6 +223,50 @@ object ScrollAnchor {
                     rv.post {
                         rv.removeCallbacks(reveal)
                         reveal.run()
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Jump to [position]/[offset] with the list hidden and leave it hidden, calling [onLanded] once
+     * the jump has been laid out -- or at [timeoutMs] regardless, whichever comes first.
+     *
+     * For a screen that reveals the list itself rather than having this do it: the post-detail
+     * screen has a reveal of its own to coordinate. Nothing here ever makes the list visible, so
+     * [onLanded] is the caller's only way back and it is guaranteed to run. It used to be called
+     * only from the pre-draw, which meant a list that never drew -- because the data never arrived,
+     * or because the layout pass had already happened before this was armed -- left the caller
+     * waiting and the screen blank with nothing to end it.
+     *
+     * [applyHidden] is the same jump for a screen that wants the reveal handled for it.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun applyHiddenAwaitingCaller(
+        rv: RecyclerView,
+        position: Int,
+        offset: Int,
+        onLanded: Runnable,
+        timeoutMs: Long = REVEAL_TIMEOUT_MS,
+    ) {
+        if (position == NO_POSITION) {
+            onLanded.run()
+            return
+        }
+        rv.visibility = View.INVISIBLE
+        val landed = AtomicBoolean(false)
+        val land = Runnable { if (landed.compareAndSet(false, true)) onLanded.run() }
+        rv.postDelayed(land, timeoutMs)
+        OneShotPreDrawListener.add(rv) {
+            rv.post {
+                if (!landed.get()) {
+                    scrollTo(rv, position, offset)
+                    // Posted so the caller is told after the jump has been laid out, not with it.
+                    rv.post {
+                        rv.removeCallbacks(land)
+                        land.run()
                     }
                 }
             }

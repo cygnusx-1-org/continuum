@@ -123,4 +123,85 @@ class FeedResumeStateTest {
         assertNull(read.anchorFullname)
         assertEquals(9, read.anchorPosition)
     }
+
+    @Test
+    fun `every gallery card on screen comes back on the image it was showing`() {
+        // Every visible card, not just the anchor. The anchor is the row at the top EDGE of the
+        // viewport -- normally the post above the one being read, partly scrolled off it, which is
+        // why the recorded offset is negative -- so reading the page from it reads it from the wrong
+        // post nearly every time.
+        val out = Bundle()
+        val pages = arrayListOf(
+            FeedResumeState.encodePage("t3_abc", 3),
+            FeedResumeState.encodePage("t3_def", 1))
+        FeedResumeState.capture(out, "feed", anchor(12, -529), "t3_abc", 50, pages)
+
+        val restored = FeedResumeState()
+        restored.read(out)
+
+        assertEquals(pages, restored.galleryPages)
+    }
+
+    @Test
+    fun `a feed with no gallery in view records nothing`() {
+        // The ordinary case, and it must leave the record exactly as it was before any of this
+        // existed rather than adding an empty key to every feed's snapshot.
+        val out = Bundle()
+        FeedResumeState.capture(out, "feed", anchor(12, -200), "t3_abc", 50)
+
+        assertFalse(out.containsKey(FeedResumeState.KEY_GALLERY_PAGES))
+        val restored = FeedResumeState()
+        restored.read(out)
+        assertNull(restored.galleryPages)
+    }
+
+    @Test
+    fun `an empty list is not written`() {
+        val out = Bundle()
+        FeedResumeState.capture(out, "feed", anchor(12, -200), "t3_abc", 50, arrayListOf())
+
+        assertFalse(out.containsKey(FeedResumeState.KEY_GALLERY_PAGES))
+    }
+
+    @Test
+    fun `clearFrom removes the pages with the rest of the record`() {
+        // The record is one-shot: a pager that rebuilds its adapter must not restore a second time,
+        // and pages left behind would be applied on a screen the user never left.
+        val args = Bundle()
+        FeedResumeState.capture(args, "feed", anchor(3, -12), "t3_abc", 20,
+            arrayListOf(FeedResumeState.encodePage("t3_abc", 4)))
+
+        FeedResumeState.clearFrom(args)
+
+        assertFalse(args.containsKey(FeedResumeState.KEY_GALLERY_PAGES))
+    }
+
+    @Test
+    fun `a page entry round trips through its encoding`() {
+        val decoded = FeedResumeState.decodePage(FeedResumeState.encodePage("t3_abc", 7))
+
+        assertEquals("t3_abc", decoded!!.first)
+        assertEquals(7, decoded.second)
+    }
+
+    @Test
+    fun `a fullname containing a colon keeps all of it`() {
+        // Split at the LAST colon, not the first. Reddit fullnames do not contain one today, and a
+        // decoder that assumed they never would is the kind that truncates a name into one that
+        // matches no post at all -- silently, since a page that matches nothing simply does nothing.
+        val decoded = FeedResumeState.decodePage(FeedResumeState.encodePage("t3_a:b:c", 2))
+
+        assertEquals("t3_a:b:c", decoded!!.first)
+        assertEquals(2, decoded.second)
+    }
+
+    @Test
+    fun `a malformed entry is ignored rather than guessed at`() {
+        // These come off disk, where a hand-edited or half-written snapshot is possible.
+        assertNull(FeedResumeState.decodePage("t3_abc"))
+        assertNull(FeedResumeState.decodePage("t3_abc:"))
+        assertNull(FeedResumeState.decodePage(":4"))
+        assertNull(FeedResumeState.decodePage("t3_abc:notanumber"))
+        assertNull(FeedResumeState.decodePage("t3_abc:-1"))
+    }
 }

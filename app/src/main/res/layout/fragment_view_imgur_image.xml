@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,10 +12,16 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
-    <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+    <!-- Same widget, and the same two attributes, as the Reddit gallery page. BigImageView
+         downloads to a cache file and gives the subsampling view a file URI, so a page costs a
+         screenful of pixels whatever the source measures; handing that view an already-decoded
+         bitmap instead made a 4000x6000 album page cost ~98MB and the pager stall. -->
+    <com.github.piasy.biv.view.BigImageView
         android:id="@+id/image_view_view_imgur_image_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:optimizeDisplay="true"
+        app:tapToRetry="false" />
 
     <LinearLayout
         android:id="@+id/load_image_error_linear_layout_view_imgur_image_fragment"

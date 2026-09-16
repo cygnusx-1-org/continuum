@@ -41,6 +41,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
+import kotlin.Pair;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import ml.docilealligator.infinityforreddit.R;
@@ -717,7 +719,43 @@ public abstract class PostFragmentBase extends Fragment {
         ScrollAnchor.Anchor anchor = ScrollAnchor.captureTopmost(recyclerView);
         Post post = anchor.isValid() ? adapter.getItemByPosition(anchor.position) : null;
         return FeedResumeState.capture(out, feedKey, anchor,
-                post == null ? null : post.getFullName(), adapter.getItemCount());
+                post == null ? null : post.getFullName(), adapter.getItemCount(),
+                visibleGalleryPages(recyclerView, adapter));
+    }
+
+    /**
+     * Which image each gallery card on screen is showing, as {@code fullname:page} entries.
+     *
+     * Every visible card rather than just the anchor. The anchor is the row at the top EDGE of the
+     * viewport, so it is normally the post ABOVE the one being read, partly scrolled off it -- that
+     * is why the recorded offset is negative -- and reading the page from it reads it from the wrong
+     * post nearly every time.
+     *
+     * Read from the adapter's snapshot rather than through {@code getItemByPosition}, which counts
+     * as access and would have Paging fetch pages while the app is being put down.
+     */
+    @NonNull
+    private ArrayList<String> visibleGalleryPages(@NonNull RecyclerView recyclerView,
+                                                  @NonNull PostRecyclerViewAdapter adapter) {
+        ArrayList<String> pages = new ArrayList<>();
+        ItemSnapshotList<Post> snapshot = adapter.snapshot();
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            View child = recyclerView.getChildAt(i);
+            if (child == null) {
+                continue;
+            }
+            int position = recyclerView.getChildAdapterPosition(child);
+            if (position == RecyclerView.NO_POSITION || position >= snapshot.size()) {
+                continue;
+            }
+            Post visible = snapshot.get(position);
+            if (visible == null || visible.getGalleryPageIndex() <= 0
+                    || visible.getFullName() == null || visible.getFullName().isEmpty()) {
+                continue;
+            }
+            pages.add(FeedResumeState.encodePage(visible.getFullName(), visible.getGalleryPageIndex()));
+        }
+        return pages;
     }
 
     /**
@@ -730,6 +768,14 @@ public abstract class PostFragmentBase extends Fragment {
     protected final void restoreAnchorWhenLoaded(@Nullable String anchorFullName,
                                                  int fallbackPosition, int offset,
                                                  long revealTimeoutMs) {
+        restoreAnchorWhenLoaded(anchorFullName, fallbackPosition, offset, revealTimeoutMs, null);
+    }
+
+    /** As above, and puts the recorded gallery pages back on the cards they were recorded from. */
+    protected final void restoreAnchorWhenLoaded(@Nullable String anchorFullName,
+                                                 int fallbackPosition, int offset,
+                                                 long revealTimeoutMs,
+                                                 @Nullable ArrayList<String> galleryPages) {
         // No getView() guard here, unlike the two capture helpers: this one is called from inside
         // onCreateView, and the fragment manager assigns the fragment's view only after that
         // returns. Guarding on it would return early every single time and silently disable the
@@ -758,7 +804,8 @@ public abstract class PostFragmentBase extends Fragment {
                     if (compactThumbnailPreloader != null) {
                         compactThumbnailPreloader.clearAnchorHint();
                     }
-                    int target = positionOfFullName(anchorFullName);
+                    int namedPosition = positionOfFullName(anchorFullName);
+                    int target = namedPosition;
                     if (target == RecyclerView.NO_POSITION) {
                         // The post is gone -- deleted, filtered out, or trimmed off the front of the
                         // cache. The recorded row is the best remaining guess.
@@ -767,6 +814,12 @@ public abstract class PostFragmentBase extends Fragment {
                     if (target >= adapter.getItemCount()) {
                         target = RecyclerView.NO_POSITION;
                     }
+                    // Onto the posts before the rows that draw them are laid out, so a card binds
+                    // on its image rather than binding on image one and shifting to it. By fullname
+                    // only: the positional fallback above is a guess at where to scroll, and
+                    // whatever post now sits at that row is a different post whose gallery must not
+                    // open part way through.
+                    applyGalleryPages(galleryPages);
                     ScrollAnchor.applyHidden(recyclerView, target, offset);
                 }
                 return Unit.INSTANCE;
@@ -815,6 +868,35 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     /** Adapter position of {@code fullName}, or {@link RecyclerView#NO_POSITION}. */
+    /** Puts {@code fullname:page} entries back on the posts they name, in one pass over the feed. */
+    private void applyGalleryPages(@Nullable ArrayList<String> galleryPages) {
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        if (galleryPages == null || galleryPages.isEmpty() || adapter == null) {
+            return;
+        }
+        HashMap<String, Integer> wanted = new HashMap<>();
+        for (String entry : galleryPages) {
+            Pair<String, Integer> decoded = FeedResumeState.decodePage(entry);
+            if (decoded != null) {
+                wanted.put(decoded.getFirst(), decoded.getSecond());
+            }
+        }
+        if (wanted.isEmpty()) {
+            return;
+        }
+        ItemSnapshotList<Post> snapshot = adapter.snapshot();
+        for (int i = 0; i < snapshot.size() && !wanted.isEmpty(); i++) {
+            Post post = snapshot.get(i);
+            if (post == null) {
+                continue;
+            }
+            Integer page = wanted.remove(post.getFullName());
+            if (page != null && !post.getGallery().isEmpty()) {
+                post.setGalleryPageIndex(Math.min(page, post.getGallery().size() - 1));
+            }
+        }
+    }
+
     protected final int positionOfFullName(@Nullable String fullName) {
         PostRecyclerViewAdapter adapter = getPostAdapter();
         if (fullName == null || fullName.isEmpty() || adapter == null) {

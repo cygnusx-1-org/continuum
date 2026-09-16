@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.resume
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.os.Looper
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
@@ -46,6 +47,19 @@ class ResumeStateTest {
 
     /** A second one, for a stack that is three deep. */
     class TopScreenActivity : Activity()
+
+    /**
+     * A screen that records a gallery page along with a position of its own, so a test can tell the
+     * two apart: stripping the page must not take the rest of the screen's state with it.
+     */
+    class GalleryScreenActivity : Activity(), Restorable {
+        override fun saveResumeState(out: Bundle) {
+            out.putInt("scrollY", 400)
+            out.putInt(ResumeGalleryPage.KEY_POST_DETAIL, 2)
+        }
+
+        override fun restoreResumeState(state: Bundle) = Unit
+    }
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val snapshot = File(context.filesDir, "resume_state.json")
@@ -124,6 +138,11 @@ class ResumeStateTest {
                 .put("stack", JSONArray().apply { stack.forEach { put(it) } })
                 .toString())
     }
+
+    private fun galleryScreen() =
+        Robolectric.buildActivity(
+            GalleryScreenActivity::class.java,
+            Intent(context, GalleryScreenActivity::class.java)).get()
 
     private val mainActivity = MainActivity::class.java.name
     private val upperScreen = UpperScreenActivity::class.java.name
@@ -357,6 +376,71 @@ class ResumeStateTest {
         assertEquals(3, stack.length())
         assertEquals("pics",
             stack.getJSONObject(1).getJSONObject("extras").getJSONObject("EN").getString("v"))
+    }
+
+    // ------------------------------------------------------------------ seeding from recents
+
+    @Test
+    fun `a recreated top screen seeds the whole stack under it, not under a namesake below it`() {
+        // Recents with the process dead: the system rebuilds only the top screen and seedFromSnapshot
+        // puts back what was under it. Matching on the class alone found the LOWEST entry of that
+        // class, so a stack that holds two of them -- a post opened from the media view opened from a
+        // post, which this feature makes routine -- seeded from the wrong one and silently dropped
+        // every screen above it. The next capture then wrote that shortened stack over the snapshot,
+        // and the session the user came back to alternated between two depths.
+        writeSnapshot(
+            stack = arrayOf(
+                entry(mainActivity),
+                entry(upperScreen, extras = mapOf("EN" to "pics")),
+                entry(topScreen),
+                entry(upperScreen, extras = mapOf("EN" to "aww"))))
+
+        seedFeedUnder(upperScreenShowing("aww"))
+        ResumeState.capture(context)
+
+        val stack = stackOnDisk()
+        assertEquals(4, stack.length())
+        assertEquals("pics",
+            stack.getJSONObject(1).getJSONObject("extras").getJSONObject("EN").getString("v"))
+        assertEquals(topScreen, stack.getJSONObject(2).getString("cls"))
+        assertEquals("aww",
+            stack.getJSONObject(3).getJSONObject("extras").getJSONObject("EN").getString("v"))
+    }
+
+    @Test
+    fun `the screen it seeds under is the one the extras name, not merely one of its class`() {
+        // Which of two namesakes this is comes from isSameScreen -- the identity where the screen
+        // offers one, its extras where it does not -- the same rule a rotation uses to decide
+        // whether a rebuilt screen is the one a destroyed entry belonged to. Coming back on the
+        // LOWER of the two has to seed only the feed under it, or the screens the user had above
+        // would be replayed a second time on top of themselves.
+        writeSnapshot(
+            stack = arrayOf(
+                entry(mainActivity),
+                entry(upperScreen, extras = mapOf("EN" to "pics")),
+                entry(topScreen),
+                entry(upperScreen, extras = mapOf("EN" to "aww"))))
+
+        seedFeedUnder(upperScreenShowing("pics"))
+        ResumeState.capture(context)
+
+        val stack = stackOnDisk()
+        assertEquals(2, stack.length())
+        assertEquals("pics",
+            stack.getJSONObject(1).getJSONObject("extras").getJSONObject("EN").getString("v"))
+    }
+
+    @Test
+    fun `a stack with one screen of a class still seeds under it`() {
+        // The ordinary shape, kept so that reaching for the topmost match cannot break the case
+        // that already worked.
+        writeSnapshot(
+            stack = arrayOf(entry(mainActivity), entry(upperScreen, extras = mapOf("EN" to "pics"))))
+
+        seedFeedUnder(upperScreenShowing("pics"))
+        ResumeState.capture(context)
+
+        assertEquals(2, stackOnDisk().length())
     }
 
     // ------------------------------------------------------------------ launch hold
@@ -598,5 +682,57 @@ class ResumeStateTest {
         ResumeState.clearAccount(context, "alice")
 
         assertFalse(snapshot.exists())
+    }
+
+    // ------------------------------------------------------------- gallery page
+
+    /**
+     * A stack of the feed, a screen above it that already recorded a gallery page and a scroll
+     * position, and [top] above that. The recents path: the system rebuilds only the top screen and
+     * seedFromSnapshot restores what was under it, which is the only way to a live stack rooted at
+     * the feed without standing a real MainActivity up.
+     */
+    private fun stackUnder(top: Activity) {
+        writeSnapshot(
+            "alice", 1,
+            entry(mainActivity),
+            entry(upperScreen, mapOf("EN" to "pics"),
+                state = mapOf(ResumeGalleryPage.KEY_POST_DETAIL to 4, "scrollY" to 900)),
+            entry(top.javaClass.name))
+        ResumeState.recordCreated(top)
+        ResumeState.seedFromSnapshot(top)
+        shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    @Test
+    fun `only the screen that was on top keeps its gallery page`() {
+        // The user was looking at one screen. The screens under it are asked to describe themselves
+        // too -- that is how the stack comes back -- but the carousels they hold were last touched
+        // some time ago, and putting them back to those images is not a resume, it is a screen the
+        // user never left being rearranged behind their back.
+        stackUnder(galleryScreen())
+
+        ResumeState.capture(context)
+
+        val stack = stackOnDisk()
+        val under = stack.getJSONObject(1).getJSONObject("state")
+        val top = stack.getJSONObject(2).getJSONObject("state")
+        assertFalse("a screen below the top kept a gallery page",
+            under.has(ResumeGalleryPage.KEY_POST_DETAIL))
+        assertTrue("the top screen lost its gallery page",
+            top.has(ResumeGalleryPage.KEY_POST_DETAIL))
+    }
+
+    @Test
+    fun `stripping the page leaves the rest of the screen's state alone`() {
+        // The screens underneath still have to come back where they were. Only the gallery page is
+        // theirs to lose, and a strip that took the scroll position with it would trade one wrong
+        // restore for a worse one.
+        stackUnder(galleryScreen())
+
+        ResumeState.capture(context)
+
+        val under = stackOnDisk().getJSONObject(1).getJSONObject("state")
+        assertTrue("the screen below lost its scroll position too", under.has("scrollY"))
     }
 }

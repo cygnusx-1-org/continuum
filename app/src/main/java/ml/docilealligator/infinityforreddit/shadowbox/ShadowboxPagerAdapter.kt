@@ -110,10 +110,14 @@ class ShadowboxPagerAdapter(
         return when (post.postType) {
             Post.IMAGE_TYPE -> {
                 val url = post.url
-                if (url != null) {
-                    ShadowboxImagePageFragment.newInstance(postIndex, blur, url, false)
-                } else {
-                    ShadowboxPreviewPageFragment.newInstance(postIndex, blur, ShadowboxPreviewPageFragment.KIND_LINK)
+                when {
+                    // An imgchest or imgbb post's url is an album landing page, so there is nothing
+                    // to show inline until it has been scraped; the preview page hands it to the
+                    // album viewer, the way a short clip's page hands off to the player.
+                    post.isImageHostAlbum ->
+                        ShadowboxPreviewPageFragment.newInstance(postIndex, blur, ShadowboxPreviewPageFragment.KIND_ALBUM)
+                    url != null -> ShadowboxImagePageFragment.newInstance(postIndex, blur, url, false)
+                    else -> ShadowboxPreviewPageFragment.newInstance(postIndex, blur, ShadowboxPreviewPageFragment.KIND_LINK)
                 }
             }
             Post.GIF_TYPE -> {

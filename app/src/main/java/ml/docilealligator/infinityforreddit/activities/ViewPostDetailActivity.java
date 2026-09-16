@@ -48,6 +48,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
+import ml.docilealligator.infinityforreddit.ImageOkHttpClient;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
@@ -204,7 +205,8 @@ public class ViewPostDetailActivity extends BaseActivity
 
         makeOpaqueIfOwnWindow();
 
-        BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext()));
+        BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext(),
+                ImageOkHttpClient.get(this.getApplicationContext())));
 
         binding = ActivityViewPostDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -1043,7 +1045,11 @@ public class ViewPostDetailActivity extends BaseActivity
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
-        if (!state.containsKey(ViewPostDetailFragmentNew.EXTRA_RESUME_COMMENT_FULLNAME)) {
+        // Either shape of anchor: a comment the user was on, or the flag that says they were
+        // above the comments entirely, which carries no comment to name.
+        if (!state.containsKey(ViewPostDetailFragmentNew.EXTRA_RESUME_COMMENT_FULLNAME)
+                && !state.containsKey(ViewPostDetailFragmentNew.EXTRA_RESUME_ABOVE_COMMENTS)
+                && !state.containsKey(ViewPostDetailFragmentNew.EXTRA_RESUME_GALLERY_PAGE)) {
             return;
         }
         resumeCommentState = state;

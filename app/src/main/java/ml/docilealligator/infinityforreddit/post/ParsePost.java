@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
+import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.MlbUrlUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
@@ -913,6 +914,9 @@ public class ParsePost {
                 }
             } else if (post.getPostType() == Post.LINK_TYPE) {
                 applyExternalVideoHost(post, data, url, uri, path, false);
+                if (post.getPostType() == Post.LINK_TYPE) {
+                    applyExternalImageHost(post, uri, url);
+                }
             }
         }
 
@@ -1196,6 +1200,73 @@ public class ParsePost {
             post.setVideoUrl(url);
             post.setVideoDownloadUrl(url);
         }
+    }
+
+    /**
+     * Promotes a link post whose URL is an image host's landing page to an image post.
+     *
+     * <p>Reddit types {@code imgchest.com/p/<id>} and {@code imgbb.com/<id>} as
+     * {@code post_hint: link}, correctly — the URL is an HTML page, and the image is on a separate
+     * CDN host. It does still generate a preview for them, which is what the promoted image card
+     * draws; the caller only reaches here on the {@link Post#LINK_TYPE} arm, so a post Reddit gave
+     * no preview stays a link rather than becoming an image card with an empty slot.
+     *
+     * <p>The post's own {@code url} is deliberately not rewritten, for the same reason as the clip
+     * hosts: copy link, open in browser and share should keep naming the page the poster linked.
+     * Finding the images behind it needs a network round trip, so that is left to
+     * {@link FetchImageHostMedia}, which runs when the album is opened rather than when the feed is
+     * bound — the card already has Reddit's preview to draw, so nothing here needs the real
+     * images. There is consequently no point at which a post could be demoted back to a link:
+     * a failed scrape surfaces as the album viewer's retry view, and a failed download as a
+     * download error.
+     */
+    private static void applyExternalImageHost(Post post, Uri uri, String url) {
+        ImageHostUtils.Host imageHost = ImageHostUtils.hostOf(uri);
+        if (imageHost == null) {
+            return;
+        }
+
+        String albumId = ImageHostUtils.albumIdOf(imageHost, uri);
+        if (albumId == null) {
+            return;
+        }
+
+        post.setImageHost(imageHost);
+        post.setImageHostId(albumId);
+
+        // A gallery post, not an image post, because that is what it is: the card has to swipe, and
+        // the one that does is already built.
+        //
+        // The preview is what decides whether it can be one at all, and that decision must not
+        // depend on the album cache below: a post promoted only once its album happened to be
+        // cached would render as a link card on one refresh and a gallery card on the next, which
+        // is exactly the redraw this feature exists to remove.
+        Post.Preview cover = post.getPreviews().isEmpty() ? null : post.getPreviews().get(0);
+        if (cover == null) {
+            return;
+        }
+
+        // An album already read this session comes back whole rather than being seeded with its
+        // cover and scraped a second time. Every screen re-parses the post -- a feed refresh, a
+        // vote, the detail screen refetching it by id on a resume -- and a re-parse that dropped
+        // back to the single cover tile is what made a carousel the user had swiped snap to image
+        // one, stop being swipeable until the page had been read again, and report settling on
+        // tile zero, which overwrote the page they were on.
+        ArrayList<Post.Gallery> resolved = FetchImageHostMedia.cachedGallery(
+                url, post.getSubredditName(), post.getId());
+        if (resolved != null) {
+            post.setResolvedImageHostGallery(resolved);
+        } else {
+            // Not read yet. How many images it holds cannot be known here -- the URL names the
+            // album, not its contents, and finding out means reading the page -- so the gallery is
+            // seeded with the cover Reddit previewed for us and the rest is filled in when the row
+            // resolves it. See Post#setResolvedImageHostGallery.
+            ArrayList<Post.Gallery> seed = new ArrayList<>(1);
+            seed.add(new Post.Gallery("image/jpg", cover.getPreviewUrl(), cover.getPreviewUrl(),
+                    post.getSubredditName() + "-" + post.getId() + ".jpg", "", ""));
+            post.setGallery(seed);
+        }
+        post.setPostType(Post.GALLERY_TYPE);
     }
 
     // Package-private so FetchRemovedPost can rebuild a recovered redgifs post the same way a live

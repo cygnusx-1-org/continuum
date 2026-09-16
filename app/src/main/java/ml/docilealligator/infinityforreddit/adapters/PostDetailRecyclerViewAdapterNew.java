@@ -81,6 +81,7 @@ import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.FilteredPostsActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
+import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewSubredditDetailActivity;
@@ -119,6 +120,7 @@ import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntr
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifPlugin;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
+import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
 import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -131,6 +133,7 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
@@ -165,6 +168,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final Retrofit mOauthRetrofit;
     private final Provider<StreamableAPI> mStreamableApiProvider;
     private final OkHttpClient mShortClipOkHttpClient;
+    private final OkHttpClient mImageHostOkHttpClient;
     private final RedditDataRoomDatabase mRedditDataRoomDatabase;
     private final SharedPreferences mPostHistorySharedPreferences;
     private final VideoMuteManager mVideoMuteManager;
@@ -267,6 +271,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                                          Retrofit oauthRetrofit, Retrofit retrofit,
                                          Retrofit redgifsRetrofit, Provider<StreamableAPI> streamableApiProvider,
                                          OkHttpClient shortClipOkHttpClient,
+                                         OkHttpClient imageHostOkHttpClient,
                                          RedditDataRoomDatabase redditDataRoomDatabase, RequestManager glide,
                                          VideoMuteManager videoMuteManager,
                                          boolean separatePostAndComments, @Nullable String accessToken,
@@ -285,6 +290,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mOauthRetrofit = oauthRetrofit;
         mStreamableApiProvider = streamableApiProvider;
         mShortClipOkHttpClient = shortClipOkHttpClient;
+        mImageHostOkHttpClient = imageHostOkHttpClient;
         mRedditDataRoomDatabase = redditDataRoomDatabase;
         mVideoMuteManager = videoMuteManager;
         mGlide = glide;
@@ -1135,7 +1141,12 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     ((PostDetailGalleryViewHolder) holder).binding.noPreviewPostTypeImageViewItemPostDetailGallery.setImageResource(R.drawable.ic_gallery_day_night_24dp);
                 } else {
                     ((PostDetailGalleryViewHolder) holder).binding.galleryFrameLayoutItemPostDetailGallery.setVisibility(View.VISIBLE);
-                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(R.string.image_index_in_gallery, 1, gallerySize));
+                    // The image the user swiped to, not image one -- the feed records it on the
+                    // post and so does this screen, so opening a post from a gallery card lands on
+                    // the picture that was showing, and a resume comes back to it.
+                    int galleryPage = Math.max(0, Math.min(currentGalleryPage(), gallerySize - 1));
+                    ((PostDetailGalleryViewHolder) holder).binding.imageIndexTextViewItemPostDetailGallery.setText(
+                            mActivity.getString(R.string.image_index_in_gallery, galleryPage + 1, gallerySize));
                     Post.Preview preview = getSuitablePreview(mPost.getPreviews());
                     if (preview != null) {
                         if (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0) {
@@ -1159,21 +1170,53 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                             mAutoplay && !blurGallery && !mShowGalleryMediaAsGrid
                                     && !((!mAutoplayNsfwVideos && mPost.isNSFW()) || mPost.isSpoiler())
                                     && mPost.hasGalleryGif());
-                    // Delay setGalleryImages until the gallery RecyclerView has been
-                    // laid out with its final width. In the split post/comments view,
-                    // the RecyclerView may have width=0 during initial bind because the
-                    // weighted LinearLayout hasn't distributed widths yet. Without this,
-                    // gallery items get bound at a tiny size and Glide decodes images at
-                    // that resolution, causing severe pixelation.
                     ArrayList<Post.Gallery> gallery = mPost.getGallery();
-                    int rvWidth = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getWidth();
-                    if (rvWidth > 0) {
+                    RecyclerView galleryList = ((PostDetailGalleryViewHolder) holder)
+                            .binding.galleryRecyclerViewItemPostDetailGallery;
+                    // Asked before the images are handed over, because afterwards the answer is
+                    // always yes. See the scroll below for what it decides.
+                    boolean sameImages = ((PostDetailGalleryViewHolder) holder).adapter
+                            .showsImages(gallery);
+                    // Images and page together, in that order and in one pass. Replacing the images
+                    // lays the carousel out from item zero, so a page applied before them is
+                    // discarded by the layout that follows -- which is how the split view, where
+                    // the images are deferred, lost a resumed page.
+                    Runnable applyImagesAndPage = () -> {
                         ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery);
+                        // One rule for this and the feed card, in GalleryPagePlacement: they draw
+                        // the same carousel from the same recorded page, and while the condition
+                        // lived inline in both binds it drifted apart.
+                        RecyclerView.LayoutManager galleryLayout = galleryList.getLayoutManager();
+                        boolean atRightPage = galleryLayout instanceof LinearLayoutManagerBugFixed
+                                && ((LinearLayoutManagerBugFixed) galleryLayout)
+                                        .findFirstVisibleItemPosition() == galleryPage;
+                        if (!mShowGalleryMediaAsGrid && GalleryPagePlacement.shouldApplyPage(
+                                !sameImages, atRightPage,
+                                ((PostDetailGalleryViewHolder) holder).galleryTouchedByUser,
+                                galleryList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE)) {
+                            if (galleryLayout instanceof LinearLayoutManagerBugFixed) {
+                                // With an offset of zero, so the tile lands flush at the leading
+                                // edge in the layout pass that follows. Plain scrollToPosition only
+                                // asks for the tile to be visible, which leaves it off-snap and
+                                // lets PagerSnapHelper animate the rest -- the shift from one image
+                                // to another that a restored page must not have.
+                                ((LinearLayoutManagerBugFixed) galleryLayout)
+                                        .scrollToPositionWithOffset(galleryPage, 0);
+                            } else {
+                                galleryList.scrollToPosition(galleryPage);
+                            }
+                        }
+                    };
+                    // Deferred until the gallery RecyclerView has been laid out with its final
+                    // width. In the split post/comments view it may have width=0 during the initial
+                    // bind, because the weighted LinearLayout has not distributed widths yet, and
+                    // tiles bound at that size decode at it -- the severe pixelation this avoids.
+                    if (galleryList.getWidth() > 0) {
+                        applyImagesAndPage.run();
                     } else {
-                        ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.post(() ->
-                                ((PostDetailGalleryViewHolder) holder).adapter.setGalleryImages(gallery)
-                        );
+                        galleryList.post(applyImagesAndPage);
                     }
+                    resolveImageHostGallery((PostDetailGalleryViewHolder) holder);
                 }
 
                 RecyclerView.LayoutManager layoutManager = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager();
@@ -1522,6 +1565,73 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         typeTextView.setBorderColor(color);
     }
 
+    /**
+     * Fills a seeded image-host album in with its real images, the post-detail half of what the feed
+     * card does; see {@code PostRecyclerViewAdapter.resolveImageHostGallery}.
+     *
+     * There is one post on this screen and it lives as long as the screen does, so there is no
+     * holder to recycle and no request to cancel -- the flag on the post is what stops it scraping
+     * twice, and the shared cache means arriving here from the feed costs nothing at all.
+     */
+    /**
+     * The image the carousel should be on, from the fragment that owns it.
+     *
+     * Not from the post: this screen's post object is replaced on every update, so reading it there
+     * would put the carousel back to image one the first time the user voted.
+     */
+    private int currentGalleryPage() {
+        return mFragment == null ? 0 : mFragment.getCurrentGalleryPage();
+    }
+
+    /**
+     * Whether the carousel is drawing the single placeholder tile an image-host album is seeded
+     * with, rather than the album itself.
+     *
+     * A one-tile carousel reports settling on tile zero as soon as it is laid out, and that is not
+     * the user moving it. Taken as one it overwrites the page they were actually on -- which is
+     * every time the post object is replaced, because the replacement is a fresh parse that has not
+     * read the album page.
+     */
+    private boolean showingSeededAlbum() {
+        Post post = mPost;
+        return post != null && post.isImageHostAlbum() && !post.isImageHostGalleryResolved();
+    }
+
+    private void resolveImageHostGallery(PostDetailGalleryViewHolder holder) {
+        Post post = mPost;
+        if (post == null || post.isImageHostGalleryResolved()) {
+            return;
+        }
+        ImageHostUtils.Host imageHost = post.getImageHost();
+        String pageUrl = post.getUrl();
+        if (imageHost == null || pageUrl == null) {
+            return;
+        }
+
+        FetchImageHostMedia.fetchAlbumInRecyclerViewAdapter(mExecutor, new Handler(),
+                mImageHostOkHttpClient, imageHost, pageUrl, new FetchImageHostMedia.Cancellable(),
+                media -> {
+                    post.setResolvedImageHostGallery(FetchImageHostMedia.toGallery(
+                            media, post.getSubredditName(), post.getId()));
+                    if (mPost == post) {
+                        holder.adapter.setGalleryImages(post.getGallery());
+                        // The remembered page, not page one: the seeded card held a single tile, so
+                        // resolving it would otherwise snap a resumed album back to its cover.
+                        int size = post.getGallery().size();
+                        int page = Math.max(0, Math.min(currentGalleryPage(), size - 1));
+                        holder.binding.imageIndexTextViewItemPostDetailGallery.setText(mActivity.getString(
+                                R.string.image_index_in_gallery, page + 1, size));
+                        // Not under a finger: the album landing while the user is already swiping
+                        // the cover must not pull the carousel back.
+                        if (page > 0 && !mShowGalleryMediaAsGrid
+                                && holder.binding.galleryRecyclerViewItemPostDetailGallery.getScrollState()
+                                        == RecyclerView.SCROLL_STATE_IDLE) {
+                            holder.binding.galleryRecyclerViewItemPostDetailGallery.scrollToPosition(page);
+                        }
+                    }
+                });
+    }
+
     public void provideItemWidth(int width) {
         itemWidth = width;
     }
@@ -1595,15 +1705,23 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 intent.putExtra(ViewVideoActivity.EXTRA_IS_NSFW, post.isNSFW());
                 mActivity.startActivity(intent);
             } else if (post.getPostType() == Post.IMAGE_TYPE) {
-                Intent intent = new Intent(mActivity, ViewImageOrGifActivity.class);
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_IMAGE_URL_KEY, post.getUrl());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, post.getSubredditName()
-                        + "-" + post.getId() + ".jpg");
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
-                intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
-                mActivity.startActivity(intent);
+                // An imgchest or imgbb post's url is the album's landing page rather than an image,
+                // and it can address twenty of them, so it goes to the album pager. Handing that
+                // url to the single-image viewer would hand Glide an HTML document.
+                Intent albumIntent = ViewImgurMediaActivity.newImageHostAlbumIntent(mActivity, post);
+                if (albumIntent == null) {
+                    Intent intent = new Intent(mActivity, ViewImageOrGifActivity.class);
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_IMAGE_URL_KEY, post.getUrl());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, post.getSubredditName()
+                            + "-" + post.getId() + ".jpg");
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_POST_ID_KEY, post.getId());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, post.getSubredditName());
+                    intent.putExtra(ViewImageOrGifActivity.EXTRA_IS_NSFW, post.isNSFW());
+                    mActivity.startActivity(intent);
+                } else {
+                    mActivity.startActivity(albumIntent);
+                }
             } else if (post.getPostType() == Post.GIF_TYPE) {
                 if (post.getMp4Variant() != null) {
                     Intent intent = new Intent(mActivity, ViewVideoActivity.class);
@@ -1635,6 +1753,16 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 intent.putExtra(LinkResolverActivity.EXTRA_POST_TITLE_KEY, post.getTitle());
                 mActivity.startActivity(intent);
             } else if (post.getPostType() == Post.GALLERY_TYPE) {
+                // An image-host album whose page has not been read yet has only its cover tile, so the
+                // gallery viewer would show one picture and call it the album. The album viewer reads
+                // the page itself, which is the whole point of it.
+                if (post.isImageHostAlbum() && !post.isImageHostGalleryResolved()) {
+                    Intent albumIntent = ViewImgurMediaActivity.newImageHostAlbumIntent(mActivity, post);
+                    if (albumIntent != null) {
+                        mActivity.startActivity(albumIntent);
+                        return;
+                    }
+                }
                 Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
@@ -3082,6 +3210,17 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     }
 
     class PostDetailGalleryViewHolder extends PostDetailBaseViewHolder implements ToroPlayer {
+
+        /**
+         * Whether the user has moved this carousel themselves.
+         *
+         * A rebind must not drag a carousel out from under a finger, but "under a finger" is not the
+         * same as "not at rest": a carousel settles after a programmatic scroll and after a layout
+         * too, and one that has never been touched is simply not where it has been told to be. That
+         * distinction is the difference between a resumed gallery landing on its image and sitting
+         * on image one.
+         */
+        boolean galleryTouchedByUser;
         ItemPostDetailGalleryBinding binding;
         PostGalleryTypeImageRecyclerViewAdapter adapter;
         GalleryGifAutoplay toroPlayer;
@@ -3162,8 +3301,16 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     super.onScrollStateChanged(recyclerView, newState);
                     if (newState == RecyclerView.SCROLL_STATE_IDLE
                             && layoutManager instanceof LinearLayoutManagerBugFixed) {
-                        toroPlayer.onGalleryPageSettled(
-                                ((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition());
+                        int settled = ((LinearLayoutManagerBugFixed) layoutManager)
+                                .findFirstVisibleItemPosition();
+                        toroPlayer.onGalleryPageSettled(settled);
+                        // Reported to the fragment, which owns it: the post this adapter holds is
+                        // replaced on every update, so a value written only there is lost the next
+                        // time the user votes, saves, or the thread refreshes.
+                        if (settled != RecyclerView.NO_POSITION && mFragment != null
+                                && !showingSeededAlbum()) {
+                            mFragment.onGalleryPageSettled(settled);
+                        }
                     }
                 }
 
@@ -3195,6 +3342,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                             downX = e.getRawX();
                             downY = e.getRawY();
                             downTime = System.currentTimeMillis();
+                            galleryTouchedByUser = true;
 
                             if (mActivity.mSliderPanel != null) {
                                 mActivity.mSliderPanel.requestDisallowInterceptTouchEvent(true);

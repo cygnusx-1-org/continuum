@@ -21,16 +21,21 @@ import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.post.RefreshPrewarmer
 
 /**
- * Decodes compact thumbnails into Glide's memory cache before their rows bind, so a row arrives with
- * its picture already in the box rather than a spinner that the picture then replaces.
+ * Decodes a feed row's picture into Glide's memory cache before the row binds, so it arrives with the
+ * picture already in the box rather than a blank that the picture then replaces.
+ *
+ * Both families, since the pop-in is the same on either: a compact row's square thumbnail and a
+ * card's full-width preview. Which of them a post gets, and at what size, is
+ * [PostRecyclerViewAdapter.previewPreloadRequest]'s answer, not this class's.
  *
  * It comes at that from two sides. While the list scrolls, the rows just past the edge it is moving
  * towards are warmed ([PreloadWindow]). And a refresh is held until the screen it opens on has been
  * warmed ([prewarm]), so a feed opens, or a pull-to-refresh swaps, with every thumbnail in place.
  *
- * Every request comes from [PostRecyclerViewAdapter.compactThumbnailPreloadRequest], the builder the
- * row's own load uses. That is the whole trick: Glide's memory cache is keyed on the url, the size and
- * the transformation, so a bitmap warmed any other way would sit unused while the row decoded its own.
+ * Every request comes from [PostRecyclerViewAdapter.previewPreloadRequest], the builder the row's own
+ * load uses, at the size the row will decode to. That is the whole trick: Glide's memory cache is keyed
+ * on the url, the size and the transformation, so a bitmap warmed any other way would sit unused while
+ * the row decoded its own.
  *
  * Main thread only, like the adapter it reads.
  */
@@ -144,21 +149,28 @@ class CompactThumbnailPreloader(
         windowLast = last
         windowScrollingUp = scrollingUp
         windowItemCount = itemCount
-        val positions = if (visible == null) emptyList() else PreloadWindow.positions(first, last, itemCount, scrollingUp)
+        val positions = if (visible == null) {
+            emptyList()
+        } else {
+            PreloadWindow.positions(first, last, itemCount, scrollingUp, adapter.preloadRowsAhead())
+        }
 
-        val box = adapter.compactThumbnailBoxSizePx
         val wanted = HashSet<String>()
         for (position in positions) {
             // peek, not getItem: getItem tells Paging the row is being looked at, and would have it
             // fetch pages for rows that are only being warmed.
             val post = adapter.peek(position) ?: continue
+            // Independent of the picture: an image-host album's tiles come from its page rather than
+            // from Glide, and reading that page ahead of the row is what stops the card arriving as
+            // an unswipeable 1/1 placeholder.
+            adapter.prefetchImageHostAlbum(post)
             val key = post.fullName
             wanted.add(key)
             if (targets.containsKey(key)) {
                 continue
             }
-            val request = adapter.compactThumbnailPreloadRequest(post) ?: continue
-            targets[key] = request.preload(box, box)
+            val preload = adapter.previewPreloadRequest(post) ?: continue
+            targets[key] = preload.request.preload(preload.width, preload.height)
         }
 
         val iterator = targets.entries.iterator()
@@ -189,11 +201,18 @@ class CompactThumbnailPreloader(
             return
         }
 
-        val box = adapter.compactThumbnailBoxSizePx
         val start = anchorIndex(posts)?.let { max(0, it - ANCHOR_ROWS_ABOVE) } ?: 0
-        val end = min(posts.size, start + firstScreenPostCount(box))
-        // A card layout, or data saving with previews off, has nothing here, and so no wait.
-        val requests = (start until end).mapNotNull { adapter.compactThumbnailPreloadRequest(posts[it]) }
+        // Bounded the same way the scroll window is, and for the same reason: the count from
+        // firstScreenPostCount is in compact rows, and a screen's worth of card previews is both far
+        // fewer rows and far more pixels than the cache holds. Unbounded, a card layout would hold
+        // the refresh waiting on two dozen full-width decodes that evict each other.
+        val budget = min(firstScreenPostCount(adapter.compactThumbnailBoxSizePx), adapter.preloadRowsAhead())
+        val end = min(posts.size, start + budget)
+        // Data saving with previews off, or a feed of text posts, has nothing here and so no wait.
+        for (index in start until end) {
+            adapter.prefetchImageHostAlbum(posts[index])
+        }
+        val requests = (start until end).mapNotNull { adapter.previewPreloadRequest(posts[it]) }
         if (requests.isEmpty()) {
             done.set(Unit)
             return
@@ -223,9 +242,9 @@ class CompactThumbnailPreloader(
             }
         }
         mainHandler.postDelayed({ done.set(Unit) }, REFRESH_HOLD_CAP_MS)
-        for (request in requests) {
-            // A thumbnail already in memory reports inside preload(), before the loop moves on.
-            request.addListener(listener).preload(box, box)
+        for (preload in requests) {
+            // A picture already in memory reports inside preload(), before the loop moves on.
+            preload.request.addListener(listener).preload(preload.width, preload.height)
         }
     }
 
@@ -244,6 +263,10 @@ class CompactThumbnailPreloader(
      * An upper bound on how many posts the first screen can show. Every compact row is at least its box
      * plus the 8dp above and below it, so dividing by that overcounts rather than under; the allowance
      * on top covers read posts and non-media posts the feed filters out after the page is loaded.
+     *
+     * Derived from the compact row for both layouts, deliberately: a card is taller, so counting in
+     * compact rows overcounts there too, and warming a few posts past the fold costs one cache entry
+     * each while undercounting would leave the first card of the screen blank -- the thing this is for.
      */
     private fun firstScreenPostCount(box: Int): Int {
         val metrics = recyclerView.resources.displayMetrics
@@ -307,16 +330,31 @@ internal object PreloadWindow {
     /**
      * [lastVisible] may be past the posts -- the load-state footer sits after them in the same list --
      * so it is clamped to the last post.
+     *
+     * [maxAhead] is how many rows this layout can afford to hold warmed at once, which is a question
+     * about the size of each row's picture rather than about the list: see
+     * `PostRecyclerViewAdapter.preloadRowsAhead`. It caps the run ahead and, when it is smaller than
+     * [MIN_AHEAD], the floor too -- a layout that can only hold three must not be given twelve.
      */
-    fun positions(firstVisible: Int, lastVisible: Int, itemCount: Int, scrollingUp: Boolean): List<Int> {
-        if (itemCount <= 0 || firstVisible < 0 || lastVisible < 0) {
+    @JvmOverloads
+    fun positions(
+        firstVisible: Int,
+        lastVisible: Int,
+        itemCount: Int,
+        scrollingUp: Boolean,
+        maxAhead: Int = MAX_AHEAD,
+    ): List<Int> {
+        if (itemCount <= 0 || firstVisible < 0 || lastVisible < 0 || maxAhead <= 0) {
             return emptyList()
         }
         val last = min(lastVisible, itemCount - 1)
         val first = min(firstVisible, last)
-        val ahead = (SCREENS_AHEAD * (last - first + 1)).coerceIn(MIN_AHEAD, MAX_AHEAD)
-        val belowCount = if (scrollingUp) BEHIND else ahead
-        val aboveCount = if (scrollingUp) ahead else BEHIND
+        val ahead = (SCREENS_AHEAD * (last - first + 1))
+            .coerceIn(min(MIN_AHEAD, maxAhead), maxAhead)
+        // The short run the other way is for a change of direction, so it is bounded the same way.
+        val behind = min(BEHIND, maxAhead)
+        val belowCount = if (scrollingUp) behind else ahead
+        val aboveCount = if (scrollingUp) ahead else behind
         val below = (last + 1..min(itemCount - 1, last + belowCount)).toList()
         val above = (first - 1 downTo max(0, first - aboveCount)).toList()
         return if (scrollingUp) above + below else below + above

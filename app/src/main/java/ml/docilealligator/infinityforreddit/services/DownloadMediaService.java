@@ -26,6 +26,7 @@ import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.annotation.WorkerThread;
 import androidx.core.app.NotificationChannelCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -53,10 +54,12 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.DownloadedMediaDeleteActionBroadcastReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
+import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.DocumentTreeUtils;
+import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.NotificationUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -80,6 +83,9 @@ public class DownloadMediaService extends JobService {
     public static final String EXTRA_SHORT_CLIP_HOST = "ESCH";
     public static final String EXTRA_SHORT_CLIP_ID = "ESCI";
     public static final String EXTRA_SHORT_CLIP_PAGE_URL = "ESCPU";
+    /** An {@link ImageHostUtils.Host} name, set instead of {@link #EXTRA_URL} for an album. */
+    public static final String EXTRA_IMAGE_HOST = "EIH";
+    public static final String EXTRA_IMAGE_HOST_PAGE_URL = "EIHPU";
     public static final String EXTRA_IS_ALL_GALLERY_MEDIA = "EIAGM";
     // When set, the media is written to the cache and shared instead of being saved to the
     // user's download folder.
@@ -103,6 +109,7 @@ public class DownloadMediaService extends JobService {
     private static final int ERROR_CANNOT_FETCH_STREAMABLE_VIDEO_LINK = 4;
     private static final int ERROR_INVALID_ARGUMENT = 5;
     private static final int ERROR_CANNOT_FETCH_SHORT_CLIP_VIDEO_LINK = 6;
+    private static final int ERROR_CANNOT_FETCH_IMAGE_HOST_LINK = 7;
 
     private static int JOB_ID = 20000;
 
@@ -117,6 +124,9 @@ public class DownloadMediaService extends JobService {
     @Inject
     @Named("short_clip")
     OkHttpClient mShortClipOkHttpClient;
+    @Inject
+    @Named("image_host")
+    OkHttpClient mImageHostOkHttpClient;
     @Inject
     @Named("default")
     SharedPreferences mSharedPreferences;
@@ -146,9 +156,19 @@ public class DownloadMediaService extends JobService {
         int currentMediaType = -1;
 
         if (post.getPostType() == Post.IMAGE_TYPE) {
-            url = post.getUrl();
             currentMediaType = EXTRA_MEDIA_TYPE_IMAGE;
-            extras.putString(EXTRA_URL, url);
+            ImageHostUtils.Host imageHost = post.getImageHost();
+            if (imageHost == null) {
+                url = post.getUrl();
+                extras.putString(EXTRA_URL, url);
+            } else {
+                // An image host's url is the album's landing page, so there is no file to ask for
+                // until it has been scraped. Deliberately no EXTRA_URL: downloadMedia treats a null
+                // one as "resolve me", and what it resolves to is the album's first image -- the
+                // cover, which is the one the card the user pressed "download" on was showing.
+                extras.putString(EXTRA_IMAGE_HOST, imageHost.name());
+                extras.putString(EXTRA_IMAGE_HOST_PAGE_URL, post.getUrl());
+            }
             extras.putInt(EXTRA_MEDIA_TYPE, currentMediaType);
             extras.putString(EXTRA_SUBREDDIT_NAME, post.getSubredditName());
             extras.putInt(EXTRA_IS_NSFW, post.isNSFW() ? 1 : 0);
@@ -638,6 +658,21 @@ public class DownloadMediaService extends JobService {
         " (" + (mediaType == EXTRA_MEDIA_TYPE_VIDEO ? "VIDEO" :
         mediaType == EXTRA_MEDIA_TYPE_GIF ? "GIF" : "IMAGE") + ")" +
         ", fileName=" + fileName + ", isNsfw=" + isNsfw);
+
+        String imageHostName = intent.getString(EXTRA_IMAGE_HOST, null);
+        String imageHostPageUrl = intent.getString(EXTRA_IMAGE_HOST_PAGE_URL, null);
+        if (fileUrl == null && imageHostName != null && imageHostPageUrl != null) {
+            // An imgchest or imgbb post: its url is a landing page, and the file being asked for is
+            // the album's first image, which is the cover the pressed card was showing.
+            fileUrl = fetchImageHostCoverUrl(imageHostName, imageHostPageUrl);
+            if (fileUrl == null) {
+                downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType,
+                        null,
+                        ERROR_CANNOT_FETCH_IMAGE_HOST_LINK,
+                        multipleDownloads);
+                return false;
+            }
+        }
 
         if (fileUrl == null) {
             // Only video whose real URL is resolved lazily reaches here: Redgifs, Streamable and
@@ -1228,6 +1263,28 @@ public class DownloadMediaService extends JobService {
         return outFile.getAbsolutePath();
     }
 
+    /**
+     * The first image of the imgchest or imgbb album at {@code pageUrl}, or null when the page
+     * cannot be read or carries none.
+     *
+     * <p>Runs on the download executor, which is where every caller of {@code downloadMedia}
+     * already is -- the scrape is a synchronous HTTP round trip.
+     */
+    @WorkerThread
+    @Nullable
+    private String fetchImageHostCoverUrl(String hostName, String pageUrl) {
+        ImageHostUtils.Host host;
+        try {
+            host = ImageHostUtils.Host.valueOf(hostName);
+        } catch (IllegalArgumentException e) {
+            // A host dropped from the enum after the job was scheduled.
+            return null;
+        }
+
+        ArrayList<ImgurMedia> media = FetchImageHostMedia.fetchSync(mImageHostOkHttpClient, host, pageUrl);
+        return media == null || media.isEmpty() ? null : media.get(0).getLink();
+    }
+
     private void downloadFinished(JobParameters parameters, NotificationCompat.Builder builder, int mediaType, int randomNotificationIdOffset, @Nullable String mimeType, @Nullable Uri destinationFileUri, int errorCode, boolean multipleDownloads) {
         if (errorCode != NO_ERROR) {
             if (!multipleDownloads) {
@@ -1254,6 +1311,10 @@ public class DownloadMediaService extends JobService {
                         break;
                     case ERROR_CANNOT_FETCH_STREAMABLE_VIDEO_LINK:
                         updateNotification(builder, mediaType, R.string.download_media_failed_cannot_fetch_streamable_url,
+                                -1, randomNotificationIdOffset, null, null);
+                        break;
+                    case ERROR_CANNOT_FETCH_IMAGE_HOST_LINK:
+                        updateNotification(builder, mediaType, R.string.download_media_failed_cannot_fetch_image_host_url,
                                 -1, randomNotificationIdOffset, null, null);
                         break;
                     case ERROR_INVALID_ARGUMENT:

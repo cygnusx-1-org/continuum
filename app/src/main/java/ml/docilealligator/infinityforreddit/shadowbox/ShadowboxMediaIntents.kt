@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity
+import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity
 import ml.docilealligator.infinityforreddit.activities.ViewRedditGalleryActivity
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity
 import ml.docilealligator.infinityforreddit.post.Post
@@ -90,6 +91,19 @@ object ShadowboxMediaIntents {
         }
         intent.putExtra(ViewVideoActivity.EXTRA_IS_NSFW, post.isNSFW)
         context.startActivity(intent)
+    }
+
+    /**
+     * The IMAGE_TYPE branch for a post on an image host, whose url is an album's landing page. Falls
+     * back to opening that page when the album cannot be addressed, which is what a link post does.
+     */
+    fun openImageHostAlbum(context: Context, post: Post) {
+        val intent = ViewImgurMediaActivity.newImageHostAlbumIntent(context, post)
+        if (intent == null) {
+            openLink(context, post)
+        } else {
+            context.startActivity(intent)
+        }
     }
 
     /** The LINK_TYPE / NO_PREVIEW_LINK_TYPE branch. Nothing to open without a URL. */

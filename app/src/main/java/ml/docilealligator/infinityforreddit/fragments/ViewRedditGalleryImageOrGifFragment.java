@@ -52,6 +52,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.BuildConfig;
+import ml.docilealligator.infinityforreddit.ImageOkHttpClient;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
@@ -103,7 +104,8 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        BigImageViewer.initialize(GlideImageLoader.with(activity.getApplicationContext()));
+        BigImageViewer.initialize(GlideImageLoader.with(activity.getApplicationContext(),
+                ImageOkHttpClient.get(activity.getApplicationContext())));
 
         binding = FragmentViewRedditGalleryImageOrGifBinding.inflate(inflater, container, false);
 

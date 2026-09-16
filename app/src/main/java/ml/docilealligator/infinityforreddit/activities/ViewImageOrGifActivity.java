@@ -50,6 +50,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.CustomFontReceiver;
+import ml.docilealligator.infinityforreddit.ImageOkHttpClient;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
@@ -144,7 +145,8 @@ public class ViewImageOrGifActivity extends AppCompatActivity
         getTheme().applyStyle(ContentFontFamily.valueOf(Objects.requireNonNull(mSharedPreferences
                 .getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))).getResId(), true);
 
-        BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext()));
+        BigImageViewer.initialize(GlideImageLoader.with(this.getApplicationContext(),
+                ImageOkHttpClient.get(this.getApplicationContext())));
 
         binding = ActivityViewImageOrGifBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
