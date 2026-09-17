@@ -118,12 +118,15 @@ import ml.docilealligator.infinityforreddit.user.BlockUser;
 import ml.docilealligator.infinityforreddit.user.FetchUserData;
 import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.user.UserFollowing;
+import ml.docilealligator.infinityforreddit.user.UserMark;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.user.UserSaving;
 import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.user.UserViewModel;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -226,6 +229,9 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     private boolean subscriptionReady = false;
     private boolean mRecordedVisit;
     private boolean mUserSaved;
+    /** Why this user is on the account's list, if they are; see {@link UserMarkIcon}. */
+    @Nullable
+    private UserMark mUserMark;
     private boolean mFetchUserInfoSuccess = false;
     private int expandedTabTextColor;
     private int expandedTabBackgroundColor;
@@ -518,6 +524,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 .get(UserViewModel.class);
 
         bindSaveUser();
+        bindUserMark();
         userViewModel.getUserLiveData().observe(this, userData -> {
             if (userData != null) {
                 if (!mRecordedVisit) {
@@ -1403,10 +1410,13 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     }
 
     /**
-     * The header's name, with the user's tag chip after it when there is one (issue #413).
+     * The header's name, with the followed/saved marker (issue #415) and the user's tag chip after
+     * it when there are any.
      */
     private void showUserName() {
-        binding.userNameTextViewViewUserDetailActivity.setText(UserTagChip.appendTo(this, userFullName, username,
+        CharSequence marked = UserMarkIcon.appendTo(this, userFullName, mUserMark,
+                mCustomThemeWrapper.getUsername());
+        binding.userNameTextViewViewUserDetailActivity.setText(UserTagChip.appendTo(this, marked, username,
                 mCustomThemeWrapper.getFlairBackgroundColor(), mCustomThemeWrapper.getFlairTextColor()));
     }
 
@@ -2233,6 +2243,22 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                         userData == null ? null : userData.getIconUrl(), () -> {});
             }
         });
+    }
+
+    /**
+     * The marker beside the header's name (issue #415). Read from Room rather than assembled from
+     * the follow chip and the save ribbon: a favourite can only be set from the Followed Users
+     * list, so the row is the only place all three reasons are known.
+     */
+    private void bindUserMark() {
+        mRedditDataRoomDatabase.subscribedUserDao().getSubscribedUserLiveData(username, accountName)
+                .observe(this, row -> {
+                    UserMark mark = UserMarks.markOf(row);
+                    if (mark != mUserMark) {
+                        mUserMark = mark;
+                        showUserName();
+                    }
+                });
     }
 
     private void applySaveUserIcon() {

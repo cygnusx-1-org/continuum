@@ -29,7 +29,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <ml.docilealligator.infinityforreddit.customviews.BadgedNameTextView
             android:id="@+id/name_text_view_item_post_compact_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
             app:layout_constraintStart_toEndOf="@id/icon_gif_image_view_item_post_compact_2"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <ml.docilealligator.infinityforreddit.customviews.BadgedNameTextView
             android:id="@+id/username_text_view_item_post_compact_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

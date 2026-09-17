@@ -87,4 +87,21 @@ public interface SubscribedUserDao {
     @Query("SELECT EXISTS(SELECT 1 FROM subscribed_users WHERE name = :name COLLATE NOCASE "
             + "AND username = :accountName COLLATE NOCASE AND is_saved = 1)")
     LiveData<Boolean> isUserSavedLiveData(String name, String accountName);
+
+    /**
+     * Every user on one account's list, live. The marker drawn beside an author's name needs all
+     * three reasons a user can be listed -- followed, saved, favourited -- so this takes the rows
+     * rather than the names {@link #getFollowedUserNames} and {@link #getSavedUserNames} answer
+     * with.
+     */
+    @Query("SELECT * FROM subscribed_users WHERE username = :accountName COLLATE NOCASE")
+    LiveData<List<SubscribedUserData>> getSubscribedUsersLiveData(String accountName);
+
+    /**
+     * One user's row, live, or null while they are on neither list. For a screen about that user
+     * alone -- their profile -- which has no use for the rest of the account's list.
+     */
+    @Query("SELECT * FROM subscribed_users WHERE name = :name COLLATE NOCASE "
+            + "AND username = :accountName COLLATE NOCASE LIMIT 1")
+    LiveData<SubscribedUserData> getSubscribedUserLiveData(String name, String accountName);
 }

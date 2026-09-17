@@ -78,12 +78,15 @@ import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
+import ml.docilealligator.infinityforreddit.user.UserMarkChanges;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.RecoveredFlair;
 import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
@@ -147,6 +150,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final int mCommentBackgroundColor;
     private final int mDividerColor;
     private final int mUsernameColor;
+    /** The account's followed, saved and favourited users; see {@link UserMarkIcon}. */
+    private UserMarks mUserMarks = UserMarks.EMPTY;
     private final int mSubmitterColor;
     private final int mModeratorColor;
     private final int mCurrentUserColor;
@@ -458,7 +463,38 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 if (mShowUserPrefix) { //adding prefix
                     authorText = "u/" + authorText;
                 }
-                ((CommentBaseViewHolder) holder).authorTextView.setText(authorText);
+
+                // Who the author is decides their colour, and the colour is settled before the
+                // name is written because the followed/saved marker beside it is drawn in it.
+                // Submitter, moderator and "you" are exclusive and in that order, as they were
+                // when this sat below the flair; the else is what clears the previous comment's
+                // colour and badge from a holder rebound in place, which every collapse, expand
+                // and "load more" does without recycling it.
+                int authorColor;
+                int authorBadge;
+                if (comment.isSubmitter()) {
+                    authorColor = mSubmitterColor;
+                    authorBadge = R.drawable.ic_mic_14dp;
+                } else if (comment.isModerator()) {
+                    authorColor = mModeratorColor;
+                    authorBadge = R.drawable.ic_verified_user_14dp;
+                } else if (java.util.Objects.equals(comment.getAuthor(), mAccountName)) {
+                    authorColor = mCurrentUserColor;
+                    authorBadge = R.drawable.ic_current_user_14dp;
+                } else {
+                    authorColor = mUsernameColor;
+                    authorBadge = 0;
+                }
+
+                TextView authorTextView = ((CommentBaseViewHolder) holder).authorTextView;
+                // An author-less comment keeps showing nothing, as it did.
+                authorTextView.setText(authorText == null ? null
+                        : UserMarkIcon.appendTo(mActivity, authorText,
+                                mUserMarks.of(comment.getAuthor()), authorColor));
+                authorTextView.setTextColor(authorColor);
+                authorTextView.setCompoundDrawablesWithIntrinsicBounds(
+                        authorBadge == 0 ? null : Utils.getTintedDrawable(mActivity, authorBadge, authorColor),
+                        null, null, null);
 
                 if (comment.getAuthorFlairHTML() != null && !comment.getAuthorFlairHTML().equals("")) {
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
@@ -499,23 +535,6 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     CharSequence flair = flairTextView.getVisibility() == View.VISIBLE ? flairTextView.getText() : null;
                     flairTextView.setText(UserTagChip.prependTo(mActivity, userTag, flair, mFlairBackgroundColor, mFlairTextColor));
                     flairTextView.setVisibility(View.VISIBLE);
-                }
-
-                if (comment.isSubmitter()) {
-                    ((CommentBaseViewHolder) holder).authorTextView.setTextColor(mSubmitterColor);
-                    Drawable submitterDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_mic_14dp, mSubmitterColor);
-                    ((CommentBaseViewHolder) holder).authorTextView.setCompoundDrawablesWithIntrinsicBounds(
-                            submitterDrawable, null, null, null);
-                } else if (comment.isModerator()) {
-                    ((CommentBaseViewHolder) holder).authorTextView.setTextColor(mModeratorColor);
-                    Drawable moderatorDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_verified_user_14dp, mModeratorColor);
-                    ((CommentBaseViewHolder) holder).authorTextView.setCompoundDrawablesWithIntrinsicBounds(
-                            moderatorDrawable, null, null, null);
-                } else if (java.util.Objects.equals(comment.getAuthor(), mAccountName)) {
-                    ((CommentBaseViewHolder) holder).authorTextView.setTextColor(mCurrentUserColor);
-                    Drawable currentUserDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_current_user_14dp, mCurrentUserColor);
-                    ((CommentBaseViewHolder) holder).authorTextView.setCompoundDrawablesWithIntrinsicBounds(
-                            currentUserDrawable, null, null, null);
                 }
 
                 if (mShowAuthorAvatar) {
@@ -719,11 +738,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 if (mShowUserPrefix) { //adding prefix
                     authorText = "u/" + authorText;
                 }
-                // No flair line in this row, so the tag follows the name on its one line. An
-                // author-less comment keeps showing nothing, as it did.
+                // No flair line in this row, so the marker and the tag follow the name on its one
+                // line. An author-less comment keeps showing nothing, as it did.
                 ((CommentFullyCollapsedViewHolder) holder).binding.userNameTextViewItemCommentFullyCollapsed.setText(
                         authorText == null ? null
-                                : UserTagChip.appendTo(mActivity, authorText, comment.getAuthor(), mFlairBackgroundColor, mFlairTextColor));
+                                : UserTagChip.appendTo(mActivity,
+                                        UserMarkIcon.appendTo(mActivity, authorText,
+                                                mUserMarks.of(comment.getAuthor()), mUsernameColor),
+                                        comment.getAuthor(), mFlairBackgroundColor, mFlairTextColor));
 
                 if (mShowAuthorAvatar) {
                     if (comment.getAuthorIconUrl() == null && comment.getAuthorFullName() != null && !comment.getAuthorFullName().isEmpty()) {
@@ -932,6 +954,25 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         for (int i = 0; i < comments.size(); i++) {
             Comment comment = comments.get(i);
             if (comment != null && username.equalsIgnoreCase(comment.getAuthor())) {
+                notifyItemChanged(i);
+            }
+        }
+    }
+
+    /**
+     * Takes the new list of followed, saved and favourited users and rebinds the comments whose
+     * author moved between them, leaving the rest of the thread where it is.
+     */
+    public void setUserMarks(UserMarks userMarks) {
+        UserMarkChanges changes = userMarks.changedFrom(mUserMarks);
+        mUserMarks = userMarks;
+        if (changes.isEmpty()) {
+            return;
+        }
+        List<Comment> comments = getCurrentList();
+        for (int i = 0; i < comments.size(); i++) {
+            Comment comment = comments.get(i);
+            if (comment != null && changes.affects(comment.getAuthor())) {
                 notifyItemChanged(i);
             }
         }

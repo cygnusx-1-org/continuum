@@ -132,12 +132,15 @@ import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
+import ml.docilealligator.infinityforreddit.user.UserMarkChanges;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
+import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
@@ -239,6 +242,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final int mSubredditColor;
     private final int mUsernameColor;
     private final int mModeratorColor;
+    /** The account's followed, saved and favourited users; see {@link UserMarkIcon}. */
+    private UserMarks mUserMarks = UserMarks.EMPTY;
     private final int mAuthorFlairTextColor;
     private final int mSpoilerBackgroundColor;
     private final int mSpoilerTextColor;
@@ -832,17 +837,21 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 ((PostDetailBaseViewHolder) holder).crosspostImageView.setVisibility(View.VISIBLE);
             }
 
+            // Settled before the name is written: the followed/saved marker beside it is drawn in
+            // the author's colour (issue #415).
+            int userColor = mPost.isModerator() ? mModeratorColor : mUsernameColor;
+            String userName = mHideSubredditAndUserPrefix ? mPost.getAuthor() : mPost.getAuthorNamePrefixed();
             if (!mHideSubredditAndUserPrefix) {
                 ((PostDetailBaseViewHolder) holder).subredditTextView.setText("r/" + mPost.getSubredditName());
-                ((PostDetailBaseViewHolder) holder).userTextView.setText(mPost.getAuthorNamePrefixed());
             } else {
                 ((PostDetailBaseViewHolder) holder).subredditTextView.setText(mPost.getSubredditName());
-                ((PostDetailBaseViewHolder) holder).userTextView.setText(mPost.getAuthor());
             }
+            ((PostDetailBaseViewHolder) holder).userTextView.setText(
+                    UserMarkIcon.appendTo(mActivity, userName, mUserMarks.of(mPost.getAuthor()), userColor));
 
             if (mPost.isModerator()) {
-                ((PostDetailBaseViewHolder) holder).userTextView.setTextColor(mModeratorColor);
-                Drawable moderatorDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_verified_user_14dp, mModeratorColor);
+                ((PostDetailBaseViewHolder) holder).userTextView.setTextColor(userColor);
+                Drawable moderatorDrawable = Utils.getTintedDrawable(mActivity, R.drawable.ic_verified_user_14dp, userColor);
                 ((PostDetailBaseViewHolder) holder).userTextView.setCompoundDrawablesWithIntrinsicBounds(
                         moderatorDrawable, null, null, null);
             }
@@ -1797,6 +1806,18 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             return;
         }
         if (username == null || username.equalsIgnoreCase(mPost.getAuthor())) {
+            notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Takes the new list of followed, saved and favourited users, and rebinds the header only when
+     * this post's author is one of the users that moved between them.
+     */
+    public void setUserMarks(UserMarks userMarks) {
+        UserMarkChanges changes = userMarks.changedFrom(mUserMarks);
+        mUserMarks = userMarks;
+        if (mPost != null && changes.affects(mPost.getAuthor())) {
             notifyDataSetChanged();
         }
     }

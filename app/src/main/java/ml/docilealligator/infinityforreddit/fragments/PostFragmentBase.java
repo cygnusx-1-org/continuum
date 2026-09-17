@@ -105,6 +105,7 @@ import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -410,6 +411,17 @@ public abstract class PostFragmentBase extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ViewCompat.requestApplyInsets(view);
+
+        // The marker beside an author's name (issue #415). Observed rather than read once: a
+        // follow or a save made on a profile stacked over this feed has to reach the rows behind
+        // it, and the adapter rebinds only the authors whose mark actually moved.
+        mRedditDataRoomDatabase.subscribedUserDao().getSubscribedUsersLiveData(mActivity.accountName)
+                .observe(getViewLifecycleOwner(), rows -> {
+                    PostRecyclerViewAdapter adapter = getPostAdapter();
+                    if (adapter != null) {
+                        adapter.setUserMarks(UserMarks.from(rows));
+                    }
+                });
     }
 
     @Override

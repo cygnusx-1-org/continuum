@@ -44,6 +44,8 @@ import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
+import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import retrofit2.Retrofit;
 
@@ -76,6 +78,8 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     private final int mColorAccent;
     private final int mMessageBackgroundColor;
     private final int mUsernameColor;
+    /** The account's followed, saved and favourited users; see {@link UserMarkIcon}. */
+    private UserMarks mUserMarks = UserMarks.EMPTY;
     private final int mSubredditColor;
     private final int mFlairBackgroundColor;
     private final int mFlairTextColor;
@@ -191,10 +195,11 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 }
 
                 // The row names the other party, which is a user unless the thread is with a
-                // subreddit — and only a user can carry a tag.
+                // subreddit — and only a user can carry a tag or a followed/saved marker.
+                String taggableUsername = message.isRecipientASubreddit() ? null : recipientUsername;
                 ((DataViewHolder) holder).binding.authorTextViewItemMessage.setText(UserTagChip.appendTo(mActivity,
-                        recipientUsername, message.isRecipientASubreddit() ? null : recipientUsername,
-                        mFlairBackgroundColor, mFlairTextColor));
+                        UserMarkIcon.appendTo(mActivity, recipientUsername, mUserMarks.of(taggableUsername), mUsernameColor),
+                        taggableUsername, mFlairBackgroundColor, mFlairTextColor));
                 String subjectRaw = displayedMessage.getSubject();
                 String subject = (subjectRaw == null || subjectRaw.isEmpty()) ? "" :
                         subjectRaw.substring(0, 1).toUpperCase(Locale.getDefault()) + subjectRaw.substring(1);
@@ -291,6 +296,19 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
 
     public void setMarkAllMessagesAsRead(boolean markAllMessagesAsRead) {
         this.markAllMessagesAsRead = markAllMessagesAsRead;
+    }
+
+    /**
+     * Takes the new list of followed, saved and favourited users. Every row names its other party
+     * and the mark is read on bind, so the list is redrawn wholesale -- there is no autoplaying
+     * media here to restart, and an inbox page is a screenful.
+     */
+    public void setUserMarks(UserMarks userMarks) {
+        boolean changed = !userMarks.changedFrom(mUserMarks).isEmpty();
+        mUserMarks = userMarks;
+        if (changed) {
+            notifyDataSetChanged();
+        }
     }
 
     public interface RetryLoadingMoreCallback {

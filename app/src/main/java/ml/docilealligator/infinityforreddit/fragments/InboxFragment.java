@@ -35,6 +35,7 @@ import ml.docilealligator.infinityforreddit.events.UserTagChangedEvent;
 import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.MessageViewModel;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -110,6 +111,15 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
         binding.recyclerViewInboxFragment.setAdapter(mAdapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mActivity, mLinearLayoutManager.getOrientation());
         binding.recyclerViewInboxFragment.addItemDecoration(dividerItemDecoration);
+
+        // The marker beside the other party's name (issue #415), which a follow made from the
+        // thread this row opens has to bring back with it.
+        mRedditDataRoomDatabase.subscribedUserDao().getSubscribedUsersLiveData(mActivity.accountName)
+                .observe(getViewLifecycleOwner(), rows -> {
+                    if (mAdapter != null) {
+                        mAdapter.setUserMarks(UserMarks.from(rows));
+                    }
+                });
 
         if (mActivity instanceof RecyclerViewContentScrollingInterface) {
             binding.recyclerViewInboxFragment.addOnScrollListener(new RecyclerView.OnScrollListener() {

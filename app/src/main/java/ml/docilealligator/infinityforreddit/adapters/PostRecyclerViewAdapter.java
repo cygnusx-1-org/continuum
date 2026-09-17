@@ -14,6 +14,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.SpannableStringBuilder;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -73,6 +74,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 import javax.inject.Provider;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -98,6 +100,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostOptionsBott
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.ShareBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
+import ml.docilealligator.infinityforreddit.customviews.BadgedNameTextView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.MaxHeightSquareFrameLayout;
 import ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView;
@@ -139,11 +142,14 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
+import ml.docilealligator.infinityforreddit.user.UserMarkChanges;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
+import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
@@ -247,6 +253,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private int mSubredditColor;
     private int mUsernameColor;
     private int mModeratorColor;
+    /** The account's followed, saved and favourited users; see {@link UserMarkIcon}. */
+    private UserMarks mUserMarks = UserMarks.EMPTY;
     private int mSpoilerBackgroundColor;
     private int mSpoilerTextColor;
     private int mFlairBackgroundColor;
@@ -1105,17 +1113,18 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             if (holder instanceof PostBaseViewHolder) {
-                // A feed row has no flair line under the author, so the user tag follows the name.
+                // A feed row has no flair line under the author, so the marker and the user tag
+                // follow the name.
+                int userColor = userColor(post);
                 if (mHideSubredditAndUserPrefix) {
                     ((PostBaseViewHolder) holder).subredditTextView.setText(post.getSubredditName());
-                    ((PostBaseViewHolder) holder).userTextView.setText(userTagged(post, post.getAuthor()));
+                    ((PostBaseViewHolder) holder).userTextView.setText(userTagged(post, post.getAuthor(), userColor));
                 } else {
                     ((PostBaseViewHolder) holder).subredditTextView.setText(post.getSubredditNamePrefixed());
-                    ((PostBaseViewHolder) holder).userTextView.setText(userTagged(post, post.getAuthorNamePrefixed()));
+                    ((PostBaseViewHolder) holder).userTextView.setText(userTagged(post, post.getAuthorNamePrefixed(), userColor));
                 }
 
-                ((PostBaseViewHolder) holder).userTextView.setTextColor(
-                        post.isModerator() ? mModeratorColor : mUsernameColor);
+                ((PostBaseViewHolder) holder).userTextView.setTextColor(userColor);
 
                 if (holder instanceof PostBaseVideoAutoplayViewHolder) {
                     ((PostBaseVideoAutoplayViewHolder) holder).toroPlayer.previewImageView.setVisibility(View.VISIBLE);
@@ -1414,31 +1423,31 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             } else if (holder instanceof PostCompactBaseViewHolder) {
                 ((PostCompactBaseViewHolder) holder).applyCompactItemLayoutParams();
 
+                // A compact row gives the author only what is left between the icon and the
+                // timestamp, so its badges are handed over separately: BadgedNameTextView puts
+                // them on a second line rather than let the name's ellipsis eat them.
+                int compactUserColor = userColor(post);
+                CharSequence inlineBadges = userBadges(post, compactUserColor, true);
+                // Built only if the row turns out to need a second line for them. The two forms
+                // differ only in the lead-in gap, so one exists exactly when the other does.
+                Supplier<CharSequence> standaloneBadges = inlineBadges == null ? null
+                        : () -> java.util.Objects.requireNonNull(userBadges(post, compactUserColor, false));
+                String compactAuthor = mHideSubredditAndUserPrefix
+                        ? post.getAuthor() : post.getAuthorNamePrefixed();
                 if (mDisplaySubredditName) {
                     ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(mSubredditColor);
-                    if (mHideSubredditAndUserPrefix) {
-                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getSubredditName());
-                    } else {
-                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getSubredditNamePrefixed());
-                    }
+                    ((PostCompactBaseViewHolder) holder).nameTextView.setNameAndBadges(
+                            mHideSubredditAndUserPrefix ? post.getSubredditName() : post.getSubredditNamePrefixed(),
+                            null, null);
 
-                    ((PostCompactBaseViewHolder) holder).usernameTextView.setTextColor(
-                            post.isModerator() ? mModeratorColor : mUsernameColor);
-                    if (mHideSubredditAndUserPrefix) {
-                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(userTagged(post, post.getAuthor()));
-                    } else {
-                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(userTagged(post, post.getAuthorNamePrefixed()));
-                    }
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setTextColor(compactUserColor);
+                    ((PostCompactBaseViewHolder) holder).usernameTextView.setNameAndBadges(
+                            compactAuthor, inlineBadges, standaloneBadges);
                     ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.VISIBLE);
                 } else {
-                    ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(
-                            post.isModerator() ? mModeratorColor : mUsernameColor);
-
-                    if (mHideSubredditAndUserPrefix) {
-                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(userTagged(post, post.getAuthor()));
-                    } else {
-                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(userTagged(post, post.getAuthorNamePrefixed()));
-                    }
+                    ((PostCompactBaseViewHolder) holder).nameTextView.setTextColor(compactUserColor);
+                    ((PostCompactBaseViewHolder) holder).nameTextView.setNameAndBadges(
+                            compactAuthor, inlineBadges, standaloneBadges);
                     ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.GONE);
                 }
 
@@ -2837,12 +2846,57 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /**
-     * {@code name} with the author's user tag chip after it, when the author has one; see
-     * {@link UserTagChip}. {@code name} is whichever spelling of the author the prefix setting
-     * calls for.
+     * {@code name} with the author's followed/saved marker and user tag chip after it, when the
+     * author has either; see {@link UserMarkIcon} and {@link UserTagChip}. {@code name} is
+     * whichever spelling of the author the prefix setting calls for, and {@code nameColor} the
+     * colour it is drawn in, which the marker follows.
      */
-    private CharSequence userTagged(Post post, String name) {
-        return UserTagChip.appendTo(mActivity, name, post.getAuthor(), mFlairBackgroundColor, mFlairTextColor);
+    private CharSequence userTagged(Post post, String name, int nameColor) {
+        CharSequence marked = UserMarkIcon.appendTo(mActivity, name, mUserMarks.of(post.getAuthor()), nameColor);
+        return UserTagChip.appendTo(mActivity, marked, post.getAuthor(), mFlairBackgroundColor, mFlairTextColor);
+    }
+
+    /** The colour this post's author is drawn in; see {@link #userTagged}. */
+    private int userColor(Post post) {
+        return post.isModerator() ? mModeratorColor : mUsernameColor;
+    }
+
+    /**
+     * The author's marker and tag chip with no name in front of them, or null when the author has
+     * neither, for a row that may have to move them to a line of their own. {@code leading} is
+     * whether they follow a name on the line, which decides the gap in front of the first one.
+     */
+    @Nullable
+    private CharSequence userBadges(Post post, int nameColor, boolean leading) {
+        CharSequence marker = UserMarkIcon.badgeFor(mActivity, mUserMarks.of(post.getAuthor()), nameColor, leading);
+        CharSequence chip = UserTagChip.chipFor(mActivity, post.getAuthor(), mFlairBackgroundColor,
+                mFlairTextColor, leading || marker != null);
+        if (marker == null) {
+            return chip;
+        }
+        if (chip == null) {
+            return marker;
+        }
+        return new SpannableStringBuilder(marker).append(chip);
+    }
+
+    /**
+     * Takes the new list of followed, saved and favourited users and rebinds the rows whose author
+     * moved between them. Only those rows, for the reason {@link #notifyUserTagChanged} gives.
+     */
+    public void setUserMarks(UserMarks userMarks) {
+        UserMarkChanges changes = userMarks.changedFrom(mUserMarks);
+        mUserMarks = userMarks;
+        if (changes.isEmpty()) {
+            return;
+        }
+        ItemSnapshotList<Post> snapshot = snapshot();
+        for (int i = 0; i < snapshot.size(); i++) {
+            Post post = snapshot.get(i);
+            if (post != null && changes.affects(post.getAuthor())) {
+                notifyItemChanged(i);
+            }
+        }
     }
 
     /**
@@ -5753,8 +5807,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     public class PostCompactBaseViewHolder extends PostViewHolder {
-        TextView nameTextView;
-        TextView usernameTextView;
+        BadgedNameTextView nameTextView;
+        BadgedNameTextView usernameTextView;
         @Nullable TextView linkTextView;
         RelativeLayout relativeLayout;
         LoadingIndicator loadingIndicator;
@@ -5774,7 +5828,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             super(itemView);
         }
 
-        void setupUsernameView(TextView usernameTextView) {
+        void setupUsernameView(BadgedNameTextView usernameTextView) {
             this.usernameTextView = usernameTextView;
 
             if (mActivity.typeface != null) {
@@ -5801,7 +5855,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
 
         void setBaseView(AspectRatioGifImageView iconGifImageView,
-                         TextView nameTextView,
+                         BadgedNameTextView nameTextView,
                          ImageView stickiedPostImageView,
                          TextView postTimeTextView,
                          TextView titleTextView,

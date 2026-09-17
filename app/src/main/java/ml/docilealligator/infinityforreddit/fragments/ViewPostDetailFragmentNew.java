@@ -108,6 +108,7 @@ import ml.docilealligator.infinityforreddit.resume.ResumeGalleryPage;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
@@ -698,6 +699,19 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         } else {
             mConcatAdapter = new ConcatAdapter(mPostAdapter, mCommentsStatusAdapter, mCommentsAdapter, mCommentsFooterAdapter);
         }
+
+        // The marker beside an author's name (issue #415). The post's author and every commenter
+        // can carry one, and both adapters read it on bind.
+        mRedditDataRoomDatabase.subscribedUserDao().getSubscribedUsersLiveData(mActivity.accountName)
+                .observe(getViewLifecycleOwner(), rows -> {
+                    UserMarks userMarks = UserMarks.from(rows);
+                    if (mPostAdapter != null) {
+                        mPostAdapter.setUserMarks(userMarks);
+                    }
+                    if (mCommentsAdapter != null) {
+                        mCommentsAdapter.setUserMarks(userMarks);
+                    }
+                });
 
         // Collapsing a comment emits a change plus a range removal at once, which the stock
         // DefaultItemAnimator plays as four staged phases. See CommentsItemAnimator.

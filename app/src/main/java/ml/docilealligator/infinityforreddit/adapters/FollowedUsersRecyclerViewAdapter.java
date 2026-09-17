@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -41,8 +43,16 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     private static final int VIEW_TYPE_USER_DIVIDER = 2;
     private static final int VIEW_TYPE_USER = 3;
 
+    /** Every user the account follows or saves, as the list's query delivered them. */
     private List<SubscribedUserData> mSubscribedUserData;
     private List<SubscribedUserData> mFavoriteSubscribedUserData;
+    /**
+     * What the "All" group shows: {@link #mSubscribedUserData} without the favourites, which are
+     * already listed in their own group above it. Derived here rather than asked of Room, because
+     * the query behind the full list is shared with the user multi-selection screen, which has no
+     * favourites group to move them to and so must keep showing every user.
+     */
+    private List<SubscribedUserData> mOtherSubscribedUserData = Collections.emptyList();
     private final BaseActivity mActivity;
     private final Executor mExecutor;
     private final Retrofit mOauthRetrofit;
@@ -82,6 +92,30 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         return mFavoriteSubscribedUserData != null && !mFavoriteSubscribedUserData.isEmpty();
     }
 
+    private boolean hasOthers() {
+        return !mOtherSubscribedUserData.isEmpty();
+    }
+
+    /**
+     * Recomputed whenever either list arrives: the two are separate queries and reach the adapter
+     * one at a time, so the group below has to be rebuilt from whichever came last.
+     */
+    private void rebuildOthers() {
+        if (mSubscribedUserData == null || mSubscribedUserData.isEmpty()) {
+            mOtherSubscribedUserData = Collections.emptyList();
+            return;
+        }
+        List<SubscribedUserData> others = new ArrayList<>(mSubscribedUserData.size());
+        for (SubscribedUserData user : mSubscribedUserData) {
+            // The row's own flag, not a scan of the favourites list: the two queries can land a
+            // moment apart, and this way a row is never in both groups at once.
+            if (!user.isFavorite()) {
+                others.add(user);
+            }
+        }
+        mOtherSubscribedUserData = others;
+    }
+
     /**
      * Resolves an adapter position to its user, across the favourites group, its divider, and the
      * full list below. Returns null for divider rows and for positions left stale by a data change.
@@ -96,13 +130,13 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
                 return mFavoriteSubscribedUserData.get(position - 1);
             }
             int index = position - (mFavoriteSubscribedUserData.size() + 2);
-            if (mSubscribedUserData != null && index >= 0 && index < mSubscribedUserData.size()) {
-                return mSubscribedUserData.get(index);
+            if (index >= 0 && index < mOtherSubscribedUserData.size()) {
+                return mOtherSubscribedUserData.get(index);
             }
             return null;
         }
-        if (mSubscribedUserData != null && position < mSubscribedUserData.size()) {
-            return mSubscribedUserData.get(position);
+        if (position < mOtherSubscribedUserData.size()) {
+            return mOtherSubscribedUserData.get(position);
         }
         return null;
     }
@@ -189,13 +223,13 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
 
     @Override
     public int getItemCount() {
-        if (mSubscribedUserData != null && !mSubscribedUserData.isEmpty()) {
-            if (hasFavorites()) {
-                return mSubscribedUserData.size() + mFavoriteSubscribedUserData.size() + 2;
-            }
-            return mSubscribedUserData.size();
+        // Each group brings its own header, and neither is shown empty -- with every user
+        // favourited there is no "All" group to head, and with none there is no favourites group.
+        int count = hasFavorites() ? mFavoriteSubscribedUserData.size() + 1 : 0;
+        if (hasOthers()) {
+            count += hasFavorites() ? mOtherSubscribedUserData.size() + 1 : mOtherSubscribedUserData.size();
         }
-        return 0;
+        return count;
     }
 
     @Override
@@ -207,11 +241,13 @@ public class FollowedUsersRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
 
     public void setSubscribedUsers(List<SubscribedUserData> subscribedUsers) {
         mSubscribedUserData = subscribedUsers;
+        rebuildOthers();
         notifyDataSetChanged();
     }
 
     public void setFavoriteSubscribedUsers(List<SubscribedUserData> favoriteSubscribedUsers) {
         mFavoriteSubscribedUserData = favoriteSubscribedUsers;
+        rebuildOthers();
         notifyDataSetChanged();
     }
 

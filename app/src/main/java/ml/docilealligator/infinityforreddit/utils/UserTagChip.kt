@@ -31,8 +31,27 @@ object UserTagChip {
         backgroundColor: Int,
         textColor: Int,
     ): CharSequence {
-        val tag = UserTags.get(username) ?: return name
-        val builder = SpannableStringBuilder(name).append(" ")
+        val chip = chipFor(context, username, backgroundColor, textColor, leadingSpace = true)
+            ?: return name
+        return SpannableStringBuilder(name).append(chip)
+    }
+
+    /**
+     * [username]'s chip on its own, or null when they have no tag — for a caller assembling the
+     * badges itself, such as the compact row that moves them to a second line when the name fills
+     * the first. [leadingSpace] is the gap that separates the chip from a name in front of it, and
+     * is dropped when nothing precedes it on the line.
+     */
+    @JvmStatic
+    fun chipFor(
+        context: Context,
+        username: String?,
+        backgroundColor: Int,
+        textColor: Int,
+        leadingSpace: Boolean,
+    ): CharSequence? {
+        val tag = UserTags.get(username) ?: return null
+        val builder = SpannableStringBuilder(if (leadingSpace) " " else "")
         val start = builder.length
         builder.append(tag)
         builder.setSpan(
