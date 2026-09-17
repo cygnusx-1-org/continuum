@@ -182,111 +182,84 @@
         android:layout_gravity="bottom"
         app:contentInsetStart="0dp"
         android:backgroundTint="#00000000"
+        android:minHeight="0dp"
         app:elevation="0dp"
         android:visibility="gone"
         style="@style/Widget.MaterialComponents.BottomAppBar">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/back_button_exo_playback_control_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:strokeWidth="0dp"
-                app:icon="@drawable/ic_arrow_back_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                style="?attr/materialIconButtonOutlinedStyle" />
-
-            <com.google.android.material.button.MaterialButton
+            <ImageView
                 android:id="@+id/rotate_left_image_view_exo_playback_control_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/content_description_rotate_left"
-                app:strokeWidth="0dp"
-                app:icon="@drawable/ic_rotate_left_white_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/rotate_right_image_view_exo_playback_control_view"
-                style="?attr/materialIconButtonOutlinedStyle" />
+                android:layout_weight="1"
+                android:padding="12dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_rotate_left_white_24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/content_description_rotate_left" />
 
-            <com.google.android.material.button.MaterialButton
+            <ImageView
                 android:id="@+id/rotate_right_image_view_exo_playback_control_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/content_description_rotate_right"
-                app:strokeWidth="0dp"
-                app:icon="@drawable/ic_rotate_right_white_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/download_image_view_exo_playback_control_view"
-                style="?attr/materialIconButtonOutlinedStyle" />
+                android:layout_weight="1"
+                android:padding="12dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_rotate_right_white_24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/content_description_rotate_right" />
 
-            <com.google.android.material.button.MaterialButton
+            <ImageView
                 android:id="@+id/download_image_view_exo_playback_control_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:strokeWidth="0dp"
-                app:icon="@drawable/ic_file_download_toolbar_white_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/share_image_view_exo_playback_control_view"
-                style="?attr/materialIconButtonOutlinedStyle" />
+                android:layout_weight="1"
+                android:padding="12dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_file_download_toolbar_white_24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/content_description_download" />
 
-            <com.google.android.material.button.MaterialButton
+            <ImageView
                 android:id="@+id/share_image_view_exo_playback_control_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/share"
-                app:strokeWidth="0dp"
-                app:icon="@drawable/ic_share_toolbar_white_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/playback_speed_image_view_exo_playback_control_view"
-                style="?attr/materialIconButtonOutlinedStyle" />
+                android:layout_weight="1"
+                android:padding="12dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_share_toolbar_white_24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/content_description_share" />
 
-            <com.google.android.material.button.MaterialButton
+            <ImageView
                 android:id="@+id/playback_speed_image_view_exo_playback_control_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:strokeWidth="0dp"
-                app:icon="@drawable/ic_playback_speed_toolbar_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/overflow_image_view_exo_playback_control_view"
-                style="?attr/materialIconButtonOutlinedStyle" />
+                android:layout_weight="1"
+                android:padding="12dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_playback_speed_toolbar_24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_playback_speed" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/overflow_image_view_exo_playback_control_view"
-                android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/download_all_image_view_exo_playback_control_view"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/action_more_options"
+                android:layout_weight="1"
                 android:visibility="gone"
-                app:strokeWidth="0dp"
-                app:icon="@drawable/ic_more_vert_white_24dp"
-                app:iconSize="24dp"
-                app:iconTint="@null"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                style="?attr/materialIconButtonOutlinedStyle" />
+                android:padding="12dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_download_all_white_24dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_download_all_gallery_media" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
     </com.google.android.material.bottomappbar.BottomAppBar>
 

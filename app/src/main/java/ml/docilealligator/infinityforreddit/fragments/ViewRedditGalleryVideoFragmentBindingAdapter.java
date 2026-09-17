@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.fragments;
 
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -16,12 +17,12 @@ class ViewRedditGalleryVideoFragmentBindingAdapter {
     private MaterialButton muteButton;
     private BottomAppBar bottomAppBar;
     private TextView titleTextView;
-    private MaterialButton backButton;
-    private MaterialButton downloadButton;
-    private MaterialButton playbackSpeedButton;
-    private MaterialButton rotateLeftButton;
-    private MaterialButton rotateRightButton;
-    private MaterialButton overflowButton;
+    private ImageView downloadButton;
+    private ImageView shareButton;
+    private ImageView playbackSpeedButton;
+    private ImageView rotateLeftButton;
+    private ImageView rotateRightButton;
+    private ImageView downloadAllButton;
 
     ViewRedditGalleryVideoFragmentBindingAdapter(FragmentViewRedditGalleryVideoBinding binding) {
         this.binding = binding;
@@ -29,12 +30,12 @@ class ViewRedditGalleryVideoFragmentBindingAdapter {
         muteButton = binding.getRoot().findViewById(R.id.mute_exo_playback_control_view);
         bottomAppBar = binding.getRoot().findViewById(R.id.bottom_navigation_exo_playback_control_view);
         titleTextView = binding.getRoot().findViewById(R.id.title_text_view_exo_playback_control_view);
-        backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
+        shareButton = binding.getRoot().findViewById(R.id.share_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
         rotateLeftButton = binding.getRoot().findViewById(R.id.rotate_left_image_view_exo_playback_control_view);
         rotateRightButton = binding.getRoot().findViewById(R.id.rotate_right_image_view_exo_playback_control_view);
-        overflowButton = binding.getRoot().findViewById(R.id.overflow_image_view_exo_playback_control_view);
+        downloadAllButton = binding.getRoot().findViewById(R.id.download_all_image_view_exo_playback_control_view);
     }
 
     RelativeLayout getRoot() {
@@ -61,27 +62,27 @@ class ViewRedditGalleryVideoFragmentBindingAdapter {
         return titleTextView;
     }
 
-    MaterialButton getBackButton() {
-        return backButton;
-    }
-
-    MaterialButton getDownloadButton() {
+    ImageView getDownloadButton() {
         return downloadButton;
     }
 
-    MaterialButton getPlaybackSpeedButton() {
+    ImageView getShareButton() {
+        return shareButton;
+    }
+
+    ImageView getPlaybackSpeedButton() {
         return playbackSpeedButton;
     }
 
-    MaterialButton getRotateLeftButton() {
+    ImageView getRotateLeftButton() {
         return rotateLeftButton;
     }
 
-    MaterialButton getRotateRightButton() {
+    ImageView getRotateRightButton() {
         return rotateRightButton;
     }
 
-    MaterialButton getOverflowButton() {
-        return overflowButton;
+    ImageView getDownloadAllButton() {
+        return downloadAllButton;
     }
 }

@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -178,9 +177,6 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
                 getArguments().getInt(EXTRA_INDEX) + 1, getArguments().getInt(EXTRA_MEDIA_COUNT)));
 
         binding.getBottomAppBar().setVisibility(View.VISIBLE);
-        binding.getBackButton().setOnClickListener(view -> {
-            activity.finish();
-        });
         binding.getDownloadButton().setOnClickListener(view -> {
             if (isDownloading) {
                 return;
@@ -191,10 +187,11 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
         binding.getPlaybackSpeedButton().setOnClickListener(view -> {
             changePlaybackSpeed();
         });
+        binding.getShareButton().setOnClickListener(view -> shareVideo());
         binding.getRotateLeftButton().setOnClickListener(view -> rotateLeft());
         binding.getRotateRightButton().setOnClickListener(view -> rotateRight());
-        binding.getOverflowButton().setVisibility(View.VISIBLE);
-        binding.getOverflowButton().setOnClickListener(this::showOverflowMenu);
+        binding.getDownloadAllButton().setVisibility(View.VISIBLE);
+        binding.getDownloadAllButton().setOnClickListener(view -> activity.downloadAllGalleryMedia());
 
         viewGalleryViewModel = new ViewModelProvider(requireActivity()).get(ViewGalleryViewModel.class);
         viewGalleryViewModel.getInsets().observe(getViewLifecycleOwner(), insets -> {
@@ -211,23 +208,6 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
         });
 
         return binding.getRoot();
-    }
-
-    private void showOverflowMenu(View anchor) {
-        PopupMenu popupMenu = new PopupMenu(activity, anchor);
-        popupMenu.getMenuInflater().inflate(R.menu.view_reddit_gallery_activity, popupMenu.getMenu());
-        Menu menu = popupMenu.getMenu();
-        for (int i = 0; i < menu.size(); i++) {
-            Utils.setTitleWithCustomFontToMenuItem(activity.typeface, menu.getItem(i), null);
-        }
-        popupMenu.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_download_all_gallery_media_view_reddit_gallery_activity) {
-                activity.downloadAllGalleryMedia();
-                return true;
-            }
-            return false;
-        });
-        popupMenu.show();
     }
 
     private void rotateLeft() {
@@ -369,6 +349,26 @@ public class ViewRedditGalleryVideoFragment extends Fragment {
         ((JobScheduler) activity.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
 
         Toast.makeText(activity, R.string.download_started, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Shares the file rather than a link, the way the image page beside this one does. The service
+     * writes a share to the cache and skips the download folder entirely, so this needs neither the
+     * storage permission {@link #download()} asks for nor a configured download location.
+     */
+    private void shareVideo() {
+        Post parentPost = activity.getPost();
+        Bundle arguments = getArguments();
+        if (parentPost == null || arguments == null) {
+            Toast.makeText(activity, R.string.downloading_media_failed_cannot_download_media, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(activity, R.string.preparing_video_for_sharing, Toast.LENGTH_SHORT).show();
+
+        JobInfo jobInfo = DownloadMediaService.constructJobInfo(activity, 5000000, parentPost,
+                arguments.getInt(EXTRA_INDEX, 0), true);
+        ((JobScheduler) activity.getSystemService(Context.JOB_SCHEDULER_SERVICE)).schedule(jobInfo);
     }
 
     private void preparePlayer(@Nullable Bundle savedInstanceState) {

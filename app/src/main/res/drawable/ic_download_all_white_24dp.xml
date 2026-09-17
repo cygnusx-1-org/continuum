@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFF">
+    <!-- Front sheet, drawn as an outline so the arrow inside it stays readable. -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M20,4v12H8V4h12m0,-2H8c-1.1,0 -2,0.9 -2,2v12c0,1.1 0.9,2 2,2h12c1.1,0 2,-0.9 2,-2V4c0,-1.1 -0.9,-2 -2,-2z" />
+    <!-- Back sheet: only the edges the front sheet does not cover, so the two read as a stack. -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M2,6v14c0,1.1 0.9,2 2,2h14v-2H4V6H2z" />
+    <!-- Download arrow. -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M13,5h2v5h2.5L14,14.5 10.5,10H13z" />
+</vector>

@@ -371,10 +371,6 @@ public class ViewVideoActivity extends AppCompatActivity
         // upstream reinstated never shows.
         binding.getToolbar().setVisibility(View.GONE);
         binding.getBottomAppBar().setVisibility(View.VISIBLE);
-        binding.getBackButton().setOnClickListener(view -> {
-            finish();
-        });
-
         binding.getDownloadButton().setOnClickListener(view -> {
             if (viewVideoViewModel.isDownloading()) {
                 return;

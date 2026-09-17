@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit.activities;
 
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -28,12 +29,11 @@ public class ViewVideoActivityBindingAdapter {
     private final MaterialButton videoQualityButton;
     private final BottomAppBar bottomAppBar;
     private final TextView titleTextView;
-    private final MaterialButton backButton;
-    private final MaterialButton downloadButton;
-    private final MaterialButton shareButton;
-    private final MaterialButton playbackSpeedButton;
-    private final MaterialButton rotateLeftButton;
-    private final MaterialButton rotateRightButton;
+    private final ImageView downloadButton;
+    private final ImageView shareButton;
+    private final ImageView playbackSpeedButton;
+    private final ImageView rotateLeftButton;
+    private final ImageView rotateRightButton;
 
     public ViewVideoActivityBindingAdapter(ActivityViewVideoBinding binding) {
         this.binding = binding;
@@ -44,7 +44,6 @@ public class ViewVideoActivityBindingAdapter {
         videoQualityButton = binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view);
         bottomAppBar = binding.getRoot().findViewById(R.id.bottom_navigation_exo_playback_control_view);
         titleTextView = binding.getRoot().findViewById(R.id.title_text_view_exo_playback_control_view);
-        backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
         shareButton = binding.getRoot().findViewById(R.id.share_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
@@ -61,7 +60,6 @@ public class ViewVideoActivityBindingAdapter {
         videoQualityButton = binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view);
         bottomAppBar = binding.getRoot().findViewById(R.id.bottom_navigation_exo_playback_control_view);
         titleTextView = binding.getRoot().findViewById(R.id.title_text_view_exo_playback_control_view);
-        backButton = binding.getRoot().findViewById(R.id.back_button_exo_playback_control_view);
         downloadButton = binding.getRoot().findViewById(R.id.download_image_view_exo_playback_control_view);
         shareButton = binding.getRoot().findViewById(R.id.share_image_view_exo_playback_control_view);
         playbackSpeedButton = binding.getRoot().findViewById(R.id.playback_speed_image_view_exo_playback_control_view);
@@ -113,27 +111,23 @@ public class ViewVideoActivityBindingAdapter {
         return titleTextView;
     }
 
-    public MaterialButton getBackButton() {
-        return backButton;
-    }
-
-    public MaterialButton getDownloadButton() {
+    public ImageView getDownloadButton() {
         return downloadButton;
     }
 
-    public MaterialButton getShareButton() {
+    public ImageView getShareButton() {
         return shareButton;
     }
 
-    public MaterialButton getPlaybackSpeedButton() {
+    public ImageView getPlaybackSpeedButton() {
         return playbackSpeedButton;
     }
 
-    public MaterialButton getRotateLeftButton() {
+    public ImageView getRotateLeftButton() {
         return rotateLeftButton;
     }
 
-    public MaterialButton getRotateRightButton() {
+    public ImageView getRotateRightButton() {
         return rotateRightButton;
     }
 

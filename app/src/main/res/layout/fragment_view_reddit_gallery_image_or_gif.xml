@@ -169,15 +169,15 @@
                         android:src="@drawable/ic_wallpaper_24dp" />
 
                     <ImageView
-                        android:id="@+id/overflow_image_view_view_reddit_gallery_image_or_gif_fragment"
+                        android:id="@+id/download_all_image_view_view_reddit_gallery_image_or_gif_fragment"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/action_more_options"
+                        android:contentDescription="@string/action_download_all_gallery_media"
                         android:padding="12dp"
                         android:scaleType="center"
-                        android:src="@drawable/ic_more_vert_white_24dp" />
+                        android:src="@drawable/ic_download_all_white_24dp" />
 
                 </LinearLayout>
 

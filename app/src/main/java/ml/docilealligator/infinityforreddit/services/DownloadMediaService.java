@@ -151,7 +151,17 @@ public class DownloadMediaService extends JobService {
      * @return JobInfo for DownloadMediaService
      */
     public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, Post post, int galleryIndex) {
+        return constructJobInfo(context, contentEstimatedBytes, post, galleryIndex, false);
+    }
+
+    /**
+     * As above, but with {@code isShare}: the job writes to the cache and hands the file to a share
+     * chooser instead of saving it to the download folder.
+     */
+    public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, Post post,
+                                           int galleryIndex, boolean isShare) {
         PersistableBundle extras = new PersistableBundle();
+        extras.putInt(EXTRA_IS_SHARE, isShare ? 1 : 0);
         String url = "";
         int currentMediaType = -1;
 
@@ -317,7 +327,18 @@ public class DownloadMediaService extends JobService {
     }
 
     public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, ImgurMedia imgurMedia, @Nullable String subredditName, boolean isNsfw, @Nullable String title) {
+        return constructJobInfo(context, contentEstimatedBytes, imgurMedia, subredditName, isNsfw, title, false);
+    }
+
+    /**
+     * As above, but with {@code isShare}: the job writes to the cache and hands the file to a share
+     * chooser instead of saving it to the download folder.
+     */
+    public static JobInfo constructJobInfo(Context context, long contentEstimatedBytes, ImgurMedia imgurMedia,
+                                           @Nullable String subredditName, boolean isNsfw, @Nullable String title,
+                                           boolean isShare) {
         PersistableBundle extras = new PersistableBundle();
+        extras.putInt(EXTRA_IS_SHARE, isShare ? 1 : 0);
         extras.putString(EXTRA_URL, imgurMedia.getLink());
 
         if (title == null || title.trim().isEmpty()) {
