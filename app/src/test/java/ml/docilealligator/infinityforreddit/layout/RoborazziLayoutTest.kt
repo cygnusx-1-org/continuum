@@ -11,6 +11,7 @@ import android.graphics.Paint
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
@@ -22,6 +23,8 @@ import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
 import androidx.recyclerview.widget.RecyclerView
+import com.github.piasy.biv.BigImageViewer
+import com.github.piasy.biv.loader.ImageLoader
 import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.google.android.material.button.MaterialButton
@@ -49,11 +52,11 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * Screenshot tests that render the feed/list item layouts across every configuration axis that can
- * change how they measure — smallest-width dp, orientation, column count, theme and font scale —
- * without needing an emulator. Robolectric reconfigures the in-process display per case (including
- * selecting -sw600dp resource variants), and Roborazzi captures a PNG that is diffed against a
- * committed golden.
+ * Screenshot tests that render the feed/list item and media-viewer layouts across every
+ * configuration axis that can change how they measure — smallest-width dp, orientation, column
+ * count, theme and font scale — without needing an emulator. Robolectric reconfigures the
+ * in-process display per case (including selecting -sw600dp resource variants), and Roborazzi
+ * captures a PNG that is diffed against a committed golden.
  *
  * Workflow:
  *   ./gradlew recordRoborazziDebug    # write/update goldens in src/test/screenshots/ (commit them)
@@ -117,6 +120,7 @@ class RoborazziLayoutTest(private val case: Case) {
         val reveal: List<Int> = emptyList(),
         val recoveredFlair: Boolean = false,
         val thumbnailSizeDp: Int? = null,
+        val selfThemed: Boolean = false,
     ) {
         /**
          * `{layout}_{theme}_sw{n}dp[_land][_xlarge][_thumb{n}]` — the pre-existing scheme with a
@@ -141,6 +145,13 @@ class RoborazziLayoutTest(private val case: Case) {
      * view that is `android:visibility="gone"` in XML draws nothing, so the golden would be
      * byte-identical whether the view is in that configuration's layout or missing from it
      * entirely — which is the drift issue #369 was.
+     *
+     * [selfThemed] marks a layout that carries its own colours in XML — the media viewers, whose
+     * bars are white-on-scrim over the media at every theme. Painting the runtime palette over
+     * those is not just redundant but destructive: on the black viewer background it drew the
+     * light theme's dark text and dark icon tint black-on-black, and the golden came out an empty
+     * rectangle. Such a layout keeps its own colours and its capture sits on black, the way the
+     * viewer does.
      */
     private data class LayoutSpec(
         val name: String,
@@ -148,6 +159,7 @@ class RoborazziLayoutTest(private val case: Case) {
         val family: Family,
         val reveal: List<Int> = emptyList(),
         val recoveredFlair: Boolean = false,
+        val selfThemed: Boolean = false,
     )
 
     companion object {
@@ -292,6 +304,69 @@ class RoborazziLayoutTest(private val case: Case) {
         )
 
         /**
+         * The full-screen media viewers and their bottom action bars. Six screens draw what is
+         * meant to be one bar — image/GIF, Imgur image, gallery image, and the three that share
+         * exo_playback_control_view — and the bar is assembled independently in each file, so the
+         * only thing keeping their icon rows on the same pixels is that someone edits all of them
+         * together. That is exactly the drift [SECONDARY_LAYOUTS]'s multi-variant block exists for,
+         * one level up: here the copies are separate layouts rather than separate configurations of
+         * one layout, so LayoutVariantIdParityTest cannot see them at all.
+         *
+         * Every bar ships hidden (the viewers reveal it on tap), hence the reveals; a golden of the
+         * unrevealed layout is an empty rectangle that cannot tell a missing row from a hidden one.
+         */
+        private val MEDIA_LAYOUTS: List<LayoutSpec> = listOf(
+            LayoutSpec(
+                "imageViewerBar", R.layout.activity_view_image_or_gif, Family.NONE,
+                reveal = listOf(R.id.bottom_navigation_view_image_or_gif_activity),
+                selfThemed = true,
+            ),
+            LayoutSpec(
+                "imgurImageBar", R.layout.fragment_view_imgur_image, Family.NONE,
+                reveal = listOf(R.id.bottom_navigation_view_imgur_image_fragment),
+                selfThemed = true,
+            ),
+            LayoutSpec(
+                // The BottomAppBar itself is visible in XML here; only the row inside it is hidden.
+                "galleryImageBar", R.layout.fragment_view_reddit_gallery_image_or_gif, Family.NONE,
+                reveal = listOf(R.id.bottom_app_bar_menu_view_reddit_gallery_image_or_gif_fragment),
+                selfThemed = true,
+            ),
+            // exo_playback_control_view is shared by all three video screens, which show different
+            // subsets of its buttons: ViewVideoActivity is the only one with the quality picker,
+            // and the two gallery fragments are the only ones with download-all. One golden per
+            // subset, because the row is weighted — a button appearing or disappearing moves every
+            // other icon in it.
+            LayoutSpec(
+                "videoBarActivity", R.layout.exo_playback_control_view, Family.NONE,
+                reveal = listOf(
+                    R.id.bottom_navigation_exo_playback_control_view,
+                    R.id.mute_exo_playback_control_view,
+                    R.id.video_quality_exo_playback_control_view,
+                ),
+                selfThemed = true,
+            ),
+            LayoutSpec(
+                "videoBarGallery", R.layout.exo_playback_control_view, Family.NONE,
+                reveal = listOf(
+                    R.id.bottom_navigation_exo_playback_control_view,
+                    R.id.mute_exo_playback_control_view,
+                    R.id.download_all_image_view_exo_playback_control_view,
+                ),
+                selfThemed = true,
+            ),
+            // The four containers those video bars sit in — activity_view_video,
+            // activity_view_video_zoomable, fragment_view_imgur_video and
+            // fragment_view_reddit_gallery_video — are deliberately not here, for the reason
+            // fragment_view_post_detail is not: they hold a video surface and nothing else this
+            // harness can render. Recorded once to check, their goldens were the placeholder image
+            // applyTheme puts in empty ImageView slots, filling a PlayerView that has no player,
+            // over a toolbar the activity sets GONE before it ever draws. That pins the
+            // placeholder, not the layout. Everything of theirs that *does* have pixels is the
+            // control view above, which they all `include` and which is covered in both states.
+        )
+
+        /**
          * The archive-recovery markers (issue #372), which no other case can reach: both are shown
          * only for content recovered from Arctic Shift, so every golden above captures them absent.
          *
@@ -378,15 +453,22 @@ class RoborazziLayoutTest(private val case: Case) {
             // Core: width x theme, portrait, at each layout's real column count.
             addAll(tier(FEED_LAYOUTS, LIGHT_DARK, FEED_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             addAll(tier(SECONDARY_LAYOUTS, LIGHT_DARK, SECONDARY_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
+            // Theme is not an axis here: these layouts hold their own colours, so light/dark/amoled
+            // would be three identical images. See [Case.selfThemed].
+            addAll(tier(MEDIA_LAYOUTS, LIGHT_ONLY, SECONDARY_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             // AMOLED: colour-only, so a few widths are enough to catch a palette regression.
             addAll(tier(FEED_LAYOUTS, AMOLED_ONLY, FEED_AMOLED_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             addAll(tier(SECONDARY_LAYOUTS, AMOLED_ONLY, SECONDARY_AMOLED_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             // Landscape: wide `w` against a narrow `sw`, and two columns for every feed family.
             addAll(tier(FEED_LAYOUTS, LIGHT_DARK, FEED_LANDSCAPE_WIDTHS, Orientation.LANDSCAPE, FontScale.NORMAL))
             addAll(tier(SECONDARY_LAYOUTS, LIGHT_DARK, SECONDARY_LANDSCAPE_WIDTHS, Orientation.LANDSCAPE, FontScale.NORMAL))
+            // Media viewers are the one family users routinely turn the phone for, so they get the
+            // full landscape width set rather than the single sample the other secondaries take.
+            addAll(tier(MEDIA_LAYOUTS, LIGHT_ONLY, FEED_LANDSCAPE_WIDTHS, Orientation.LANDSCAPE, FontScale.NORMAL))
             // Font scale: the overflow stressor, at the narrowest widths where it bites first.
             addAll(tier(FEED_LAYOUTS, LIGHT_ONLY, FEED_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
             addAll(tier(SECONDARY_LAYOUTS, LIGHT_ONLY, SECONDARY_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
+            addAll(tier(MEDIA_LAYOUTS, LIGHT_ONLY, SECONDARY_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
             // Recovery markers: the core widths, plus the same font-scale stressor.
             addAll(tier(RECOVERED_LAYOUTS, LIGHT_DARK, SECONDARY_CORE_WIDTHS, Orientation.PORTRAIT, FontScale.NORMAL))
             addAll(tier(RECOVERED_LAYOUTS, LIGHT_ONLY, SECONDARY_FONT_WIDTHS, Orientation.PORTRAIT, FontScale.XLARGE))
@@ -417,7 +499,7 @@ class RoborazziLayoutTest(private val case: Case) {
                             Case(
                                 spec.name, spec.res, spec.family, swDp, orientation, themeLabel,
                                 themeType, fontScale, spec.reveal, spec.recoveredFlair,
-                                thumbnailSizeDp,
+                                thumbnailSizeDp, spec.selfThemed,
                             ),
                         )
                     }
@@ -501,6 +583,13 @@ class RoborazziLayoutTest(private val case: Case) {
 
     @Before
     fun configureScreen() {
+        // BigImageView asks BigImageViewer for the loader inside its constructor and throws when
+        // none is installed, so the three image viewers each call BigImageViewer.initialize()
+        // before they inflate (ViewImageOrGifActivity.java:148, ViewImgurImageFragment.java:93,
+        // ViewRedditGalleryImageOrGifFragment.java:106). Robolectric resets statics per sandbox,
+        // so install one here too — a no-op loader rather than the real Glide one, because these
+        // goldens never load a URI and the real loader would drag Glide's pipeline into a JVM run.
+        BigImageViewer.initialize(NoOpImageLoader)
         // xxhdpi (3 px/dp) so text renders at realistic pixel sizes and real-world word-wrap /
         // clipping bugs surface the way users see them. setQualifiers reloads resources, so the
         // -sw600dp variants (including bool/isTablet) apply at 600 and 934.
@@ -565,7 +654,9 @@ class RoborazziLayoutTest(private val case: Case) {
         controller.create()
 
         val palette = Palette(case.themeType, app, activity.resources)
-        pageBackground = palette.pageBackground
+        // Media viewers draw over the media itself, which is what their scrim colours are chosen
+        // against; every other layout sits on the theme's page background. See [Case.selfThemed].
+        pageBackground = if (case.selfThemed) Color.BLACK else palette.pageBackground
 
         // One column's worth of the display. The StaggeredGridLayoutManagerItemOffsetDecoration insets
         // (R.dimen.staggeredLayoutManagerItemOffset, plus negative card-3 offsets) are deliberately not
@@ -673,13 +764,17 @@ class RoborazziLayoutTest(private val case: Case) {
                 gallery.minimumHeight = SAMPLE_IMAGE_SIZE_PX
             }
         }
+        // Colours come from the adapter for everything except the self-themed media viewers, which
+        // already hold theirs. Placeholder *content* is still injected for both, since an empty
+        // title measures to nothing whoever owns its colour.
+        val themeColours = !case.selfThemed
         when (view) {
-            is MaterialCardView -> view.setCardBackgroundColor(palette.cardBackground)
-            is MaterialButton -> {
+            is MaterialCardView -> if (themeColours) view.setCardBackgroundColor(palette.cardBackground)
+            is MaterialButton -> if (themeColours) {
                 view.setTextColor(palette.textColor)
                 view.iconTint = ColorStateList.valueOf(palette.iconColor)
             }
-            is Button -> view.setTextColor(palette.textColor)
+            is Button -> if (themeColours) view.setTextColor(palette.textColor)
             is TextView -> {
                 // Relative to the item, not the display: in a 2-column feed an item is half the
                 // display wide, and a display-relative threshold would stop filling its title.
@@ -687,18 +782,29 @@ class RoborazziLayoutTest(private val case: Case) {
                 if (view.text.isNullOrEmpty() && view.width >= minFillWidth) {
                     view.text = SAMPLE_TEXT
                 }
-                view.setTextColor(palette.textColor)
+                if (themeColours) view.setTextColor(palette.textColor)
             }
             is ImageView ->
                 if (view.drawable == null) {
                     view.setImageDrawable(palette.sampleImage())
-                } else {
+                } else if (themeColours) {
                     view.imageTintList = ColorStateList.valueOf(palette.iconColor)
                 }
         }
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) applyTheme(view.getChildAt(i), palette, itemWidthPx)
         }
+    }
+
+    /** Stands in for the Glide-backed loader the media viewers install. See [configureScreen]. */
+    private object NoOpImageLoader : ImageLoader {
+        override fun loadImage(requestId: Int, uri: Uri, callback: ImageLoader.Callback) = Unit
+
+        override fun prefetch(uri: Uri) = Unit
+
+        override fun cancel(requestId: Int) = Unit
+
+        override fun cancelAll() = Unit
     }
 
     /** The gallery-page RecyclerView in this subtree, if this container is a media gallery block. */
