@@ -202,9 +202,13 @@ public class ViewImageOrGifActivity extends AppCompatActivity
             isApng = true;
         }
 
-        if (postTitle != null) {
+        if (postTitle != null && !postTitle.isEmpty()) {
             Spanned title = Html.fromHtml(String.format("<font color=\"#FFFFFF\"><small>%s</small></font>", postTitle));
             binding.titleTextViewViewImageOrGifActivity.setText(title);
+        } else {
+            // Avatars, wiki pages, the sidebar and the rules open this activity without a post
+            // title; the title row would otherwise be an empty strip above the buttons.
+            binding.titleTextViewViewImageOrGifActivity.setVisibility(View.GONE);
         }
 
         Objects.requireNonNull(getSupportActionBar()).hide();
