@@ -622,17 +622,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity
             ArrayList<ImgurMedia> images = new ArrayList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 try {
-                    JSONObject image = jsonArray.getJSONObject(i);
-                    String type = image.getString(JSONUtils.TYPE_KEY);
-                    if (type.contains("gif")) {
-                        images.add(new ImgurMedia(image.getString(JSONUtils.ID_KEY),
-                                image.getString(JSONUtils.TITLE_KEY), image.getString(JSONUtils.DESCRIPTION_KEY),
-                                "video/mp4", image.getString(JSONUtils.MP4_KEY)));
-                    } else {
-                        images.add(new ImgurMedia(image.getString(JSONUtils.ID_KEY),
-                                image.getString(JSONUtils.TITLE_KEY), image.getString(JSONUtils.DESCRIPTION_KEY),
-                                type, image.getString(JSONUtils.LINK_KEY)));
-                    }
+                    images.add(parseImgurMediaItem(jsonArray.getJSONObject(i)));
                 } catch (JSONException e) {
                     Log.e("ViewImgurMediaActivity", "parseImgurImages failed", e);
                 }
@@ -646,6 +636,36 @@ public class ViewImgurMediaActivity extends AppCompatActivity
         return null;
     }
 
+    /**
+     * One item of an Imgur response, album entry or standalone.
+     *
+     * <p>Imgur serves an animated item as both a .gif and an .mp4, and this screen plays the mp4.
+     * The v3 API does not always have one: album 81AzJbD returns {@code "type": "image/gif"} with
+     * {@code "mp4": ""} and a perfectly good {@code link} to the .gif. Taking the mp4 on the type
+     * alone then built an ImgurMedia with no link at all, and every consumer of it broke the same
+     * way — the video page opened with nothing to play, and download and share resolved the empty
+     * url against Retrofit's {@code http://localhost/} placeholder base and failed to connect.
+     *
+     * <p>So the mp4 has to be there to be used. Without one the item is whatever its link says it
+     * is, which for these is a GIF the image page renders.
+     */
+    @WorkerThread
+    private static ImgurMedia parseImgurMediaItem(JSONObject image) throws JSONException {
+        String id = image.getString(JSONUtils.ID_KEY);
+        String title = image.getString(JSONUtils.TITLE_KEY);
+        String description = image.getString(JSONUtils.DESCRIPTION_KEY);
+        String type = image.getString(JSONUtils.TYPE_KEY);
+        // isNull first: optString renders a JSON null as the four characters "null", which would
+        // pass the emptiness check below and become the link.
+        String mp4 = image.isNull(JSONUtils.MP4_KEY) ? "" : image.optString(JSONUtils.MP4_KEY);
+
+        if (type.contains("gif") && !mp4.isEmpty()) {
+            return new ImgurMedia(id, title, description, "video/mp4", mp4);
+        }
+
+        return new ImgurMedia(id, title, description, type, image.getString(JSONUtils.LINK_KEY));
+    }
+
     @WorkerThread
     @Nullable
     private static ImgurMedia parseImgurImage(@Nullable String response) {
@@ -653,17 +673,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity
             return null;
         }
         try {
-            JSONObject image = new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY);
-            String type = image.getString(JSONUtils.TYPE_KEY);
-            if (type.contains("gif")) {
-                return new ImgurMedia(image.getString(JSONUtils.ID_KEY),
-                        image.getString(JSONUtils.TITLE_KEY), image.getString(JSONUtils.DESCRIPTION_KEY),
-                        "video/mp4", image.getString(JSONUtils.MP4_KEY));
-            } else {
-                return new ImgurMedia(image.getString(JSONUtils.ID_KEY),
-                        image.getString(JSONUtils.TITLE_KEY), image.getString(JSONUtils.DESCRIPTION_KEY),
-                        type, image.getString(JSONUtils.LINK_KEY));
-            }
+            return parseImgurMediaItem(new JSONObject(response).getJSONObject(JSONUtils.DATA_KEY));
         } catch (JSONException e) {
             Log.e("ViewImgurMediaActivity", "parseImgurImage failed", e);
         }

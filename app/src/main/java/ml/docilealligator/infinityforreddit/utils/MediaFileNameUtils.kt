@@ -368,20 +368,21 @@ object MediaFileNameUtils {
         }
     }
 
-    private fun getExtension(imgurMedia: ImgurMedia): String {
-        // ImgurMedia already exposes a reasonable filename with extension.
-        val extension = FilenameUtils.getExtension(imgurMedia.fileName)
-        if (!extension.isNullOrEmpty()) {
-            return "." + extension.lowercase().substring(0, minOf(extension.length, 5))
+    /**
+     * The link decides, exactly as it does for every other media type, and the media type is only
+     * the fallback for a link that carries no usable extension.
+     *
+     * This used to read the extension off `ImgurMedia.getFileName()`, which derived it from the
+     * media type alone -- so an animated item Imgur serves only as a .gif, with no .mp4 rendition,
+     * was typed as an image and downloaded as `.jpg`, leaving a GIF on disk that nothing would
+     * treat as animated.
+     */
+    private fun getExtension(imgurMedia: ImgurMedia): String = getExtension(
+        imgurMedia.link,
+        if (imgurMedia.type == ImgurMedia.TYPE_VIDEO) {
+            DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO
+        } else {
+            DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE
         }
-        // Fallback based on type if the filename lacks an extension.
-        return getExtension(
-            imgurMedia.link,
-            if (imgurMedia.type == ImgurMedia.TYPE_VIDEO) {
-                DownloadMediaService.EXTRA_MEDIA_TYPE_VIDEO
-            } else {
-                DownloadMediaService.EXTRA_MEDIA_TYPE_IMAGE
-            }
-        )
-    }
+    )
 }

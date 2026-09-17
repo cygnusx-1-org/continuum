@@ -30,6 +30,11 @@ public class ImgurMedia implements Parcelable {
         title = Objects.requireNonNull(in.readString());
         description = Objects.requireNonNull(in.readString());
         link = Objects.requireNonNull(in.readString());
+        // Restored explicitly rather than re-derived: the constructor above reads it from the
+        // response's mime type, which no longer exists here. Without this a video came back as an
+        // image after process death, and the album then opened it in the image page and named its
+        // download .jpg.
+        type = in.readInt();
     }
 
     public static final Creator<ImgurMedia> CREATOR = new Creator<ImgurMedia>() {
@@ -64,14 +69,6 @@ public class ImgurMedia implements Parcelable {
         return link;
     }
 
-    public String getFileName() {
-        if (type == TYPE_VIDEO) {
-            return "Imgur-" + id + ".mp4";
-        }
-
-        return "Imgur-" + id + ".jpg";
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -83,5 +80,6 @@ public class ImgurMedia implements Parcelable {
         parcel.writeString(title);
         parcel.writeString(description);
         parcel.writeString(link);
+        parcel.writeInt(type);
     }
 }
