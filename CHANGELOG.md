@@ -2,6 +2,15 @@
 
 ---
 
+8.3.1.6 / 2026-9-17
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented View image index in the gallery view #419
+* Fixed Cannot filter out pinned posts with post filters #420
+* Implemented Highlight followed users #415
+* Implemented Set custom tags for other users like in RES #413
+
 8.3.1.5 / 2026-9-16
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
