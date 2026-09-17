@@ -56,7 +56,8 @@ class AccountScopedKeysTest {
             SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE,
             SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
             SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
-            SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)) {
+            SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
+            SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE)) {
             assertTrue(file, AccountScopedKeys.isScoped(file, "anything_at_all"))
         }
     }

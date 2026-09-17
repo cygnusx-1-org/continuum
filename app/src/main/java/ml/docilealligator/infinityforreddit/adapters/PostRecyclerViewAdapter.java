@@ -144,6 +144,7 @@ import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
+import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
@@ -1104,12 +1105,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             if (holder instanceof PostBaseViewHolder) {
+                // A feed row has no flair line under the author, so the user tag follows the name.
                 if (mHideSubredditAndUserPrefix) {
                     ((PostBaseViewHolder) holder).subredditTextView.setText(post.getSubredditName());
-                    ((PostBaseViewHolder) holder).userTextView.setText(post.getAuthor());
+                    ((PostBaseViewHolder) holder).userTextView.setText(userTagged(post, post.getAuthor()));
                 } else {
                     ((PostBaseViewHolder) holder).subredditTextView.setText(post.getSubredditNamePrefixed());
-                    ((PostBaseViewHolder) holder).userTextView.setText(post.getAuthorNamePrefixed());
+                    ((PostBaseViewHolder) holder).userTextView.setText(userTagged(post, post.getAuthorNamePrefixed()));
                 }
 
                 ((PostBaseViewHolder) holder).userTextView.setTextColor(
@@ -1423,9 +1425,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ((PostCompactBaseViewHolder) holder).usernameTextView.setTextColor(
                             post.isModerator() ? mModeratorColor : mUsernameColor);
                     if (mHideSubredditAndUserPrefix) {
-                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthor());
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(userTagged(post, post.getAuthor()));
                     } else {
-                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(post.getAuthorNamePrefixed());
+                        ((PostCompactBaseViewHolder) holder).usernameTextView.setText(userTagged(post, post.getAuthorNamePrefixed()));
                     }
                     ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.VISIBLE);
                 } else {
@@ -1433,9 +1435,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             post.isModerator() ? mModeratorColor : mUsernameColor);
 
                     if (mHideSubredditAndUserPrefix) {
-                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getAuthor());
+                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(userTagged(post, post.getAuthor()));
                     } else {
-                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(post.getAuthorNamePrefixed());
+                        ((PostCompactBaseViewHolder) holder).nameTextView.setText(userTagged(post, post.getAuthorNamePrefixed()));
                     }
                     ((PostCompactBaseViewHolder) holder).usernameTextView.setVisibility(View.GONE);
                 }
@@ -2832,6 +2834,34 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setHidePostFlair(boolean hidePostFlair) {
         mHidePostFlair = hidePostFlair;
+    }
+
+    /**
+     * {@code name} with the author's user tag chip after it, when the author has one; see
+     * {@link UserTagChip}. {@code name} is whichever spelling of the author the prefix setting
+     * calls for.
+     */
+    private CharSequence userTagged(Post post, String name) {
+        return UserTagChip.appendTo(mActivity, name, post.getAuthor(), mFlairBackgroundColor, mFlairTextColor);
+    }
+
+    /**
+     * Rebinds the rows whose author is {@code username}, whose tag has just changed — or every
+     * row when {@code username} is null, which is every tag going at once. Only those rows: a
+     * rebind restarts an autoplaying video, and the other rows have nothing new to show.
+     */
+    public void notifyUserTagChanged(@Nullable String username) {
+        if (username == null) {
+            notifyDataSetChanged();
+            return;
+        }
+        ItemSnapshotList<Post> snapshot = snapshot();
+        for (int i = 0; i < snapshot.size(); i++) {
+            Post post = snapshot.get(i);
+            if (post != null && username.equalsIgnoreCase(post.getAuthor())) {
+                notifyItemChanged(i);
+            }
+        }
     }
 
     public void setHideSubredditAndUserPrefix(boolean hideSubredditAndUserPrefix) {

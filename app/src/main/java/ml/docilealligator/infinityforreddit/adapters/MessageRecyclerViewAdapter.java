@@ -44,6 +44,7 @@ import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
+import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import retrofit2.Retrofit;
 
 @SuppressWarnings("NullAway.Init")
@@ -76,6 +77,8 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     private final int mMessageBackgroundColor;
     private final int mUsernameColor;
     private final int mSubredditColor;
+    private final int mFlairBackgroundColor;
+    private final int mFlairTextColor;
     private final int mPrimaryTextColor;
     private final int mSecondaryTextColor;
     private final int mUnreadMessageBackgroundColor;
@@ -96,6 +99,9 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
         mMessageBackgroundColor = customThemeWrapper.getCardViewBackgroundColor();
         mUsernameColor = customThemeWrapper.getUsername();
         mSubredditColor = customThemeWrapper.getSubreddit();
+        // A user tag is drawn as a chip in the flair colours; see UserTagChip.
+        mFlairBackgroundColor = customThemeWrapper.getFlairBackgroundColor();
+        mFlairTextColor = customThemeWrapper.getFlairTextColor();
         mPrimaryTextColor = customThemeWrapper.getPrimaryTextColor();
         mSecondaryTextColor = customThemeWrapper.getSecondaryTextColor();
         int spoilerBackgroundColor = mSecondaryTextColor | 0xFF000000;
@@ -184,7 +190,11 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                     ((DataViewHolder) holder).binding.titleTextViewItemMessage.setVisibility(View.GONE);
                 }
 
-                ((DataViewHolder) holder).binding.authorTextViewItemMessage.setText(recipientUsername);
+                // The row names the other party, which is a user unless the thread is with a
+                // subreddit — and only a user can carry a tag.
+                ((DataViewHolder) holder).binding.authorTextViewItemMessage.setText(UserTagChip.appendTo(mActivity,
+                        recipientUsername, message.isRecipientASubreddit() ? null : recipientUsername,
+                        mFlairBackgroundColor, mFlairTextColor));
                 String subjectRaw = displayedMessage.getSubject();
                 String subject = (subjectRaw == null || subjectRaw.isEmpty()) ? "" :
                         subjectRaw.substring(0, 1).toUpperCase(Locale.getDefault()) + subjectRaw.substring(1);

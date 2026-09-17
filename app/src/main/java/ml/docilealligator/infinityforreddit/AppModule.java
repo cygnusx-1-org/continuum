@@ -197,6 +197,15 @@ abstract class AppModule {
     }
 
     @Provides
+    @Named("user_tags")
+    static SharedPreferences provideUserTagsSharedPreferences(Application application,
+                                                              @Named("current_account") SharedPreferences currentAccountSharedPreferences) {
+        return accountScoped(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
+                application.getSharedPreferences(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE),
+                currentAccountSharedPreferences);
+    }
+
+    @Provides
     @Named("security")
     @Singleton
     static SharedPreferences provideSecuritySharedPreferences(Application application) {

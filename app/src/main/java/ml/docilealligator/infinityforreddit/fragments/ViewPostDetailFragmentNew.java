@@ -95,6 +95,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeSpoilerBlurEvent;
 import ml.docilealligator.infinityforreddit.events.FlairSelectedEvent;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
+import ml.docilealligator.infinityforreddit.events.UserTagChangedEvent;
 import ml.docilealligator.infinityforreddit.extensions.ConcatAdapterKt;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.message.InboxCount;
@@ -1972,6 +1973,20 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             Post updatedPost = new Post(event.post);
 
             viewPostDetailFragmentViewModel.setPost(updatedPost);
+        }
+    }
+
+    /**
+     * The post's author and every comment's author may carry the tag, and both adapters read it on
+     * bind, so both are rebound where they stand rather than reattached.
+     */
+    @Subscribe
+    public void onUserTagChangedEvent(UserTagChangedEvent event) {
+        if (mPostAdapter != null) {
+            mPostAdapter.notifyUserTagChanged(event.getUsername());
+        }
+        if (mCommentsAdapter != null) {
+            mCommentsAdapter.notifyUserTagChanged(event.getUsername());
         }
     }
 

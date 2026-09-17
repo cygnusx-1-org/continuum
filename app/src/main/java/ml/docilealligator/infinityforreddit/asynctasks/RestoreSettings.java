@@ -162,6 +162,8 @@ public class RestoreSettings {
                                 rawFile(context, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE));
                         targets.put(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE, postHistorySharedPreferences);
                         targets.put(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE, recentlyVisitedSharedPreferences);
+                        targets.put(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
+                                rawFile(context, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE));
 
                         Map<String, Object> restoredDefaultPreferences = null;
 

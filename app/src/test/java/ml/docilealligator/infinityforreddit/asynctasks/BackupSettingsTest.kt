@@ -223,6 +223,7 @@ class BackupSettingsTest {
             SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
             SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
             SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
+            SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
         )) {
             val entry = BuildConfig.VERSION_NAME + "/" + name + BackupSettings.PREFERENCES_FILE_SUFFIX
             assertTrue(entry, names.contains(entry))

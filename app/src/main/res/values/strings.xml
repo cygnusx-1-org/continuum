@@ -89,6 +89,8 @@
     <string name="action_set_wallpaper">Set as Wallpaper</string>
     <string name="action_send_private_message">Send Private Message</string>
     <string name="action_block_user">Block User</string>
+    <string name="action_tag_user">Tag User</string>
+    <string name="action_edit_user_tag">Edit User Tag</string>
     <string name="action_select_user_flair">Select User Flair</string>
     <string name="action_give_award">Give Award</string>
     <string name="action_save_to_database">Save to Database</string>
@@ -637,6 +639,7 @@
     <string name="settings_delete_front_page_scrolled_positions_in_database_title">Delete All Front Page Scrolled Positions</string>
     <string name="settings_delete_resume_state_title">Delete Resume Data</string>
     <string name="settings_delete_read_posts_in_database_title">Delete All Read Posts</string>
+    <string name="settings_delete_user_tags_title">Delete All User Tags</string>
     <string name="settings_delete_all_legacy_settings_title">Delete All Legacy Settings</string>
     <string name="settings_reset_all_settings_title">Reset All Settings</string>
     <string name="restart_app_see_changes">Restart the app to see the changes</string>
@@ -727,6 +730,7 @@
     <string name="settings_delete_account_post_layouts_summary">Forget the layout each feed remembers</string>
     <string name="settings_delete_account_front_page_scrolled_position_summary">Forget where Home had been read up to</string>
     <string name="settings_delete_account_resume_state_summary">Forget the screens and posts saved for Resume where I left off</string>
+    <string name="settings_delete_account_user_tags_summary">Forget the private tags put on other users</string>
     <string name="delete_account_subreddits_confirmation">%1$s forgets which subreddits it is subscribed to and which of them are favourites. A signed-in account\'s list is Reddit\'s and comes back the next time subscriptions are refreshed; subreddits subscribed to while logged out are kept only in the app, and do not. Every other account keeps its own.</string>
     <string name="delete_account_users_confirmation">%1$s forgets the users it follows and the users it has saved. Follows made while signed in are Reddit\'s and come back the next time subscriptions are refreshed; follows made while logged out, and saved users, are kept only in the app and do not. Every other account keeps its own.</string>
     <string name="delete_account_sort_types_confirmation">%1$s forgets the sort order it has remembered for every feed. Every other account keeps its own.</string>
@@ -734,6 +738,7 @@
     <string name="delete_account_front_page_scrolled_position_confirmation">%1$s forgets where it had been read up to in Home, so the feed opens at the top next time. Every other account keeps its own.</string>
     <string name="delete_account_resume_state_confirmation">%1$s forgets the screens it had open and the posts cached to put them back, so the next launch opens on Home. The setting stays on and starts recording again from here. Every other account keeps its own.</string>
     <string name="delete_account_read_posts_confirmation">%1$s forgets which posts it has read, so posts it has already seen stop being marked. Upvoted, downvoted, hidden and saved posts are left alone, and every other account keeps its own read history.</string>
+    <string name="delete_account_user_tags_confirmation">%1$s forgets every tag it has put on other users. Every other account keeps its own.</string>
     <string name="settings_device_title">Device</string>
     <string name="settings_device_summary">Foldable support, image decoding limit</string>
     <string name="settings_miscellaneous_title">Miscellaneous</string>
@@ -1345,6 +1350,7 @@
     <string name="delete_all_front_page_scrolled_positions_success">Delete all scrolled positions in front page successfully</string>
     <string name="delete_resume_state_success">Resume data deleted</string>
     <string name="delete_all_read_posts_success">Delete all read posts successfully</string>
+    <string name="delete_all_user_tags_success">User tags deleted</string>
     <string name="delete_all_legacy_settings_success">Delete all legacy settings successfully</string>
     <string name="reset_all_settings_success">Reset all settings successfully</string>
 
@@ -1442,6 +1448,11 @@
     <string name="login_failed_result_url_unknown_error">No code found in the result URL. No error provided.</string>
 
     <string name="block_user">Block User</string>
+    <string name="tag_user_dialog_title">Tag u/%1$s</string>
+    <string name="user_tag_hint">Tag</string>
+    <string name="user_tag_dialog_message">Only you see this tag. It is shown beside this user\'s name everywhere in the app.</string>
+    <string name="set_user_tag">Set tag</string>
+    <string name="remove_user_tag">Remove tag</string>
     <string name="block_user_success">Blocked</string>
     <string name="block_user_failed">Failed to block user</string>
 

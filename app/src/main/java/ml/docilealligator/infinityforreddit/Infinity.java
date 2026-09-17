@@ -45,6 +45,7 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder;
 import ml.docilealligator.infinityforreddit.randomsubreddit.RandomSubredditRepository;
 import ml.docilealligator.infinityforreddit.reminder.ReminderManager;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
+import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.MaterialYouUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -102,6 +103,9 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
     @Inject
     @Named("amoled_theme")
     SharedPreferences amoledThemeSharedPreferences;
+    @Inject
+    @Named("user_tags")
+    SharedPreferences mUserTagsSharedPreferences;
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
     @Inject
@@ -170,6 +174,10 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
         appLock = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.APP_LOCK, false);
         appLockTimeout = SharedPreferencesUtils.getLong(mSecuritySharedPreferences, SharedPreferencesUtils.APP_LOCK_TIMEOUT, "600000");
         isSecureMode = mSecuritySharedPreferences.getBoolean(SharedPreferencesUtils.SECURE_MODE, false);
+
+        // The user tags are read on every author bind, so the store is static and given its
+        // account-scoped file here rather than threaded through every adapter that shows a name.
+        UserTags.install(mUserTagsSharedPreferences);
 
         // Give the block recorder somewhere to write. Until this runs it silently drops what it is
         // told, which is what keeps PostFilter.isPostAllowed callable from unit tests with no setup.

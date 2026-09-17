@@ -100,6 +100,7 @@ import ml.docilealligator.infinityforreddit.events.PostPositionUpdateEventToPost
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.events.ShowDividerInCompactLayoutPreferenceEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
+import ml.docilealligator.infinityforreddit.events.UserTagChangedEvent;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
@@ -1337,6 +1338,18 @@ public abstract class PostFragmentBase extends Fragment {
         if (getPostAdapter() != null) {
             getPostAdapter().setHideSubredditAndUserPrefix(event.hideSubredditAndUserPrefix);
             refreshAdapter();
+        }
+    }
+
+    /**
+     * A tag is read on bind, so the rows only need rebinding — not the reattach refreshAdapter()
+     * does for a setting the adapter itself holds.
+     */
+    @Subscribe
+    public void onUserTagChangedEvent(UserTagChangedEvent event) {
+        PostRecyclerViewAdapter adapter = getPostAdapter();
+        if (adapter != null) {
+            adapter.notifyUserTagChanged(event.getUsername());
         }
     }
 

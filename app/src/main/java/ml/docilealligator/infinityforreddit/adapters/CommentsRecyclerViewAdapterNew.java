@@ -79,10 +79,12 @@ import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
+import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.RecoveredFlair;
 import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
 
@@ -151,6 +153,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final int mAuthorFlairTextColor;
     private final int mRecoveredBackgroundColor;
     private final int mRecoveredTextColor;
+    private final int mFlairBackgroundColor;
+    private final int mFlairTextColor;
     private final int mUpvotedColor;
     private final int mDownvotedColor;
     private final int mSingleCommentThreadBackgroundColor;
@@ -384,6 +388,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         // borrows the NSFW chip's.
         mRecoveredBackgroundColor = customThemeWrapper.getNsfwBackgroundColor();
         mRecoveredTextColor = customThemeWrapper.getNsfwTextColor();
+        // A user tag is drawn as a chip in the flair colours; see UserTagChip.
+        mFlairBackgroundColor = customThemeWrapper.getFlairBackgroundColor();
+        mFlairTextColor = customThemeWrapper.getFlairTextColor();
         mUsernameColor = customThemeWrapper.getUsername();
         mUpvotedColor = customThemeWrapper.getUpvoted();
         mDownvotedColor = customThemeWrapper.getDownvoted();
@@ -481,6 +488,17 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     // stays on screen, and now that a recovered comment shows its marker here, that
                     // means a Recovered badge on a comment that was never recovered.
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setVisibility(View.GONE);
+                }
+
+                // The tag goes at the front of the flair line, ahead of the Recovered marker and
+                // the flair, once both have had their say about what the line holds — including
+                // whether it is shown at all, which is why this is read back rather than rebuilt.
+                String userTag = UserTags.get(comment.getAuthor());
+                if (userTag != null) {
+                    TextView flairTextView = ((CommentBaseViewHolder) holder).authorFlairTextView;
+                    CharSequence flair = flairTextView.getVisibility() == View.VISIBLE ? flairTextView.getText() : null;
+                    flairTextView.setText(UserTagChip.prependTo(mActivity, userTag, flair, mFlairBackgroundColor, mFlairTextColor));
+                    flairTextView.setVisibility(View.VISIBLE);
                 }
 
                 if (comment.isSubmitter()) {
@@ -701,7 +719,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 if (mShowUserPrefix) { //adding prefix
                     authorText = "u/" + authorText;
                 }
-                ((CommentFullyCollapsedViewHolder) holder).binding.userNameTextViewItemCommentFullyCollapsed.setText(authorText);
+                // No flair line in this row, so the tag follows the name on its one line. An
+                // author-less comment keeps showing nothing, as it did.
+                ((CommentFullyCollapsedViewHolder) holder).binding.userNameTextViewItemCommentFullyCollapsed.setText(
+                        authorText == null ? null
+                                : UserTagChip.appendTo(mActivity, authorText, comment.getAuthor(), mFlairBackgroundColor, mFlairTextColor));
 
                 if (mShowAuthorAvatar) {
                     if (comment.getAuthorIconUrl() == null && comment.getAuthorFullName() != null && !comment.getAuthorFullName().isEmpty()) {
@@ -894,6 +916,25 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
 
     public boolean setDataSavingMode(boolean dataSavingMode) {
         return mEmotePlugin.setDataSavingMode(dataSavingMode) || mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+    }
+
+    /**
+     * Rebinds the comments by {@code username}, whose tag has just changed — or every comment
+     * when {@code username} is null, which is every tag going at once. Only those: a rebind
+     * restarts a comment's autoplaying GIFs, and the other comments have nothing new to show.
+     */
+    public void notifyUserTagChanged(@Nullable String username) {
+        if (username == null) {
+            notifyDataSetChanged();
+            return;
+        }
+        List<Comment> comments = getCurrentList();
+        for (int i = 0; i < comments.size(); i++) {
+            Comment comment = comments.get(i);
+            if (comment != null && username.equalsIgnoreCase(comment.getAuthor())) {
+                notifyItemChanged(i);
+            }
+        }
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {

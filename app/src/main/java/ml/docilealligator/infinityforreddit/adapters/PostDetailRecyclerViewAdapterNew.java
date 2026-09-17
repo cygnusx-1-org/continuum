@@ -132,11 +132,13 @@ import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.StreamableVideo;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
+import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
+import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.CacheManager;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
@@ -783,6 +785,19 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             } else if (mPost.getAuthorFlair() != null && !mPost.getAuthorFlair().isEmpty()) {
                 ((PostDetailBaseViewHolder) holder).authorFlairTextView.setVisibility(View.VISIBLE);
                 ((PostDetailBaseViewHolder) holder).authorFlairTextView.setText(mPost.getAuthorFlair());
+            } else {
+                // The one holder here is rebound in place when a user tag changes, so a line that
+                // held only the tag has to be put away again once the tag is gone.
+                ((PostDetailBaseViewHolder) holder).authorFlairTextView.setVisibility(View.GONE);
+            }
+
+            // The tag leads the flair line, as it does under a comment; see UserTagChip.
+            String userTag = UserTags.get(mPost.getAuthor());
+            if (userTag != null) {
+                TextView authorFlairTextView = ((PostDetailBaseViewHolder) holder).authorFlairTextView;
+                CharSequence flair = authorFlairTextView.getVisibility() == View.VISIBLE ? authorFlairTextView.getText() : null;
+                authorFlairTextView.setText(UserTagChip.prependTo(mActivity, userTag, flair, mFlairBackgroundColor, mFlairTextColor));
+                authorFlairTextView.setVisibility(View.VISIBLE);
             }
 
             switch (mPost.getVoteType()) {
@@ -1768,6 +1783,21 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
                 mActivity.startActivity(intent);
             }
+        }
+    }
+
+    /**
+     * Rebinds the one row when the post's author is {@code username}, whose tag has just changed,
+     * or when {@code username} is null and every tag went. A rebind restarts an autoplaying
+     * video, so another user's tag changing is not a reason for one.
+     */
+    public void notifyUserTagChanged(@Nullable String username) {
+        // No post yet means no row to rebind; the bind that comes with the post reads the tag.
+        if (mPost == null) {
+            return;
+        }
+        if (username == null || username.equalsIgnoreCase(mPost.getAuthor())) {
+            notifyDataSetChanged();
         }
     }
 

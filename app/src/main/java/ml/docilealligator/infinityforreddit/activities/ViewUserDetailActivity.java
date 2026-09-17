@@ -25,6 +25,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -88,6 +89,7 @@ import ml.docilealligator.infinityforreddit.events.ChangeNSFWEvent;
 import ml.docilealligator.infinityforreddit.events.GoBackToMainPageEvent;
 import ml.docilealligator.infinityforreddit.events.ShowThumbnailOnTheLeftInCompactLayoutEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
+import ml.docilealligator.infinityforreddit.events.UserTagChangedEvent;
 import ml.docilealligator.infinityforreddit.fragments.CommentsListingFragment;
 import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
@@ -117,10 +119,12 @@ import ml.docilealligator.infinityforreddit.user.FetchUserData;
 import ml.docilealligator.infinityforreddit.user.UserData;
 import ml.docilealligator.infinityforreddit.user.UserFollowing;
 import ml.docilealligator.infinityforreddit.user.UserSaving;
+import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.user.UserViewModel;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -201,6 +205,11 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Nullable
     private Call<String> subredditAutocompleteCall;
     private String username;
+    /**
+     * The name the header shows, "u/" and all: the one from the intent until Reddit answers with
+     * the user's own capitalisation. Kept so the header can be redrawn when the user's tag changes.
+     */
+    private String userFullName;
     @Nullable
     private String initialSortType;
     @Nullable
@@ -315,7 +324,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         Resources resources = getResources();
 
         String title = "u/" + username;
-        binding.userNameTextViewViewUserDetailActivity.setText(title);
+        userFullName = title;
+        showUserName();
         binding.toolbarViewUserDetailActivity.setTitle(title);
 
         setSupportActionBar(binding.toolbarViewUserDetailActivity);
@@ -666,8 +676,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     binding.subscribeUserChipViewUserDetailActivity.setVisibility(View.INVISIBLE);
                 }
 
-                String userFullName = "u/" + userData.getName();
-                binding.userNameTextViewViewUserDetailActivity.setText(userFullName);
+                userFullName = "u/" + userData.getName();
+                showUserName();
                 if (!title.equals(userFullName)) {
                     Objects.requireNonNull(getSupportActionBar()).setTitle(userFullName);
                 }
@@ -1392,14 +1402,27 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         navigationWrapper.setInboxCount(this, inboxCount);
     }
 
+    /**
+     * The header's name, with the user's tag chip after it when there is one (issue #413).
+     */
+    private void showUserName() {
+        binding.userNameTextViewViewUserDetailActivity.setText(UserTagChip.appendTo(this, userFullName, username,
+                mCustomThemeWrapper.getFlairBackgroundColor(), mCustomThemeWrapper.getFlairTextColor()));
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.view_user_detail_activity, menu);
         if (username.equals(accountName)) {
             menu.findItem(R.id.action_send_private_message_view_user_detail_activity).setVisible(false);
             menu.findItem(R.id.action_report_view_user_detail_activity).setVisible(false);
+            menu.findItem(R.id.action_tag_user_view_user_detail_activity).setVisible(false);
             menu.findItem(R.id.action_block_user_view_user_detail_activity).setVisible(false);
         } else {
+            // Named for what it will do, before the theme is applied to the titles below. The menu
+            // is invalidated when the tag changes, so this is re-read then.
+            menu.findItem(R.id.action_tag_user_view_user_detail_activity).setTitle(
+                    UserTags.isTagged(username) ? R.string.action_edit_user_tag : R.string.action_tag_user);
             menu.findItem(R.id.action_edit_profile_view_user_detail_activity).setVisible(false);
         }
         applyMenuItemTheme(menu);
@@ -1470,6 +1493,9 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             Intent reportIntent = new Intent(this, LinkResolverActivity.class);
             reportIntent.setData(Uri.parse("https://www.reddithelp.com/en/categories/rules-reporting/account-and-community-restrictions/what-should-i-do-if-i-see-something-i"));
             startActivity(reportIntent);
+            return true;
+        } else if (itemId == R.id.action_tag_user_view_user_detail_activity) {
+            showUserTagDialog();
             return true;
         } else if (itemId == R.id.action_block_user_view_user_detail_activity) {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
@@ -1727,6 +1753,54 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                 .show();
     }
 
+    /**
+     * Sets, changes or removes this user's private tag (issue #413). Nothing here talks to Reddit,
+     * so unlike Block User it needs no account: an anonymous browser can tag people too.
+     *
+     * "Set tag" on an emptied field removes the tag, as `UserTags.set` says; "Remove tag" is offered
+     * as well, but only once there is a tag to remove, so a fresh dialog has one fewer button to
+     * read.
+     */
+    private void showUserTagDialog() {
+        View rootView = getLayoutInflater().inflate(R.layout.dialog_edit_user_tag, binding.getRoot(), false);
+        TextInputEditText tagEditText = rootView.findViewById(R.id.text_input_edit_text_edit_user_tag_dialog);
+        String currentTag = UserTags.get(username);
+        if (currentTag != null) {
+            // The field's own length, not the tag's: a tag longer than the field's limit (one
+            // restored from a backup, say) is cut to fit, and a caret past the end throws.
+            tagEditText.setText(currentTag);
+            tagEditText.setSelection(tagEditText.length());
+        }
+        tagEditText.requestFocus();
+        Utils.showKeyboard(this, new Handler(), tagEditText);
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialogTheme)
+                .setTitle(getString(R.string.tag_user_dialog_title, username))
+                .setView(rootView)
+                .setPositiveButton(R.string.set_user_tag, (dialogInterface, i) -> {
+                    Utils.hideKeyboard(this);
+                    UserTags.set(username, Objects.requireNonNull(tagEditText.getText()).toString());
+                })
+                .setNegativeButton(R.string.cancel, (dialogInterface, i) -> Utils.hideKeyboard(this))
+                .setOnDismissListener(dialogInterface -> Utils.hideKeyboard(this));
+        if (currentTag != null) {
+            builder.setNeutralButton(R.string.remove_user_tag, (dialogInterface, i) -> {
+                Utils.hideKeyboard(this);
+                UserTags.remove(username);
+            });
+        }
+        AlertDialog dialog = builder.show();
+        tagEditText.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                Utils.hideKeyboard(this);
+                UserTags.set(username, Objects.requireNonNull(tagEditText.getText()).toString());
+                dialog.dismiss();
+                return true;
+            }
+            return false;
+        });
+    }
+
     private void goToUser() {
         View rootView = getLayoutInflater().inflate(R.layout.dialog_go_to_thing_edit_text, binding.getRoot(), false);
         TextInputEditText thingEditText = rootView.findViewById(R.id.text_input_edit_text_go_to_thing_edit_text);
@@ -1796,6 +1870,13 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Subscribe
     public void goBackToMainPageEvent(GoBackToMainPageEvent event) {
         finish();
+    }
+
+    /** The header and the menu both show the tag, so both are redrawn; the tabs redraw themselves. */
+    @Subscribe
+    public void onUserTagChangedEvent(UserTagChangedEvent event) {
+        showUserName();
+        invalidateOptionsMenu();
     }
 
     @Override

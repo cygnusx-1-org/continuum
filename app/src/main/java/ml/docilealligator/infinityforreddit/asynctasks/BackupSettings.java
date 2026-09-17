@@ -88,6 +88,7 @@ public class BackupSettings {
             SharedPreferences postDetailsSharedPreferences = rawFile(context, SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE);
             SharedPreferences navigationDrawerSharedPreferences = rawFile(context, SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
             SharedPreferences bottomAppBarSharedPreferences = rawFile(context, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE);
+            SharedPreferences userTagsSharedPreferences = rawFile(context, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE);
 
             File cacheDir = Utils.getCacheDir(context);
             if (cacheDir == null) {
@@ -133,6 +134,7 @@ public class BackupSettings {
             boolean res12 = saveMapToFile(postHistorySharedPreferences.getAll(), backupDir, SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE);
             boolean res13 = saveMapToFile(navigationDrawerSharedPreferences.getAll(), backupDir, SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE);
             boolean res26 = saveMapToFile(recentlyVisitedSharedPreferences.getAll(), backupDir, SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE);
+            boolean res31 = saveMapToFile(userTagsSharedPreferences.getAll(), backupDir, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE);
 
             List<SubscribedSubredditData> anonymousSubscribedSubredditsData = redditDataRoomDatabase.subscribedSubredditDao().getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT);
             String anonymousSubscribedSubredditsDataJson = new Gson().toJson(anonymousSubscribedSubredditsData);
@@ -214,7 +216,7 @@ public class BackupSettings {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
                         && res18 && res19 && res20 && res21 && res22 && res23 && res24 && res25 && res26
-                        && res27 && res28 && res29 && res30 && zipRes && resPrivate;
+                        && res27 && res28 && res29 && res30 && res31 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {

@@ -31,6 +31,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentInboxBinding;
 import ml.docilealligator.infinityforreddit.events.RepliedToPrivateMessageEvent;
+import ml.docilealligator.infinityforreddit.events.UserTagChangedEvent;
 import ml.docilealligator.infinityforreddit.message.FetchMessage;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.MessageViewModel;
@@ -243,6 +244,14 @@ public class InboxFragment extends Fragment implements FragmentCommunicator {
     public void onRepliedToPrivateMessageEvent(RepliedToPrivateMessageEvent repliedToPrivateMessageEvent) {
         if (mAdapter != null && mWhere.equals(FetchMessage.WHERE_MESSAGES)) {
             mAdapter.updateMessageReply(repliedToPrivateMessageEvent.newReply, repliedToPrivateMessageEvent.messagePosition);
+        }
+    }
+
+    /** Every row names its other party, and the tag is read on bind, so the rows are rebound. */
+    @Subscribe
+    public void onUserTagChangedEvent(UserTagChangedEvent event) {
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
         }
     }
 }

@@ -55,7 +55,13 @@
         app:key="delete_account_read_posts"
         app:icon="@drawable/ic_history_day_night_24dp"
         app:title="@string/settings_delete_read_posts_in_database_title"
-        app:summary=""
+        app:summary="" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="delete_account_user_tags"
+        app:icon="@drawable/ic_label_day_night_24dp"
+        app:title="@string/settings_delete_user_tags_title"
+        app:summary="@string/settings_delete_account_user_tags_summary"
         app:bottom="true" />
 
 </androidx.preference.PreferenceScreen>

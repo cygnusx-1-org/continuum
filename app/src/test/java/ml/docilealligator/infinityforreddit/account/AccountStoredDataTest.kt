@@ -35,6 +35,7 @@ class AccountStoredDataTest {
     private lateinit var sortType: SharedPreferences
     private lateinit var postLayout: SharedPreferences
     private lateinit var frontPageScrolledPosition: SharedPreferences
+    private lateinit var userTags: SharedPreferences
     private lateinit var database: RedditDataRoomDatabase
 
     @Before
@@ -43,8 +44,9 @@ class AccountStoredDataTest {
         postLayout = file(SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE)
         frontPageScrolledPosition =
             file(SharedPreferencesUtils.FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE)
+        userTags = file(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE)
 
-        for (preferences in listOf(sortType, postLayout, frontPageScrolledPosition)) {
+        for (preferences in listOf(sortType, postLayout, frontPageScrolledPosition, userTags)) {
             preferences.edit().clear().commit()
         }
 
@@ -156,6 +158,23 @@ class AccountStoredDataTest {
 
         assertEquals(setOf(AccountScope.key("bob", SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST)),
             postLayout.all.keys)
+    }
+
+    @Test
+    fun `deleting user tags leaves the other accounts theirs`() {
+        userTags.edit()
+            .putString(AccountScope.key("alice", "carol"), "helpful")
+            .putString(AccountScope.key("alice", "dave"), "troll")
+            .putString(AccountScope.key("bob", "carol"), "expert")
+            .putString(AccountScope.key(null, "carol"), "friend")
+            .commit()
+
+        AccountStoredData.deleteUserTags(context, "alice")
+
+        assertEquals(setOf(
+            AccountScope.key("bob", "carol"),
+            AccountScope.key(null, "carol"),
+        ), userTags.all.keys)
     }
 
     /**

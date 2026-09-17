@@ -173,6 +173,7 @@ public class SharedPreferencesUtils {
     public static final String DELETE_ACCOUNT_FRONT_PAGE_SCROLLED_POSITION = "delete_account_front_page_scrolled_position";
     public static final String DELETE_ACCOUNT_RESUME_STATE = "delete_account_resume_state";
     public static final String DELETE_ACCOUNT_READ_POSTS = "delete_account_read_posts";
+    public static final String DELETE_ACCOUNT_USER_TAGS = "delete_account_user_tags";
     public static final String IMAGE_DOWNLOAD_LOCATION = "image_download_location";
     public static final String GIF_DOWNLOAD_LOCATION = "gif_download_location";
     public static final String VIDEO_DOWNLOAD_LOCATION = "video_download_location";
@@ -543,6 +544,9 @@ public class SharedPreferencesUtils {
     public static final String SEPARATE_POST_AND_COMMENTS_IN_PORTRAIT_MODE = "separate_post_and_comments_in_portrait_mode";
     public static final String SEPARATE_POST_AND_COMMENTS_IN_LANDSCAPE_MODE = "separate_post_and_comments_in_landscape_mode";
     public static final String SWAP_POST_AND_COMMENTS_IN_SPLIT_MODE = "swap_post_and_comments_in_split_mode";
+
+    // One key per tagged user, the lowercased username, holding the tag; every key is per-account.
+    public static final String USER_TAGS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.user_tags";
 
     public static final String SECURITY_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.security";
     public static final String REQUIRE_AUTHENTICATION_TO_GO_TO_ACCOUNT_SECTION_IN_NAVIGATION_DRAWER = "require_auth_to_account_section";

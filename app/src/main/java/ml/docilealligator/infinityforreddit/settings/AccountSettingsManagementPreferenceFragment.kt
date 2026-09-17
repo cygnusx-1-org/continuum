@@ -21,6 +21,7 @@ import ml.docilealligator.infinityforreddit.account.AccountViewModel
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserBottomSheetFragment
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent
+import ml.docilealligator.infinityforreddit.events.UserTagChangedEvent
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
@@ -155,6 +156,18 @@ class AccountSettingsManagementPreferenceFragment : CustomFontPreferenceFragment
             AccountStoredData.deleteReadPosts(redditDataRoomDatabase, accountName)
         }
 
+        // Tags are read when a name is bound, so the open screens only need their rows rebound,
+        // which is what UserTagChangedEvent asks of them; recreating the activities would be more.
+        // Posted from the main thread, and not through afterDelete: that is skipped once this
+        // screen has been backed out of, and the screens under it still have names to redraw.
+        deleteAction(SharedPreferencesUtils.DELETE_ACCOUNT_USER_TAGS,
+            R.string.delete_account_user_tags_confirmation,
+            R.string.delete_all_user_tags_success,
+            recreateActivities = false) { context, accountName ->
+            AccountStoredData.deleteUserTags(context, accountName)
+            handler.post { EventBus.getDefault().post(UserTagChangedEvent(null)) }
+        }
+
         showReadPostsSize()
     }
 
@@ -229,9 +242,8 @@ class AccountSettingsManagementPreferenceFragment : CustomFontPreferenceFragment
      * How much the read history is costing, on the row that deletes it.
      *
      * The measurement is two queries, so the row is given a summary of the same one-line shape
-     * first. Without it the row is a line shorter until the count arrives and then grows, and it is
-     * the last row in its group — the group's bottom edge would move a moment after the screen
-     * opened.
+     * first. Without it the row is a line shorter until the count arrives and then grows, and the
+     * row below it, and the group's bottom edge, would move a moment after the screen opened.
      */
     private fun showReadPostsSize() {
         val preference =

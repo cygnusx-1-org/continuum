@@ -14,8 +14,9 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
  * Management screen, and they are what used to be the Advanced screen's "Delete All" actions. Each
  * is deliberately narrow: this account's subscription list, its followed and saved users, the sort
  * order a feed remembers, the layout a feed remembers, where Home had reached, the screen stack it
- * left behind, and which posts have been read. None of them is a setting anyone chose on a settings
- * screen, which is why they are worth clearing without resetting the settings that were.
+ * left behind, which posts have been read, and the tags it has put on other users. None of them is
+ * a setting anyone chose on a settings screen, which is why they are worth clearing without
+ * resetting the settings that were.
  *
  * Every function is scoped to one account and touches no other's, which is what separates them from
  * the actions left on Global Settings Management — the theme library and the legacy keys have no
@@ -129,5 +130,12 @@ object AccountStoredData {
     fun deleteReadPosts(redditDataRoomDatabase: RedditDataRoomDatabase, accountName: String?) {
         redditDataRoomDatabase.readPostDao().deleteAllReadPosts(
             accountName ?: Account.ANONYMOUS_ACCOUNT, ReadPostType.READ_POSTS)
+    }
+
+    /** The private tags this account has put on other users (issue #413). */
+    @JvmStatic
+    fun deleteUserTags(context: Context, accountName: String?) {
+        AccountSettings.resetFile(
+            context, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE, accountName)
     }
 }

@@ -24,7 +24,8 @@ object AccountScopedKeys {
 
     /**
      * Files where every key belongs to an account: one feed's layout, one feed's sort order, one
-     * account's drawer, one account's post-detail arrangement, one account's bottom bar.
+     * account's drawer, one account's post-detail arrangement, one account's bottom bar, one
+     * account's user tags.
      */
     private val WHOLE_FILE_SCOPED = setOf(
         SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE,
@@ -32,6 +33,7 @@ object AccountScopedKeys {
         SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
         SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
         SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
+        SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
     )
 
     /**

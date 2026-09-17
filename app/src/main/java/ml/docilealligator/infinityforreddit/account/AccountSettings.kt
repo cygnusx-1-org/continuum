@@ -54,7 +54,7 @@ object AccountSettings {
         )
 
     /**
-     * Every file a per-account key can be in: the five the façade routes, the four that scope their
+     * Every file a per-account key can be in: the six the façade routes, the four that scope their
      * own keys, and the default file.
      */
     private val SCOPED_FILES: List<ScopedFile> = listOf(
@@ -67,6 +67,7 @@ object AccountSettings {
         ScopedFile(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE),
         ScopedFile(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE),
         ScopedFile(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE),
+        ScopedFile(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE),
         // Tabs name subreddits and multireddits the destination account may not have, and a tab
         // pointing at something it cannot load is worse than the tabs it already had. A reset does
         // clear them: there the account is going back to defaults, which always load.
