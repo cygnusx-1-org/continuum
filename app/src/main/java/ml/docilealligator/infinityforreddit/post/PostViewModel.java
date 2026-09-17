@@ -70,6 +70,16 @@ public class PostViewModel extends ViewModel {
     private PostFilter postFilter;
     @Nullable
     private String userWhere;
+    /**
+     * Whether this feed is a random tab -- r/random, r/randnsfw or r/myrandom -- rather than a
+     * subreddit asked for by name.
+     *
+     * <p>A random tab is a {@link PostType#SUBREDDIT} feed like any other, and {@link #name} holds
+     * whichever subreddit the roll landed on rather than the pseudo name, so nothing else here can
+     * tell the two apart. Only {@link #isPinnedHere} cares: a random tab labels every post with its
+     * own subreddit and draws no pin, exactly as the firehose feeds do.
+     */
+    private boolean randomSubredditFeed;
     private ReadPostsListInterface readPostsList;
     private final UserProfileImagesBatchLoader loader;
     private final MutableLiveData<Boolean> hideReadPostsValue = new MutableLiveData<>();
@@ -168,7 +178,7 @@ public class PostViewModel extends ViewModel {
                          SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                          @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String subredditName, @PostType int postType,
                          SortType sortType, PostFilter postFilter, ReadPostsListInterface readPostsList,
-                         UserProfileImagesBatchLoader loader) {
+                         UserProfileImagesBatchLoader loader, boolean randomSubredditFeed) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -182,6 +192,7 @@ public class PostViewModel extends ViewModel {
         this.readPostsList = readPostsList;
         this.loader = loader;
         this.name = subredditName;
+        this.randomSubredditFeed = randomSubredditFeed;
 
         sortTypeLiveData = new MutableLiveData<>(sortType);
         postFilterLiveData = new MutableLiveData<>(postFilter);
@@ -349,10 +360,42 @@ public class PostViewModel extends ViewModel {
     }
 
     private boolean isPostVisible(Post post) {
-        if (Boolean.TRUE.equals(hideReadPostsValue.getValue()) && post.isRead()) {
+        if (Boolean.TRUE.equals(hideReadPostsValue.getValue()) && post.isRead() && !isPinnedHere(post)) {
             return false;
         }
         return !Boolean.TRUE.equals(mediaOnlyValue.getValue()) || post.isMediaPost();
+    }
+
+    /**
+     * Whether {@code post}'s pin belongs to the feed on screen: stickied, on a feed the reader
+     * reached by naming one place -- a subreddit's own page, a search, or the other-discussions
+     * listing for a single post.
+     *
+     * <p>Such a post survives hiding read posts. A subreddit's announcement and its daily thread are
+     * what a reader comes back to, and hiding read posts is a convenience switched on once rather
+     * than a request aimed at any particular post, so opening one should not be what makes it
+     * disappear. A post filter is the opposite -- a rule the user wrote -- and {@link
+     * PostFilter#isPostAllowed} applies those to pinned posts like any other (issue #420).
+     *
+     * <p>Reddit sends {@code stickied: true} to every listing that carries the post, not just to the
+     * subreddit that pinned it, so the flag alone would also exempt a post pinned somewhere else
+     * entirely. Hence the rest of the test: Home and a multireddit are their own post types, and the
+     * two {@link PostType#SUBREDDIT} feeds carrying subreddits the reader never opened are ruled out
+     * separately -- a firehose (r/all, r/popular, ContinuumAll) by name, and a random tab by {@link
+     * #randomSubredditFeed}, whose {@link #name} is whichever subreddit the roll landed on. Each of
+     * those labels every post with its own subreddit and draws no pin, so a read post lingering
+     * there would have nothing on screen to explain it.
+     *
+     * <p>The two feeds that are neither: a {@link PostType#SEARCH} run from outside any subreddit
+     * has a null {@code name} and is exempt like the rest of search, and a {@code DUPLICATES} feed
+     * keys on a post id rather than a subreddit name, which no firehose name can collide with.
+     */
+    private boolean isPinnedHere(Post post) {
+        return post.isStickied()
+                && (postType == PostType.SUBREDDIT || postType == PostType.SEARCH
+                        || postType == PostType.DUPLICATES)
+                && !randomSubredditFeed
+                && !Constants.isFirehoseSubreddit(name);
     }
 
     public LiveData<PagingData<Post>> getPosts() {
@@ -608,6 +651,8 @@ public class PostViewModel extends ViewModel {
         private final PostFilter postFilter;
         @Nullable
         private String userWhere;
+        /** Passed through to {@link PostViewModel#randomSubredditFeed}; false for every other feed. */
+        private boolean randomSubredditFeed;
         private final ReadPostsListInterface readPostsList;
         private final UserProfileImagesBatchLoader loader;
 
@@ -639,7 +684,7 @@ public class PostViewModel extends ViewModel {
                        SharedPreferences sharedPreferences, @Nullable SharedPreferences postFeedScrolledPositionSharedPreferences,
                        @Nullable SharedPreferences postHistorySharedPreferences, @Nullable String name, @PostType int postType, SortType sortType,
                        PostFilter postFilter, ReadPostsListInterface readPostsList,
-                       UserProfileImagesBatchLoader loader) {
+                       UserProfileImagesBatchLoader loader, boolean randomSubredditFeed) {
             this.executor = executor;
             this.retrofit = retrofit;
             this.redditDataRoomDatabase = redditDataRoomDatabase;
@@ -654,6 +699,7 @@ public class PostViewModel extends ViewModel {
             this.postFilter = postFilter;
             this.readPostsList = readPostsList;
             this.loader = loader;
+            this.randomSubredditFeed = randomSubredditFeed;
         }
 
         // PostType.MULTIREDDIT
@@ -767,7 +813,8 @@ public class PostViewModel extends ViewModel {
             } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList, loader);
+                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList, loader,
+                        randomSubredditFeed);
             } else if (postType == PostType.MULTIREDDIT) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
@@ -775,7 +822,8 @@ public class PostViewModel extends ViewModel {
             } else if (postType == PostType.ANONYMOUS_FRONT_PAGE || postType == PostType.ANONYMOUS_MULTIREDDIT) {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,
-                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList, loader);
+                        postHistorySharedPreferences, name, postType, sortType, postFilter, readPostsList, loader,
+                        false);
             } else {
                 return (T) new PostViewModel(executor, retrofit, redditDataRoomDatabase, accessToken,
                         accountName, sharedPreferences, postFeedScrolledPositionSharedPreferences,

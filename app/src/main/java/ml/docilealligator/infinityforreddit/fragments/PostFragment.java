@@ -1185,7 +1185,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     mRedditDataRoomDatabase, mActivity.accessToken, mActivity.accountName, mSharedPreferences,
                     mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences,
                     randomSubredditPseudoName != null ? currentRandomSubreddit : subredditName,
-                    postType, sortType, Objects.requireNonNull(postFilter), readPostsList, loader)
+                    postType, sortType, Objects.requireNonNull(postFilter), readPostsList, loader,
+                    randomSubredditPseudoName != null)
             ).get(PostViewModel.class);
         } else if (postType == PostType.MULTIREDDIT) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
@@ -1263,7 +1264,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             mPostViewModel = new ViewModelProvider(this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName,
                     mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    null, subredditName, postType, sortType, Objects.requireNonNull(postFilter), readPostsList, loader)
+                    null, subredditName, postType, sortType, Objects.requireNonNull(postFilter), readPostsList, loader,
+                    randomSubredditPseudoName != null)
             ).get(PostViewModel.class);
         } else if (postType == PostType.USER) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,

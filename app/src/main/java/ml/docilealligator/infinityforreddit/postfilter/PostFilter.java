@@ -224,15 +224,22 @@ public class PostFilter implements Parcelable {
         }
     };
 
+    /**
+     * Whether {@code post} survives {@code postFilter}, applied while a feed's response is parsed.
+     *
+     * <p>A pinned post is filtered like any other. It was once exempt, which meant a subreddit's
+     * stickied thread ignored every rule the user wrote -- excluded author, excluded flair,
+     * excluded keyword, comment and score limits alike -- with nothing on screen to say why it had
+     * stayed (issue #420). A pin still counts for "hide read posts", on the feeds where it describes
+     * what the reader is looking at (see {@code PostViewModel#isPinnedHere}): that hides posts the
+     * user never named, while a filter rule is one they wrote.
+     */
     public static boolean isPostAllowed(@Nullable Post post, @Nullable PostFilter postFilter) {
         if (postFilter == null || post == null) {
             return true;
         }
         if (post.isNSFW() && !postFilter.allowNSFW) {
             return false;
-        }
-        if(post.isStickied()){
-            return true;
         }
         if (postFilter.maxVote > 0 && post.getVoteType() + post.getScore() > postFilter.maxVote) {
             return false;
