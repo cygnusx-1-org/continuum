@@ -2,6 +2,15 @@
 
 ---
 
+8.3.1.7 / 2026-9-19
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Gesture to read/unread a post #411
+* Improved the consistency of Resume where I left off
+* Fixed Creating a MultiReddit shows a "Cannot create this multireddit" error even though it succeeds #422
+* Changed the layout of video media view buttons to be consistent with the new image media view layout
+
 8.3.1.6 / 2026-9-17
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
