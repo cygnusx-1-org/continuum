@@ -2,6 +2,12 @@
 
 ---
 
+8.3.1.8 / 2026-9-19
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed default Comment Swipe Actions
+
 8.3.1.7 / 2026-9-19
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
