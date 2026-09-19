@@ -79,7 +79,11 @@ object SwipeActionPreferences {
             .apply()
     }
 
-    /** The four post actions of a left swipe, deepest levels empty unless the user filled them. */
+    /**
+     * The four post actions on the row's left side -- the ones a drag to the right uncovers --
+     * deepest levels empty unless the user filled them. The keys are named for the side too; see
+     * [SwipeActionSideMigration] for the flip that made them so.
+     */
     @JvmStatic
     fun postLeftLevels(preferences: SharedPreferences): IntArray = intArrayOf(
         post(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0"),

@@ -84,7 +84,7 @@ class SwipeActionPainter(
         val strip = abs(clamped).toInt()
         // Normally the icon trails the row's moving edge by a fixed margin. That needs the strip
         // to be wider than the icon and its margin together, and it is not always: one action
-        // bound to a direction stops the row at a quarter of the threshold, which on a phone is
+        // bound to a side stops the row at a quarter of the threshold, which on a phone is
         // narrower than the icon itself, and trailing the edge put most of it off the screen.
         // Centred in the strip instead, so it comes out from under the row rather than past it.
         val trailsTheEdge = strip >= horizontalOffset + icon.intrinsicWidth

@@ -12,7 +12,9 @@ import ml.docilealligator.infinityforreddit.utils.SwipeActionPreferences
 import org.greenrobot.eventbus.EventBus
 
 /**
- * What a swipe does to a post: up to four actions per direction, reached by swiping further.
+ * What a swipe does to a post: up to four actions on each side of the row, reached by swiping
+ * further. The sides are the ones the actions show on -- the left side is what a swipe to the
+ * right uncovers -- which is why the headings say "Left Side" rather than "Swipe Left".
  *
  * The pickers hang off the switch above them, so a screen that does nothing looks like it does
  * nothing. Every level past the first starts empty, which is what makes a plain one-step swipe

@@ -13,7 +13,7 @@ import org.greenrobot.eventbus.EventBus
 
 /**
  * What a swipe does to a comment. Comments used to read the post screen's settings outright, so
- * the switch and the first level of each direction start on whatever that screen said rather than
+ * the switch and the first level of each side start on whatever that screen said rather than
  * on this one's defaults -- turning a shared setting into two must not look like a reset.
  */
 class CommentSwipeActionPreferenceFragment : CustomFontPreferenceFragmentCompat() {

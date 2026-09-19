@@ -8,6 +8,7 @@ import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.utils.DisableNsfwForeverMigration
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
+import ml.docilealligator.infinityforreddit.utils.SwipeActionSideMigration
 
 /**
  * Moves every per-account setting written before [AccountScope] onto the one key scheme.
@@ -123,6 +124,13 @@ object AccountSettingsMigration {
         executor: Executor,
         redditDataRoomDatabase: RedditDataRoomDatabase,
     ) {
+        // Synchronous, and before the rest: a handful of keys the first feed to come up reads
+        // straight away, and a swap that landed on the executor a frame later would leave that feed
+        // swiping the old way until something reconfigured it. Everything below then copies values
+        // that are already by side. Its own marker, in the default file rather than here, because
+        // that marker has to travel with a backup.
+        SwipeActionSideMigration.migrate(PreferenceManager.getDefaultSharedPreferences(context))
+
         if (internalSharedPreferences.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false) &&
             seedVersionOf(internalSharedPreferences) >= SEED_VERSION &&
             internalSharedPreferences.getBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_SCOPE_MIGRATED, false)

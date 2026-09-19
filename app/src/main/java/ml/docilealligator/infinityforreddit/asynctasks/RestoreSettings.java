@@ -55,6 +55,7 @@ import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.SwipeActionSideMigration;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import net.lingala.zip4j.ZipFile;
 import org.apache.commons.io.FileUtils;
@@ -222,6 +223,11 @@ public class RestoreSettings {
                         // into settings; on a backup that already has them it finds nothing to do.
                         AccountSettingsMigration.rerunIfBackupPredatesAccountScope(
                                 rawFile(context, SharedPreferencesUtils.INTERNAL_SHARED_PREFERENCES_FILE),
+                                restoredDefaultPreferences);
+
+                        // A backup from before the swipe keys named the side of the row holds them
+                        // in the old sense; only the keys it brought in are turned over.
+                        SwipeActionSideMigration.flipRestoredKeys(defaultSharedPreferences,
                                 restoredDefaultPreferences);
                     } else {
                         // Nothing was read, so nothing was restored. Without this the success branch

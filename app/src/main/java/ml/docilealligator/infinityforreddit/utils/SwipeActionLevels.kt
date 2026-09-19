@@ -4,17 +4,22 @@ import kotlin.math.abs
 import kotlin.math.min
 
 /**
- * Which of a swipe direction's actions the finger is currently over.
+ * Which of a swipe side's actions the finger is currently over.
  *
  * The `threshold` setting is how far a swipe travels in total, and a surface's slots divide that
  * distance evenly: on posts, which have four, they sit at a quarter, a half, three quarters and
  * all of it. The division is by how many slots there *are*, never by how many are filled, so a
- * direction with one action bound arms at the same distance it will still arm at after three
+ * side with one action bound arms at the same distance it will still arm at after three
  * more are added. Filling a slot in never moves the ones before it.
  *
  * Each band is bound to its own action, so the distance travelled is what picks between them,
  * and the action only runs when the finger lifts: the user can swipe past a level and come back
  * without triggering it.
+ *
+ * The two ladders are named for the side of the row they show on, not for the way the finger
+ * moves. Dragging a row to the right uncovers its left edge, and what is painted there is the
+ * left ladder -- the one the settings screen heads "Left Side". It is the side the user sees
+ * and can point at; which way the finger went is the same gesture seen from the other end.
  *
  * How many slots a surface has is the caller's: [configure] takes one entry per slot, so posts
  * pass four and comments three. Everything past the first starts empty, and an empty slot ends
@@ -26,10 +31,10 @@ import kotlin.math.min
  */
 class SwipeActionLevels {
 
-    /** Each level of a left swipe, deepest last; [NONE] for a level the user left empty. */
+    /** Each level shown on the row's left side, deepest last; [NONE] for one the user left empty. */
     private var leftLevels = intArrayOf(NONE)
 
-    /** Each level of a right swipe, deepest last; [NONE] for a level the user left empty. */
+    /** Each level shown on the row's right side, deepest last; [NONE] for one the user left empty. */
     private var rightLevels = intArrayOf(NONE)
 
     /** How many bands this surface offers: four on posts, three on comments. */
@@ -44,7 +49,7 @@ class SwipeActionLevels {
     /** The deepest band the finger has reached since the drag began; 0 before the first. */
     private var armedLevel = 0
 
-    /** The action [armedLevel] resolved to, held so releasing needs no direction of its own. */
+    /** The action [armedLevel] resolved to, held so releasing needs no drag of its own. */
     private var armedAction = NONE
 
     fun configure(leftLevels: IntArray, rightLevels: IntArray, baseThreshold: Float) {
@@ -71,7 +76,7 @@ class SwipeActionLevels {
         return level
     }
 
-    /** The action bound to [level] in the direction [dX] points, or [NONE]. */
+    /** The action bound to [level] on the side a drag of [dX] uncovers, or [NONE]. */
     fun actionFor(dX: Float, level: Int): Int {
         if (level < 1 || level > maxLevels) return NONE
         val levels = levelsFor(dX)
@@ -128,10 +133,14 @@ class SwipeActionLevels {
         armedAction = NONE
     }
 
-    private fun levelsFor(dX: Float): IntArray = if (dX > 0) rightLevels else leftLevels
+    /**
+     * The ladder on the side [dX] uncovers. A positive drag moves the row right and bares its left
+     * edge, so it reads the left ladder; the stored keys say `left` and `right` for the same reason.
+     */
+    private fun levelsFor(dX: Float): IntArray = if (dX > 0) leftLevels else rightLevels
 
     /**
-     * How many of this direction's slots the user actually filled in, counting from the first.
+     * How many of this side's slots the user actually filled in, counting from the first.
      * An empty slot collapses the ladder, so everything past it is out of reach. This says how
      * far a swipe can get, never how far apart the bands are -- that is fixed by the slot count.
      */

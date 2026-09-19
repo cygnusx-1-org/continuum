@@ -192,7 +192,9 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
 
         // One-time migration: every per-account setting moves onto the single AccountScope key
         // scheme, retiring the five conventions that grew up around it. Also runs the removal of
-        // "Forever Disable NSFW", which has to follow it to write canonical keys.
+        // "Forever Disable NSFW", which has to follow it to write canonical keys, and the swap that
+        // turned the swipe actions from gesture-named to side-named, which has to precede the
+        // first feed reading them.
         AccountSettingsMigration.migrate(this, mInternalSharedPreferences, executor,
                 redditDataRoomDatabase);
 

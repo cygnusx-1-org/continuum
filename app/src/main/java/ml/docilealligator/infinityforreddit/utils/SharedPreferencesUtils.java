@@ -227,6 +227,11 @@ public class SharedPreferencesUtils {
     public static final String COMMENT_SWIPE_RIGHT_ACTION = "comment_swipe_right_action";
     public static final String COMMENT_SWIPE_RIGHT_ACTION_LEVEL_2 = "comment_swipe_right_action_level_2";
     public static final String COMMENT_SWIPE_RIGHT_ACTION_LEVEL_3 = "comment_swipe_right_action_level_3";
+    // The left/right keys above used to be named for the way the finger moved, and now name the
+    // side of the row the action shows on -- the opposite meaning. This marks a default
+    // preferences file whose values have been swapped to match; see SwipeActionSideMigration.
+    // Not per-account: it describes the file, and travels with it in a backup.
+    public static final String SWIPE_ACTION_SIDES_MIGRATED = "swipe_action_sides_migrated";
     // Post swipe actions. The stored value is what is in settings_post_swipe_actions_values, so the
     // first two have to keep the numbers the old two-action list gave them. The misspelling is the
     // one this block has always had; renaming it is its own change, not a rider on this one.
