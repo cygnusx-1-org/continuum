@@ -97,6 +97,7 @@ import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AspectRatioGifImageView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.RebindInPlaceItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockLinearLayoutManager;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostDetailGalleryBinding;
@@ -149,6 +150,7 @@ import ml.docilealligator.infinityforreddit.videoautoplay.Playable;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroPlayer;
 import ml.docilealligator.infinityforreddit.videoautoplay.ToroUtil;
 import ml.docilealligator.infinityforreddit.videoautoplay.media.PlaybackInfo;
+import ml.docilealligator.infinityforreddit.videoautoplay.media.VolumeInfo;
 import ml.docilealligator.infinityforreddit.videoautoplay.widget.Container;
 import okhttp3.OkHttpClient;
 import pl.droidsonroids.gif.GifImageView;
@@ -682,6 +684,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             if (mPost == null) {
                 return;
             }
+            resetRowDecoration((PostDetailBaseViewHolder) holder);
             ((PostDetailBaseViewHolder) holder).titleTextView.setText(mPost.getTitle());
             applyTypeColor(((PostDetailBaseViewHolder) holder).typeTextView, mPost.getPostType());
             if (mPost.getSubredditNamePrefixed().startsWith("u/")) {
@@ -933,24 +936,36 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             }
 
             if (holder instanceof PostDetailBaseVideoAutoplayViewHolder) {
-                ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setVisibility(View.VISIBLE);
-                Post.Preview preview = getSuitablePreview(mPost.getPreviews());
-                if (preview != null) {
-                    ((PostDetailBaseVideoAutoplayViewHolder) holder).aspectRatioFrameLayout.setAspectRatio((float) preview.getPreviewWidth() / preview.getPreviewHeight());
-                    // Restated because a rebound holder may carry the centred scale type the
-                    // placeholder below sets, which would crop a real preview.
-                    ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                    mGlide.load(preview.getPreviewUrl()).centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView);
-                } else {
-                    // No still to show. Without this the row is a black square with the player's
-                    // buffering spinner on it: see showNoPreviewPlaceholder in
-                    // PostRecyclerViewAdapter for why Reddit sometimes has no preview at all.
-                    ((PostDetailBaseVideoAutoplayViewHolder) holder).aspectRatioFrameLayout.setAspectRatio(1);
-                    mGlide.clear(((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView);
-                    ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setScaleType(ImageView.ScaleType.CENTER);
-                    ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setImageResource(R.drawable.ic_video_day_night_24dp);
+                ((PostDetailBaseVideoAutoplayViewHolder) holder).bindPost(mPost.getId());
+                // Only while there is nothing underneath to cover. Putting the still back over a
+                // player that is already painting is the flash of the first frame in issue #423,
+                // and this row is rebound for every change to the post's own state.
+                if (!((PostDetailBaseVideoAutoplayViewHolder) holder).hasRenderedFirstFrame) {
+                    ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setVisibility(View.VISIBLE);
+                    Post.Preview preview = getSuitablePreview(mPost.getPreviews());
+                    if (preview != null) {
+                        ((PostDetailBaseVideoAutoplayViewHolder) holder).aspectRatioFrameLayout.setAspectRatio((float) preview.getPreviewWidth() / preview.getPreviewHeight());
+                        // Restated because a rebound holder may carry the centred scale type the
+                        // placeholder below sets, which would crop a real preview.
+                        ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                        mGlide.load(preview.getPreviewUrl()).centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy).into(((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView);
+                    } else {
+                        // No still to show. Without this the row is a black square with the player's
+                        // buffering spinner on it: see showNoPreviewPlaceholder in
+                        // PostRecyclerViewAdapter for why Reddit sometimes has no preview at all.
+                        ((PostDetailBaseVideoAutoplayViewHolder) holder).aspectRatioFrameLayout.setAspectRatio(1);
+                        mGlide.clear(((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView);
+                        ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setScaleType(ImageView.ScaleType.CENTER);
+                        ((PostDetailBaseVideoAutoplayViewHolder) holder).previewImageView.setImageResource(R.drawable.ic_video_day_night_24dp);
+                    }
                 }
-                if (!((PostDetailBaseVideoAutoplayViewHolder) holder).isManuallyPaused) {
+                Boolean manuallyMuted = ((PostDetailBaseVideoAutoplayViewHolder) holder).manuallyMuted;
+                if (manuallyMuted != null) {
+                    // The reader tapped mute on this clip, and that outranks the preference for as
+                    // long as the clip is on screen: re-reading the preference on a rebind is what
+                    // silently re-muted a video they had just unmuted.
+                    ((PostDetailBaseVideoAutoplayViewHolder) holder).setVolume(manuallyMuted ? 0f : 1f);
+                } else if (!((PostDetailBaseVideoAutoplayViewHolder) holder).isManuallyPaused) {
                     if (mVideoMuteManager.getRememberMuteOption()) {
                         ((PostDetailBaseVideoAutoplayViewHolder) holder).setVolume(mVideoMuteManager.isMuted() ? 0f : 1f);
                     } else {
@@ -1487,9 +1502,28 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
     }
 
+    @SuppressWarnings("ReferenceEquality") // Identity is the point; see below.
     public void updatePost(@NonNull Post post) {
+        // The fragment calls this on every emission of the view model's data state, including the
+        // ones that only moved the comment list -- collapsing a comment, a reply landing. Those
+        // carry the very Post instance the row is already showing, and rebinding for one restarts
+        // the video on it: issue #423. Reference equality is the test, as it is for the in-flight
+        // clip fetches above, because Post.equals() folds in mutable state, so a moderation action
+        // that changed the post in place would read as "no change" and never reach the row.
+        if (mPost == post) {
+            return;
+        }
+        boolean hadPost = mPost != null;
         mPost = post;
-        notifyDataSetChanged();
+        if (hadPost) {
+            // The one row changes in place, so it keeps the ExoPlayer attached to it: see
+            // RebindInPlaceItemAnimator. notifyDataSetChanged() would mark the holder invalid,
+            // which recycles the view and releases the player with it.
+            notifyItemChanged(0, RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
+        } else {
+            // getItemCount() was 0 until now, so the row is appearing rather than changing.
+            notifyItemInserted(0);
+        }
         mImageAndGifEntry.setBlurImage(
                 (post.isNSFW() && mNeedBlurNsfw
                         && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()))
@@ -1778,8 +1812,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
     /**
      * Rebinds the one row when the post's author is {@code username}, whose tag has just changed,
-     * or when {@code username} is null and every tag went. A rebind restarts an autoplaying
-     * video, so another user's tag changing is not a reason for one.
+     * or when {@code username} is null and every tag went. A rebind reloads the header's avatar
+     * and flair, so another user's tag changing is not a reason for one.
      */
     public void notifyUserTagChanged(@Nullable String username) {
         // No post yet means no row to rebind; the bind that comes with the post reads the tag.
@@ -1787,7 +1821,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             return;
         }
         if (username == null || username.equalsIgnoreCase(mPost.getAuthor())) {
-            notifyDataSetChanged();
+            // In place, so a tag changing does not restart the video on the row. See updatePost.
+            notifyItemChanged(0, RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
         }
     }
 
@@ -1799,27 +1834,44 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         UserMarkChanges changes = userMarks.changedFrom(mUserMarks);
         mUserMarks = userMarks;
         if (mPost != null && changes.affects(mPost.getAuthor())) {
-            notifyDataSetChanged();
+            // In place, so a mark changing does not restart the video on the row. See updatePost.
+            notifyItemChanged(0, RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
         }
+    }
+
+    /**
+     * Puts the row's conditional decoration back to bare, so a bind only has to say what this post
+     * does carry.
+     *
+     * <p>Runs at the top of every bind as well as on a recycle. A rebind in place -- which is how
+     * the post's own state reaches the row, see {@link #updatePost} -- never passes through the
+     * pool, so anything left standing from the previous state would stay on the row: the filled
+     * arrow of a vote that has since been switched, a lock or spoiler chip a moderator has just
+     * taken off, the body of a self post whose text was removed.
+     */
+    private void resetRowDecoration(@NonNull PostDetailBaseViewHolder holder) {
+        holder.userTextView.setTextColor(mUsernameColor);
+        holder.userTextView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+        holder.upvoteButton.setIconResource(R.drawable.ic_upvote_24dp);
+        holder.upvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
+        holder.scoreTextView.setTextColor(mPostIconAndInfoColor);
+        holder.downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
+        holder.downvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
+        holder.flairTextView.setVisibility(View.GONE);
+        holder.recoveredTextView.setVisibility(View.GONE);
+        holder.lockedImageView.setVisibility(View.GONE);
+        holder.spoilerTextView.setVisibility(View.GONE);
+        holder.nsfwTextView.setVisibility(View.GONE);
+        holder.contentMarkdownView.setVisibility(View.GONE);
+        holder.archivedImageView.setVisibility(View.GONE);
+        holder.crosspostImageView.setVisibility(View.GONE);
     }
 
     @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
         if (holder instanceof PostDetailBaseViewHolder) {
-            ((PostDetailBaseViewHolder) holder).userTextView.setTextColor(mUsernameColor);
-            ((PostDetailBaseViewHolder) holder).userTextView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-            ((PostDetailBaseViewHolder) holder).upvoteButton.setIconResource(R.drawable.ic_upvote_24dp);
-            ((PostDetailBaseViewHolder) holder).upvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            ((PostDetailBaseViewHolder) holder).scoreTextView.setTextColor(mPostIconAndInfoColor);
-            ((PostDetailBaseViewHolder) holder).downvoteButton.setIconResource(R.drawable.ic_downvote_24dp);
-            ((PostDetailBaseViewHolder) holder).downvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            ((PostDetailBaseViewHolder) holder).flairTextView.setVisibility(View.GONE);
-            ((PostDetailBaseViewHolder) holder).recoveredTextView.setVisibility(View.GONE);
-            ((PostDetailBaseViewHolder) holder).lockedImageView.setVisibility(View.GONE);
-            ((PostDetailBaseViewHolder) holder).spoilerTextView.setVisibility(View.GONE);
-            ((PostDetailBaseViewHolder) holder).nsfwTextView.setVisibility(View.GONE);
-            ((PostDetailBaseViewHolder) holder).contentMarkdownView.setVisibility(View.GONE);
+            resetRowDecoration((PostDetailBaseViewHolder) holder);
 
             if (holder instanceof PostDetailBaseVideoAutoplayViewHolder) {
                 if (((PostDetailBaseVideoAutoplayViewHolder) holder).fetchRedgifsOrStreamableVideoCall != null && !((PostDetailBaseVideoAutoplayViewHolder) holder).fetchRedgifsOrStreamableVideoCall.isCanceled()) {
@@ -1828,11 +1880,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 }
                 // Deliberately not cancelled here. This adapter holds one row for one post, and
                 // loading a post detail rebinds it two or three times in a few hundred
-                // milliseconds -- every notifyDataSetChanged from updatePost recycles the holder
-                // and binds it straight back. Cancelling on recycle killed each resolve a few
-                // milliseconds after it started, so no fetch ever finished and the clip sat on its
-                // preview image forever. A recycle here means "rebinding the same post", not "the
-                // reader scrolled away", which is what the feed's cancellation is for. The repeat
+                // milliseconds -- each clip URL that resolves notifies the row again, which
+                // recycles the holder and binds it straight back. Cancelling on recycle killed
+                // each resolve a few milliseconds after it started, so no fetch ever finished and
+                // the clip sat on its preview image forever. A recycle here means "rebinding the
+                // same post" (updatePost is exempt: it rebinds in place and never reaches this),
+                // not "the reader scrolled away", which is what the feed's cancellation is for.
+                // The repeat
                 // binds are cheap because FetchShortClipVideo caches by host and clip id, and a
                 // result that arrives for a superseded post is dropped by the identity guard.
                 ((PostDetailBaseVideoAutoplayViewHolder) holder).mErrorLoadingRedgifsImageView.setVisibility(View.GONE);
@@ -2550,6 +2604,20 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         private Drawable playDrawable;
         private Drawable pauseDrawable;
         private boolean setDefaultResolutionAlready;
+        /** The post this holder is showing, so a rebind can tell a new clip from the same one. */
+        @Nullable
+        private String boundPostId;
+        /**
+         * What the reader chose with the mute button, null until they touch it. Kept for as long as
+         * the holder shows this post, so a rebind -- which happens whenever the post's score, save
+         * state or author tag moves -- does not put the "Mute autoplaying videos" preference back
+         * over their choice. Whether the choice outlives the post is a different question, and the
+         * one Settings > Video > "Remember muting option" answers; that is VideoMuteManager's job.
+         */
+        @Nullable
+        private Boolean manuallyMuted;
+        /** Whether the player has painted, i.e. whether the preview still is covering anything. */
+        private boolean hasRenderedFirstFrame;
 
         public PostDetailBaseVideoAutoplayViewHolder(@NonNull View itemView,
                                                      AspectRatioGifImageView iconGifImageView,
@@ -2629,11 +2697,13 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         muteButton.setImageDrawable(AppCompatResources.getDrawable(mActivity, R.drawable.ic_mute_24dp));
                         helper.setVolume(0f);
                         volume = 0f;
+                        manuallyMuted = true;
                         mVideoMuteManager.setMuted(true);
                     } else {
                         muteButton.setImageDrawable(AppCompatResources.getDrawable(mActivity, R.drawable.ic_unmute_24dp));
                         helper.setVolume(1f);
                         volume = 1f;
+                        manuallyMuted = false;
                         mVideoMuteManager.setMuted(false);
                     }
                 }
@@ -2689,8 +2759,35 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             mediaUri = videoUri;
         }
 
+        /**
+         * Points the holder at {@code postId}, dropping what belonged to the clip it was showing
+         * before. A rebind for the same post keeps all of it, which is what lets a playing video
+         * survive one.
+         */
+        void bindPost(@NonNull String postId) {
+            if (postId.equals(boundPostId)) {
+                return;
+            }
+            boundPostId = postId;
+            manuallyMuted = null;
+            hasRenderedFirstFrame = false;
+        }
+
         void setVolume(float volume) {
             this.volume = volume;
+            // Straight through to the clip as well. A bind used to be preceded by the player being
+            // released and re-created, so onTracksChanged applied this field for us; a rebind in
+            // place leaves the player alone, and nothing else would carry the new value to it.
+            // Marking the post NSFW with "Mute NSFW videos" on is the case that reaches here with a
+            // value the clip does not already have.
+            //
+            // setVolumeInfo, not setVolume: the helper prepares lazily, so between initialize() and
+            // the first play() there is no player yet and Playable#setVolume throws on one. This
+            // records the volume on the playback info either way and applies it when there is a
+            // player, which is also what makes it stick for a clip that has not started.
+            if (helper != null) {
+                helper.setVolumeInfo(new VolumeInfo(volume == 0f, volume));
+            }
         }
 
         void resetVolume() {
@@ -2868,6 +2965,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
                     @Override
                     public void onRenderedFirstFrame() {
+                        hasRenderedFirstFrame = true;
                         mGlide.clear(previewImageView);
                         previewImageView.setVisibility(View.GONE);
                     }
@@ -2919,6 +3017,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 helper = null;
             }
             container = null;
+            // Nothing is painting the row any more, so the next bind has to put the still back up.
+            hasRenderedFirstFrame = false;
         }
 
         @Override

@@ -1,7 +1,5 @@
 package ml.docilealligator.infinityforreddit.customviews
 
-import androidx.recyclerview.widget.DefaultItemAnimator
-
 /**
  * Item animator for the comment list.
  *
@@ -28,8 +26,11 @@ import androidx.recyclerview.widget.DefaultItemAnimator
  *    animates the "+N" child-count badge in on a live view and drags the score across with it, and
  *    a row whose view type flips to the fully-collapsed one loses the cross-fade partner that
  *    bridges the two layouts and blinks straight from one to the other.
+ *
+ * In the combined layout this list also carries the post row, which must be exempt from that
+ * replacement so the video on it survives a rebind; the base class is what arranges it.
  */
-class CommentsItemAnimator : DefaultItemAnimator() {
+class CommentsItemAnimator : RebindInPlaceItemAnimator() {
     init {
         removeDuration = 120
         moveDuration = 120

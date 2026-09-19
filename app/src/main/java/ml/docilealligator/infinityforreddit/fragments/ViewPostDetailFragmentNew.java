@@ -83,6 +83,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AdjustableTouchSlopItemTouchHelper;
 import ml.docilealligator.infinityforreddit.customviews.CommentsItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.RebindInPlaceItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.SwipeActionPainter;
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewPostDetailBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
@@ -678,6 +679,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         // DefaultItemAnimator plays as four staged phases. See CommentsItemAnimator.
         (mCommentsRecyclerView != null ? mCommentsRecyclerView : binding.postDetailRecyclerViewViewPostDetailFragment)
                 .setItemAnimator(new CommentsItemAnimator());
+        if (mCommentsRecyclerView != null) {
+            // With the post on a list of its own, the animator above is on the other one, so the
+            // post row needs its own: a rebind for a vote or a user tag must not replace the row,
+            // or the video playing on it is released and restarts. See RebindInPlaceItemAnimator.
+            binding.postDetailRecyclerViewViewPostDetailFragment.setItemAnimator(new RebindInPlaceItemAnimator());
+        }
 
         viewPostDetailFragmentViewModel.getUiState().observe(getViewLifecycleOwner(), uiState -> {
             RecyclerView recyclerView = mCommentsRecyclerView != null ? mCommentsRecyclerView : binding.postDetailRecyclerViewViewPostDetailFragment;
