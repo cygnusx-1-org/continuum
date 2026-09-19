@@ -639,11 +639,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"Razdijeli mapu za svaki podreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Spremi NSFW medija na drugu lokaciju"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Lokacija preuzimanja"</string>
-    <string name="settings_swipe_action_title">"Akcija prevlačenja"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Haptična povratna informacija"</string>
+    <string name="settings_swipe_actions_title">"Akcije prevlačenja"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Haptična povratna informacija"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Onemogući prijelaz između kartica"</string>
-    <string name="settings_enable_swipe_action_title">"Omogući akciju prevlačenja"</string>
-    <string name="settings_swipe_action_threshold">"Prag"</string>
+    <string name="settings_swipe_actions_threshold">"Prag"</string>
     <string name="settings_pull_to_refresh_title">"Povuci za ovježavanje"</string>
     <string name="settings_security_title">"Sigurnost"</string>
     <string name="settings_require_authentication_to_show_accounts">"Zahtijeva autentifikaciju za prikaz računa"</string>
@@ -702,9 +701,7 @@
     <string name="settings_hide_subreddit_description_title">"Sakri opis podreddita"</string>
     <string name="settings_disable_image_preview_title">"Onemogući predpregled slike u "</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Iskljuci pregled u videima i GIF objavama"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Povuci lijevo"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Prelazak prstom u desno"</string>
-    <string name="settings_swipe_action_info_summary">"Nije primjenjivo na feed sa više od 1 stupca ili pojedinosti o objavi"</string>
+    <string name="settings_swipe_actions_info_summary">"Nije primjenjivo na feed sa više od 1 stupca ili pojedinosti o objavi"</string>
     <string name="settings_language_title">"Jezik"</string>
     <string name="settings_enable_search_history_title">"Uključi povijest pretraživanja"</string>
     <string name="settings_post_history_title">"Povijest objava"</string>
@@ -760,8 +757,6 @@
     <string name="settings_restore_settings_title">"Vrati postavke"</string>
     <string name="settings_credits_love_animation_title">"Ljubavna animacija"</string>
     <string name="settings_swipe_between_posts_title">"Prijeđi prstom između objava"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Dok je omogućeno, radnje prelaska u komentarima nisu dostupne. Oba koriste horizontalna prevlačenja, tako da se ne mogu koristiti u isto vrijeme."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Nedostupno dok je omogućeno prevlačenje između objava. Isključi to da biste koristili akcije prevlačenja komentara."</string>
     <string name="settings_navigation_drawer_title">"Ladica za navigaciju"</string>
     <string name="settings_collapse_account_section_title">"Sažmi odjeljak računa"</string>
     <string name="settings_collapse_reddit_section_title">"Sažmi Reddit odjeljak"</string>
@@ -876,7 +871,7 @@
     <string name="settings_category_gesture_sensitivity_title">"Osjetljivost pokreta"</string>
     <string name="settings_tab_switching_sensitivity">"Osjetljivost prebacivanja kartica"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Osjetljivost prelaska prstom udesno za povratak"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Osjetljivost poteza u komentarima"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Osjetljivost poteza u komentarima"</string>
     <string name="default_sensitivity">"Zadano"</string>
     <string name="low">"Nizak"</string>
     <string name="very_low">"Vrlo nisko"</string>

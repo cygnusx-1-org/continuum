@@ -253,6 +253,9 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
                     activity.startActivity(intent);
                 }
                 canStartLockScreenActivity = false;
+                // The stack has settled with this screen on top. onActivityPaused below records
+                // it one transition too early to be right on its own; see onActivityResumed.
+                ResumeState.onActivityResumed(Infinity.this);
             }
 
             @Override

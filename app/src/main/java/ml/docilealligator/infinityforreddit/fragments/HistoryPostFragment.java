@@ -310,6 +310,7 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             binding.recyclerViewHistoryPostFragment.setLayoutManager(mLinearLayoutManager);
+            applyPostFeedTopBuffer(binding.recyclerViewHistoryPostFragment);
         } else {
             mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(nColumns, StaggeredGridLayoutManager.VERTICAL);
             binding.recyclerViewHistoryPostFragment.setLayoutManager(mStaggeredGridLayoutManager);
@@ -608,14 +609,17 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
         int nColumns = getNColumns(getResources());
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
-            if (binding.recyclerViewHistoryPostFragment.getItemDecorationCount() > 0) {
+            // Every decoration, not just the first: a one-column feed can carry the top buffer as
+            // well as the grid offset it is leaving behind.
+            while (binding.recyclerViewHistoryPostFragment.getItemDecorationCount() > 0) {
                 binding.recyclerViewHistoryPostFragment.removeItemDecorationAt(0);
             }
             binding.recyclerViewHistoryPostFragment.setLayoutManager(mLinearLayoutManager);
+            applyPostFeedTopBuffer(binding.recyclerViewHistoryPostFragment);
             mStaggeredGridLayoutManager = null;
         } else {
             mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(nColumns, StaggeredGridLayoutManager.VERTICAL);
-            if (binding.recyclerViewHistoryPostFragment.getItemDecorationCount() > 0) {
+            while (binding.recyclerViewHistoryPostFragment.getItemDecorationCount() > 0) {
                 binding.recyclerViewHistoryPostFragment.removeItemDecorationAt(0);
             }
             binding.recyclerViewHistoryPostFragment.setLayoutManager(mStaggeredGridLayoutManager);

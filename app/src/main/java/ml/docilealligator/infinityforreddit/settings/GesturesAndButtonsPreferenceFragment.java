@@ -11,9 +11,12 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
+import ml.docilealligator.infinityforreddit.events.ChangeEnableCommentSwipeActionSwitchEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeEnableSwipeActionSwitchEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeLockBottomAppBarEvent;
 import ml.docilealligator.infinityforreddit.events.ChangePullToRefreshEvent;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.SwipeActionPreferences;
 import org.greenrobot.eventbus.EventBus;
 
 /**
@@ -24,6 +27,9 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
     @Inject
     @Named("default")
     SharedPreferences sharedPreferences;
+
+    @Nullable
+    private SwitchPreference swipeBetweenPostsSwitch;
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
@@ -64,21 +70,32 @@ public class GesturesAndButtonsPreferenceFragment extends CustomFontPreferenceFr
             });
         }
 
-        SwitchPreference swipeBetweenPostsSwitch = findPreference(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS);
+        swipeBetweenPostsSwitch = findPreference(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS);
         if (swipeBetweenPostsSwitch != null) {
-            // Swipe Between Posts and comment Swipe Action both consume horizontal swipes and
-            // cannot coexist; the former takes precedence. Warn here when it is enabled.
-            updateSwipeBetweenPostsSummary(swipeBetweenPostsSwitch, swipeBetweenPostsSwitch.isChecked());
             swipeBetweenPostsSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
-                updateSwipeBetweenPostsSummary(swipeBetweenPostsSwitch, (Boolean) newValue);
+                // Swipe Between Posts and the swipe actions both consume a horizontal swipe on a
+                // post, so only one of them can be on. Each side switches the other off rather
+                // than silently overriding it, which is what left a screen of settings that
+                // looked available and did nothing.
+                if ((Boolean) newValue) {
+                    SwipeActionPreferences.turnOffSwipeActions(sharedPreferences);
+                    EventBus.getDefault().post(new ChangeEnableSwipeActionSwitchEvent(false));
+                    EventBus.getDefault().post(new ChangeEnableCommentSwipeActionSwitchEvent(false));
+                }
                 return true;
             });
         }
     }
 
-    private void updateSwipeBetweenPostsSummary(SwitchPreference swipeBetweenPostsSwitch, boolean enabled) {
-        swipeBetweenPostsSwitch.setSummary(enabled
-                ? getString(R.string.settings_swipe_between_posts_disables_comment_swipe_summary)
-                : null);
+    @Override
+    public void onResume() {
+        super.onResume();
+        // The swipe action screens can have switched this off while they were on top, and coming
+        // back does not re-inflate the preference, so its checkbox would still say what it said
+        // when this screen was built.
+        if (swipeBetweenPostsSwitch != null) {
+            swipeBetweenPostsSwitch.setChecked(
+                    sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_BETWEEN_POSTS, false));
+        }
     }
 }

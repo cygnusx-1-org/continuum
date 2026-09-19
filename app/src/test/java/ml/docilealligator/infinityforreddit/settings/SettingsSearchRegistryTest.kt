@@ -64,14 +64,14 @@ class SettingsSearchRegistryTest {
 
     @Test
     fun indexesPreferenceThatOpensAnotherScreen() {
-        val item = itemTitled(R.string.settings_swipe_action_title)
+        val item = itemTitled(R.string.settings_swipe_actions_title)
 
         // It sits under the "Post" heading of the Gestures & Buttons screen.
         val expected = context.getString(R.string.settings_gestures_and_buttons_title) +
             " › " + context.getString(R.string.settings_category_post_title)
         assertEquals(expected, item.breadcrumb)
         assertEquals(SwipeActionPreferenceFragment::class.java, item.fragmentClass)
-        assertEquals(context.getString(R.string.settings_swipe_action_title), item.fragmentTitle)
+        assertEquals(context.getString(R.string.settings_swipe_actions_title), item.fragmentTitle)
     }
 
     /**

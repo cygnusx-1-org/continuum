@@ -70,6 +70,7 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
@@ -586,6 +587,9 @@ public class ViewPostDetailActivity extends BaseActivity
 
             @Override
             public void onPageSelected(int position) {
+                // Paging between this screen's own tabs moves no activity, so nothing else
+                // writes the new one down until the next transition.
+                ResumeState.noteStateChanged(ViewPostDetailActivity.this);
                 List<Post> posts = viewPostDetailActivityViewModel.getPosts();
                 if (posts != null && position > posts.size() - 5) {
                     viewPostDetailActivityViewModel.fetchMorePosts(

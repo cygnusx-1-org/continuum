@@ -1058,6 +1058,11 @@ public class Post implements Parcelable {
         isRead = true;
     }
 
+    /** Undoes {@link #markAsRead}; the stored read-posts row is deleted separately. */
+    public void markAsUnread() {
+        isRead = false;
+    }
+
     public boolean isRecovered() {
         return isRecovered;
     }

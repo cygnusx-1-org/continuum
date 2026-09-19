@@ -78,6 +78,8 @@ class AccountScopedScreenKeysTest {
         R.xml.video_preferences,
         R.xml.gestures_and_buttons_preferences,
         R.xml.swipe_action_preferences,
+        R.xml.post_swipe_action_preferences,
+        R.xml.comment_swipe_action_preferences,
         R.xml.sort_type_preferences,
         R.xml.miscellaneous_preferences,
         R.xml.account_settings_management_preferences,

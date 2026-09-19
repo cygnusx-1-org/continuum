@@ -643,11 +643,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"प्रत्येक सबरैडिट के लिए पृथक फोल्डर "</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"NSFW मीडिया को विभिन्न स्थानों पर सहेजें"</string>
     <string name="settings_nsfw_download_location_title">"NSFW स्थान डाउनलोड करें"</string>
-    <string name="settings_swipe_action_title">"स्वाइप प्रतिक्रिया "</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"स्पर्श प्रतिपुष्टि "</string>
+    <string name="settings_swipe_actions_title">"स्वाइप प्रतिक्रियाएँ"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"स्पर्श प्रतिपुष्टि "</string>
     <string name="settings_disable_swiping_between_tabs_title">"टैब्स के बीच स्वाइपिंग बंद करें "</string>
-    <string name="settings_enable_swipe_action_title">"स्वाइप प्रतिक्रियाओं को शुरु करें "</string>
-    <string name="settings_swipe_action_threshold">"दहलीज "</string>
+    <string name="settings_swipe_actions_threshold">"दहलीज "</string>
     <string name="settings_pull_to_refresh_title">"ताजा करने के लिए खींचें"</string>
     <string name="settings_security_title">"सुरक्षा "</string>
     <string name="settings_require_authentication_to_show_accounts">"खाते दिखाने के लिए प्रमाणीकरण की आवश्यकता है"</string>
@@ -709,9 +708,7 @@
     <string name="settings_hide_subreddit_description_title">"सबरैडिट विवरण छुपाएं "</string>
     <string name="settings_disable_image_preview_title">"डेटा संरक्षण प्रणाली में चित्र पूर्वावलोकन बंद करें"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"केवल वीडियो और जिफ़ पोस्ट में वीडियो अक्षम करें"</string>
-    <string name="settings_swipe_action_swipe_left_title">"बायां स्वाइप"</string>
-    <string name="settings_swipe_action_swipe_right_title">"दायां स्वाइप"</string>
-    <string name="settings_swipe_action_info_summary">"एक स्तंभ या पोस्ट विवरण से अधिक वाली पोस्ट फीड पर लागू नहीं "</string>
+    <string name="settings_swipe_actions_info_summary">"एक स्तंभ या पोस्ट विवरण से अधिक वाली पोस्ट फीड पर लागू नहीं "</string>
     <string name="settings_language_title">"भाषा "</string>
     <string name="settings_enable_search_history_title">"सुरक्षा इतिहास सक्षम करें"</string>
     <string name="settings_post_history_title">"इतिहास के बाद"</string>
@@ -767,8 +764,6 @@
     <string name="settings_restore_settings_title">"सेटिंग्स पुनर्स्थापित करें"</string>
     <string name="settings_credits_love_animation_title">"लव एनिमेशन"</string>
     <string name="settings_swipe_between_posts_title">"पोस्ट के बीच स्वाइप करें"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"सक्षम होने पर, टिप्पणियों में स्वाइप क्रियाएं अनुपलब्ध हैं। दोनों क्षैतिज स्वाइप का उपयोग करते हैं, इसलिए उनका उपयोग एक ही समय में नहीं किया जा सकता है।"</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"अनुपलब्ध है जबकि पोस्ट के बीच स्वाइप सक्षम है। टिप्पणी स्वाइप क्रियाओं का उपयोग करने के लिए इसे बंद करें।"</string>
     <string name="settings_navigation_drawer_title">"नेविगेशन ड्रॉअर"</string>
     <string name="settings_collapse_account_section_title">"खाता अनुभाग संक्षिप्त करें"</string>
     <string name="settings_collapse_reddit_section_title">"संक्षिप्त करें Reddit अनुभाग"</string>
@@ -883,7 +878,7 @@
     <string name="settings_category_gesture_sensitivity_title">"हावभाव संवेदनशीलता"</string>
     <string name="settings_tab_switching_sensitivity">"टैब स्विचिंग संवेदनशीलता"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"वापस जाने के लिए दाएं स्वाइप की संवेदनशीलता"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"टिप्पणियों में स्वाइप एक्शन संवेदनशीलता"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"टिप्पणियों में स्वाइप एक्शन संवेदनशीलता"</string>
     <string name="default_sensitivity">"पूर्वनिर्धारित"</string>
     <string name="low">"कम"</string>
     <string name="very_low">"बहुत कम"</string>

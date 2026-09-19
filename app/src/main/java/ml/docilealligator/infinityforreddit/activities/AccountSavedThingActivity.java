@@ -54,6 +54,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -239,6 +240,9 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
                 } else {
                     lockSwipeRightToGoBack();
                 }
+                // Paging between this screen's own tabs moves no activity, so nothing else
+                // writes the new one down until the next transition.
+                ResumeState.noteStateChanged(AccountSavedThingActivity.this);
                 // Keep the active search applied to whichever tab is now showing. Posted so the
                 // freshly selected fragment has been added before we look it up; guarded because a
                 // view-posted runnable can still fire after the activity is torn down.

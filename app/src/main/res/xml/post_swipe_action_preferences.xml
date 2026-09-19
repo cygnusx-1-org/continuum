@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="enable_swipe_action"
+        app:summary="@string/settings_enable_swipe_actions_turns_off_swipe_between_posts_summary"
+        app:title="@string/settings_enable_post_swipe_actions_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
+        app:title="@string/settings_swipe_actions_left" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="0"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_left_action"
+        app:title="@string/settings_swipe_actions_first_left_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="-1"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_left_action_level_2"
+        app:title="@string/settings_swipe_actions_second_left_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="-1"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_left_action_level_3"
+        app:title="@string/settings_swipe_actions_third_left_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="-1"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_left_action_level_4"
+        app:title="@string/settings_swipe_actions_fourth_left_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
+        app:title="@string/settings_swipe_actions_right" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="1"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_right_action"
+        app:title="@string/settings_swipe_actions_first_right_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="-1"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_right_action_level_2"
+        app:title="@string/settings_swipe_actions_second_right_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="-1"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_right_action_level_3"
+        app:title="@string/settings_swipe_actions_third_right_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="-1"
+        app:dependency="enable_swipe_action"
+        app:entries="@array/settings_post_swipe_actions"
+        app:entryValues="@array/settings_post_swipe_actions_values"
+        app:key="swipe_right_action_level_4"
+        app:title="@string/settings_swipe_actions_fourth_right_title"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>

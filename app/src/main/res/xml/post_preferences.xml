@@ -26,6 +26,14 @@
         app:title="@string/settings_default_link_post_layout"
         app:useSimpleSummaryProvider="true" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="0"
+        android:entries="@array/settings_post_feed_top_buffer"
+        app:entryValues="@array/settings_post_feed_top_buffer_values"
+        app:key="post_feed_top_buffer"
+        app:summary="@string/settings_post_feed_top_buffer_summary"
+        app:title="@string/settings_post_feed_top_buffer_title" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         app:title="@string/settings_number_of_columns_in_post_feed_title"
         app:fragment="ml.docilealligator.infinityforreddit.settings.NumberOfColumnsInPostFeedPreferenceFragment" />

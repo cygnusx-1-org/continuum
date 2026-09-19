@@ -112,6 +112,7 @@ import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisite
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.subreddit.FetchSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
@@ -1268,6 +1269,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 } else {
                     lockSwipeRightToGoBack();
                 }
+                // Paging between this screen's own tabs moves no activity, so nothing else
+                // writes the new one down until the next transition.
+                ResumeState.noteStateChanged(ViewSubredditDetailActivity.this);
 
                 if (showBottomAppBar) {
                     navigationWrapper.showNavigation();

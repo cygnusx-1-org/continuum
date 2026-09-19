@@ -740,6 +740,18 @@ object ResumeState {
             }
             if (activity.isFinishing) {
                 live.removeAt(i)
+                // The stack has just settled one screen shorter. Backing out delivers this
+                // screen's pause before the one underneath resumes, so the capture that pause
+                // ran still had this screen on it; without a capture here the snapshot keeps a
+                // screen the user has left, and the next launch reopens it.
+                //
+                // Only while something is still on screen. Dismissing from recents finishes every
+                // activity too, and capturing there would peel the stack apart one destroy at a
+                // time -- writing the feed alone over the snapshot that onActivityStopped had
+                // just written correctly, moments before the process is killed.
+                if (startedCount > 0) {
+                    capture(activity.applicationContext)
+                }
             } else {
                 // Destroyed for a configuration change, not dismissed: the screen is still on the
                 // stack and is about to be rebuilt. Keeping the entry is what stops a rotation from
@@ -755,6 +767,35 @@ object ResumeState {
     fun onActivityStarted() {
         startedCount++
         canSeed = false
+    }
+
+    /**
+     * A screen has settled at the top, so the stack is now what the user is actually looking at.
+     *
+     * [onActivityPaused] runs before the screen being opened exists and before the screen being
+     * left is destroyed, so on its own it can only ever record the stack as it was one
+     * transition ago -- open Settings and the snapshot still says the feed, leave Settings and it
+     * still says Settings. Capturing once the new top has resumed is what makes the snapshot
+     * describe the present, and [recordDestroyed] does the same for the way back.
+     */
+    @JvmStatic
+    fun onActivityResumed(context: Context) {
+        capture(context)
+    }
+
+    /**
+     * A screen's recorded state changed while the screen itself stayed put.
+     *
+     * Every other capture hangs off a transition: an activity resumes, one is destroyed, the app
+     * stops, a feed comes to rest. Moving between a screen's *own* pages is none of those -- the
+     * tab strip and a settings sub-screen both change what [Restorable.saveResumeState] would say
+     * without the activity going anywhere -- so nothing reached disk until the next transition
+     * happened to come along. A process killed before then came back to where the user was two
+     * moves ago, which is the whole failure this exists to prevent.
+     */
+    @JvmStatic
+    fun noteStateChanged(context: Context) {
+        capture(context)
     }
 
     /**

@@ -649,11 +649,10 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Her Subreddit için Ayrı Klasör"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"NSFW Medyayı Farklı Konumda Kaydet"</string>
     <string name="settings_nsfw_download_location_title">"NSFW İndirme Konumu"</string>
-    <string name="settings_swipe_action_title">"Kaydırma İşlemi"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Dokunsal Geribildirim"</string>
+    <string name="settings_swipe_actions_title">"Kaydırma İşlemleri"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Dokunsal Geribildirim"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Sekmelerdeki Kaydırmayı Devre Dışı Bırak"</string>
-    <string name="settings_enable_swipe_action_title">"Kaydırma İşlemini Etkinleştir"</string>
-    <string name="settings_swipe_action_threshold">"Düzey"</string>
+    <string name="settings_swipe_actions_threshold">"Düzey"</string>
     <string name="settings_pull_to_refresh_title">"Yenilemek İçin Çektir"</string>
     <string name="settings_security_title">"Güvenlik"</string>
     <string name="settings_require_authentication_to_show_accounts">"Hesapları Göstermek için Kimlik Doğrulaması Gerektir"</string>
@@ -715,9 +714,7 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_hide_subreddit_description_title">"Subreddit Açıklamasını Gizle"</string>
     <string name="settings_disable_image_preview_title">"Veri Tasarrufu Modunda Görüntüleri Önizlemeyi Devre Dışı Bırak"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Yalnızca Video ve Gif Gönderilerinde Önizlemeyi Devre Dışı Bırak"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Sola Kaydır"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Sağa Kaydır"</string>
-    <string name="settings_swipe_action_info_summary">"Birden fazla sütun veya gönderi ayrıntısı içeren gönderi akışı için geçerli değildir."</string>
+    <string name="settings_swipe_actions_info_summary">"Birden fazla sütun veya gönderi ayrıntısı içeren gönderi akışı için geçerli değildir."</string>
     <string name="settings_language_title">"Dil"</string>
     <string name="settings_enable_search_history_title">"Arama Geçmişini Etkinleştir"</string>
     <string name="settings_post_history_title">"Gönderi Geçmişi"</string>
@@ -773,8 +770,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_restore_settings_title">"Ayarları Eski Haline Getir"</string>
     <string name="settings_credits_love_animation_title">"Aşk Animasyonu"</string>
     <string name="settings_swipe_between_posts_title">"Gönderiler Arasında Kaydır"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Etkinleştirildiğinde yorumlardaki kaydırma eylemleri kullanılamaz. Her ikisi de yatay kaydırmalar kullandığından aynı anda kullanılamazlar."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Gönderiler Arasında Kaydırma etkinken kullanılamaz. Yorum kaydırma işlemlerini kullanmak için bunu kapatın."</string>
     <string name="settings_navigation_drawer_title">"Gezinme Çekmecesi"</string>
     <string name="settings_collapse_account_section_title">"Hesap Bölümünü Daralt"</string>
     <string name="settings_collapse_reddit_section_title">"Reddit Bölümünü Daralt"</string>
@@ -889,7 +884,7 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_category_gesture_sensitivity_title">"Hareket Hassasiyeti"</string>
     <string name="settings_tab_switching_sensitivity">"Sekme Değiştirme Hassasiyeti"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Geri Dönmek İçin Sağa Kaydırma Hassasiyeti"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Kaydırma Hareketi Hassasiyeti Yorumlarda"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Kaydırma Hareketi Hassasiyeti Yorumlarda"</string>
     <string name="default_sensitivity">"Varsayılan"</string>
     <string name="low">"Düşük"</string>
     <string name="very_low">"Çok Düşük"</string>

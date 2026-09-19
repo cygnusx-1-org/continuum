@@ -21,7 +21,6 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.media3.common.util.UnstableApi;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
@@ -37,9 +36,11 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
+import ml.docilealligator.infinityforreddit.activities.SetReminderActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewSubredditDetailActivity;
+import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.CommentMoreBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSheetFragment;
@@ -70,6 +71,7 @@ import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.VoteThing;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
+import ml.docilealligator.infinityforreddit.utils.ShareScreenshotUtilsKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import retrofit2.Retrofit;
@@ -424,21 +426,71 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
         }
     }
 
-    public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int direction, int swipeLeftAction, int swipeRightAction) {
-        if (viewHolder instanceof CommentBaseViewHolder) {
-            if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.START) {
-                if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).downvoteButton.performClick();
+    /**
+     * Runs the action a swipe landed on. Which of the direction's three levels was reached is the
+     * fragment's decision; by the time it gets here it is one action on one comment.
+     *
+     * Reply is hidden on this feed -- there is nowhere to reply to a comment from a profile -- so
+     * a swipe bound to it does nothing rather than firing a listener on an invisible button.
+     */
+    public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int action) {
+        if (!(viewHolder instanceof CommentBaseViewHolder)) {
+            return;
+        }
+        CommentBaseViewHolder holder = (CommentBaseViewHolder) viewHolder;
+        int position = holder.getBindingAdapterPosition();
+        if (position < 0) {
+            return;
+        }
+        Comment comment = getItem(position);
+        if (comment == null) {
+            return;
+        }
+
+        switch (action) {
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_UPVOTE:
+                holder.upvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_DOWNVOTE:
+                holder.downvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SAVE:
+                holder.saveButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_REPLY:
+                if (holder.replyButton.getVisibility() == View.VISIBLE) {
+                    holder.replyButton.performClick();
                 }
-            } else {
-                if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).downvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SHARE: {
+                String permalink = comment.getPermalink();
+                if (permalink != null) {
+                    mActivity.shareLink(permalink);
                 }
+                break;
             }
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_PROFILE: {
+                Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
+                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, comment.getAuthor());
+                mActivity.startActivity(intent);
+                break;
+            }
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SHARE_AS_IMAGE:
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SHARE_AS_IMAGE_WITH_THREAD:
+                // This feed lists one person's comments from all over Reddit: there is no post to
+                // head the picture with and no thread around any of them, so both share the
+                // comment on its own.
+                ShareScreenshotUtilsKt.shareCommentAsScreenshot(mActivity, comment);
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SET_REMINDER: {
+                String linkId = comment.getLinkId();
+                if (linkId != null) {
+                    SetReminderActivity.Companion.startReminderActivity(mActivity, linkId, comment);
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 

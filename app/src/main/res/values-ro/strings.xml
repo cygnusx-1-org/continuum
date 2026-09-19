@@ -652,11 +652,10 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Dosar Separat pentru Fiecare Subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Salvează NSFW Media în locație diferită"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Locație de descărcare"</string>
-    <string name="settings_swipe_action_title">"Acțiune de Glilsare"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Răspuns Tactil"</string>
+    <string name="settings_swipe_actions_title">"Acțiuni de Glisare"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Răspuns Tactil"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Dezactivează Glisarea între File"</string>
-    <string name="settings_enable_swipe_action_title">"Activează Acțiunea de Glisare"</string>
-    <string name="settings_swipe_action_threshold">"Prag"</string>
+    <string name="settings_swipe_actions_threshold">"Prag"</string>
     <string name="settings_pull_to_refresh_title">"Trage pentru a Reîmprospăta"</string>
     <string name="settings_security_title">"Securitate"</string>
     <string name="settings_require_authentication_to_show_accounts">"Necesită Autentificare pentru a Afișa Conturile"</string>
@@ -718,9 +717,7 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_hide_subreddit_description_title">"Ascunde Descrierea Subreddit-ului"</string>
     <string name="settings_disable_image_preview_title">"Dezactivarea Previzualizării Imaginilor în Regimul de Economisire a Datelor"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Dezactivează Previzualizarea doar pentru Postările Video și Gif"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Glisează spre Stânga"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Glisează spre Dreapta"</string>
-    <string name="settings_swipe_action_info_summary">"Nu se aplică la fluxul de postări cu mai mult de o coloană sau la detaliile postării."</string>
+    <string name="settings_swipe_actions_info_summary">"Nu se aplică la fluxul de postări cu mai mult de o coloană sau la detaliile postării."</string>
     <string name="settings_language_title">"Limba"</string>
     <string name="settings_enable_search_history_title">"Activează Istoricul Căutărilor"</string>
     <string name="settings_post_history_title">"Istoric Postări"</string>
@@ -776,8 +773,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_restore_settings_title">"Restabilirea Setărilor"</string>
     <string name="settings_credits_love_animation_title">"Animație de Dragoste"</string>
     <string name="settings_swipe_between_posts_title">"Glisează între Postări"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Când sunt activate, acțiunile de glisare din comentarii nu sunt disponibile. Ambele folosesc glisări orizontale, deci nu pot fi folosite în același timp."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Indisponibil când glisarea între postări este activată. Dezactivează-l pentru a folosi acțiunile de glisare în comentarii."</string>
     <string name="settings_navigation_drawer_title">"Panou de Navigare"</string>
     <string name="settings_collapse_account_section_title">"Restrânge Secția de Cont"</string>
     <string name="settings_collapse_reddit_section_title">"Restrânge Secția Reddit"</string>
@@ -892,7 +887,7 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_category_gesture_sensitivity_title">"Sensibilitate la gesturi"</string>
     <string name="settings_tab_switching_sensitivity">"Sensibilitate la comutarea filelor"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Sensibilitatea glisării spre dreapta pentru a reveni"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Sensibilitatea acțiunii de glisare în comentarii"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Sensibilitatea acțiunii de glisare în comentarii"</string>
     <string name="default_sensitivity">"Implicit"</string>
     <string name="low">"Scăzut"</string>
     <string name="very_low">"Foarte scăzut"</string>

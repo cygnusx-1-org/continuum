@@ -648,11 +648,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"각 하위 레딧에 대한 별도의 폴더"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"NSFW 미디어를 다른 위치에 저장"</string>
     <string name="settings_nsfw_download_location_title">"NSFW 다운로드 위치"</string>
-    <string name="settings_swipe_action_title">"스와이프 액션"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"햅틱 피드백"</string>
+    <string name="settings_swipe_actions_title">"스와이프 액션"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"햅틱 피드백"</string>
     <string name="settings_disable_swiping_between_tabs_title">"탭 간 스와이프 비활성화"</string>
-    <string name="settings_enable_swipe_action_title">"스와이프 동작 활성화"</string>
-    <string name="settings_swipe_action_threshold">"임계값"</string>
+    <string name="settings_swipe_actions_threshold">"임계값"</string>
     <string name="settings_pull_to_refresh_title">"당겨서 새로 고침"</string>
     <string name="settings_security_title">"보안"</string>
     <string name="settings_require_authentication_to_show_accounts">"계정을 표시하려면 인증이 필요합니다."</string>
@@ -711,9 +710,7 @@
     <string name="settings_hide_subreddit_description_title">"하위 레딧 설명 숨기기"</string>
     <string name="settings_disable_image_preview_title">"데이터 절약 모드에서 이미지 미리보기 비활성화"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"는 비디오 및 GIF 게시물의 미리보기만 비활성화합니다."</string>
-    <string name="settings_swipe_action_swipe_left_title">"왼쪽으로 스와이프"</string>
-    <string name="settings_swipe_action_swipe_right_title">"오른쪽으로 스와이프"</string>
-    <string name="settings_swipe_action_info_summary">"열이 2개 이상이거나 게시물 세부정보가 있는 게시물 피드에는 적용할 수 없습니다."</string>
+    <string name="settings_swipe_actions_info_summary">"열이 2개 이상이거나 게시물 세부정보가 있는 게시물 피드에는 적용할 수 없습니다."</string>
     <string name="settings_language_title">"언어"</string>
     <string name="settings_enable_search_history_title">"검색 기록 활성화"</string>
     <string name="settings_post_history_title">"게시물 기록"</string>
@@ -769,8 +766,6 @@
     <string name="settings_restore_settings_title">"복원 설정"</string>
     <string name="settings_credits_love_animation_title">"사랑 애니메이션"</string>
     <string name="settings_swipe_between_posts_title">"게시물 간 스와이프"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"활성화된 동안 댓글에서 스와이프 동작을 사용할 수 없습니다. 둘 다 가로 스와이프를 사용하므로 동시에 사용할 수 없습니다."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"게시물 간 스와이프가 활성화된 동안에는 사용할 수 없습니다. 댓글 스와이프 동작을 사용하려면 이 기능을 끄세요."</string>
     <string name="settings_navigation_drawer_title">"탐색 서랍"</string>
     <string name="settings_collapse_account_section_title">"축소 계정 섹션"</string>
     <string name="settings_collapse_reddit_section_title">"축소 Reddit 섹션"</string>
@@ -885,7 +880,7 @@
     <string name="settings_category_gesture_sensitivity_title">"제스처 감도"</string>
     <string name="settings_tab_switching_sensitivity">"탭 전환 감도"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"오른쪽으로 스와이프해 뒤로 가기 감도"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"댓글의 스와이프 동작 감도"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"댓글의 스와이프 동작 감도"</string>
     <string name="default_sensitivity">"기본값"</string>
     <string name="low">"낮음"</string>
     <string name="very_low">"매우 낮음"</string>

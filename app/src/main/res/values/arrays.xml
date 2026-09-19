@@ -443,15 +443,21 @@
         <item>@string/go_to_top</item>
     </string-array>
 
-    <string-array name="settings_swipe_action_threshold">
-        <item>0.1</item>
-        <item>0.2</item>
+    <!-- How far a full swipe travels, as a fraction of the row's width. A surface's slots divide
+         it evenly whatever is bound to them, so at 0.3 a post reaches its four every 7.5% of the
+         row. Nothing below 0.3, or four slots would be closer together than a thumb can aim;
+         nothing above 0.4, or a swipe is no longer a flick. Shown as percentages, stored as
+         fractions. -->
+    <string-array name="settings_swipe_actions_threshold">
+        <item>30%</item>
+        <item>35%</item>
+        <item>40%</item>
+    </string-array>
+
+    <string-array name="settings_swipe_actions_threshold_values">
         <item>0.3</item>
+        <item>0.35</item>
         <item>0.4</item>
-        <item>0.5</item>
-        <item>0.6</item>
-        <item>0.7</item>
-        <item>0.8</item>
     </string-array>
 
     <string-array name="settings_data_saving_mode">
@@ -466,14 +472,84 @@
         <item>2</item>
     </string-array>
 
-    <string-array name="settings_swipe_actions">
+    <!-- Post swipe actions. The values are stored, so the first two keep the numbers the
+         two-action list gave them; -1 is a level the user left empty. -->
+    <string-array name="settings_post_swipe_actions">
+        <item>@string/none</item>
         <item>@string/upvote</item>
         <item>@string/downvote</item>
+        <item>@string/save</item>
+        <item>@string/swipe_action_hide</item>
+        <item>@string/swipe_action_mark_as_read_and_hide</item>
+        <item>@string/swipe_action_mark_as_read</item>
+        <item>@string/swipe_action_mark_as_unread</item>
+        <item>@string/swipe_action_toggle_read</item>
+        <item>@string/share</item>
+        <item>@string/profile</item>
+        <item>@string/comment</item>
+        <item>@string/open_in_new_window</item>
+        <item>@string/action_crosspost</item>
     </string-array>
 
-    <string-array name="settings_swipe_actions_values">
+    <string-array name="settings_post_swipe_actions_values">
+        <item>-1</item>
         <item>0</item>
         <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>10</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+
+    <!-- Comment swipe actions: their own namespace, deliberately without the hide and read
+         actions, which mean nothing on a comment. -->
+    <string-array name="settings_comment_swipe_actions">
+        <item>@string/none</item>
+        <item>@string/upvote</item>
+        <item>@string/downvote</item>
+        <item>@string/save</item>
+        <item>@string/reply</item>
+        <item>@string/share</item>
+        <item>@string/share_as_image</item>
+        <item>@string/share_as_image_with_thread</item>
+        <item>@string/profile</item>
+        <item>@string/set_reminder</item>
+    </string-array>
+
+    <string-array name="settings_comment_swipe_actions_values">
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>7</item>
+        <item>5</item>
+        <item>8</item>
+    </string-array>
+
+    <string-array name="settings_post_feed_top_buffer">
+        <item>@string/none</item>
+        <item>32dp</item>
+        <item>64dp</item>
+        <item>96dp</item>
+        <item>128dp</item>
+    </string-array>
+
+    <string-array name="settings_post_feed_top_buffer_values">
+        <item>0</item>
+        <item>32</item>
+        <item>64</item>
+        <item>96</item>
+        <item>128</item>
     </string-array>
 
     <string-array name="settings_language">
@@ -869,13 +945,13 @@
         <item>0.1</item>
     </string-array>
 
-    <string-array name="settings_swipe_action_sensitivity_in_comments">
+    <string-array name="settings_swipe_actions_sensitivity_in_comments">
         <item>@string/default_sensitivity</item>
         <item>@string/low</item>
         <item>@string/very_low</item>
     </string-array>
 
-    <string-array name="settings_swipe_action_sensitivity_in_comments_values">
+    <string-array name="settings_swipe_actions_sensitivity_in_comments_values">
         <item>1</item>
         <item>5</item>
         <item>10</item>

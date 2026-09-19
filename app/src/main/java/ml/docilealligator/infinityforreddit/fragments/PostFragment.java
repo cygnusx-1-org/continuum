@@ -939,6 +939,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
             binding.recyclerViewPostFragment.setLayoutManager(mLinearLayoutManager);
+            applyPostFeedTopBuffer(binding.recyclerViewPostFragment);
         } else {
             mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(nColumns, StaggeredGridLayoutManager.VERTICAL);
             binding.recyclerViewPostFragment.setLayoutManager(mStaggeredGridLayoutManager);
@@ -1935,14 +1936,17 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         int nColumns = getNColumns(getResources());
         if (nColumns == 1) {
             mLinearLayoutManager = new LinearLayoutManagerBugFixed(mActivity);
-            if (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {
+            // Every decoration, not just the first: a one-column feed can carry the top buffer as
+            // well as the grid offset it is leaving behind.
+            while (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {
                 binding.recyclerViewPostFragment.removeItemDecorationAt(0);
             }
             binding.recyclerViewPostFragment.setLayoutManager(mLinearLayoutManager);
+            applyPostFeedTopBuffer(binding.recyclerViewPostFragment);
             mStaggeredGridLayoutManager = null;
         } else {
             mStaggeredGridLayoutManager = new StaggeredGridLayoutManager(nColumns, StaggeredGridLayoutManager.VERTICAL);
-            if (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {
+            while (binding.recyclerViewPostFragment.getItemDecorationCount() > 0) {
                 binding.recyclerViewPostFragment.removeItemDecorationAt(0);
             }
             binding.recyclerViewPostFragment.setLayoutManager(mStaggeredGridLayoutManager);

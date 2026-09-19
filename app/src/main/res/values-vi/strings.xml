@@ -645,11 +645,10 @@ Nếu không thì thay tên chúng trước khi Bật Material You."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Thư mục riêng cho mỗi subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Lưu NSFW Phương tiện ở vị trí khác"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Vị trí tải xuống"</string>
-    <string name="settings_swipe_action_title">"Hành động vuốt"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Phản hồi xúc giác"</string>
+    <string name="settings_swipe_actions_title">"Hành động vuốt"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Phản hồi xúc giác"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Tắt vuốt giữa các tab"</string>
-    <string name="settings_enable_swipe_action_title">"Bật hành động vuốt"</string>
-    <string name="settings_swipe_action_threshold">"Ngưỡng"</string>
+    <string name="settings_swipe_actions_threshold">"Ngưỡng"</string>
     <string name="settings_pull_to_refresh_title">"Kéo để làm mới"</string>
     <string name="settings_security_title">"Bảo mật"</string>
     <string name="settings_require_authentication_to_show_accounts">"Yêu cầu xác thực để hiển thị tài khoản"</string>
@@ -711,9 +710,7 @@ Tự động phát video bị tắt."</string>
     <string name="settings_hide_subreddit_description_title">"Ẩn mô tả subreddit"</string>
     <string name="settings_disable_image_preview_title">"Tắt xem trước hình ảnh trong chế độ tiết kiệm dữ liệu"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Chỉ tắt xem trước trong các bài đăng video và gif"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Vuốt trái"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Vuốt phải"</string>
-    <string name="settings_swipe_action_info_summary">"Không áp dụng cho nguồn dữ liệu bài đăng có nhiều hơn 1 cột hoặc chi tiết bài đăng."</string>
+    <string name="settings_swipe_actions_info_summary">"Không áp dụng cho nguồn dữ liệu bài đăng có nhiều hơn 1 cột hoặc chi tiết bài đăng."</string>
     <string name="settings_language_title">"Ngôn ngữ"</string>
     <string name="settings_enable_search_history_title">"Bật lịch sử tìm kiếm"</string>
     <string name="settings_post_history_title">"Lịch sử bài đăng"</string>
@@ -769,8 +766,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_restore_settings_title">"Khôi phục cài đặt"</string>
     <string name="settings_credits_love_animation_title">"Hoạt ảnh yêu"</string>
     <string name="settings_swipe_between_posts_title">"Vuốt giữa các bài đăng"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Khi được bật, các thao tác vuốt trong bình luận sẽ không khả dụng. Cả hai đều sử dụng thao tác vuốt ngang nên không thể sử dụng cùng lúc."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Không khả dụng khi bật Vuốt giữa các bài đăng. Hãy tắt tính năng đó đi để sử dụng thao tác vuốt bình luận."</string>
     <string name="settings_navigation_drawer_title">"Ngăn điều hướng"</string>
     <string name="settings_collapse_account_section_title">"Thu gọn khu vực tài khoản"</string>
     <string name="settings_collapse_reddit_section_title">"Thu gọn khu vực Reddit"</string>
@@ -885,7 +880,7 @@ Tự động phát video bị tắt."</string>
     <string name="settings_category_gesture_sensitivity_title">"Độ nhạy cử chỉ"</string>
     <string name="settings_tab_switching_sensitivity">"Độ nhạy chuyển đổi tab"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Độ nhạy của thao tác vuốt sang phải để quay lại"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Độ nhạy của hành động vuốt trong phần Bình luận"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Độ nhạy của hành động vuốt trong phần Bình luận"</string>
     <string name="default_sensitivity">"Mặc định"</string>
     <string name="low">"Thấp"</string>
     <string name="very_low">"Rất Thấp"</string>

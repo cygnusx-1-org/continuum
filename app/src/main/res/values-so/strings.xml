@@ -638,11 +638,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"Fayl gaar ah oo Subreddit kasta ah"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Keydso NSFW Warbaahinta meel kala duwan"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Soo dejiso Goobta"</string>
-    <string name="settings_swipe_action_title">"Dhaqdhaqaaq Dhaqaale"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Jawaab celinta Haptic"</string>
+    <string name="settings_swipe_actions_title">"Dhaqdhaqaaqyada Dhaqaale"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Jawaab celinta Haptic"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Jooji ku dhufashada tabsyada dhexdooda"</string>
-    <string name="settings_enable_swipe_action_title">"Daar Ficil Tuug"</string>
-    <string name="settings_swipe_action_threshold">"Xaddiga"</string>
+    <string name="settings_swipe_actions_threshold">"Xaddiga"</string>
     <string name="settings_pull_to_refresh_title">"Jiid si aad u Cusbooneysiiso"</string>
     <string name="settings_security_title">"Amniga"</string>
     <string name="settings_require_authentication_to_show_accounts">"waxay u baahan tahay xaqiijin si loo muujiyo xisaabaadka"</string>
@@ -701,9 +700,7 @@
     <string name="settings_hide_subreddit_description_title">"Qari Sharaxaada Subreddit"</string>
     <string name="settings_disable_image_preview_title">"Dami Horudhac Sawirka Habka Kaydinta Xogta"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Kaliya Jooji Aragtida Fiidiyowga iyo Qoraalada Gif"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Ku dhufo bidix"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Ku dhufo Midig"</string>
-    <string name="settings_swipe_action_info_summary">"Laguma dabaqi karo in lagu dhejiyo quudinta wax ka badan 1 tiir ama tafaasiisha boostada."</string>
+    <string name="settings_swipe_actions_info_summary">"Laguma dabaqi karo in lagu dhejiyo quudinta wax ka badan 1 tiir ama tafaasiisha boostada."</string>
     <string name="settings_language_title">"Luuqadda"</string>
     <string name="settings_enable_search_history_title">"Dari taariikhda raadinta"</string>
     <string name="settings_post_history_title">"Taariikhda Boostada"</string>
@@ -759,8 +756,6 @@
     <string name="settings_restore_settings_title">"Soo Celinta Dejinta"</string>
     <string name="settings_credits_love_animation_title">"Animation Jacaylka"</string>
     <string name="settings_swipe_between_posts_title">"Ku dhufo Boostada dhexdooda"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Marka la kartiyeeyo, ficilka ku dhufo faallooyinka lama heli karo. Labaduba waxay adeegsadaan xabag toosan, markaa isku mar lama isticmaali karo."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"lama heli karo inta u dhexaysa Boostada la furo Dami taas si aad u isticmaasho falcelinta faallaynta."</string>
     <string name="settings_navigation_drawer_title">"Drawer navigation"</string>
     <string name="settings_collapse_account_section_title">"Burburka Koontada"</string>
     <string name="settings_collapse_reddit_section_title">"Burbur Reddit Qaybta"</string>
@@ -875,7 +870,7 @@
     <string name="settings_category_gesture_sensitivity_title">"Dareenka tilmaanta ee"</string>
     <string name="settings_tab_switching_sensitivity">"Tab Dareemidda Dareenka"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Xasaasiyadda ku dhufashada midig ee dib u noqoshada"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Dhaqdhaqaaqa Xasaasiga ah ee Faallooyinka"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Dhaqdhaqaaqa Xasaasiga ah ee Faallooyinka"</string>
     <string name="default_sensitivity">"Defast"</string>
     <string name="low">"hooseeya"</string>
     <string name="very_low">"Aad u hooseeya"</string>

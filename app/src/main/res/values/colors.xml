@@ -11,4 +11,23 @@
     <color name="roundedBottomSheetPrimaryNavigationBarColor">#000000</color>
     <color name="primaryTextColor">#000000</color>
     <color name="dividerColor">#E0E0E0</color>
+
+    <!-- The band behind a swiped row, one colour per action so a level is recognisable without
+         reading its icon. Upvote and downvote are not here: they stay on the custom theme's own
+         vote colours. The two that hide a post are the destructive ones, and the only reds. -->
+    <color name="swipeActionSave">#EBCA3F</color>
+    <color name="swipeActionHide">#B71C1C</color>
+    <color name="swipeActionMarkAsReadAndHide">#7F0000</color>
+    <color name="swipeActionMarkAsRead">#00796B</color>
+    <color name="swipeActionMarkAsUnread">#8E24AA</color>
+    <color name="swipeActionToggleRead">#546E7A</color>
+    <color name="swipeActionShare">#F50057</color>
+    <color name="swipeActionProfile">#448AFF</color>
+    <color name="swipeActionComment">#43A047</color>
+    <color name="swipeActionOpenInNewWindow">#0288D1</color>
+    <color name="swipeActionCrosspost">#F4511E</color>
+    <color name="swipeActionShareAsImage">#C51162</color>
+    <color name="swipeActionShareAsImageWithThread">#880E4F</color>
+    <color name="swipeActionSetReminder">#5D4037</color>
+    <color name="swipeActionReply">#3ABF6D</color>
 </resources>

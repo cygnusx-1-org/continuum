@@ -37,6 +37,7 @@ import ml.docilealligator.infinityforreddit.bottomsheetfragments.AccountChooserB
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySettingsBinding;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.settings.APIKeysPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.AboutPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.DebugPreferenceFragment;
@@ -102,6 +103,10 @@ public class SettingsActivity extends BaseActivity implements
             resumeFragments.remove(resumeFragments.size() - 1);
             resumeFragmentTitles.remove(resumeFragmentTitles.size() - 1);
         }
+        // Moving between settings screens is one activity throughout, so no lifecycle callback
+        // writes the new depth down. Without this a kill after opening a sub-screen resumes at
+        // the settings root, and one after backing out of it resumes into the screen just left.
+        ResumeState.noteStateChanged(this);
     };
 
     @Inject
@@ -471,6 +476,7 @@ public class SettingsActivity extends BaseActivity implements
         fragment.setArguments(args);
         fragment.setTargetFragment(caller, 0);
         recordResumeNavigation(fragment, pref.getTitle());
+        ResumeState.noteStateChanged(this);
 
         getSupportFragmentManager().beginTransaction()
             .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right)

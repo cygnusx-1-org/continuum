@@ -651,11 +651,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"Отдельная папка для каждого сабреддита"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Сохранить NSFW носитель в другом месте"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Местоположение загрузки"</string>
-    <string name="settings_swipe_action_title">"Жест"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Тактильная отдача"</string>
+    <string name="settings_swipe_actions_title">"Жесты"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Тактильная отдача"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Отключить перелистывание вкладок"</string>
-    <string name="settings_enable_swipe_action_title">"Включить жест"</string>
-    <string name="settings_swipe_action_threshold">"Предел"</string>
+    <string name="settings_swipe_actions_threshold">"Предел"</string>
     <string name="settings_pull_to_refresh_title">"Потяни, чтобы обновить"</string>
     <string name="settings_security_title">"Безопасность"</string>
     <string name="settings_require_authentication_to_show_accounts">"Для отображения аккаунтов необходима аутентификация"</string>
@@ -717,9 +716,7 @@
     <string name="settings_hide_subreddit_description_title">"Скрыть описание сабреддитов"</string>
     <string name="settings_disable_image_preview_title">"Отключить предпросмотр изображения в режиме экономии трафика"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Отключить предпросмотр только в постах с видео и GIF"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Жест влево"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Жест вправо"</string>
-    <string name="settings_swipe_action_info_summary">"Не для ленты новостей &gt; 1 столбца или деталей поста."</string>
+    <string name="settings_swipe_actions_info_summary">"Не для ленты новостей &gt; 1 столбца или деталей поста."</string>
     <string name="settings_language_title">"Язык"</string>
     <string name="settings_enable_search_history_title">"Включить историю поиска"</string>
     <string name="settings_post_history_title">"История поста"</string>
@@ -775,8 +772,6 @@
     <string name="settings_restore_settings_title">"Восстановить настройки"</string>
     <string name="settings_credits_love_animation_title">"Анимация любви"</string>
     <string name="settings_swipe_between_posts_title">"Жест между постами"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Если этот параметр включен, действия смахивания в комментариях недоступны. Оба используют горизонтальные свайпы, поэтому их нельзя использовать одновременно."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Недоступно, пока включено пролистывание между сообщениями. Отключи это, чтобы использовать действия по пролистыванию комментариев."</string>
     <string name="settings_navigation_drawer_title">"Боковая панель"</string>
     <string name="settings_collapse_account_section_title">"Свернуть раздел аккаунта"</string>
     <string name="settings_collapse_reddit_section_title">"Свернуть раздел Reddit"</string>
@@ -891,7 +886,7 @@
     <string name="settings_category_gesture_sensitivity_title">"Чувствительность к жестам"</string>
     <string name="settings_tab_switching_sensitivity">"Чувствительность переключения вкладок"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Чувствительность жеста «Свайп вправо для возврата»"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Чувствительность к действию смахивания в комментариях"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Чувствительность к действию смахивания в комментариях"</string>
     <string name="default_sensitivity">"По умолчанию"</string>
     <string name="low">"Низкий"</string>
     <string name="very_low">"Очень низкий"</string>

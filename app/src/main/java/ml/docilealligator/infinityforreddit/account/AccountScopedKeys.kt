@@ -52,7 +52,7 @@ object AccountScopedKeys {
         "hide_image_count_in_gallery", "hide_post_flair", "hide_subreddit_and_user_prefix",
         "hide_the_number_of_votes", "hide_the_number_of_comments", "hide_text_post_content",
         "fixed_height_preview_in_card", "show_gallery_media_as_grid",
-        "post_compact_thumbnail_size",
+        "post_compact_thumbnail_size", "post_feed_top_buffer",
         "show_divider_in_compact_layout", "show_thumbnail_on_the_left_in_compact_layout",
         "long_press_to_hide_toolbar_in_compact_layout",
         "post_compact_layout_toolbar_hidden_by_default",
@@ -115,6 +115,12 @@ object AccountScopedKeys {
         "long_press_post_non_media_area", "long_press_post_media",
         "enable_swipe_action", "swipe_left_action", "swipe_right_action",
         "vibrate_when_action_triggered", "disable_swiping_between_tabs", "swipe_action_threshold",
+        "swipe_left_action_level_2", "swipe_left_action_level_3", "swipe_left_action_level_4",
+        "swipe_right_action_level_2", "swipe_right_action_level_3", "swipe_right_action_level_4",
+        "enable_comment_swipe_action", "comment_swipe_left_action",
+        "comment_swipe_left_action_level_2", "comment_swipe_left_action_level_3",
+        "comment_swipe_right_action",
+        "comment_swipe_right_action_level_2", "comment_swipe_right_action_level_3",
 
         // Sort type. The defaults a feed falls back to, alongside the sort_type file that
         // remembers each feed's own — one account's reading habits are not another's.

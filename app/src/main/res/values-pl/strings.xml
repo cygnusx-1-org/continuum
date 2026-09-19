@@ -645,11 +645,10 @@ W przeciwnym razie, zmień ich nazwę przed włączeniem Material You."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Oddzielny folder dla każdego subreddita"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Zapisz NSFW multimedia w innej lokalizacji"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Pobierz lokalizację"</string>
-    <string name="settings_swipe_action_title">"Akcja przesuwania"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Reakcja na dotyk"</string>
+    <string name="settings_swipe_actions_title">"Akcje przesuwania"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Reakcja na dotyk"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Wyłącz przesuwanie między kartami"</string>
-    <string name="settings_enable_swipe_action_title">"Włącz akcje przesuwania"</string>
-    <string name="settings_swipe_action_threshold">"Próg"</string>
+    <string name="settings_swipe_actions_threshold">"Próg"</string>
     <string name="settings_pull_to_refresh_title">"Pociągnij, żeby odświeżyć"</string>
     <string name="settings_security_title">"Bezpieczeństwo"</string>
     <string name="settings_require_authentication_to_show_accounts">"Wymagaj autoryzacji, aby pokazać konta"</string>
@@ -711,9 +710,7 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_hide_subreddit_description_title">"Ukryj opis subreddita"</string>
     <string name="settings_disable_image_preview_title">"Wyłącz podgląd obrazu w trybie oszczędzania danych"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Wyłącz podgląd tylko dla postów z filmami i gifami"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Przesuń w lewo"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Przesuń w prawo"</string>
-    <string name="settings_swipe_action_info_summary">"Nie dotyczy kanału postów z więcej niż jedną kolumną lub szczegółami posta."</string>
+    <string name="settings_swipe_actions_info_summary">"Nie dotyczy kanału postów z więcej niż jedną kolumną lub szczegółami posta."</string>
     <string name="settings_language_title">"Język"</string>
     <string name="settings_enable_search_history_title">"Włącz historię wyszukiwania"</string>
     <string name="settings_post_history_title">"Historia postów"</string>
@@ -769,8 +766,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_restore_settings_title">"Przywróć ustawienia"</string>
     <string name="settings_credits_love_animation_title">"Animacja miłości"</string>
     <string name="settings_swipe_between_posts_title">"Przesuwaj pomiędzy postami"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Po włączeniu operacje przesuwania w komentarzach są niedostępne. Oba wykorzystują przesunięcia poziome, więc nie można ich używać w tym samym czasie."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Niedostępne, gdy włączone jest przesuwanie między postami. Wyłącz tę opcję, aby móc korzystać z funkcji przesuwania komentarza."</string>
     <string name="settings_navigation_drawer_title">"Pasek nawigacji"</string>
     <string name="settings_collapse_account_section_title">"Schowaj sekcję Konto"</string>
     <string name="settings_collapse_reddit_section_title">"Zwiń sekcję Reddit"</string>
@@ -885,7 +880,7 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_category_gesture_sensitivity_title">"Czułość gestów"</string>
     <string name="settings_tab_switching_sensitivity">"Czułość przełączania zakładek"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Czułość przesunięcia w prawo, aby wrócić"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Czułość akcji przesuwania w komentarzach"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Czułość akcji przesuwania w komentarzach"</string>
     <string name="default_sensitivity">"Domyślnie"</string>
     <string name="low">"Niski"</string>
     <string name="very_low">"Bardzo niski"</string>

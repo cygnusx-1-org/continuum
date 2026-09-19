@@ -24,7 +24,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -41,11 +40,13 @@ import java.util.Locale;
 import java.util.Objects;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
+import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
+import ml.docilealligator.infinityforreddit.activities.SetReminderActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
@@ -85,6 +86,7 @@ import ml.docilealligator.infinityforreddit.user.UserTags;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.RecoveredFlair;
 import ml.docilealligator.infinityforreddit.utils.SavedCommentCacheNotifier;
+import ml.docilealligator.infinityforreddit.utils.ShareScreenshotUtilsKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
@@ -878,21 +880,98 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         resetSearchedPosition(false);
     }
 
-    public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int direction, int swipeLeftAction, int swipeRightAction) {
-        if (viewHolder instanceof CommentBaseViewHolder) {
-            if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.START) {
-                if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).downvoteButton.performClick();
+    /**
+     * A comment and the replies below it, deepest first and capped at ten, which is what the
+     * share-as-image-with-thread picture is made of. The list is in display order, so the thread
+     * is the run of rows after this one that are indented further than it.
+     */
+    private ArrayList<Comment> threadUnder(Comment comment, int position) {
+        List<Comment> currentList = getCurrentList();
+        ArrayList<Comment> thread = new ArrayList<>();
+        thread.add(comment);
+        for (int i = position + 1; i < currentList.size() && thread.size() < 10; i++) {
+            Comment child = currentList.get(i);
+            if (child == null) break;
+            if (child.getDepth() <= comment.getDepth()) break;
+            thread.add(child);
+        }
+        return thread;
+    }
+
+    /**
+     * Runs the action a swipe landed on. Which of the direction's three levels was reached is the
+     * fragment's decision; by the time it gets here it is one action on one comment.
+     */
+    public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int action) {
+        if (!(viewHolder instanceof CommentBaseViewHolder)) {
+            return;
+        }
+        CommentBaseViewHolder holder = (CommentBaseViewHolder) viewHolder;
+        int position = holder.getBindingAdapterPosition();
+        if (position < 0) {
+            return;
+        }
+        Comment comment = getItem(position);
+        if (comment == null) {
+            return;
+        }
+
+        switch (action) {
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_UPVOTE:
+                holder.upvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_DOWNVOTE:
+                holder.downvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SAVE:
+                holder.saveButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_REPLY:
+                if (holder.replyButton.getVisibility() == View.VISIBLE) {
+                    holder.replyButton.performClick();
                 }
-            } else {
-                if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((CommentBaseViewHolder) viewHolder).downvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SHARE: {
+                String permalink = comment.getPermalink();
+                if (permalink != null) {
+                    mActivity.shareLink(permalink);
                 }
+                break;
             }
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_PROFILE: {
+                Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
+                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, comment.getAuthor());
+                mActivity.startActivity(intent);
+                break;
+            }
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SHARE_AS_IMAGE:
+                ShareScreenshotUtilsKt.shareCommentAsScreenshot(mActivity, comment);
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SHARE_AS_IMAGE_WITH_THREAD:
+                if (mPost == null) {
+                    // No post to head the picture with, so the comment on its own is all of it.
+                    ShareScreenshotUtilsKt.shareCommentAsScreenshot(mActivity, comment);
+                } else {
+                    ShareScreenshotUtilsKt.sharePostWithCommentsAsScreenshot(mActivity, mPost,
+                            threadUnder(comment, position), mActivity.customThemeWrapper,
+                            mActivity.getResources().getConfiguration().locale,
+                            java.util.Objects.requireNonNull(mActivity.getDefaultSharedPreferences()
+                                    .getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
+                                            SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
+                            new SaveMemoryCenterInisdeDownsampleStrategy(
+                                    SharedPreferencesUtils.getInt(mActivity.getDefaultSharedPreferences(),
+                                            SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000")));
+                }
+                break;
+            case SharedPreferencesUtils.COMMENT_SWIPE_ACITON_SET_REMINDER: {
+                String linkId = comment.getLinkId();
+                if (linkId != null) {
+                    SetReminderActivity.Companion.startReminderActivity(mActivity, linkId, comment);
+                }
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -1240,17 +1319,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                     bundle.putBoolean(CommentMoreBottomSheetFragment.EXTRA_SHOW_REPLY_OPTION,
                             mPost != null && !mPost.isArchived() && !mPost.isLocked() && !comment.isLocked());
                     bundle.putParcelable(CommentMoreBottomSheetFragment.EXTRA_POST, mPost);
-                    int commentPos = getBindingAdapterPosition();
-                    List<Comment> currentList = getCurrentList();
-                    ArrayList<Comment> thread = new ArrayList<>();
-                    thread.add(comment);
-                    for (int i = commentPos + 1; i < currentList.size() && thread.size() < 10; i++) {
-                        Comment child = currentList.get(i);
-                        if (child == null) break;
-                        if (child.getDepth() <= comment.getDepth()) break;
-                        thread.add(child);
-                    }
-                    bundle.putParcelableArrayList(CommentMoreBottomSheetFragment.EXTRA_THREAD_COMMENTS, thread);
+                    bundle.putParcelableArrayList(CommentMoreBottomSheetFragment.EXTRA_THREAD_COMMENTS,
+                            threadUnder(comment, getBindingAdapterPosition()));
                     CommentMoreBottomSheetFragment commentMoreBottomSheetFragment = new CommentMoreBottomSheetFragment();
                     commentMoreBottomSheetFragment.setArguments(bundle);
                     commentMoreBottomSheetFragment.show(mFragment.getChildFragmentManager(), commentMoreBottomSheetFragment.getTag());

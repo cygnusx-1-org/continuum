@@ -51,7 +51,6 @@ import androidx.paging.ItemSnapshotList;
 import androidx.paging.PagingDataAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -65,6 +64,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.loadingindicator.LoadingIndicator;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.ImmutableList;
 import com.libRG.CustomTextView;
 import java.util.ArrayList;
@@ -86,8 +86,10 @@ import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStra
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
+import ml.docilealligator.infinityforreddit.activities.CommentActivity;
 import ml.docilealligator.infinityforreddit.activities.FilteredPostsActivity;
 import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
+import ml.docilealligator.infinityforreddit.activities.SubmitCrosspostActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImgurMediaActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewPostDetailActivity;
@@ -128,11 +130,13 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostVideoTypeAutopla
 import ml.docilealligator.infinityforreddit.databinding.ItemPostVideoTypeAutoplayLegacyControllerBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostWithPreviewBinding;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
+import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
 import ml.docilealligator.infinityforreddit.post.FetchShortClipVideo;
 import ml.docilealligator.infinityforreddit.post.FetchStreamableVideo;
+import ml.docilealligator.infinityforreddit.post.HidePost;
 import ml.docilealligator.infinityforreddit.post.MarkPostAsReadInterface;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.PostType;
@@ -146,6 +150,7 @@ import ml.docilealligator.infinityforreddit.user.UserMarkChanges;
 import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.ImageHostUtils;
+import ml.docilealligator.infinityforreddit.utils.NewWindowUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.ShortClipHostUtils;
@@ -3204,35 +3209,238 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return null;
     }
 
-    public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int direction, int swipeLeftAction, int swipeRightAction) {
-        if (viewHolder instanceof PostBaseViewHolder) {
-            if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.START) {
-                if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((PostBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((PostBaseViewHolder) viewHolder).downvoteButton.performClick();
+    /**
+     * Runs the action a swipe landed on. Which of the direction's three levels was reached is the
+     * fragment's decision; by the time it gets here it is one action on one row.
+     *
+     * Voting goes through the row's own buttons, which every swipeable layout has and which carry
+     * the optimistic vote styling with them. Nothing else can: a compact row's toolbar can be
+     * hidden and the card layouts differ, so clicking a button that may not be there would be a
+     * silent no-op on whichever layout lacks it.
+     */
+    public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int action) {
+        if (!(viewHolder instanceof PostViewHolder)) {
+            return;
+        }
+        PostViewHolder holder = (PostViewHolder) viewHolder;
+        int position = holder.getBindingAdapterPosition();
+        if (position < 0) {
+            return;
+        }
+        Post post = getItemByPosition(position);
+        if (post == null) {
+            return;
+        }
+
+        switch (action) {
+            case SharedPreferencesUtils.SWIPE_ACITON_UPVOTE:
+                holder.upvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE:
+                holder.downvoteButton.performClick();
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_SAVE:
+                holder.toggleSave(post, position);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_HIDE:
+                toggleHideWithUndo(holder.itemView, post, position);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_MARK_AS_READ_AND_HIDE:
+                holder.setReadStateFromSwipe(post, true);
+                hideReadPostWithUndo(holder.itemView, post, position);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_MARK_AS_READ:
+                holder.setReadStateFromSwipe(post, true);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_MARK_AS_UNREAD:
+                holder.setReadStateFromSwipe(post, false);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_TOGGLE_READ:
+                holder.setReadStateFromSwipe(post, !post.isRead());
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_SHARE:
+                shareLink(post);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_PROFILE: {
+                if (!post.isAuthorDeleted()) {
+                    Intent profileIntent = new Intent(mActivity, ViewUserDetailActivity.class);
+                    profileIntent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, post.getAuthor());
+                    mActivity.startActivity(profileIntent);
                 }
-            } else {
-                if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((PostBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((PostBaseViewHolder) viewHolder).downvoteButton.performClick();
-                }
+                break;
             }
-        } else if (viewHolder instanceof PostCompactBaseViewHolder) {
-            if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.START) {
-                if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((PostCompactBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((PostCompactBaseViewHolder) viewHolder).downvoteButton.performClick();
+            case SharedPreferencesUtils.SWIPE_ACITON_COMMENT:
+                writeComment(post);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_OPEN_IN_NEW_WINDOW:
+                openInNewWindow(holder, post, position);
+                break;
+            case SharedPreferencesUtils.SWIPE_ACITON_CROSSPOST:
+                if (requiresAccount()) {
+                    Intent crosspostIntent = new Intent(mActivity, SubmitCrosspostActivity.class);
+                    crosspostIntent.putExtra(SubmitCrosspostActivity.EXTRA_POST, post);
+                    mActivity.startActivity(crosspostIntent);
                 }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** Whether this action can go ahead, telling the user to log in when it cannot. */
+    private boolean requiresAccount() {
+        if (Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
+            Toast.makeText(mActivity, R.string.login_first, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    /** Reply to the post, the way the options sheet's Comment entry does. */
+    private void writeComment(Post post) {
+        if (!requiresAccount()) {
+            return;
+        }
+        if (post.isArchived()) {
+            Toast.makeText(mActivity, R.string.archived_post_comment_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (post.isLocked()) {
+            Toast.makeText(mActivity, R.string.locked_post_comment_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(mActivity, CommentActivity.class);
+        intent.putExtra(CommentActivity.EXTRA_PARENT_FULLNAME_KEY, post.getFullName());
+        intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_TITLE_KEY, post.getTitle());
+        intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_MARKDOWN_KEY, post.getSelfText());
+        intent.putExtra(CommentActivity.EXTRA_COMMENT_PARENT_BODY_KEY, post.getSelfTextPlain());
+        intent.putExtra(CommentActivity.EXTRA_SUBREDDIT_NAME_KEY, post.getSubredditName());
+        intent.putExtra(CommentActivity.EXTRA_IS_REPLYING_KEY, false);
+        intent.putExtra(CommentActivity.EXTRA_PARENT_DEPTH_KEY, 0);
+        mActivity.startActivity(intent);
+    }
+
+    /**
+     * Opens the post in its own window, as the options sheet does. The list position travels with
+     * it so the vote, save and hide the window reports back still find the row they came from;
+     * what is deliberately not sent is the fragment id, which would tie the window to this feed.
+     */
+    private void openInNewWindow(PostViewHolder holder, Post post, int position) {
+        holder.markPostRead(post, true);
+
+        Intent intent = new Intent(mActivity, ViewPostDetailActivity.class);
+        intent.putExtra(ViewPostDetailActivity.EXTRA_POST_DATA, post);
+        intent.putExtra(ViewPostDetailActivity.EXTRA_POST_LIST_POSITION, position);
+        mActivity.startActivity(NewWindowUtils.addNewWindowFlags(intent));
+    }
+
+    /**
+     * Hides or unhides, and offers to put it back. Hiding is the one destructive action on the
+     * list, and on a three-level swipe it is the easiest one to overshoot into.
+     */
+    private void toggleHideWithUndo(View anchor, Post post, int position) {
+        boolean hide = !post.isHidden();
+        setHidden(post, position, hide, () ->
+                Snackbar.make(anchor,
+                                hide ? R.string.post_hide_success : R.string.post_unhide_success,
+                                Snackbar.LENGTH_LONG)
+                        .setAction(R.string.undo, view -> setHidden(post, position, !hide, null))
+                        .show());
+    }
+
+    /**
+     * Hides a post that has just been marked read, and puts both halves back together.
+     *
+     * Unlike the plain Hide action this never unhides: "Mark as Read + Hide" is one direction, and
+     * swiping an already-hidden post would otherwise mark it read and unhide it in the same
+     * gesture -- two answers at once. An already-hidden post has only the read half left to do,
+     * which the caller has already done.
+     */
+    private void hideReadPostWithUndo(View anchor, Post post, int position) {
+        if (post.isHidden()) {
+            return;
+        }
+        // Names both halves, because Undo puts both back: a message that mentioned only the
+        // hiding would quietly un-mark the post read as well.
+        setHidden(post, position, true, () ->
+                Snackbar.make(anchor, R.string.post_marked_as_read_and_hidden, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.undo, view -> {
+                            // The stored half only. Unhiding posts an update event that repaints
+                            // the row, and by then this holder may show a different post.
+                            storeReadState(post, false);
+                            setHidden(post, position, false, null);
+                        })
+                        .show());
+    }
+
+    /**
+     * Anonymous accounts have no Reddit-side hidden list, so they keep their own; both branches
+     * have to announce the change or the row will not redraw.
+     */
+    private void setHidden(Post post, int position, boolean hidden, @Nullable Runnable onSuccess) {
+        if (Account.ANONYMOUS_ACCOUNT.equals(mAccountName)) {
+            if (hidden) {
+                ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                        post.getId(), ReadPostType.ANONYMOUS_HIDDEN_POSTS,
+                        ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
             } else {
-                if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((PostCompactBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((PostCompactBaseViewHolder) viewHolder).downvoteButton.performClick();
-                }
+                ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                        post.getId(), ReadPostType.ANONYMOUS_HIDDEN_POSTS);
             }
+            onHidden(post, position, hidden, onSuccess);
+            return;
+        }
+
+        HidePost.HidePostListener listener = new HidePost.HidePostListener() {
+            @Override
+            public void success() {
+                onHidden(post, position, hidden, onSuccess);
+            }
+
+            @Override
+            public void failed() {
+                post.setHidden(!hidden);
+                Toast.makeText(mActivity,
+                        hidden ? R.string.post_hide_failed : R.string.post_unhide_failed,
+                        Toast.LENGTH_SHORT).show();
+                EventBus.getDefault().post(new PostUpdateEventToPostList(post, position));
+                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+            }
+        };
+        if (hidden) {
+            HidePost.hidePost(mOauthRetrofit, mAccessToken, post.getFullName(), listener);
+        } else {
+            HidePost.unhidePost(mOauthRetrofit, mAccessToken, post.getFullName(), listener);
+        }
+    }
+
+    /**
+     * The stored half of a post's read state, with none of the row's colours. Assumes the caller
+     * has checked that this feed handles read posts at all.
+     */
+    private void storeReadState(Post post, boolean read) {
+        if (read) {
+            post.markAsRead();
+            ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                    post.getId(), ReadPostType.READ_POSTS,
+                    ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+        } else {
+            post.markAsUnread();
+            ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                    post.getId(), ReadPostType.READ_POSTS);
+        }
+    }
+
+    private void onHidden(Post post, int position, boolean hidden, @Nullable Runnable onSuccess) {
+        post.setHidden(hidden);
+        EventBus.getDefault().post(new PostUpdateEventToPostList(post, position));
+        EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+        if (onSuccess != null) {
+            onSuccess.run();
+        } else {
+            Toast.makeText(mActivity,
+                    hidden ? R.string.post_hide_success : R.string.post_unhide_success,
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -3915,78 +4123,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
                     Post post = getItem(position);
                     if (post != null) {
-                        if (post.isSaved()) {
-                            saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
-                            if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                                ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
-                                        post.getId(), ReadPostType.ANONYMOUS_SAVED_POSTS);
-                                post.setSaved(!post.isSaved());
-                                Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
-                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                            } else {
-                                SaveThing.unsaveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
-                                        new SaveThing.SaveThingListener() {
-                                            @Override
-                                            public void success() {
-                                                post.setSaved(false);
-                                                LocalSaved.onUnsaved(mRedditDataRoomDatabase, mExecutor,
-                                                        mAccountName, post.getFullName());
-                                                SavedPostCacheNotifier.onSavedPostChanged();
-                                                if (getBindingAdapterPosition() == position) {
-                                                    saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
-                                                }
-                                                Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
-                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                            }
-
-                                            @Override
-                                            public void failed() {
-                                                post.setSaved(true);
-                                                if (getBindingAdapterPosition() == position) {
-                                                    saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
-                                                }
-                                                Toast.makeText(mActivity, R.string.post_unsaved_failed, Toast.LENGTH_SHORT).show();
-                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                            }
-                                        });
-                            }
-                        } else {
-                            saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
-                            if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                                ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
-                                        post.getId(), ReadPostType.ANONYMOUS_SAVED_POSTS,
-                                        ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
-                                post.setSaved(!post.isSaved());
-                                Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
-                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                            } else {
-                                SaveThing.saveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
-                                        new SaveThing.SaveThingListener() {
-                                            @Override
-                                            public void success() {
-                                                post.setSaved(true);
-                                                LocalSaved.onSaved(mRedditDataRoomDatabase, mExecutor,
-                                                        mOauthRetrofit, mAccessToken, mAccountName, post.getFullName());
-                                                SavedPostCacheNotifier.onSavedPostChanged();
-                                                if (getBindingAdapterPosition() == position) {
-                                                    saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);
-                                                }
-                                                Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
-                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                            }
-
-                                            @Override
-                                            public void failed() {
-                                                post.setSaved(false);
-                                                if (getBindingAdapterPosition() == position) {
-                                                    saveButton.setIconResource(R.drawable.ic_bookmark_border_grey_24dp);
-                                                }
-                                                Toast.makeText(mActivity, R.string.post_saved_failed, Toast.LENGTH_SHORT).show();
-                                                EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
-                                            }
-                                        });
-                            }
-                        }
+                        toggleSave(post, position);
                     }
                 });
             }
@@ -4073,6 +4210,116 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         }
                     });
                 }
+            }
+        }
+
+        /**
+         * Save or unsave, from the button or from a swipe. A swipe can land on a layout whose
+         * toolbar has no save button at all, so the icon write is the part that is optional here,
+         * not the save.
+         */
+        void toggleSave(Post post, int position) {
+            if (post.isSaved()) {
+                setSaveIcon(false);
+                if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                    ReadPostModification.deleteReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                            post.getId(), ReadPostType.ANONYMOUS_SAVED_POSTS);
+                    post.setSaved(!post.isSaved());
+                    Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
+                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                } else {
+                    SaveThing.unsaveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
+                            new SaveThing.SaveThingListener() {
+                                @Override
+                                public void success() {
+                                    post.setSaved(false);
+                                    LocalSaved.onUnsaved(mRedditDataRoomDatabase, mExecutor,
+                                            mAccountName, post.getFullName());
+                                    SavedPostCacheNotifier.onSavedPostChanged();
+                                    if (getBindingAdapterPosition() == position) {
+                                        setSaveIcon(false);
+                                    }
+                                    Toast.makeText(mActivity, R.string.post_unsaved_success, Toast.LENGTH_SHORT).show();
+                                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                                }
+
+                                @Override
+                                public void failed() {
+                                    post.setSaved(true);
+                                    if (getBindingAdapterPosition() == position) {
+                                        setSaveIcon(true);
+                                    }
+                                    Toast.makeText(mActivity, R.string.post_unsaved_failed, Toast.LENGTH_SHORT).show();
+                                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                                }
+                            });
+                }
+            } else {
+                setSaveIcon(true);
+                if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                    ReadPostModification.insertReadPost(mRedditDataRoomDatabase, mExecutor, mActivity.accountName,
+                            post.getId(), ReadPostType.ANONYMOUS_SAVED_POSTS,
+                            ReadPostsUtils.GetReadPostsLimit(mActivity.accountName, mPostHistorySharedPreferences));
+                    post.setSaved(!post.isSaved());
+                    Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
+                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                } else {
+                    SaveThing.saveThing(mOauthRetrofit, mAccessToken, post.getFullName(),
+                            new SaveThing.SaveThingListener() {
+                                @Override
+                                public void success() {
+                                    post.setSaved(true);
+                                    LocalSaved.onSaved(mRedditDataRoomDatabase, mExecutor,
+                                            mOauthRetrofit, mAccessToken, mAccountName, post.getFullName());
+                                    SavedPostCacheNotifier.onSavedPostChanged();
+                                    if (getBindingAdapterPosition() == position) {
+                                        setSaveIcon(true);
+                                    }
+                                    Toast.makeText(mActivity, R.string.post_saved_success, Toast.LENGTH_SHORT).show();
+                                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                                }
+
+                                @Override
+                                public void failed() {
+                                    post.setSaved(false);
+                                    if (getBindingAdapterPosition() == position) {
+                                        setSaveIcon(false);
+                                    }
+                                    Toast.makeText(mActivity, R.string.post_saved_failed, Toast.LENGTH_SHORT).show();
+                                    EventBus.getDefault().post(new PostUpdateEventToPostDetailFragment(post));
+                                }
+                            });
+                }
+            }
+        }
+
+        private void setSaveIcon(boolean saved) {
+            if (saveButton != null) {
+                saveButton.setIconResource(saved
+                        ? R.drawable.ic_bookmark_grey_24dp : R.drawable.ic_bookmark_border_grey_24dp);
+            }
+        }
+
+        /**
+         * The read state the user asked for by swiping. Unlike {@link #markPostRead}, which is the
+         * feed deciding on its own, this does not consult "Mark Posts As Read" -- the swipe is the
+         * request. It also writes the row's colours back, which nothing else undoes.
+         */
+        void setReadStateFromSwipe(Post post, boolean read) {
+            if (!mHandleReadPost) {
+                Toast.makeText(mActivity, R.string.post_history_unavailable, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            storeReadState(post, read);
+            setItemViewBackgroundColor(read);
+            titleTextView.setTextColor(read ? mReadPostTitleColor : mPostTitleColor);
+            if (this instanceof PostTextTypeViewHolder) {
+                ((PostTextTypeViewHolder) this).contentTextView.setTextColor(
+                        read ? mReadPostContentColor : mPostContentColor);
+            }
+            if (!read) {
+                Toast.makeText(mActivity, R.string.post_marked_as_unread, Toast.LENGTH_SHORT).show();
             }
         }
 

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import ml.docilealligator.infinityforreddit.R;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -41,6 +42,8 @@ public class SettingsSearchRegistry {
     private static final String BREADCRUMB_SEPARATOR = " › ";
     /** Separates the parts of an item identity; cannot occur in a key or title. */
     private static final String IDENTITY_SEPARATOR = "\u0000";
+    /** {@code %s} / {@code %1$s} and friends -- a summary's runtime value, absent here. */
+    private static final Pattern FORMAT_SPECIFIER = Pattern.compile("%(\\d+\\$)?[sd]");
 
     /**
      * Preference fragment -> the XML resource it inflates. Must match each fragment's
@@ -67,6 +70,8 @@ public class SettingsSearchRegistry {
         m.put(VideoPreferenceFragment.class, R.xml.video_preferences);
         m.put(GesturesAndButtonsPreferenceFragment.class, R.xml.gestures_and_buttons_preferences);
         m.put(SwipeActionPreferenceFragment.class, R.xml.swipe_action_preferences);
+        m.put(PostSwipeActionPreferenceFragment.class, R.xml.post_swipe_action_preferences);
+        m.put(CommentSwipeActionPreferenceFragment.class, R.xml.comment_swipe_action_preferences);
         m.put(SecurityPreferenceFragment.class, R.xml.security_preferences);
         m.put(DataSavingModePreferenceFragment.class, R.xml.data_saving_mode_preferences);
         m.put(ProxyPreferenceFragment.class, R.xml.proxy_preferences);
@@ -315,8 +320,7 @@ public class SettingsSearchRegistry {
                     attrs.title = stringAttribute(c, parser, i);
                     break;
                 case "summary":
-                    String summary = stringAttribute(c, parser, i);
-                    attrs.summary = summary == null || summary.isEmpty() ? null : summary;
+                    attrs.summary = searchableSummary(stringAttribute(c, parser, i));
                     break;
                 case "key":
                     attrs.key = parser.getAttributeValue(i);
@@ -332,6 +336,22 @@ public class SettingsSearchRegistry {
             }
         }
         return attrs;
+    }
+
+    /**
+     * A summary as a search result should read it, or null when there is nothing to show.
+     *
+     * <p>A ListPreference whose summary carries a format specifier has its current value put
+     * there at runtime; the crawl has no value to substitute, so the specifier is dropped rather
+     * than indexed and shown to the user as "%1$s".
+     */
+    @Nullable
+    private static String searchableSummary(@Nullable String summary) {
+        if (summary == null) {
+            return null;
+        }
+        String withoutValue = FORMAT_SPECIFIER.matcher(summary).replaceAll("").trim();
+        return withoutValue.isEmpty() ? null : withoutValue;
     }
 
     /** Resolves an attribute that may be either a string resource or a literal. */

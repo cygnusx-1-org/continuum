@@ -1320,6 +1320,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     }
                 }
                 sectionsPagerAdapter.displaySortTypeInToolbar();
+                // The tab is half of what this screen records, and changing it moves no activity,
+                // so nothing would otherwise write it down until the next transition.
+                ResumeState.noteStateChanged(MainActivity.this);
             }
         });
 

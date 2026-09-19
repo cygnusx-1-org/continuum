@@ -645,11 +645,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"Διαφορετικός Φάκελος για κάθε Subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Αποθήκευση NSFW πολυμέσων σε διαφορετική τοποθεσία"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Τοποθεσία λήψης"</string>
-    <string name="settings_swipe_action_title">"Ενέργεια Συρσίματος"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Απτική Ανάδραση"</string>
+    <string name="settings_swipe_actions_title">"Ενέργειες Συρσίματος"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Απτική Ανάδραση"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Απενεργοποίηση Συρσίματος Μεταξύ Καρτελών"</string>
-    <string name="settings_enable_swipe_action_title">"Ενεργοποίηση Ενέργειας Συρσίματος"</string>
-    <string name="settings_swipe_action_threshold">"Όριο"</string>
+    <string name="settings_swipe_actions_threshold">"Όριο"</string>
     <string name="settings_pull_to_refresh_title">"Τράβα για Ανάρτηση"</string>
     <string name="settings_security_title">"Ασφάλεια"</string>
     <string name="settings_require_authentication_to_show_accounts">"Απαίτηση Αυθεντικοποίησης για Εμφάνιση Λογαριασμών"</string>
@@ -711,9 +710,7 @@
     <string name="settings_hide_subreddit_description_title">"Απόκρυψη Περιγραφής Subreddit"</string>
     <string name="settings_disable_image_preview_title">"Απενεργοποίηση Προεπισκόπησης Εικόνας στην Λειτουργία Εξοικονόμησης Δεδομένων"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Απόκρυψη Προεπισκόπησης μόνο στα Βίντεο και στις Αναρτήσεις Gif"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Σύρε Αριστερά"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Σύρε Δεξιά"</string>
-    <string name="settings_swipe_action_info_summary">"Δεν εφαρμόζεται σε ροή αναρτήσεων με πάνω από 1 στήλη ή με λεπτομέρειες ανάρτησης."</string>
+    <string name="settings_swipe_actions_info_summary">"Δεν εφαρμόζεται σε ροή αναρτήσεων με πάνω από 1 στήλη ή με λεπτομέρειες ανάρτησης."</string>
     <string name="settings_language_title">"Γλώσσα"</string>
     <string name="settings_enable_search_history_title">"Ενεργοποίηση Ιστορικού Αναζήτησης"</string>
     <string name="settings_post_history_title">"Ιστορικό Αναρτήσεων"</string>
@@ -769,8 +766,6 @@
     <string name="settings_restore_settings_title">"Ανάκτηση Ρυθμίσεων"</string>
     <string name="settings_credits_love_animation_title">"Εφέ Μου αρέσει"</string>
     <string name="settings_swipe_between_posts_title">"Σύρε Μεταξύ Αναρτήσεων"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Ενώ είναι ενεργοποιημένη, οι ενέργειες ολίσθησης στα σχόλια δεν είναι διαθέσιμες. Και τα δύο χρησιμοποιούν οριζόντια σύρματα, επομένως δεν μπορούν να χρησιμοποιηθούν ταυτόχρονα."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Το δεν είναι διαθέσιμο ενώ είναι ενεργοποιημένη η σάρωση μεταξύ αναρτήσεων. Απενεργοποίησε το για να χρησιμοποιήσεις τις ενέργειες ολίσθησης σχολίων."</string>
     <string name="settings_navigation_drawer_title">"Συρτάρι Πλοήγησης"</string>
     <string name="settings_collapse_account_section_title">"Σύμπτυξη Τμήματος Λογαριασμού"</string>
     <string name="settings_collapse_reddit_section_title">"Σύμπτυξη Τμήματος Reddit"</string>
@@ -885,7 +880,7 @@
     <string name="settings_category_gesture_sensitivity_title">"Ευαισθησία χειρονομίας"</string>
     <string name="settings_tab_switching_sensitivity">"Ευαισθησία εναλλαγής καρτελών"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Ευαισθησία σάρωσης προς τα δεξιά για επιστροφή"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Swipe Action Sensitivity στα σχόλια"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Swipe Action Sensitivity στα σχόλια"</string>
     <string name="default_sensitivity">"Προεπιλογή"</string>
     <string name="low">"Χαμηλό"</string>
     <string name="very_low">"Πολύ χαμηλό"</string>

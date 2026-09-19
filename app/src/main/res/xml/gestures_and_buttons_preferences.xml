@@ -36,6 +36,7 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="swipe_between_posts"
+        app:summary="@string/settings_swipe_between_posts_turns_off_swipe_actions_summary"
         app:title="@string/settings_swipe_between_posts_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
@@ -59,10 +60,10 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="5"
-        android:entries="@array/settings_swipe_action_sensitivity_in_comments"
-        app:entryValues="@array/settings_swipe_action_sensitivity_in_comments_values"
+        android:entries="@array/settings_swipe_actions_sensitivity_in_comments"
+        app:entryValues="@array/settings_swipe_actions_sensitivity_in_comments_values"
         app:key="swipe_action_sensitivity_in_comments"
-        app:title="@string/settings_swipe_action_sensitivity_in_comments"
+        app:title="@string/settings_swipe_actions_sensitivity_in_comments"
         app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
@@ -130,7 +131,7 @@
         app:useSimpleSummaryProvider="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:title="@string/settings_swipe_action_title"
+        app:title="@string/settings_swipe_actions_title"
         app:fragment="ml.docilealligator.infinityforreddit.settings.SwipeActionPreferenceFragment" />
 
 </PreferenceScreen>

@@ -652,11 +652,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"Окрема тека для кожного сабредиту"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Збережи NSFW медіа в іншому місці"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Місце завантаження"</string>
-    <string name="settings_swipe_action_title">"Дії ковзанням"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Тактильний відгук"</string>
+    <string name="settings_swipe_actions_title">"Дії ковзанням"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Тактильний відгук"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Вимкнути ковзання між вкладками"</string>
-    <string name="settings_enable_swipe_action_title">"Дозволити дії ковзанням"</string>
-    <string name="settings_swipe_action_threshold">"Поріг"</string>
+    <string name="settings_swipe_actions_threshold">"Поріг"</string>
     <string name="settings_pull_to_refresh_title">"Потягни для оновлення"</string>
     <string name="settings_security_title">"Безпека"</string>
     <string name="settings_require_authentication_to_show_accounts">"Щоб показати обліківки потрібна автентифікація"</string>
@@ -718,9 +717,7 @@
     <string name="settings_hide_subreddit_description_title">"Ховати опис сабредиту"</string>
     <string name="settings_disable_image_preview_title">"Вимкнути передперегляд зображень у режимі збереження даних"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Вимкнути передперегляд лише для відео і дописів Gif"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Ковзнути ліворуч"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Ковзнути праворуч"</string>
-    <string name="settings_swipe_action_info_summary">"Не застосовується до стрічок з дописами із більше ніж 1 стовпцем або відомостями про допис."</string>
+    <string name="settings_swipe_actions_info_summary">"Не застосовується до стрічок з дописами із більше ніж 1 стовпцем або відомостями про допис."</string>
     <string name="settings_language_title">"Мова"</string>
     <string name="settings_enable_search_history_title">"Дозволити історію пошуку"</string>
     <string name="settings_post_history_title">"Історія дописів"</string>
@@ -776,8 +773,6 @@
     <string name="settings_restore_settings_title">"Відновити налаштування"</string>
     <string name="settings_credits_love_animation_title">"Анімація любові"</string>
     <string name="settings_swipe_between_posts_title">"Ковзати між дописами"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Якщо ввімкнено, дії гортання в коментарях недоступні. Обидва використовують горизонтальне проведення, тому їх не можна використовувати одночасно."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Недоступно, якщо ввімкнено гортати між публікаціями. Вимкни це, щоб гортати коментарі."</string>
     <string name="settings_navigation_drawer_title">"Шторка переходів"</string>
     <string name="settings_collapse_account_section_title">"Згорнути розділ Обліківка"</string>
     <string name="settings_collapse_reddit_section_title">"Згорнути розділ Reddit"</string>
@@ -892,7 +887,7 @@
     <string name="settings_category_gesture_sensitivity_title">"Чутливість до жестів"</string>
     <string name="settings_tab_switching_sensitivity">"Чутливість перемикання вкладок"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Чутливість проведення праворуч для повернення"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Чутливість до дії пальцем у коментарях"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Чутливість до дії пальцем у коментарях"</string>
     <string name="default_sensitivity">"Типово"</string>
     <string name="low">"Низький"</string>
     <string name="very_low">"Дуже низький"</string>

@@ -652,11 +652,10 @@ Pokud ano, přejmenuj je, než povolíš Material You."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Různé složky pro každý subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Ušetři NSFW médií na jiném místě"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Umístění stahování"</string>
-    <string name="settings_swipe_action_title">"Akce posouvání"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Haptická zpětná vazba"</string>
+    <string name="settings_swipe_actions_title">"Akce posouvání"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Haptická zpětná vazba"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Zakázat posouvání mezi kartami"</string>
-    <string name="settings_enable_swipe_action_title">"Povolit akci posouvání"</string>
-    <string name="settings_swipe_action_threshold">"Práh"</string>
+    <string name="settings_swipe_actions_threshold">"Práh"</string>
     <string name="settings_pull_to_refresh_title">"Potáhnout pro obnovení"</string>
     <string name="settings_security_title">"Bezpečnost"</string>
     <string name="settings_require_authentication_to_show_accounts">"Vyžadovat ověření pro zobrazení účtů"</string>
@@ -718,9 +717,7 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_hide_subreddit_description_title">"Skrýt popis subredditu"</string>
     <string name="settings_disable_image_preview_title">"Skrýt náhled obrázků v režimu úspory dat"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Zakázat pouze náhled ve video a GIF příspěvcích"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Posouvání doleva"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Posouvání doprava"</string>
-    <string name="settings_swipe_action_info_summary">"Nepoužitelné na seznam příspěvků s více než 1 sloupcem nebo detailem příspěvku."</string>
+    <string name="settings_swipe_actions_info_summary">"Nepoužitelné na seznam příspěvků s více než 1 sloupcem nebo detailem příspěvku."</string>
     <string name="settings_language_title">"Jazyk"</string>
     <string name="settings_enable_search_history_title">"Povolit historii vyhledávání"</string>
     <string name="settings_post_history_title">"Historie příspěvků"</string>
@@ -776,8 +773,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_restore_settings_title">"Obnovit nastavení"</string>
     <string name="settings_credits_love_animation_title">"Animace lásky"</string>
     <string name="settings_swipe_between_posts_title">"Posouvání mezi příspěvky"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Pokud je tato možnost povolena, akce přejetí prstem v komentářích nejsou dostupné. Oba používají horizontální přejetí, takže je nelze používat současně."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Není k dispozici, pokud je povoleno Přejíždění mezi příspěvky. Chceš-li používat akce přejetí komentářem, vypni to."</string>
     <string name="settings_navigation_drawer_title">"Navigační panel"</string>
     <string name="settings_collapse_account_section_title">"Sbalit sekci účtů"</string>
     <string name="settings_collapse_reddit_section_title">"Sbalit sekci Redditu"</string>
@@ -892,7 +887,7 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_category_gesture_sensitivity_title">"Citlivost na gesta"</string>
     <string name="settings_tab_switching_sensitivity">"Citlivost přepínání záložek"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Citlivost gesta přejetí doprava zpět"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Citlivost akce přejetím v komentářích"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Citlivost akce přejetím v komentářích"</string>
     <string name="default_sensitivity">"Výchozí"</string>
     <string name="low">"Nízká"</string>
     <string name="very_low">"Velmi nízká"</string>

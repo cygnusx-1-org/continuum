@@ -43,7 +43,6 @@ import androidx.media3.ui.PlayerView;
 import androidx.media3.ui.TimeBar;
 import androidx.media3.ui.TrackSelectionDialogBuilder;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.RequestBuilder;
@@ -1531,24 +1530,6 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {
         mImageAndGifEntry.setAutoplayCommentGif(autoplayCommentGif);
         mEmotePlugin.setAutoplayCommentGif(autoplayCommentGif);
-    }
-
-    public void onItemSwipe(RecyclerView.ViewHolder viewHolder, int direction, int swipeLeftAction, int swipeRightAction) {
-        if (viewHolder instanceof PostDetailBaseViewHolder) {
-            if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.START) {
-                if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((PostDetailBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((PostDetailBaseViewHolder) viewHolder).downvoteButton.performClick();
-                }
-            } else {
-                if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-                    ((PostDetailBaseViewHolder) viewHolder).upvoteButton.performClick();
-                } else if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-                    ((PostDetailBaseViewHolder) viewHolder).downvoteButton.performClick();
-                }
-            }
-        }
     }
 
     public void addOneComment() {

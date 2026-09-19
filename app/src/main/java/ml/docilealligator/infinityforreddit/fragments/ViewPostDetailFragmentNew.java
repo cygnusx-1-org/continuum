@@ -13,11 +13,8 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,7 +27,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.MenuItemImpl;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.MenuItemCompat;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -87,11 +83,16 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.AdjustableTouchSlopItemTouchHelper;
 import ml.docilealligator.infinityforreddit.customviews.CommentsItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.SwipeActionPainter;
 import ml.docilealligator.infinityforreddit.databinding.FragmentViewPostDetailBinding;
 import ml.docilealligator.infinityforreddit.events.ChangeAutoplayCommentGifEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeEnableCommentSwipeActionSwitchEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNSFWBlurEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.ChangeSpoilerBlurEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeSwipeActionLevelsEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeSwipeActionThresholdEvent;
+import ml.docilealligator.infinityforreddit.events.ChangeVibrateWhenActionTriggeredEvent;
 import ml.docilealligator.infinityforreddit.events.FlairSelectedEvent;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostDetailFragment;
 import ml.docilealligator.infinityforreddit.events.PostUpdateEventToPostList;
@@ -111,6 +112,8 @@ import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.SwipeActionLevels;
+import ml.docilealligator.infinityforreddit.utils.SwipeActionPreferences;
 import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
@@ -247,15 +250,14 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private CommentsStatusRecyclerViewAdapter mCommentsStatusAdapter;
     private CommentsRecyclerViewAdapterNew mCommentsAdapter;
     private CommentsFooterRecyclerViewAdapter mCommentsFooterAdapter;
-    private ColorDrawable backgroundSwipeRight;
-    private ColorDrawable backgroundSwipeLeft;
     @SuppressWarnings("NullAway.Init")
-    private Drawable drawableSwipeRight;
+    private SwipeActionPainter swipeActionPainter;
+    /**
+     * A field, not a local: the enable switch has to be able to attach and detach it, which is
+     * exactly what it could not do while it went out of scope with onCreateView.
+     */
     @SuppressWarnings("NullAway.Init")
-    private Drawable drawableSwipeLeft;
-    private int swipeLeftAction;
-    private int swipeRightAction;
-    private float swipeActionThreshold;
+    private AdjustableTouchSlopItemTouchHelper touchHelper;
     private boolean shouldSwipeBack;
     private int commentScrollPosition = -1;
     // Resume where I left off. resumeScrollPending is spent by the first tree that can honour it.
@@ -475,15 +477,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             }
         });
 
-        boolean enableSwipeAction = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false);
-        boolean vibrateWhenActionTriggered = mSharedPreferences.getBoolean(SharedPreferencesUtils.VIBRATE_WHEN_ACTION_TRIGGERED, true);
-        swipeActionThreshold = SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.SWIPE_ACTION_THRESHOLD, "0.3");
-        swipeRightAction = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1");
-        swipeLeftAction = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0");
-        initializeSwipeActionDrawable();
-        AdjustableTouchSlopItemTouchHelper touchHelper = new AdjustableTouchSlopItemTouchHelper(new AdjustableTouchSlopItemTouchHelper.Callback() {
-            boolean exceedThreshold = false;
-
+        boolean enableSwipeAction = SwipeActionPreferences.commentSwipeEnabled(mSharedPreferences);
+        swipeActionPainter = new SwipeActionPainter(mActivity, mCustomThemeWrapper, true);
+        swipeActionPainter.setVibrateWhenActionTriggered(
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.VIBRATE_WHEN_ACTION_TRIGGERED, true));
+        configureSwipeActionLevels();
+        touchHelper = new AdjustableTouchSlopItemTouchHelper(new AdjustableTouchSlopItemTouchHelper.Callback() {
             @Override
             public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
                 if (!(viewHolder instanceof CommentsRecyclerViewAdapterNew.CommentBaseViewHolder)) {
@@ -518,57 +517,19 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             @Override
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 View itemView = viewHolder.itemView;
-                int horizontalOffset = (int) Utils.convertDpToPixel(16, mActivity);
-                if (dX > 0) {
-                    if (dX > (itemView.getRight() - itemView.getLeft()) * swipeActionThreshold) {
-                        dX = (itemView.getRight() - itemView.getLeft()) * swipeActionThreshold;
-                        if (!exceedThreshold && isCurrentlyActive) {
-                            exceedThreshold = true;
-                            if (vibrateWhenActionTriggered) {
-                                itemView.setHapticFeedbackEnabled(true);
-                                itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                            }
-                        }
-                        backgroundSwipeRight.setBounds(0, itemView.getTop(), itemView.getRight(), itemView.getBottom());
-                    } else {
-                        exceedThreshold = false;
-                        backgroundSwipeRight.setBounds(0, 0, 0, 0);
-                    }
-
-                    drawableSwipeRight.setBounds(itemView.getLeft() + ((int) dX) - horizontalOffset - drawableSwipeRight.getIntrinsicWidth(),
-                            (itemView.getBottom() + itemView.getTop() - drawableSwipeRight.getIntrinsicHeight()) / 2,
-                            itemView.getLeft() + ((int) dX) - horizontalOffset,
-                            (itemView.getBottom() + itemView.getTop() + drawableSwipeRight.getIntrinsicHeight()) / 2);
-                    backgroundSwipeRight.draw(c);
-                    drawableSwipeRight.draw(c);
-                } else if (dX < 0) {
-                    if (-dX > (itemView.getRight() - itemView.getLeft()) * swipeActionThreshold) {
-                        dX = -(itemView.getRight() - itemView.getLeft()) * swipeActionThreshold;
-                        if (!exceedThreshold && isCurrentlyActive) {
-                            exceedThreshold = true;
-                            if (vibrateWhenActionTriggered) {
-                                itemView.setHapticFeedbackEnabled(true);
-                                itemView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-                            }
-                        }
-                        backgroundSwipeLeft.setBounds(0, itemView.getTop(), itemView.getRight(), itemView.getBottom());
-                    } else {
-                        exceedThreshold = false;
-                        backgroundSwipeLeft.setBounds(0, 0, 0, 0);
-                    }
-                    drawableSwipeLeft.setBounds(itemView.getRight() + ((int) dX) + horizontalOffset,
-                            (itemView.getBottom() + itemView.getTop() - drawableSwipeLeft.getIntrinsicHeight()) / 2,
-                            itemView.getRight() + ((int) dX) + horizontalOffset + drawableSwipeLeft.getIntrinsicWidth(),
-                            (itemView.getBottom() + itemView.getTop() + drawableSwipeLeft.getIntrinsicHeight()) / 2);
-                    backgroundSwipeLeft.draw(c);
-                    drawableSwipeLeft.draw(c);
+                if (isCurrentlyActive) {
+                    swipeActionPainter.onDrag(itemView, dX);
                 }
 
-                if (!isCurrentlyActive && exceedThreshold && mCommentsAdapter != null) {
-                    mCommentsAdapter.onItemSwipe(viewHolder, dX > 0 ? ItemTouchHelper.END : ItemTouchHelper.START, swipeLeftAction, swipeRightAction);
-                    exceedThreshold = false;
+                float travel = swipeActionPainter.draw(c, itemView, dX);
+
+                if (!isCurrentlyActive) {
+                    int action = swipeActionPainter.consumeAction();
+                    if (action != SwipeActionLevels.NONE && mCommentsAdapter != null) {
+                        mCommentsAdapter.onItemSwipe(viewHolder, action);
+                    }
                 }
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                super.onChildDraw(c, recyclerView, viewHolder, travel, dY, actionState, isCurrentlyActive);
             }
 
             @Override
@@ -1366,22 +1327,45 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         }
     }
 
-    private void initializeSwipeActionDrawable() {
-        if (swipeRightAction == SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE) {
-            backgroundSwipeRight = new ColorDrawable(mCustomThemeWrapper.getDownvoted());
-            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
-        } else {
-            backgroundSwipeRight = new ColorDrawable(mCustomThemeWrapper.getUpvoted());
-            drawableSwipeRight = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
-        }
+    /** Reads both directions' ladders, and the distance each of their bands arms at. */
+    private void configureSwipeActionLevels() {
+        configureSwipeActionLevels(SwipeActionPreferences.threshold(mSharedPreferences));
+    }
 
-        if (swipeLeftAction == SharedPreferencesUtils.SWIPE_ACITON_UPVOTE) {
-            backgroundSwipeLeft = new ColorDrawable(mCustomThemeWrapper.getUpvoted());
-            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_upward_day_night_24dp, null));
-        } else {
-            backgroundSwipeLeft = new ColorDrawable(mCustomThemeWrapper.getDownvoted());
-            drawableSwipeLeft = Objects.requireNonNull(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_arrow_downward_day_night_24dp, null));
-        }
+    /**
+     * @param threshold taken from the event rather than read back from settings: a preference's
+     *                  change listener runs before its new value is stored, so re-reading it
+     *                  there would reconfigure the ladder with the value the user just replaced.
+     */
+    private void configureSwipeActionLevels(float threshold) {
+        swipeActionPainter.getLevels().configure(
+                SwipeActionPreferences.commentLeftLevels(mSharedPreferences),
+                SwipeActionPreferences.commentRightLevels(mSharedPreferences),
+                threshold);
+    }
+
+    @Subscribe
+    public void onChangeSwipeActionLevelsEvent(ChangeSwipeActionLevelsEvent changeSwipeActionLevelsEvent) {
+        configureSwipeActionLevels();
+    }
+
+    @Subscribe
+    public void onChangeSwipeActionThresholdEvent(ChangeSwipeActionThresholdEvent changeSwipeActionThresholdEvent) {
+        configureSwipeActionLevels(changeSwipeActionThresholdEvent.swipeActionThreshold);
+    }
+
+    @Subscribe
+    public void onChangeVibrateWhenActionTriggeredEvent(ChangeVibrateWhenActionTriggeredEvent event) {
+        swipeActionPainter.setVibrateWhenActionTriggered(event.vibrateWhenActionTriggered);
+    }
+
+    @Subscribe
+    public void onChangeEnableCommentSwipeActionSwitchEvent(ChangeEnableCommentSwipeActionSwitchEvent event) {
+        RecyclerView recyclerView = mCommentsRecyclerView == null
+                ? binding.postDetailRecyclerViewViewPostDetailFragment : mCommentsRecyclerView;
+        touchHelper.attachToRecyclerView(event.enableSwipeAction ? recyclerView : null,
+                SharedPreferencesUtils.getFloat(mSharedPreferences,
+                        SharedPreferencesUtils.SWIPE_ACTION_SENSITIVITY_IN_COMMENTS, "5"));
     }
 
     public void addComment(Comment comment) {

@@ -643,11 +643,10 @@ Appuyez pour réessayer."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Dossier séparé pour chaque Subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Enregistrer NSFW Média dans un emplacement différent"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Emplacement de téléchargement"</string>
-    <string name="settings_swipe_action_title">"Action de swipe"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Retour haptique"</string>
+    <string name="settings_swipe_actions_title">"Actions de swipe"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Retour haptique"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Désactiver le swiping entre les onglets"</string>
-    <string name="settings_enable_swipe_action_title">"Activer l'action de swipe"</string>
-    <string name="settings_swipe_action_threshold">"Seuil"</string>
+    <string name="settings_swipe_actions_threshold">"Seuil"</string>
     <string name="settings_pull_to_refresh_title">"Tirer pour rafraîchir"</string>
     <string name="settings_security_title">"Sécurité"</string>
     <string name="settings_require_authentication_to_show_accounts">"Nécessite de s'authentifier pour afficher les comptes"</string>
@@ -706,9 +705,7 @@ Appuyez pour réessayer."</string>
     <string name="settings_hide_subreddit_description_title">"Cacher la description des subreddits"</string>
     <string name="settings_disable_image_preview_title">"Désactiver l'aperçu de l'image en mode économie de données"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Désactiver uniquement l'aperçu dans les publications vidéo et gif"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Swipe à gauche"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Swipe à droite"</string>
-    <string name="settings_swipe_action_info_summary">"Ne s'applique pas au flux de publication avec plus d'une colonne ou un détail de publication."</string>
+    <string name="settings_swipe_actions_info_summary">"Ne s'applique pas au flux de publication avec plus d'une colonne ou un détail de publication."</string>
     <string name="settings_language_title">"Langage"</string>
     <string name="settings_enable_search_history_title">"Activer l'historique de recherche"</string>
     <string name="settings_post_history_title">"Historique des posts"</string>
@@ -764,8 +761,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_restore_settings_title">"Restaurer les Paramètres"</string>
     <string name="settings_credits_love_animation_title">"Animation d'amour"</string>
     <string name="settings_swipe_between_posts_title">"Swiper entre les publications"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Lorsqu'elles sont activées, les actions de balayage dans les commentaires ne sont pas disponibles. Les deux utilisent des balayages horizontaux, ils ne peuvent donc pas être utilisés en même temps."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Non disponible lorsque le balayage entre les publications est activé. Désactivez cette option pour utiliser les actions de balayage des commentaires."</string>
     <string name="settings_navigation_drawer_title">"Onglet de Navigation"</string>
     <string name="settings_collapse_account_section_title">"Réduire la section du compte"</string>
     <string name="settings_collapse_reddit_section_title">"Réduire Section Reddit"</string>
@@ -880,7 +875,7 @@ Appuyez pour réessayer."</string>
     <string name="settings_category_gesture_sensitivity_title">"Sensibilité gestuelle"</string>
     <string name="settings_tab_switching_sensitivity">"Sensibilité de commutation des onglets"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Sensibilité du balayage vers la droite pour revenir en arrière"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Sensibilité de l'action de balayage dans les commentaires"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Sensibilité de l'action de balayage dans les commentaires"</string>
     <string name="default_sensitivity">"Par défaut"</string>
     <string name="low">"Faible"</string>
     <string name="very_low">"Très faible"</string>

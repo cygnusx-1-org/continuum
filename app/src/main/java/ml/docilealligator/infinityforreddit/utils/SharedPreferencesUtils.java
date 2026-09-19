@@ -209,8 +209,57 @@ public class SharedPreferencesUtils {
     public static final String DISABLE_IMAGE_PREVIEW = "disable_image_preview";
     public static final String SWIPE_LEFT_ACTION = "swipe_left_action";
     public static final String SWIPE_RIGHT_ACTION = "swipe_right_action";
+    // One swipe passes through up to three bands, each bound to its own action. Levels 2 and 3 are
+    // empty until the user fills them in, which is what makes the ladder invisible by default.
+    public static final String SWIPE_LEFT_ACTION_LEVEL_2 = "swipe_left_action_level_2";
+    public static final String SWIPE_LEFT_ACTION_LEVEL_3 = "swipe_left_action_level_3";
+    public static final String SWIPE_LEFT_ACTION_LEVEL_4 = "swipe_left_action_level_4";
+    public static final String SWIPE_RIGHT_ACTION_LEVEL_2 = "swipe_right_action_level_2";
+    public static final String SWIPE_RIGHT_ACTION_LEVEL_3 = "swipe_right_action_level_3";
+    public static final String SWIPE_RIGHT_ACTION_LEVEL_4 = "swipe_right_action_level_4";
+    // Comments used to share the post keys above, ENABLE_SWIPE_ACTION included. They have their
+    // own now, because their action list is a different one: value 3 is Hide on a post and Reply
+    // on a comment, and the two surfaces are switched on separately.
+    public static final String ENABLE_COMMENT_SWIPE_ACTION = "enable_comment_swipe_action";
+    public static final String COMMENT_SWIPE_LEFT_ACTION = "comment_swipe_left_action";
+    public static final String COMMENT_SWIPE_LEFT_ACTION_LEVEL_2 = "comment_swipe_left_action_level_2";
+    public static final String COMMENT_SWIPE_LEFT_ACTION_LEVEL_3 = "comment_swipe_left_action_level_3";
+    public static final String COMMENT_SWIPE_RIGHT_ACTION = "comment_swipe_right_action";
+    public static final String COMMENT_SWIPE_RIGHT_ACTION_LEVEL_2 = "comment_swipe_right_action_level_2";
+    public static final String COMMENT_SWIPE_RIGHT_ACTION_LEVEL_3 = "comment_swipe_right_action_level_3";
+    // Post swipe actions. The stored value is what is in settings_post_swipe_actions_values, so the
+    // first two have to keep the numbers the old two-action list gave them. The misspelling is the
+    // one this block has always had; renaming it is its own change, not a rider on this one.
+    public static final int SWIPE_ACITON_NONE = -1;
     public static final int SWIPE_ACITON_UPVOTE = 0;
     public static final int SWIPE_ACITON_DOWNVOTE = 1;
+    public static final int SWIPE_ACITON_SAVE = 2;
+    public static final int SWIPE_ACITON_HIDE = 3;
+    public static final int SWIPE_ACITON_MARK_AS_READ = 4;
+    public static final int SWIPE_ACITON_MARK_AS_UNREAD = 5;
+    public static final int SWIPE_ACITON_TOGGLE_READ = 6;
+    public static final int SWIPE_ACITON_SHARE = 7;
+    public static final int SWIPE_ACITON_PROFILE = 8;
+    /** Write a reply to the post, as the options sheet's "Comment" does. */
+    public static final int SWIPE_ACITON_COMMENT = 9;
+    /** Both halves of finishing with a post in one swipe. Numbered after the rest, not beside
+     *  Hide, because the stored value is what the old lists already handed out. */
+    public static final int SWIPE_ACITON_MARK_AS_READ_AND_HIDE = 10;
+    public static final int SWIPE_ACITON_OPEN_IN_NEW_WINDOW = 11;
+    public static final int SWIPE_ACITON_CROSSPOST = 12;
+    // Comment swipe actions: a separate namespace from the post ones above, never mixed with them.
+    public static final int COMMENT_SWIPE_ACITON_NONE = -1;
+    public static final int COMMENT_SWIPE_ACITON_UPVOTE = 0;
+    public static final int COMMENT_SWIPE_ACITON_DOWNVOTE = 1;
+    public static final int COMMENT_SWIPE_ACITON_SAVE = 2;
+    public static final int COMMENT_SWIPE_ACITON_REPLY = 3;
+    public static final int COMMENT_SWIPE_ACITON_SHARE = 4;
+    public static final int COMMENT_SWIPE_ACITON_PROFILE = 5;
+    public static final int COMMENT_SWIPE_ACITON_SHARE_AS_IMAGE = 6;
+    public static final int COMMENT_SWIPE_ACITON_SHARE_AS_IMAGE_WITH_THREAD = 7;
+    public static final int COMMENT_SWIPE_ACITON_SET_REMINDER = 8;
+    /** Dp of empty space above the first post, so the feed starts within reach of a thumb. */
+    public static final String POST_FEED_TOP_BUFFER = "post_feed_top_buffer";
     public static final String LANGUAGE = "language";
     public static final String LANGUAGE_DEFAULT_VALUE = "auto";
     public static final String ENABLE_SEARCH_HISTORY = "enable_search_history";

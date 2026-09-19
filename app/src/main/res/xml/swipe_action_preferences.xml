@@ -3,42 +3,29 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         app:icon="@drawable/ic_info_preference_day_night_24dp"
-        app:summary="@string/settings_swipe_action_info_summary"
+        app:summary="@string/settings_swipe_actions_info_summary"
         app:enabled="false" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
-        app:key="enable_swipe_action"
-        app:title="@string/settings_enable_swipe_action_title" />
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:fragment="ml.docilealligator.infinityforreddit.settings.PostSwipeActionPreferenceFragment"
+        app:title="@string/settings_post_swipe_actions_title" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
-        app:defaultValue="0"
-        app:entries="@array/settings_swipe_actions"
-        app:entryValues="@array/settings_swipe_actions_values"
-        app:key="swipe_left_action"
-        app:title="@string/settings_swipe_action_swipe_left_title"
-        app:useSimpleSummaryProvider="true" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
-        app:defaultValue="1"
-        app:entries="@array/settings_swipe_actions"
-        app:entryValues="@array/settings_swipe_actions_values"
-        app:key="swipe_right_action"
-        app:title="@string/settings_swipe_action_swipe_right_title"
-        app:useSimpleSummaryProvider="true" />
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:fragment="ml.docilealligator.infinityforreddit.settings.CommentSwipeActionPreferenceFragment"
+        app:title="@string/settings_comment_swipe_actions_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0.3"
-        app:entries="@array/settings_swipe_action_threshold"
-        app:entryValues="@array/settings_swipe_action_threshold"
+        app:entries="@array/settings_swipe_actions_threshold"
+        app:entryValues="@array/settings_swipe_actions_threshold_values"
         app:key="swipe_action_threshold"
-        app:title="@string/settings_swipe_action_threshold"
-        app:useSimpleSummaryProvider="true" />
+        app:summary="@string/settings_swipe_actions_threshold_summary"
+        app:title="@string/settings_swipe_actions_threshold" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="vibrate_when_action_triggered"
-        app:title="@string/settings_swipe_action_haptic_feedback_title" />
+        app:title="@string/settings_swipe_actions_haptic_feedback_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"

@@ -653,11 +653,10 @@ Renomeie-os antes de ativar o Material You se você tiver."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Pasta separada para cada subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Salvar NSFW mídia em local diferente"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Local de download"</string>
-    <string name="settings_swipe_action_title">"Ação de deslizar"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Resposta tátil"</string>
+    <string name="settings_swipe_actions_title">"Ações de deslizar"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Resposta tátil"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Desativar o deslizar entre abas"</string>
-    <string name="settings_enable_swipe_action_title">"Ativar ação de deslizar"</string>
-    <string name="settings_swipe_action_threshold">"Limite"</string>
+    <string name="settings_swipe_actions_threshold">"Limite"</string>
     <string name="settings_pull_to_refresh_title">"Puxar para atualizar"</string>
     <string name="settings_security_title">"Segurança"</string>
     <string name="settings_require_authentication_to_show_accounts">"Exigir autenticação para exibir contas"</string>
@@ -719,9 +718,7 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_hide_subreddit_description_title">"Ocultar descrição do subreddit"</string>
     <string name="settings_disable_image_preview_title">"Desativar prévia de imagem no modo de economia de dados"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Só desativar prévia em GIFs e vídeos"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Deslizar para a esquerda"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Deslizar para a direita"</string>
-    <string name="settings_swipe_action_info_summary">"Não aplicável ao feed de postagem com mais de 1 coluna ou detalhes de postagem."</string>
+    <string name="settings_swipe_actions_info_summary">"Não aplicável ao feed de postagem com mais de 1 coluna ou detalhes de postagem."</string>
     <string name="settings_language_title">"Idioma"</string>
     <string name="settings_enable_search_history_title">"Ativar histórico de busca"</string>
     <string name="settings_post_history_title">"Histórico de busca"</string>
@@ -777,8 +774,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_restore_settings_title">"Restaurar ajustes"</string>
     <string name="settings_credits_love_animation_title">"Animações de Amor"</string>
     <string name="settings_swipe_between_posts_title">"Deslizar entre postagens"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Enquanto ativado, as ações de deslizar nos comentários ficam indisponíveis. Ambos usam deslizamentos horizontais, portanto não podem ser usados ao mesmo tempo."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Indisponível enquanto Deslizar entre postagens estiver ativado. Desligue isso para usar ações de deslizar nos comentários."</string>
     <string name="settings_navigation_drawer_title">"Menu de navegação"</string>
     <string name="settings_collapse_account_section_title">"Retrair seção de conta"</string>
     <string name="settings_collapse_reddit_section_title">"Retrair seção do Reddit"</string>
@@ -893,7 +888,7 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_category_gesture_sensitivity_title">"Sensibilidade de gesto"</string>
     <string name="settings_tab_switching_sensitivity">"Sensibilidade de comutação da guia"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Sensibilidade do deslize para a direita para voltar"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Sensibilidade da ação de deslizar nos comentários"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Sensibilidade da ação de deslizar nos comentários"</string>
     <string name="default_sensitivity">"Padrão"</string>
     <string name="low">"Baixo"</string>
     <string name="very_low">"Muito Baixo"</string>

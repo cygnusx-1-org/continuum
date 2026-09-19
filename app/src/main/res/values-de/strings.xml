@@ -652,11 +652,10 @@ Benenne diese Themen sonst neu."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Separater Ordner pro Subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"NSFW-Medien an einem anderen Ort speichern"</string>
     <string name="settings_nsfw_download_location_title">"NSFW-Download-Speicherort"</string>
-    <string name="settings_swipe_action_title">"Aktion beim Wischen"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"haptisches Feedback"</string>
+    <string name="settings_swipe_actions_title">"Aktionen beim Wischen"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"haptisches Feedback"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Wischen zwischen den Reitern deaktivieren"</string>
-    <string name="settings_enable_swipe_action_title">"Wisch-Aktion aktivieren"</string>
-    <string name="settings_swipe_action_threshold">"Begrenzung"</string>
+    <string name="settings_swipe_actions_threshold">"Begrenzung"</string>
     <string name="settings_pull_to_refresh_title">"Ziehen zum Aktualisieren"</string>
     <string name="settings_security_title">"Sicherheit"</string>
     <string name="settings_require_authentication_to_show_accounts">"Authentifizierung benötigt um Profile anzuzeigen"</string>
@@ -718,9 +717,7 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_hide_subreddit_description_title">"Verstecke Subredditbeschreibung"</string>
     <string name="settings_disable_image_preview_title">"Bildvorschau im Datensparmodus deaktivieren"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Vorschau nur bei Video- und GIF-Beiträgen deaktivieren"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Wische nach links"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Wische nach rechts"</string>
-    <string name="settings_swipe_action_info_summary">"Gilt nicht für Post-Feeds mit mehr als 1 Spalte oder Post-Detail."</string>
+    <string name="settings_swipe_actions_info_summary">"Gilt nicht für Post-Feeds mit mehr als 1 Spalte oder Post-Detail."</string>
     <string name="settings_language_title">"Sprache"</string>
     <string name="settings_enable_search_history_title">"Suchverlauf aktivieren"</string>
     <string name="settings_post_history_title">"Beitragsverlauf aktivieren"</string>
@@ -776,8 +773,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_restore_settings_title">"Einstellungen wiederherstellen"</string>
     <string name="settings_credits_love_animation_title">"Liebes-Animation"</string>
     <string name="settings_swipe_between_posts_title">"Zwischen Beiträgen wischen"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Während diese Option aktiviert ist, sind Wischaktionen in Kommentaren nicht verfügbar. Beide verwenden horizontale Wischbewegungen und können daher nicht gleichzeitig verwendet werden."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Nicht verfügbar, solange „Zwischen Beiträgen wischen“ aktiviert ist. Schalte das aus, um Wischaktionen in Kommentaren zu verwenden."</string>
     <string name="settings_navigation_drawer_title">"Navigationsmenü"</string>
     <string name="settings_collapse_account_section_title">"Sektion für Konten zusammenklappen"</string>
     <string name="settings_collapse_reddit_section_title">"Sektion für Reddit zusammenklappen"</string>
@@ -892,7 +887,7 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_category_gesture_sensitivity_title">"Gestenempfindlichkeit"</string>
     <string name="settings_tab_switching_sensitivity">"Empfindlichkeit beim Reiterwechsel"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Empfindlichkeit für „Nach rechts wischen, um zurückzugehen“"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Wischaktionsempfindlichkeit in Kommentaren"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Wischaktionsempfindlichkeit in Kommentaren"</string>
     <string name="default_sensitivity">"Standard"</string>
     <string name="low">"Niedrig"</string>
     <string name="very_low">"Sehr niedrig"</string>

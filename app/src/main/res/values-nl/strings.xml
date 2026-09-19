@@ -648,11 +648,10 @@ Zo wel, hernoem ze voordat je Material You aanzet."</string>
     <string name="settings_separate_folder_for_each_subreddit">"Aparte Map Voor Elke Subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Bewaar NSFW Media op een andere locatie"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Downloadlocatie"</string>
-    <string name="settings_swipe_action_title">"Swipe-actie"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Haptische Feedback"</string>
+    <string name="settings_swipe_actions_title">"Swipe-acties"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Haptische Feedback"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Schakel Swipen Tussen Tabbladen Uit"</string>
-    <string name="settings_enable_swipe_action_title">"Schakel Swipen In"</string>
-    <string name="settings_swipe_action_threshold">"Drempel"</string>
+    <string name="settings_swipe_actions_threshold">"Drempel"</string>
     <string name="settings_pull_to_refresh_title">"Trek om te vernieuwen"</string>
     <string name="settings_security_title">"Beveiliging"</string>
     <string name="settings_require_authentication_to_show_accounts">"Authenticatie vereisen om accounts te tonen"</string>
@@ -714,9 +713,7 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_hide_subreddit_description_title">"Verberg Subreddit Omschrijving"</string>
     <string name="settings_disable_image_preview_title">"Schakel Afbeeldingsvoorbeeld uit in de Gegevensbesparingsmodus"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Zet Alleen De Preview Uit in Video en Gif Posts"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Swipe naar links"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Swipe naar rechts"</string>
-    <string name="settings_swipe_action_info_summary">"Niet van toepassing op postfeed met meer dan 1 kolom of postdetail."</string>
+    <string name="settings_swipe_actions_info_summary">"Niet van toepassing op postfeed met meer dan 1 kolom of postdetail."</string>
     <string name="settings_language_title">"Taal"</string>
     <string name="settings_enable_search_history_title">"Zoekgeschiedenis Inschakelen"</string>
     <string name="settings_post_history_title">"Post Geschiedenis"</string>
@@ -772,8 +769,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_restore_settings_title">"Instellingen Herstellen"</string>
     <string name="settings_credits_love_animation_title">"Liefde animatie"</string>
     <string name="settings_swipe_between_posts_title">"Swipen Tussen Posts"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Indien ingeschakeld, zijn veegacties in opmerkingen niet beschikbaar. Beide maken gebruik van horizontale swipes, dus ze kunnen niet tegelijkertijd worden gebruikt."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Niet beschikbaar als vegen tussen berichten is ingeschakeld. Schakel dat uit om veegacties voor reacties te gebruiken."</string>
     <string name="settings_navigation_drawer_title">"Navigatielade"</string>
     <string name="settings_collapse_account_section_title">"Accountsectie samenvouwen"</string>
     <string name="settings_collapse_reddit_section_title">"Samenvouwen Reddit Sectie"</string>
@@ -888,7 +883,7 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_category_gesture_sensitivity_title">"Gebaargevoeligheid"</string>
     <string name="settings_tab_switching_sensitivity">"Gevoeligheid voor schakelen tussen tabbladen"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Gevoeligheid van naar rechts vegen om terug te gaan"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Veegactiegevoeligheid in opmerkingen"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Veegactiegevoeligheid in opmerkingen"</string>
     <string name="default_sensitivity">"Standaard"</string>
     <string name="low">"Laag"</string>
     <string name="very_low">"Zeer laag"</string>

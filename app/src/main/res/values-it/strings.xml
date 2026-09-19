@@ -653,11 +653,10 @@ Se hai dei temi con questi nomi devi cambiarli prima di attivare la Personalizza
     <string name="settings_separate_folder_for_each_subreddit">"Cartelle differenti per ogni subreddit"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"Salva NSFW file multimediali in posizioni diverse"</string>
     <string name="settings_nsfw_download_location_title">"NSFW Posizione di download"</string>
-    <string name="settings_swipe_action_title">"Azione di scorrimento"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"Feedback aptico"</string>
+    <string name="settings_swipe_actions_title">"Azioni di scorrimento"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"Feedback aptico"</string>
     <string name="settings_disable_swiping_between_tabs_title">"Disabilita lo scorrimento tra le schede"</string>
-    <string name="settings_enable_swipe_action_title">"Abilita azione di scorrimento"</string>
-    <string name="settings_swipe_action_threshold">"Soglia"</string>
+    <string name="settings_swipe_actions_threshold">"Soglia"</string>
     <string name="settings_pull_to_refresh_title">"Trascina per aggiornare"</string>
     <string name="settings_security_title">"Sicurezza"</string>
     <string name="settings_require_authentication_to_show_accounts">"Richiedi l'autenticazione per mostrare gli account"</string>
@@ -719,9 +718,7 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_hide_subreddit_description_title">"Nascondi descrizione dei subreddit"</string>
     <string name="settings_disable_image_preview_title">"Disabilita le anteprime delle immagini in modalità risparmio dati"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"Disabilita anteprima solo nei post con video o GIF"</string>
-    <string name="settings_swipe_action_swipe_left_title">"Scorri a sinistra"</string>
-    <string name="settings_swipe_action_swipe_right_title">"Scorri a destra"</string>
-    <string name="settings_swipe_action_info_summary">"Non applicabile ai feed con più di una colonna o ai post aperti."</string>
+    <string name="settings_swipe_actions_info_summary">"Non applicabile ai feed con più di una colonna o ai post aperti."</string>
     <string name="settings_language_title">"Lingua"</string>
     <string name="settings_enable_search_history_title">"Abilita cronologia di ricerca"</string>
     <string name="settings_post_history_title">"Cronologia dei post"</string>
@@ -777,8 +774,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_restore_settings_title">"Reimposta le impostazioni"</string>
     <string name="settings_credits_love_animation_title">"Animazione amore"</string>
     <string name="settings_swipe_between_posts_title">"Scorri tra i post"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"Se abilitata, le azioni di scorrimento nei commenti non sono disponibili. Entrambi utilizzano gli spostamenti orizzontali, quindi non possono essere utilizzati contemporaneamente."</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"Non disponibile mentre è abilitato lo scorrimento tra i post. Disattivalo per utilizzare le azioni di scorrimento dei commenti."</string>
     <string name="settings_navigation_drawer_title">"Drawer Navigazione"</string>
     <string name="settings_collapse_account_section_title">"Comprimi la sezione Account"</string>
     <string name="settings_collapse_reddit_section_title">"Comprimi la sezione Reddit"</string>
@@ -893,7 +888,7 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_category_gesture_sensitivity_title">"Sensibilità ai gesti"</string>
     <string name="settings_tab_switching_sensitivity">"Sensibilità di commutazione scheda"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"Sensibilità dello scorrimento a destra per tornare indietro"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"Sensibilità dell'azione di scorrimento nei commenti"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"Sensibilità dell'azione di scorrimento nei commenti"</string>
     <string name="default_sensitivity">"Predefinito"</string>
     <string name="low">"Basso"</string>
     <string name="very_low">"Molto basso"</string>

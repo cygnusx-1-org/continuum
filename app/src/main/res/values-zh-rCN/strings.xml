@@ -652,11 +652,10 @@
     <string name="settings_separate_folder_for_each_subreddit">"每个版块单独设置文件夹"</string>
     <string name="settings_save_nsfw_media_in_different_folder_title">"将NSFW媒体保存在不同位置"</string>
     <string name="settings_nsfw_download_location_title">"NSFW 下载位置"</string>
-    <string name="settings_swipe_action_title">"滑动动作"</string>
-    <string name="settings_swipe_action_haptic_feedback_title">"触觉反馈"</string>
+    <string name="settings_swipe_actions_title">"滑动动作"</string>
+    <string name="settings_swipe_actions_haptic_feedback_title">"触觉反馈"</string>
     <string name="settings_disable_swiping_between_tabs_title">"禁止在标签页之间滑动"</string>
-    <string name="settings_enable_swipe_action_title">"启用滑动动作"</string>
-    <string name="settings_swipe_action_threshold">"判定阈值"</string>
+    <string name="settings_swipe_actions_threshold">"判定阈值"</string>
     <string name="settings_pull_to_refresh_title">"下拉刷新"</string>
     <string name="settings_security_title">"安全"</string>
     <string name="settings_require_authentication_to_show_accounts">"需要身份验证才能显示帐户"</string>
@@ -718,9 +717,7 @@ Reddit 视频分辨率较低。
     <string name="settings_hide_subreddit_description_title">"隐藏版块描述"</string>
     <string name="settings_disable_image_preview_title">"省流模式下禁用图像预览"</string>
     <string name="settings_only_disable_preview_in_video_and_gif_posts_title">"仅禁用视频和动图帖子预览"</string>
-    <string name="settings_swipe_action_swipe_left_title">"向左滑动"</string>
-    <string name="settings_swipe_action_swipe_right_title">"向右滑动"</string>
-    <string name="settings_swipe_action_info_summary">"不适用于超过 1 列的帖子列表或帖子详情。"</string>
+    <string name="settings_swipe_actions_info_summary">"不适用于超过 1 列的帖子列表或帖子详情。"</string>
     <string name="settings_language_title">"语言"</string>
     <string name="settings_enable_search_history_title">"启用搜索历史"</string>
     <string name="settings_post_history_title">"帖子历史"</string>
@@ -776,8 +773,6 @@ Reddit 视频分辨率较低。
     <string name="settings_restore_settings_title">"恢复设置"</string>
     <string name="settings_credits_love_animation_title">"喜爱动画"</string>
     <string name="settings_swipe_between_posts_title">"在帖子间滑动"</string>
-    <string name="settings_swipe_between_posts_disables_comment_swipe_summary">"启用后，评论中的滑动操作不可用。两者都使用水平滑动，因此不能同时使用。"</string>
-    <string name="settings_enable_swipe_action_disabled_by_swipe_between_posts_summary">"启用“在帖子之间滑动”时不可用。关闭它以使用评论滑动操作。"</string>
     <string name="settings_navigation_drawer_title">"导航抽屉"</string>
     <string name="settings_collapse_account_section_title">"折叠帐户区域"</string>
     <string name="settings_collapse_reddit_section_title">"折叠 Reddit 区域"</string>
@@ -892,7 +887,7 @@ Reddit 视频分辨率较低。
     <string name="settings_category_gesture_sensitivity_title">"手势灵敏度"</string>
     <string name="settings_tab_switching_sensitivity">"标签切换灵敏度"</string>
     <string name="settings_swipe_right_to_go_back_sensitivity">"向右滑动返回的灵敏度"</string>
-    <string name="settings_swipe_action_sensitivity_in_comments">"评论中的滑动操作灵敏度"</string>
+    <string name="settings_swipe_actions_sensitivity_in_comments">"评论中的滑动操作灵敏度"</string>
     <string name="default_sensitivity">"默认字体"</string>
     <string name="low">"低"</string>
     <string name="very_low">"极低"</string>
