@@ -82,20 +82,36 @@ public class ParseMultiReddit {
         boolean isSubscriber = singleMultiRedditJSON.getBoolean(JSONUtils.IS_SUBSCRIBER_KEY);
         boolean isFavorited = singleMultiRedditJSON.getBoolean(JSONUtils.IS_FAVORITED_KEY);
 
-        JSONArray subredditsArray = singleMultiRedditJSON.getJSONArray(JSONUtils.SUBREDDITS_KEY);
-        ArrayList<ExpandedSubredditInMultiReddit> subreddits = new ArrayList<>();
-        for (int i = 0; i < subredditsArray.length(); i++) {
-            JSONObject subredditData = subredditsArray.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
-            subreddits.add(
-                    new ExpandedSubredditInMultiReddit(
-                            subredditsArray.getJSONObject(i).getString(JSONUtils.NAME_KEY),
-                            subredditData.isNull(JSONUtils.COMMUNITY_ICON_KEY) ? subredditData.getString(JSONUtils.NAME_KEY) : subredditData.getString(JSONUtils.COMMUNITY_ICON_KEY)
-                    )
-            );
-        }
+        ArrayList<ExpandedSubredditInMultiReddit> subreddits =
+                parseSubredditsInMultiReddit(singleMultiRedditJSON.getJSONArray(JSONUtils.SUBREDDITS_KEY));
 
         return new MultiReddit(path, displayName, name, description, copiedFrom,
                 iconUrl, visibility, owner, nSubscribers, createdUTC, over18, isSubscriber,
                 isFavorited, subreddits);
+    }
+
+    /**
+     * Reddit nests each subreddit's own fields under "data" only when the request asked for
+     * expand_srs=true; otherwise an entry is just {"name": "..."}. The create endpoint ignores
+     * that flag entirely, so both shapes have to parse: a missing icon costs the list a picture,
+     * it is not a reason to fail the whole multireddit.
+     */
+    static ArrayList<ExpandedSubredditInMultiReddit> parseSubredditsInMultiReddit(
+            JSONArray subredditsArray) {
+        ArrayList<ExpandedSubredditInMultiReddit> subreddits = new ArrayList<>();
+        for (int i = 0; i < subredditsArray.length(); i++) {
+            try {
+                JSONObject subredditJSON = subredditsArray.getJSONObject(i);
+                JSONObject subredditData = subredditJSON.optJSONObject(JSONUtils.DATA_KEY);
+                String iconUrl = subredditData == null || subredditData.isNull(JSONUtils.COMMUNITY_ICON_KEY)
+                        ? null
+                        : subredditData.getString(JSONUtils.COMMUNITY_ICON_KEY);
+                subreddits.add(new ExpandedSubredditInMultiReddit(
+                        subredditJSON.getString(JSONUtils.NAME_KEY), iconUrl));
+            } catch (JSONException e) {
+                Log.e("ParseMultiReddit", "parseSubredditsInMultiReddit failed", e);
+            }
+        }
+        return subreddits;
     }
 }

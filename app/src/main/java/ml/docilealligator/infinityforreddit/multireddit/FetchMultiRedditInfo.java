@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.multireddit;
 
 import android.os.Handler;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -12,7 +11,6 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import retrofit2.Call;
@@ -125,21 +123,8 @@ public class FetchMultiRedditInfo {
             boolean over18 = object.getBoolean(JSONUtils.OVER_18_KEY);
             boolean isSubscriber = object.getBoolean(JSONUtils.IS_SUBSCRIBER_KEY);
             boolean isFavorite = object.getBoolean(JSONUtils.IS_FAVORITED_KEY);
-            ArrayList<ExpandedSubredditInMultiReddit> subreddits = new ArrayList<>();
-            JSONArray subredditsArray = object.getJSONArray(JSONUtils.SUBREDDITS_KEY);
-            for (int i = 0; i < subredditsArray.length(); i++) {
-                try {
-                    JSONObject subredditData = subredditsArray.getJSONObject(i).getJSONObject(JSONUtils.DATA_KEY);
-                    subreddits.add(
-                            new ExpandedSubredditInMultiReddit(
-                                    subredditsArray.getJSONObject(i).getString(JSONUtils.NAME_KEY),
-                                    subredditData.isNull(JSONUtils.COMMUNITY_ICON_KEY) ? subredditData.getString(JSONUtils.NAME_KEY) : subredditData.getString(JSONUtils.COMMUNITY_ICON_KEY)
-                            )
-                    );
-                } catch (JSONException e) {
-                    Log.e("FetchMultiRedditInfo", "parseMultiRedditInfo failed", e);
-                }
-            }
+            ArrayList<ExpandedSubredditInMultiReddit> subreddits =
+                    ParseMultiReddit.parseSubredditsInMultiReddit(object.getJSONArray(JSONUtils.SUBREDDITS_KEY));
 
             return new MultiReddit(path, displayName, name, description, copiedFrom, iconUrl,
                     visibility, owner, nSubscribers, createdUTC, over18, isSubscriber, isFavorite,
