@@ -19,6 +19,19 @@ object SwipeActionPreferences {
     private const val VOTE_UP = "0"
     private const val VOTE_DOWN = "1"
 
+    /**
+     * What each side does before the user has chosen anything, on both surfaces.
+     *
+     * Downvote on the left and upvote on the right is what this app has always drawn. Under the
+     * old gesture naming that was `swipe_left_action = upvote`, because a swipe to the left bares
+     * the row's *right* edge -- so the defaults read as the mirror of what they put on screen.
+     * They are named for the side now, like the keys, which is the same picture written the right
+     * way round. [SwipeActionSideMigration] turns a stored pair over to reach the same place, so
+     * an install that never opened this screen and one that did end up agreeing.
+     */
+    private const val DEFAULT_LEFT_SIDE = VOTE_DOWN
+    private const val DEFAULT_RIGHT_SIDE = VOTE_UP
+
     private val POST_ACTIONS = setOf(
         SharedPreferencesUtils.SWIPE_ACITON_UPVOTE,
         SharedPreferencesUtils.SWIPE_ACITON_DOWNVOTE,
@@ -86,7 +99,7 @@ object SwipeActionPreferences {
      */
     @JvmStatic
     fun postLeftLevels(preferences: SharedPreferences): IntArray = intArrayOf(
-        post(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0"),
+        post(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, DEFAULT_LEFT_SIDE),
         post(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION_LEVEL_2, EMPTY),
         post(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION_LEVEL_3, EMPTY),
         post(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION_LEVEL_4, EMPTY),
@@ -94,7 +107,7 @@ object SwipeActionPreferences {
 
     @JvmStatic
     fun postRightLevels(preferences: SharedPreferences): IntArray = intArrayOf(
-        post(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1"),
+        post(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, DEFAULT_RIGHT_SIDE),
         post(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION_LEVEL_2, EMPTY),
         post(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION_LEVEL_3, EMPTY),
         post(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION_LEVEL_4, EMPTY),
@@ -103,7 +116,7 @@ object SwipeActionPreferences {
     @JvmStatic
     fun commentLeftLevels(preferences: SharedPreferences): IntArray = intArrayOf(
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION,
-            seededLevel1(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0")),
+            seededLevel1(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, DEFAULT_LEFT_SIDE)),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION_LEVEL_2, EMPTY),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION_LEVEL_3, EMPTY),
     )
@@ -111,14 +124,31 @@ object SwipeActionPreferences {
     @JvmStatic
     fun commentRightLevels(preferences: SharedPreferences): IntArray = intArrayOf(
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION,
-            seededLevel1(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1")),
+            seededLevel1(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, DEFAULT_RIGHT_SIDE)),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION_LEVEL_2, EMPTY),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION_LEVEL_3, EMPTY),
     )
 
     /**
+     * What a side does before the user has chosen anything: [DEFAULT_LEFT_SIDE] or
+     * [DEFAULT_RIGHT_SIDE] for a level-1 key, and empty for any other, which is every deeper one.
+     *
+     * The settings XML declares the same values as `app:defaultValue`, and has to: the picker
+     * reads that one and the swipe reads this one, so the two disagreeing means a screen that
+     * names a side the swipe does not use.
+     */
+    @JvmStatic
+    fun defaultLevel1(key: String): String = when (key) {
+        SharedPreferencesUtils.SWIPE_LEFT_ACTION,
+        SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION -> DEFAULT_LEFT_SIDE
+        SharedPreferencesUtils.SWIPE_RIGHT_ACTION,
+        SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION -> DEFAULT_RIGHT_SIDE
+        else -> EMPTY
+    }
+
+    /**
      * What a comment's first level falls back to before the user has ever opened the new screen:
-     * whatever the single shared setting said, since comments used to read it.
+     * whatever the post side of the same name said, since comments used to read it.
      *
      * Only upvote and downvote carry across. They are 0 and 1 on both lists, and until this change
      * they were the only two values the shared setting could hold -- but it can hold Hide now, and

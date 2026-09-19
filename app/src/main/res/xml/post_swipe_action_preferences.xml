@@ -11,7 +11,7 @@
         app:title="@string/settings_swipe_actions_left_side" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
-        app:defaultValue="0"
+        app:defaultValue="1"
         app:dependency="enable_swipe_action"
         app:entries="@array/settings_post_swipe_actions"
         app:entryValues="@array/settings_post_swipe_actions_values"
@@ -50,7 +50,7 @@
         app:title="@string/settings_swipe_actions_right_side" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
-        app:defaultValue="1"
+        app:defaultValue="0"
         app:dependency="enable_swipe_action"
         app:entries="@array/settings_post_swipe_actions"
         app:entryValues="@array/settings_post_swipe_actions_values"

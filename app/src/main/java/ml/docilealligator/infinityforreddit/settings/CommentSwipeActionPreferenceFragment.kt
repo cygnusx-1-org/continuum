@@ -23,9 +23,9 @@ class CommentSwipeActionPreferenceFragment : CustomFontPreferenceFragmentCompat(
 
         seedEnabledFromPostSwipe()
         seedFromPostAction(SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION,
-            SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0")
+            SharedPreferencesUtils.SWIPE_LEFT_ACTION)
         seedFromPostAction(SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION,
-            SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1")
+            SharedPreferencesUtils.SWIPE_RIGHT_ACTION)
 
         findPreference<SwitchPreference>(SharedPreferencesUtils.ENABLE_COMMENT_SWIPE_ACTION)
             ?.setOnPreferenceChangeListener { _, newValue ->
@@ -63,11 +63,11 @@ class CommentSwipeActionPreferenceFragment : CustomFontPreferenceFragmentCompat(
      * Not `getPreferenceManager().getSharedPreferences()`: that is null once a screen is on a
      * PreferenceDataStore, and this key is per-account.
      */
-    private fun seedFromPostAction(commentKey: String, postKey: String, fallback: String) {
+    private fun seedFromPostAction(commentKey: String, postKey: String) {
         val preferences = mActivity.defaultSharedPreferences
         if (preferences.contains(commentKey)) return
-        findPreference<ListPreference>(commentKey)?.value =
-            SwipeActionPreferences.seededLevel1(preferences, postKey, fallback)
+        findPreference<ListPreference>(commentKey)?.value = SwipeActionPreferences.seededLevel1(
+            preferences, postKey, SwipeActionPreferences.defaultLevel1(commentKey))
     }
 
     companion object {
