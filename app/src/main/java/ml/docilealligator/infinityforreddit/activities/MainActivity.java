@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
@@ -43,6 +44,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.OneShotPreDrawListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.ViewGroupCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -238,6 +240,9 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private FragmentManager fragmentManager;
     @SuppressWarnings("NullAway.Init")
     private SectionsPagerAdapter sectionsPagerAdapter;
+    // Non-null exactly while the main page shows tab names; null when the strip is hidden.
+    @Nullable
+    private TabLayoutMediator tabLayoutMediator;
     @SuppressWarnings("NullAway.Init")
     private NavigationDrawerRecyclerViewMergedAdapter adapter;
     private NavigationWrapper navigationWrapper;
@@ -1262,11 +1267,26 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         if (mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), true)) {
             // Always scrollable so tabs render at their natural width and never wrap.
             binding.includedAppBar.tabLayoutMainActivity.setTabMode(TabLayout.MODE_SCROLLABLE);
-            new TabLayoutMediator(binding.includedAppBar.tabLayoutMainActivity, binding.includedAppBar.viewPagerMainActivity, (tab, position) -> {
-                if (sectionsPagerAdapter != null) {
-                    Utils.setTitleWithCustomFontToTab(typeface, tab, sectionsPagerAdapter.getPageTitle(position));
-                }
-            }).attach();
+            // autoRefresh off. The mediator's answer to a data set change is to drop every tab and
+            // build the strip again, which is what threw the scroll position away; the adapter
+            // edits the strip in place instead. See SectionsPagerAdapter#syncTabStrip.
+            tabLayoutMediator = new TabLayoutMediator(binding.includedAppBar.tabLayoutMainActivity,
+                    binding.includedAppBar.viewPagerMainActivity, /* autoRefresh= */ false,
+                    (tab, position) -> {
+                        if (sectionsPagerAdapter != null) {
+                            // The key is what syncTabStrip diffs against, so each tab carries its own.
+                            String tabKey = sectionsPagerAdapter.userKeyAtPosition(position);
+                            tab.setTag(tabKey == null ? "" : tabKey);
+                            Utils.setTitleWithCustomFontToTab(typeface, tab,
+                                    sectionsPagerAdapter.getPageTitle(position));
+                        }
+                    });
+            tabLayoutMediator.attach();
+            // attach() ends by scrolling the strip to the current tab, but it does that before the
+            // tab views it has just made have been laid out, so every width it measures is zero and
+            // it settles at the start of the strip. Resuming onto a tab far along the strip would
+            // come back with the first tabs showing and the indicator off screen.
+            anchorTabStripToSelectedTab();
 
             // Add double-tap to scroll to top functionality for all tabs
             binding.includedAppBar.tabLayoutMainActivity.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -2099,6 +2119,24 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         binding.includedAppBar.viewPagerMainActivity.setCurrentItem(position, false);
     }
 
+    /**
+     * Put the tab strip back on the tab it has selected, once the tab views have been laid out.
+     *
+     * <p>TabLayout works its scroll position out from the tab views' bounds, and a tab view that
+     * has just been created, recycled or shifted along by one slot carries nothing useful until the
+     * next layout pass -- {@code calculateScrollXForTab} reads whatever it was left with and
+     * scrolls somewhere unrelated to the tab it was asked for. Anything that adds, removes or
+     * re-selects a tab therefore has to come back and set the scroll again once the strip has been
+     * measured. Only the scroll: the indicator already puts itself right in SlidingTabIndicator's
+     * onLayout, and the selected tab view is already marked.
+     */
+    private void anchorTabStripToSelectedTab() {
+        TabLayout tabLayout = binding.includedAppBar.tabLayoutMainActivity;
+        OneShotPreDrawListener.add(tabLayout, () -> tabLayout.setScrollPosition(
+                binding.includedAppBar.viewPagerMainActivity.getCurrentItem(), 0f,
+                /* updateSelectedTabView= */ false, /* updateIndicatorPosition= */ false));
+    }
+
     private void handleGoHomeIntent(Intent intent) {
         if (intent.getBooleanExtra(EXTRA_GO_HOME, false)) {
             binding.includedAppBar.viewPagerMainActivity.setCurrentItem(0, false);
@@ -2361,8 +2399,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             return resolvedTabsCache;
         }
 
-        // Rebuild the resolved tab list and only notify (which makes TabLayoutMediator tear down and
-        // rebuild every tab, jolting the strip's scroll) when it has actually changed. The dynamic
+        // Rebuild the resolved tab list and only notify when it has actually changed. The dynamic
         // lists' LiveData re-emit identical data repeatedly during the initial sync, and churning the
         // adapter on each of those was what made the tab strip jump around.
         private void refreshTabs() {
@@ -2382,20 +2419,176 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             // Only an existing list can say which tab the pager was on; before the first build
             // userKeyAtPosition would build (and answer from) the new one.
             String currentKey = resolvedTabsCache == null ? null : userKeyAtPosition(currentItem);
+            String selectedTabKeyBefore = selectedTabKey();
             resolvedTabsCache = newResolved;
             notifyDataSetChanged();
+            // The pager knows about the new list now, so the strip can be brought in line with it.
+            syncTabStrip(newResolved);
             if (currentKey != null) {
                 int newPosition = positionOfUserKey(currentKey);
                 if (newPosition < 0) {
                     newPosition = 0;
                 }
-                if (newPosition != currentItem) {
+                // Against the pager's index now, not the one read at the top: syncTabStrip moves
+                // the pager itself when it removes the tab the pager was on, because TabLayout
+                // answers that by selecting a neighbour. Comparing with the stale index would skip
+                // the re-seat whenever the tab happens to come back to the index it started at,
+                // leaving the pager on whatever the neighbour was.
+                if (newPosition != binding.includedAppBar.viewPagerMainActivity.getCurrentItem()) {
                     binding.includedAppBar.viewPagerMainActivity.setCurrentItem(newPosition, false);
                 }
             }
             // The tab a resume asked for may only now have arrived from the dynamic lists. After
             // the re-seat so a pending resume wins over it.
             applyResumeTab();
+            // A tab landing in front of the current one, or the current one going, moves the strip
+            // onto a different tab -- and TabLayout worked that move out from tab views this
+            // refresh had only just created or shifted, so it scrolled to stale bounds. Set the
+            // scroll again once they are real. A tab appended past the end moves neither, and the
+            // strip is left exactly where the user had it.
+            if (tabLayoutMediator != null
+                    && (binding.includedAppBar.viewPagerMainActivity.getCurrentItem() != currentItem
+                    || !selectedTabKey().equals(selectedTabKeyBefore))) {
+                anchorTabStripToSelectedTab();
+            }
+        }
+
+        /** The key of the tab the strip has selected, or "" when there is no strip or no selection. */
+        private String selectedTabKey() {
+            if (tabLayoutMediator == null) {
+                return "";
+            }
+            TabLayout tabLayout = binding.includedAppBar.tabLayoutMainActivity;
+            return tabKeyOf(tabLayout.getTabAt(tabLayout.getSelectedTabPosition()));
+        }
+
+        /**
+         * Bring the tab strip in line with {@code resolved}, adding and removing only the tabs that
+         * actually changed.
+         *
+         * <p>This is the work {@link TabLayoutMediator} would do for us, and the reason it is
+         * attached with {@code autoRefresh} off. Its version calls {@code removeAllTabs()} and adds
+         * every tab back, and TabLayout hands those tabs their views out of a pool twelve deep: on
+         * a strip of more than twelve tabs the view that comes back for position 0 is one that was
+         * laid out far along the strip, and it still carries those bounds. The {@code selectTab()}
+         * closing the rebuild measures the scroll against them and leaves the strip scrolled into
+         * the last tabs. The layout pass that follows corrects the tab views and the indicator, but
+         * not the scroll, so it stays there -- which is what a cold start after subscribing to a
+         * subreddit looked like, since a new subscription lands at the end of the list and changes
+         * it. Touching only the tab that changed leaves every other tab view, and the scroll, alone.
+         */
+        private void syncTabStrip(List<ResolvedTab> resolved) {
+            if (tabLayoutMediator == null) {
+                // Tab names are turned off, so there is no strip to keep up to date.
+                return;
+            }
+            TabLayout tabLayout = binding.includedAppBar.tabLayoutMainActivity;
+            // The strip itself is the "before" list: each tab carries the key it was configured
+            // with, so the diff can never drift away from what is actually on screen.
+            List<String> oldKeys = new ArrayList<>();
+            for (int i = 0; i < tabLayout.getTabCount(); i++) {
+                oldKeys.add(tabKeyOf(tabLayout.getTabAt(i)));
+            }
+            List<String> newKeys = new ArrayList<>();
+            for (ResolvedTab tab : resolved) {
+                newKeys.add(MainPageTabsUtils.userKey(tab.postType, tab.name));
+            }
+            boolean[] keepOld = new boolean[oldKeys.size()];
+            boolean[] keepNew = new boolean[newKeys.size()];
+            markCommonKeys(oldKeys, newKeys, keepOld, keepNew);
+            // Back to front, so the index of every tab still to be looked at stays valid.
+            for (int i = oldKeys.size() - 1; i >= 0; i--) {
+                if (!keepOld[i]) {
+                    tabLayout.removeTabAt(i);
+                }
+            }
+            // Front to back: everything before i already matches, so i is where the tab belongs.
+            for (int i = 0; i < newKeys.size(); i++) {
+                if (!keepNew[i]) {
+                    TabLayout.Tab tab = tabLayout.newTab();
+                    tab.setTag(newKeys.get(i));
+                    Utils.setTitleWithCustomFontToTab(typeface, tab, resolved.get(i).title);
+                    tabLayout.addTab(tab, i, false);
+                }
+            }
+            // Removing the selected tab re-selects its neighbour, but if nothing at all survived
+            // there was no neighbour to fall back to and the strip is left with no selection.
+            if (tabLayout.getSelectedTabPosition() < 0 && tabLayout.getTabCount() > 0) {
+                tabLayout.selectTab(tabLayout.getTabAt(Math.min(
+                        binding.includedAppBar.viewPagerMainActivity.getCurrentItem(),
+                        tabLayout.getTabCount() - 1)));
+            }
+            // A tab that survived kept its view, but its label can still have changed underneath it
+            // -- a renamed multireddit, or a title edited in Customize Tabs.
+            for (int i = 0; i < newKeys.size(); i++) {
+                TabLayout.Tab tab = tabLayout.getTabAt(i);
+                if (tab != null && !TextUtils.equals(tab.getText(), resolved.get(i).title)) {
+                    Utils.setTitleWithCustomFontToTab(typeface, tab, resolved.get(i).title);
+                }
+            }
+        }
+
+        /** The user key a tab was configured with, or "" for a tab that somehow carries none. */
+        private String tabKeyOf(@Nullable TabLayout.Tab tab) {
+            Object tag = tab == null ? null : tab.getTag();
+            return tag instanceof String ? (String) tag : "";
+        }
+
+        /**
+         * Pair up the keys the two lists have in common, in order, so what is left is the run of
+         * removals and insertions that turns one list into the other: everything unmarked in
+         * {@code oldKeys} has to go, everything unmarked in {@code newKeys} has to be added, and
+         * every tab marked in both keeps the view it already has.
+         */
+        private void markCommonKeys(List<String> oldKeys, List<String> newKeys,
+                                    boolean[] keepOld, boolean[] keepNew) {
+            int oldCount = oldKeys.size();
+            int newCount = newKeys.size();
+            // Matching the shared head and tail off first keeps the table below the size of what
+            // actually moved. A subscription arriving or leaving changes one entry, so for the
+            // refreshes this runs on in practice there is no table left to fill at all; only a
+            // genuine reorder gets that far, and then it is over the reordered stretch alone.
+            int head = 0;
+            while (head < oldCount && head < newCount && oldKeys.get(head).equals(newKeys.get(head))) {
+                keepOld[head] = true;
+                keepNew[head] = true;
+                head++;
+            }
+            int tail = 0;
+            while (oldCount - 1 - tail >= head && newCount - 1 - tail >= head
+                    && oldKeys.get(oldCount - 1 - tail).equals(newKeys.get(newCount - 1 - tail))) {
+                keepOld[oldCount - 1 - tail] = true;
+                keepNew[newCount - 1 - tail] = true;
+                tail++;
+            }
+            int oldMiddle = oldCount - tail - head;
+            int newMiddle = newCount - tail - head;
+            if (oldMiddle <= 0 || newMiddle <= 0) {
+                // One side of the middle is empty: everything left is a pure removal or insertion.
+                return;
+            }
+            int[][] lengths = new int[oldMiddle + 1][newMiddle + 1];
+            for (int i = oldMiddle - 1; i >= 0; i--) {
+                for (int j = newMiddle - 1; j >= 0; j--) {
+                    lengths[i][j] = oldKeys.get(head + i).equals(newKeys.get(head + j))
+                            ? lengths[i + 1][j + 1] + 1
+                            : Math.max(lengths[i + 1][j], lengths[i][j + 1]);
+                }
+            }
+            int i = 0;
+            int j = 0;
+            while (i < oldMiddle && j < newMiddle) {
+                if (oldKeys.get(head + i).equals(newKeys.get(head + j))) {
+                    keepOld[head + i] = true;
+                    keepNew[head + j] = true;
+                    i++;
+                    j++;
+                } else if (lengths[i + 1][j] >= lengths[i][j + 1]) {
+                    i++;
+                } else {
+                    j++;
+                }
+            }
         }
 
         private boolean sameResolvedTabs(List<ResolvedTab> a, List<ResolvedTab> b) {
