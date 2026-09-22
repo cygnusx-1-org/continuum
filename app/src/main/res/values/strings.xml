@@ -1553,9 +1553,14 @@
     <string name="post_filter_usage_multireddit_all">MultiReddit</string>
     <string name="post_filter_usage_embedded_multireddit_all">All MultiReddits</string>
     <string name="post_filter_usage_search">Search</string>
+    <string name="post_filter_usage_all_feeds">Home + MultiReddits + Subreddits + Users</string>
+    <string name="post_filter_usage_subreddits">Subreddit(s)</string>
+    <string name="post_filter_usage_multireddits">MultiReddit(s)</string>
     <string name="subreddit">Subreddit</string>
     <string name="user">User</string>
-    <string name="edit_post_filter_name_of_usage_info">Leave it blank to apply this post filter to all the subreddits / users / multireddits</string>
+    <string name="filter_name_of_usage_info_subreddit">Leave it blank to apply this filter to every subreddit.</string>
+    <string name="filter_name_of_usage_info_user">Leave it blank to apply this filter to every user.</string>
+    <string name="filter_name_of_usage_info_multireddit">Leave it blank to apply this filter to every MultiReddit.</string>
     <string name="click_to_apply_post_filter">Click here to apply it to some post feeds</string>
     <string name="post_filter_usage_embedded_more_count">and %1$d more</string>
     <string name="post_filter_name_explanation">The post filter name should be unique.</string>
@@ -1622,6 +1627,12 @@
     <string name="post_filter_rule_error_wildcard_too_short">Use at least %1$d characters. Shorter words match far more subreddits than you would expect.</string>
     <string name="post_filter_rule_error_asterisk">Pick a match type instead of typing *.</string>
     <string name="post_filter_match_explanation">A match other than \'Exact\' only applies on r/%1$s, so a broad word cannot empty your other feeds. It will be added to \'Applies to\' for you.</string>
+    <string name="post_filter_match_unavailable">\'Starts with\', \'Ends with\' and \'Contains\' only run on r/%1$s, so they need a filter of their own. This one already holds other rules.</string>
+    <string name="post_filter_match_required">This filter holds nothing but \'Starts with\', \'Ends with\' and \'Contains\' subreddit rules, which run on r/%1$s alone. Remove them to add other kinds of rule.</string>
+    <string name="post_filter_rule_refused_wildcard_filter">This filter holds nothing but \'Starts with\', \'Ends with\' and \'Contains\' subreddit rules. Add this to a different filter.</string>
+    <string name="post_filter_rule_refused_plain_filter">\'Starts with\', \'Ends with\' and \'Contains\' need a filter of their own, and this one already holds other rules.</string>
+    <string name="post_filter_rule_refused_wildcard_filter_named">%1$s holds nothing but \'Starts with\', \'Ends with\' and \'Contains\' subreddit rules. Add this to a different filter.</string>
+    <string name="post_filter_rule_refused_mixed_filter">This filter holds both \'Starts with\', \'Ends with\' or \'Contains\' subreddit rules and ordinary ones. Remove one kind before adding more.</string>
     <string name="post_filter_applies_to_summary_locked">A \'Starts with\', \'Ends with\' or \'Contains\' rule only runs on r/ContinuumAll, so this filter is pinned to it. Remove that rule to choose other feeds.</string>
     <string name="post_filter_wildcard_scoped_to_continuum_all">r/%1$s added to \'Applies to\'</string>
 

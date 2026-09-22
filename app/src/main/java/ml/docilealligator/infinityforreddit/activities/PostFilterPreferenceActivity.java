@@ -33,11 +33,13 @@ import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.postfilter.DeletePostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.FilterRule;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterRuleKinds;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterRules;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterSeeds;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterWithUsage;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterWithUsageViewModel;
 import ml.docilealligator.infinityforreddit.postfilter.RuleField;
+import ml.docilealligator.infinityforreddit.utils.Snackbars;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.CustomizePostFilterViewModel;
 import ml.docilealligator.infinityforreddit.viewmodels.SavePostFilterResult;
@@ -254,6 +256,18 @@ public class PostFilterPreferenceActivity extends BaseActivity {
 
         List<FilterRule> rules = new ArrayList<>(PostFilterRules.toRules(postFilter));
         for (FilterRule rule : newRules) {
+            // "Add to post filter" only ever produces whole names, so a wildcard filter can take
+            // none of them. Mixing the two kinds is what pins an otherwise ordinary filter to
+            // r/ContinuumAll and leaves the rest of it inert everywhere else (issue #426).
+            if (!PostFilterRuleKinds.accepts(rules, rule)) {
+                String message = PostFilterRuleKinds.isMixed(rules)
+                        ? getString(R.string.post_filter_rule_refused_mixed_filter)
+                        : getString(R.string.post_filter_rule_refused_wildcard_filter_named, postFilter.name);
+                // Not a Toast: the reason runs past the two lines a Toast will show, and the part it
+                // would cut is what tells the user how to get the rule in.
+                Snackbars.showMultiline(binding.getRoot(), message);
+                return;
+            }
             PostFilterRules.addRule(rules, rule);
         }
         PostFilterRules.applyRules(postFilter, rules);

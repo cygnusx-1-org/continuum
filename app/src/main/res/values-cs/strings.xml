@@ -1430,7 +1430,6 @@ Chodí popředu."</string>
     <string name="post_filter_usage_search">"Hledat"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Uživatel"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Ponech prázdné pro použití tohoto filtru příspěvků na všechny subreddity / uživatele / multireddity"</string>
     <string name="click_to_apply_post_filter">"Kliknutím sem jej použiješ u některých kanálů příspěvků"</string>
     <string name="post_filter_usage_embedded_more_count">"a %1$d dalších"</string>
     <string name="post_filter_name_explanation">"Název post filtru by měl být jedinečný."</string>
@@ -1904,4 +1903,6 @@ Klepnutím to zkusíš znova."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Některé telefony (jako Xiaomi, Oppo nebo Vivo) vyžadují, abys v nastavení systému telefonu zapnul „Automatické spuštění“ nebo „Spouštění aplikací na pozadí“. V opačném případě přestanou připomenutí fungovat, pokud se telefon restartuje."</string>
     <string name="reminder_set">"Připomenutí nastaveno"</string>
     <string name="reminder">"Připomenutí"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(y)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(y)"</string>
 </resources>

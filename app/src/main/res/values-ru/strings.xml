@@ -1430,7 +1430,6 @@ https://play.google.com/store/"</string>
     <string name="post_filter_usage_search">"Поиск"</string>
     <string name="subreddit">"Сабреддит"</string>
     <string name="user">"Пользователь"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Оставь пустым, чтобы применить этот фильтр постов ко всем сабреддитам / пользователям / MultiRedditм"</string>
     <string name="click_to_apply_post_filter">"Нажми здесь, чтобы применить его к некоторым каналам сообщений."</string>
     <string name="post_filter_usage_embedded_more_count">"и еще %1$d"</string>
     <string name="post_filter_name_explanation">"Имя почтового фильтра должно быть уникальным."</string>
@@ -1904,4 +1903,6 @@ https://play.google.com/store/"</string>
     <string name="reminder_reliability_notice_device_settings_description">"Некоторые телефоны (например, Xiaomi, Oppo или Vivo) требуют включения «Автозапуска» или «Фонового запуска приложений» в системных настройках твоего телефона. В противном случае напоминания перестанут работать, если телефон перезагрузится."</string>
     <string name="reminder_set">"Напоминание установлено"</string>
     <string name="reminder">"Напоминание"</string>
+    <string name="post_filter_usage_subreddits">"Сабреддит(ы)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(ы)"</string>
 </resources>

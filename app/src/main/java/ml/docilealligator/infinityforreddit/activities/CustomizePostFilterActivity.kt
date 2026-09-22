@@ -11,6 +11,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,10 +41,13 @@ import ml.docilealligator.infinityforreddit.postfilter.FilterRule
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockRecorder
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterBlockedSubreddit
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterRuleKinds
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterRules
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsageGroups
 import ml.docilealligator.infinityforreddit.postfilter.RuleField
 import ml.docilealligator.infinityforreddit.subreddit.SubredditWithSelection
+import ml.docilealligator.infinityforreddit.utils.Snackbars
 import ml.docilealligator.infinityforreddit.utils.Utils
 import ml.docilealligator.infinityforreddit.viewmodels.CustomizePostFilterViewModel
 import ml.docilealligator.infinityforreddit.viewmodels.SavePostFilterResult
@@ -405,6 +409,12 @@ class CustomizePostFilterActivity :
     // region Rules
 
     private fun showRuleSheet(rule: FilterRule?) {
+        // A filter saved before the two kinds were kept apart can hold both, and then there is no
+        // kind of rule left to offer. Editing still opens — that is how such a filter gets unpicked.
+        if (rule == null && PostFilterRuleKinds.isMixed(rules)) {
+            refuseRule(null)
+            return
+        }
         val fragment = AddPostFilterRuleBottomSheetFragment()
         fragment.arguments = Bundle().apply {
             putParcelable(AddPostFilterRuleBottomSheetFragment.EXTRA_RULE, rule)
@@ -421,6 +431,10 @@ class CustomizePostFilterActivity :
     override fun onRuleClicked(rule: FilterRule) = showRuleSheet(rule)
 
     override fun onRuleRemoved(rule: FilterRule) {
+        // Judged before the removal, not at undo time: a rule deleted from a filter that was already
+        // mixed goes back regardless, or the one way to unpick such a filter would be unable to
+        // undo a wrong tap.
+        val wasMixed = PostFilterRuleKinds.isMixed(rules)
         if (!rules.remove(rule)) {
             return
         }
@@ -430,12 +444,23 @@ class CustomizePostFilterActivity :
             R.string.post_filter_rule_removed,
             Snackbar.LENGTH_LONG
         ).setAction(R.string.undo) {
+            // Otherwise through the same guard as any other add: deleting the last rule of a kind
+            // frees the filter to take the other, and the user may have done that while this was up.
+            if (!wasMixed && !PostFilterRuleKinds.accepts(rules, rule)) {
+                refuseRule(rule)
+                return@setAction
+            }
             PostFilterRules.addRule(rules, rule)
             adapter.setRules(rules)
         }.show()
     }
 
     override fun onRuleSubmitted(original: FilterRule?, rule: FilterRule) {
+        // The sheet's chips already rule this out; this catches the paths that do not go through it.
+        if (!PostFilterRuleKinds.accepts(rules, rule, original)) {
+            refuseRule(rule)
+            return
+        }
         // The regex columns hold one pattern per polarity, so a second one has to displace the first
         // rather than silently vanish at save time.
         val displaced = rules.firstOrNull {
@@ -477,6 +502,29 @@ class CustomizePostFilterActivity :
         original?.let { rules.remove(it) }
         PostFilterRules.addRule(rules, rule)
         adapter.setRules(rules)
+        // After the rule lands, not before: a rule the user backed out of must not leave the filter
+        // pinned to a feed they never asked for. Judged on the filter rather than on the rule, so
+        // that editing one wildcard rule of a filter that holds others does not re-scope it twice.
+        if (PostFilterRuleKinds.hasWildcard(rules)) {
+            scopeToContinuumAll()
+        }
+    }
+
+    /**
+     * Refuses [rule], of a kind this filter cannot hold — see [PostFilterRuleKinds]. The message is
+     * about the filter first: a mixed one refuses both kinds, and saying it "holds nothing but"
+     * one of them would be untrue. Null when there is no candidate yet, as from the add button.
+     */
+    private fun refuseRule(rule: FilterRule?) {
+        val message = when {
+            rule == null || PostFilterRuleKinds.isMixed(rules) -> R.string.post_filter_rule_refused_mixed_filter
+            PostFilterRuleKinds.isWildcard(rule) -> R.string.post_filter_rule_refused_plain_filter
+            else -> R.string.post_filter_rule_refused_wildcard_filter
+        }
+        Snackbars.showMultiline(
+            binding.coordinatorLayoutCustomizePostFilterActivity,
+            getString(message)
+        )
     }
 
     /**
@@ -484,7 +532,7 @@ class CustomizePostFilterActivity :
      * for the user is what makes picking a match type the whole interaction — the alternative was
      * refusing the rule until they went and found the "Applies to" section themselves.
      */
-    override fun onWildcardMatchChosen() {
+    private fun scopeToContinuumAll() {
         // Pin the filter to r/ContinuumAll and drop everything else: a wildcard term is inert on any
         // other feed, so leaving Home or a subreddit attached would leave the filter doing only part
         // of what it says on the feeds it lists.
@@ -531,14 +579,25 @@ class CustomizePostFilterActivity :
         }
     }
 
+    /**
+     * Adds everything a picker returned. A picker deals in whole names, so a wildcard filter can
+     * take none of it.
+     */
     private fun addRules(field: RuleField, exclude: Boolean, values: List<String>) {
+        val terms = values.map { it.trim() }.filter { it.isNotEmpty() }
+        if (terms.isEmpty()) {
+            return
+        }
+        // Judged against the filter as it stands rather than one term at a time, or the first of
+        // them would be what refused the second.
+        val first = FilterRule(field, exclude, terms[0])
+        if (!PostFilterRuleKinds.accepts(rules, first)) {
+            refuseRule(first)
+            return
+        }
         var added = false
-        for (value in values) {
-            val trimmed = value.trim()
-            if (trimmed.isEmpty()) {
-                continue
-            }
-            added = PostFilterRules.addRule(rules, FilterRule(field, exclude, trimmed)) || added
+        for (term in terms) {
+            added = PostFilterRules.addRule(rules, FilterRule(field, exclude, term)) || added
         }
         if (added) {
             adapter.setRules(rules)
@@ -556,11 +615,43 @@ class CustomizePostFilterActivity :
 
     override fun newPostFilterUsage(type: Int) {
         when (type) {
+            // Four rows, no dialog: the group means all of each of them, so there is no name to ask
+            // for. See [PostFilterUsageGroups].
+            PostFilterUsageGroups.ALL_FEEDS_TYPE -> addAllFeedsUsages()
             PostFilterUsage.SUBREDDIT_TYPE,
             PostFilterUsage.USER_TYPE,
             PostFilterUsage.MULTIREDDIT_TYPE -> editUsageNameOfUsage(type, null, null)
             else -> addUsages(type, listOf(PostFilterUsage.NO_USAGE))
         }
+    }
+
+    private fun addAllFeedsUsages(): Boolean {
+        var added = false
+        for (type in PostFilterUsageGroups.ALL_FEEDS_TYPES) {
+            added = addUsage(
+                PostFilterUsage(postFilter.name, accountName, type, PostFilterUsage.NO_USAGE)
+            ) || added
+        }
+        if (added) {
+            adapter.setUsages(usages)
+        }
+        return added
+    }
+
+    override fun onAllFeedsUsageRemoved() {
+        // All four go, or the chip would come back the moment one of them was left behind.
+        val removed = usages.filter { PostFilterUsageGroups.isAllFeedsMember(it) }
+        if (!usages.removeAll(removed.toSet())) {
+            return
+        }
+        adapter.setUsages(usages)
+        Snackbar.make(
+            binding.coordinatorLayoutCustomizePostFilterActivity,
+            R.string.post_filter_usage_removed,
+            Snackbar.LENGTH_LONG
+        ).setAction(R.string.undo) {
+            addAllFeedsUsages()
+        }.show()
     }
 
     override fun onUsageClicked(usage: PostFilterUsage) {
@@ -624,6 +715,8 @@ class CustomizePostFilterActivity :
             dialogView.findViewById(R.id.text_input_edit_text_edit_post_or_comment_filter_name_of_usage_dialog)
         val pickImageView: ImageView =
             dialogView.findViewById(R.id.add_subreddits_users_image_view_customize_post_filter_activity)
+        val infoTextView: TextView =
+            dialogView.findViewById(R.id.message_text_view_edit_post_or_comment_filter_name_of_usage_dialog)
         usageDialogEditText = editText
         usageDialogType = type
         usageDialogReplacing = replacing
@@ -643,6 +736,9 @@ class CustomizePostFilterActivity :
         val titleStringId = when (type) {
             PostFilterUsage.USER_TYPE -> {
                 editText.setHint(R.string.settings_tab_username)
+                // Blank widens the name within this usage type and nothing else: a filter left blank
+                // here runs on every user page and still not on Home or on any subreddit.
+                infoTextView.setText(R.string.filter_name_of_usage_info_user)
                 pickImageView.setOnClickListener {
                     addUsageUsersLauncher.launch(
                         Intent(this, UserMultiselectionActivity::class.java).putExtra(
@@ -655,11 +751,13 @@ class CustomizePostFilterActivity :
             }
             PostFilterUsage.MULTIREDDIT_TYPE -> {
                 editText.setHint(R.string.settings_tab_multi_reddit_name)
+                infoTextView.setText(R.string.filter_name_of_usage_info_multireddit)
                 pickImageView.visibility = View.GONE
                 R.string.multi_reddit
             }
             else -> {
                 editText.setHint(R.string.settings_tab_subreddit_name)
+                infoTextView.setText(R.string.filter_name_of_usage_info_subreddit)
                 pickImageView.setOnClickListener {
                     addUsageSubredditsLauncher.launch(
                         Intent(this, SubredditMultiselectionActivity::class.java).putExtra(

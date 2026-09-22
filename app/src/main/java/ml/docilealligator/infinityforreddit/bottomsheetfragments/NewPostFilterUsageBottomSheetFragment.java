@@ -11,6 +11,7 @@ import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment;
 import ml.docilealligator.infinityforreddit.databinding.FragmentNewPostFilterUsageBottomSheetBinding;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsageGroups;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class NewPostFilterUsageBottomSheetFragment extends LandscapeExpandedRoundedBottomSheetDialogFragment {
@@ -38,6 +39,11 @@ public class NewPostFilterUsageBottomSheetFragment extends LandscapeExpandedRoun
                              @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         FragmentNewPostFilterUsageBottomSheetBinding binding = FragmentNewPostFilterUsageBottomSheetBinding.inflate(inflater, container, false);
+
+        binding.allFeedsTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
+            host.newPostFilterUsage(PostFilterUsageGroups.ALL_FEEDS_TYPE);
+            dismiss();
+        });
 
         binding.homeTextViewNewPostFilterUsageBottomSheetFragment.setOnClickListener(view -> {
             host.newPostFilterUsage(PostFilterUsage.HOME_TYPE);

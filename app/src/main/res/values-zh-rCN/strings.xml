@@ -1427,7 +1427,6 @@ Reddit 视频分辨率较低。
     <string name="post_filter_usage_search">"搜索"</string>
     <string name="subreddit">"版块"</string>
     <string name="user">"用户"</string>
-    <string name="edit_post_filter_name_of_usage_info">"留空可将此帖子过滤器应用于所有版块、用户或 MultiReddit"</string>
     <string name="click_to_apply_post_filter">"单击此处将其应用于某些帖子提要"</string>
     <string name="post_filter_usage_embedded_more_count">"和 %1$d 更多"</string>
     <string name="post_filter_name_explanation">"后置过滤器名称应该是唯一的。"</string>
@@ -1896,4 +1895,6 @@ Reddit 视频分辨率较低。
     <string name="reminder_reliability_notice_device_settings_description">"某些手机（如Xiaomi、Oppo或Vivo）要求您在手机的系统设置中打开“自动启动”或“后台应用程序启动”。否则，如果您的手机重新启动，提醒将停止工作。"</string>
     <string name="reminder_set">"已设置提醒"</string>
     <string name="reminder">"提醒"</string>
+    <string name="post_filter_usage_subreddits">"版块"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>

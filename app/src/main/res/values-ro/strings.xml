@@ -1431,7 +1431,6 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="post_filter_usage_search">"Căutare"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Utilizator"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Lasă-l gol pentru a aplica acest filtru de postări la toate subreddit-urile / utilizatorii / multireddit-uri"</string>
     <string name="click_to_apply_post_filter">"Fă clic aici pentru a-l aplica unor postări"</string>
     <string name="post_filter_usage_embedded_more_count">"și %1$d mai mult"</string>
     <string name="post_filter_name_explanation">"Numele filtrului post trebuie să fie unic."</string>
@@ -1902,4 +1901,6 @@ Apasă pentru a reîncerca."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Unele telefoane (cum ar fi Xiaomi, Oppo sau Vivo) necesită să activezi „Pornire automată” sau „Lansare aplicație în fundal” în setările de sistem ale telefonului tău. În caz contrar, mementourile nu vor mai funcționa dacă telefonul repornește."</string>
     <string name="reminder_set">"Memento setat"</string>
     <string name="reminder">"Memento"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(uri)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(uri)"</string>
 </resources>

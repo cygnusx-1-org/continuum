@@ -28,7 +28,9 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostFilterShowOnlyBi
 import ml.docilealligator.infinityforreddit.postfilter.FilterRule
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterRange
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterRuleKinds
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsageGroups
 import ml.docilealligator.infinityforreddit.postfilter.RuleField
 import ml.docilealligator.infinityforreddit.postfilter.SubredditMatchMode
 import java.util.Locale
@@ -58,6 +60,9 @@ class PostFilterRulesRecyclerViewAdapter(
         fun onUsageClicked(usage: PostFilterUsage)
 
         fun onUsageRemoved(usage: PostFilterUsage)
+
+        /** The grouped chip's X: every feed [PostFilterUsageGroups] stands for goes at once. */
+        fun onAllFeedsUsageRemoved()
 
         fun onRuleClicked(rule: FilterRule)
 
@@ -108,12 +113,16 @@ class PostFilterRulesRecyclerViewAdapter(
     private var blockedCounts: Map<String, Int> = emptyMap()
 
     /**
-     * A wildcard subreddit rule only ever runs on r/ContinuumAll, so a filter that has one is pinned
+     * A wildcard subreddit rule only ever runs on r/ContinuumAll, so a filter holding one is pinned
      * to that feed alone. Letting it also apply to Home would produce a filter that is half inert
      * there, with nothing on screen to say which half.
+     *
+     * One such rule is enough, including in a mixed filter saved before [PostFilterRuleKinds] kept
+     * the two kinds apart. The way out is the same either way: delete the wildcard rule, which the
+     * summary says, and the feeds become editable again.
      */
-    private val hasWildcardRule: Boolean
-        get() = rules.any { it.field == RuleField.SUBREDDIT && it.matchMode.isWildcard }
+    private val isPinnedToContinuumAll: Boolean
+        get() = PostFilterRuleKinds.hasWildcard(rules)
 
     /** Display-only: which header chips the user has checked. Never affects what gets saved. */
     private val checkedPolarities = LinkedHashSet<Boolean>()
@@ -144,7 +153,7 @@ class PostFilterRulesRecyclerViewAdapter(
         checkedFields.retainAll { field -> rules.any { it.field == field } }
         refreshTail()
         rulesHeaderBinding?.let { bindRulesHeaderChips(it) }
-        // Adding or removing a wildcard rule locks or unlocks "Applies to", so it rebinds too.
+        // Adding or removing a rule can lock or unlock "Applies to", so it rebinds too.
         appliesToBinding?.let { bindUsageChips(it) }
     }
 
@@ -255,24 +264,50 @@ class PostFilterRulesRecyclerViewAdapter(
     // region Applies to
 
     private fun bindUsageChips(binding: ItemPostFilterAppliesToBinding) {
-        val locked = hasWildcardRule
+        val locked = isPinnedToContinuumAll
         binding.summaryTextViewItemPostFilterAppliesTo.setText(
             if (locked) R.string.post_filter_applies_to_summary_locked else R.string.post_filter_applies_to_summary
         )
         val chipGroup = binding.chipGroupItemPostFilterAppliesTo
         chipGroup.removeAllViews()
+        // Home, all subreddits, all users and all MultiReddits are four rows but one intent, and
+        // four chips saying so read as clutter rather than as coverage.
+        val grouped = PostFilterUsageGroups.coversAllFeeds(usages)
+        if (grouped) {
+            val groupLabel = activity.getString(R.string.post_filter_usage_all_feeds)
+            val groupChip = chipStyler.inflate(chipGroup, R.layout.chip_post_filter_usage)
+            groupChip.text = groupLabel
+            // Nothing to rename — the group is every feed of each kind — so only the X is live.
+            groupChip.isClickable = false
+            groupChip.isCloseIconVisible = !locked
+            groupChip.setCloseIconContentDescription(
+                activity.getString(R.string.content_description_remove_post_filter_rule, groupLabel)
+            )
+            if (!locked) {
+                groupChip.setOnCloseIconClickListener { callback.onAllFeedsUsageRemoved() }
+            }
+            chipGroup.addView(groupChip)
+        }
         for (usage in usages) {
+            if (grouped && PostFilterUsageGroups.isAllFeedsMember(usage)) {
+                continue
+            }
             val label = usageLabel(usage)
             val chip = chipStyler.inflate(chipGroup, R.layout.chip_post_filter_usage)
             chip.text = label
-            // While locked the feed cannot be removed either: with "Add feed" gone there would be no
-            // way to put it back short of deleting the rule that caused the lock.
+            // While locked the feed can be neither removed nor renamed: with "Add feed" gone there
+            // would be no way to put it back short of deleting the rules that caused the lock, which
+            // is the trap issue #426 was reported from — r/ContinuumAll edited to something else,
+            // and then nothing on screen to edit it back with.
             chip.isCloseIconVisible = !locked
             chip.setCloseIconContentDescription(
                 activity.getString(R.string.content_description_remove_post_filter_rule, label)
             )
-            chip.setOnClickListener { callback.onUsageClicked(usage) }
-            chip.setOnCloseIconClickListener { callback.onUsageRemoved(usage) }
+            chip.isClickable = !locked
+            if (!locked) {
+                chip.setOnClickListener { callback.onUsageClicked(usage) }
+                chip.setOnCloseIconClickListener { callback.onUsageRemoved(usage) }
+            }
             chipGroup.addView(chip)
         }
         if (locked) {

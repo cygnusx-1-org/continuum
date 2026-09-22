@@ -1413,7 +1413,6 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="post_filter_usage_search">"Pretraži"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Korisnik"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Ostavi polje praznim da biste primijenili ovaj filtar objava na sve podreddite / korisnike / multireddite"</string>
     <string name="click_to_apply_post_filter">"Klikni ovdje da biste ga primijenili na neke feedove objava"</string>
     <string name="post_filter_usage_embedded_more_count">"i %1$d više"</string>
     <string name="post_filter_name_explanation">"Naziv filtra objave treba biti jedinstven."</string>
@@ -1881,4 +1880,6 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="reminder_reliability_notice_device_settings_description">"Neki telefoni (kao što su Xiaomi, Oppo ili Vivo) zahtijevaju da uključi \"Automatsko pokretanje\" ili \"Pokretanje aplikacije u pozadini\" u postavkama sustava vašeg telefona. U suprotnom, podsjetnici će prestati raditi ako se vaš telefon ponovo pokrene."</string>
     <string name="reminder_set">"Podsjetnik postavljen"</string>
     <string name="reminder">"Podsjetnik"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(i)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(i)"</string>
 </resources>

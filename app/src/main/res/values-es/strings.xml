@@ -1430,7 +1430,6 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="post_filter_usage_search">"Búsqueda"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Usuario"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Dejar vacío para aplicar este filtro de publicaciones a todos los subreddits / usuarios / multireddits"</string>
     <string name="click_to_apply_post_filter">"Haga clic aquí para aplicarlo a algunas publicaciones."</string>
     <string name="post_filter_usage_embedded_more_count">"y %1$d más"</string>
     <string name="post_filter_name_explanation">"El nombre del filtro de publicaciones debe ser único."</string>
@@ -1901,4 +1900,6 @@ Toque para volver a intentarlo."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Algunos teléfonos (como Xiaomi, Oppo o Vivo) requieren que actives el \"Inicio automático\" o el \"Inicio de aplicación en segundo plano\" en la configuración del sistema de tu teléfono. De lo contrario, los recordatorios dejarán de funcionar si el teléfono se reinicia."</string>
     <string name="reminder_set">"Recordatorio programado"</string>
     <string name="reminder">"Recordatorio"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(s)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(s)"</string>
 </resources>

@@ -1427,7 +1427,6 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="post_filter_usage_search">"Zoeken"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Gebruiker"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Houd leeg om deze post filter toe te passen op subreddits / gebruikers / multireddits"</string>
     <string name="click_to_apply_post_filter">"Klik hier om het op sommige berichtfeeds toe te passen"</string>
     <string name="post_filter_usage_embedded_more_count">"en %1$d meer"</string>
     <string name="post_filter_name_explanation">"De postfilternaam moet uniek zijn."</string>
@@ -1893,4 +1892,6 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Bij sommige telefoons (zoals Xiaomi, Oppo of Vivo) moet je \"Automatisch starten\" of \"Achtergrondapp starten\" inschakelen in de systeeminstellingen van je telefoon. Anders werken herinneringen niet meer nadat je telefoon opnieuw is opgestart."</string>
     <string name="reminder_set">"Herinnering ingesteld"</string>
     <string name="reminder">"Herinnering"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(s)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(s)"</string>
 </resources>

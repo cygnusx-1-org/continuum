@@ -1421,7 +1421,6 @@
     <string name="post_filter_usage_search">"खोजें"</string>
     <string name="subreddit">"सबरेडिट"</string>
     <string name="user">"उपयोगकर्ता"</string>
-    <string name="edit_post_filter_name_of_usage_info">"इस पोस्ट फ़िल्टर को सभी सबरेडिट्स/उपयोगकर्ताओं/MultiReddit पर लागू करने के लिए इसे खाली छोड़ दें"</string>
     <string name="click_to_apply_post_filter">"इसे कुछ पोस्ट फ़ीड पर लागू करने के लिए यहां क्लिक करें"</string>
     <string name="post_filter_usage_embedded_more_count">"और %1$d अधिक"</string>
     <string name="post_filter_name_explanation">"पोस्ट फ़िल्टर नाम अद्वितीय होना चाहिए."</string>
@@ -1887,4 +1886,6 @@
     <string name="reminder_reliability_notice_device_settings_description">"कुछ फ़ोन (जैसे Xiaomi, Oppo, या Vivo) के लिए आपको अपने फ़ोन की सिस्टम सेटिंग्स में \"ऑटो-स्टार्ट\" या \"बैकग्राउंड ऐप लॉन्च\" चालू करना होगा। अन्यथा, यदि आपका फ़ोन पुनः प्रारंभ होता है तो अनुस्मारक काम करना बंद कर देंगे।"</string>
     <string name="reminder_set">"रिमाइंडर सेट हो गया"</string>
     <string name="reminder">"रिमाइंडर"</string>
+    <string name="post_filter_usage_subreddits">"सबरेडिट"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>

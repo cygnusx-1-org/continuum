@@ -17,6 +17,7 @@ import ml.docilealligator.infinityforreddit.customviews.FilterChipStyler
 import ml.docilealligator.infinityforreddit.customviews.LandscapeExpandedRoundedBottomSheetDialogFragment
 import ml.docilealligator.infinityforreddit.databinding.FragmentAddPostFilterRuleBottomSheetBinding
 import ml.docilealligator.infinityforreddit.postfilter.FilterRule
+import ml.docilealligator.infinityforreddit.postfilter.PostFilterRuleKinds
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterRules
 import ml.docilealligator.infinityforreddit.postfilter.RuleField
 import ml.docilealligator.infinityforreddit.postfilter.SubredditMatchMode
@@ -32,6 +33,10 @@ import java.util.regex.PatternSyntaxException
  * where the validation those boxes never did now lives — an unusable regex or a comma that the
  * comma-separated storage would silently split into two terms is refused here, as you type, rather
  * than surfacing as a toast on save or as a filter that quietly matches the wrong thing.
+ *
+ * [PostFilterRuleKinds] is enforced the same way: a chip for a kind of rule this filter cannot hold
+ * is disabled rather than allowed and then rejected, with the line under the match chips saying
+ * why.
  */
 class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheetDialogFragment() {
 
@@ -47,13 +52,6 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
          * The host takes over: the sheet is already dismissed by the time this is called.
          */
         fun onRuleValuePickerRequested(field: RuleField, exclude: Boolean)
-
-        /**
-         * A wildcard match type was picked, so the filter needs to apply to r/ContinuumAll — the
-         * only feed those run on. The host adds it to "Applies to" rather than the sheet refusing
-         * the rule, so choosing the match type is the whole interaction.
-         */
-        fun onWildcardMatchChosen()
     }
 
     companion object {
@@ -74,6 +72,14 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
     private var selectedField = RuleField.SUBREDDIT
     private var exclude = true
     private var matchMode = SubredditMatchMode.EXACT
+
+    /**
+     * Which kinds of rule this filter can still take, from what is already in it — see
+     * [PostFilterRuleKinds]. Both are true for an empty filter, and for the filter that holds
+     * nothing but the rule being edited, which is how a filter converts from one kind to the other.
+     */
+    private var wildcardAllowed = true
+    private var plainAllowed = true
 
     /** The match chips' listener fires while they are being re-synced; ignore those. */
     private var bindingMatchChips = false
@@ -109,6 +115,24 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
             ?: editedRule?.matchMode
             ?: SubredditMatchMode.EXACT
 
+        val editedIsWildcard = editedRule?.let { PostFilterRuleKinds.isWildcard(it) }
+        val otherRules = editedRule
+            ?.let { edited -> existingRules.filterNot { it.isSameTermAs(edited) } }
+            ?: existingRules
+        wildcardAllowed =
+            editedIsWildcard == true || otherRules.none { !PostFilterRuleKinds.isWildcard(it) }
+        plainAllowed =
+            editedIsWildcard == false || otherRules.none { PostFilterRuleKinds.isWildcard(it) }
+        if (!plainAllowed) {
+            // Nothing but a wildcard subreddit rule can go in, so the sheet opens on one rather than
+            // on a field the user would find disabled. 'Contains' because a filter of these is being
+            // built to sweep, and it is the mode the other two are narrowings of.
+            selectedField = RuleField.SUBREDDIT
+            if (!matchMode.isWildcard) {
+                matchMode = SubredditMatchMode.CONTAINS
+            }
+        }
+
         val primaryTextColor = customThemeWrapper.primaryTextColor
         val secondaryTextColor = customThemeWrapper.secondaryTextColor
         binding.titleTextViewAddPostFilterRuleBottomSheetFragment.setText(
@@ -120,8 +144,6 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         binding.fieldLabelTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
         binding.matchLabelTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
         binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment.setTextColor(secondaryTextColor)
-        binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment.text =
-            getString(R.string.post_filter_match_explanation, Constants.CONTINUUM_ALL_SUBREDDIT)
         binding.valueTextInputLayoutAddPostFilterRuleBottomSheetFragment.boxStrokeColor = primaryTextColor
         binding.valueTextInputLayoutAddPostFilterRuleBottomSheetFragment.defaultHintTextColor =
             ColorStateList.valueOf(primaryTextColor)
@@ -147,6 +169,8 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
             chip.text = getString(fieldLabelRes(field))
             chip.tag = field
             chip.isChecked = field == selectedField
+            // Only a subreddit rule can be a wildcard one, so every other field is a plain rule.
+            setChipEnabled(chip, plainAllowed || field == RuleField.SUBREDDIT)
             fieldChipGroup.addView(chip)
         }
         fieldChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
@@ -162,6 +186,7 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
             chip.text = getString(matchLabelRes(mode))
             chip.tag = mode
             chip.isChecked = mode == matchMode
+            setChipEnabled(chip, if (mode.isWildcard) wildcardAllowed else plainAllowed)
             matchChipGroup.addView(chip)
         }
         matchChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
@@ -195,11 +220,7 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         binding.saveTextViewAddPostFilterRuleBottomSheetFragment.setOnClickListener {
             if (validate()) {
                 val rule = FilterRule(selectedField, exclude, storedValue())
-                val scopeNeeded = rule.matchMode.isWildcard
                 dismiss()
-                if (scopeNeeded) {
-                    host.onWildcardMatchChosen()
-                }
                 host.onRuleSubmitted(editedRule, rule)
             }
         }
@@ -247,16 +268,44 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         val matchVisibility = if (subredditRule) View.VISIBLE else View.GONE
         binding.matchLabelTextViewAddPostFilterRuleBottomSheetFragment.visibility = matchVisibility
         binding.matchChipGroupAddPostFilterRuleBottomSheetFragment.visibility = matchVisibility
-        binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment.visibility =
-            if (subredditRule && matchMode.isWildcard) View.VISIBLE else View.GONE
+        bindMatchSummary(subredditRule)
         binding.valueTextInputEditTextAddPostFilterRuleBottomSheetFragment.hint = getString(hintRes(selectedField))
         binding.polaritySummaryTextViewAddPostFilterRuleBottomSheetFragment.setText(
             if (exclude) R.string.post_filter_rule_exclude_summary else R.string.post_filter_rule_include_summary
         )
-        // Only subreddits and users have a picker to bulk-select from.
+        // Only subreddits and users have a picker to bulk-select from, and everything it returns is
+        // a whole name — so it has nothing to offer a filter that can only take wildcard rules.
+        val pickable = selectedField == RuleField.SUBREDDIT || selectedField == RuleField.USER
         binding.pickImageViewAddPostFilterRuleBottomSheetFragment.visibility =
-            if (selectedField == RuleField.SUBREDDIT || selectedField == RuleField.USER) View.VISIBLE else View.GONE
+            if (pickable && plainAllowed) View.VISIBLE else View.GONE
         validate()
+    }
+
+    /**
+     * The line under the match chips: why a match type is unavailable, if one is, and otherwise the
+     * standing explanation of what a wildcard match does once it is picked.
+     */
+    private fun bindMatchSummary(subredditRule: Boolean) {
+        val summary = binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment
+        val text = when {
+            !subredditRule -> null
+            !plainAllowed -> getString(R.string.post_filter_match_required, Constants.CONTINUUM_ALL_SUBREDDIT)
+            !wildcardAllowed -> getString(R.string.post_filter_match_unavailable, Constants.CONTINUUM_ALL_SUBREDDIT)
+            matchMode.isWildcard ->
+                getString(R.string.post_filter_match_explanation, Constants.CONTINUUM_ALL_SUBREDDIT)
+            else -> null
+        }
+        summary.text = text.orEmpty()
+        summary.visibility = if (text == null) View.GONE else View.VISIBLE
+    }
+
+    /**
+     * The alpha is the whole of the disabled look: the colour states [FilterChipStyler] installs
+     * have no disabled entry, so a chip that cannot be picked otherwise looks like one that can.
+     */
+    private fun setChipEnabled(chip: Chip, enabled: Boolean) {
+        chip.isEnabled = enabled
+        chip.alpha = if (enabled) 1f else 0.5f
     }
 
     /** Returns true when the current input is a rule that can be stored, and shows why when not. */
@@ -276,11 +325,17 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
             else -> null
         }
         binding.valueTextInputLayoutAddPostFilterRuleBottomSheetFragment.error = error
-        val valid = value.isNotEmpty() && error == null
+        // The chips already rule out a rule of the kind this filter cannot take, and the line under
+        // them says why; this is the backstop, so it withholds OK rather than repeating the message.
+        val valid = value.isNotEmpty() && error == null && acceptedByFilter()
         binding.saveTextViewAddPostFilterRuleBottomSheetFragment.isEnabled = valid
         binding.saveTextViewAddPostFilterRuleBottomSheetFragment.alpha = if (valid) 1f else 0.5f
         return valid
     }
+
+    private fun acceptedByFilter(): Boolean = PostFilterRuleKinds.accepts(
+        existingRules, FilterRule(selectedField, exclude, storedValue()), editedRule
+    )
 
     private fun isDuplicate(value: String): Boolean {
         val candidate = FilterRule(selectedField, exclude, storedValue())

@@ -1428,7 +1428,6 @@ https://play.google.com/store/"</string>
     <string name="post_filter_usage_search">"Cerca"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Utente"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Lascia vuoto per applicare questo filtro post a tutti i subreddit / utenti / multireddit"</string>
     <string name="click_to_apply_post_filter">"Fare clic qui per applicarlo ad alcuni feed di post"</string>
     <string name="post_filter_usage_embedded_more_count">"e %1$d altro"</string>
     <string name="post_filter_name_explanation">"Il nome del filtro post deve essere univoco."</string>
@@ -1901,4 +1900,6 @@ Non preoccupatevi, potete ancora godervi Continuum."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Alcuni telefoni (come Xiaomi, Oppo o Vivo) richiedono l'attivazione di \"Avvio automatico\" o \"Avvio app in background\" nelle impostazioni di sistema del telefono. Altrimenti, i promemoria smetteranno di funzionare se il telefono si riavvia."</string>
     <string name="reminder_set">"Promemoria impostato"</string>
     <string name="reminder">"Promemoria"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>

@@ -12,7 +12,7 @@
         android:paddingBottom="16dp"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
-        android:text="@string/edit_post_filter_name_of_usage_info"
+        android:text="@string/filter_name_of_usage_info_subreddit"
         android:textColor="?attr/primaryTextColor"
         android:textSize="?attr/font_default"
         android:fontFamily="?attr/font_family" />

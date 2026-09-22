@@ -1431,7 +1431,6 @@ https://play.google.com/store/"</string>
     <string name="post_filter_usage_search">"Пошук"</string>
     <string name="subreddit">"Сабредит"</string>
     <string name="user">"Користувач"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Залиште порожнім, щоб застосувати цей фільтр дописів для всіх сабредитів / користувачів / MultiReddit"</string>
     <string name="click_to_apply_post_filter">"Натисни тут, щоб застосувати його до деяких каналів публікацій"</string>
     <string name="post_filter_usage_embedded_more_count">"та %1$d інші"</string>
     <string name="post_filter_name_explanation">"Назва фільтра публікації має бути унікальною."</string>
@@ -1904,4 +1903,6 @@ https://play.google.com/store/"</string>
     <string name="reminder_reliability_notice_device_settings_description">"Деякі телефони (наприклад, Xiaomi, Oppo або Vivo) вимагають увімкнути «Автозапуск» або «Фоновий запуск програми» в системних налаштуваннях телефону. Інакше нагадування перестануть працювати, якщо телефон перезавантажиться."</string>
     <string name="reminder_set">"Нагадування встановлено"</string>
     <string name="reminder">"Нагадування"</string>
+    <string name="post_filter_usage_subreddits">"Сабредит(и)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(и)"</string>
 </resources>

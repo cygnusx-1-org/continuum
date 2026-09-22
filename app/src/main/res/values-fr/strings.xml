@@ -1417,7 +1417,6 @@ Basé sur le thème sombre Indigo"</string>
     <string name="post_filter_usage_search">"Rechercher"</string>
     <string name="subreddit">"Sous-reddit"</string>
     <string name="user">"Utilisateur"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Laissez-le vide pour appliquer ce filtre de publication à tous les subreddits / utilisateurs / multireddits"</string>
     <string name="click_to_apply_post_filter">"Cliquez ici pour l'appliquer à certains flux de publications"</string>
     <string name="post_filter_usage_embedded_more_count">"et %1$d plus"</string>
     <string name="post_filter_name_explanation">"Le nom du post-filtre doit être unique."</string>
@@ -1889,4 +1888,6 @@ Cliquez pour réessayer."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Certains téléphones (comme Xiaomi, Oppo ou Vivo) exigent que tu actives le « Démarrage automatique » ou le « Lancement d’application en arrière-plan » dans les paramètres système de ton téléphone. Sinon, les rappels cesseront de fonctionner si ton téléphone redémarre."</string>
     <string name="reminder_set">"Rappel programmé"</string>
     <string name="reminder">"Rappel"</string>
+    <string name="post_filter_usage_subreddits">"Sous-reddit(s)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(s)"</string>
 </resources>

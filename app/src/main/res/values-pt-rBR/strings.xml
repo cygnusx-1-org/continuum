@@ -1432,7 +1432,6 @@ Ela não está doente ou algo assim, mas definitivamente poderia melhorar."</str
     <string name="post_filter_usage_search">"Pesquisar"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Usuário"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Deixe vazio para aplicar o filtro da postagem a todo MultiReddit/subreddit/usuário"</string>
     <string name="click_to_apply_post_filter">"Clique aqui para aplicá-lo a alguns feeds de postagem"</string>
     <string name="post_filter_usage_embedded_more_count">"e %1$d mais"</string>
     <string name="post_filter_name_explanation">"O nome do pós-filtro deve ser exclusivo."</string>
@@ -1904,4 +1903,6 @@ Toque para tentar novamente."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Alguns telefones (como Xiaomi, Oppo ou Vivo) exigem que você ative o \"Início automático\" ou \"Início do aplicativo em segundo plano\" nas configurações do sistema do seu telefone. Caso contrário, os lembretes deixarão de funcionar se o telefone for reiniciado."</string>
     <string name="reminder_set">"Lembrete definido"</string>
     <string name="reminder">"Lembrete"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(s)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(s)"</string>
 </resources>

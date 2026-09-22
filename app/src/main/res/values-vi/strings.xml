@@ -1424,7 +1424,6 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="post_filter_usage_search">"Tìm kiếm"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Người dùng"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Để trống để áp dụng bộ lọc bài đăng này vào tất cả subreddit / người dùng / multireddit"</string>
     <string name="click_to_apply_post_filter">"Nhấp vào đây để áp dụng nó cho một số nguồn cấp dữ liệu bài đăng"</string>
     <string name="post_filter_usage_embedded_more_count">"và %1$d hơn thế nữa"</string>
     <string name="post_filter_name_explanation">"Tên bộ lọc bài đăng phải là duy nhất."</string>
@@ -1891,4 +1890,6 @@ Nhấn để thử lại."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Một số điện thoại (như Xiaomi, Oppo hoặc Vivo) yêu cầu bạn bật \"Tự động khởi động\" hoặc \"Khởi chạy ứng dụng nền\" trong cài đặt hệ thống của điện thoại. Nếu không, lời nhắc sẽ ngừng hoạt động nếu điện thoại của bạn khởi động lại."</string>
     <string name="reminder_set">"Đã đặt lời nhắc"</string>
     <string name="reminder">"Lời nhắc"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>

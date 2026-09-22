@@ -1416,7 +1416,6 @@
     <string name="post_filter_usage_search">"தேடு"</string>
     <string name="subreddit">"துணைரெட்டிட்"</string>
     <string name="user">"பயனர்"</string>
-    <string name="edit_post_filter_name_of_usage_info">"அனைத்து சப்ரெடிட்கள் / பயனர்கள் / மல்டிரெடிட்களுக்கு இந்த இடுகை வடிப்பானைப் பயன்படுத்த அதை காலியாக விடவும்"</string>
     <string name="click_to_apply_post_filter">"சில இடுகை ஊட்டங்களுக்குப் பயன்படுத்த இங்கே கிளிக் செய்யவும்"</string>
     <string name="post_filter_usage_embedded_more_count">"மற்றும் %1$d மேலும்"</string>
     <string name="post_filter_name_explanation">"இடுகை வடிப்பான் பெயர் தனிப்பட்டதாக இருக்க வேண்டும்."</string>
@@ -1882,4 +1881,6 @@
     <string name="reminder_reliability_notice_device_settings_description">"சில ஃபோன்களுக்கு (Xiaomi, Oppo, அல்லது Vivo போன்றவை) உங்கள் ஃபோனின் சிஸ்டம் அமைப்புகளில் \"தானியங்கு-தொடக்கம்\" அல்லது \"பின்னணி பயன்பாட்டு வெளியீடு\" என்பதை இயக்க வேண்டும். இல்லையெனில், உங்கள் தொலைபேசி மறுதொடக்கம் செய்யப்பட்டால் நினைவூட்டல்கள் வேலை செய்வதை நிறுத்திவிடும்."</string>
     <string name="reminder_set">"நினைவூட்டல் அமைக்கப்பட்டது"</string>
     <string name="reminder">"நினைவூட்டல்"</string>
+    <string name="post_filter_usage_subreddits">"துணைரெட்டிட்(கள்)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>

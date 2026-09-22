@@ -1427,7 +1427,6 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="post_filter_usage_search">"Ara"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Kullanıcı"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Bu gönderi filtresini tüm subreddit'lere / kullanıcılara / multireddit'lere uygulamak için boş bırakın"</string>
     <string name="click_to_apply_post_filter">"Bazı gönderi akışlarına uygulamak için burayı tıklayın"</string>
     <string name="post_filter_usage_embedded_more_count">"ve %1$d daha fazlası"</string>
     <string name="post_filter_name_explanation">"Son filtre adı benzersiz olmalıdır."</string>
@@ -1897,4 +1896,6 @@ Tekrar denemek için dokun."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Bazı telefonlar (Xiaomi, Oppo veya Vivo gibi), telefonunun sistem ayarlarında \"Otomatik başlatma\" veya \"Arka Planda Uygulama Başlatma\" özelliğini açmanı gerektirir. Aksi takdirde telefonun yeniden başlatılırsa hatırlatıcılar çalışmayı durdurur."</string>
     <string name="reminder_set">"Hatırlatıcı ayarlandı"</string>
     <string name="reminder">"Hatırlatıcı"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(ler)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(ler)"</string>
 </resources>

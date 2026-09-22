@@ -1423,7 +1423,6 @@
     <string name="post_filter_usage_search">"Αναζήτηση"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Χρήστης"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Άφησε κενό για να γίνει εφαρμογή του φίλτρου ανάρτησης σε όλα τα subreddit/multireddits/χρήστες"</string>
     <string name="click_to_apply_post_filter">"Κάνε κλικ εδώ για να το εφαρμόσεις σε ορισμένες ροές αναρτήσεων"</string>
     <string name="post_filter_usage_embedded_more_count">"και %1$d ακόμη"</string>
     <string name="post_filter_name_explanation">"Το όνομα του φίλτρου ανάρτησης πρέπει να είναι μοναδικό."</string>
@@ -1894,4 +1893,6 @@
     <string name="reminder_reliability_notice_device_settings_description">"Ορισμένα τηλέφωνα (όπως Xiaomi, Oppo ή Vivo) απαιτούν να ενεργοποιήσεις την \"Αυτόματη εκκίνηση\" ή την \"Εκκίνηση εφαρμογής στο παρασκήνιο\" στις ρυθμίσεις συστήματος του τηλεφώνου σου. Διαφορετικά, οι υπενθυμίσεις θα σταματήσουν να λειτουργούν εάν γίνει επανεκκίνηση του τηλεφώνου σου."</string>
     <string name="reminder_set">"Η υπενθύμιση ορίστηκε"</string>
     <string name="reminder">"Υπενθύμιση"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(s)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(s)"</string>
 </resources>

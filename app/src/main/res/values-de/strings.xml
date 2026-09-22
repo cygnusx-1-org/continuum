@@ -1430,7 +1430,6 @@ Sie ist nicht krank oder so, aber sie könnte sich definitiv bessern."</string>
     <string name="post_filter_usage_search">"Suche"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Benutzer"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Leer lassen, um diesen Beitragsfilter auf alle Subreddits / Benutzer / MultiReddits anzuwenden"</string>
     <string name="click_to_apply_post_filter">"Tippe hier, um ihn auf einige Beitrags-Feeds anzuwenden"</string>
     <string name="post_filter_usage_embedded_more_count">"und %1$d mehr"</string>
     <string name="post_filter_name_explanation">"Der Postfiltername sollte eindeutig sein."</string>
@@ -1901,4 +1900,6 @@ Keine Sorge, du kannst Continuum trotzdem genießen."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Bei einigen Telefonen (etwa Xiaomi, Oppo oder Vivo) musst du in den Systemeinstellungen deines Telefons „Autostart“ oder „App-Start im Hintergrund“ aktivieren. Sonst funktionieren Erinnerungen nach einem Neustart des Telefons nicht mehr."</string>
     <string name="reminder_set">"Erinnerung eingerichtet"</string>
     <string name="reminder">"Erinnerung"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(s)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(s)"</string>
 </resources>

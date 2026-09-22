@@ -1426,7 +1426,6 @@ https://play.google.com/store/"</string>
     <string name="post_filter_usage_search">"検索"</string>
     <string name="subreddit">"サブレディット"</string>
     <string name="user">"ユーザー"</string>
-    <string name="edit_post_filter_name_of_usage_info">"この投稿フィルターを全てのSubreddit / ユーザー / MultiReddit に適用するには空のままにしてください"</string>
     <string name="click_to_apply_post_filter">"一部の投稿フィードに適用するにはここをクリックしてください"</string>
     <string name="post_filter_usage_embedded_more_count">"と %1$d 詳細"</string>
     <string name="post_filter_name_explanation">"ポストフィルター名は一意である必要があります。"</string>
@@ -1890,4 +1889,6 @@ https://play.google.com/store/"</string>
     <string name="reminder_reliability_notice_device_settings_description">"一部の携帯電話 (Xiaomi、Oppo、または Vivo など) では、携帯電話のシステム設定で「自動起動」または「バックグラウンドでのアプリの起動」をオンにする必要があります。そうしないと、携帯電話が再起動するとリマインダーが機能しなくなります。"</string>
     <string name="reminder_set">"リマインダーを設定しました"</string>
     <string name="reminder">"リマインダー"</string>
+    <string name="post_filter_usage_subreddits">"サブレディット"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>

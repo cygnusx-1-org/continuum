@@ -1423,7 +1423,6 @@ Nie jest chora ani nic, ale na pewno może stać się lepsza."</string>
     <string name="post_filter_usage_search">"Szukaj"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Użytkownik"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Pozostaw puste, aby zastosować ten filtr postów do wszystkich subredditów / użytkowników / multiredditów"</string>
     <string name="click_to_apply_post_filter">"Kliknij tutaj, aby zastosować go do niektórych kanałów postów"</string>
     <string name="post_filter_usage_embedded_more_count">"i %1$d więcej"</string>
     <string name="post_filter_name_explanation">"Nazwa filtra pocztowego powinna być unikalna."</string>
@@ -1895,4 +1894,6 @@ Kliknij by spróbować ponownie."</string>
     <string name="reminder_reliability_notice_device_settings_description">"Niektóre telefony (np. Xiaomi, Oppo lub Vivo) wymagają włączenia opcji „Automatyczny start” lub „Uruchamianie aplikacji w tle” w ustawieniach systemowych telefonu. W przeciwnym razie przypomnienia przestaną działać po ponownym uruchomieniu telefonu."</string>
     <string name="reminder_set">"Przypomnienie ustawione"</string>
     <string name="reminder">"Przypomnienie"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit(y)"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit(y)"</string>
 </resources>

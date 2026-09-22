@@ -1419,7 +1419,6 @@
     <string name="post_filter_usage_search">"검색"</string>
     <string name="subreddit">"서브레딧"</string>
     <string name="user">"사용자"</string>
-    <string name="edit_post_filter_name_of_usage_info">"이 게시물 필터를 모든 하위 레딧/사용자/멀티 레딧에 적용하려면 비워 두세요."</string>
     <string name="click_to_apply_post_filter">"일부 게시물 피드에 적용하려면 여기를 클릭하세요."</string>
     <string name="post_filter_usage_embedded_more_count">"외 %1$d"</string>
     <string name="post_filter_name_explanation">"포스트 필터 이름은 고유해야 합니다."</string>
@@ -1883,4 +1882,6 @@
     <string name="reminder_reliability_notice_device_settings_description">"일부 휴대폰(예: Xiaomi, Oppo 또는 Vivo)의 경우 휴대폰 시스템 설정에서 \"자동 시작\" 또는 \"백그라운드 앱 실행\"을 켜야 합니다. 그렇지 않으면 휴대전화가 다시 시작되면 알림 작동이 중지됩니다."</string>
     <string name="reminder_set">"알림이 설정되었습니다"</string>
     <string name="reminder">"알림"</string>
+    <string name="post_filter_usage_subreddits">"서브레딧"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>

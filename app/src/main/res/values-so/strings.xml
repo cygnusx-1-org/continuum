@@ -1409,7 +1409,6 @@
     <string name="post_filter_usage_search">"raadinta"</string>
     <string name="subreddit">"Subreddit"</string>
     <string name="user">"Isticmaalaha"</string>
-    <string name="edit_post_filter_name_of_usage_info">"Bannaan ku daa si aad u mariso shaandhaynta boostada dhammaan isticmaalayaasha / isticmaalayaasha badan"</string>
     <string name="click_to_apply_post_filter">"Riix halkan si aad ugu dabaqdo quudinta boostada qaarkood"</string>
     <string name="post_filter_usage_embedded_more_count">"iyo %1$d ka badan"</string>
     <string name="post_filter_name_explanation">"Magaca filtarka boostada waa inuu ahaado mid gaar ah."</string>
@@ -1875,4 +1874,6 @@
     <string name="reminder_reliability_notice_device_settings_description">"Taleefanka qaarkood (sida Xiaomi, Oppo, ama Vivo) waxay kaaga baahan yihiin inaad shido \"Auto-start\" ama \"Background App Launch\" ee nidaamka telefoonkaaga. Haddii kale, xusuusiyayaashu way joojin doonaan shaqada haddii taleefankaagu dib u bilaabo."</string>
     <string name="reminder_set">"Xusuusinta waa la dejiyay"</string>
     <string name="reminder">"Xusuusin"</string>
+    <string name="post_filter_usage_subreddits">"Subreddit"</string>
+    <string name="post_filter_usage_multireddits">"MultiReddit"</string>
 </resources>
