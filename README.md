@@ -66,6 +66,7 @@ See [DEBUGGING](/DEBUGGING.md)
 # Installation
 You can easily install and update Continuum with [Discoverium](https://github.com/cygnusx-1-org/Discoverium/) via its search button.
 <p align="left">
+    <a href="https://github.com/cygnusx-1-org/Discoverium/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="assets/badges/discoverium.png" height="60">
       <img alt="Get it on Discoverium" src="assets/badges/discoverium.png" height="60">
