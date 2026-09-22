@@ -17,22 +17,9 @@
 <hr style="display: inline-block; width: 100%; border: 1px dotted #ff00cc;">
 
 <p align="center" style="margin-top: -2em;">
-  <a href="https://discord.gg/vDuSpJEDrW">
-    <picture>
-      <source height="24px" media="(prefers-color-scheme: dark)" srcset="/assets/icons/Discord.png" />
-      <img height="24px" src="/assets/icons/Discord.png" />
-    </picture>
-  </a>&nbsp;&nbsp;&nbsp;
-  <a href="https://old.reddit.com/r/continuumreddit/">
-    <picture>
-      <source height="24px" media="(prefers-color-scheme: dark)" srcset="/assets/icons/Reddit.png" />
-      <img height="24px" src="/assets/icons/Reddit.png" />
-    </picture>
-  </a>
+<a href="https://discord.gg/vDuSpJEDrW"><picture><source height="24px" media="(prefers-color-scheme: dark)" srcset="/assets/icons/Discord.png" /><img height="24px" src="/assets/icons/Discord.png" /></picture></a>
+<a href="https://old.reddit.com/r/continuumreddit/"><picture><source height="24px" media="(prefers-color-scheme: dark)" srcset="/assets/icons/Reddit.png" /><img height="24px" src="/assets/icons/Reddit.png" /></picture></a>
 </p>
-
-
-
 
 
 A Reddit client on Android written in Java. It does not have any ads and it features a clean UI and smooth browsing experience
