@@ -2167,27 +2167,43 @@ class ViewPostDetailFragmentViewModelNew(
         return -1
     }
 
+    /**
+     * Index of the next comment matching [query], or -1 when the thread holds no match at all.
+     *
+     * Wraps like a browser's find bar: running off the end resumes at the other one, so the last
+     * match's "next" is the first, and the first match's "previous" is the last. That also gives
+     * the very first press something to find in either direction — with nothing highlighted yet
+     * ([currentSearchedPosition] of -1) the backwards pass used to scan an empty range and report
+     * no match, so the up arrow did nothing until the down arrow had been used.
+     *
+     * The wrapped pass re-visits [currentSearchedPosition] itself, so a query with a single match
+     * stays on it rather than reporting the thread has none.
+     */
     fun getNextSearchedPosition(query: String, currentSearchedPosition: Int, searchNextComment: Boolean): Int {
         _dataState.value.comments?.let {
             if (!it.isEmpty()) {
+                // Clamped because a refresh can shrink the list under a stale highlight.
+                val from = currentSearchedPosition.coerceIn(-1, it.size - 1)
                 // Locale.ROOT: a Turkish/Azeri device lower-cases "I" to dotless "i", so searching
                 // a thread for a word containing an I would find nothing. This folds comment text
                 // for matching, never for display.
+                val loweredQuery = query.lowercase(Locale.ROOT)
+                fun matches(i: Int) =
+                    it[i].commentRawText?.lowercase(Locale.ROOT)?.contains(loweredQuery) == true
+
                 if (searchNextComment) {
-                    for (i in currentSearchedPosition + 1..<it.size) {
-                        if (it[i].commentRawText?.lowercase(Locale.ROOT)
-                                ?.contains(query.lowercase(Locale.ROOT)) == true
-                        ) {
-                            return i
-                        }
+                    for (i in from + 1..<it.size) {
+                        if (matches(i)) return i
+                    }
+                    for (i in 0..from) {
+                        if (matches(i)) return i
                     }
                 } else {
-                    for (i in currentSearchedPosition - 1 downTo 0) {
-                        if (it[i].commentRawText?.lowercase(Locale.ROOT)
-                                ?.contains(query.lowercase(Locale.ROOT)) == true
-                        ) {
-                            return i
-                        }
+                    for (i in from - 1 downTo 0) {
+                        if (matches(i)) return i
+                    }
+                    for (i in it.size - 1 downTo from.coerceAtLeast(0)) {
+                        if (matches(i)) return i
                     }
                 }
             }

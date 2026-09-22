@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -613,18 +614,33 @@ public class ViewPostDetailActivity extends BaseActivity
 
         binding.searchPanelMaterialCardViewViewPostDetailActivity.setOnClickListener(null);
 
-        binding.nextResultImageViewViewPostDetailActivity.setOnClickListener(view -> {
-            ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-            if (fragment != null) {
-                searchComment(fragment, true);
-            }
-        });
+        binding.nextResultImageViewViewPostDetailActivity.setOnClickListener(view -> searchCommentInCurrentFragment(true));
 
-        binding.previousResultImageViewViewPostDetailActivity.setOnClickListener(view -> {
-            ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
-            if (fragment != null) {
-                searchComment(fragment, false);
+        binding.previousResultImageViewViewPostDetailActivity.setOnClickListener(view -> searchCommentInCurrentFragment(false));
+
+        // Enter (the IME's Search action, or a hardware Enter) steps to the next match, as in a
+        // browser's find bar. Consuming it also keeps the keyboard up for the next press.
+        binding.searchTextInputEditTextViewPostDetailActivity.setOnEditorActionListener((textView, actionId, event) -> {
+            if (event != null) {
+                // A hardware Enter reaches this listener twice: TextView reports the field's own
+                // action id (not IME_NULL) on both the down and the up half, so keying off the
+                // action id alone would step two matches per press. Only the down half searches;
+                // both halves are consumed so the up half cannot fall through to TextView's
+                // advance-focus handling.
+                if (event.getKeyCode() != KeyEvent.KEYCODE_ENTER
+                        && event.getKeyCode() != KeyEvent.KEYCODE_NUMPAD_ENTER) {
+                    return false;
+                }
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    searchCommentInCurrentFragment(true);
+                }
+                return true;
             }
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchCommentInCurrentFragment(true);
+                return true;
+            }
+            return false;
         });
 
         binding.closeSearchPanelImageViewViewPostDetailActivity.setOnClickListener(view -> {
@@ -808,6 +824,13 @@ public class ViewPostDetailActivity extends BaseActivity
         Editable searchText = binding.searchTextInputEditTextViewPostDetailActivity.getText();
         if (searchText != null && !searchText.toString().isEmpty()) {
             fragment.searchComment(searchText.toString(), searchNextComment);
+        }
+    }
+
+    private void searchCommentInCurrentFragment(boolean searchNextComment) {
+        ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
+        if (fragment != null) {
+            searchComment(fragment, searchNextComment);
         }
     }
 

@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -321,6 +322,30 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private FragmentViewPostDetailBinding binding;
     @Nullable
     private RecyclerView mCommentsRecyclerView;
+    /**
+     * Adapter position of the comment the search panel last jumped to, or
+     * {@link RecyclerView#NO_POSITION} when nothing is highlighted. Kept so the anchor can be
+     * re-applied after the keyboard pans the window; see {@link #scrollToSearchResult()}.
+     */
+    private int mSearchResultAbsolutePosition = RecyclerView.NO_POSITION;
+    /** Window pan {@link #scrollToSearchResult()} last anchored under; see {@link #windowPanMarker()}. */
+    private int mSearchResultAnchorPanMarker;
+    /** Scratch for the getLocationOnScreen calls the pre-draw check makes every frame. */
+    private final int[] searchResultLocationBuffer = new int[2];
+    /**
+     * Re-anchors the highlighted search result when the keyboard pans the window out from under it.
+     *
+     * A pan lays nothing out again — no inset, layout or scroll callback arrives once it has
+     * settled — so this polls instead, and self-corrects as the pan animates rather than guessing
+     * when it has finished. While no search is running it costs one field comparison per frame.
+     */
+    private final ViewTreeObserver.OnPreDrawListener searchResultAnchorPreDrawListener = () -> {
+        if (mSearchResultAbsolutePosition != RecyclerView.NO_POSITION && binding != null
+                && windowPanMarker() != mSearchResultAnchorPanMarker) {
+            scrollToSearchResult();
+        }
+        return true;
+    };
     @Nullable
     private View.OnLayoutChangeListener onLayoutChangeListener;
     private int recyclerViewWidth;
@@ -1453,16 +1478,69 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
 
                 mCommentsAdapter.highlightSearchResult(searchedPosition);
 
-                if (mCommentsRecyclerView == null) {
-                    binding.postDetailRecyclerViewViewPostDetailFragment.scrollToPosition(absoluteSearchedPosition);
-                } else {
-                    mCommentsRecyclerView.scrollToPosition(absoluteSearchedPosition);
-                }
+                mSearchResultAbsolutePosition = absoluteSearchedPosition;
+                scrollToSearchResult();
             }
         }
     }
 
+    /**
+     * Brings the highlighted search result to the top of the area the user can actually see.
+     *
+     * A plain scrollToPosition anchors a backwards target at the recycler's own top edge, and
+     * that edge is not always on screen: the keyboard the search panel keeps up pans the whole
+     * window upward, taking the toolbar and the top band of the recycler with it, so stepping to
+     * the previous match used to land it out of sight.
+     */
+    private void scrollToSearchResult() {
+        if (mSearchResultAbsolutePosition == RecyclerView.NO_POSITION || binding == null) {
+            return;
+        }
+        RecyclerView recyclerView = commentsRecyclerView();
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (!(layoutManager instanceof LinearLayoutManagerBugFixed)) {
+            return;
+        }
+        mSearchResultAnchorPanMarker = windowPanMarker();
+        // RecyclerView.scrollToPosition did this itself; the layout manager's offset variant does
+        // not, and a fling still running would carry the list past the match.
+        recyclerView.stopScroll();
+        ((LinearLayoutManagerBugFixed) layoutManager)
+                .scrollToPositionWithOffset(mSearchResultAbsolutePosition, searchResultTopOffset(recyclerView));
+    }
+
+    /**
+     * Screen Y of the decor view, which moves only when the window manager pans the window to keep
+     * the focused field clear of the keyboard.
+     *
+     * The recycler's own screen Y would be the obvious thing to watch, but the collapsing app bar
+     * shifts that too, so watching it would re-anchor — and so undo — an ordinary scroll the user
+     * made with a match still highlighted. The decor view is immune to the app bar.
+     */
+    private int windowPanMarker() {
+        mActivity.getWindow().getDecorView().getLocationOnScreen(searchResultLocationBuffer);
+        return searchResultLocationBuffer[1];
+    }
+
+    /**
+     * Pixels from the recycler's top edge down to the first row the user can actually see.
+     *
+     * getLocationOnScreen subtracts the keyboard pan, so a Y above the status bar is exactly how
+     * much of the recycler is hidden; when the recycler starts on screen the offset is 0.
+     */
+    private int searchResultTopOffset(RecyclerView recyclerView) {
+        recyclerView.getLocationOnScreen(searchResultLocationBuffer);
+        int visibleTop = 0;
+        WindowInsetsCompat rootInsets = ViewCompat.getRootWindowInsets(recyclerView);
+        if (rootInsets != null) {
+            visibleTop = rootInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()).top;
+        }
+        return Math.max(0, visibleTop - searchResultLocationBuffer[1]);
+    }
+
     public void resetSearchedPosition() {
+        mSearchResultAbsolutePosition = RecyclerView.NO_POSITION;
+        mSearchResultAnchorPanMarker = 0;
         if (mCommentsAdapter != null) {
             mCommentsAdapter.resetSearchedPosition(
                     viewPostDetailFragmentViewModel.checkIfNotifyOldSearchedPositionNeeded(
@@ -1490,12 +1568,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_search_view_post_detail_fragment) {
-            if (mActivity.toggleSearchPanelVisibility() && mCommentsAdapter != null) {
-                mCommentsAdapter.resetSearchedPosition(
-                        viewPostDetailFragmentViewModel.checkIfNotifyOldSearchedPositionNeeded(
-                                mCommentsAdapter.getSearchedPosition()
-                        )
-                );
+            if (mActivity.toggleSearchPanelVisibility()) {
+                resetSearchedPosition();
             }
         } else if (itemId == R.id.action_refresh_view_post_detail_fragment) {
             viewPostDetailFragmentViewModel.refresh(true, true);
@@ -1717,6 +1791,10 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             mCommentsAdapter.setCanStartActivity(true);
         }
         binding.postDetailRecyclerViewViewPostDetailFragment.onWindowVisibilityChanged(View.VISIBLE);
+        // Registered here rather than in onCreateView: a detached view hands out a throwaway
+        // ViewTreeObserver that is merged into the real one on attach, so a later remove() would
+        // miss and leave this listener — and the fragment it holds — alive for good.
+        binding.getRoot().getViewTreeObserver().addOnPreDrawListener(searchResultAnchorPreDrawListener);
         tryMarkingPostAsRead();
     }
 
@@ -1724,6 +1802,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     public void onPause() {
         super.onPause();
         binding.postDetailRecyclerViewViewPostDetailFragment.onWindowVisibilityChanged(View.GONE);
+        binding.getRoot().getViewTreeObserver().removeOnPreDrawListener(searchResultAnchorPreDrawListener);
         // Stop Read Aloud (post or comment) when this post leaves the foreground,
         // including swiping to another post within the same activity. Skip on a
         // configuration change (e.g. rotation) so playback continues across it.

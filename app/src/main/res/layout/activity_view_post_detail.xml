@@ -80,6 +80,8 @@
                     android:fontFamily="?attr/font_family"
                     android:textSize="?attr/font_default"
                     android:hint="@string/search_comments"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch|flagNoExtractUi"
                     android:maxLines="1" />
 
             </com.google.android.material.textfield.TextInputLayout>
