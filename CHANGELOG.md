@@ -2,6 +2,15 @@
 
 ---
 
+8.3.1.9 / 2026-9-24
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Improve searching comments #427
+* Fixed Issues with post filters related to wildcard rules and Applied to choices #426
+* Fixed Tab strip jumps to last tabs after unsubscribing a middle subreddit tab #405
+* Fixed Collapsing a comment mutes post video and makes it lag for a moment #423
+
 8.3.1.8 / 2026-9-19
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
