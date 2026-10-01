@@ -2142,7 +2142,8 @@ class ViewPostDetailFragmentViewModelNew(
     fun getPreviousParentCommentPosition(currentPosition: Int): Int {
         _dataState.value.comments?.let {
             if (!it.isEmpty()) {
-                for (i in currentPosition - 1 downTo 0) {
+                // The caller counts in the adapter's list, which can briefly run ahead of this one.
+                for (i in minOf(currentPosition, it.size) - 1 downTo 0) {
                     if (it[i].depth == 0) {
                         return i
                     }

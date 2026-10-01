@@ -1502,11 +1502,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
         mSearchResultAnchorPanMarker = windowPanMarker();
-        // RecyclerView.scrollToPosition did this itself; the layout manager's offset variant does
-        // not, and a fling still running would carry the list past the match.
-        recyclerView.stopScroll();
-        ((LinearLayoutManagerBugFixed) layoutManager)
-                .scrollToPositionWithOffset(mSearchResultAbsolutePosition, searchResultTopOffset(recyclerView));
+        jumpToPosition(recyclerView, (LinearLayoutManagerBugFixed) layoutManager,
+                mSearchResultAbsolutePosition, searchResultTopOffset(recyclerView));
     }
 
     /**
@@ -1959,14 +1956,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        int currentPosition = ConcatAdapterKt.getLocalPosition(
-                mConcatAdapter, mCommentsAdapter, layoutManager.findFirstVisibleItemPosition()
+        int nextParentPosition = viewPostDetailFragmentViewModel.getNextParentCommentPosition(
+                topCommentPosition(layoutManager)
         );
-        if (currentPosition < 0) {
-            currentPosition = 0;
-        }
-
-        int nextParentPosition = viewPostDetailFragmentViewModel.getNextParentCommentPosition(currentPosition);
         if (nextParentPosition < 0) {
             return;
         }
@@ -1976,7 +1968,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        layoutManager.scrollToPositionWithOffset(absoluteParentPosition, 0);
+        jumpToPosition(recyclerView, layoutManager, absoluteParentPosition, 0);
     }
 
     public void scrollToPreviousParentComment() {
@@ -1986,14 +1978,9 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        int currentPosition = ConcatAdapterKt.getLocalPosition(
-                mConcatAdapter, mCommentsAdapter, layoutManager.findFirstVisibleItemPosition()
+        int previousParentPosition = viewPostDetailFragmentViewModel.getPreviousParentCommentPosition(
+                topCommentPosition(layoutManager)
         );
-        if (currentPosition < 0) {
-            currentPosition = 0;
-        }
-
-        int previousParentPosition = viewPostDetailFragmentViewModel.getPreviousParentCommentPosition(currentPosition);
         if (previousParentPosition < 0) {
             return;
         }
@@ -2003,7 +1990,36 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        layoutManager.scrollToPositionWithOffset(absoluteParentPosition, 0);
+        jumpToPosition(recyclerView, layoutManager, absoluteParentPosition, 0);
+    }
+
+    /**
+     * The comment at the top of the list, as an index into the comments, for the next and previous
+     * top-level comment buttons to step from.
+     *
+     * Rows outside the comments map to the matching end rather than to the first comment: -1 while
+     * the post, or the status row above the comments, is still the top row, so "next" lands on the
+     * first comment instead of skipping it; and the comment count once only the footer is left.
+     */
+    private int topCommentPosition(LinearLayoutManagerBugFixed layoutManager) {
+        int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
+        if (firstVisiblePosition < ConcatAdapterKt.getAbsolutePosition(mConcatAdapter, mCommentsAdapter, 0)) {
+            return -1;
+        }
+        int localPosition = ConcatAdapterKt.getLocalPosition(mConcatAdapter, mCommentsAdapter, firstVisiblePosition);
+        return localPosition >= 0 ? localPosition : mCommentsAdapter.getItemCount();
+    }
+
+    /**
+     * Puts {@code absolutePosition} {@code offset} pixels below the top of {@code recyclerView}.
+     *
+     * RecyclerView.scrollToPosition stops a running fling itself; the layout manager's offset
+     * variant does not, and a fling still under way would carry the list on past the target.
+     */
+    private static void jumpToPosition(RecyclerView recyclerView, LinearLayoutManagerBugFixed layoutManager,
+                                       int absolutePosition, int offset) {
+        recyclerView.stopScroll();
+        layoutManager.scrollToPositionWithOffset(absolutePosition, offset);
     }
 
     public void scrollToParentComment(int position, int currentDepth) {
@@ -2023,7 +2039,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             return;
         }
 
-        ((LinearLayoutManagerBugFixed) layoutManager).scrollToPositionWithOffset(absoluteParentPosition, 0);
+        jumpToPosition(recyclerView, (LinearLayoutManagerBugFixed) layoutManager, absoluteParentPosition, 0);
     }
 
     public void delayTransition() {
