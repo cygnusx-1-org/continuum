@@ -316,32 +316,29 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 dismiss();
             });
 
-            if (mBaseActivity instanceof ViewPostDetailActivity) {
-                binding.readAloudTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
-                TextToSpeechHelper helper = ((ViewPostDetailActivity) mBaseActivity).getTextToSpeechHelper();
-                if (helper.isSpeaking()) {
-                    binding.readAloudTextViewPostOptionsBottomSheetFragment.setText(R.string.stop_reading);
-                }
-                binding.readAloudTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
-                    if (helper.isSpeaking()) {
-                        helper.stop();
-                    } else {
-                        StringBuilder textToSpeak = new StringBuilder();
-                        if (mPost.getTitle() != null) {
-                            textToSpeak.append(mPost.getTitle());
-                        }
-                        String selfText = mPost.getSelfTextPlain();
-                        if (selfText != null && !selfText.isEmpty()) {
-                            if (textToSpeak.length() > 0) {
-                                textToSpeak.append("\n\n");
-                            }
-                            textToSpeak.append(selfText);
-                        }
-                        helper.speak(textToSpeak.toString());
-                    }
-                    dismiss();
-                });
+            TextToSpeechHelper helper = mBaseActivity.getTextToSpeechHelper();
+            if (helper.isSpeaking()) {
+                binding.readAloudTextViewPostOptionsBottomSheetFragment.setText(R.string.stop_reading);
             }
+            binding.readAloudTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                if (helper.isSpeaking()) {
+                    helper.stop();
+                } else {
+                    StringBuilder textToSpeak = new StringBuilder();
+                    if (mPost.getTitle() != null) {
+                        textToSpeak.append(mPost.getTitle());
+                    }
+                    String selfText = mPost.getSelfTextPlain();
+                    if (selfText != null && !selfText.isEmpty()) {
+                        if (textToSpeak.length() > 0) {
+                            textToSpeak.append("\n\n");
+                        }
+                        textToSpeak.append(selfText);
+                    }
+                    helper.speak(textToSpeak.toString());
+                }
+                dismiss();
+            });
 
             binding.translateTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                 StringBuilder textToTranslate = new StringBuilder();

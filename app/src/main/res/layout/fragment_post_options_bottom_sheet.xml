@@ -94,7 +94,6 @@
             android:text="@string/read_aloud"
             android:textColor="?attr/primaryTextColor"
             android:textSize="?attr/font_default"
-            android:visibility="gone"
             app:drawableTint="?attr/primaryTextColor" />
 
         <androidx.appcompat.widget.AppCompatTextView

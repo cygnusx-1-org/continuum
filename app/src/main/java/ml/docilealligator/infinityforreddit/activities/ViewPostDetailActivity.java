@@ -76,7 +76,6 @@ import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.thing.SortTypeSelectionCallback;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
-import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.ViewPostDetailActivityViewModel;
 import org.greenrobot.eventbus.EventBus;
@@ -977,25 +976,6 @@ public class ViewPostDetailActivity extends BaseActivity
         this.post = viewPostDetailActivityViewModel.getPost();
         this.posts = viewPostDetailActivityViewModel.getPosts();
         Bridge.saveInstanceState(this, outState);
-    }
-
-    public TextToSpeechHelper getTextToSpeechHelper() {
-        // Owned by the ViewModel so playback survives configuration changes (e.g. rotation).
-        return viewPostDetailActivityViewModel.getTextToSpeechHelper(this);
-    }
-
-    public void stopTextToSpeech() {
-        viewPostDetailActivityViewModel.stopTextToSpeech();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Release the TTS engine when the activity is no longer visible (backgrounded or
-        // left), but keep it alive across a configuration change such as rotation.
-        if (viewPostDetailActivityViewModel != null && !isChangingConfigurations()) {
-            viewPostDetailActivityViewModel.shutdownTextToSpeech();
-        }
     }
 
     @Override

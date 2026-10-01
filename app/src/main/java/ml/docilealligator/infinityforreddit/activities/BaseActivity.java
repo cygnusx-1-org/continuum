@@ -53,6 +53,7 @@ import androidx.core.view.OneShotPreDrawListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.NestedScrollView;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.appbar.AppBarLayout;
@@ -81,7 +82,9 @@ import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
+import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
+import ml.docilealligator.infinityforreddit.viewmodels.TextToSpeechViewModel;
 import org.greenrobot.eventbus.EventBus;
 
 public abstract class BaseActivity extends AppCompatActivity implements CustomFontReceiver, Restorable {
@@ -682,9 +685,32 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        // Release the TTS engine when the activity is no longer visible (backgrounded or
+        // left), but keep it alive across a configuration change such as rotation.
+        if (!isChangingConfigurations()) {
+            textToSpeechViewModel().shutdownTextToSpeech();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
+    }
+
+    private TextToSpeechViewModel textToSpeechViewModel() {
+        return new ViewModelProvider(this).get(TextToSpeechViewModel.class);
+    }
+
+    public TextToSpeechHelper getTextToSpeechHelper() {
+        // Owned by a ViewModel so playback survives configuration changes (e.g. rotation).
+        return textToSpeechViewModel().getTextToSpeechHelper(this);
+    }
+
+    public void stopTextToSpeech() {
+        textToSpeechViewModel().stopTextToSpeech();
     }
 
     @Override
