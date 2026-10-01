@@ -372,6 +372,11 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 dismiss();
             });
 
+            binding.setReminderTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
+                SetReminderActivity.Companion.startReminderActivity(mBaseActivity, mPost, null);
+                dismiss();
+            });
+
             if (mBaseActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
                 binding.commentTextViewPostOptionsBottomSheetFragment.setVisibility(View.GONE);
                 binding.crosspostTextViewPostOptionsBottomSheetFragment.setVisibility(View.GONE);
@@ -414,11 +419,6 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                         dismiss();
                     });
                 }
-
-                binding.setReminderTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
-                    SetReminderActivity.Companion.startReminderActivity(mBaseActivity, mPost, null);
-                    dismiss();
-                });
 
                 binding.reportTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {
                     Intent intent = new Intent(mBaseActivity, ReportActivity.class);

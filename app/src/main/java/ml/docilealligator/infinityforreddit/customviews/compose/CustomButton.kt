@@ -128,3 +128,31 @@ fun CustomNeutralTextButton(
         )
     }
 }
+
+/**
+ * A text button for a destructive action, in the theme's accent colour rather than a fixed red, so
+ * a custom theme controls it. With the default themes that is the same #FF1868 the app's XML
+ * dialogs give their Delete buttons.
+ */
+@Composable
+fun CustomNegativeTextButton(
+    modifier: Modifier = Modifier,
+    @StringRes stringResId: Int,
+    fontFamily: FontFamily? = LocalTypography.current.fontFamily,
+    fontSize: TextUnit = LocalTypography.current.fontSize.default,
+    onclick: () -> Unit
+) {
+    TextButton(
+        modifier = modifier,
+        colors = ButtonDefaults.textButtonColors().copy(
+            contentColor = Color(LocalAppTheme.current.colorAccent)
+        ),
+        onClick = onclick
+    ) {
+        Text(
+            stringResource(stringResId),
+            fontFamily = fontFamily,
+            fontSize = fontSize
+        )
+    }
+}

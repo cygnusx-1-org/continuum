@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.room.withTransaction
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -22,9 +23,25 @@ class ReminderManager(
     private val alarmManager: AlarmManager,
     private val customThemeWrapper: CustomThemeWrapper
 ) {
-    suspend fun setReminder(reminder: Reminder) {
-        redditRoomDatabase.reminderDao().insert(reminder)
-        setAlarm(reminder)
+    /**
+     * Saves [reminder] and sets its alarm, unless another reminder for the same post or comment is
+     * already set for the same time. That one is returned instead, and nothing is saved.
+     *
+     * post_id, comment_id and reminder_time are the table's primary key and the insert replaces on
+     * conflict, so the duplicate used to overwrite the existing reminder while leaving its alarm
+     * armed under its own request code, which then fired for a reminder no longer listed.
+     */
+    suspend fun setReminder(reminder: Reminder): Reminder? {
+        val existingReminder = redditRoomDatabase.withTransaction {
+            findReminderAtSameTime(reminder) ?: run {
+                redditRoomDatabase.reminderDao().insert(reminder)
+                null
+            }
+        }
+        if (existingReminder == null) {
+            setAlarm(reminder)
+        }
+        return existingReminder
     }
 
     fun setAlarm(reminder: Reminder) {
@@ -70,6 +87,43 @@ class ReminderManager(
 
     fun getAllRemindersFlow(): Flow<List<Reminder>> {
         return redditRoomDatabase.reminderDao().getAllRemindersFlow()
+    }
+
+    /**
+     * Moves [reminder] to [newReminderTime], unless another reminder for the same post or comment
+     * is already set for that time. That one is returned instead and [reminder] is left as it was,
+     * for the reason given on [setReminder].
+     */
+    suspend fun updateReminder(reminder: Reminder, newReminderTime: Long): Reminder? {
+        if (newReminderTime == reminder.reminderTime) {
+            return null
+        }
+        val newReminder = reminder.copy(
+            reminderTime = newReminderTime
+        )
+        val existingReminder = redditRoomDatabase.withTransaction {
+            findReminderAtSameTime(newReminder) ?: run {
+                redditRoomDatabase.reminderDao().deleteReminder(reminder)
+                redditRoomDatabase.reminderDao().insert(newReminder)
+                null
+            }
+        }
+        if (existingReminder == null) {
+            // Same request code as the old alarm, which this replaces.
+            setAlarm(newReminder)
+        }
+        return existingReminder
+    }
+
+    private suspend fun findReminderAtSameTime(reminder: Reminder): Reminder? =
+        redditRoomDatabase.reminderDao().getReminder(reminder.postId, reminder.commentId, reminder.reminderTime)
+
+    suspend fun deleteReminder(reminder: Reminder) {
+        redditRoomDatabase.reminderDao().deleteReminder(reminder)
+        PendingIntent.getBroadcast(applicationContext, reminder.createdAt.toInt(), Intent(
+            applicationContext,
+            ReminderAlarmReceiver::class.java
+        ), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT).cancel();
     }
 
     companion object {

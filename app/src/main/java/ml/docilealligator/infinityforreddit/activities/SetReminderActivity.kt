@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,9 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -36,7 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.LaunchedEffect
@@ -67,9 +64,10 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.comment.Comment
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
 import ml.docilealligator.infinityforreddit.customviews.compose.AppTheme
+import ml.docilealligator.infinityforreddit.customviews.compose.CustomDatePickerDialog
 import ml.docilealligator.infinityforreddit.customviews.compose.CustomFilledButton
-import ml.docilealligator.infinityforreddit.customviews.compose.CustomNeutralTextButton
 import ml.docilealligator.infinityforreddit.customviews.compose.CustomPositiveTextButton
+import ml.docilealligator.infinityforreddit.customviews.compose.CustomTimePickerDialog
 import ml.docilealligator.infinityforreddit.customviews.compose.LocalAppTheme
 import ml.docilealligator.infinityforreddit.customviews.compose.LocalTypography
 import ml.docilealligator.infinityforreddit.customviews.compose.PrimaryText
@@ -77,15 +75,14 @@ import ml.docilealligator.infinityforreddit.customviews.compose.SecondaryText
 import ml.docilealligator.infinityforreddit.customviews.compose.ThemedTopAppBar
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.reminder.ReminderManager
+import ml.docilealligator.infinityforreddit.reminder.ReminderTime
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import ml.docilealligator.infinityforreddit.viewmodels.SetReminderViewModel
 import ml.docilealligator.infinityforreddit.viewmodels.SetReminderViewModel.Companion.provideFactory
 import retrofit2.Retrofit
 import java.time.Instant
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
@@ -166,13 +163,12 @@ class SetReminderActivity: BaseActivity() {
         val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
         windowInsetsController.isAppearanceLightStatusBars = customThemeWrapper.isLightStatusBar
 
-        val calendar = Calendar.getInstance()
-        val formatter = DateTimeFormatter.ofPattern(
-            mSharedPreferences.getString(
-                SharedPreferencesUtils.TIME_FORMAT_KEY,
-                SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE
-            ), Locale.getDefault()
-        )
+        val timeFormat = mSharedPreferences.getString(
+            SharedPreferencesUtils.TIME_FORMAT_KEY,
+            SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE
+        ) ?: SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE
+        val formatter = DateTimeFormatter.ofPattern(timeFormat, Locale.getDefault())
+        val is24Hour = ReminderTime.is24Hour(timeFormat, DateFormat.is24HourFormat(this))
 
         val reminderPresetTimes = listOf(
             ReminderPredefinedTime(
@@ -218,13 +214,16 @@ class SetReminderActivity: BaseActivity() {
 
                 var showDatePicker by remember { mutableStateOf(false) }
                 var showTimePicker by remember { mutableStateOf(false) }
+                // Date and time both from the same instant: the time from now and the date from a
+                // day later disagree on the night the clocks change, and can name a time already past.
+                val initialPickerTime = remember { ReminderTime.toPickerTime(reminderTimeMillis) }
                 val datePickerState = rememberDatePickerState(
-                    initialSelectedDateMillis = reminderTimeMillis + ZonedDateTime.now().offset.totalSeconds * 1000
+                    initialSelectedDateMillis = ReminderTime.toPickerDateMillis(reminderTimeMillis)
                 )
                 val timePickerState = rememberTimePickerState(
-                    initialHour = calendar.get(Calendar.HOUR_OF_DAY),
-                    initialMinute = calendar.get(Calendar.MINUTE),
-                    is24Hour = true,
+                    initialHour = initialPickerTime.hour,
+                    initialMinute = initialPickerTime.minute,
+                    is24Hour = is24Hour,
                 )
 
                 val setReminderResult by mViewModel.setReminderResult.collectAsStateWithLifecycle()
@@ -234,7 +233,7 @@ class SetReminderActivity: BaseActivity() {
 
                 LaunchedEffect(timePickerState.hour, timePickerState.minute, datePickerState.selectedDateMillis) {
                     datePickerState.selectedDateMillis?.let {
-                        reminderTimeMillis = getDateAndTimeMillis(it, timePickerState.hour, timePickerState.minute)
+                        reminderTimeMillis = ReminderTime.fromPicker(it, timePickerState.hour, timePickerState.minute)
                         val instant = Instant.ofEpochMilli(reminderTimeMillis)
                         reminderTimeString = formatter.withZone(ZoneId.systemDefault()).format(instant)
                     } ?: run {
@@ -246,6 +245,8 @@ class SetReminderActivity: BaseActivity() {
                 LaunchedEffect(snackbarMessage) {
                     snackbarMessage?.let {
                         snackbarHostState.showSnackbar(it)
+                        // Otherwise the same message set again is no change, and nothing shows.
+                        snackbarMessage = null
                     }
                 }
 
@@ -258,6 +259,7 @@ class SetReminderActivity: BaseActivity() {
                             }
                             is AppResult.Error<*> -> {
                                 snackbarMessage = getString(it.error as Int)
+                                mViewModel.onSetReminderResultHandled()
                             }
                         }
                     }
@@ -337,10 +339,10 @@ class SetReminderActivity: BaseActivity() {
                             reminderPresetTimes.forEachIndexed { _, reminderPresetTime ->
                                 CustomFilledButton(text = reminderPresetTime.textOnButton) {
                                     val reminderTime = reminderPresetTime.timeInMillis + System.currentTimeMillis()
-                                    datePickerState.selectedDateMillis = reminderTime + ZonedDateTime.now().offset.totalSeconds * 1000
-                                    calendar.timeInMillis = reminderTime
-                                    timePickerState.hour = calendar.get(Calendar.HOUR_OF_DAY)
-                                    timePickerState.minute = calendar.get(Calendar.MINUTE)
+                                    datePickerState.selectedDateMillis = ReminderTime.toPickerDateMillis(reminderTime)
+                                    val pickerTime = ReminderTime.toPickerTime(reminderTime)
+                                    timePickerState.hour = pickerTime.hour
+                                    timePickerState.minute = pickerTime.minute
                                 }
                             }
                         }
@@ -359,7 +361,7 @@ class SetReminderActivity: BaseActivity() {
 
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth(1f)
+                                .fillMaxWidth()
                                 .padding(top = 4.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
@@ -467,55 +469,20 @@ class SetReminderActivity: BaseActivity() {
                         )
 
                         if (showDatePicker) {
-                            DatePickerDialog(
-                                onDismissRequest = {
-                                    showDatePicker = false
-                                },
-                                confirmButton = {
-                                    CustomPositiveTextButton(stringResId = R.string.ok) {
-                                        showDatePicker = false
-                                    }
-                                },
-                                dismissButton = {
-                                    CustomNeutralTextButton(stringResId = R.string.cancel) {
-                                        showDatePicker = false
-                                    }
-                                }
-                            ) {
-                                DatePicker(state = datePickerState)
+                            CustomDatePickerDialog(datePickerState) {
+                                showDatePicker = false
                             }
                         }
 
                         if (showTimePicker) {
-                            AlertDialog(
-                                onDismissRequest = {
-                                    showTimePicker = false
-                                },
-                                dismissButton = {
-                                    CustomNeutralTextButton(stringResId = R.string.cancel) {
-                                        showTimePicker = false
-                                    }
-                                },
-                                confirmButton = {
-                                    CustomPositiveTextButton(stringResId = R.string.ok) {
-                                        showTimePicker = false
-                                    }
-                                },
-                                text = {
-                                    TimePicker(
-                                        state = timePickerState,
-                                    )
-                                }
-                            )
+                            CustomTimePickerDialog(timePickerState) {
+                                showTimePicker = false
+                            }
                         }
                     }
                 }
             }
         }
-    }
-
-    fun getDateAndTimeMillis(dateMillis: Long, hour: Int, minute: Int): Long {
-        return dateMillis + hour * 60 * 60 * 1000 + minute * 60 * 1000 - ZonedDateTime.now().offset.totalSeconds * 1000
     }
 
     override fun getDefaultSharedPreferences(): SharedPreferences {

@@ -2126,4 +2126,7 @@
     <string name="reminder_reliability_notice_device_settings_description">Some phones (like Xiaomi, Oppo, or Vivo) require you to turn on "Auto-start" or "Background App Launch" in your phone\'s system settings. Otherwise, reminders will stop working if your phone restarts.</string>
     <string name="reminder_set">Reminder set</string>
     <string name="reminder">Reminder</string>
+    <string name="reminder_time">Reminder time</string>
+    <string name="reminder_already_set_for_post">You already have a reminder for this post at this time.</string>
+    <string name="reminder_already_set_for_comment">You already have a reminder for this comment at this time.</string>
 </resources>

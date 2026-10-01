@@ -35,16 +35,30 @@ class SetReminderViewModel(
     ) {
         (post?.id ?: postId)?.let {
             viewModelScope.launch {
-                reminderManager.setReminder(
+                val existingReminder = reminderManager.setReminder(
                     Reminder(
                         accountName, it, comment?.id ?: "", content, System.currentTimeMillis(), reminderTime
                     )
                 )
-                _setReminderResult.value = AppResult.Success(Unit)
+                _setReminderResult.value = if (existingReminder == null) {
+                    AppResult.Success(Unit)
+                } else if (existingReminder.commentId.isEmpty()) {
+                    AppResult.Error(R.string.reminder_already_set_for_post)
+                } else {
+                    AppResult.Error(R.string.reminder_already_set_for_comment)
+                }
             }
         } ?: run {
             _setReminderResult.value = AppResult.Error(R.string.invalid_reminder_post_id)
         }
+    }
+
+    /**
+     * Clears a handled result. The same error twice in a row is an equal value, which a StateFlow
+     * does not emit again, so a second attempt at a time already taken would show nothing.
+     */
+    fun onSetReminderResultHandled() {
+        _setReminderResult.value = null
     }
 
     companion object {

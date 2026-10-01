@@ -763,6 +763,21 @@ public class DownloadMediaService extends JobService {
         boolean separateDownloadFolder = mSharedPreferences.getBoolean(SharedPreferencesUtils.SEPARATE_FOLDER_FOR_EACH_SUBREDDIT, false);
         boolean isShare = intent.getInt(EXTRA_IS_SHARE, 0) == 1;
 
+        // A video whose URL carried an image extension, or none this maps, is saved as an mp4
+        // whichever destination it lands in: the name is lying about the bytes. Doing it here
+        // rather than in the MediaStore write is what covers the chosen folder and the share cache
+        // too, which otherwise created the document under the image name -- a GIF post downloaded
+        // as video landed as "name.gif" holding mp4 bytes.
+        String extensionMimeType = DocumentTreeUtils.mimeTypeMatchingExtension(fileName);
+        if (mediaType == EXTRA_MEDIA_TYPE_VIDEO
+                && (extensionMimeType == null || extensionMimeType.startsWith("image/"))) {
+            fileName = replaceExtension(fileName, "mp4");
+            if (!multipleDownloads) {
+                // A single download's notification is titled with the name it was scheduled under.
+                builder.setContentTitle(fileName);
+            }
+        }
+
         // Settle the destination folder and the filename before opening the response. Enumerating a
         // SAF directory costs a Binder round trip per entry, seconds on a full download folder, and
         // doing it with the response already open left the socket idle the whole time against
@@ -1083,17 +1098,11 @@ public class DownloadMediaService extends JobService {
                 //
                 // Restricted to the two types that have a collection here. An extension mapping to
                 // audio/ or anything else would have nowhere to go, so the mediaType guess stands.
+                //
+                // A video's name has already been given an mp4 extension by downloadMedia when it
+                // carried an image one; left alone, MediaStore would append its own ".mp4" and the
+                // file would land as "name.jpg.mp4".
                 String extensionMimeType = DocumentTreeUtils.mimeTypeMatchingExtension(destinationFileName);
-
-                if (mediaType == EXTRA_MEDIA_TYPE_VIDEO
-                        && (extensionMimeType == null || extensionMimeType.startsWith("image/"))) {
-                    // A video post whose URL carried an image extension, or none this maps: the
-                    // name is lying about the bytes. The name has to be corrected along with the
-                    // type, or MediaStore appends its own ".mp4" and the file lands as
-                    // "name.jpg.mp4".
-                    destinationFileName = replaceExtension(destinationFileName, "mp4");
-                    extensionMimeType = "video/mp4";
-                }
 
                 if (extensionMimeType != null
                         && (extensionMimeType.startsWith("image/") || extensionMimeType.startsWith("video/"))) {
