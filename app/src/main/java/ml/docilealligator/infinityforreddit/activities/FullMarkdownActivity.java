@@ -37,6 +37,10 @@ import ml.docilealligator.infinityforreddit.databinding.ActivityCommentFullMarkd
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -46,6 +50,10 @@ public class FullMarkdownActivity extends BaseActivity {
     public static final String EXTRA_MARKDOWN = "EM";
     public static final String EXTRA_IS_NSFW = "EIN";
     public static final String EXTRA_SUBMIT_POST = "ESP";
+    /** Optional: the subreddit the text is for, whose comment faces the preview then shows. */
+    public static final String EXTRA_SUBREDDIT_NAME = "ESN";
+    /** Whether the text is a post body rather than a comment; stylesheets can tell them apart. */
+    public static final String EXTRA_IS_POST = "EIP";
 
     @Inject
     @Named("default")
@@ -56,6 +64,9 @@ public class FullMarkdownActivity extends BaseActivity {
     @Inject
     CustomThemeWrapper mCustomThemeWrapper;
     private ActivityCommentFullMarkdownBinding binding;
+    /** Kept for the life of the screen, so the preview is redrawn when its comment faces arrive. */
+    @Nullable
+    private CommentFaces commentFaces;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -144,8 +155,15 @@ public class FullMarkdownActivity extends BaseActivity {
                 builder.linkColor(mCustomThemeWrapper.getLinkColor());
             }
         };
+        String subredditName = getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME);
+        CommentFaceContext faceContext = getIntent().getBooleanExtra(EXTRA_IS_POST, false)
+                ? CommentFaceContext.POST : CommentFaceContext.COMMENT;
+        CommentFaces faces = CommentFaces.create(this, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL);
+        commentFaces = faces;
+        faces.prefetch(subredditName);
+        EmoteCloseBracketInlineProcessor closeBracketInlineProcessor = new EmoteCloseBracketInlineProcessor();
         Markwon markwon = MarkdownUtils.createContentPreviewRedditMarkwon(this, miscPlugin, markdownColor,
-                markdownColor | 0xFF000000);
+                markdownColor | 0xFF000000, closeBracketInlineProcessor, faces.getPlugin());
 
         CustomMarkwonAdapter markwonAdapter = MarkdownUtils.createCustomTablesAdapter(this);
         LinearLayoutManagerBugFixed linearLayoutManager = new SwipeLockLinearLayoutManager(this, new SwipeLockInterface() {
@@ -165,9 +183,18 @@ public class FullMarkdownActivity extends BaseActivity {
         });
         binding.contentRecyclerViewCommentFullMarkdownActivity.setLayoutManager(linearLayoutManager);
         binding.contentRecyclerViewCommentFullMarkdownActivity.setAdapter(markwonAdapter);
+        closeBracketInlineProcessor.setCommentFaceLookup(faces.lookup(subredditName, faceContext));
         markwonAdapter.setMarkdown(markwon, markdown);
         // noinspection NotifyDataSetChanged
         markwonAdapter.notifyDataSetChanged();
+        faces.observe(this, subreddit -> {
+            if (subreddit.equalsIgnoreCase(subredditName) && CommentFaces.mayContainFace(markdown)) {
+                closeBracketInlineProcessor.setCommentFaceLookup(faces.lookup(subredditName, faceContext));
+                markwonAdapter.setMarkdown(markwon, markdown);
+                // noinspection NotifyDataSetChanged
+                markwonAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override

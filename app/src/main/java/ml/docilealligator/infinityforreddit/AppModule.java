@@ -26,9 +26,11 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountScopedKeys;
 import ml.docilealligator.infinityforreddit.account.AccountScopedSharedPreferences;
 import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
+import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LoopAvailableExoCreator;
 import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceRepository;
 import ml.docilealligator.infinityforreddit.reminder.ReminderManager;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -309,6 +311,17 @@ abstract class AppModule {
     ) {
         return new UserProfileImagesBatchLoader(executor, new Handler(Looper.getMainLooper()),
                 redditDataRoomDatabase, retrofit, oauthRetrofit);
+    }
+
+    @Provides
+    @Singleton
+    static CommentFaceRepository provideCommentFaceRepository(Context context,
+                                                              @Named("no_oauth") Retrofit retrofit,
+                                                              Executor executor) {
+        // A stylesheet is public and the same for everyone, so it goes through the app's own
+        // token rather than whichever account is signed in.
+        return new CommentFaceRepository(new File(context.getCacheDir(), "comment_faces"),
+                retrofit.create(RedditAPI.class), executor, new Handler(Looper.getMainLooper()));
     }
 
     @Provides

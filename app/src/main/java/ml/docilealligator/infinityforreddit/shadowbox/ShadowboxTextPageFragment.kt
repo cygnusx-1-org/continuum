@@ -20,6 +20,8 @@ import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed
 import ml.docilealligator.infinityforreddit.databinding.ShadowboxMediaTextBinding
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry
@@ -42,6 +44,9 @@ class ShadowboxTextPageFragment : ShadowboxPageFragment() {
 
     /** Where the body starts: clear of the status bar, plus a margin. */
     private var topInsetPadding = 0
+
+    /** Kept while the page shows its body, so it is redrawn when the post's comment faces arrive. */
+    private var commentFaces: CommentFaces? = null
 
     override fun onCreateMediaView(inflater: LayoutInflater, container: ViewGroup) {
         val binding = ShadowboxMediaTextBinding.inflate(inflater, container, true)
@@ -115,10 +120,13 @@ class ShadowboxTextPageFragment : ShadowboxPageFragment() {
             host, embeddedMediaType, dataSavingMode, disableImagePreview, ::openMarkdownMedia
         )
         val emoteCloseBracketInlineProcessor = EmoteCloseBracketInlineProcessor()
+        val commentFaces = CommentFaces.create(host, embeddedMediaType, dataSavingMode, disableImagePreview)
+        this.commentFaces = commentFaces
+        commentFaces.prefetch(post.subredditName)
         val imageAndGifPlugin = ImageAndGifPlugin()
         val markwon = MarkdownUtils.createFullRedditMarkwon(
-            host, miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, imageAndGifPlugin,
-            markdownColor, customThemeWrapper.spoilerBackgroundColor, null
+            host, miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, commentFaces.plugin,
+            imageAndGifPlugin, markdownColor, customThemeWrapper.spoilerBackgroundColor, null
         )
         // Never blurred: the page's own overlay has already been tapped away by the time anything
         // is rendered, so blurring the pictures inside it again would leave no way to see them.
@@ -141,9 +149,20 @@ class ShadowboxTextPageFragment : ShadowboxPageFragment() {
         imageAndGifEntry.setCurrentPostTitle(post.title)
         val adapter = MarkdownUtils.createCustomTablesAndImagesAdapter(host, imageAndGifEntry)
         binding.contentRecyclerViewShadowboxMediaText.adapter = adapter
-        adapter.setMarkdown(markwon, selfText)
-        @Suppress("NotifyDataSetChanged")
-        adapter.notifyDataSetChanged()
+        val render = {
+            emoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                commentFaces.lookup(post.subredditName, CommentFaceContext.POST)
+            )
+            adapter.setMarkdown(markwon, selfText)
+            @Suppress("NotifyDataSetChanged")
+            adapter.notifyDataSetChanged()
+        }
+        render()
+        commentFaces.observe(viewLifecycleOwner) { subreddit ->
+            if (subreddit.equals(post.subredditName, ignoreCase = true) && CommentFaces.mayContainFace(selfText)) {
+                render()
+            }
+        }
     }
 
     /** Opens an image, gif or emote from the body in the viewer the rest of the app opens it in. */

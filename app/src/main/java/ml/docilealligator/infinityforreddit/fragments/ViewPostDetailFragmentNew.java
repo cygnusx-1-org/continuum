@@ -1623,6 +1623,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 editPostIntent.putExtra(EditPostActivity.EXTRA_FULLNAME, mPost.getFullName());
                 editPostIntent.putExtra(EditPostActivity.EXTRA_TITLE, mPost.getTitle());
                 editPostIntent.putExtra(EditPostActivity.EXTRA_CONTENT, mPost.getSelfText());
+                editPostIntent.putExtra(EditPostActivity.EXTRA_SUBREDDIT_NAME, mPost.getSubredditName());
                 startActivityForResult(editPostIntent, EDIT_POST_REQUEST_CODE);
             } else {
                 Toast.makeText(mActivity, R.string.cannot_edit_post_with_images, Toast.LENGTH_LONG).show();

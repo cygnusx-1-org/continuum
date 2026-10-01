@@ -88,6 +88,7 @@ public class CommentMoreBottomSheetFragment extends LandscapeExpandedRoundedBott
                     Intent intent = new Intent(activity, EditCommentActivity.class);
                     intent.putExtra(EditCommentActivity.EXTRA_FULLNAME, comment.getFullName());
                     intent.putExtra(EditCommentActivity.EXTRA_CONTENT, comment.getCommentMarkdown());
+                    intent.putExtra(EditCommentActivity.EXTRA_SUBREDDIT_NAME, comment.getSubredditName());
                     if (comment.getMediaMetadataMap() != null) {
                         ArrayList<MediaMetadata> mediaMetadataList = new ArrayList<>(comment.getMediaMetadataMap().values());
                         intent.putParcelableArrayListExtra(EditCommentActivity.EXTRA_MEDIA_METADATA_LIST, mediaMetadataList);

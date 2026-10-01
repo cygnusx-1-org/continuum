@@ -17,6 +17,7 @@ import io.noties.markwon.recycler.table.TableEntry;
 import io.noties.markwon.recycler.table.TableEntryPlugin;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFacePlugin;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
@@ -44,6 +45,7 @@ public class MarkdownUtils {
                                                   @NonNull MarkwonPlugin miscPlugin,
                                                   @NonNull EmoteCloseBracketInlineProcessor emoteCloseBracketInlineProcessor,
                                                   @NonNull EmotePlugin emotePlugin,
+                                                  @NonNull CommentFacePlugin commentFacePlugin,
                                                   @NonNull ImageAndGifPlugin imageAndGifPlugin,
                                                   int markdownColor,
                                                   int spoilerBackgroundColor,
@@ -66,6 +68,7 @@ public class MarkdownUtils {
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
                 .usePlugin(imageAndGifPlugin)
                 .usePlugin(emotePlugin)
+                .usePlugin(commentFacePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
                 .usePlugin(new RedditListPlugin())
                 .build();
@@ -76,6 +79,7 @@ public class MarkdownUtils {
                                                   @NonNull MarkwonPlugin miscPlugin,
                                                   @NonNull EmoteCloseBracketInlineProcessor emoteCloseBracketInlineProcessor,
                                                   @NonNull EmotePlugin emotePlugin,
+                                                  @NonNull CommentFacePlugin commentFacePlugin,
                                                   @NonNull ImageAndGifPlugin imageAndGifPlugin,
                                                   @NonNull VideoPlugin videoPlugin,
                                                   int markdownColor,
@@ -100,6 +104,7 @@ public class MarkdownUtils {
                 .usePlugin(imageAndGifPlugin)
                 .usePlugin(videoPlugin)
                 .usePlugin(emotePlugin)
+                .usePlugin(commentFacePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
                 .usePlugin(new RedditListPlugin())
                 .build();
@@ -162,6 +167,37 @@ public class MarkdownUtils {
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(TableEntryPlugin.create(context))
+                .usePlugin(new RedditListPlugin())
+                .build();
+    }
+
+    /**
+     * The preview Markwon with comment faces: {@code closeBracketInlineProcessor} stands in for
+     * the default one so links can become faces, and only links, since images are not parsed here.
+     */
+    @NonNull
+    public static Markwon createContentPreviewRedditMarkwon(@NonNull Context context,
+                                                            @NonNull MarkwonPlugin miscPlugin,
+                                                            int markdownColor,
+                                                            int spoilerBackgroundColor,
+                                                            @NonNull EmoteCloseBracketInlineProcessor closeBracketInlineProcessor,
+                                                            @NonNull CommentFacePlugin commentFacePlugin) {
+        return Markwon.builder(context)
+                .usePlugin(MarkwonInlineParserPlugin.create(plugin -> {
+                    plugin.excludeInlineProcessor(HtmlInlineProcessor.class);
+                    plugin.excludeInlineProcessor(BangInlineProcessor.class);
+                    plugin.excludeInlineProcessor(CloseBracketInlineProcessor.class);
+                    plugin.addInlineProcessor(closeBracketInlineProcessor);
+                }))
+                .usePlugin(miscPlugin)
+                .usePlugin(SuperscriptPlugin.create())
+                .usePlugin(SpoilerParserPlugin.create(markdownColor, spoilerBackgroundColor))
+                .usePlugin(RedditHeadingPlugin.create())
+                .usePlugin(StrikethroughPlugin.create())
+                .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
+                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(commentFacePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
                 .usePlugin(new RedditListPlugin())
                 .build();

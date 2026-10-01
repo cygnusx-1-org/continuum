@@ -41,6 +41,8 @@ import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
@@ -79,6 +81,10 @@ public class WikiActivity extends BaseActivity {
     private String mSubredditName;
     private EmoteCloseBracketInlineProcessor emoteCloseBracketInlineProcessor;
     private EmotePlugin emotePlugin;
+    private CommentFaces commentFaces;
+    /** The page on screen, rebuilt when the subreddit's comment faces arrive. */
+    @Nullable
+    private String shownWikiMarkdown;
     private ImageAndGifPlugin imageAndGifPlugin;
     private ImageAndGifEntry imageAndGifEntry;
     private Markwon markwon;
@@ -198,6 +204,15 @@ public class WikiActivity extends BaseActivity {
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, mSubredditName);
                     intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
                 });
+        commentFaces = CommentFaces.create(this, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL);
+        commentFaces.prefetch(mSubredditName);
+        commentFaces.observe(this, subreddit -> {
+            String markdown = shownWikiMarkdown;
+            if (markdown != null && subreddit.equalsIgnoreCase(mSubredditName)
+                    && CommentFaces.mayContainFace(markdown)) {
+                showWikiMarkdown(markdown);
+            }
+        });
         imageAndGifPlugin = new ImageAndGifPlugin();
         imageAndGifEntry = new ImageAndGifEntry(this,
                 mGlide, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL, (mediaMetadata, commentId, postId, postTitle) -> {
@@ -211,7 +226,8 @@ public class WikiActivity extends BaseActivity {
             intent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
         });
         markwon = MarkdownUtils.createFullRedditMarkwon(this,
-                miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, imageAndGifPlugin, markdownColor, spoilerBackgroundColor, onLinkLongClickListener);
+                miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, commentFaces.getPlugin(), imageAndGifPlugin,
+                markdownColor, spoilerBackgroundColor, onLinkLongClickListener);
 
         markwonAdapter = MarkdownUtils.createCustomTablesAndImagesAdapter(this, imageAndGifEntry);
         LinearLayoutManagerBugFixed linearLayoutManager = new SwipeLockLinearLayoutManager(this, new SwipeLockInterface() {
@@ -239,10 +255,17 @@ public class WikiActivity extends BaseActivity {
         if (wikiMarkdown == null) {
             loadWiki();
         } else {
-            markwonAdapter.setMarkdown(markwon, wikiMarkdown);
-            // noinspection NotifyDataSetChanged
-            markwonAdapter.notifyDataSetChanged();
+            showWikiMarkdown(wikiMarkdown);
         }
+    }
+
+    private void showWikiMarkdown(String markdown) {
+        shownWikiMarkdown = markdown;
+        emoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                commentFaces.lookup(mSubredditName, CommentFaceContext.WIKI));
+        markwonAdapter.setMarkdown(markwon, markdown);
+        // noinspection NotifyDataSetChanged
+        markwonAdapter.notifyDataSetChanged();
     }
 
     private void loadWiki() {
@@ -264,9 +287,7 @@ public class WikiActivity extends BaseActivity {
                     try {
                         String markdown = new JSONObject(responseBody)
                                 .getJSONObject(JSONUtils.DATA_KEY).getString(JSONUtils.CONTENT_MD_KEY);
-                        markwonAdapter.setMarkdown(markwon, Utils.modifyMarkdown(markdown));
-                        // noinspection NotifyDataSetChanged
-                        markwonAdapter.notifyDataSetChanged();
+                        showWikiMarkdown(Utils.modifyMarkdown(markdown));
                     } catch (JSONException e) {
                         e.printStackTrace();
                         showErrorView(R.string.error_loading_wiki);
@@ -369,6 +390,10 @@ public class WikiActivity extends BaseActivity {
 
             if (imageAndGifEntry != null) {
                 imageAndGifEntry.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
+            }
+
+            if (commentFaces != null) {
+                commentFaces.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
             }
         }
     }

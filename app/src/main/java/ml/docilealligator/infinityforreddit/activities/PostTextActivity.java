@@ -569,6 +569,8 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
             Intent intent = new Intent(this, FullMarkdownActivity.class);
             intent.putExtra(FullMarkdownActivity.EXTRA_MARKDOWN, binding.postTextContentEditTextPostTextActivity.getText().toString());
             intent.putExtra(FullMarkdownActivity.EXTRA_SUBMIT_POST, true);
+            intent.putExtra(FullMarkdownActivity.EXTRA_SUBREDDIT_NAME, subredditName);
+            intent.putExtra(FullMarkdownActivity.EXTRA_IS_POST, true);
             startActivityForResult(intent, MARKDOWN_PREVIEW_REQUEST_CODE);
         } else if (itemId == R.id.action_send_post_text_activity) {
             submitPost();

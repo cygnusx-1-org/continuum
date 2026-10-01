@@ -127,6 +127,10 @@ public interface RedditAPI {
     @GET("/r/{subredditName}/about/rules.json?raw_json=1")
     Call<String> getRules(@Path("subredditName") @Nullable String subredditName);
 
+    /** The subreddit's old-Reddit stylesheet and its uploaded images, for comment faces. */
+    @GET("/r/{subredditName}/about/stylesheet.json?raw_json=1")
+    Call<String> getSubredditStylesheet(@Path("subredditName") String subredditName);
+
     @GET("/r/{subredditName}/about/rules.json?raw_json=1")
     Call<String> getRulesOauth(@HeaderMap Map<String, String> headers, @Path("subredditName") @Nullable String subredditName);
 

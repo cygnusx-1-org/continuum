@@ -141,6 +141,9 @@ public interface AppComponent {
     @javax.inject.Named("default")
     android.content.SharedPreferences defaultSharedPreferences();
 
+    /** For every screen that renders comment faces; see {@code CommentFaces}. */
+    ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceRepository commentFaceRepository();
+
     void inject(MainActivity mainActivity);
 
     void inject(LoginActivity loginActivity);

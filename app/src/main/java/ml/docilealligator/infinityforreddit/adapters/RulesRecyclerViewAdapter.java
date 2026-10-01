@@ -23,12 +23,15 @@ import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewImageOrGifActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.customviews.RebindInPlaceItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockLinearLayoutManager;
 import ml.docilealligator.infinityforreddit.customviews.slidr.widget.SliderPanel;
 import ml.docilealligator.infinityforreddit.databinding.ItemRuleBinding;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
@@ -41,6 +44,8 @@ public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecycler
     private final BaseActivity activity;
     private final EmoteCloseBracketInlineProcessor emoteCloseBracketInlineProcessor;
     private final EmotePlugin emotePlugin;
+    private final CommentFaces commentFaces;
+    private final String subredditName;
     private final ImageAndGifPlugin imageAndGifPlugin;
     private final ImageAndGifEntry imageAndGifEntry;
     private final Markwon markwon;
@@ -54,6 +59,7 @@ public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecycler
                                     @Nullable SliderPanel sliderPanel, String subredditName) {
         this.activity = activity;
         this.sliderPanel = sliderPanel;
+        this.subredditName = subredditName;
         mPrimaryTextColor = customThemeWrapper.getPrimaryTextColor();
         int spoilerBackgroundColor = mPrimaryTextColor | 0xFF000000;
         MarkwonPlugin miscPlugin = new AbstractMarkwonPlugin() {
@@ -100,6 +106,13 @@ public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecycler
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, subredditName);
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
                 });
+        commentFaces = CommentFaces.create(activity, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL);
+        commentFaces.prefetch(subredditName);
+        commentFaces.observe(activity, loadedSubreddit -> {
+            if (loadedSubreddit.equalsIgnoreCase(subredditName)) {
+                notifyItemRangeChanged(0, getItemCount(), RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
+            }
+        });
         imageAndGifPlugin = new ImageAndGifPlugin();
         imageAndGifEntry = new ImageAndGifEntry(activity,
                 Glide.with(activity), SharedPreferencesUtils.EMBEDDED_MEDIA_ALL,
@@ -114,8 +127,8 @@ public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecycler
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
                 });
         markwon = MarkdownUtils.createFullRedditMarkwon(activity,
-                miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, imageAndGifPlugin, mPrimaryTextColor,
-                spoilerBackgroundColor, onLinkLongClickListener);
+                miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, commentFaces.getPlugin(),
+                imageAndGifPlugin, mPrimaryTextColor, spoilerBackgroundColor, onLinkLongClickListener);
     }
 
     @NonNull
@@ -131,6 +144,8 @@ public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecycler
         if (rule.getDescriptionHtml() == null) {
             holder.binding.descriptionMarkwonViewItemRule.setVisibility(View.GONE);
         } else {
+            emoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                    commentFaces.lookup(subredditName, CommentFaceContext.GENERIC));
             holder.markwonAdapter.setMarkdown(markwon, rule.getDescriptionHtml());
             //noinspection NotifyDatasetChanged
             holder.markwonAdapter.notifyDataSetChanged();
@@ -156,6 +171,7 @@ public class RulesRecyclerViewAdapter extends RecyclerView.Adapter<RulesRecycler
     public void setDataSavingMode(boolean dataSavingMode) {
         emotePlugin.setDataSavingMode(dataSavingMode);
         imageAndGifEntry.setDataSavingMode(dataSavingMode);
+        commentFaces.setDataSavingMode(dataSavingMode);
     }
 
     class RuleViewHolder extends RecyclerView.ViewHolder {

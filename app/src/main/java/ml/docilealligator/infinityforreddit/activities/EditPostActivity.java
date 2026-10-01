@@ -53,6 +53,8 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
     public static final String EXTRA_TITLE = "ET";
     public static final String EXTRA_CONTENT = "EC";
     public static final String EXTRA_FULLNAME = "EF";
+    /** Optional: the post's subreddit, for the comment faces in the markdown preview. */
+    public static final String EXTRA_SUBREDDIT_NAME = "ESN";
 
     private static final int PICK_IMAGE_REQUEST_CODE = 100;
     private static final int CAPTURE_IMAGE_REQUEST_CODE = 200;
@@ -268,6 +270,8 @@ public class EditPostActivity extends BaseActivity implements UploadImageEnabled
             Intent intent = new Intent(this, FullMarkdownActivity.class);
             intent.putExtra(FullMarkdownActivity.EXTRA_MARKDOWN, binding.postContentEditTextEditPostActivity.getText().toString());
             intent.putExtra(FullMarkdownActivity.EXTRA_SUBMIT_POST, true);
+            intent.putExtra(FullMarkdownActivity.EXTRA_SUBREDDIT_NAME, getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME));
+            intent.putExtra(FullMarkdownActivity.EXTRA_IS_POST, true);
             startActivityForResult(intent, MARKDOWN_PREVIEW_REQUEST_CODE);
         } else if (item.getItemId() == R.id.action_send_edit_post_activity) {
             editPost();

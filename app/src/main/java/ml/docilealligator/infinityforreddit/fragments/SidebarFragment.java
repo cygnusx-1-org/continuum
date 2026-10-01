@@ -47,6 +47,8 @@ import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
@@ -88,6 +90,9 @@ public class SidebarFragment extends Fragment {
     private String sidebarDescription;
     @SuppressWarnings("NullAway.Init")
     private EmotePlugin emotePlugin;
+    /** Null until the view is built with a subreddit to take a stylesheet from. */
+    @Nullable
+    private CommentFaces commentFaces;
     @SuppressWarnings("NullAway.Init")
     private ImageAndGifEntry imageAndGifEntry;
     private FragmentSidebarBinding binding;
@@ -183,6 +188,9 @@ public class SidebarFragment extends Fragment {
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, subredditName);
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
                 });
+        CommentFaces faces = CommentFaces.create(mActivity, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL);
+        commentFaces = faces;
+        faces.prefetch(subredditName);
         ImageAndGifPlugin imageAndGifPlugin = new ImageAndGifPlugin();
         imageAndGifEntry = new ImageAndGifEntry(mActivity,
                 Glide.with(this), SharedPreferencesUtils.EMBEDDED_MEDIA_ALL,
@@ -197,8 +205,8 @@ public class SidebarFragment extends Fragment {
                     imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
                 });
         Markwon markwon = MarkdownUtils.createFullRedditMarkwon(mActivity,
-                miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, imageAndGifPlugin, markdownColor,
-                spoilerBackgroundColor, onLinkLongClickListener);
+                miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, faces.getPlugin(), imageAndGifPlugin,
+                markdownColor, spoilerBackgroundColor, onLinkLongClickListener);
         CustomMarkwonAdapter markwonAdapter = MarkdownUtils.createCustomTablesAndImagesAdapter(mActivity, imageAndGifEntry);
         markwonAdapter.setOnLongClickListener(view -> {
             if (sidebarDescription != null && !sidebarDescription.equals("")) {
@@ -232,12 +240,25 @@ public class SidebarFragment extends Fragment {
             if (subredditData != null) {
                 sidebarDescription = subredditData.getSidebarDescription();
                 if (sidebarDescription != null && !sidebarDescription.equals("")) {
+                    emoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                            faces.lookup(subredditName, CommentFaceContext.SIDEBAR));
                     markwonAdapter.setMarkdown(markwon, sidebarDescription);
                     // noinspection NotifyDataSetChanged
                     markwonAdapter.notifyDataSetChanged();
                 }
             } else {
                 fetchSubredditData();
+            }
+        });
+        faces.observe(getViewLifecycleOwner(), loadedSubreddit -> {
+            String description = sidebarDescription;
+            if (description != null && loadedSubreddit.equalsIgnoreCase(subredditName)
+                    && CommentFaces.mayContainFace(description)) {
+                emoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                        faces.lookup(subredditName, CommentFaceContext.SIDEBAR));
+                markwonAdapter.setMarkdown(markwon, description);
+                // noinspection NotifyDataSetChanged
+                markwonAdapter.notifyDataSetChanged();
             }
         });
 
@@ -288,6 +309,9 @@ public class SidebarFragment extends Fragment {
     public void setDataSavingMode(boolean dataSavingMode) {
         emotePlugin.setDataSavingMode(dataSavingMode);
         imageAndGifEntry.setDataSavingMode(dataSavingMode);
+        if (commentFaces != null) {
+            commentFaces.setDataSavingMode(dataSavingMode);
+        }
     }
 
     @Subscribe
@@ -300,6 +324,10 @@ public class SidebarFragment extends Fragment {
 
             if (imageAndGifEntry != null) {
                 imageAndGifEntry.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
+            }
+
+            if (commentFaces != null) {
+                commentFaces.setDataSavingMode(changeNetworkStatusEvent.connectedNetwork == Utils.NETWORK_TYPE_CELLULAR);
             }
         }
     }

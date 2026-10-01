@@ -6,6 +6,9 @@ import androidx.annotation.Nullable;
 import io.noties.markwon.inlineparser.InlineProcessor;
 import java.util.Map;
 import java.util.regex.Pattern;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFace;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceLookup;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceNode;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import org.commonmark.internal.Bracket;
 import org.commonmark.internal.util.Escaping;
@@ -18,6 +21,8 @@ public class EmoteCloseBracketInlineProcessor extends InlineProcessor {
 
     @Nullable
     private Map<String, MediaMetadata> mediaMetadataMap;
+    @Nullable
+    private CommentFaceLookup commentFaceLookup;
 
     @Override
     public char specialCharacter() {
@@ -116,7 +121,13 @@ public class EmoteCloseBracketInlineProcessor extends InlineProcessor {
 
                 linkOrImage = new Emote(mediaMetadata, title);
             } else {
-                linkOrImage = new Link(dest, title);
+                // A comment face is an ordinary link that the subreddit's stylesheet draws as an
+                // image; whether it has text of its own is read before the text moves under it.
+                CommentFaceLookup lookup = commentFaceLookup;
+                CommentFace face = lookup == null || dest == null ? null
+                        : lookup.find(dest, title, opener.node.getNext() != null);
+                linkOrImage = face != null && dest != null
+                        ? new CommentFaceNode(face, dest, title) : new Link(dest, title);
             }
 
             Node node = opener.node.getNext();
@@ -157,5 +168,13 @@ public class EmoteCloseBracketInlineProcessor extends InlineProcessor {
 
     public void setMediaMetadataMap(@Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         this.mediaMetadataMap = mediaMetadataMap;
+    }
+
+    /**
+     * Rebound, like the media map, before each body is parsed: faces belong to the subreddit the
+     * body was posted in. Null turns them off.
+     */
+    public void setCommentFaceLookup(@Nullable CommentFaceLookup commentFaceLookup) {
+        this.commentFaceLookup = commentFaceLookup;
     }
 }

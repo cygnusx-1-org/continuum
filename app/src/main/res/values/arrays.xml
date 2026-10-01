@@ -858,25 +858,44 @@
         <item>@string/save_locally_and_online_anonymous</item>
     </string-array>
 
+    <!-- 0-15 are the combinations from before comment faces and keep their meaning; each one
+         added since is 16 plus a mask of emote 1, GIF 2, image 4, comment face 8. See
+         SharedPreferencesUtils.embeddedMediaFlags. -->
     <string-array name="settings_embedded_media_type">
         <item>@string/all</item>
+        <item>@string/image_gif_and_emote</item>
+        <item>@string/image_gif_and_comment_face</item>
+        <item>@string/image_emote_and_comment_face</item>
+        <item>@string/gif_emote_and_comment_face</item>
         <item>@string/image_and_gif</item>
         <item>@string/image_and_emote</item>
+        <item>@string/image_and_comment_face</item>
         <item>@string/gif_and_emote</item>
+        <item>@string/gif_and_comment_face</item>
+        <item>@string/emote_and_comment_face</item>
         <item>@string/image_embedded_media</item>
         <item>@string/gif</item>
         <item>@string/emote</item>
+        <item>@string/comment_face</item>
         <item>@string/none</item>
     </string-array>
 
     <string-array name="settings_embedded_media_type_values">
         <item>15</item>
+        <item>23</item>
+        <item>30</item>
+        <item>29</item>
+        <item>27</item>
         <item>7</item>
         <item>6</item>
+        <item>28</item>
         <item>5</item>
+        <item>26</item>
+        <item>25</item>
         <item>3</item>
         <item>2</item>
         <item>1</item>
+        <item>24</item>
         <item>0</item>
     </string-array>
 

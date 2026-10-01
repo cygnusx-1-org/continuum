@@ -58,6 +58,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.CommentIndentationView;
 import ml.docilealligator.infinityforreddit.customviews.CommentToolbar;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.RebindInPlaceItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockLinearLayoutManager;
@@ -69,6 +70,8 @@ import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
@@ -107,6 +110,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final Retrofit mOauthRetrofit;
     private final EmoteCloseBracketInlineProcessor mEmoteCloseBracketInlineProcessor;
     private final EmotePlugin mEmotePlugin;
+    private final CommentFaces mCommentFaces;
     private final ImageAndGifPlugin mImageAndGifPlugin;
     private final VideoPlugin mVideoPlugin;
     private final Markwon mCommentMarkwon;
@@ -284,11 +288,14 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                         activity.startActivity(intent);
                     }
                 });
+        mCommentFaces = CommentFaces.create(activity,
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"));
         mImageAndGifPlugin = new ImageAndGifPlugin();
         mVideoPlugin = new VideoPlugin();
         mCommentMarkwon = MarkdownUtils.createFullRedditMarkwon(mActivity,
-                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mImageAndGifPlugin,
-                mVideoPlugin, mCommentTextColor, commentSpoilerBackgroundColor, onLinkLongClickListener);
+                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mCommentFaces.getPlugin(),
+                mImageAndGifPlugin, mVideoPlugin, mCommentTextColor, commentSpoilerBackgroundColor,
+                onLinkLongClickListener);
 
         mNeedBlurNsfw = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.BLUR_NSFW_BASE), true);
         mDoNotBlurNsfwInNsfwSubreddits = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS), false);
@@ -357,6 +364,10 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         });
         recycledViewPool = new RecyclerView.RecycledViewPool();
         mPost = post;
+        if (post != null) {
+            mCommentFaces.prefetch(post.getSubredditName());
+        }
+        mCommentFaces.observe(activity, this::onCommentFacesLoaded);
         mLocale = locale;
         mSingleCommentId = singleCommentId;
 
@@ -608,6 +619,8 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 }
 
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(comment.getMediaMetadataMap());
+                mEmoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                        mCommentFaces.lookup(comment.getSubredditName(), CommentFaceContext.COMMENT));
                 mImageAndGifPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mImageAndGifEntry.setCurrentCommentId(comment.getId());
                 mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
@@ -1016,7 +1029,25 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     }
 
     public boolean setDataSavingMode(boolean dataSavingMode) {
-        return mEmotePlugin.setDataSavingMode(dataSavingMode) || mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+        // Not ||: each of them needs the new mode, whether or not one before it changed.
+        return mEmotePlugin.setDataSavingMode(dataSavingMode)
+                | mImageAndGifEntry.setDataSavingMode(dataSavingMode)
+                | mCommentFaces.setDataSavingMode(dataSavingMode);
+    }
+
+    /**
+     * Rebinds the comments from {@code subreddit} that may hold a face, now that its stylesheet
+     * has arrived. Only those: a rebind restarts a comment's autoplaying GIFs.
+     */
+    private void onCommentFacesLoaded(String subreddit) {
+        List<Comment> comments = getCurrentList();
+        for (int i = 0; i < comments.size(); i++) {
+            Comment comment = comments.get(i);
+            if (comment != null && subreddit.equalsIgnoreCase(comment.getSubredditName())
+                    && CommentFaces.mayContainFace(comment.getCommentMarkdown())) {
+                notifyItemChanged(i, RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
+            }
+        }
     }
 
     /**
@@ -1065,6 +1096,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     public void updatePost(@NonNull Post post) {
         Post previousPost = mPost;
         mPost = post;
+        mCommentFaces.prefetch(post.getSubredditName());
         applyImageBlur();
 
         // Bound rows read isArchived()/isLocked() for the vote and reply tint, and applyImageBlur()

@@ -19,6 +19,7 @@ import androidx.annotation.OptIn;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.media3.common.util.UnstableApi;
+import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,6 +50,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.CommentIndentationView;
 import ml.docilealligator.infinityforreddit.customviews.CommentToolbar;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
+import ml.docilealligator.infinityforreddit.customviews.RebindInPlaceItemAnimator;
 import ml.docilealligator.infinityforreddit.customviews.SpoilerOnClickTextView;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockInterface;
 import ml.docilealligator.infinityforreddit.customviews.SwipeLockLinearLayoutManager;
@@ -60,6 +62,8 @@ import ml.docilealligator.infinityforreddit.localsaved.LocalSaved;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
@@ -98,6 +102,7 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     private final Locale mLocale;
     private final EmoteCloseBracketInlineProcessor mEmoteCloseBracketInlineProcessor;
     private final EmotePlugin mEmotePlugin;
+    private final CommentFaces mCommentFaces;
     private final ImageAndGifPlugin mImageAndGifPlugin;
     private final VideoPlugin mVideoPlugin;
     private final Markwon mMarkwon;
@@ -219,11 +224,17 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                         activity.startActivity(intent);
                     }
                 });
+        // Comments here come from any number of subreddits, each with its own stylesheet, so
+        // nothing is prefetched: a stylesheet loads when a comment from it first needs one.
+        mCommentFaces = CommentFaces.create(activity,
+                SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"));
+        mCommentFaces.observe(activity, this::onCommentFacesLoaded);
         mImageAndGifPlugin = new ImageAndGifPlugin();
         mVideoPlugin = new VideoPlugin();
         mMarkwon = MarkdownUtils.createFullRedditMarkwon(mActivity,
-                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mImageAndGifPlugin,
-                mVideoPlugin, mCommentColor, commentSpoilerBackgroundColor, onLinkLongClickListener);
+                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mCommentFaces.getPlugin(),
+                mImageAndGifPlugin, mVideoPlugin, mCommentColor, commentSpoilerBackgroundColor,
+                onLinkLongClickListener);
         mImageAndGifEntry = new ImageAndGifEntry(activity, Glide.with(activity),
                 SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 (mediaMetadata, commentId, postId, postTitle) -> {
@@ -320,6 +331,8 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                 }
 
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(comment.getMediaMetadataMap());
+                mEmoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                        mCommentFaces.lookup(comment.getSubredditName(), CommentFaceContext.COMMENT));
                 mImageAndGifPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mImageAndGifEntry.setCurrentCommentId(comment.getId());
                 mImageAndGifEntry.setCurrentPostId(comment.getLinkId());
@@ -539,7 +552,26 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
     }
 
     public boolean setDataSavingMode(boolean dataSavingMode) {
-        return mEmotePlugin.setDataSavingMode(dataSavingMode) || mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+        // Not ||: each of them needs the new mode, whether or not one before it changed.
+        return mEmotePlugin.setDataSavingMode(dataSavingMode)
+                | mImageAndGifEntry.setDataSavingMode(dataSavingMode)
+                | mCommentFaces.setDataSavingMode(dataSavingMode);
+    }
+
+    /** Rebinds the loaded comments from {@code subreddit} that may hold a face, now that its stylesheet is here. */
+    private void onCommentFacesLoaded(String subreddit) {
+        PagedList<Comment> comments = getCurrentList();
+        if (comments == null) {
+            return;
+        }
+        for (int i = 0; i < comments.size(); i++) {
+            // get(), not getItem(): this is no reason to page in more comments.
+            Comment comment = comments.get(i);
+            if (comment != null && subreddit.equalsIgnoreCase(comment.getSubredditName())
+                    && CommentFaces.mayContainFace(comment.getCommentMarkdown())) {
+                notifyItemChanged(i, RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
+            }
+        }
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {

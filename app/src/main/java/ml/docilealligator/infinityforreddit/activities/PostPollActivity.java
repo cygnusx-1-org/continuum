@@ -623,6 +623,8 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
             Intent intent = new Intent(this, FullMarkdownActivity.class);
             intent.putExtra(FullMarkdownActivity.EXTRA_MARKDOWN, binding.postContentEditTextPostPollActivity.getText().toString());
             intent.putExtra(FullMarkdownActivity.EXTRA_SUBMIT_POST, true);
+            intent.putExtra(FullMarkdownActivity.EXTRA_SUBREDDIT_NAME, subredditName);
+            intent.putExtra(FullMarkdownActivity.EXTRA_IS_POST, true);
             startActivityForResult(intent, MARKDOWN_PREVIEW_REQUEST_CODE);
         } else if (itemId == R.id.action_send_post_poll_activity) {
             submitPost();

@@ -114,6 +114,8 @@ import ml.docilealligator.infinityforreddit.managers.VideoMuteManager;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.EvenBetterLinkMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
@@ -182,6 +184,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final SaveMemoryCenterInisdeDownsampleStrategy mSaveMemoryCenterInsideDownsampleStrategy;
     private final EmoteCloseBracketInlineProcessor mEmoteCloseBracketInlineProcessor;
     private final EmotePlugin mEmotePlugin;
+    private final CommentFaces mCommentFaces;
     private final ImageAndGifPlugin mImageAndGifPlugin;
     private final VideoPlugin mVideoPlugin;
     private final Markwon mPostDetailMarkwon;
@@ -489,11 +492,20 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         activity.startActivity(intent);
                     }
                 });
+        // The post body's own Embedded Media Type, the one its images and GIFs follow.
+        mCommentFaces = CommentFaces.create(activity,
+                SharedPreferencesUtils.getInt(postDetailsSharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
+                mDataSavingMode, mDisableImagePreview);
+        if (mPost != null) {
+            mCommentFaces.prefetch(mPost.getSubredditName());
+        }
+        mCommentFaces.observe(activity, this::onCommentFacesLoaded);
         mImageAndGifPlugin = new ImageAndGifPlugin();
         mVideoPlugin = new VideoPlugin();
         mPostDetailMarkwon = MarkdownUtils.createFullRedditMarkwon(mActivity,
-                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mImageAndGifPlugin,
-                mVideoPlugin, markdownColor, postSpoilerBackgroundColor, onLinkLongClickListener);
+                miscPlugin, mEmoteCloseBracketInlineProcessor, mEmotePlugin, mCommentFaces.getPlugin(),
+                mImageAndGifPlugin, mVideoPlugin, markdownColor, postSpoilerBackgroundColor,
+                onLinkLongClickListener);
         mImageAndGifEntry = new ImageAndGifEntry(activity,
                 mGlide, SharedPreferencesUtils.getInt(postDetailsSharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
                 mDataSavingMode, mDisableImagePreview,
@@ -921,6 +933,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 ((PostDetailBaseViewHolder) holder).contentMarkdownView.setVisibility(View.VISIBLE);
                 ((PostDetailBaseViewHolder) holder).contentMarkdownView.setAdapter(mMarkwonAdapter);
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(mPost.getMediaMetadataMap());
+                mEmoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                        mCommentFaces.lookup(mPost.getSubredditName(), CommentFaceContext.POST));
                 mImageAndGifPlugin.setMediaMetadataMap(mPost.getMediaMetadataMap());
                 mVideoPlugin.setMediaMetadataMap(mPost.getMediaMetadataMap());
                 // A post body embed has no comment id; the name is title + post id.
@@ -1515,6 +1529,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         }
         boolean hadPost = mPost != null;
         mPost = post;
+        mCommentFaces.prefetch(post.getSubredditName());
         if (hadPost) {
             // The one row changes in place, so it keeps the ExoPlayer attached to it: see
             // RebindInPlaceItemAnimator. notifyDataSetChanged() would mark the holder invalid,
@@ -1554,11 +1569,20 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             mDataSavingMode = dataSavingMode;
             mEmotePlugin.setDataSavingMode(dataSavingMode);
             mImageAndGifEntry.setDataSavingMode(dataSavingMode);
+            mCommentFaces.setDataSavingMode(dataSavingMode);
 
             return true;
         }
 
         return false;
+    }
+
+    /** Rebinds the post body if it may hold a face from {@code subreddit}, whose stylesheet just arrived. */
+    private void onCommentFacesLoaded(String subreddit) {
+        if (mPost != null && getItemCount() > 0 && subreddit.equalsIgnoreCase(mPost.getSubredditName())
+                && CommentFaces.mayContainFace(mPost.getSelfText())) {
+            notifyItemChanged(0, RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
+        }
     }
 
     public void setAutoplayCommentGif(boolean autoplayCommentGif) {

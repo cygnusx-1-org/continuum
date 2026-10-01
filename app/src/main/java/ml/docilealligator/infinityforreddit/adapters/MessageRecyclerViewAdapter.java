@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +20,7 @@ import io.noties.markwon.MarkwonConfiguration;
 import io.noties.markwon.core.MarkwonTheme;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.inlineparser.BangInlineProcessor;
+import io.noties.markwon.inlineparser.CloseBracketInlineProcessor;
 import io.noties.markwon.inlineparser.HtmlInlineProcessor;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
 import io.noties.markwon.linkify.LinkifyPlugin;
@@ -33,10 +35,14 @@ import ml.docilealligator.infinityforreddit.activities.ViewPrivateMessagesActivi
 import ml.docilealligator.infinityforreddit.activities.ViewSubredditDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.customviews.RebindInPlaceItemAnimator;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterErrorBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterLoadingBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemMessageBinding;
 import ml.docilealligator.infinityforreddit.markdown.RedditListPlugin;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
+import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.redditheading.RedditHeadingPlugin;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerAwareMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerParserPlugin;
@@ -46,6 +52,7 @@ import ml.docilealligator.infinityforreddit.message.InboxCount;
 import ml.docilealligator.infinityforreddit.message.Message;
 import ml.docilealligator.infinityforreddit.message.ReadMessage;
 import ml.docilealligator.infinityforreddit.user.UserMarks;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.UserMarkIcon;
 import ml.docilealligator.infinityforreddit.utils.UserTagChip;
 import retrofit2.Retrofit;
@@ -69,6 +76,9 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
     private final BaseActivity mActivity;
     private final Retrofit mOauthRetrofit;
     private final Markwon mMarkwon;
+    /** Only for comment faces: images are not parsed here, so it never meets an emote. */
+    private final EmoteCloseBracketInlineProcessor mEmoteCloseBracketInlineProcessor;
+    private final CommentFaces mCommentFaces;
     @Nullable
     private final String mAccessToken;
     private final String mAccountName;
@@ -114,12 +124,20 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
         mColorPrimaryLightTheme = customThemeWrapper.getColorPrimaryLightTheme();
         mButtonTextColor = customThemeWrapper.getButtonTextColor();
 
+        // A reply or mention is a comment, so it shows the faces its subreddit's stylesheet draws.
+        mEmoteCloseBracketInlineProcessor = new EmoteCloseBracketInlineProcessor();
+        mCommentFaces = CommentFaces.create(activity, SharedPreferencesUtils.getInt(
+                activity.getDefaultSharedPreferences(), SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"));
+        mCommentFaces.observe(activity, this::onCommentFacesLoaded);
+
         // todo:https://github.com/Docile-Alligator/Infinity-For-Reddit/issues/1027
         //  add tables support and replace with MarkdownUtils#commonPostMarkwonBuilder
         mMarkwon = Markwon.builder(mActivity)
                 .usePlugin(MarkwonInlineParserPlugin.create(plugin -> {
                     plugin.excludeInlineProcessor(HtmlInlineProcessor.class);
                     plugin.excludeInlineProcessor(BangInlineProcessor.class);
+                    plugin.excludeInlineProcessor(CloseBracketInlineProcessor.class);
+                    plugin.addInlineProcessor(mEmoteCloseBracketInlineProcessor);
                 }))
                 .usePlugin(new AbstractMarkwonPlugin() {
                     @Override
@@ -143,6 +161,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(mCommentFaces.getPlugin())
                 .usePlugin(new RedditListPlugin())
                 .build();
         mAccessToken = accessToken;
@@ -206,6 +225,8 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 String subject = (subjectRaw == null || subjectRaw.isEmpty()) ? "" :
                         subjectRaw.substring(0, 1).toUpperCase(Locale.getDefault()) + subjectRaw.substring(1);
                 ((DataViewHolder) holder).binding.subjectTextViewItemMessage.setText(subject);
+                mEmoteCloseBracketInlineProcessor.setCommentFaceLookup(message.wasComment()
+                        ? mCommentFaces.lookup(message.getSubredditName(), CommentFaceContext.COMMENT) : null);
                 mMarkwon.setMarkdown(((DataViewHolder) holder).binding.contentCustomMarkwonViewItemMessage, displayedMessage.getBody());
             }
         }
@@ -310,6 +331,22 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
         mUserMarks = userMarks;
         if (changed) {
             notifyDataSetChanged();
+        }
+    }
+
+    /** Rebinds the replies and mentions from {@code subreddit} that may hold a face, now that its stylesheet is here. */
+    private void onCommentFacesLoaded(String subreddit) {
+        PagedList<Message> messages = getCurrentList();
+        if (messages == null) {
+            return;
+        }
+        for (int i = 0; i < messages.size(); i++) {
+            // get(), not getItem(): this is no reason to page in more messages.
+            Message message = messages.get(i);
+            if (message != null && message.wasComment() && subreddit.equalsIgnoreCase(message.getSubredditName())
+                    && CommentFaces.mayContainFace(message.getDisplayedMessage().getBody())) {
+                notifyItemChanged(i, RebindInPlaceItemAnimator.PAYLOAD_REBIND_IN_PLACE);
+            }
         }
     }
 

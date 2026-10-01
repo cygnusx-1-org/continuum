@@ -380,16 +380,57 @@ public class SharedPreferencesUtils {
     public static final String EMBEDDED_MEDIA_TYPE = "embedded_media_type";
     public static final int EMBEDDED_MEDIA_ALL = 15;
 
+    private static final int EMBEDDED_MEDIA_EMOTE = 1;
+    private static final int EMBEDDED_MEDIA_GIF = 2;
+    private static final int EMBEDDED_MEDIA_IMAGE = 4;
+    private static final int EMBEDDED_MEDIA_COMMENT_FACE = 8;
+    private static final int EMBEDDED_MEDIA_FLAGS_CODE = 16;
+
+    /**
+     * The media kinds an Embedded Media Type setting shows. The values from before comment faces
+     * (0-15) name fixed combinations rather than bits — 3 is Image alone, 7 Image and GIF — and
+     * stay as they are so existing settings keep their meaning, with All (15) now including faces.
+     * Every combination added since is 16 plus a mask of the flags above.
+     */
+    private static int embeddedMediaFlags(int embeddedMediaType) {
+        if (embeddedMediaType >= EMBEDDED_MEDIA_FLAGS_CODE) {
+            return embeddedMediaType & (EMBEDDED_MEDIA_FLAGS_CODE - 1);
+        }
+        switch (embeddedMediaType) {
+            case EMBEDDED_MEDIA_ALL:
+                return EMBEDDED_MEDIA_IMAGE | EMBEDDED_MEDIA_GIF | EMBEDDED_MEDIA_EMOTE | EMBEDDED_MEDIA_COMMENT_FACE;
+            case 7:
+                return EMBEDDED_MEDIA_IMAGE | EMBEDDED_MEDIA_GIF;
+            case 6:
+                return EMBEDDED_MEDIA_IMAGE | EMBEDDED_MEDIA_EMOTE;
+            case 5:
+                return EMBEDDED_MEDIA_GIF | EMBEDDED_MEDIA_EMOTE;
+            case 3:
+                return EMBEDDED_MEDIA_IMAGE;
+            case 2:
+                return EMBEDDED_MEDIA_GIF;
+            case 1:
+                return EMBEDDED_MEDIA_EMOTE;
+            default:
+                return 0;
+        }
+    }
+
     public static boolean canShowImage(int embeddedMediaType) {
-        return embeddedMediaType == 15 || embeddedMediaType == 7 || embeddedMediaType == 6 || embeddedMediaType == 3;
+        return (embeddedMediaFlags(embeddedMediaType) & EMBEDDED_MEDIA_IMAGE) != 0;
     }
 
     public static boolean canShowGif(int embeddedMediaType) {
-        return embeddedMediaType == 15 || embeddedMediaType == 7 || embeddedMediaType == 5 || embeddedMediaType == 2;
+        return (embeddedMediaFlags(embeddedMediaType) & EMBEDDED_MEDIA_GIF) != 0;
     }
 
     public static boolean canShowEmote(int embeddedMediaType) {
-        return embeddedMediaType == 15 || embeddedMediaType == 6 || embeddedMediaType == 5 || embeddedMediaType == 1;
+        return (embeddedMediaFlags(embeddedMediaType) & EMBEDDED_MEDIA_EMOTE) != 0;
+    }
+
+    /** Subreddit stylesheet comment faces, `[](#face)`; see {@code markdown.commentface}. */
+    public static boolean canShowCommentFace(int embeddedMediaType) {
+        return (embeddedMediaFlags(embeddedMediaType) & EMBEDDED_MEDIA_COMMENT_FACE) != 0;
     }
 
     // Every numeric setting in the app is stored as a string (they are all backed by a

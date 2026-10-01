@@ -67,6 +67,8 @@ import ml.docilealligator.infinityforreddit.events.ChangeNetworkStatusEvent;
 import ml.docilealligator.infinityforreddit.events.SwitchAccountEvent;
 import ml.docilealligator.infinityforreddit.markdown.CustomMarkwonAdapter;
 import ml.docilealligator.infinityforreddit.markdown.MarkdownUtils;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
+import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmoteCloseBracketInlineProcessor;
 import ml.docilealligator.infinityforreddit.markdown.emote.EmotePlugin;
 import ml.docilealligator.infinityforreddit.markdown.imageandgif.ImageAndGifEntry;
@@ -138,6 +140,9 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
     private int parentPosition;
     private boolean isSubmitting = false;
     private boolean isReplying;
+    /** Kept for the life of the screen, so the parent is redrawn when its comment faces arrive. */
+    @Nullable
+    private CommentFaces parentCommentFaces;
     @Nullable
     private Uri capturedImageUri;
     private ArrayList<UploadedImage> uploadedImages = new ArrayList<>();
@@ -306,7 +311,13 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
                 imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_SUBREDDIT_OR_USERNAME_KEY, intent.getStringExtra(EXTRA_SUBREDDIT_NAME_KEY));
                 imageIntent.putExtra(ViewImageOrGifActivity.EXTRA_FILE_NAME_KEY, mediaMetadata.fileName);
             });
-            Markwon postBodyMarkwon = MarkdownUtils.createFullRedditMarkwon(this, miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, imageAndGifPlugin, parentTextColor, parentSpoilerBackgroundColor, null);
+            // The parent is the comment being replied to, or else the post.
+            String parentSubredditName = intent.getStringExtra(EXTRA_SUBREDDIT_NAME_KEY);
+            CommentFaceContext parentContext = isReplying ? CommentFaceContext.COMMENT : CommentFaceContext.POST;
+            CommentFaces commentFaces = CommentFaces.create(this, SharedPreferencesUtils.EMBEDDED_MEDIA_ALL);
+            parentCommentFaces = commentFaces;
+            commentFaces.prefetch(parentSubredditName);
+            Markwon postBodyMarkwon = MarkdownUtils.createFullRedditMarkwon(this, miscPlugin, emoteCloseBracketInlineProcessor, emotePlugin, commentFaces.getPlugin(), imageAndGifPlugin, parentTextColor, parentSpoilerBackgroundColor, null);
             CustomMarkwonAdapter markwonAdapter = MarkdownUtils.createCustomTablesAndImagesAdapter(this, imageAndGifEntry);
             markwonAdapter.setOnLongClickListener(view -> {
                 Utils.hideKeyboard(CommentActivity.this);
@@ -316,9 +327,21 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             });
             binding.commentContentMarkdownView.setLayoutManager(new LinearLayoutManagerBugFixed(this));
             binding.commentContentMarkdownView.setAdapter(markwonAdapter);
+            emoteCloseBracketInlineProcessor.setCommentFaceLookup(commentFaces.lookup(parentSubredditName, parentContext));
             markwonAdapter.setMarkdown(postBodyMarkwon, parentBodyMarkdown);
             // noinspection NotifyDataSetChanged
             markwonAdapter.notifyDataSetChanged();
+            commentFaces.observe(this, subreddit -> {
+                String markdown = parentBodyMarkdown;
+                if (markdown != null && subreddit.equalsIgnoreCase(parentSubredditName)
+                        && CommentFaces.mayContainFace(markdown)) {
+                    emoteCloseBracketInlineProcessor.setCommentFaceLookup(
+                            commentFaces.lookup(parentSubredditName, parentContext));
+                    markwonAdapter.setMarkdown(postBodyMarkwon, markdown);
+                    // noinspection NotifyDataSetChanged
+                    markwonAdapter.notifyDataSetChanged();
+                }
+            });
         }
         if (isReplying) {
             binding.commentToolbar.setTitle(getString(R.string.comment_activity_label_is_replying));
@@ -554,6 +577,7 @@ public class CommentActivity extends BaseActivity implements UploadImageEnabledA
             Intent intent = new Intent(this, FullMarkdownActivity.class);
             intent.putExtra(FullMarkdownActivity.EXTRA_MARKDOWN, binding.commentCommentEditText.getText().toString());
             intent.putExtra(FullMarkdownActivity.EXTRA_SUBMIT_POST, true);
+            intent.putExtra(FullMarkdownActivity.EXTRA_SUBREDDIT_NAME, getIntent().getStringExtra(EXTRA_SUBREDDIT_NAME_KEY));
             startActivityForResult(intent, MARKDOWN_PREVIEW_REQUEST_CODE);
         } else if (itemId == R.id.action_send_comment_activity) {
             sendComment();

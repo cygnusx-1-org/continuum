@@ -402,6 +402,13 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
     }
 
     protected boolean dispatchUrlLongClick(TextView textView, ClickableSpan clickableSpan) {
+        if (!(clickableSpan instanceof URLSpan)) {
+            // Not a link, so nothing for the link listener: such a span's "text" is only the
+            // characters it covers, a comment face's one replacement character. It gets the press
+            // as a click instead.
+            clickableSpan.onClick(textView);
+            return true;
+        }
         ClickableSpanWithText clickableSpanWithText = ClickableSpanWithText.ofSpan(textView, clickableSpan);
         boolean handled = onLinkLongClickListener != null && onLinkLongClickListener.onLongClick(textView, clickableSpanWithText.text());
 

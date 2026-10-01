@@ -1920,6 +1920,14 @@
     <string name="image_embedded_media">Image</string>
     <string name="emote">Emote</string>
     <string name="none">None</string>
+    <string name="image_gif_and_emote">Image, GIF and emote</string>
+    <string name="image_gif_and_comment_face">Image, GIF and comment face</string>
+    <string name="image_emote_and_comment_face">Image, emote and comment face</string>
+    <string name="gif_emote_and_comment_face">GIF, emote and comment face</string>
+    <string name="image_and_comment_face">Image and comment face</string>
+    <string name="gif_and_comment_face">GIF and comment face</string>
+    <string name="emote_and_comment_face">Emote and comment face</string>
+    <string name="comment_face">Comment face</string>
 
     <string name="comment_filter_display_mode">Display mode</string>
     <string name="comment_filter_display_mode_remove_comments">Remove comments</string>
