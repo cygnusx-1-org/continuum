@@ -2,6 +2,16 @@
 
 ---
 
+8.3.3.1 / 2026-10-1
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Updated to `upstream` version 8.3.3
+* Implemented Support for stickers in comments #432
+* Implemented Kill momentum when pressing floating button to go to next comment #433
+* Fixed Comment gestures trigger even if the option is disabled #431
+* Fixed Comments containing only 9 or less digits followed by a period appear invisible #430
+
 8.3.1.9 / 2026-9-24
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
