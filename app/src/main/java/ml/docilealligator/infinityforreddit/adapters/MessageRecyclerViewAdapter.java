@@ -36,6 +36,7 @@ import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterErrorBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterLoadingBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemMessageBinding;
+import ml.docilealligator.infinityforreddit.markdown.RedditListPlugin;
 import ml.docilealligator.infinityforreddit.markdown.redditheading.RedditHeadingPlugin;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerAwareMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerParserPlugin;
@@ -142,6 +143,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(new RedditListPlugin())
                 .build();
         mAccessToken = accessToken;
         mAccountName = accountName;

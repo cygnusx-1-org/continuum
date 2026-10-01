@@ -7,13 +7,11 @@ import androidx.annotation.NonNull;
 import io.noties.markwon.AbstractMarkwonPlugin;
 import io.noties.markwon.MarkwonSpansFactory;
 import io.noties.markwon.MarkwonVisitor;
-import io.noties.markwon.core.CorePlugin;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import ml.docilealligator.infinityforreddit.markdown.BlockQuoteWithExceptionParser;
-import org.commonmark.node.Block;
+import ml.docilealligator.infinityforreddit.markdown.CoreBlockTypes;
 import org.commonmark.node.BlockQuote;
 import org.commonmark.node.HtmlBlock;
 import org.commonmark.node.Node;
@@ -79,11 +77,8 @@ public class SpoilerParserPlugin extends AbstractMarkwonPlugin {
     public void configureParser(@NonNull Parser.Builder builder) {
         builder.customBlockParserFactory(new BlockQuoteWithExceptionParser.Factory());
 
-        Set<Class<? extends Block>> blocks = CorePlugin.enabledBlockTypes();
-        blocks.remove(HtmlBlock.class);
-        blocks.remove(BlockQuote.class);
-
-        builder.enabledBlockTypes(blocks);
+        CoreBlockTypes.disable(builder, HtmlBlock.class);
+        CoreBlockTypes.disable(builder, BlockQuote.class);
     }
 
     @Override

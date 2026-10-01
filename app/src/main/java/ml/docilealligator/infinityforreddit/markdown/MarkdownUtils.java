@@ -67,6 +67,7 @@ public class MarkdownUtils {
                 .usePlugin(imageAndGifPlugin)
                 .usePlugin(emotePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
+                .usePlugin(new RedditListPlugin())
                 .build();
     }
 
@@ -100,6 +101,7 @@ public class MarkdownUtils {
                 .usePlugin(videoPlugin)
                 .usePlugin(emotePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
+                .usePlugin(new RedditListPlugin())
                 .build();
     }
 
@@ -118,6 +120,7 @@ public class MarkdownUtils {
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
                 .usePlugin(uploadedImagePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
+                .usePlugin(new RedditListPlugin())
                 .build();
     }
 
@@ -138,6 +141,7 @@ public class MarkdownUtils {
                 .usePlugin(giphyGifPlugin)
                 .usePlugin(uploadedImagePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
+                .usePlugin(new RedditListPlugin())
                 .build();
     }
 
@@ -159,6 +163,7 @@ public class MarkdownUtils {
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
                 .usePlugin(TableEntryPlugin.create(context))
+                .usePlugin(new RedditListPlugin())
                 .build();
     }
 
@@ -178,6 +183,7 @@ public class MarkdownUtils {
                         .setOnLinkLongClickListener(onLinkLongClickListener)))
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
                 .usePlugin(TableEntryPlugin.create(context))
+                .usePlugin(new RedditListPlugin())
                 .build();
     }
 
@@ -197,6 +203,7 @@ public class MarkdownUtils {
                 .usePlugin(miscPlugin)
                 .usePlugin(MovementMethodPlugin.create(EvenBetterLinkMovementMethod.newInstance().setOnLinkLongClickListener(onLinkLongClickListener)))
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(new RedditListPlugin())
                 .build();
     }
 

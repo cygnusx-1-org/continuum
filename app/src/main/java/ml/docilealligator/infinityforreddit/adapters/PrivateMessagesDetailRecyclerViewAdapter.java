@@ -38,6 +38,7 @@ import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemPrivateMessageReceivedBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPrivateMessageSentBinding;
+import ml.docilealligator.infinityforreddit.markdown.RedditListPlugin;
 import ml.docilealligator.infinityforreddit.markdown.redditheading.RedditHeadingPlugin;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerAwareMovementMethod;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerParserPlugin;
@@ -110,6 +111,7 @@ public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapt
                 .usePlugin(RedditHeadingPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(new RedditListPlugin())
                 .build();
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
         mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
