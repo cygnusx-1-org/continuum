@@ -61,14 +61,16 @@ object SwipeActionPreferences {
     )
 
     /**
-     * Whether comments swipe at all. Their own switch now, falling back to the post one, which
-     * used to turn all three surfaces on together -- so someone who had swiping on keeps it in
-     * comments until they say otherwise.
+     * Whether comments swipe at all: their own switch, and nothing else.
+     *
+     * It used to fall back to the post switch while unset, for installs from before comments had
+     * one. That fallback could not tell those apart from an account that only ever turned on
+     * Post Swipe Actions, so doing that turned comment swipes on too -- while the comment screen,
+     * which shows its own default, said they were off.
      */
     @JvmStatic
     fun commentSwipeEnabled(preferences: SharedPreferences): Boolean =
-        preferences.getBoolean(SharedPreferencesUtils.ENABLE_COMMENT_SWIPE_ACTION,
-            preferences.getBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false))
+        preferences.getBoolean(SharedPreferencesUtils.ENABLE_COMMENT_SWIPE_ACTION, false)
 
     @JvmStatic
     fun threshold(preferences: SharedPreferences): Float =
@@ -113,18 +115,20 @@ object SwipeActionPreferences {
         post(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION_LEVEL_4, EMPTY),
     )
 
+    /**
+     * The three comment actions on the row's left side. Like [commentSwipeEnabled], these read
+     * only the comment keys: the post screen's sides say nothing about comments.
+     */
     @JvmStatic
     fun commentLeftLevels(preferences: SharedPreferences): IntArray = intArrayOf(
-        comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION,
-            seededLevel1(preferences, SharedPreferencesUtils.SWIPE_LEFT_ACTION, DEFAULT_LEFT_SIDE)),
+        comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION, DEFAULT_LEFT_SIDE),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION_LEVEL_2, EMPTY),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_LEFT_ACTION_LEVEL_3, EMPTY),
     )
 
     @JvmStatic
     fun commentRightLevels(preferences: SharedPreferences): IntArray = intArrayOf(
-        comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION,
-            seededLevel1(preferences, SharedPreferencesUtils.SWIPE_RIGHT_ACTION, DEFAULT_RIGHT_SIDE)),
+        comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION, DEFAULT_RIGHT_SIDE),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION_LEVEL_2, EMPTY),
         comment(preferences, SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION_LEVEL_3, EMPTY),
     )
@@ -144,21 +148,6 @@ object SwipeActionPreferences {
         SharedPreferencesUtils.SWIPE_RIGHT_ACTION,
         SharedPreferencesUtils.COMMENT_SWIPE_RIGHT_ACTION -> DEFAULT_RIGHT_SIDE
         else -> EMPTY
-    }
-
-    /**
-     * What a comment's first level falls back to before the user has ever opened the new screen:
-     * whatever the post side of the same name said, since comments used to read it.
-     *
-     * Only upvote and downvote carry across. They are 0 and 1 on both lists, and until this change
-     * they were the only two values the shared setting could hold -- but it can hold Hide now, and
-     * 3 means Reply on the comment list, so anything else falls back to this list's own default
-     * rather than being read as the action that happens to share its number.
-     */
-    @JvmStatic
-    fun seededLevel1(preferences: SharedPreferences, postKey: String, fallback: String): String {
-        val shared = preferences.getString(postKey, fallback) ?: fallback
-        return if (shared == VOTE_UP || shared == VOTE_DOWN) shared else fallback
     }
 
     private fun post(preferences: SharedPreferences, key: String, default: String): Int =

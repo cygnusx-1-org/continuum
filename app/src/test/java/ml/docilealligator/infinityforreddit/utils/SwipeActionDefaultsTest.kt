@@ -8,6 +8,8 @@ import androidx.test.core.app.ApplicationProvider
 import ml.docilealligator.infinityforreddit.R
 import ml.docilealligator.infinityforreddit.account.AccountScope
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -181,31 +183,40 @@ class SwipeActionDefaultsTest {
         assertEquals(commentUpvote, SwipeActionPreferences.commentRightLevels(preferences)[0])
     }
 
-    // ------------------------------------------------ comments seeding from the post screen
+    // ------------------------------------------------ comments apart from the post screen
 
     @Test
-    fun `comments start on the post screen's choice, side for side`() {
-        // Comments used to read the post keys outright, so a comment side with nothing of its own
-        // follows the post side of the same name rather than resetting to the default.
+    fun `turning on post swipe actions leaves comments off`() {
+        // Issue #431: comments fell back to the post switch while their own was unset, so this
+        // swiped comments while the comment screen, showing its own default, said they were off.
+        preferences.edit()
+            .putBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, true)
+            .commit()
+
+        assertFalse(SwipeActionPreferences.commentSwipeEnabled(preferences))
+    }
+
+    @Test
+    fun `the comment switch alone turns comments on`() {
+        preferences.edit()
+            .putBoolean(SharedPreferencesUtils.ENABLE_SWIPE_ACTION, false)
+            .putBoolean(SharedPreferencesUtils.ENABLE_COMMENT_SWIPE_ACTION, true)
+            .commit()
+
+        assertTrue(SwipeActionPreferences.commentSwipeEnabled(preferences))
+    }
+
+    @Test
+    fun `comment sides keep their own defaults whatever the post screen says`() {
+        // The picker shows the XML default for a comment side with nothing stored, so the swipe
+        // has to use it too rather than the post side of the same name.
         preferences.edit()
             .putString(SharedPreferencesUtils.SWIPE_LEFT_ACTION, "0")
             .putString(SharedPreferencesUtils.SWIPE_RIGHT_ACTION, "1")
             .commit()
 
-        assertEquals(commentUpvote, SwipeActionPreferences.commentLeftLevels(preferences)[0])
-        assertEquals(commentDownvote, SwipeActionPreferences.commentRightLevels(preferences)[0])
-    }
-
-    @Test
-    fun `a post action comments do not have falls back to this side's default`() {
-        // Hide is 3 on the post list and Reply on the comment list. Carrying the number across
-        // would bind a comment swipe to an action the user never picked.
-        preferences.edit()
-            .putString(SharedPreferencesUtils.SWIPE_LEFT_ACTION,
-                SharedPreferencesUtils.SWIPE_ACITON_HIDE.toString())
-            .commit()
-
         assertEquals(commentDownvote, SwipeActionPreferences.commentLeftLevels(preferences)[0])
+        assertEquals(commentUpvote, SwipeActionPreferences.commentRightLevels(preferences)[0])
     }
 
     // -------------------------------------------------------------------------------- helpers
