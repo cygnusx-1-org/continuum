@@ -8,8 +8,8 @@ import androidx.annotation.VisibleForTesting
 import java.io.IOException
 import java.util.ArrayDeque
 import java.util.EnumMap
+import java.util.Random
 import java.util.concurrent.Executor
-import java.util.concurrent.ThreadLocalRandom
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -86,7 +86,8 @@ class RandomSubredditRepository @Inject constructor(
             if (usable.isEmpty()) {
                 return null
             }
-            return usable[ThreadLocalRandom.current().nextInt(usable.size)]
+            // Not ThreadLocalRandom, for the reason RandomSubredditListCache.sampleCandidates gives.
+            return usable[Random().nextInt(usable.size)]
         }
     }
 

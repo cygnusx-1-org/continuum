@@ -11,7 +11,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.ThreadLocalRandom
+import java.util.Random
 import ml.docilealligator.infinityforreddit.apis.DownloadFile
 import retrofit2.Retrofit
 
@@ -51,7 +51,10 @@ class RandomSubredditListCache(
      */
     fun sampleCandidates(list: RandomSubredditList, count: Int): List<String> {
         val reservoir = ArrayList<String>(count)
-        val random = ThreadLocalRandom.current()
+        // Never ThreadLocalRandom: Android 10 and 11 initialise it in the zygote, so every launch
+        // inherits the same seed and draws the same batch until the device reboots (#441).
+        // Random() mixes in System.nanoTime() here, in this process, so each launch differs.
+        val random = Random()
         var seen = 0
 
         try {
