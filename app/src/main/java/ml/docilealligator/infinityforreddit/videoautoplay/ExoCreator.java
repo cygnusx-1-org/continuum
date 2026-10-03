@@ -55,6 +55,16 @@ public interface ExoCreator {
   ExoPlayer createPlayer();
 
   /**
+   * Called when {@link ToroExo} hands out a pooled {@link ExoPlayer} again instead of creating one,
+   * so whatever {@link #createPlayer()} set from the user's settings can be brought up to date. The
+   * pool lives as long as the process.
+   *
+   * @param player the pooled {@link ExoPlayer} being reused.
+   */
+  default void reusePlayer(@NonNull ExoPlayer player) {
+  }
+
+  /**
    * Create a {@link MediaSource} from media {@link Uri}.
    *
    * @param uri the media {@link Uri}.

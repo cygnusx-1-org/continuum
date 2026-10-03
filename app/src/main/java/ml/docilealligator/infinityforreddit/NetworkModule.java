@@ -6,8 +6,6 @@ import androidx.annotation.NonNull;
 import dagger.Module;
 import dagger.Provides;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -17,11 +15,11 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.network.AccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.AnonymousAccessTokenInterceptor;
+import ml.docilealligator.infinityforreddit.network.PreferenceProxySelector;
 import ml.docilealligator.infinityforreddit.network.RedgifsAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.ServerAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.network.SortTypeConverterFactory;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
-import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import okhttp3.ConnectionPool;
 import okhttp3.EventListener;
 import okhttp3.HttpUrl;
@@ -41,9 +39,12 @@ abstract class NetworkModule {
     @Singleton
     static OkHttpClient provideBaseOkhttp(@Named("proxy") SharedPreferences mProxySharedPreferences,
                                           ApiCallTracker apiCallTracker) {
-        boolean proxyEnabled = mProxySharedPreferences.getBoolean(SharedPreferencesUtils.PROXY_ENABLED, false);
+        // A selector rather than a fixed proxy: this client lives as long as the process, and the
+        // proxy setting has to apply the moment it changes.
+        PreferenceProxySelector proxySelector = PreferenceProxySelector.get(mProxySharedPreferences);
 
         var builder = new OkHttpClient.Builder()
+                .proxySelector(proxySelector)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
@@ -61,19 +62,7 @@ abstract class NetworkModule {
                     }
                 });
 
-        if (proxyEnabled) {
-            Proxy.Type proxyType = Proxy.Type.valueOf(mProxySharedPreferences.getString(SharedPreferencesUtils.PROXY_TYPE, "HTTP"));
-            if (proxyType != Proxy.Type.DIRECT) {
-                String proxyHost = mProxySharedPreferences.getString(SharedPreferencesUtils.PROXY_HOSTNAME, "127.0.0.1");
-                int proxyPort = SharedPreferencesUtils.getInt(mProxySharedPreferences, SharedPreferencesUtils.PROXY_PORT, "1080");
-
-                InetSocketAddress proxyAddr = InetSocketAddress.createUnresolved(proxyHost, proxyPort);
-                Proxy proxy = new Proxy(proxyType, proxyAddr);
-                builder.proxy(proxy);
-            }
-        }
-
-        return builder.build();
+        return proxySelector.track(builder.build());
     }
 
     @Provides
@@ -90,12 +79,13 @@ abstract class NetworkModule {
     }
 
     @Provides
-    static ConnectionPool provideConnectionPool() {
+    static ConnectionPool provideConnectionPool(@Named("proxy") SharedPreferences proxySharedPreferences) {
         // OkHttp's default pool: keep up to 5 idle connections alive for 5 minutes so requests
         // reuse warm TCP/TLS connections instead of paying a fresh DNS+TCP+TLS handshake every call.
         // The previous ConnectionPool(0, 1, NANOSECONDS) disabled keep-alive entirely as a 2020-era
         // workaround for stale-connection timeouts in okhttp3, which modern OkHttp (5.x) handles.
-        return new ConnectionPool();
+        // Tracked so a proxy change drops connections made through the old one.
+        return PreferenceProxySelector.get(proxySharedPreferences).track(new ConnectionPool());
     }
 
     @Provides

@@ -58,6 +58,9 @@ public class PostViewModel extends ViewModel {
     private final SharedPreferences sharedPreferences;
     @Nullable
     private final SharedPreferences postFeedScrolledPositionSharedPreferences;
+    /** Null for the anonymous feeds, which never hide read posts automatically. */
+    @Nullable
+    private final SharedPreferences postHistorySharedPreferences;
     @Nullable
     private String name;
     @Nullable
@@ -83,6 +86,11 @@ public class PostViewModel extends ViewModel {
     private ReadPostsListInterface readPostsList;
     private final UserProfileImagesBatchLoader loader;
     private final MutableLiveData<Boolean> hideReadPostsValue = new MutableLiveData<>();
+    /**
+     * Whether the user has asked to hide read posts from the FAB or the toolbar. Kept apart from the
+     * automatic setting so that switching the setting off does not bring back posts they hid by hand.
+     */
+    private boolean hideReadPostsRequested;
     /**
      * Whether the feed is currently showing media posts only -- the gallery layout's "Media Posts
      * Only" setting, which the fragment re-applies whenever the layout it is showing changes
@@ -147,6 +155,7 @@ public class PostViewModel extends ViewModel {
         this.accountName = accountName;
         this.sharedPreferences = sharedPreferences;
         this.postFeedScrolledPositionSharedPreferences = postFeedScrolledPositionSharedPreferences;
+        this.postHistorySharedPreferences = postHistorySharedPreferences;
         this.postType = postType;
         this.sortType = sortType;
         this.postFilter = postFilter;
@@ -168,8 +177,7 @@ public class PostViewModel extends ViewModel {
 
         filteredPosts = buildFilteredPosts();
 
-        hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false));
+        hideReadPostsValue.setValue(isHideReadPostsAutomaticallyOn());
     }
 
     // PostType.SUBREDDIT || PostType.ANONYMOUS_FRONT_PAGE || PostType.ANONYMOUS_MULTIREDDIT
@@ -186,6 +194,7 @@ public class PostViewModel extends ViewModel {
         this.accountName = accountName;
         this.sharedPreferences = sharedPreferences;
         this.postFeedScrolledPositionSharedPreferences = postFeedScrolledPositionSharedPreferences;
+        this.postHistorySharedPreferences = postHistorySharedPreferences;
         this.postType = postType;
         this.sortType = sortType;
         this.postFilter = postFilter;
@@ -209,9 +218,7 @@ public class PostViewModel extends ViewModel {
 
         filteredPosts = buildFilteredPosts();
 
-        hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false)
-                && ((postType != PostType.SUBREDDIT || Constants.isFirehoseSubreddit(subredditName)) || postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE), false)));
+        hideReadPostsValue.setValue(isHideReadPostsAutomaticallyOn());
     }
 
     // PostType.MULTIREDDIT
@@ -228,6 +235,7 @@ public class PostViewModel extends ViewModel {
         this.accountName = accountName;
         this.sharedPreferences = sharedPreferences;
         this.postFeedScrolledPositionSharedPreferences = postFeedScrolledPositionSharedPreferences;
+        this.postHistorySharedPreferences = postHistorySharedPreferences;
         this.postType = postType;
         this.sortType = sortType;
         this.postFilter = postFilter;
@@ -251,8 +259,7 @@ public class PostViewModel extends ViewModel {
 
         filteredPosts = buildFilteredPosts();
 
-        hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false));
+        hideReadPostsValue.setValue(isHideReadPostsAutomaticallyOn());
     }
 
     // PostPagingSource.TYPE_USER
@@ -270,6 +277,7 @@ public class PostViewModel extends ViewModel {
         this.accountName = accountName;
         this.sharedPreferences = sharedPreferences;
         this.postFeedScrolledPositionSharedPreferences = postFeedScrolledPositionSharedPreferences;
+        this.postHistorySharedPreferences = postHistorySharedPreferences;
         this.postType = postType;
         this.sortType = sortType;
         this.postFilter = postFilter;
@@ -293,9 +301,7 @@ public class PostViewModel extends ViewModel {
 
         filteredPosts = buildFilteredPosts();
 
-        hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false)
-                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_USERS_BASE), false));
+        hideReadPostsValue.setValue(isHideReadPostsAutomaticallyOn());
     }
 
     // postType == PostType.SEARCH
@@ -312,6 +318,7 @@ public class PostViewModel extends ViewModel {
         this.accountName = accountName;
         this.sharedPreferences = sharedPreferences;
         this.postFeedScrolledPositionSharedPreferences = postFeedScrolledPositionSharedPreferences;
+        this.postHistorySharedPreferences = postHistorySharedPreferences;
         this.postType = postType;
         this.sortType = sortType;
         this.postFilter = postFilter;
@@ -336,9 +343,7 @@ public class PostViewModel extends ViewModel {
 
         filteredPosts = buildFilteredPosts();
 
-        hideReadPostsValue.setValue(postHistorySharedPreferences != null
-                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false)
-                && postHistorySharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE), false));
+        hideReadPostsValue.setValue(isHideReadPostsAutomaticallyOn());
     }
 
     /**
@@ -458,13 +463,59 @@ public class PostViewModel extends ViewModel {
     }
 
     public void hideReadPosts() {
-        // Guard against re-firing when read posts are already hidden. Re-setting the same value makes
-        // the switchMap tear down and rebuild the filter pipeline while the previous collection is still
-        // cancelling; the two collectors then race over the cached post stream and crash paging with a
-        // ConcurrentModificationException (issue #321). Only the initial false->true transition rebuilds,
-        // which is the safe single-rebuild case.
-        if (!Boolean.TRUE.equals(hideReadPostsValue.getValue())) {
-            hideReadPostsValue.setValue(true);
+        hideReadPostsRequested = true;
+        updateHideReadPosts();
+    }
+
+    /**
+     * Re-reads Settings > Post History > Hide Read Posts Automatically. The fragment calls this
+     * whenever one of those switches changes: MainActivity outlives a settings change, so its feeds
+     * would otherwise keep the value they were built with, and a refresh would go on showing read
+     * posts until the app was restarted (issue #442).
+     */
+    public void applyHideReadPostsSetting() {
+        updateHideReadPosts();
+    }
+
+    private void updateHideReadPosts() {
+        boolean hide = hideReadPostsRequested || isHideReadPostsAutomaticallyOn();
+        // Only an actual change is posted. Re-setting the same value makes the switchMap tear down and
+        // rebuild the filter pipeline while the previous collection is still cancelling; the two
+        // collectors then race over the cached post stream and crash paging with a
+        // ConcurrentModificationException (issue #321). A real change is the safe single-rebuild case.
+        if (hide != Boolean.TRUE.equals(hideReadPostsValue.getValue())) {
+            hideReadPostsValue.setValue(hide);
+        }
+    }
+
+    /**
+     * Whether the Post History settings hide read posts in this feed: the main switch, and for a
+     * subreddit, a user or a search the switch for that kind of feed as well. The firehose
+     * subreddits count as front pages rather than as subreddits the reader chose.
+     */
+    private boolean isHideReadPostsAutomaticallyOn() {
+        SharedPreferences prefs = postHistorySharedPreferences;
+        if (prefs == null || !prefs.getBoolean(
+                AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE), false)) {
+            return false;
+        }
+        switch (postType) {
+            case PostType.FRONT_PAGE:
+            case PostType.MULTIREDDIT:
+            case PostType.DUPLICATES:
+            case PostType.ANONYMOUS_FRONT_PAGE:
+            case PostType.ANONYMOUS_MULTIREDDIT:
+                return true;
+            case PostType.SUBREDDIT:
+                return Constants.isFirehoseSubreddit(name) || prefs.getBoolean(
+                        AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE), false);
+            case PostType.SEARCH:
+                return prefs.getBoolean(
+                        AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE), false);
+            default:
+                // Every other type is built by the user-posts constructor.
+                return prefs.getBoolean(
+                        AccountScope.key(accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_USERS_BASE), false);
         }
     }
 

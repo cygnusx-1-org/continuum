@@ -1,10 +1,9 @@
 package ml.docilealligator.infinityforreddit
 
 import android.content.Context
-import java.net.InetSocketAddress
-import java.net.Proxy
 import java.util.concurrent.TimeUnit
 import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener
+import ml.docilealligator.infinityforreddit.network.PreferenceProxySelector
 import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import okhttp3.OkHttpClient
@@ -80,26 +79,14 @@ object ImageOkHttpClient {
             builder.eventListenerFactory(ApiMonitorEventListener.Factory(apiCallTracker))
         }
 
-        val proxySharedPreferences = applicationContext.getSharedPreferences(
-            SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE
-        )
-        if (proxySharedPreferences.getBoolean(SharedPreferencesUtils.PROXY_ENABLED, false)) {
-            val proxyType = Proxy.Type.valueOf(
-                proxySharedPreferences.getString(SharedPreferencesUtils.PROXY_TYPE, "HTTP")!!
+        // Read per connection, as for the API clients: this one is built once for the process.
+        val proxySelector = PreferenceProxySelector.get(
+            applicationContext.getSharedPreferences(
+                SharedPreferencesUtils.PROXY_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE
             )
-            if (proxyType != Proxy.Type.DIRECT) {
-                val proxyHost = proxySharedPreferences.getString(
-                    SharedPreferencesUtils.PROXY_HOSTNAME, "127.0.0.1"
-                )
-                val proxyPort = SharedPreferencesUtils.getInt(
-                    proxySharedPreferences, SharedPreferencesUtils.PROXY_PORT, "1080"
-                )
-                builder.proxy(
-                    Proxy(proxyType, InetSocketAddress.createUnresolved(proxyHost, proxyPort))
-                )
-            }
-        }
+        )
+        builder.proxySelector(proxySelector)
 
-        return builder.build()
+        return proxySelector.track(builder.build())
     }
 }

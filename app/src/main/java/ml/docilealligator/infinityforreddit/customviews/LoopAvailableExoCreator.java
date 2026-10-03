@@ -23,12 +23,22 @@ public class LoopAvailableExoCreator extends DefaultExoCreator {
     @Override
     public ExoPlayer createPlayer() {
         ExoPlayer player = super.createPlayer();
+        applyRepeatMode(player);
+        return player;
+    }
+
+    // A pooled player keeps the repeat mode it was created with, and the pool outlives a change to
+    // Settings > Video > Loop.
+    @Override
+    public void reusePlayer(@NonNull ExoPlayer player) {
+        applyRepeatMode(player);
+    }
+
+    private void applyRepeatMode(ExoPlayer player) {
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.LOOP_VIDEO, true)) {
             player.setRepeatMode(Player.REPEAT_MODE_ALL);
         } else {
             player.setRepeatMode(Player.REPEAT_MODE_OFF);
         }
-
-        return player;
     }
 }

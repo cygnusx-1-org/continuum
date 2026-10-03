@@ -60,6 +60,8 @@ public class SecurityPreferenceFragment extends CustomFontPreferenceFragmentComp
         if (secureModeSwitch != null) {
             secureModeSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ToggleSecureModeEvent((Boolean) newValue));
+                // This screen too, not only the ones resumed after it.
+                ((Infinity) mActivity.getApplication()).applySecureMode(mActivity);
                 return true;
             });
         }

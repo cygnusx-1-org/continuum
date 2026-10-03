@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -56,6 +58,7 @@ import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.thing.ReplyNotificationsToggle;
 import ml.docilealligator.infinityforreddit.thing.SaveThing;
 import ml.docilealligator.infinityforreddit.thing.SortType;
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesLiveDataKt;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SwipeActionLevels;
 import ml.docilealligator.infinityforreddit.utils.SwipeActionPreferences;
@@ -117,6 +120,11 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     private LinearLayoutManagerBugFixed mLinearLayoutManager;
     @SuppressWarnings("NullAway.Init")
     private CommentsListingRecyclerViewAdapter mAdapter;
+    // The settings mAdapter was built with. See rebuildAdapterIfSettingsChanged.
+    @Nullable
+    private List<Object> mAdapterSettings;
+    // The sensitivity the swipe touch helper was last attached with.
+    private float mSwipeActionSensitivity;
     @SuppressWarnings("NullAway.Init")
     private SortType sortType;
     // True on a fresh (non-recreation) launch; gates the one-time deep-link sort override in bindView.
@@ -259,11 +267,40 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
             return false;
         });
 
+        mSwipeActionSensitivity = SharedPreferencesUtils.getFloat(mSharedPreferences,
+                SharedPreferencesUtils.SWIPE_ACTION_SENSITIVITY_IN_COMMENTS, "5");
         if (enableSwipeAction) {
-            touchHelper.attachToRecyclerView(
-                    binding.recyclerViewCommentsListingFragment,
-                    SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.SWIPE_ACTION_SENSITIVITY_IN_COMMENTS, "5")
-            );
+            touchHelper.attachToRecyclerView(binding.recyclerViewCommentsListingFragment, mSwipeActionSensitivity);
+        }
+
+        // This screen can be a main page tab, and MainActivity outlives a settings change.
+        SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences,
+                        SharedPreferencesUtils.SWIPE_ACTION_SENSITIVITY_IN_COMMENTS, "5")
+                .observe(getViewLifecycleOwner(), sensitivity -> {
+                    float swipeActionSensitivity = Float.parseFloat(sensitivity);
+                    if (swipeActionSensitivity == mSwipeActionSensitivity) {
+                        return;
+                    }
+                    mSwipeActionSensitivity = swipeActionSensitivity;
+                    if (SwipeActionPreferences.commentSwipeEnabled(mSharedPreferences)) {
+                        // The slop is set on attach, and attaching to the same view again is a no-op.
+                        touchHelper.attachToRecyclerView(null, mSwipeActionSensitivity);
+                        touchHelper.attachToRecyclerView(binding.recyclerViewCommentsListingFragment,
+                                mSwipeActionSensitivity);
+                    }
+                });
+        for (String key : new String[]{SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY,
+                SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, SharedPreferencesUtils.SHOW_COMMENT_TOP_PADDING,
+                SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES,
+                SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW}) {
+            SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, key, false)
+                    .observe(getViewLifecycleOwner(), value -> rebuildAdapterIfSettingsChanged());
+        }
+        for (String key : new String[]{SharedPreferencesUtils.TIME_FORMAT_KEY,
+                SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, SharedPreferencesUtils.DATA_SAVING_MODE,
+                SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION}) {
+            SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, key, "")
+                    .observe(getViewLifecycleOwner(), value -> rebuildAdapterIfSettingsChanged());
         }
 
         new Handler().postDelayed(this::bindView, 0);
@@ -300,10 +337,7 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
                 ((ActivityToolbarInterface) mActivity).displaySortType();
             }
 
-            mAdapter = new CommentsListingRecyclerViewAdapter(mActivity, this, mOauthRetrofit, customThemeWrapper,
-                    getResources().getConfiguration().locale, mSharedPreferences,
-                    mActivity.accessToken, mActivity.accountName,
-                    username, () -> mCommentViewModel.retryLoadingMore());
+            mAdapter = createAdapter(username);
 
             binding.recyclerViewCommentsListingFragment.setAdapter(mAdapter);
 
@@ -388,6 +422,50 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
 
             binding.swipeRefreshLayoutViewCommentsListingFragment.setOnRefreshListener(() -> mCommentViewModel.refresh());
         }
+    }
+
+    private CommentsListingRecyclerViewAdapter createAdapter(String username) {
+        mAdapterSettings = adapterSettings();
+        return new CommentsListingRecyclerViewAdapter(mActivity, this, mOauthRetrofit, customThemeWrapper,
+                getResources().getConfiguration().locale, mSharedPreferences,
+                mActivity.accessToken, mActivity.accountName,
+                username, () -> mCommentViewModel.retryLoadingMore());
+    }
+
+    /**
+     * Every setting the adapter reads once, when it is built, as one value to compare. Autoplaying
+     * comment GIFs is left out: it has its own event, and the adapter can change it in place.
+     */
+    private List<Object> adapterSettings() {
+        return Arrays.asList(
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false),
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_DIVIDER, false),
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_COMMENT_TOP_PADDING, false),
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true),
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false),
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_IMAGE_PREVIEW, false),
+                Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY,
+                        SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE)),
+                SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.EMBEDDED_MEDIA_TYPE, "15"),
+                Objects.requireNonNull(mSharedPreferences.getString(SharedPreferencesUtils.DATA_SAVING_MODE,
+                        SharedPreferencesUtils.DATA_SAVING_MODE_OFF)),
+                SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000"));
+    }
+
+    /**
+     * Builds the adapter again, around the comments already loaded, when a setting it read at
+     * construction has changed. The adapter and the markdown plugins it owns take a dozen settings
+     * that way, and building it again is what a restart would have done.
+     */
+    private void rebuildAdapterIfSettingsChanged() {
+        if (mAdapter == null || binding == null || adapterSettings().equals(mAdapterSettings)) {
+            return;
+        }
+        CommentsListingRecyclerViewAdapter previousAdapter = mAdapter;
+        mAdapter = createAdapter(Objects.requireNonNull(requireArguments().getString(EXTRA_USERNAME)));
+        mAdapter.setNetworkState(mCommentViewModel.getPaginationNetworkState().getValue());
+        mAdapter.submitList(previousAdapter.getCurrentList());
+        refreshAdapter(binding.recyclerViewCommentsListingFragment, mAdapter);
     }
 
     @Override

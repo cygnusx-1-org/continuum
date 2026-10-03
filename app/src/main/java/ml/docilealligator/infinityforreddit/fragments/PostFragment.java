@@ -237,6 +237,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     // pass: one flag read by both, cleared only once both have had it.
     private boolean resumePending;
     private boolean resumeWhereILeftOff;
+    // The fold-support setting this feed's layout was last resolved with.
+    private boolean foldSupportEnabled;
     @Nullable
     private String resumeFeedKey;
     @Nullable
@@ -377,9 +379,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         postType = getArguments().getInt(EXTRA_POST_TYPE);
 
         int defaultPostLayout;
-        boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
+        foldSupportEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
         boolean isTablet = getResources().getBoolean(R.bool.isTablet);
-        if (foldEnabled && isTablet) {
+        if (foldSupportEnabled && isTablet) {
             defaultPostLayout = SharedPreferencesUtils.getInt(mSharedPreferences,
                     SharedPreferencesUtils.DEFAULT_POST_LAYOUT_UNFOLDED_KEY, "0");
         } else {
@@ -1148,6 +1150,46 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     }
                 });
 
+        // Fold support picks which default layout a tablet shows and how many columns it gets, both
+        // settled when the feed was built.
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences,
+                        SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false)
+                .observe(getViewLifecycleOwner(), foldEnabled -> {
+                    if (foldEnabled == foldSupportEnabled) {
+                        // Including the emission on registration, the value onCreateView read.
+                        return;
+                    }
+                    foldSupportEnabled = foldEnabled;
+                    if (!getResources().getBoolean(R.bool.isTablet)) {
+                        return;
+                    }
+                    if (followsDefaultPostLayout()) {
+                        changePostLayout(SharedPreferencesUtils.getInt(mSharedPreferences, foldEnabled
+                                ? SharedPreferencesUtils.DEFAULT_POST_LAYOUT_UNFOLDED_KEY
+                                : SharedPreferencesUtils.DEFAULT_POST_LAYOUT_KEY, "0"), true);
+                    } else {
+                        // Its own layout stays, but the column count is re-read.
+                        changePostLayout(postLayout, true);
+                    }
+                });
+
+        // The view model reads these when it is built, and MainActivity outlives a settings change,
+        // so without this its feeds kept the launch-time value and a refresh went on showing read
+        // posts until a restart (issue #442). The emission on registration is a no-op.
+        for (String hideReadPostsKey : new String[]{
+                SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE,
+                SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE,
+                SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_USERS_BASE,
+                SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE}) {
+            SharedPreferencesLiveDataKt.booleanLiveData(mPostHistorySharedPreferences,
+                            AccountScope.key(mActivity.accountName, hideReadPostsKey), false)
+                    .observe(getViewLifecycleOwner(), hide -> {
+                        if (mPostViewModel != null) {
+                            mPostViewModel.applyHideReadPostsSetting();
+                        }
+                    });
+        }
+
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false).observe(getViewLifecycleOwner(), showGalleryMediaAsGrid -> {
             if (getPostAdapter() != null) {
                 if (getPostAdapter().setShowGalleryMediaAsGrid(showGalleryMediaAsGrid)) {
@@ -1295,8 +1337,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     private void bindPostViewModel() {
         // Before the first observe, so the initial value costs no pipeline rebuild. Both
-        // initializeAndBindPostViewModel paths land here.
+        // initializeAndBindPostViewModel paths land here. A view model handed back by
+        // ViewModelProvider may predate a change to the hide-read setting.
         applyMediaOnlyPosts();
+        mPostViewModel.applyHideReadPostsSetting();
 
         // Also before the first observe: the source has to know whether its first load comes from
         // disk before that load is asked for. The key is set even with nothing to restore, because
@@ -2080,74 +2124,49 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     @Subscribe
     public void onChangeDefaultPostLayoutEvent(ChangeDefaultPostLayoutEvent changeDefaultPostLayoutEvent) {
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            switch (postType) {
-                case PostType.SUBREDDIT:
-                    if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + bundle.getString(EXTRA_NAME))) {
-                        changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
-                    }
-                    break;
-                case PostType.USER:
-                    if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + bundle.getString(EXTRA_USER_NAME))) {
-                        changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
-                    }
-                    break;
-                case PostType.MULTIREDDIT:
-                    if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + bundle.getString(EXTRA_NAME))) {
-                        changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
-                    }
-                    break;
-                case PostType.SEARCH:
-                    if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST)) {
-                        changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
-                    }
-                    break;
-                case PostType.FRONT_PAGE:
-                    if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST)) {
-                        changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
-                    }
-                    break;
-            }
+        // An unfolded tablet shows the unfolded default instead, so this one is not its to apply.
+        if (!usesUnfoldedPostLayout() && followsDefaultPostLayout()) {
+            changePostLayout(changeDefaultPostLayoutEvent.defaultPostLayout, true);
         }
     }
 
     @Subscribe
     public void onChangeDefaultPostLayoutUnfoldedEvent(ChangeDefaultPostLayoutUnfoldedEvent event) {
-        boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
-        boolean isTablet = getResources().getBoolean(R.bool.isTablet);
-        if (foldEnabled && isTablet) {
-            Bundle bundle = getArguments();
-            if (bundle != null) {
-                switch (postType) {
-                    case PostType.SUBREDDIT:
-                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + bundle.getString(EXTRA_NAME))) {
-                            changePostLayout(event.defaultPostLayoutUnfolded, true);
-                        }
-                        break;
-                    case PostType.USER:
-                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + bundle.getString(EXTRA_USER_NAME))) {
-                            changePostLayout(event.defaultPostLayoutUnfolded, true);
-                        }
-                        break;
-                    case PostType.MULTIREDDIT:
-                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + bundle.getString(EXTRA_NAME))) {
-                            changePostLayout(event.defaultPostLayoutUnfolded, true);
-                        }
-                        break;
-                    case PostType.SEARCH:
-                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST)) {
-                            changePostLayout(event.defaultPostLayoutUnfolded, true);
-                        }
-                        break;
-                    case PostType.FRONT_PAGE:
-                        if (!mPostLayoutSharedPreferences.contains(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST)) {
-                            changePostLayout(event.defaultPostLayoutUnfolded, true);
-                        }
-                        break;
-                }
-            }
+        if (usesUnfoldedPostLayout() && followsDefaultPostLayout()) {
+            changePostLayout(event.defaultPostLayoutUnfolded, true);
         }
+    }
+
+    /** Whether this feed shows the unfolded default post layout: a tablet with fold support on. */
+    private boolean usesUnfoldedPostLayout() {
+        return getResources().getBoolean(R.bool.isTablet)
+                && mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
+    }
+
+    /**
+     * Whether this feed shows the default post layout rather than one chosen for it alone. Reads the
+     * same key onCreateView takes the feed's own layout from.
+     */
+    private boolean followsDefaultPostLayout() {
+        String postLayoutKey;
+        switch (postType) {
+            case PostType.SEARCH:
+                postLayoutKey = SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST;
+                break;
+            case PostType.SUBREDDIT:
+                postLayoutKey = SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName;
+                break;
+            case PostType.USER:
+                postLayoutKey = SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username;
+                break;
+            case PostType.MULTIREDDIT:
+            case PostType.ANONYMOUS_MULTIREDDIT:
+                postLayoutKey = SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath;
+                break;
+            default:
+                postLayoutKey = SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST;
+        }
+        return !mPostLayoutSharedPreferences.contains(postLayoutKey);
     }
 
     @Subscribe

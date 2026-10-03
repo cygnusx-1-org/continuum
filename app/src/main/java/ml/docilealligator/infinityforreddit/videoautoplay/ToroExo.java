@@ -143,7 +143,11 @@ public final class ToroExo {
     @NonNull  //
     public ToroExoPlayer requestPlayer(@NonNull ExoCreator creator) {
         ExoPlayer player = getPool(checkNotNull(creator)).acquire();
-        if (player == null) player = creator.createPlayer();
+        if (player == null) {
+            player = creator.createPlayer();
+        } else {
+            creator.reusePlayer(player);
+        }
         return new ToroExoPlayer(player);
     }
 

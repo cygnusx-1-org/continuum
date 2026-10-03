@@ -31,6 +31,7 @@ import androidx.paging.CombinedLoadStates;
 import androidx.paging.ItemSnapshotList;
 import androidx.paging.LoadState;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -149,6 +150,8 @@ public abstract class PostFragmentBase extends Fragment {
     protected RecyclerView.SmoothScroller smoothScroller;
     protected LazyModeRunnable lazyModeRunnable;
     protected float lazyModeInterval;
+    /** What the feed's {@link TopBufferItemDecoration} adds above the first post, 0 for none. */
+    private int postFeedTopBufferPx;
     protected boolean isInLazyMode = false;
     protected boolean isLazyModePaused = false;
     protected int postLayout;
@@ -220,17 +223,7 @@ public abstract class PostFragmentBase extends Fragment {
             }
         };
         lazyModeInterval = SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.LAZY_MODE_INTERVAL_KEY, "2.5");
-        resumeLazyModeCountDownTimer = new CountDownTimer((long) (lazyModeInterval * 1000), (long) (lazyModeInterval * 1000)) {
-            @Override
-            public void onTick(long l) {
-
-            }
-
-            @Override
-            public void onFinish() {
-                resumeLazyMode(true);
-            }
-        };
+        resumeLazyModeCountDownTimer = createResumeLazyModeCountDownTimer();
 
         mGlide = Glide.with(mActivity);
 
@@ -355,6 +348,40 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false).observe(getViewLifecycleOwner(), postTypeTriangleIndicator -> {
+            if (getPostAdapter() != null && getPostAdapter().setPostTypeTriangleIndicator(postTypeTriangleIndicator)) {
+                refreshAdapter();
+            }
+        });
+
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_POST_TYPE_INDICATOR, false).observe(getViewLifecycleOwner(), hidePostTypeIndicator -> {
+            if (getPostAdapter() != null && getPostAdapter().setHidePostTypeIndicator(hidePostTypeIndicator)) {
+                refreshAdapter();
+            }
+        });
+
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_IMAGE_COUNT_IN_GALLERY, false).observe(getViewLifecycleOwner(), hideImageCountInGallery -> {
+            if (getPostAdapter() != null && getPostAdapter().setHideImageCountInGallery(hideImageCountInGallery)) {
+                refreshAdapter();
+            }
+        });
+
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false).observe(getViewLifecycleOwner(), disableProfileAvatarAnimation -> {
+            if (getPostAdapter() != null && getPostAdapter().setDisableProfileAvatarAnimation(disableProfileAvatarAnimation)) {
+                refreshAdapter();
+            }
+        });
+
+        // Only a one-column feed carries the buffer; changePostLayout applies it when the feed
+        // goes back to one column.
+        SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences, SharedPreferencesUtils.POST_FEED_TOP_BUFFER, "0").observe(getViewLifecycleOwner(), s -> {
+            RecyclerView recyclerView = getPostRecyclerView();
+            if (recyclerView.getLayoutManager() instanceof LinearLayoutManager
+                    && topBufferPxFor(Integer.parseInt(s)) != postFeedTopBufferPx) {
+                applyPostFeedTopBuffer(recyclerView);
+            }
+        });
+
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -441,6 +468,9 @@ public abstract class PostFragmentBase extends Fragment {
         isLazyModePaused = false;
 
         lazyModeInterval = SharedPreferencesUtils.getFloat(mSharedPreferences, SharedPreferencesUtils.LAZY_MODE_INTERVAL_KEY, "2.5");
+        // The pause-and-resume timer runs on the interval too, and it was built with the feed.
+        resumeLazyModeCountDownTimer.cancel();
+        resumeLazyModeCountDownTimer = createResumeLazyModeCountDownTimer();
         lazyModeHandler.postDelayed(lazyModeRunnable, (long) (lazyModeInterval * 1000));
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Toast.makeText(mActivity, getString(R.string.lazy_mode_start, lazyModeInterval),
@@ -501,6 +531,20 @@ public abstract class PostFragmentBase extends Fragment {
 
     public final boolean isInLazyMode() {
         return isInLazyMode;
+    }
+
+    private CountDownTimer createResumeLazyModeCountDownTimer() {
+        return new CountDownTimer((long) (lazyModeInterval * 1000), (long) (lazyModeInterval * 1000)) {
+            @Override
+            public void onTick(long l) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                resumeLazyMode(true);
+            }
+        };
     }
 
     protected abstract void refreshAdapter();
@@ -623,12 +667,21 @@ public abstract class PostFragmentBase extends Fragment {
      * every window-inset pass, which would take a top padding back off again.
      */
     protected final void applyPostFeedTopBuffer(RecyclerView recyclerView) {
-        int bufferDp = SharedPreferencesUtils.getInt(mSharedPreferences,
-                SharedPreferencesUtils.POST_FEED_TOP_BUFFER, "0");
-        if (bufferDp > 0) {
-            recyclerView.addItemDecoration(new TopBufferItemDecoration(
-                    (int) Utils.convertDpToPixel(bufferDp, mActivity)));
+        // Replaces whatever buffer the feed already has, so the setting can change under a live feed.
+        for (int i = recyclerView.getItemDecorationCount() - 1; i >= 0; i--) {
+            if (recyclerView.getItemDecorationAt(i) instanceof TopBufferItemDecoration) {
+                recyclerView.removeItemDecorationAt(i);
+            }
         }
+        postFeedTopBufferPx = topBufferPxFor(SharedPreferencesUtils.getInt(mSharedPreferences,
+                SharedPreferencesUtils.POST_FEED_TOP_BUFFER, "0"));
+        if (postFeedTopBufferPx > 0) {
+            recyclerView.addItemDecoration(new TopBufferItemDecoration(postFeedTopBufferPx));
+        }
+    }
+
+    private int topBufferPxFor(int bufferDp) {
+        return bufferDp > 0 ? (int) Utils.convertDpToPixel(bufferDp, mActivity) : 0;
     }
 
     /** Reads both directions' ladders, and the distance each of their bands arms at. */

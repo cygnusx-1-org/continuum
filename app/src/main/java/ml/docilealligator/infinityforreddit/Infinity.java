@@ -25,6 +25,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.evernote.android.state.StateSaver;
 import com.livefront.bridge.Bridge;
 import com.livefront.bridge.SavedStateHandler;
+import java.io.File;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -129,6 +130,19 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
             };
 
     /**
+     * Activities take their custom fonts from the typefaces here when they are created, so these
+     * have to follow the font family settings, which recreate the activities after they change.
+     */
+    private final SharedPreferences.OnSharedPreferenceChangeListener fontPreferenceListener =
+            (sharedPreferences, key) -> {
+                if (SharedPreferencesUtils.FONT_FAMILY_KEY.equals(key)
+                        || SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY.equals(key)
+                        || SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY.equals(key)) {
+                    loadCustomFonts();
+                }
+            };
+
+    /**
      * The setting is per-account, and switching accounts finishes the activities without restarting
      * the process, so nothing else would re-read it: the mirror would keep answering with the
      * previous account's choice until the app was killed.
@@ -139,6 +153,40 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
                     refreshShortClipPreference();
                 }
             };
+
+    /**
+     * Loads the custom font each font family setting selects and drops the ones it no longer does.
+     * When this ran only at startup, switching away from Custom kept the custom font until a restart,
+     * and switching back to it showed the default one.
+     */
+    private void loadCustomFonts() {
+        typeface = loadCustomFont(FontFamily.Custom.name().equals(mSharedPreferences.getString(
+                SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name())), "font_family.ttf");
+        titleTypeface = loadCustomFont(TitleFontFamily.Custom.name().equals(mSharedPreferences.getString(
+                SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name())), "title_font_family.ttf");
+        contentTypeface = loadCustomFont(ContentFontFamily.Custom.name().equals(mSharedPreferences.getString(
+                SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name())), "content_font_family.ttf");
+    }
+
+    @Nullable
+    private Typeface loadCustomFont(boolean selected, String fileName) {
+        File fontsDirectory = getExternalFilesDir("fonts");
+        if (!selected || fontsDirectory == null) {
+            return null;
+        }
+        File fontFile = new File(fontsDirectory, fileName);
+        if (!fontFile.exists()) {
+            // Custom chosen before a file has been picked. The font screen loads the file once one is.
+            return null;
+        }
+        try {
+            return Typeface.createFromFile(fontFile);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            Toast.makeText(this, R.string.unable_to_load_font, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+    }
 
     private void refreshShortClipPreference() {
         ShortClipHostUtils.setInlinePlaybackEnabled(mSharedPreferences.getBoolean(
@@ -198,20 +246,8 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
         AccountSettingsMigration.migrate(this, mInternalSharedPreferences, executor,
                 redditDataRoomDatabase);
 
-        try {
-            if (FontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.FONT_FAMILY_KEY, FontFamily.Default.name()))) {
-                typeface = Typeface.createFromFile(getExternalFilesDir("fonts") + "/font_family.ttf");
-            }
-            if (TitleFontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY, TitleFontFamily.Default.name()))) {
-                titleTypeface = Typeface.createFromFile(getExternalFilesDir("fonts") + "/title_font_family.ttf");
-            }
-            if (ContentFontFamily.Custom.name().equals(mSharedPreferences.getString(SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY, ContentFontFamily.Default.name()))) {
-                contentTypeface = Typeface.createFromFile(getExternalFilesDir("fonts") + "/content_font_family.ttf");
-            }
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            Toast.makeText(this, R.string.unable_to_load_font, Toast.LENGTH_SHORT).show();
-        }
+        loadCustomFonts();
+        mSharedPreferences.registerOnSharedPreferenceChangeListener(fontPreferenceListener);
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
@@ -226,9 +262,7 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
 
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle bundle) {
-                if (isSecureMode) {
-                    activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                }
+                applySecureMode(activity);
                 // And again here, because the Pre callbacks above are API 29 and the framework
                 // simply never dispatches them below that -- minSdk is 24. Without this the live
                 // stack stayed empty on Android 7 through 9, so nothing was ever recorded and
@@ -248,6 +282,9 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
 
             @Override
             public void onActivityResumed(@NonNull Activity activity) {
+                // Again on every resume: the screens already open when secure mode is switched,
+                // MainActivity above all, were created under the old setting.
+                applySecureMode(activity);
                 if (canStartLockScreenActivity && appLock
                         && System.currentTimeMillis() - mSecuritySharedPreferences.getLong(SharedPreferencesUtils.LAST_FOREGROUND_TIME, 0) >= appLockTimeout
                         && !(activity instanceof LockScreenActivity)) {
@@ -436,6 +473,15 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
     @Subscribe
     public void onToggleSecureModeEvent(ToggleSecureModeEvent secureModeEvent) {
         isSecureMode = secureModeEvent.isSecureMode;
+    }
+
+    /** Matches {@code activity}'s window to the secure-mode setting, in either direction. */
+    public void applySecureMode(Activity activity) {
+        if (isSecureMode) {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        } else {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
     }
 
     @Subscribe

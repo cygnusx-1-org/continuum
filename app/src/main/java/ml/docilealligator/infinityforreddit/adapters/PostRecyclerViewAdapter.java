@@ -3023,6 +3023,46 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return false;
     }
 
+    // return true if the current value is not the same as the new value
+    public boolean setPostTypeTriangleIndicator(boolean postTypeTriangleIndicator) {
+        if (mPostTypeTriangleIndicator != postTypeTriangleIndicator) {
+            mPostTypeTriangleIndicator = postTypeTriangleIndicator;
+            return true;
+        }
+
+        return false;
+    }
+
+    // return true if the current value is not the same as the new value
+    public boolean setHidePostTypeIndicator(boolean hidePostTypeIndicator) {
+        if (mHidePostTypeIndicator != hidePostTypeIndicator) {
+            mHidePostTypeIndicator = hidePostTypeIndicator;
+            return true;
+        }
+
+        return false;
+    }
+
+    // return true if the current value is not the same as the new value
+    public boolean setHideImageCountInGallery(boolean hideImageCountInGallery) {
+        if (mHideImageCountInGallery != hideImageCountInGallery) {
+            mHideImageCountInGallery = hideImageCountInGallery;
+            return true;
+        }
+
+        return false;
+    }
+
+    // return true if the current value is not the same as the new value
+    public boolean setDisableProfileAvatarAnimation(boolean disableProfileAvatarAnimation) {
+        if (mDisableProfileAvatarAnimation != disableProfileAvatarAnimation) {
+            mDisableProfileAvatarAnimation = disableProfileAvatarAnimation;
+            return true;
+        }
+
+        return false;
+    }
+
     @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
