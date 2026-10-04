@@ -2,6 +2,16 @@
 
 ---
 
+8.3.3.2 / 2026-10-3
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Hide read posts setting only works after restarting the app #442
+* Made every setting but Post Filters apply without an app restart
+* Fixed Editing an existing comment sometimes doesn't show anything, but the input box #310
+* Fixed Random SFW/NSFW subreddit option keeps returning the same subreddits across sessions #441
+* Added Read Aloud to the Bottom Sheet menu in the feed
+
 8.3.3.1 / 2026-10-1
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
