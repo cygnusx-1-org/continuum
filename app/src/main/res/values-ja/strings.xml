@@ -790,7 +790,6 @@
     <string name="settings_loop_video_title">"動画をループ再生する"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"クリップ ホスト リンクをインラインで再生します"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"streamain、streamin、streamff、dubz、dropr からのリンクをブラウザーで開くのではなく、フィードや投稿の詳細でビデオとして再生します。スポーツのサブレディットがこれらのサイトにハイライトを投稿します。削除されたクリップはリンク カードに戻ります。"</string>
-    <string name="settings_loop_video_summary">"この設定を反映するにはアプリを再起動して下さい"</string>
     <string name="settings_remember_mute">"ミュートを記憶"</string>
     <string name="settings_post_details_title">"投稿の詳細"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"縦画面で投稿とコメントを分割する"</string>

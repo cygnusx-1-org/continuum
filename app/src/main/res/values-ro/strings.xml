@@ -794,7 +794,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_loop_video_title">"Redare Buclă"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Redă linkuri gazdă clipuri inline"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Redă linkuri de la streamain, streamin, streamff, dubz și dropr ca videoclipuri în flux și în detaliile postării, în loc să le deschizi într-un browser. Subreddit-urile sportive postează momente importante pe aceste site-uri. Un clip care a fost șters revine la un card de link."</string>
-    <string name="settings_loop_video_summary">"Repornește aplicația pentru a aplica această setare la redarea automată a videoclipurilor"</string>
     <string name="settings_remember_mute">"Reține dezactivarea sunetului"</string>
     <string name="settings_post_details_title">"Detalii Postare"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Separă Postarea de Comentarii în Orientarea Portret"</string>

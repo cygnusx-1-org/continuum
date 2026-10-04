@@ -1391,7 +1391,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                         ((PostBaseGalleryTypeViewHolder) holder).galleryRecyclerView.setPadding(0, 0, 0, 0);
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setIsGridLayout(false);
-                        ((PostBaseGalleryTypeViewHolder) holder).imageIndexTextView.setVisibility(View.VISIBLE);
+                        // Hide Image Count in Gallery: the holder hides it once when it is built,
+                        // and this bind would otherwise show it again on every post.
+                        ((PostBaseGalleryTypeViewHolder) holder).imageIndexTextView.setVisibility(
+                                mHideImageCountInGallery ? View.GONE : View.VISIBLE);
                     }
                     /*if (layoutManager instanceof GridLayoutManager) {
                         int spanCount = gallerySize == 2 || gallerySize == 4 ? 2 : 3;

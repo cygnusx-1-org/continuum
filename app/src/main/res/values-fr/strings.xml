@@ -782,7 +782,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_loop_video_title">"Vidéo en boucle"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Lire les liens hôtes du clip en ligne"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Lisez les liens de streamain, streamin, streamff, dubz et dropr sous forme de vidéos dans le flux et dans les détails de la publication, au lieu de les ouvrir dans un navigateur. Les subreddits sportifs publient les faits saillants sur ces sites. Un clip qui a été supprimé revient à une carte de lien."</string>
-    <string name="settings_loop_video_summary">"Redémarrer l'application pour appliquer le paramètre de lecture automatique des vidéos"</string>
     <string name="settings_remember_mute">"Mémoriser la sourdine"</string>
     <string name="settings_post_details_title">"Détails du post"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Séparez la publication et les commentaires en mode portrait"</string>

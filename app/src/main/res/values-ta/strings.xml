@@ -784,7 +784,6 @@
     <string name="settings_loop_video_title">"லூப் வீடியோ"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"ப்ளே கிளிப் ஹோஸ்ட் இணைப்புகள் இன்லைன்"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"streamain, streamin, streamff, dubz மற்றும் dropr ஆகியவற்றிலிருந்து இணைப்புகளை உலாவியில் திறப்பதற்குப் பதிலாக ஊட்டத்திலும் இடுகை விவரங்களிலும் வீடியோக்களாக இயக்கவும். விளையாட்டு சப்ரெடிட்கள் இந்தத் தளங்களில் சிறப்பம்சங்களை இடுகின்றன. நீக்கப்பட்ட கிளிப் மீண்டும் இணைப்பு அட்டையாக மாறும்."</string>
-    <string name="settings_loop_video_summary">"தானாக இயங்கும் வீடியோக்களுக்கு இந்த அமைப்பைப் பயன்படுத்த, பயன்பாட்டை மறுதொடக்கம் செய்யவும்"</string>
     <string name="settings_remember_mute">"ஒலியை நினைவில் கொள்ளுங்கள்"</string>
     <string name="settings_post_details_title">"இடுகை விவரங்கள்"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"போர்ட்ரெய்ட் பயன்முறையில் தனி இடுகை மற்றும் கருத்துகள்"</string>

@@ -787,7 +787,6 @@
     <string name="settings_loop_video_title">"루프 비디오"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"재생 클립 호스트 링크 인라인"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"streamain, streamin, streamff, dubz 및 dropr의 링크를 브라우저에서 여는 대신 피드 및 게시물 세부 정보의 비디오로 재생합니다. 스포츠 하위 레딧은 이러한 사이트에 하이라이트를 게시합니다. 삭제된 클립은 링크 카드로 대체됩니다."</string>
-    <string name="settings_loop_video_summary">"자동 재생 동영상에 이 설정을 적용하려면 앱을 다시 시작하세요."</string>
     <string name="settings_remember_mute">"음소거 기억"</string>
     <string name="settings_post_details_title">"게시물 세부 정보"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"세로 모드에서 게시물과 댓글 분리"</string>

@@ -4,8 +4,7 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="proxy_enabled"
-        app:title="@string/settings_proxy_enabled"
-        app:summary="@string/restart_app_see_changes" />
+        app:title="@string/settings_proxy_enabled" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="HTTP"

@@ -23,8 +23,7 @@
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="loop_video"
-        app:title="@string/settings_loop_video_title"
-        app:summary="@string/settings_loop_video_summary" />
+        app:title="@string/settings_loop_video_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="100"

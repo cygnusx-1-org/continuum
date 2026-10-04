@@ -787,7 +787,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_loop_video_title">"Zapętl film"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Odtwarzaj linki do hostów klipów w tekście"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Odtwarzaj linki z streamain, streamin, streamff, dubz i dropr jako filmy w aktualnościach i szczegółach postów, zamiast otwierać je w przeglądarce. Subreddity sportowe publikują najważniejsze wydarzenia w tych witrynach. Usunięty klip wraca do karty łącza."</string>
-    <string name="settings_loop_video_summary">"Zrestartuj aplikację, żeby zastosować to ustawienie do autoodtwarzanych filmów"</string>
     <string name="settings_remember_mute">"Zapamiętaj wyciszenie"</string>
     <string name="settings_post_details_title">"Szczegóły posta"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Oddzielne posty i komentarze w trybie portretowym"</string>

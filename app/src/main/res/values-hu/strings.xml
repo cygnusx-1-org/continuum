@@ -782,7 +782,6 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_loop_video_title">"Videó ismétlése"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Klipgazdahivatkozások lejátszása soron belül"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Játssza le a streamain, streamin, streamff, dubz és dropr linkjeit videóként a hírfolyamban és a bejegyzés részleteiben, ahelyett, hogy böngészőben nyitná meg őket. A sport subreddits kiemeléseket tesz közzé ezeken a webhelyeken. A törölt klip visszakerül egy linkkártyára."</string>
-    <string name="settings_loop_video_summary">"Indítsd újra az alkalmazást, hogy ezt a beállítást alkalmazza az automatikusan lejátszott videókra"</string>
     <string name="settings_remember_mute">"Némítás megjegyzése"</string>
     <string name="settings_post_details_title">"bejegyzés részletei"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Külön bejegyzés és megjegyzések álló módban"</string>

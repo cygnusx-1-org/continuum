@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -135,7 +136,10 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
      */
     private final SharedPreferences.OnSharedPreferenceChangeListener fontPreferenceListener =
             (sharedPreferences, key) -> {
-                if (SharedPreferencesUtils.FONT_FAMILY_KEY.equals(key)
+                // A null key is the whole file cleared: Reset All Settings, which then recreates
+                // the activities with the default fonts.
+                if (key == null
+                        || SharedPreferencesUtils.FONT_FAMILY_KEY.equals(key)
                         || SharedPreferencesUtils.TITLE_FONT_FAMILY_KEY.equals(key)
                         || SharedPreferencesUtils.CONTENT_FONT_FAMILY_KEY.equals(key)) {
                     loadCustomFonts();
@@ -170,8 +174,12 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
 
     @Nullable
     private Typeface loadCustomFont(boolean selected, String fileName) {
+        if (!selected) {
+            return null;
+        }
+        // Only now: this touches storage, on the main thread at every launch.
         File fontsDirectory = getExternalFilesDir("fonts");
-        if (!selected || fontsDirectory == null) {
+        if (fontsDirectory == null) {
             return null;
         }
         File fontFile = new File(fontsDirectory, fileName);
@@ -477,10 +485,17 @@ public class Infinity extends Application implements DefaultLifecycleObserver {
 
     /** Matches {@code activity}'s window to the secure-mode setting, in either direction. */
     public void applySecureMode(Activity activity) {
+        Window window = activity.getWindow();
+        boolean secure = (window.getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
+        // Only on a change: setting a window flag relays the window's attributes to the window
+        // manager, and this runs on every resume.
+        if (secure == isSecureMode) {
+            return;
+        }
         if (isSecureMode) {
-            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         } else {
-            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
         }
     }
 

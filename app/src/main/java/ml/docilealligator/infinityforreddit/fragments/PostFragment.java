@@ -23,6 +23,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.CombinedLoadStates;
 import androidx.paging.ItemSnapshotList;
@@ -246,6 +247,13 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     private long lastResumeStoreAt;
     private final Runnable resumeStoreRunnable = this::storeResumeCache;
     private SortType sortType;
+    // A subreddit or user feed's sort as its saved sort, else the default in Settings, gave it when
+    // last read; null for every other feed. A feed still showing it follows a change of the default.
+    @Nullable
+    private SortType settingsSortType;
+    // A changed default waiting for this feed to be the one on screen, see applyPendingSortType.
+    @Nullable
+    private SortType pendingSortType;
     @Nullable
     private PostFilter postFilter;
     private ReadPostsListInterface readPostsList;
@@ -267,6 +275,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         if (mAdapter != null && binding.recyclerViewPostFragment != null) {
             binding.recyclerViewPostFragment.onWindowVisibilityChanged(View.VISIBLE);
         }
+        applyPendingSortType();
     }
 
     @Override
@@ -486,23 +495,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.SUBREDDIT_TYPE;
             nameOfUsage = subredditName;
 
+            settingsSortType = savedOrDefaultSortType();
             SortType overrideSortType = getOverrideSortType(savedInstanceState);
-            if (overrideSortType != null) {
-                sortType = overrideSortType;
-            } else {
-                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + subredditName,
-                        mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TYPE, SortType.Type.HOT.name()));
-                String sortTime = null;
-                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
-                    sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + subredditName,
-                            mSharedPreferences.getString(SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
-                }
-                if (sortTime != null) {
-                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
-                } else {
-                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
-                }
-            }
+            sortType = overrideSortType != null ? overrideSortType : settingsSortType;
             // A random tab shows a different subreddit after every refresh, so each post names its
             // own -- the same reason the firehose feeds do.
             boolean displaySubredditName = Constants.isFirehoseSubreddit(subredditName)
@@ -644,20 +639,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             usage = PostFilterUsage.USER_TYPE;
             nameOfUsage = username;
 
+            settingsSortType = savedOrDefaultSortType();
             SortType overrideSortType = getOverrideSortType(savedInstanceState);
-            if (overrideSortType != null) {
-                sortType = overrideSortType;
-            } else {
-                String sort = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_USER_POST_BASE + username,
-                        mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TYPE, SortType.Type.NEW.name()));
-                if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
-                    String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_USER_POST_BASE + username,
-                            mSharedPreferences.getString(SharedPreferencesUtils.USER_DEFAULT_SORT_TIME, SortType.Time.ALL.name()));
-                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
-                } else {
-                    sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
-                }
-            }
+            sortType = overrideSortType != null ? overrideSortType : settingsSortType;
             postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
@@ -1173,9 +1157,26 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     }
                 });
 
+        // A subreddit or user feed with no saved sort took the default when it was built, and the
+        // tabs in MainActivity outlive a settings change, so they kept the old default until a
+        // restart. The emission on registration, and every return to the screen, is a no-op.
+        if (settingsSortType != null) {
+            boolean user = postType == PostType.USER;
+            Observer<String> defaultSortTypeObserver = value -> followDefaultSortType();
+            SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences,
+                            user ? SharedPreferencesUtils.USER_DEFAULT_SORT_TYPE : SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TYPE,
+                            (user ? SortType.Type.NEW : SortType.Type.HOT).name())
+                    .observe(getViewLifecycleOwner(), defaultSortTypeObserver);
+            SharedPreferencesLiveDataKt.stringLiveData(mSharedPreferences,
+                            user ? SharedPreferencesUtils.USER_DEFAULT_SORT_TIME : SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TIME,
+                            SortType.Time.ALL.name())
+                    .observe(getViewLifecycleOwner(), defaultSortTypeObserver);
+        }
+
         // The view model reads these when it is built, and MainActivity outlives a settings change,
         // so without this its feeds kept the launch-time value and a refresh went on showing read
-        // posts until a restart (issue #442). The emission on registration is a no-op.
+        // posts until a restart (issue #442). Applied together with media-only, which re-reads
+        // them, so one rebuild covers both; the emission on registration is a no-op.
         for (String hideReadPostsKey : new String[]{
                 SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_BASE,
                 SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SUBREDDITS_BASE,
@@ -1183,11 +1184,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE}) {
             SharedPreferencesLiveDataKt.booleanLiveData(mPostHistorySharedPreferences,
                             AccountScope.key(mActivity.accountName, hideReadPostsKey), false)
-                    .observe(getViewLifecycleOwner(), hide -> {
-                        if (mPostViewModel != null) {
-                            mPostViewModel.applyHideReadPostsSetting();
-                        }
-                    });
+                    .observe(getViewLifecycleOwner(), hide -> applyMediaOnlyPosts());
         }
 
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false).observe(getViewLifecycleOwner(), showGalleryMediaAsGrid -> {
@@ -1300,28 +1297,29 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         if (postType == PostType.SEARCH) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName, mSharedPreferences,
-                    mPostFeedScrolledPositionSharedPreferences, null, subredditName,
+                    mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, subredditName,
                     query, trendingSource, postType, sortType, Objects.requireNonNull(postFilter), readPostsList, loader)
             ).get(PostViewModel.class);
         } else if (postType == PostType.SUBREDDIT || postType == PostType.DUPLICATES) {
             mPostViewModel = new ViewModelProvider(this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName,
                     mSharedPreferences, mPostFeedScrolledPositionSharedPreferences,
-                    null, subredditName, postType, sortType, Objects.requireNonNull(postFilter), readPostsList, loader,
-                    randomSubredditPseudoName != null)
+                    mPostHistorySharedPreferences, subredditName, postType, sortType, Objects.requireNonNull(postFilter),
+                    readPostsList, loader, randomSubredditPseudoName != null)
             ).get(PostViewModel.class);
         } else if (postType == PostType.USER) {
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
                     mRetrofit, mRedditDataRoomDatabase, null, mActivity.accountName, mSharedPreferences,
-                    mPostFeedScrolledPositionSharedPreferences, null, username,
+                    mPostFeedScrolledPositionSharedPreferences, mPostHistorySharedPreferences, username,
                     postType, sortType, Objects.requireNonNull(postFilter), where, readPostsList, loader)
             ).get(PostViewModel.class);
         } else {
             //Anonymous front page or multireddit
             boolean reusedExistingViewModel = mPostViewModel != null;
             mPostViewModel = new ViewModelProvider(PostFragment.this, new PostViewModel.Factory(mExecutor,
-                    mRetrofit, mRedditDataRoomDatabase, mSharedPreferences, concatenatedSubredditNames,
-                    postType, sortType, Objects.requireNonNull(postFilter), readPostsList, loader)
+                    mRetrofit, mRedditDataRoomDatabase, mSharedPreferences, mPostHistorySharedPreferences,
+                    concatenatedSubredditNames, postType, sortType, Objects.requireNonNull(postFilter), readPostsList,
+                    loader)
             ).get(PostViewModel.class);
             if (reusedExistingViewModel) {
                 // On a reload (e.g. after subscribing) ViewModelProvider.get() hands back the existing
@@ -1337,10 +1335,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
     private void bindPostViewModel() {
         // Before the first observe, so the initial value costs no pipeline rebuild. Both
-        // initializeAndBindPostViewModel paths land here. A view model handed back by
-        // ViewModelProvider may predate a change to the hide-read setting.
+        // initializeAndBindPostViewModel paths land here. This also re-reads the hide-read setting,
+        // which a view model handed back by ViewModelProvider may predate.
         applyMediaOnlyPosts();
-        mPostViewModel.applyHideReadPostsSetting();
 
         // Also before the first observe: the source has to know whether its first load comes from
         // disk before that load is asked for. The key is set even with nothing to restore, because
@@ -1542,18 +1539,98 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                         break;
                 }
             }
-            if (binding.fetchPostInfoLinearLayoutPostFragment.getVisibility() != View.GONE) {
-                binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
-                mGlide.clear(binding.fetchPostInfoImageViewPostFragment);
-            }
-            hasPost = false;
-            if (isInLazyMode) {
-                stopLazyMode();
-            }
-            this.sortType = sortType;
-            mPostViewModel.changeSortType(sortType);
-            goBackToTop();
+            applySortType(sortType);
         }
+    }
+
+    /** Shows the feed in sortType without saving it as this feed's own. */
+    private void applySortType(SortType sortType) {
+        if (binding.fetchPostInfoLinearLayoutPostFragment.getVisibility() != View.GONE) {
+            binding.fetchPostInfoLinearLayoutPostFragment.setVisibility(View.GONE);
+            mGlide.clear(binding.fetchPostInfoImageViewPostFragment);
+        }
+        hasPost = false;
+        if (isInLazyMode) {
+            stopLazyMode();
+        }
+        this.sortType = sortType;
+        // Whatever the feed shows now supersedes a default it was still waiting to apply.
+        pendingSortType = null;
+        mPostViewModel.changeSortType(sortType);
+        goBackToTop();
+    }
+
+    /**
+     * The sort a subreddit or user feed opens in when nothing hands it one: its saved sort, else the
+     * default in Settings.
+     */
+    private SortType savedOrDefaultSortType() {
+        boolean user = postType == PostType.USER;
+        String sort = mSortTypeSharedPreferences.getString(user
+                        ? SharedPreferencesUtils.SORT_TYPE_USER_POST_BASE + username
+                        : SharedPreferencesUtils.SORT_TYPE_SUBREDDIT_POST_BASE + subredditName,
+                mSharedPreferences.getString(user
+                        ? SharedPreferencesUtils.USER_DEFAULT_SORT_TYPE
+                        : SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TYPE,
+                        (user ? SortType.Type.NEW : SortType.Type.HOT).name()));
+        if (SortType.Type.CONTROVERSIAL.name().equals(sort) || SortType.Type.TOP.name().equals(sort)) {
+            String sortTime = mSortTypeSharedPreferences.getString(user
+                            ? SharedPreferencesUtils.SORT_TIME_USER_POST_BASE + username
+                            : SharedPreferencesUtils.SORT_TIME_SUBREDDIT_POST_BASE + subredditName,
+                    mSharedPreferences.getString(user
+                            ? SharedPreferencesUtils.USER_DEFAULT_SORT_TIME
+                            : SharedPreferencesUtils.SUBREDDIT_DEFAULT_SORT_TIME,
+                            SortType.Time.ALL.name()));
+            return new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)),
+                    SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
+        }
+        return new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
+    }
+
+    /**
+     * Moves this feed to a changed default sort, if it is still showing the one Settings gave it. A
+     * sort the user picked, saved or not, or a saved sort the default does not reach, stays.
+     */
+    private void followDefaultSortType() {
+        SortType previous = settingsSortType;
+        if (previous == null) {
+            return;
+        }
+        SortType latest = savedOrDefaultSortType();
+        if (isSameSortType(latest, previous)) {
+            return;
+        }
+        settingsSortType = latest;
+        // An off-screen tab may already be waiting on an earlier change it has not applied yet.
+        SortType shown = pendingSortType != null ? pendingSortType : sortType;
+        if (isSameSortType(shown, previous)) {
+            pendingSortType = latest;
+            applyPendingSortType();
+        }
+    }
+
+    /**
+     * Applies a changed default only to the feed on screen: rebuilding every tab's Pager at once
+     * while one is loading is the ConcurrentModificationException that keeps Post Filters
+     * restart-only. The tabs off screen apply theirs in onResume, when they become the one shown.
+     */
+    private void applyPendingSortType() {
+        SortType pending = pendingSortType;
+        if (pending == null || !isResumed() || mPostViewModel == null) {
+            return;
+        }
+        if (isSameSortType(pending, sortType)) {
+            pendingSortType = null;
+            return;
+        }
+        applySortType(pending);
+        if (mActivity instanceof ActivityToolbarInterface) {
+            ((ActivityToolbarInterface) mActivity).displaySortType();
+        }
+    }
+
+    private static boolean isSameSortType(SortType a, SortType b) {
+        return a.getType() == b.getType() && a.getTime() == b.getTime();
     }
 
     @Override
@@ -1582,9 +1659,11 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 || postType == PostType.ANONYMOUS_MULTIREDDIT || postType == PostType.USER
                 || postType == PostType.SEARCH)
                 && sortType != null) {
-            outState.putString(SORT_TYPE_STATE, sortType.getType().name());
-            if (sortType.getTime() != null) {
-                outState.putString(SORT_TIME_STATE, sortType.getTime().name());
+            // A tab torn down before it was shown again comes back in the default it was waiting for.
+            SortType savedSortType = pendingSortType != null ? pendingSortType : sortType;
+            outState.putString(SORT_TYPE_STATE, savedSortType.getType().name());
+            if (savedSortType.getTime() != null) {
+                outState.putString(SORT_TIME_STATE, savedSortType.getTime().name());
             }
         }
     }
@@ -2015,7 +2094,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Override
     protected void applyMediaOnlyPosts() {
         if (mPostViewModel != null) {
-            mPostViewModel.setMediaOnly(shouldShowMediaOnlyPosts());
+            mPostViewModel.applyFeedFilters(shouldShowMediaOnlyPosts());
         }
     }
 

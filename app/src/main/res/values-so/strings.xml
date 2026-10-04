@@ -777,7 +777,6 @@
     <string name="settings_loop_video_title">"Ku celi fiidiyowga"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Play clip host host links inline"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Ka ciyaar xiriirinta streamain, streamin, streamff, dubz iyo dropr sida fiidiyowyada quudinta iyo faahfaahinta boostada, halkii aad browserka ka furi lahayd. Subreddit-yada ciyaaraha waxay goobahan soo dhejiyaan waxyaabaha muhiimka ah. Clip-ka la tirtiray wuxuu ku noqonayaa kaarka xiriirka."</string>
-    <string name="settings_loop_video_summary">"Dib u bilaw abka si aad u dabaqdo goobtan si toos ah fiidyaha"</string>
     <string name="settings_remember_mute">"Xusuusnow aamus"</string>
     <string name="settings_post_details_title">"Faahfaahinta Boostada"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Boos gaar ah iyo faallooyin ku jira Habka Sawirka"</string>

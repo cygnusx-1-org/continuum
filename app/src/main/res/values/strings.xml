@@ -853,7 +853,6 @@
     <string name="settings_loop_video_title">Loop Video</string>
     <string name="settings_play_short_clip_hosts_inline_title">Play clip host links inline</string>
     <string name="settings_play_short_clip_hosts_inline_summary">Play links from streamain, streamin, streamff, dubz and dropr as videos in the feed and in post details, instead of opening them in a browser. Sports subreddits post highlights to these sites. A clip that has been deleted falls back to a link card.</string>
-    <string name="settings_loop_video_summary">Restart the app to apply this setting to autoplaying videos</string>
     <string name="settings_remember_mute">Remember Mute</string>
     <string name="settings_post_details_title">Post Details</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">Separate Post And Comments in Portrait Mode</string>

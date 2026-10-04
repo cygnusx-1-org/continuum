@@ -58,7 +58,6 @@ public class PostViewModel extends ViewModel {
     private final SharedPreferences sharedPreferences;
     @Nullable
     private final SharedPreferences postFeedScrolledPositionSharedPreferences;
-    /** Null for the anonymous feeds, which never hide read posts automatically. */
     @Nullable
     private final SharedPreferences postHistorySharedPreferences;
     @Nullable
@@ -468,13 +467,24 @@ public class PostViewModel extends ViewModel {
     }
 
     /**
-     * Re-reads Settings > Post History > Hide Read Posts Automatically. The fragment calls this
-     * whenever one of those switches changes: MainActivity outlives a settings change, so its feeds
-     * would otherwise keep the value they were built with, and a refresh would go on showing read
-     * posts until the app was restarted (issue #442).
+     * Brings both feed filters up to date at once: media-only as the fragment passes it, and
+     * Settings > Post History > Hide Read Posts Automatically re-read. The fragment calls this
+     * whenever either setting changes: MainActivity outlives a settings change, so its feeds would
+     * otherwise keep the hide-read value they were built with, and a refresh would go on showing
+     * read posts until the app was restarted (issue #442).
+     *
+     * <p>Both in one emission: coming back from Settings with both changed would otherwise rebuild
+     * the filter pipeline twice back to back, the second while the first collection is still
+     * cancelling -- the race behind issue #321.
      */
-    public void applyHideReadPostsSetting() {
-        updateHideReadPosts();
+    public void applyFeedFilters(boolean mediaOnly) {
+        hideReadPostsAndMediaOnlyLiveData.hold();
+        try {
+            setMediaOnly(mediaOnly);
+            updateHideReadPosts();
+        } finally {
+            hideReadPostsAndMediaOnlyLiveData.release();
+        }
     }
 
     private void updateHideReadPosts() {
@@ -828,7 +838,8 @@ public class PostViewModel extends ViewModel {
 
         //Anonymous Front Page
         public Factory(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
-                       SharedPreferences sharedPreferences, @Nullable String concatenatedSubredditNames,
+                       SharedPreferences sharedPreferences, @Nullable SharedPreferences postHistorySharedPreferences,
+                       @Nullable String concatenatedSubredditNames,
                        @PostType int postType, SortType sortType, PostFilter postFilter,
                        ReadPostsListInterface readPostsList, UserProfileImagesBatchLoader loader) {
             this.executor = executor;
@@ -842,6 +853,8 @@ public class PostViewModel extends ViewModel {
             // anonymous vote/hide/save metadata. Using the real anonymous sentinel fixes both.
             this.accountName = Account.ANONYMOUS_ACCOUNT;
             this.sharedPreferences = sharedPreferences;
+            // Anonymous browsing marks posts read too, so it honours Hide Read Posts Automatically.
+            this.postHistorySharedPreferences = postHistorySharedPreferences;
             this.name = concatenatedSubredditNames;
             this.postType = postType;
             this.sortType = sortType;
@@ -892,12 +905,33 @@ public class PostViewModel extends ViewModel {
      * rebuild the pipeline twice back to back -- the rebuild race behind issue #321.
      */
     private static class HideReadPostsAndMediaOnlyLiveData extends MediatorLiveData<Pair<Boolean, Boolean>> {
+        private final LiveData<Boolean> hideReadPostsValue;
+        private final LiveData<Boolean> mediaOnlyValue;
+        // While held, a change to either flag waits for release(), which emits once for both.
+        private boolean held;
+
         HideReadPostsAndMediaOnlyLiveData(LiveData<Boolean> hideReadPostsValue, LiveData<Boolean> mediaOnlyValue) {
-            addSource(hideReadPostsValue, hideReadPosts -> update(Pair.create(hideReadPosts, mediaOnlyValue.getValue())));
-            addSource(mediaOnlyValue, mediaOnly -> update(Pair.create(hideReadPostsValue.getValue(), mediaOnly)));
+            this.hideReadPostsValue = hideReadPostsValue;
+            this.mediaOnlyValue = mediaOnlyValue;
+            addSource(hideReadPostsValue, hideReadPosts -> update());
+            addSource(mediaOnlyValue, mediaOnly -> update());
         }
 
-        private void update(Pair<Boolean, Boolean> hideReadPostsAndMediaOnly) {
+        void hold() {
+            held = true;
+        }
+
+        void release() {
+            held = false;
+            update();
+        }
+
+        private void update() {
+            if (held) {
+                return;
+            }
+            Pair<Boolean, Boolean> hideReadPostsAndMediaOnly =
+                    Pair.create(hideReadPostsValue.getValue(), mediaOnlyValue.getValue());
             if (!hideReadPostsAndMediaOnly.equals(getValue())) {
                 setValue(hideReadPostsAndMediaOnly);
             }

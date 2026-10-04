@@ -785,7 +785,6 @@
     <string name="settings_loop_video_title">"लूप वीडियो"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"क्लिप होस्ट लिंक इनलाइन चलाएं"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"streamain, streamin, streamff, dubz और dropr के लिंक को ब्राउज़र में खोलने के बजाय फ़ीड और पोस्ट विवरण में वीडियो के रूप में चलाएं। स्पोर्ट्स सबरेडिट्स इन साइटों पर हाइलाइट्स पोस्ट करते हैं। हटाई जा चुकी क्लिप वापस एक लिंक कार्ड पर आ जाती है।"</string>
-    <string name="settings_loop_video_summary">"इस सेटिंग को ऑटोप्लेइंग वीडियो पर लागू करने के लिए ऐप को पुनरारंभ करें"</string>
     <string name="settings_remember_mute">"म्यूट की स्थिति याद रखें"</string>
     <string name="settings_post_details_title">"पोस्ट विवरण"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"पोर्ट्रेट मोड में अलग पोस्ट और टिप्पणियाँ"</string>

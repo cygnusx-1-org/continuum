@@ -794,7 +794,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_loop_video_title">"Video wiederholen"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Clip-Host-Links inline abspielen"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Links von streamain, streamin, streamff, dubz und dropr als Videos im Feed und in den Beitragsdetails abspielen, statt sie im Browser zu öffnen. Sport-Subreddits veröffentlichen Highlights auf diesen Websites. Ein gelöschter Clip fällt auf eine Linkkarte zurück."</string>
-    <string name="settings_loop_video_summary">"Starte die App neu, um die Einstellung auf Videos anzuwenden"</string>
     <string name="settings_remember_mute">"Stummschaltung merken"</string>
     <string name="settings_post_details_title">"Post Informationen"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Post und Kommentare im Hochformat trennen"</string>

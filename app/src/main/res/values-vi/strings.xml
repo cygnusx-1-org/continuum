@@ -787,7 +787,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_loop_video_title">"Lặp lại Video"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Phát clip liên kết máy chủ nội tuyến"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Phát các liên kết từ streamain, streamin, streamff, dubz và dropr dưới dạng video trong nguồn cấp dữ liệu và trong chi tiết bài đăng, thay vì mở chúng trong trình duyệt. Các subreddit thể thao đăng những điểm nổi bật lên các trang web này. Clip đã bị xóa sẽ quay trở lại thẻ liên kết."</string>
-    <string name="settings_loop_video_summary">"Khởi động lại ứng dụng để áp dụng các cài đặt"</string>
     <string name="settings_remember_mute">"Ghi nhớ Tắt tiếng"</string>
     <string name="settings_post_details_title">"Chi tiết bài đăng"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Chia tách bài đăng và bình luận ở chế độ xoay dọc"</string>

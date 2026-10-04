@@ -795,7 +795,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_loop_video_title">"Repetir vídeo"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Reproduzir links de host de clipe em linha"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Reproduza links de streamain, streamin, streamff, dubz e dropr como vídeos no feed e nos detalhes da postagem, em vez de abri-los em um navegador. Os subreddits esportivos publicam destaques nesses sites. Um clipe que foi excluído volta para um cartão de link."</string>
-    <string name="settings_loop_video_summary">"Reinicie o aplicativo para aplicar este ajuste aos vídeos de reprodução automática"</string>
     <string name="settings_remember_mute">"Lembrar o silenciamento"</string>
     <string name="settings_post_details_title">"Detalhes da postagem"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Separar a postagem dos comentários no modo retrato"</string>

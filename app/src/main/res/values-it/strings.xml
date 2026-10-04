@@ -795,7 +795,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_loop_video_title">"Video in loop"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Riproduci i collegamenti host dei clip in linea"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Riproduci collegamenti da streamain, streamin, streamff, dubz e dropr come video nel feed e nei dettagli del post, invece di aprirli in un browser. I subreddit sportivi pubblicano i momenti salienti su questi siti. Una clip che è stata eliminata ritorna a una scheda di collegamento."</string>
-    <string name="settings_loop_video_summary">"Riavvia l'app per applicare questa impostazione di riproduzione automatica video"</string>
     <string name="settings_remember_mute">"Ricorda il silenziamento"</string>
     <string name="settings_post_details_title">"Dettagli post"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Dividi il post dai commenti in vista verticale"</string>

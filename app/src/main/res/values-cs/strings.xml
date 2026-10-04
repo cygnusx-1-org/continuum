@@ -794,7 +794,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_loop_video_title">"Smyčka videí"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Přehrát odkazy hostitele klipů v řádku"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Přehrávej odkazy z streamain, streamin, streamff, dubz a dropr jako videa ve zdroji a v podrobnostech příspěvku, místo abys je otevíral v prohlížeči. Sportovní subreddity zveřejňují na těchto stránkách to nejlepší. Klip, který byl odstraněn, se vrátí zpět na kartu odkazu."</string>
-    <string name="settings_loop_video_summary">"Restartuj aplikaci pro použití tohoto nastavení na automaticky přehrávaná videa"</string>
     <string name="settings_remember_mute">"Zapamatovat ztlumení"</string>
     <string name="settings_post_details_title">"Podrobnosti o příspěvku"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Oddělit příspěvek a komentáře v režimu na výšku"</string>

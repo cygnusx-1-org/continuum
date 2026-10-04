@@ -793,7 +793,6 @@
     <string name="settings_loop_video_title">"Зациклить видео"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Воспроизвести встроенные ссылки на хосты клипов"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Воспроизводи ссылки с streamain, streamin, streamff, dubz и dropr как видео в ленте и в деталях публикации, вместо того чтобы открывать их в браузере. Спортивные субреддиты публикуют на этих сайтах самые яркие моменты. Удалённый клип возвращается на карточку ссылки."</string>
-    <string name="settings_loop_video_summary">"Перезапусти приложение, чтобы применить этот параметр к автоматическому воспроизведению видео"</string>
     <string name="settings_remember_mute">"Запоминать отключение звука"</string>
     <string name="settings_post_details_title">"Детали поста"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Разделять пост и комментарии в портретном режиме"</string>

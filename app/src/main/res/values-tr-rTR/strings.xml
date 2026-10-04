@@ -791,7 +791,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_loop_video_title">"Yinelenen Video"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Klip ana makine bağlantılarını satır içi oynat"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"streamain, streamin, streamff, dubz ve dropr bağlantılarını bir tarayıcıda açmak yerine akışta ve gönderi ayrıntılarında video olarak oynatın. Spor alt dizinleri bu sitelerde öne çıkanları yayınlar. Silinen bir klip, bağlantı kartına geri döner."</string>
-    <string name="settings_loop_video_summary">"Bu ayarı otomatik olarak oynatılan videolara uygulamak için uygulamayı yeniden başlatın"</string>
     <string name="settings_remember_mute">"Sessizliği Hatırla"</string>
     <string name="settings_post_details_title">"Gönderi Ayrıntıları"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Portre Modunda Gönderi ve Yorumları Ayır"</string>

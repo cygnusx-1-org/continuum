@@ -794,7 +794,6 @@ Reddit 视频分辨率较低。
     <string name="settings_loop_video_title">"循环视频"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"播放剪辑主机链接内联"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"将来自streamain、streamin、streamff、dubz 和dropr 的链接作为视频在提要和帖子详细信息中播放，而不是在浏览器中打开它们。体育子版块将精彩内容发布到这些网站。已删除的剪辑会退回到链接卡。"</string>
-    <string name="settings_loop_video_summary">"重启应用使自动播放视频设置生效"</string>
     <string name="settings_remember_mute">"记住静音"</string>
     <string name="settings_post_details_title">"帖子详情"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"竖屏模式下分隔帖子与评论"</string>

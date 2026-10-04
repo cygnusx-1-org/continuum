@@ -790,7 +790,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_loop_video_title">"Loop-video"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Speel cliphostlinks inline af"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Speel links van streamain, streamin, streamff, dubz en dropr af als video's in de feed en in berichtdetails, in plaats van ze in een browser te openen. Sportsubreddits plaatsen hoogtepunten op deze sites. Een verwijderde clip valt terug op een linkkaart."</string>
-    <string name="settings_loop_video_summary">"Start de app opnieuw om deze instelling toe te passen op het automatisch afspelen van video's"</string>
     <string name="settings_remember_mute">"Onthoud dempen"</string>
     <string name="settings_post_details_title">"Berichtdetails"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Scheid post en reacties in portretmodus"</string>

@@ -778,7 +778,6 @@
     <string name="settings_loop_video_title">"Video u petlji"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Reproduciraj veze za host isječaka u tekstu"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Reproduciraj veze sa streamain, streamin, streamff, dubz i dropr kao videozapise u feedu i u detaljima posta, umjesto da ih otvarate u pregledniku. Sportski podredditi objavljuju istaknute događaje na tim stranicama. Isječak koji je izbrisan vraća se na karticu veze."</string>
-    <string name="settings_loop_video_summary">"Ponovno pokreni aplikaciju kako biste ovu postavku primijenili na video zapise koji se automatski reproduciraju"</string>
     <string name="settings_remember_mute">"Zapamti isključivanje zvuka"</string>
     <string name="settings_post_details_title">"Detalji posta"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Odvojeni post i komentari u portretnom načinu"</string>

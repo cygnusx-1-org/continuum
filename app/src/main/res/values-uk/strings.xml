@@ -794,7 +794,6 @@
     <string name="settings_loop_video_title">"Зациклювати відео"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Відтворити вбудовані посилання на хост кліпу"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Відтворюй посилання з streamain, streamin, streamff, dubz і dropr як відео в стрічці та в деталях публікації, а не відкривай їх у браузері. Спортивні субредити публікують найкращі моменти на цих сайтах. Кліп, який було видалено, повертається на картку посилання."</string>
-    <string name="settings_loop_video_summary">"Перезапусти застосунок, щоб налаштування самовідтворення відеозаписів увійшли в дію"</string>
     <string name="settings_remember_mute">"Запам’ятовувати вимкнення звуку"</string>
     <string name="settings_post_details_title">"Відомості дописів"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Відокремлювати дописи і коментарі в портретному режимі"</string>

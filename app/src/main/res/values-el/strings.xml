@@ -787,7 +787,6 @@
     <string name="settings_loop_video_title">"Βίντεο σε Βρόχο"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Αναπαραγωγή συνδέσμων κεντρικού υπολογιστή κλιπ ενσωματωμένα"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Παίξε συνδέσμους από streamain, streamin, streamff, dubz και dropr ως βίντεο στη ροή και στις λεπτομέρειες της ανάρτησης, αντί να τους ανοίξεις σε ένα πρόγραμμα περιήγησης. Τα αθλητικά subreddits δημοσιεύουν στιγμιότυπα σε αυτούς τους ιστότοπους. Ένα κλιπ που έχει διαγραφεί επιστρέφει σε μια κάρτα συνδέσμου."</string>
-    <string name="settings_loop_video_summary">"Επανεκκίνησε την εφαρμογή για εφαρμογή ρυθμίσεων αυτόματης αναπαραγωγής βίντεο"</string>
     <string name="settings_remember_mute">"Θυμήσου τη σίγαση"</string>
     <string name="settings_post_details_title">"Πληροφορίες Ανάρτησης"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Διαχωρισμός Αναρτήσεων Και Σχολίων σε Οριζόντιο Προσανατολισμό"</string>

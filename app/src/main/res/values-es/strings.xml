@@ -794,7 +794,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_loop_video_title">"Vídeo en bucle"</string>
     <string name="settings_play_short_clip_hosts_inline_title">"Reproducir enlaces de host de clips en línea"</string>
     <string name="settings_play_short_clip_hosts_inline_summary">"Reproduzca enlaces de streamain, streamin, streamff, dubz y dropr como videos en el feed y en los detalles de la publicación, en lugar de abrirlos en un navegador. Los subreddits deportivos publican momentos destacados en estos sitios. Un clip que se ha eliminado vuelve a una tarjeta de enlace."</string>
-    <string name="settings_loop_video_summary">"Reinicie la aplicación para aplicar esta configuración a la reproducción automática de vídeos"</string>
     <string name="settings_remember_mute">"Recordar silencio"</string>
     <string name="settings_post_details_title">"Detalles"</string>
     <string name="settings_separate_post_and_comments_in_portrait_mode_title">"Separar publicación y comentarios en modo vertical"</string>
