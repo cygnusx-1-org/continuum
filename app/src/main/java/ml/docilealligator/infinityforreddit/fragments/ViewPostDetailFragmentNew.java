@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -247,6 +248,11 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     private boolean mLockFab;
     private boolean mSwipeUpToHideFab;
     private boolean mSeparatePostAndComments = false;
+    /**
+     * Between asking the archive about a post handed over by the feed and its answer, or the wait
+     * running out. Nothing is rendered in that window: see renderContent.
+     */
+    private boolean mAwaitingPostRecovery = false;
     private ConcatAdapter mConcatAdapter;
     private PostDetailRecyclerViewAdapterNew mPostAdapter;
     private CommentsStatusRecyclerViewAdapter mCommentsStatusAdapter;
@@ -670,6 +676,11 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                     public void fetchMoreChildComments(int position) {
                         viewPostDetailFragmentViewModel.fetchMoreChildComments(position);
                     }
+
+                    @Override
+                    public void beforeBind(Comment comment) {
+                        viewPostDetailFragmentViewModel.applyLateRecovery(comment);
+                    }
                 });
 
         mPostAdapter.setCommentsSupplier(() -> mCommentsAdapter != null ? mCommentsAdapter.getVisibleComments() : null);
@@ -784,6 +795,15 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             mCommentsFooterAdapter.notifyIfStateChanged();
 
             applyResume();
+            // A fresh view has nothing on screen yet, so a restored or rotated thread draws every
+            // late-recovered body in from the start; a collapse may have hidden a held one.
+            releaseOffScreenRecoveries();
+        });
+
+        viewPostDetailFragmentViewModel.getLateRecoveryLiveData().observe(getViewLifecycleOwner(), ignored -> {
+            releaseOffScreenRecoveries();
+            // A held body, or a pass that ended short, is what the recover action is offered for.
+            setupMenu();
         });
 
         // Keep the snapshot current as the user reads, so a process killed without lifecycle
@@ -795,6 +815,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 if (newState != RecyclerView.SCROLL_STATE_IDLE || mActivity == null) {
                     return;
                 }
+                // Rows the scroll carried off screen can take the bodies held back from them.
+                releaseOffScreenRecoveries();
                 recyclerView.removeCallbacks(resumeCaptureRunnable);
                 long since = SystemClock.uptimeMillis() - lastResumeCaptureAt;
                 if (since >= RESUME_CAPTURE_THROTTLE_MS) {
@@ -804,6 +826,17 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 }
             }
         });
+        if (mCommentsRecyclerView != null) {
+            // With the post on a list of its own, scrolling that list is what takes it off screen.
+            binding.postDetailRecyclerViewViewPostDetailFragment.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        releaseOffScreenPostRecovery();
+                    }
+                }
+            });
+        }
 
         bindView(savedInstanceState);
 
@@ -846,7 +879,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             // The callback runs inline for a post Reddit has not scrubbed, which is every ordinary
             // one, leaving the path below unchanged for them.
             boolean[] renderRefused = {false};
+            boolean[] commentsFetchedAlongside = {false};
+            PostDetailCommentsCache cache = savedInstanceState == null && viewPostDetailFragmentViewModel.getSingleCommentId() == null
+                    ? postDetailCommentsCacheManager.getCache(mPost) : null;
+            mAwaitingPostRecovery = true;
             viewPostDetailFragmentViewModel.recoverPostBeforeFirstRender(mPost, postToRender -> {
+                mAwaitingPostRecovery = false;
                 // The archive request outlives this fragment; ignore a late reply once it is torn
                 // down so we don't touch a null activity/binding.
                 if (mActivity == null || !isAdded()) {
@@ -869,21 +907,30 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                     return Unit.INSTANCE;
                 }
 
-                PostDetailCommentsCache cache = savedInstanceState == null && viewPostDetailFragmentViewModel.getSingleCommentId() == null
-                        ? postDetailCommentsCacheManager.getCache(mPost) : null;
                 if (restoreCache(cache)) {
                     postDetailCommentsCacheManager.removeCache(mPost);
 
                     restoreCommentScrollPosition();
                 } else {
                     if (comments == null) {
-                        viewPostDetailFragmentViewModel.fetchCommentsRespectRecommendedSort(false);
+                        if (!commentsFetchedAlongside[0]) {
+                            viewPostDetailFragmentViewModel.fetchCommentsRespectRecommendedSort(false);
+                        }
                     } else {
                         restoreCommentScrollPosition();
                     }
                 }
                 return Unit.INSTANCE;
             });
+
+            // Still waiting on the archive: fetch the comments now rather than once it has answered.
+            // Their own recovery waits on the same archive, and queued behind the post's the two
+            // waits added up; the view model holds the comments back until the post has been drawn.
+            // Never behind the sensitive warning, whose only way out is leaving.
+            if (mAwaitingPostRecovery && cache == null && comments == null && !needsSensitiveWarning()) {
+                commentsFetchedAlongside[0] = true;
+                viewPostDetailFragmentViewModel.fetchCommentsRespectRecommendedSort(false);
+            }
 
             if (renderRefused[0]) {
                 return;
@@ -931,6 +978,12 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
     }
 
     private boolean renderContent() {
+        if (mAwaitingPostRecovery) {
+            // The uiState observer gets here too, the moment it starts -- with a cached thread, or a
+            // fetch still resolving its sort, that is before the archive has answered, and the post
+            // would draw as Reddit served it and then change. The recovery callback renders instead.
+            return false;
+        }
         if (showSensitiveWarning()) {
             return false;
         }
@@ -1008,6 +1061,97 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         return mCommentsRecyclerView != null
                 ? mCommentsRecyclerView
                 : binding.postDetailRecyclerViewViewPostDetailFragment;
+    }
+
+    /**
+     * Lets the archive's late answers through to the post and the comments whose rows are not on
+     * screen; see {@link #releaseOffScreenPostRecovery} and {@link #releaseOffScreenCommentRecoveries}.
+     */
+    private void releaseOffScreenRecoveries() {
+        releaseOffScreenPostRecovery();
+        releaseOffScreenCommentRecoveries();
+    }
+
+    /**
+     * Applies the archive's late answer for the post once the post's row is off screen, handing the
+     * result to the adapter at once rather than leaving it to the data observer, so the row is marked
+     * for rebinding before anything can scroll it back into view.
+     */
+    private void releaseOffScreenPostRecovery() {
+        if (binding == null || mPostAdapter == null || !viewPostDetailFragmentViewModel.hasLatePostRecovery()) {
+            return;
+        }
+        RecyclerView recyclerView = binding.postDetailRecyclerViewViewPostDetailFragment;
+        if (recyclerView.isComputingLayout()) {
+            recyclerView.post(this::releaseOffScreenPostRecovery);
+            return;
+        }
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            if (recyclerView.getChildViewHolder(recyclerView.getChildAt(i)).getBindingAdapter() == mPostAdapter) {
+                return;
+            }
+        }
+
+        Post recovered = viewPostDetailFragmentViewModel.applyLatePostRecovery();
+        if (recovered != null) {
+            mPost = recovered;
+            mPostAdapter.updatePost(recovered);
+        }
+    }
+
+    /**
+     * Lets the archived bodies that arrived after the thread was drawn through to every comment whose
+     * row is not on screen, and has those rows rebound, which writes the body in before the row is
+     * next seen. A row on screen keeps what it shows until it has left: a comment never changes
+     * under the reader's eyes (issue #446).
+     *
+     * The rebinds are notified synchronously rather than by submitting a patched list, whose diff
+     * lands a frame or more later — long enough for a scroll to bring the row into view first.
+     */
+    private void releaseOffScreenCommentRecoveries() {
+        if (binding == null || mCommentsAdapter == null) {
+            return;
+        }
+        Set<String> released = viewPostDetailFragmentViewModel.getHeldLateRecoveryIds();
+        if (released.isEmpty()) {
+            return;
+        }
+        RecyclerView recyclerView = commentsRecyclerView();
+        if (recyclerView.isComputingLayout()) {
+            recyclerView.post(this::releaseOffScreenCommentRecoveries);
+            return;
+        }
+
+        List<Comment> current = mCommentsAdapter.getCurrentList();
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
+            if (holder.getBindingAdapter() != mCommentsAdapter) {
+                continue;
+            }
+            int position = holder.getBindingAdapterPosition();
+            if (position < 0 || position >= current.size()) {
+                // A row whose comment cannot be told right now -- a full rebind pending, or one
+                // animating away. Holding everything back is the safe answer; the next pass decides.
+                return;
+            }
+            String id = current.get(position).getId();
+            if (id != null) {
+                released.remove(id);
+            }
+        }
+        if (released.isEmpty()) {
+            return;
+        }
+
+        viewPostDetailFragmentViewModel.releaseLateRecoveries(released);
+        for (int i = 0; i < current.size(); i++) {
+            String id = current.get(i).getId();
+            if (id != null && released.contains(id)) {
+                // Off screen, so this only marks the row: a holder parked in RecyclerView's cache is
+                // rebound before it is shown again instead of coming back with the old body.
+                mCommentsAdapter.notifyItemChanged(i);
+            }
+        }
     }
 
     /**
@@ -1837,7 +1981,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                 children,
                 viewPostDetailFragmentViewModel.getSortType(),
                 commentScrollPosition,
-                viewPostDetailFragmentViewModel.getRecoveryAttemptedIds()
+                viewPostDetailFragmentViewModel.getRecoveryAttemptedIds(),
+                viewPostDetailFragmentViewModel.getLateRecoveries()
         );
     }
 
@@ -1914,9 +2059,13 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
         }
     }
 
+    private boolean needsSensitiveWarning() {
+        return mPost != null && mPost.isNSFW()
+                && !mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false);
+    }
+
     private boolean showSensitiveWarning() {
-        if (mPost != null && mPost.isNSFW()
-                && !mNsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.NSFW_BASE), false)) {
+        if (needsSensitiveWarning()) {
             MaterialAlertDialogBuilder sensitiveWarningBuilder = new MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
                     .setTitle(R.string.warning)
                     .setMessage(R.string.this_post_contains_sensitive_content)

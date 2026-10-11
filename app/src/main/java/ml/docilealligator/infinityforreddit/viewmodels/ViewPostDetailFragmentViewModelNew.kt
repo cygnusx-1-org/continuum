@@ -12,9 +12,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.paging.PagingSource
 import com.google.gson.Gson
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -34,6 +39,7 @@ import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage
 import ml.docilealligator.infinityforreddit.moderation.CommentModerationEvent
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent
+import ml.docilealligator.infinityforreddit.post.FetchRemovedPost
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.post.PostPagingSource.PostPagingSourceError
@@ -196,7 +202,65 @@ class ViewPostDetailFragmentViewModelNew(
      */
     private val recoveryAttemptedIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
+    /**
+     * Ids an automatic pass is still asking the archive about, so the menu and the explicit action
+     * do not ask again. Apart from [recoveryAttemptedIds] because none of these is answered yet: a
+     * pass that stops early hands its ids back.
+     */
+    private val recoveryInFlightIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    /**
+     * Archived bodies that arrived after their comments were drawn. Never patched into the list —
+     * that would rewrite rows the reader may be looking at — but written onto a comment as its row
+     * is bound, once [releaseLateRecoveries] has let it through. Kept after being written, because a
+     * copy taken before then (a vote, a collapse) can put an unrecovered instance back on screen.
+     */
+    private val lateRecoveries = HashMap<String, FetchRemovedComment.Result>()
+
+    /** The [lateRecoveries] whose rows were off screen at some point after the body arrived. */
+    private val releasedLateRecoveryIds = HashSet<String>()
+
+    /** Fires when [lateRecoveries] gains bodies, or a pass ends, after its page was drawn. */
+    val lateRecoveryLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
+
+    /** Parent of the automatic passes that outlive their page's draw, so a refresh can stop them. */
+    private val backgroundRecovery = SupervisorJob(viewModelScope.coroutineContext.job)
+
+    /** Bumped whenever the comment list is replaced, so a pass for the old list cannot reach the new. */
+    @Volatile
+    private var recoveryGeneration = 0
+
     private var commentRecoveryJob: Job? = null
+
+    /**
+     * The post [fetchPostAndCommentsById] parsed and is holding back while the archive is asked about
+     * it. The comment fetch running alongside reads the subreddit and comment count from here —
+     * partly on a parsing thread, hence volatile.
+     */
+    @Volatile
+    private var unpublishedPost: Post? = null
+
+    /**
+     * Publishes the post once its archive wait is over. Comments loading alongside join this before
+     * they are published, so a thread never draws ahead of its post and is never pushed down by it.
+     */
+    private var postPublication: Job? = null
+
+    /**
+     * The archive's answer, or the wait for it, for the post this view opened with — asked by
+     * [recoverPostBeforeFirstRender] or [publishPostAfterRecovery], once per ViewModel.
+     */
+    private var postRecovery: Deferred<Post>? = null
+
+    /** The archive's answer for this post, once it has given one, for a refresh to reuse. */
+    private var postArchive: FetchRemovedPost.Result? = null
+
+    /** An answer for the post that arrived after it was drawn, held until its row is off screen. */
+    private var latePostRecovery: FetchRemovedPost.Result? = null
+
+    /** The post comment fetches are for: the published one, else the one about to be. */
+    private val commentsPost: Post?
+        get() = _dataState.value.post ?: unpublishedPost
 
     val derivedPostId: String?
         get() = _dataState.value.post?.id ?: postId
@@ -297,7 +361,7 @@ class ViewPostDetailFragmentViewModelNew(
         sortType: SortType.Type,
         changeRefreshState: Boolean,
     ) {
-        val post = _dataState.value.post
+        val post = commentsPost
         val subredditName = post?.subredditName
 
         // Tier 1: a sort the user explicitly saved for this subreddit wins over everything.
@@ -441,7 +505,7 @@ class ViewPostDetailFragmentViewModelNew(
      * Reddit will return in one response.
      */
     private fun currentCommentLimit(): Int = commentLimitFor(
-        _dataState.value.post?.getNComments() ?: COMMENT_LIMIT_MAX,
+        commentsPost?.getNComments() ?: COMMENT_LIMIT_MAX,
         commentFetchNonce
     )
 
@@ -459,7 +523,7 @@ class ViewPostDetailFragmentViewModelNew(
         // here — so every recovered body is about to revert to the placeholder Reddit serves. Let
         // the archive be asked about them again; otherwise the ids are remembered as already
         // handled and the bodies never come back.
-        recoveryAttemptedIds.clear()
+        resetCommentRecovery()
 
         /*fetchCommentJob?.cancel()
         fetchCommentJob = viewModelScope.launch {
@@ -516,8 +580,10 @@ class ViewPostDetailFragmentViewModelNew(
             }
 
             if (response.isSuccessful) {
-                commentFilter = fetchCommentFilter(_dataState.value.post?.subredditName ?: "")
+                commentFilter = fetchCommentFilter(commentsPost?.subredditName ?: "")
                 val parseCommentsResult = parseComments(response.body(), commentFilter!!, expandChildren)
+                // Never ahead of a post still waiting on the archive: see postPublication.
+                postPublication?.join()
                 when (parseCommentsResult) {
                     is AppResult.Success<ParseCommentsResult> -> {
                         _uiState.value = _uiState.value.copy(
@@ -620,7 +686,13 @@ class ViewPostDetailFragmentViewModelNew(
                     if (response.isSuccessful) {
                         val post = parsePost(response.body())
                         post?.let { post ->
-                            setPost(post)
+                            // Asked about alongside the comments rather than ahead of them: both
+                            // wait on the same archive, and queued one behind the other a removed
+                            // post with removed comments waited twice. An ordinary post needs no
+                            // archive and is published at once, as before.
+                            unpublishedPost = post
+                            val publication = publishPostAfterRecovery(post)
+                            postPublication = publication
 
                             commentFilter = fetchCommentFilter(post.subredditName)
 
@@ -631,6 +703,7 @@ class ViewPostDetailFragmentViewModelNew(
                             if (loadSubredditCommentSort(post.subredditName) == null
                                 && !respectSubredditRecommendedSortType) {
                                 val parseCommentsResult = parseComments(response.body(), commentFilter!!, expandChildren)
+                                publication.join()
                                 when (parseCommentsResult) {
                                     is AppResult.Success<ParseCommentsResult> -> {
                                         _dataState.value = _dataState.value.copy(
@@ -1064,10 +1137,11 @@ class ViewPostDetailFragmentViewModelNew(
                             }
 
                             if (response.isSuccessful) {
-                                val post = withContext(Dispatchers.Default) {
+                                val parsed = withContext(Dispatchers.Default) {
                                     response.body()?.let { ParsePost.parsePostSync(it) }
                                 }
-                                post?.let { post ->
+                                parsed?.let { parsed ->
+                                    val post = recoverRefreshedPost(parsed) ?: _dataState.value.post ?: parsed
                                     if (fetchComments) {
                                         _dataState.value = _dataState.value.copy(
                                             post = post,
@@ -1267,7 +1341,7 @@ class ViewPostDetailFragmentViewModelNew(
 
     @Nullable
     private suspend fun parsePost(response: String?): Post? {
-        val post = withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.Default) {
             val allData: JSONArray =
                 JSONArray(response).getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY)
                     .getJSONArray(JSONUtils.CHILDREN_KEY)
@@ -1277,15 +1351,97 @@ class ViewPostDetailFragmentViewModelNew(
                 val data = allData.getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY)
                 ParsePost.parseBasicData(data)
             }
-        } ?: return null
+        }
+    }
 
-        // Recovered before it is handed on, so a removed post is never drawn as
-        // "[ Removed by moderator ]" and then swapped for its real title a moment later. Under the
-        // same budget as the feed path: recoverIfRemoved has no deadline of its own, and the network
-        // timeouts behind it are 30s, which is not something a post's first draw may wait on.
-        return withTimeoutOrNull(POST_RECOVERY_WAIT_MILLIS) {
-            RecoverRemovedPost.recoverIfRemoved(arcticShiftRetrofit, post)
-        } ?: post
+    /**
+     * [post] as the archive holds it, or [post] itself when Reddit never scrubbed it, the archive
+     * has nothing, or the wait ran out. fetchArchived has no deadline of its own, and the network
+     * timeouts behind it are 30s, which is not something a post's first draw may wait on.
+     *
+     * An answer that lands after the wait is not dropped: it is held in [latePostRecovery], to be
+     * written onto whatever the post has become once its row is off screen.
+     */
+    private suspend fun recoverPostWithinWait(post: Post): Post {
+        if (!RecoverRemovedPost.needsRecovery(post)) {
+            return post
+        }
+
+        val archived = viewModelScope.async { RecoverRemovedPost.fetchArchived(arcticShiftRetrofit, post) }
+        if (withTimeoutOrNull(POST_RECOVERY_WAIT_MILLIS) { archived.join() } != null) {
+            val result = archived.await() ?: return post
+            postArchive = result
+            return RecoverRemovedPost.recovered(post, result)
+        }
+
+        viewModelScope.launch {
+            val result = archived.await() ?: return@launch
+            postArchive = result
+            latePostRecovery = result
+            lateRecoveryLiveData.value = Unit
+        }
+        return post
+    }
+
+    /** Whether the archive answered for the post after it was drawn, and that is yet to be applied. */
+    fun hasLatePostRecovery(): Boolean = latePostRecovery != null
+
+    /**
+     * Writes the archive's late answer onto the post as it is now — votes, saves and all — and
+     * publishes it. Only for while the post's row is off screen, which is why it returns the post:
+     * the fragment hands it to the adapter itself, at once, before anything can scroll the row back.
+     *
+     * @return the recovered post, or null when there is nothing to apply — including a post that
+     *         was recovered some other way in the meantime.
+     */
+    fun applyLatePostRecovery(): Post? {
+        val archived = latePostRecovery ?: return null
+        latePostRecovery = null
+        val current = _dataState.value.post ?: return null
+        if (!RecoverRemovedPost.needsRecovery(current)) {
+            return null
+        }
+        val recovered = RecoverRemovedPost.recovered(current, archived)
+        setPost(recovered)
+        return recovered
+    }
+
+    /**
+     * A refreshed [post] recovered the way the one on screen was, so a pull-to-refresh never puts
+     * "[ Removed by moderator ]" back over content the archive restored. Reuses the archive's
+     * earlier answer when there is one; otherwise asks, under the usual wait.
+     *
+     * @return null to keep the post on screen as it is: it shows archived content this view model
+     *         has no answer for — recovered before it got here — and the archive did not answer in
+     *         time to rebuild it.
+     */
+    private suspend fun recoverRefreshedPost(post: Post): Post? {
+        // Reddit still serves a removed post's content to its author — and the refresh that follows
+        // an edit is the author's — so the archive's older copy must not go back over it.
+        if (!RecoverRemovedPost.needsRecovery(post) || post.author == accountName) {
+            return post
+        }
+        postArchive?.let { return RecoverRemovedPost.recovered(post, it) }
+
+        val recovered = recoverPostWithinWait(post)
+        if (recovered === post && _dataState.value.post?.isRecovered == true) {
+            return null
+        }
+        return recovered
+    }
+
+    /**
+     * Publishes [post] once it has been recovered, so a removed post is never drawn as
+     * "[ Removed by moderator ]" and then swapped for its real title a moment later. Recorded as
+     * [postRecovery], so a rotated view comes back to this answer instead of asking again.
+     */
+    private fun publishPostAfterRecovery(post: Post): Job {
+        val recovery = viewModelScope.async { recoverPostWithinWait(post) }
+        postRecovery = recovery
+        return viewModelScope.launch {
+            setPost(recovery.await())
+            unpublishedPost = null
+        }
     }
 
     // The comment sort fallback is the "Comment Default Sort Type" setting, resolved in the
@@ -1466,6 +1622,9 @@ class ViewPostDetailFragmentViewModelNew(
         // The cached comments were recovered when they were first parsed, and this is what stops the
         // restored view offering to recover the ones the archive already said it does not have.
         recoveryAttemptedIds.addAll(cache.recoveryAttemptedIds)
+        // Held back at the time, but nothing of this view is on screen yet; the fragment lets them
+        // through before its first draw.
+        lateRecoveries.putAll(cache.lateRecoveries)
 
         if (_dataState.value.post == null) {
             _dataState.value = _dataState.value.copy(
@@ -1887,7 +2046,8 @@ class ViewPostDetailFragmentViewModelNew(
      *
      * [onReady] is called on the main thread with the post to draw: synchronously when Reddit has
      * not scrubbed this post, so an ordinary post's path is exactly as it was, and otherwise once
-     * the archive has answered or the wait has run out.
+     * the archive has answered or the wait has run out. The comments may be fetched alongside; they
+     * are not published until [onReady] has run.
      */
     fun recoverPostBeforeFirstRender(post: Post, onReady: (Post) -> Unit) {
         if (!RecoverRemovedPost.needsRecovery(post)) {
@@ -1895,19 +2055,33 @@ class ViewPostDetailFragmentViewModelNew(
             return
         }
 
-        viewModelScope.launch {
-            val recovered = withTimeoutOrNull(POST_RECOVERY_WAIT_MILLIS) {
-                RecoverRemovedPost.recoverIfRemoved(arcticShiftRetrofit, post)
+        // Asked once per ViewModel. A rotation brings a new view to the same answer — waiting for it
+        // while it is still on its way — instead of asking again, which would hold the redraw of a
+        // post already on screen on the archive and swap the post when it answered. A view arriving
+        // after the answer draws the post it saved, which carries anything done to it since.
+        val asked = postRecovery
+        if (asked != null) {
+            if (asked.isCompleted) {
+                onReady(post)
+            } else {
+                viewModelScope.launch { onReady(asked.await()) }
             }
-            if (recovered != null) {
+            return
+        }
+
+        val recovery = viewModelScope.async { recoverPostWithinWait(post) }
+        postRecovery = recovery
+        postPublication = viewModelScope.launch {
+            val recovered = recovery.await()
+            if (recovered !== post) {
                 // Published before onReady so the adapter is holding the recovered post by the time
                 // the fragment attaches it, which is what makes this a first draw and not a redraw.
                 _dataState.value = _dataState.value.copy(post = recovered)
             }
-            // Either way the post is drawn exactly once. A late answer is deliberately dropped
-            // rather than applied: swapping the title out from under a post already on screen is
-            // the redraw this whole path exists to avoid.
-            onReady(recovered ?: post)
+            // Either way the post is drawn exactly once. A late answer is held rather than applied
+            // here: swapping the title out from under a post already on screen is the redraw this
+            // whole path exists to avoid. It goes in once the row is off screen.
+            onReady(recovered)
         }
     }
 
@@ -1917,18 +2091,125 @@ class ViewPostDetailFragmentViewModelNew(
      * and swapping a moment later. Covers replies that are still collapsed too — expanding a thread
      * puts those same objects on screen.
      *
+     * Waits at most [RecoverRemovedComments.RENDER_WAIT_MILLIS], then lets the page be drawn. The
+     * pass itself carries on: what it brings back after that goes to [lateRecoveries], to be written
+     * in only as each row is drawn off screen.
+     *
      * Skipped above [RecoverRemovedComments.AUTO_RECOVERY_COMMENT_LIMIT] comments, where recovery is
      * the user's call, so opening a mega-thread is never made to wait on the archive.
      */
     private suspend fun preRecoverComments(comments: List<Comment>) {
-        if ((_dataState.value.post?.getNComments()
+        if ((commentsPost?.getNComments()
                 ?: 0) > RecoverRemovedComments.AUTO_RECOVERY_COMMENT_LIMIT) {
             return
         }
-        recoveryAttemptedIds.addAll(
-            RecoverRemovedComments.recoverInPlace(arcticShiftRetrofit, comments, recoveryAttemptedIds)
-        )
+
+        val all = RecoverRemovedComments.flatten(comments)
+        val ids = RecoverRemovedComments.candidateIds(all)
+            .filterNot { recoveryAttemptedIds.contains(it) || recoveryInFlightIds.contains(it) }
+        if (ids.isEmpty()) {
+            return
+        }
+        recoveryInFlightIds.addAll(ids)
+
+        val generation = recoveryGeneration
+        val byId = all.associateBy { it.id }
+        // The pass hands chunks over on the main thread while this page waits on a parsing thread.
+        // The lock makes "still before the draw" one answer for both: a chunk either lands on the
+        // parsed objects before they are published, or goes to lateRecoveries — never onto the
+        // objects once they are.
+        val lock = Any()
+        var beforeRender = true
+        val pass = viewModelScope.launch(backgroundRecovery) {
+            try {
+                RecoverRemovedComments.recover(arcticShiftRetrofit, ids) { requested, recovered ->
+                    if (generation != recoveryGeneration) {
+                        return@recover
+                    }
+                    recoveryAttemptedIds.addAll(requested)
+                    synchronized(lock) {
+                        if (beforeRender) {
+                            for ((id, result) in recovered) {
+                                byId[id]?.let { RecoverRemovedComments.applyTo(it, result) }
+                            }
+                            return@recover
+                        }
+                    }
+                    addLateRecoveries(recovered.filter { (id, result) ->
+                        byId[id]?.let { RecoverRemovedComments.changes(it, result) } == true
+                    })
+                }
+            } finally {
+                if (generation == recoveryGeneration) {
+                    recoveryInFlightIds.removeAll(ids.toSet())
+                    if (!synchronized(lock) { beforeRender }) {
+                        // The menu offers what this pass did not get to; let it look again.
+                        lateRecoveryLiveData.value = Unit
+                    }
+                }
+            }
+        }
+
+        withTimeoutOrNull(RecoverRemovedComments.RENDER_WAIT_MILLIS) { pass.join() }
+        synchronized(lock) { beforeRender = false }
     }
+
+    private fun addLateRecoveries(recovered: Map<String, FetchRemovedComment.Result>) {
+        if (recovered.isEmpty()) {
+            return
+        }
+        lateRecoveries.putAll(recovered)
+        lateRecoveryLiveData.value = Unit
+    }
+
+    /**
+     * Forgets every automatic pass and its results, for a comment list that is about to be replaced
+     * with Reddit's placeholders again.
+     */
+    private fun resetCommentRecovery() {
+        recoveryGeneration++
+        backgroundRecovery.cancelChildren()
+        recoveryAttemptedIds.clear()
+        recoveryInFlightIds.clear()
+        lateRecoveries.clear()
+        releasedLateRecoveryIds.clear()
+    }
+
+    /**
+     * The ids whose archived body arrived after their row was drawn and has not been let through
+     * yet — each one on screen when last looked at. Copied, for the caller to whittle down.
+     */
+    fun getHeldLateRecoveryIds(): MutableSet<String> {
+        val held = HashSet(lateRecoveries.keys)
+        held.removeAll(releasedLateRecoveryIds)
+        return held
+    }
+
+    /**
+     * Lets the archived bodies for [ids] through to [applyLateRecovery]. Only for comments whose
+     * rows are off screen: the next time one is drawn, it is drawn recovered.
+     */
+    fun releaseLateRecoveries(ids: Collection<String>) {
+        releasedLateRecoveryIds.addAll(ids)
+    }
+
+    /**
+     * Writes a late archived body onto [comment] as its row is bound — in place, because a bind is
+     * the one moment nobody is looking at the row, and a copy would make the list see a change and
+     * bind it again. Does nothing for a comment still held back, or one already recovered.
+     */
+    fun applyLateRecovery(comment: Comment) {
+        val id = comment.id ?: return
+        if (releasedLateRecoveryIds.contains(id)) {
+            lateRecoveries[id]?.let { RecoverRemovedComments.applyTo(comment, it) }
+        }
+    }
+
+    /**
+     * The late archived bodies, for the comments cache to carry: a body still held back when the
+     * user left is drawn straight in by the view the cache is restored into.
+     */
+    fun getLateRecoveries(): Map<String, FetchRemovedComment.Result> = HashMap(lateRecoveries)
 
     /**
      * A snapshot of the ids the archive has answered for, for the comments cache to carry. Copied
@@ -1937,26 +2218,29 @@ class ViewPostDetailFragmentViewModelNew(
     fun getRecoveryAttemptedIds(): Set<String> = HashSet(recoveryAttemptedIds)
 
     /**
-     * Whether any loaded comment is still a removal placeholder the archive has not been asked about
-     * — which is exactly when the explicit action has something to do.
+     * Whether any loaded comment is still a removal placeholder the archive has not been asked about,
+     * or one whose archived body is being held back while its row is on screen — which is exactly
+     * when the explicit action has something to do.
      *
      * Ids are recorded as attempted only once the archive has answered for them, so a comment it
      * simply does not hold stops counting after the first pass; what is left are the threads
-     * recovery skipped for being over the cap, and the pages whose pre-render wait ran out.
+     * recovery skipped for being over the cap, and the passes the archive cut short.
      */
     fun hasUnrecoveredComments(): Boolean {
         val comments = _dataState.value.comments ?: return false
-        return RecoverRemovedComments.hasCandidateOutside(comments, recoveryAttemptedIds)
+        return getHeldLateRecoveryIds().isNotEmpty()
+            || RecoverRemovedComments.hasCandidateOutside(comments, recoveryAttemptedIds, recoveryInFlightIds)
     }
 
     /**
-     * The explicit "Recover deleted comments" action, and now the only path that patches comments
+     * The explicit "Recover deleted comments" action, and the only path that patches comments
      * already on screen.
      *
-     * Automatic recovery happens before the first draw ([preRecoverComments]); when it cannot — a
-     * thread over [RecoverRemovedComments.AUTO_RECOVERY_COMMENT_LIMIT], or a page whose wait ran out
-     * — nothing is recovered behind the user's back. This is what they tap instead, and
-     * [hasUnrecoveredComments] is what puts it in the menu.
+     * Automatic recovery writes a body in only where nobody is looking ([preRecoverComments],
+     * [applyLateRecovery]); when it cannot — a thread over
+     * [RecoverRemovedComments.AUTO_RECOVERY_COMMENT_LIMIT], a pass the archive cut short, or a body
+     * held back because its row is on screen — nothing changes behind the user's back. This is what
+     * they tap instead, and [hasUnrecoveredComments] is what puts it in the menu.
      *
      * One archive request per 250 ids, and one list update per request: 150 removed comments cost
      * one call, not 150.
@@ -1969,23 +2253,29 @@ class ViewPostDetailFragmentViewModelNew(
             return
         }
 
+        // Bodies already here but held back because their rows are on screen. The user asked, so
+        // they are drawn now.
+        val held = getHeldLateRecoveryIds()
+        releaseLateRecoveries(held)
+        val released = applyRecoveredComments(lateRecoveries.filterKeys { held.contains(it) })
+
         val comments = _dataState.value.comments ?: return
         val ids = RecoverRemovedComments.candidateIds(comments)
-            .filterNot { recoveryAttemptedIds.contains(it) }
+            .filterNot { recoveryAttemptedIds.contains(it) || recoveryInFlightIds.contains(it) }
         if (ids.isEmpty()) {
-            commentRecoveryEventLiveData.value = CommentRecoveryResult(0, 0, completed = true)
+            commentRecoveryEventLiveData.value = CommentRecoveryResult(released, released, completed = true)
             return
         }
 
         commentRecoveryJob = viewModelScope.launch {
-            var recovered = 0
+            var recovered = released
             val completed = RecoverRemovedComments.recover(arcticShiftRetrofit, ids) { requested, results ->
                 recoveryAttemptedIds.addAll(requested)
                 recovered += applyRecoveredComments(results)
             }
 
             commentRecoveryEventLiveData.value =
-                CommentRecoveryResult(recovered, ids.size, completed)
+                CommentRecoveryResult(recovered, ids.size + released, completed)
             commentRecoveryJob = null
             // No automatic re-sweep for comments that arrived mid-pass: they stay unrecovered, which
             // keeps the menu item showing, so the escape hatch advertises itself rather than the app
@@ -2839,9 +3129,10 @@ class ViewPostDetailFragmentViewModelNew(
          *
          * Generous on purpose: this is usually the session's first archive request, so it pays DNS
          * and the TLS handshake on top of the call itself, and 2s was short enough to lose that race
-         * on mobile data — leaving the post drawn as "[ Removed by moderator ]" with no second
-         * chance. The network timeouts behind it are 30s, far too long to hold a screen on, so the
-         * deadline is here rather than left to them.
+         * on mobile data — leaving the post drawn as "[ Removed by moderator ]" until the reader
+         * scrolled it away, the only time a late answer may be applied. The network timeouts behind
+         * it are 30s, far too long to hold a screen on, so the deadline is here rather than left to
+         * them.
          */
         private const val POST_RECOVERY_WAIT_MILLIS = 5_000L
 

@@ -3,13 +3,13 @@ package ml.docilealligator.infinityforreddit.comment
 import android.os.SystemClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import ml.docilealligator.infinityforreddit.apis.ArcticShiftAPI
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost
 import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.awaitResponse
 import java.io.IOException
 
 /**
@@ -51,10 +51,12 @@ object RecoverRemovedComments {
      *
      * Generous for the same reason post recovery is: the first archive call of a session pays DNS
      * and the TLS handshake on top of the request, and 2s was measured losing that race by a couple
-     * of hundred milliseconds — which costs the page its recovery, since a late answer is dropped
-     * rather than swapped in. Still short enough that a dead archive cannot hold comments hostage.
+     * of hundred milliseconds. Losing it no longer costs the page its recovery — the pass carries on
+     * past the deadline, and what it brings back is written into rows as they are drawn off screen —
+     * but a row already on screen keeps its placeholder until it scrolls away, so the first screenful
+     * is still worth the wait. Short enough that a slow archive cannot hold comments hostage.
      */
-    private const val RENDER_WAIT_MILLIS = 5_000L
+    const val RENDER_WAIT_MILLIS = 5_000L
 
     /**
      * Process-wide, because the rate limit is: two posts open in the same session share one budget.
@@ -82,14 +84,14 @@ object RecoverRemovedComments {
     }
 
     /**
-     * Whether any comment in [comments] is a candidate that [skip] does not already account for.
+     * Whether any comment in [comments] is a candidate that none of [skip] already accounts for.
      *
      * The same question [candidateIds] answers, without building the list to answer it: this drives
      * the post-detail menu, which is rebuilt on every data-state emission — a vote, a collapse, a
      * page of comments — so it runs far more often than a recovery pass does.
      */
-    fun hasCandidateOutside(comments: List<Comment>, skip: Set<String>): Boolean =
-        comments.any { isCandidate(it) && !skip.contains(it.id) }
+    fun hasCandidateOutside(comments: List<Comment>, vararg skip: Set<String>): Boolean =
+        comments.any { comment -> isCandidate(comment) && skip.none { it.contains(comment.id) } }
 
     /** A comment Reddit has scrubbed and that the archive can be asked about by id. */
     private fun isCandidate(comment: Comment): Boolean {
@@ -102,45 +104,13 @@ object RecoverRemovedComments {
     }
 
     /**
-     * Recovers the removed comments in [comments] — and, recursively, in their replies — writing the
-     * archived bodies straight onto the freshly parsed objects.
-     *
-     * This is the path that matters for how recovery *looks*. Patching a list the adapter is already
-     * showing makes each removed comment visibly flash "[deleted]" and then swap to its real body;
-     * patching comments no adapter has seen yet means they simply arrive recovered, with no redraw.
-     * Replies are included even when they are currently collapsed, because expanding a thread later
-     * puts those very objects on screen.
-     *
-     * Waits at most [RENDER_WAIT_MILLIS] for the archive and then gives up, leaving the comments as
-     * Reddit served them rather than delaying the page behind a slow archive.
-     *
-     * @param skip ids already asked about, so a page that repeats one does not re-spend a request.
-     * @return the ids the archive answered for, whether or not it held anything. Empty when the wait
-     *         ran out, so those ids stay eligible for a later attempt.
+     * [comments] and, recursively, every reply under them — collapsed ones included, because
+     * expanding a thread later puts those very objects on screen.
      */
-    suspend fun recoverInPlace(
-        arcticShiftRetrofit: Retrofit,
-        comments: List<Comment>,
-        skip: Set<String>
-    ): Set<String> {
+    fun flatten(comments: List<Comment>): List<Comment> {
         val all = ArrayList<Comment>()
         flatten(comments, all)
-
-        val ids = candidateIds(all).filterNot { skip.contains(it) }
-        if (ids.isEmpty()) {
-            return emptySet()
-        }
-
-        val attempted = HashSet<String>()
-        withTimeoutOrNull(RENDER_WAIT_MILLIS) {
-            recover(arcticShiftRetrofit, ids) { requested, recovered ->
-                attempted.addAll(requested)
-                for (comment in all) {
-                    comment.id?.let { recovered[it] }?.let { applyTo(comment, it) }
-                }
-            }
-        }
-        return attempted
+        return all
     }
 
     private fun flatten(comments: List<Comment>, into: MutableList<Comment>) {
@@ -151,15 +121,22 @@ object RecoverRemovedComments {
     }
 
     /**
+     * Whether writing [result] onto [comment] would change anything. It would not when the archive
+     * holds a copy of a comment whose body Reddit never scrubbed (only its author), or when the
+     * record has already been written.
+     */
+    fun changes(comment: Comment, result: FetchRemovedComment.Result): Boolean =
+        result.body != comment.commentMarkdown
+            || (result.author != null && result.author != comment.author)
+
+    /**
      * Writes an archived record onto [comment].
      *
-     * @return false when the record would change nothing — the archive holds a copy of a comment
-     *         whose body Reddit never scrubbed (only its author), so applying it would count a no-op
-     *         as a recovery.
+     * @return false when the record would change nothing (see [changes]), so a no-op is never
+     *         counted as a recovery.
      */
     fun applyTo(comment: Comment, result: FetchRemovedComment.Result): Boolean {
-        if (result.body == comment.commentMarkdown
-            && (result.author == null || result.author == comment.author)) {
+        if (!changes(comment, result)) {
             return false
         }
 
@@ -181,8 +158,8 @@ object RecoverRemovedComments {
      * an id present in the former and absent from the latter is one the archive genuinely does not
      * have.
      *
-     * Requests and parsing happen on [Dispatchers.IO]; a 6-figure-character payload is not parsed
-     * on the caller's thread.
+     * Each request is cancelled along with the caller, so a deadline around this call holds. Parsing
+     * happens on [Dispatchers.IO]; a 6-figure-character payload is not parsed on the caller's thread.
      *
      * @return true when every chunk was fetched. False means the pass stopped early — a cooldown, a
      *         network failure or an error from the archive — so the caller can retry those ids later
@@ -202,7 +179,7 @@ object RecoverRemovedComments {
 
         val api = arcticShiftRetrofit.create(ArcticShiftAPI::class.java)
         for (chunk in ids.chunked(CHUNK_SIZE)) {
-            val outcome = withContext(Dispatchers.IO) { fetchChunk(api, chunk) } ?: return false
+            val outcome = fetchChunk(api, chunk) ?: return false
             onChunk(chunk, outcome.recovered)
             if (!outcome.mayContinue) {
                 return false
@@ -225,14 +202,20 @@ object RecoverRemovedComments {
      * and holds none of the chunk — or null when the request yielded nothing usable and the pass
      * must stop.
      */
-    private fun fetchChunk(api: ArcticShiftAPI, chunk: List<String>): ChunkOutcome? {
+    private suspend fun fetchChunk(api: ArcticShiftAPI, chunk: List<String>): ChunkOutcome? {
+        // Awaited, not executed: a blocking execute() ignores cancellation, so a deadline wrapped
+        // around it only fired once the archive answered or OkHttp's own 30s timeouts did — the
+        // ~20s comment loads of issue #446.
         val response: Response<String> = try {
-            api.getRemovedComments(chunk.joinToString(",")).execute()
+            api.getRemovedComments(chunk.joinToString(",")).awaitResponse()
         } catch (e: IOException) {
             // Transient: leave these ids unrecovered rather than remembering them as absent.
             return null
         }
+        return withContext(Dispatchers.IO) { readChunk(response) }
+    }
 
+    private fun readChunk(response: Response<String>): ChunkOutcome? {
         // Checked before isSuccessful() because a 429 is a back-off rather than a plain failure —
         // and it carries no data to salvage, so it stops the pass outright.
         if (response.code() == 429) {

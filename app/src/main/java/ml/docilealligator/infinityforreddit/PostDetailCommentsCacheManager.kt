@@ -1,6 +1,7 @@
 package ml.docilealligator.infinityforreddit
 
 import ml.docilealligator.infinityforreddit.comment.Comment
+import ml.docilealligator.infinityforreddit.comment.FetchRemovedComment
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter
 import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.thing.SortType
@@ -14,7 +15,8 @@ class PostDetailCommentsCacheManager(
         children: ArrayList<String>?,
         sortType: SortType.Type,
         scrollPosition: Int,
-        recoveryAttemptedIds: Set<String>
+        recoveryAttemptedIds: Set<String>,
+        lateRecoveries: Map<String, FetchRemovedComment.Result>
     ) {
         cacheMap[post.id] = PostDetailCommentsCache(
             post,
@@ -22,7 +24,8 @@ class PostDetailCommentsCacheManager(
             children,
             sortType,
             scrollPosition,
-            recoveryAttemptedIds
+            recoveryAttemptedIds,
+            lateRecoveries
         )
     }
 

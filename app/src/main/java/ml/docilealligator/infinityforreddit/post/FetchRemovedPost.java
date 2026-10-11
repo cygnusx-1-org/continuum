@@ -27,7 +27,26 @@ public class FetchRemovedPost {
     private static final Pattern SOLE_URL = Pattern.compile("https?://\\S+");
 
     public static void fetchRemovedPost(Retrofit arcticShiftRetrofit, Post post, FetchRemovedPostListener listener) {
-        arcticShiftRetrofit.create(ArcticShiftAPI.class).getRemovedPost(post.getId())
+        fetchArchivedPost(arcticShiftRetrofit, post.getId(), new ArchivedPostListener() {
+            @Override
+            public void fetchSuccess(Result result) {
+                applyArchived(post, result);
+                listener.fetchSuccess(post);
+            }
+
+            @Override
+            public void fetchFailed() {
+                listener.fetchFailed();
+            }
+        });
+    }
+
+    /**
+     * The archive's copy of the post with this id, parsed but written onto nothing: for a caller
+     * that decides later which post it goes onto -- one that may have changed in the meantime.
+     */
+    public static void fetchArchivedPost(Retrofit arcticShiftRetrofit, String postId, ArchivedPostListener listener) {
+        arcticShiftRetrofit.create(ArcticShiftAPI.class).getRemovedPost(postId)
                 .enqueue(new Callback<String>() {
                     @Override
                     public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
@@ -36,82 +55,12 @@ public class FetchRemovedPost {
                             return;
                         }
 
-                        Result result = parseResponse(response.body(), post.getId());
+                        Result result = parseResponse(response.body(), postId);
                         if (result == null) {
                             listener.fetchFailed();
                             return;
                         }
-
-                        if (result.title != null) {
-                            post.setTitle(result.title);
-                        }
-                        if (result.author != null) {
-                            post.setAuthor(result.author);
-                            post.setAuthorFlair(result.authorFlair);
-                            post.setAuthorFlairHTML(result.authorFlairHTML);
-                        }
-                        // Only restore link flair the removal stripped: fill it in when the post
-                        // currently has none, but never overwrite a flair that is still present (it
-                        // may be the surviving original or a mod's post-removal reason flair).
-                        if (!result.flair.isEmpty() && post.getFlair().isEmpty()) {
-                            post.setFlair(result.flair);
-                        }
-                        if (result.redgifsId != null) {
-                            // The original was a redgifs post; rebuild it as the app renders a live
-                            // one — a redgifs video (VIDEO_TYPE + isRedgifs, media.redgifs.com mp4) —
-                            // plus the recovered Reddit preview frame, so it plays (or at least shows
-                            // the poster when the redgifs video was itself deleted) instead of a link.
-                            post.setPostType(Post.VIDEO_TYPE);
-                            post.setIsRedgifs(true);
-                            post.setRedgifsId(result.redgifsId);
-                            post.setVideoUrl(result.redgifsVideoUrl);
-                            post.setVideoDownloadUrl(result.redgifsVideoUrl);
-                            // Restore the redgifs watch url too, so the card's domain/share match a
-                            // live redgifs post (the removal had rewritten url to the self permalink).
-                            if (result.redgifsUrl != null) {
-                                post.setUrl(result.redgifsUrl);
-                            }
-                            if (result.mediaPreviews != null && post.getPreviews().isEmpty()) {
-                                post.setPreviews(result.mediaPreviews);
-                            }
-                            applyRecoveredBody(post, result.body);
-                        } else if (result.link != null) {
-                            // The original post was a link post; rebuild it as one so the recovered
-                            // destination renders as a tappable link card rather than as body text.
-                            post.setUrl(result.link);
-                            post.setPostType(Post.NO_PREVIEW_LINK_TYPE);
-                            applyRecoveredBody(post, result.body);
-                        } else if (result.mediaUrl != null) {
-                            // The original post was an image/gif whose url the removal rewrote to the
-                            // self permalink; rebuild it as media so the picture renders rather than a
-                            // bare link. Only restore the preview the removal stripped — never clobber
-                            // one the live post somehow still has.
-                            post.setUrl(result.mediaUrl);
-                            post.setPostType(result.mediaPostType);
-                            if (result.mediaPostType == Post.GIF_TYPE) {
-                                post.setVideoUrl(result.mediaUrl);
-                            }
-                            if (result.mediaPreviews != null && post.getPreviews().isEmpty()) {
-                                post.setPreviews(result.mediaPreviews);
-                            }
-                            if (result.mediaThumbnail != null) {
-                                post.setThumbnailUrl(result.mediaThumbnail);
-                            }
-                            applyRecoveredBody(post, result.body);
-                        } else if (result.body != null) {
-                            // The original was a self/text post; restore its body and re-type it as
-                            // text. A removed self post arrives typed NO_PREVIEW_LINK_TYPE — its live
-                            // url is the self permalink and its body is gone — which renders an empty
-                            // "LINK" card; setting TEXT_TYPE drops the card so it reads as plain text.
-                            // (getItemViewType still upgrades to the link holder if a body-link preview
-                            // survives, so a legitimate self-post preview is not lost.)
-                            if (result.isSelf) {
-                                post.setPostType(Post.TEXT_TYPE);
-                            }
-                            applyRecoveredBody(post, result.body);
-                        }
-                        post.setRecovered(true);
-                        listener.fetchSuccess(post);
+                        listener.fetchSuccess(result);
                     }
 
                     @Override
@@ -119,6 +68,79 @@ public class FetchRemovedPost {
                         listener.fetchFailed();
                     }
                 });
+    }
+
+    /** Rewrites {@code post} as the archive holds it. */
+    public static void applyArchived(Post post, Result result) {
+        if (result.title != null) {
+            post.setTitle(result.title);
+        }
+        if (result.author != null) {
+            post.setAuthor(result.author);
+            post.setAuthorFlair(result.authorFlair);
+            post.setAuthorFlairHTML(result.authorFlairHTML);
+        }
+        // Only restore link flair the removal stripped: fill it in when the post
+        // currently has none, but never overwrite a flair that is still present (it
+        // may be the surviving original or a mod's post-removal reason flair).
+        if (!result.flair.isEmpty() && post.getFlair().isEmpty()) {
+            post.setFlair(result.flair);
+        }
+        if (result.redgifsId != null) {
+            // The original was a redgifs post; rebuild it as the app renders a live
+            // one — a redgifs video (VIDEO_TYPE + isRedgifs, media.redgifs.com mp4) —
+            // plus the recovered Reddit preview frame, so it plays (or at least shows
+            // the poster when the redgifs video was itself deleted) instead of a link.
+            post.setPostType(Post.VIDEO_TYPE);
+            post.setIsRedgifs(true);
+            post.setRedgifsId(result.redgifsId);
+            post.setVideoUrl(result.redgifsVideoUrl);
+            post.setVideoDownloadUrl(result.redgifsVideoUrl);
+            // Restore the redgifs watch url too, so the card's domain/share match a
+            // live redgifs post (the removal had rewritten url to the self permalink).
+            if (result.redgifsUrl != null) {
+                post.setUrl(result.redgifsUrl);
+            }
+            if (result.mediaPreviews != null && post.getPreviews().isEmpty()) {
+                post.setPreviews(result.mediaPreviews);
+            }
+            applyRecoveredBody(post, result.body);
+        } else if (result.link != null) {
+            // The original post was a link post; rebuild it as one so the recovered
+            // destination renders as a tappable link card rather than as body text.
+            post.setUrl(result.link);
+            post.setPostType(Post.NO_PREVIEW_LINK_TYPE);
+            applyRecoveredBody(post, result.body);
+        } else if (result.mediaUrl != null) {
+            // The original post was an image/gif whose url the removal rewrote to the
+            // self permalink; rebuild it as media so the picture renders rather than a
+            // bare link. Only restore the preview the removal stripped — never clobber
+            // one the live post somehow still has.
+            post.setUrl(result.mediaUrl);
+            post.setPostType(result.mediaPostType);
+            if (result.mediaPostType == Post.GIF_TYPE) {
+                post.setVideoUrl(result.mediaUrl);
+            }
+            if (result.mediaPreviews != null && post.getPreviews().isEmpty()) {
+                post.setPreviews(result.mediaPreviews);
+            }
+            if (result.mediaThumbnail != null) {
+                post.setThumbnailUrl(result.mediaThumbnail);
+            }
+            applyRecoveredBody(post, result.body);
+        } else if (result.body != null) {
+            // The original was a self/text post; restore its body and re-type it as
+            // text. A removed self post arrives typed NO_PREVIEW_LINK_TYPE — its live
+            // url is the self permalink and its body is gone — which renders an empty
+            // "LINK" card; setting TEXT_TYPE drops the card so it reads as plain text.
+            // (getItemViewType still upgrades to the link holder if a body-link preview
+            // survives, so a legitimate self-post preview is not lost.)
+            if (result.isSelf) {
+                post.setPostType(Post.TEXT_TYPE);
+            }
+            applyRecoveredBody(post, result.body);
+        }
+        post.setRecovered(true);
     }
 
     /**
@@ -205,7 +227,7 @@ public class FetchRemovedPost {
                                 mediaThumbnail = thumbnail;
                             }
                         } else {
-                            // Not a recognized image — recover as a tappable link (see onResponse).
+                            // Not a recognized image — recover as a tappable link (see applyArchived).
                             link = url;
                         }
                     }
@@ -225,7 +247,7 @@ public class FetchRemovedPost {
             if (isRemovalPlaceholder(author)) {
                 author = null;
             }
-            // Always non-null (""); only applied when the author is recovered (see onResponse).
+            // Always non-null (""); only applied when the author is recovered (see applyArchived).
             String authorFlair = parseAuthorFlairText(post);
             String authorFlairHTML = parseAuthorFlairHtml(post);
             // Post's own link flair (independent of the author); "" when absent.
@@ -506,7 +528,8 @@ public class FetchRemovedPost {
         return flair;
     }
 
-    private static final class Result {
+    /** What the archive holds for a post, ready for {@link #applyArchived} to write onto one. */
+    public static final class Result {
         @Nullable
         final String title;
         @Nullable
@@ -518,7 +541,7 @@ public class FetchRemovedPost {
         final String authorFlair;
         final String authorFlairHTML;
         final String flair;
-        // Recovered image/gif: mediaUrl non-null iff the post is rebuilt as media (see onResponse);
+        // Recovered image/gif: mediaUrl non-null iff the post is rebuilt as media (see applyArchived);
         // mediaPostType is then Post.IMAGE_TYPE or Post.GIF_TYPE, else -1.
         @Nullable
         final String mediaUrl;
@@ -528,10 +551,10 @@ public class FetchRemovedPost {
         @Nullable
         final String mediaThumbnail;
         // The archive's is_self: when true the original was a text post, so a recovered body is
-        // re-typed TEXT_TYPE (see onResponse) rather than left as the removed post's link type.
+        // re-typed TEXT_TYPE (see applyArchived) rather than left as the removed post's link type.
         final boolean isSelf;
         // Recovered redgifs: redgifsId non-null iff the post is rebuilt as a redgifs video (see
-        // onResponse), with redgifsVideoUrl the media.redgifs.com mp4 the app plays and redgifsUrl
+        // applyArchived), with redgifsVideoUrl the media.redgifs.com mp4 the app plays and redgifsUrl
         // the watch page restored as the post's url.
         @Nullable
         final String redgifsId;
@@ -565,6 +588,12 @@ public class FetchRemovedPost {
 
     public interface FetchRemovedPostListener {
         void fetchSuccess(Post post);
+
+        void fetchFailed();
+    }
+
+    public interface ArchivedPostListener {
+        void fetchSuccess(Result result);
 
         void fetchFailed();
     }

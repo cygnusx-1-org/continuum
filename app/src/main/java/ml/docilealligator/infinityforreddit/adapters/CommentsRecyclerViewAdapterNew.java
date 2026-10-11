@@ -465,6 +465,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
             return;
         }
 
+        Comment boundComment = getItem(position);
+        if (boundComment != null) {
+            mCommentRecyclerViewAdapterCallback.beforeBind(boundComment);
+        }
+
         if (holder instanceof CommentBaseViewHolder) {
             Comment comment = getItem(position);
             if (comment != null) {
@@ -1140,6 +1145,12 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         boolean toggleExpandComment(int position);
         void collapseComment(int position);
         void fetchMoreChildComments(int position);
+
+        /**
+         * Called for a comment about to be bound, so an archived body that arrived after the list
+         * was drawn can be written in at the one moment its row is not on screen.
+         */
+        void beforeBind(Comment comment);
     }
 
     public class CommentBaseViewHolder extends RecyclerView.ViewHolder {
