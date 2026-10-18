@@ -116,8 +116,8 @@ ${RELEVANT_COMMIT_MESSAGES}"
 
 # Section 3: everything after "./gradlew assembleRelease"
 3() {
-  # Build the APKs and upload them to GitHub as a new release (continuum for release,
-  # continuum-beta for beta).
+  # Upload the APKs built in section 2 to GitHub as a new release (continuum for release,
+  # continuum-beta for beta). release-github.sh does not build them itself.
   scripts/release-github.sh "${VARIANT}" "${RELEVANT_COMMIT_MESSAGES}"
 
   # Push the release commit (e.g. the CHANGELOG update) to origin, the non-beta continuum repo.
