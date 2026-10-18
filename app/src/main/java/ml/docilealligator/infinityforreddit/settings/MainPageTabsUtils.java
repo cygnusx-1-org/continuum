@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -292,6 +293,25 @@ public class MainPageTabsUtils {
     public static String userKey(int postType, String name) {
         String n = isNameBasedType(postType) && name != null ? name.toLowerCase(Locale.US) : "";
         return postType + "|" + n;
+    }
+
+    /**
+     * The pager item id for the tab with this {@link #userKey}: a 64-bit FNV-1a hash of the key,
+     * never negative, so never {@code RecyclerView.NO_ID}.
+     *
+     * <p>It has to be a function of the key alone. FragmentStateAdapter saves each tab's fragment
+     * under its item id and, when the activity is recreated, hands it back to whichever tab now has
+     * that id. A counter handing ids out in the order tabs were first asked for gave the same tab a
+     * different id in the new activity whenever the old one had shown a later tab first, and the
+     * restored Saved Posts fragment came back in the All tab's slot (issue #455).
+     */
+    public static long stableTabId(String userKey) {
+        long hash = 0xcbf29ce484222325L;
+        for (byte b : userKey.getBytes(StandardCharsets.UTF_8)) {
+            hash ^= b & 0xff;
+            hash *= 0x100000001b3L;
+        }
+        return hash & Long.MAX_VALUE;
     }
 
     /**

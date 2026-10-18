@@ -2817,16 +2817,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         // The dynamic tabs load async and reshuffle the list as each source arrives; with position-
         // based ids ViewPager2 would lose track of the current page and drift off the first tab.
         // Keying on content lets it keep the current page (e.g. Home stays first, so it stays put).
-        private final java.util.Map<String, Long> tabIds = new java.util.HashMap<>();
-        private long nextTabId = 0;
-
+        // Derived from the key, never counted out: the ids outlive this adapter in the saved state
+        // a recreated activity restores its fragments from. See MainPageTabsUtils#stableTabId.
         private long idForKey(String key) {
-            Long id = tabIds.get(key);
-            if (id == null) {
-                id = nextTabId++;
-                tabIds.put(key, id);
-            }
-            return id;
+            return MainPageTabsUtils.stableTabId(key);
         }
 
         @Override
