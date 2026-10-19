@@ -16,10 +16,14 @@ import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.account.AccountScope
+import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper
+import ml.docilealligator.infinityforreddit.resume.ResumeState
+import ml.docilealligator.infinityforreddit.settings.MainPageTabsUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.model.enums.EncryptionMethod
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -60,6 +64,8 @@ class RestoreSettingsTest {
     private lateinit var nsfwAndSpoiler: SharedPreferences
     private lateinit var internal: SharedPreferences
     private lateinit var currentAccount: SharedPreferences
+    private lateinit var bottomAppBar: SharedPreferences
+    private lateinit var mainPageTabs: SharedPreferences
 
     @Before
     fun setUp() {
@@ -68,14 +74,25 @@ class RestoreSettingsTest {
         nsfwAndSpoiler = file(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE)
         internal = file(SharedPreferencesUtils.INTERNAL_SHARED_PREFERENCES_FILE)
         currentAccount = file(CURRENT_ACCOUNT_FILE)
+        bottomAppBar = file(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE)
+        // The name restore() hands the restore for the main page tabs, not the app's own file.
+        mainPageTabs = file("main_page_tabs_test")
 
-        for (preferences in listOf(defaultPreferences, sortType, nsfwAndSpoiler, internal, currentAccount)) {
+        for (preferences in listOf(defaultPreferences, sortType, nsfwAndSpoiler, internal, currentAccount,
+            bottomAppBar, mainPageTabs)) {
             preferences.edit().clear().commit()
         }
         internal.edit()
             .putBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, true)
             .putBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_SEEDED, true)
             .commit()
+    }
+
+    /** The restore forgets cached feeds, which is ResumeState's in-memory state too. */
+    @After
+    fun tearDown() {
+        ResumeState.resetForTests()
+        File(context.filesDir, "resume_state.json").delete()
     }
 
     private fun file(name: String): SharedPreferences =
@@ -181,11 +198,12 @@ class RestoreSettingsTest {
 
         // Written through the injected preferences this would have become "<signed in>.theme":
         // one account served, the rest left on defaults, and nothing under the bare key for the
-        // migration re-run to seed them from.
+        // migration re-run to seed them from. Anonymous is the one account a restore hands it to.
         assertEquals("2", defaultPreferences.getString(SharedPreferencesUtils.THEME_KEY, null))
         for (stored in defaultPreferences.all.keys) {
             assertFalse("scoped on the way in: " + stored,
-                stored.endsWith("." + SharedPreferencesUtils.THEME_KEY))
+                stored != key(null, SharedPreferencesUtils.THEME_KEY)
+                    && stored.endsWith("." + SharedPreferencesUtils.THEME_KEY))
         }
     }
 
@@ -311,6 +329,31 @@ class RestoreSettingsTest {
     }
 
     /**
+     * Infinity's filters have no owner and its backup no accounts. Shared out among the accounts
+     * already on the device, they replaced each one's filter of the same name.
+     */
+    @Test
+    fun `filters from a backup that brought no accounts go to anonymous alone`() {
+        val database = realDatabase()
+        try {
+            database.openHelper.writableDatabase.execSQL(
+                "INSERT INTO accounts (username, karma, is_current_user, is_mod) VALUES ('alice', 0, 1, 0)")
+
+            restore(database, listOf(
+                "post_filters.json" to """[{"name":"NSFW"}]""",
+                "post_filter_usage.json" to """[{"name":"NSFW","usage":2,"nameOfUsage":"pics"}]""",
+                "comment_filters.json" to """[{"name":"Spoilers"}]""",
+            ))
+
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT), usernamesIn(database, "post_filter"))
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT), usernamesIn(database, "post_filter_usage"))
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT), usernamesIn(database, "comment_filter"))
+        } finally {
+            database.close()
+        }
+    }
+
+    /**
      * A backup taken from an install that restore had crashed on: the placeholder is among its
      * accounts, and a filter is in it twice, once under each name. The copy under the new name is
      * the one the user was looking at when they took it.
@@ -372,14 +415,262 @@ class RestoreSettingsTest {
 
     @Test
     fun `restoring a backup from before the key scheme asks for the migration again`() {
+        internal.edit().putBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_SCOPE_MIGRATED, true).commit()
+        val database = realDatabase()
+        try {
+            restore(
+                database,
+                listOf("accounts.json" to accountsJson("alice")),
+                listOf(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                    SharedPreferencesUtils.THEME_KEY to "2"
+                )),
+            )
+
+            assertFalse(internal.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false))
+            assertFalse(internal.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_SEEDED, false))
+            assertFalse("the backup's bottom app bar is under its old keys too",
+                internal.getBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_SCOPE_MIGRATED, true))
+        } finally {
+            database.close()
+        }
+    }
+
+    // --- an Infinity backup: no accounts, the old spellings, the old numbering --------------
+
+    /**
+     * Infinity has one set of settings, and an account on this device with any history owns a
+     * scoped copy of most of them -- which the migration, filling only what is missing, kept.
+     */
+    @Test
+    fun `an older backup's settings replace anonymous's own`() {
+        defaultPreferences.edit()
+            .putString(key(null, SharedPreferencesUtils.THEME_KEY), "0")
+            .putString(key("alice", SharedPreferencesUtils.THEME_KEY), "1")
+            .commit()
+
         restore(
             SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
                 SharedPreferencesUtils.THEME_KEY to "2"
             )
         )
 
-        assertFalse(internal.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false))
-        assertFalse(internal.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_SEEDED, false))
+        assertEquals("2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals("a signed-in account the backup did not bring keeps its own",
+            "1", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
+        assertTrue("nor is the migration asked to share the backup out to it",
+            internal.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false))
+    }
+
+    /**
+     * What anonymous was last looking at was fetched from the subscriptions the backup has just
+     * replaced; reopened, it showed their posts until a refresh.
+     */
+    @Test
+    fun `a backup that brought no accounts forgets where anonymous left off`() {
+        val snapshot = File(context.filesDir, "resume_state.json")
+        snapshot.writeText("""{"version":1,"account":"${Account.ANONYMOUS_ACCOUNT}","stack":[]}""")
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.THEME_KEY to "2"
+            )
+        )
+
+        assertFalse(snapshot.exists())
+    }
+
+    @Test
+    fun `a backup that brought no accounts leaves a signed-in account's place alone`() {
+        val snapshot = File(context.filesDir, "resume_state.json")
+        snapshot.writeText("""{"version":1,"account":"alice","stack":[]}""")
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.THEME_KEY to "2"
+            )
+        )
+
+        assertTrue(snapshot.exists())
+    }
+
+    @Test
+    fun `a backup that brought accounts forgets every account's place`() {
+        val snapshot = File(context.filesDir, "resume_state.json")
+        snapshot.writeText("""{"version":1,"account":"alice","stack":[]}""")
+        val database = realDatabase()
+        try {
+            restore(database, listOf("accounts.json" to accountsJson("alice")))
+
+            assertFalse(snapshot.exists())
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun `a swipe action the backup set on one side reaches anonymous turned over`() {
+        defaultPreferences.edit()
+            .putString(key(null, SharedPreferencesUtils.SWIPE_LEFT_ACTION), "3")
+            .putString(key(null, SharedPreferencesUtils.SWIPE_RIGHT_ACTION), "4")
+            .commit()
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                // The old sense: the action a swipe to the left ran, which showed on the right.
+                SharedPreferencesUtils.SWIPE_LEFT_ACTION to "1"
+            )
+        )
+
+        assertEquals("1", defaultPreferences.getString(key(null, SharedPreferencesUtils.SWIPE_RIGHT_ACTION), null))
+        assertFalse("the side the backup left unset goes back to its default",
+            defaultPreferences.contains(key(null, SharedPreferencesUtils.SWIPE_LEFT_ACTION)))
+    }
+
+    @Test
+    fun `an older backup's own spelling of a per-account file replaces anonymous's`() {
+        nsfwAndSpoiler.edit().putBoolean(key(null, SharedPreferencesUtils.NSFW_BASE), false).commit()
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.THEME_KEY to "2"
+            ),
+            // Infinity's spelling of anonymous's NSFW switch: no prefix at all.
+            SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.NSFW_BASE to true
+            ),
+        )
+
+        assertTrue(nsfwAndSpoiler.getBoolean(key(null, SharedPreferencesUtils.NSFW_BASE), false))
+        assertFalse(nsfwAndSpoiler.contains(SharedPreferencesUtils.NSFW_BASE))
+    }
+
+    @Test
+    fun `a backup with Disable NSFW Forever on leaves anonymous's NSFW off`() {
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.THEME_KEY to "2",
+                "disable_nsfw_forever" to true,
+            ),
+            SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.NSFW_BASE to true
+            ),
+        )
+
+        assertFalse(nsfwAndSpoiler.getBoolean(key(null, SharedPreferencesUtils.NSFW_BASE), true))
+        assertFalse("the deleted feature's key goes", defaultPreferences.contains("disable_nsfw_forever"))
+    }
+
+    @Test
+    fun `an Infinity bottom app bar comes back in this app's numbering`() {
+        bottomAppBar.edit()
+            .putInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2), 5)
+            .commit()
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.THEME_KEY to "2"
+            ),
+            // Infinity's numbering: 11 is Random, 13 Filter Posts; its FAB's 10 is Go To Top.
+            SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE to mapOf(
+                "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1 to 13,
+                "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2 to 11,
+                "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3 to 5,
+                "-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB to 10,
+            ),
+        )
+
+        assertEquals(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_FILTER_POSTS,
+            bottomAppBar.getInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1), -1))
+        assertFalse("Random is gone, so the slot goes back to its default",
+            bottomAppBar.contains(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2)))
+        assertEquals("an option before Random keeps its number",
+            5, bottomAppBar.getInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3), -1))
+        assertEquals(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB_GO_TO_TOP,
+            bottomAppBar.getInt(key(null, SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB), -1))
+        assertFalse(bottomAppBar.contains("-" + SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1))
+    }
+
+    @Test
+    fun `an older backup's numbered tabs replace anonymous's tab list`() {
+        mainPageTabs.edit()
+            .putString(key(null, SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER), "[]")
+            .commit()
+
+        restore(
+            SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.THEME_KEY to "2"
+            ),
+            SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE to mapOf(
+                SharedPreferencesUtils.MAIN_PAGE_TAB_COUNT to 2,
+                SharedPreferencesUtils.MAIN_PAGE_TAB_1_POST_TYPE to SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT,
+                SharedPreferencesUtils.MAIN_PAGE_TAB_1_NAME to "pics",
+            ),
+        )
+
+        val tabs = MainPageTabsUtils.load(mainPageTabs, Account.ANONYMOUS_ACCOUNT)
+        assertEquals(2, tabs.size)
+        assertEquals(SharedPreferencesUtils.MAIN_PAGE_TAB_POST_TYPE_SUBREDDIT, tabs[0].postType)
+        assertEquals("pics", tabs[0].name)
+    }
+
+    /**
+     * Infinity's backup has no accounts.json, but read posts and reminders for every account it
+     * had. One such row failing its foreign key took the whole database restore back with it.
+     */
+    @Test
+    fun `rows for an account the backup did not bring do not take the database restore back`() {
+        val database = realDatabase()
+        try {
+            restore(database, listOf(
+                "anonymous_subscribed_subreddits.json" to anonymousSubredditsJson("-"),
+                "read_posts.json" to """[
+                    {"username":"edgan","id":"abc","time":1,"readPostType":0},
+                    {"username":"-","id":"def","time":1,"readPostType":0}]""",
+                "reminders.json" to """[{"accountName":"edgan","postId":"abc","commentId":"",
+                    "content":"look again","createdAt":1,"reminderTime":2}]""",
+            ))
+
+            assertEquals(1, database.subscribedSubredditDao()
+                .getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT).size)
+            assertEquals(listOf(Account.ANONYMOUS_ACCOUNT), usernamesIn(database, "read_posts"))
+            val reminders = database.reminderDao().getAllRemindersForBackup()
+            assertEquals("a reminder is kept, without the account", 1, reminders.size)
+            assertNull(reminders[0].accountName)
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun `users an Infinity backup follows come back followed`() {
+        val database = realDatabase()
+        try {
+            restore(database, listOf(
+                "anonymous_subscribed_users.json" to
+                    """[{"name":"spez","iconUrl":"","username":"-","favorite":false}]""",
+            ))
+
+            val user = database.subscribedUserDao().getSubscribedUser("spez", Account.ANONYMOUS_ACCOUNT)
+            assertTrue(user!!.isFollowed)
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun `themes from before posts were coloured by type get the built-in colours`() {
+        val database = realDatabase()
+        try {
+            restore(database, listOf(
+                "custom_themes.json" to """[{"name":"Mine","isLightTheme":false,"isDarkTheme":false,"isAmoledTheme":false}]""",
+            ))
+
+            val theme = database.customThemeDao().getCustomTheme("Mine")
+            assertEquals(CustomThemeWrapper.getSolarizedAmoled(context).imageTypeBackgroundColor,
+                theme!!.imageTypeBackgroundColor)
+        } finally {
+            database.close()
+        }
     }
 
     @Test

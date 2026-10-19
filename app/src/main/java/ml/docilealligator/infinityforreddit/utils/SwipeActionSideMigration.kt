@@ -97,6 +97,20 @@ object SwipeActionSideMigration {
     }
 
     /**
+     * The keys [flipRestoredKeys] leaves the restored ones on: [restoredDefaultPreferences]'s own,
+     * and -- when it turned them over -- the other side of every swipe pair among them, which the
+     * swap may have written or cleared. For a caller that copies the restored keys on.
+     */
+    @JvmStatic
+    fun keysAfterFlip(restoredDefaultPreferences: Map<String, *>): Set<String> {
+        val keys = restoredDefaultPreferences.keys
+        if (SharedPreferencesUtils.SWIPE_ACTION_SIDES_MIGRATED in keys) {
+            return keys
+        }
+        return keys + keys.mapNotNull(::partnerOf)
+    }
+
+    /**
      * Swaps the values of every left/right pair that [keys] touches, reading them from [existing],
      * and returns whether anything was written. A pair is turned over once, whichever of its two
      * keys came first.

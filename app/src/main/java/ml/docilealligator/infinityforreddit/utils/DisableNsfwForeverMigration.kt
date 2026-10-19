@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.utils
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.AccountScope
@@ -51,5 +52,29 @@ object DisableNsfwForeverMigration {
         editor.apply()
 
         defaultSharedPreferences.edit().remove(DISABLE_NSFW_FOREVER).apply()
+    }
+
+    /**
+     * The same for anonymous alone, for a restore that gives a backup's settings to anonymous and
+     * leaves the accounts on this device as they were -- an Infinity backup, which can still carry
+     * the feature switched on. Commits: the restore ends by killing the process.
+     */
+    @SuppressLint("ApplySharedPref")
+    @JvmStatic
+    fun turnOffNsfwForAnonymous(
+        defaultSharedPreferences: SharedPreferences,
+        nsfwAndSpoilerSharedPreferences: SharedPreferences,
+    ) {
+        if (!defaultSharedPreferences.contains(DISABLE_NSFW_FOREVER)) {
+            return
+        }
+
+        if (defaultSharedPreferences.getBoolean(DISABLE_NSFW_FOREVER, false)) {
+            nsfwAndSpoilerSharedPreferences.edit()
+                .putBoolean(AccountScope.key(null, SharedPreferencesUtils.NSFW_BASE), false)
+                .commit()
+        }
+
+        defaultSharedPreferences.edit().remove(DISABLE_NSFW_FOREVER).commit()
     }
 }

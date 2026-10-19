@@ -99,6 +99,9 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
     private var restorePassword: String? = null
     private var restoreFileUri: Uri? = null
 
+    /** Whether the restore under way is the silent try with Infinity's fixed password. */
+    private var tryingInfinityPassword = false
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.backup_and_restore_preferences, rootKey)
 
@@ -156,7 +159,11 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
             }
         } else if (requestCode == SELECT_RESTORE_SETTINGS_DIRECTORY_REQUEST_CODE) {
             restoreFileUri = data.data
-            showRestorePasswordDialog()
+            // An Infinity backup always has the same password, so it restores without asking. Any
+            // other comes back as a wrong password, and that is when the dialog asks.
+            restorePassword = RestoreSettings.INFINITY_BACKUP_PASSWORD
+            tryingInfinityPassword = true
+            performRestore()
         }
     }
 
@@ -264,6 +271,7 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
                     // Clear the password from memory after use
                     restorePassword = null
                     restoreFileUri = null
+                    tryingInfinityPassword = false
                 }
 
                 override fun failed(errorMessage: String) {
@@ -271,10 +279,15 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
                     // Clear the password from memory after use
                     restorePassword = null
                     restoreFileUri = null
+                    tryingInfinityPassword = false
                 }
 
                 override fun failedWithWrongPassword(errorMessage: String) {
-                    Toast.makeText(mActivity, errorMessage, Toast.LENGTH_LONG).show()
+                    // Infinity's password not fitting is no mistake of the user's: just ask.
+                    if (!tryingInfinityPassword) {
+                        Toast.makeText(mActivity, errorMessage, Toast.LENGTH_LONG).show()
+                    }
+                    tryingInfinityPassword = false
                     // Don't clear restoreFileUri so it can be reused
                     restorePassword = null
                     showRestorePasswordDialog()

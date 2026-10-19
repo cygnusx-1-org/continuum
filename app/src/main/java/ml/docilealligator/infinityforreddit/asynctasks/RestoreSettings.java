@@ -26,10 +26,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
@@ -50,6 +52,7 @@ import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisited;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.reminder.Reminder;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.subscribeduser.SubscribedUserData;
 import ml.docilealligator.infinityforreddit.utils.AppRestartHelper;
@@ -68,6 +71,12 @@ import org.apache.commons.io.FileUtils;
  * second time, onto whichever account happens to be signed in when the restore runs.
  */
 public class RestoreSettings {
+    /**
+     * The password every Infinity for Reddit backup is encrypted with. It is fixed there rather than
+     * chosen, so a restore can try it before asking.
+     */
+    public static final String INFINITY_BACKUP_PASSWORD = "123321";
+
     public static void restoreSettings(Context context, Executor executor, Handler handler,
                                 ContentResolver contentResolver, Uri zipFileUri,
                                 String password,
@@ -166,7 +175,12 @@ public class RestoreSettings {
                         targets.put(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
                                 rawFile(context, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE));
 
-                        Map<String, Object> restoredDefaultPreferences = null;
+                        // What each file held, by the name the backup gave it.
+                        Map<String, Map<String, Object>> restoredFiles = new HashMap<>();
+                        // Whether the backup has an accounts.json at all, and whether accounts from
+                        // it are now the ones on this device. Infinity's has neither.
+                        boolean backupHasAccountsFile = false;
+                        boolean restoredAccounts = false;
 
                         for (File f : restoreFiles) {
                             if (f.isFile()) {
@@ -185,11 +199,11 @@ public class RestoreSettings {
                                 // Read into a local first: every file must be imported even after
                                 // one has failed.
                                 result = result && imported != null;
-                                if (imported != null
-                                        && SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE.equals(backedUpFile)) {
-                                    restoredDefaultPreferences = imported;
+                                if (imported != null) {
+                                    restoredFiles.put(backedUpFile, imported);
                                 }
                             } else if (f.isDirectory() && f.getName().equals("database")) {
+                                backupHasAccountsFile = new File(f, "accounts.json").exists();
                                 // All of it or none of it. Written table by table with nothing
                                 // around it, a restore that failed part of the way through kept
                                 // whatever it had reached -- the local accounts already deleted,
@@ -200,6 +214,7 @@ public class RestoreSettings {
                                     Account currentAccount = redditDataRoomDatabase.runInTransaction(
                                             () -> restoreDatabase(context, redditDataRoomDatabase, f));
                                     if (currentAccount != null) {
+                                        restoredAccounts = true;
                                         // Also update the current account shared preferences for
                                         // immediate effect. Only once committed: written inside the
                                         // transaction, a rollback would leave them naming an
@@ -217,18 +232,32 @@ public class RestoreSettings {
                             }
                         }
 
-                        // A backup taken before the key scheme holds per-account settings under
-                        // their old global spellings, which nothing reads any more. Letting the
-                        // migration run once more over the restored files is what turns them back
-                        // into settings; on a backup that already has them it finds nothing to do.
-                        AccountSettingsMigration.rerunIfBackupPredatesAccountScope(
-                                rawFile(context, SharedPreferencesUtils.INTERNAL_SHARED_PREFERENCES_FILE),
-                                restoredDefaultPreferences);
-
                         // A backup from before the swipe keys named the side of the row holds them
-                        // in the old sense; only the keys it brought in are turned over.
+                        // in the old sense; only the keys it brought in are turned over. Before the
+                        // step below, which copies them on.
                         SwipeActionSideMigration.flipRestoredKeys(defaultSharedPreferences,
-                                restoredDefaultPreferences);
+                                restoredFiles.get(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE));
+
+                        // A backup taken before the key scheme -- Infinity's among them -- holds
+                        // per-account settings under their old global spellings, which nothing reads
+                        // any more. This turns them back into settings; on a backup that already has
+                        // them it finds nothing to do. Infinity's bottom app bar options also predate
+                        // Random being dropped, as does any backup too old to hold accounts.
+                        AccountSettingsMigration.adoptRestoredBackup(
+                                rawFile(context, SharedPreferencesUtils.INTERNAL_SHARED_PREFERENCES_FILE),
+                                restoredFiles, targets, restoredAccounts, !backupHasAccountsFile);
+
+                        // A feed cached before the restore was built from the subscriptions and
+                        // settings it has just replaced, and reopening it shows the old ones' posts
+                        // until a refresh. A backup that brought accounts replaced them all; one that
+                        // brought none -- every Infinity backup -- replaced only anonymous's.
+                        if (result) {
+                            if (restoredAccounts) {
+                                ResumeState.clearAll(context);
+                            } else {
+                                ResumeState.clearAccount(context, Account.ANONYMOUS_ACCOUNT);
+                            }
+                        }
                     } else {
                         // Nothing was read, so nothing was restored. Without this the success branch
                         // below would fire too, toasting success and restarting the app on a restore
@@ -308,6 +337,14 @@ public class RestoreSettings {
         }
         if (anonymousSubscribedUsersFile.exists()) {
             List<SubscribedUserData> anonymousSubscribedUsers = getListFromFile(anonymousSubscribedUsersFile, new TypeToken<List<SubscribedUserData>>() {}.getType());
+            // Taken before a user could be saved without being followed -- every Infinity backup --
+            // a row was a follow and says nothing more. Gson leaves the missing flag false, and a row
+            // neither followed nor saved is listed while every screen offers to follow them.
+            if (!rowsHave(anonymousSubscribedUsersFile, "followed")) {
+                for (SubscribedUserData user : anonymousSubscribedUsers) {
+                    user.setFollowed(true);
+                }
+            }
             redditDataRoomDatabase.subscribedUserDao().insertAll(anonymousSubscribedUsers);
         }
         if (anonymousMultiredditsFile.exists()) {
@@ -321,6 +358,12 @@ public class RestoreSettings {
         }
         if (customThemesFile.exists()) {
             List<CustomTheme> customThemes = getListFromFile(customThemesFile, new TypeToken<List<CustomTheme>>() {}.getType());
+            // Taken before each type of post had a colour of its own -- every Infinity backup -- a
+            // theme has none, and Gson leaves an int it does not find at 0, which is transparent.
+            // The six came in together, so one stands for them all.
+            if (!rowsHave(customThemesFile, "imageTypeBackgroundColor")) {
+                fillPostTypeColors(context, customThemes);
+            }
             restoreCustomThemes(context, redditDataRoomDatabase, customThemes);
         }
         Account currentAccount = null;
@@ -363,17 +406,23 @@ public class RestoreSettings {
         // Filters after accounts, though nothing here has a foreign key on
         // one: a backup taken before a filter had an owner has to be shared
         // out among the accounts, and that list is only right once the block
-        // above has restored them.
+        // above has restored them. Only the backup's own accounts, though: one
+        // that brought none -- every Infinity backup -- gives its filters to
+        // anonymous alone, like its settings, and the accounts already on this
+        // device keep theirs rather than have a filter of the same name replaced.
+        List<String> filterOwners = currentAccount != null
+                ? accountNames(redditDataRoomDatabase)
+                : Collections.singletonList(Account.ANONYMOUS_ACCOUNT);
         if (postFiltersFile.exists()) {
             List<PostFilter> postFilters = getListFromFile(postFiltersFile, new TypeToken<List<PostFilter>>() {}.getType());
             List<PostFilterUsage> postFilterUsage = postFilterUsageFile.exists()
                     ? getListFromFile(postFilterUsageFile, new TypeToken<List<PostFilterUsage>>() {}.getType())
                     : Collections.emptyList();
-            if (namesAccounts(postFiltersFile)) {
+            if (rowsHave(postFiltersFile, "username")) {
                 redditDataRoomDatabase.postFilterDao().insertAll(postFilters);
                 redditDataRoomDatabase.postFilterUsageDao().insertAll(postFilterUsage);
             } else {
-                for (String username : accountNames(redditDataRoomDatabase)) {
+                for (String username : filterOwners) {
                     for (PostFilter postFilter : postFilters) {
                         postFilter.username = username;
                     }
@@ -390,11 +439,11 @@ public class RestoreSettings {
             List<CommentFilterUsage> commentFilterUsage = commentFilterUsageFile.exists()
                     ? getListFromFile(commentFilterUsageFile, new TypeToken<List<CommentFilterUsage>>() {}.getType())
                     : Collections.emptyList();
-            if (namesAccounts(commentFiltersFile)) {
+            if (rowsHave(commentFiltersFile, "username")) {
                 redditDataRoomDatabase.commentFilterDao().insertAll(commentFilters);
                 redditDataRoomDatabase.commentFilterUsageDao().insertAll(commentFilterUsage);
             } else {
-                for (String username : accountNames(redditDataRoomDatabase)) {
+                for (String username : filterOwners) {
                     for (CommentFilter commentFilter : commentFilters) {
                         commentFilter.username = username;
                     }
@@ -406,9 +455,17 @@ public class RestoreSettings {
                 }
             }
         }
+        // Everything below has a foreign key onto an account, and a backup can name accounts it
+        // does not bring back: Infinity's holds read posts and reminders for every account it had
+        // and no accounts at all. One such row failed its key, and took the whole database restore
+        // back with it -- anonymous subscriptions, multireddits, themes and filters included.
+        Set<String> accountsInDatabase = namesInAccountsTable(redditDataRoomDatabase);
+
         // Restore read_posts after accounts so the FK on username is satisfied.
         if (readPostsFile.exists()) {
-            List<ReadPost> readPosts = getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType());
+            List<ReadPost> readPosts = onAccountsInDatabase(
+                    getListFromFile(readPostsFile, new TypeToken<List<ReadPost>>() {}.getType()),
+                    ReadPost::getUsername, accountsInDatabase, "read_posts");
             if (!readPosts.isEmpty()) {
                 redditDataRoomDatabase.readPostDao().insertAll(readPosts);
             }
@@ -416,7 +473,9 @@ public class RestoreSettings {
 
         // Restore local_saved after accounts so the FK on username is satisfied.
         if (localSavedFile.exists()) {
-            List<LocalSavedThing> localSaved = getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType());
+            List<LocalSavedThing> localSaved = onAccountsInDatabase(
+                    getListFromFile(localSavedFile, new TypeToken<List<LocalSavedThing>>() {}.getType()),
+                    LocalSavedThing::getUsername, accountsInDatabase, "local_saved");
             if (!localSaved.isEmpty()) {
                 redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
             }
@@ -432,7 +491,9 @@ public class RestoreSettings {
 
         // Restore reminders after accounts so the FK on username is satisfied.
         if (remindersFile.exists()) {
-            List<Reminder> reminders = getListFromFile(remindersFile, new TypeToken<List<Reminder>>() {}.getType());
+            List<Reminder> reminders = withoutAbsentAccounts(
+                    getListFromFile(remindersFile, new TypeToken<List<Reminder>>() {}.getType()),
+                    accountsInDatabase);
             if (!reminders.isEmpty()) {
                 redditDataRoomDatabase.reminderDao().insertAll(reminders);
             }
@@ -444,14 +505,18 @@ public class RestoreSettings {
         // Reddit can re-sync them -- and, like the tables above, only after
         // the accounts they reference exist again.
         if (recentlyVisitedFile.exists()) {
-            List<RecentlyVisited> recentlyVisited = getListFromFile(recentlyVisitedFile, new TypeToken<List<RecentlyVisited>>() {}.getType());
+            List<RecentlyVisited> recentlyVisited = onAccountsInDatabase(
+                    getListFromFile(recentlyVisitedFile, new TypeToken<List<RecentlyVisited>>() {}.getType()),
+                    RecentlyVisited::getUsername, accountsInDatabase, "recently_visited");
             if (!recentlyVisited.isEmpty()) {
                 redditDataRoomDatabase.recentlyVisitedDao().insertAll(recentlyVisited);
             }
         }
 
         if (recentSearchQueriesFile.exists()) {
-            List<RecentSearchQuery> recentSearchQueries = getListFromFile(recentSearchQueriesFile, new TypeToken<List<RecentSearchQuery>>() {}.getType());
+            List<RecentSearchQuery> recentSearchQueries = onAccountsInDatabase(
+                    getListFromFile(recentSearchQueriesFile, new TypeToken<List<RecentSearchQuery>>() {}.getType()),
+                    RecentSearchQuery::getUsername, accountsInDatabase, "recent_search_queries");
             if (!recentSearchQueries.isEmpty()) {
                 redditDataRoomDatabase.recentSearchQueryDao().insertAll(recentSearchQueries);
             }
@@ -586,24 +651,88 @@ public class RestoreSettings {
     }
 
     /**
-     * Whether a backed up filter file says which account each filter belongs to.
+     * Whether the rows of a backed up table carry {@code field}: a backup taken before the column
+     * existed does not.
      *
-     * Backups taken before filters had an owner do not, and Gson fills the field in from its own
-     * initialiser rather than leaving it null, so the JSON is the only place the difference shows.
-     * An unreadable or empty file is treated as saying so: there is then nothing to share out.
+     * Gson fills a field it does not find from the class's own initialiser, or leaves it at zero,
+     * rather than marking it absent, so the JSON is the only place the difference shows. Only the
+     * first row is read, a backup's rows all being written by one version. An unreadable or empty
+     * file is treated as carrying it: there is then nothing to fill in.
      */
-    private static boolean namesAccounts(File file) {
+    private static boolean rowsHave(File file, String field) {
         try (JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             JsonElement parsed = JsonParser.parseReader(reader);
             if (!parsed.isJsonArray() || parsed.getAsJsonArray().size() == 0) {
                 return true;
             }
             JsonElement first = parsed.getAsJsonArray().get(0);
-            return !first.isJsonObject() || first.getAsJsonObject().has("username");
+            return !first.isJsonObject() || first.getAsJsonObject().has(field);
         } catch (Exception e) {
-            Log.e("RestoreSettings", "namesAccounts failed", e);
+            Log.e("RestoreSettings", "rowsHave failed", e);
             return true;
         }
+    }
+
+    /** Gives each theme the post type colours every built-in theme has. */
+    private static void fillPostTypeColors(Context context, List<CustomTheme> customThemes) {
+        CustomTheme defaults = CustomThemeWrapper.getSolarizedAmoled(context);
+        for (CustomTheme customTheme : customThemes) {
+            customTheme.textTypeBackgroundColor = defaults.textTypeBackgroundColor;
+            customTheme.imageTypeBackgroundColor = defaults.imageTypeBackgroundColor;
+            customTheme.linkTypeBackgroundColor = defaults.linkTypeBackgroundColor;
+            customTheme.videoTypeBackgroundColor = defaults.videoTypeBackgroundColor;
+            customTheme.gifTypeBackgroundColor = defaults.gifTypeBackgroundColor;
+            customTheme.galleryTypeBackgroundColor = defaults.galleryTypeBackgroundColor;
+        }
+    }
+
+    /**
+     * Every name in the accounts table, which is what a restored row's foreign key can point at:
+     * anonymous, and the placeholder old-spelling rows are parked on until the rename moves them.
+     */
+    private static Set<String> namesInAccountsTable(RedditDataRoomDatabase redditDataRoomDatabase) {
+        Set<String> names = new HashSet<>();
+        names.add(Account.ANONYMOUS_ACCOUNT);
+        for (Account account : redditDataRoomDatabase.accountDao().getAllAccounts()) {
+            names.add(account.getAccountName());
+        }
+        return names;
+    }
+
+    /** The rows whose account is in the database; the rest belong to nobody here and are dropped. */
+    private static <T> List<T> onAccountsInDatabase(List<T> rows, Function<T, String> accountOf,
+                                                    Set<String> accountsInDatabase, String table) {
+        List<T> kept = new ArrayList<>(rows.size());
+        for (T row : rows) {
+            if (accountsInDatabase.contains(accountOf.apply(row))) {
+                kept.add(row);
+            }
+        }
+        if (kept.size() < rows.size()) {
+            Log.w("RestoreSettings", "dropped " + (rows.size() - kept.size()) + " " + table
+                    + " rows for accounts not on this device");
+        }
+        return kept;
+    }
+
+    /**
+     * The reminders, with an account that is not in the database taken off them rather than the
+     * reminder dropped. The list is not per account, and a reminder whose account goes keeps going
+     * the same way: the foreign key sets it to null on delete.
+     */
+    private static List<Reminder> withoutAbsentAccounts(List<Reminder> reminders,
+                                                        Set<String> accountsInDatabase) {
+        List<Reminder> kept = new ArrayList<>(reminders.size());
+        for (Reminder reminder : reminders) {
+            String accountName = reminder.getAccountName();
+            if (accountName == null || accountsInDatabase.contains(accountName)) {
+                kept.add(reminder);
+            } else {
+                kept.add(new Reminder(null, reminder.getPostId(), reminder.getCommentId(),
+                        reminder.getContent(), reminder.getCreatedAt(), reminder.getReminderTime()));
+            }
+        }
+        return kept;
     }
 
     /**

@@ -1131,6 +1131,22 @@ object ResumeState {
     }
 
     /**
+     * Forget every account's snapshot and cached feeds. For a restore that has brought accounts of
+     * its own: every feed recorded before it was built from subscriptions and settings the backup
+     * has just replaced, and reopening one would show the old ones' posts until a refresh.
+     */
+    @JvmStatic
+    fun clearAll(context: Context) {
+        restoring = null
+        loaded = true
+        loadedAccount = null
+        canSeed = false
+        lastWritten = null
+        FeedCache.clearAll()
+        File(context.filesDir, FILE_NAME).delete()
+    }
+
+    /**
      * Forget one named account's snapshot and the posts it points at, leaving every other account's
      * alone.
      *

@@ -113,6 +113,61 @@ object AccountSettingsMigration {
     )
 
     /**
+     * The files [rescope] works through, by the name a backup gives each one. The default
+     * preferences are filed under [SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE] there, though
+     * that is not the file they live in.
+     */
+    private val RESCOPED_BACKUP_FILES = listOf(
+        SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE to NSFW_AND_SPOILER,
+        SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE to POST_HISTORY,
+        SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE to RECENTLY_VISITED,
+        SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE to MAIN_PAGE_TABS,
+        SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to DEFAULT_FILE,
+    )
+
+    /**
+     * The files [seed] works through, by the name a backup gives each one and the name
+     * [AccountScopedKeys] knows it by.
+     */
+    private val SEEDED_BACKUP_FILES = listOf(
+        SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to AccountScopedKeys.DEFAULT_PREFERENCES,
+        SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE to
+            SharedPreferencesUtils.POST_LAYOUT_SHARED_PREFERENCES_FILE,
+        SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE to
+            SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE,
+        SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE to
+            SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE,
+        SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE to
+            SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE,
+    )
+
+    /**
+     * Where Random sat in each bottom app bar list it was dropped from. It went without the stored
+     * values being moved, so every option after it now sits one lower; Infinity still has it. Frozen
+     * literals, like [LEGACY_ANONYMOUS_PREFIX]: this is the old numbering, not the current one.
+     */
+    private val REMOVED_RANDOM_OPTION: Map<String, Int> = buildMap {
+        for (base in listOf(
+            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_1,
+            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_2,
+            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_3,
+            SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_OPTION_4,
+        )) {
+            put(base, 11)
+        }
+        for (base in listOf(
+            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_1,
+            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_2,
+            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_3,
+            SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_OPTION_4,
+        )) {
+            put(base, 12)
+        }
+        put(SharedPreferencesUtils.MAIN_ACTIVITY_BOTTOM_APP_BAR_FAB, 7)
+        put(SharedPreferencesUtils.OTHER_ACTIVITIES_BOTTOM_APP_BAR_FAB, 7)
+    }
+
+    /**
      * Opens every preferences file itself rather than taking them injected: the injected ones are
      * [AccountScopedSharedPreferences], and a migration that reads through the façade would see one
      * account's filtered view and write keys that are scoped twice.
@@ -262,11 +317,253 @@ object AccountSettingsMigration {
             return
         }
 
-        // commit(), not apply(): a restore ends by killing the process.
+        // commit(), not apply(): a restore ends by killing the process. The bottom app bar too: its
+        // old keys are in the backup like the rest, and its own flag would otherwise skip them.
         internalSharedPreferences.edit()
             .putBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false)
             .putBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_SEEDED, false)
             .putInt(SharedPreferencesUtils.ACCOUNT_SCOPE_SEED_VERSION, 0)
+            .putBoolean(SharedPreferencesUtils.BOTTOM_APP_BAR_SCOPE_MIGRATED, false)
+            .commit()
+    }
+
+    /**
+     * Takes in the settings of a restored backup from before [AccountScope] -- Infinity's, or this
+     * app's own from before the key scheme -- which hold every per-account setting under its old
+     * global spelling. A backup that already has scoped keys is left exactly as the restore wrote it.
+     *
+     * Anonymous takes the backup's settings outright, over whatever it has. Filling only what it
+     * lacks, as the migration does, would leave most of them standing on any install with history:
+     * once anonymous owns a scoped copy of a setting, nothing reads the global one the backup wrote.
+     * Only what the backup carried is written; a setting it did not hold keeps anonymous's own value.
+     *
+     * Signed-in accounts are another matter. A backup that brought accounts of its own
+     * ([backupBroughtAccounts]) has the migration run again at the next start, which gives those
+     * accounts the backup's settings the way an upgrade would, finding anonymous already done. One
+     * that brought none -- every Infinity backup -- leaves the accounts on this device as they were.
+     *
+     * [restored] is every preferences file the restore read, and [files] where each one went, both
+     * by the name the backup gives the file. Values are read back out of [files] rather than taken
+     * from [restored], so a fix-up the restore has already made to them is kept: the swipe sides.
+     * [oldBottomAppBarNumbering] is for a backup from before Random left the bottom app bar.
+     */
+    @JvmStatic
+    fun adoptRestoredBackup(
+        internalSharedPreferences: SharedPreferences,
+        restored: Map<String, Map<String, *>>,
+        files: Map<String, SharedPreferences>,
+        backupBroughtAccounts: Boolean,
+        oldBottomAppBarNumbering: Boolean,
+    ) {
+        val restoredDefaults = restored[SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE]
+        if (restoredDefaults == null || !predatesAccountScope(restoredDefaults)) {
+            return
+        }
+
+        for ((fileName, scoped) in RESCOPED_BACKUP_FILES) {
+            val restoredKeys = restored[fileName]?.keys ?: continue
+            rescopeAnonymous(files[fileName] ?: continue, scoped, restoredKeys)
+        }
+        for ((fileName, classification) in SEEDED_BACKUP_FILES) {
+            val restoredFile = restored[fileName] ?: continue
+            // The swipe sides were turned over on the way in, which can move a value onto a key the
+            // backup did not hold, or off one it did.
+            val restoredKeys = if (fileName == SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE) {
+                SwipeActionSideMigration.keysAfterFlip(restoredFile)
+            } else {
+                restoredFile.keys
+            }
+            seedAnonymous(files[fileName] ?: continue, classification, restoredKeys)
+        }
+
+        val defaultSharedPreferences = files[SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE]
+        if (defaultSharedPreferences != null) {
+            splitSaveSortTypeForAnonymous(defaultSharedPreferences, restoredDefaults.keys)
+        }
+
+        val bottomAppBarKeys = restored[SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE]?.keys
+        val bottomAppBar = files[SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE]
+        if (bottomAppBarKeys != null && bottomAppBar != null) {
+            scopeBottomAppBarForAnonymous(bottomAppBar, bottomAppBarKeys, oldBottomAppBarNumbering)
+        }
+
+        val mainPageTabsKeys = restored[SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE]?.keys
+        val mainPageTabs = files[SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE]
+        if (mainPageTabsKeys != null && mainPageTabs != null) {
+            rebuildAnonymousTabsFrom(mainPageTabs, mainPageTabsKeys)
+        }
+
+        if (backupBroughtAccounts) {
+            rerunIfBackupPredatesAccountScope(internalSharedPreferences, restoredDefaults)
+        } else {
+            val nsfwAndSpoiler = files[SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE]
+            if (defaultSharedPreferences != null && nsfwAndSpoiler != null) {
+                // With no run of the migration to come, the deleted feature's key is acted on here,
+                // for the one account the backup's settings went to.
+                DisableNsfwForeverMigration.turnOffNsfwForAnonymous(defaultSharedPreferences, nsfwAndSpoiler)
+            }
+        }
+    }
+
+    /**
+     * [rescope] for anonymous alone, from the spellings the backup carried, and over a canonical key
+     * anonymous already has. The old spellings go, as they do there.
+     */
+    @SuppressLint("ApplySharedPref")
+    private fun rescopeAnonymous(
+        preferences: SharedPreferences,
+        scoped: List<Scoped>,
+        restoredKeys: Set<String>,
+    ) {
+        val existing = preferences.all
+        val editor = preferences.edit()
+        var changed = false
+
+        for (entry in scoped) {
+            val candidates = oldKeysFor(null, entry)
+            val found = candidates.firstOrNull { it in restoredKeys && existing.containsKey(it) } ?: continue
+            if (!copy(editor, AccountScope.key(null, entry.base), existing[found])) {
+                continue
+            }
+            candidates.forEach(editor::remove)
+            changed = true
+        }
+
+        if (changed) {
+            editor.commit()
+        }
+    }
+
+    /**
+     * [seed] for anonymous alone, from the global keys the backup carried, and over a scoped copy
+     * anonymous already has. The global keys stay, as they do there: a run of the migration that
+     * follows seeds the backup's accounts from them.
+     */
+    @SuppressLint("ApplySharedPref")
+    private fun seedAnonymous(
+        preferences: SharedPreferences,
+        classification: String,
+        restoredKeys: Set<String>,
+    ) {
+        val unscoped = restoredKeys.filter { AccountScope.baseOf(it) == null }.toSet()
+        val toCopy = AccountScopedKeys.scopedKeysIn(classification, unscoped)
+        if (toCopy.isEmpty()) {
+            return
+        }
+
+        val existing = preferences.all
+        val editor = preferences.edit()
+        var changed = false
+        for (key in toCopy) {
+            val value = existing[key]
+            if (value == null) {
+                // Cleared on the way in: the far side of a swipe pair the backup set one side of,
+                // which goes back to its default rather than keep what anonymous had there.
+                editor.remove(AccountScope.key(null, key))
+                changed = true
+            } else if (copy(editor, AccountScope.key(null, key), value)) {
+                changed = true
+            }
+        }
+        if (changed) {
+            editor.commit()
+        }
+    }
+
+    /**
+     * [splitSaveSortType] for anonymous alone. A half the backup holds on its own has already been
+     * copied by [seedAnonymous] and outranks the combined toggle, as it does there.
+     */
+    @SuppressLint("ApplySharedPref")
+    private fun splitSaveSortTypeForAnonymous(
+        defaultSharedPreferences: SharedPreferences,
+        restoredKeys: Set<String>,
+    ) {
+        if (SharedPreferencesUtils.SAVE_SORT_TYPE !in restoredKeys) {
+            return
+        }
+
+        val saveSortType = defaultSharedPreferences.all[SharedPreferencesUtils.SAVE_SORT_TYPE]
+        val editor = defaultSharedPreferences.edit()
+        var changed = false
+        for (base in listOf(SharedPreferencesUtils.SAVE_POST_SORT, SharedPreferencesUtils.SAVE_COMMENT_SORT)) {
+            if (base !in restoredKeys && copy(editor, AccountScope.key(null, base), saveSortType)) {
+                changed = true
+            }
+        }
+        if (changed) {
+            editor.commit()
+        }
+    }
+
+    /**
+     * [scopeBottomAppBar] for anonymous alone: the backup's `"-"` bar, over the one anonymous has.
+     * The bare keys are some signed-in bar's, left for a run of the migration to share out.
+     */
+    @SuppressLint("ApplySharedPref")
+    private fun scopeBottomAppBarForAnonymous(
+        preferences: SharedPreferences,
+        restoredKeys: Set<String>,
+        oldNumbering: Boolean,
+    ) {
+        val existing = preferences.all
+        val editor = preferences.edit()
+        var changed = false
+
+        for (base in BOTTOM_APP_BAR) {
+            val old = LEGACY_ANONYMOUS_PREFIX + base
+            if (old !in restoredKeys || !existing.containsKey(old)) {
+                continue
+            }
+            val target = AccountScope.key(null, base)
+            val value = if (oldNumbering) renumberedBottomAppBarOption(base, existing[old]) else existing[old]
+            if (value == null) {
+                // Random: an option this app no longer has, so the slot goes back to its default.
+                editor.remove(target)
+            } else {
+                copy(editor, target, value)
+            }
+            editor.remove(old)
+            changed = true
+        }
+
+        if (changed) {
+            editor.commit()
+        }
+    }
+
+    /** [value] for [base] in the current numbering, or null where it was the Random that went. */
+    private fun renumberedBottomAppBarOption(base: String, value: Any?): Any? {
+        val random = REMOVED_RANDOM_OPTION[base] ?: return value
+        if (value !is Int) {
+            return value
+        }
+        return when {
+            value < random -> value
+            value == random -> null
+            else -> value - 1
+        }
+    }
+
+    /**
+     * Lets the backup's numbered tab keys -- Infinity's, and this app's from before the ordered tab
+     * list -- decide anonymous's tabs. They are only read while an account has no ordered list yet,
+     * so anonymous's goes, and the next main page builds a new one from them. A backup holding an
+     * ordered list of its own has already handed it over through [rescopeAnonymous]; that one wins.
+     */
+    @SuppressLint("ApplySharedPref")
+    private fun rebuildAnonymousTabsFrom(preferences: SharedPreferences, restoredKeys: Set<String>) {
+        // Anonymous's numbered keys were written with no prefix at all.
+        if (SharedPreferencesUtils.MAIN_PAGE_TAB_COUNT !in restoredKeys &&
+            SharedPreferencesUtils.MAIN_PAGE_TAB_1_POST_TYPE !in restoredKeys
+        ) {
+            return
+        }
+        if (oldKeysFor(null, Scoped(SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER)).any { it in restoredKeys }) {
+            return
+        }
+        preferences.edit()
+            .remove(AccountScope.key(null, SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER))
             .commit()
     }
 
