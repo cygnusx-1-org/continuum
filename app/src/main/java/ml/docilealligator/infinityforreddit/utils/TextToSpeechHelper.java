@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit.utils;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import java.util.Locale;
@@ -10,65 +9,82 @@ import ml.docilealligator.infinityforreddit.R;
 
 public class TextToSpeechHelper {
 
-    private static final String DBG_TAG = "ReadAloudDbg"; // TTSDBG
-
     private final Context context;
     @Nullable
     private TextToSpeech tts;
     private boolean initialized;
     @Nullable
     private String pendingText;
+    // Bumped by shutdown(), so a late onInit from an engine that was already released is ignored.
+    private int generation;
 
     public TextToSpeechHelper(Context context) {
         this.context = context.getApplicationContext();
     }
 
     private void initIfNeeded() {
-        Log.d(DBG_TAG, "TTSDBG initIfNeeded: tts==null " + (tts == null) + ", thread " + Thread.currentThread().getName()); // TTSDBG
-        if (tts == null) {
-            tts = new TextToSpeech(context, status -> {
-                Log.d(DBG_TAG, "TTSDBG onInit: status " + status + ", tts==null " + (tts == null) + ", pendingText==null " + (pendingText == null) + ", thread " + Thread.currentThread().getName()); // TTSDBG
-                if (tts == null) {
-                    // shut down before init completed
-                    Log.d(DBG_TAG, "TTSDBG onInit: dropped because tts==null"); // TTSDBG
-                    return;
-                }
-                if (status == TextToSpeech.SUCCESS) {
-                    int result = tts.setLanguage(Locale.getDefault());
-                    Log.d(DBG_TAG, "TTSDBG onInit: setLanguage(" + Locale.getDefault() + ") -> " + result); // TTSDBG
-                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.d(DBG_TAG, "TTSDBG onInit: setLanguage(US) -> " + tts.setLanguage(Locale.US)); // TTSDBG
-                    }
-                    initialized = true;
-                    if (pendingText != null) {
-                        speak(pendingText);
-                        pendingText = null;
-                    }
-                } else {
-                    Log.d(DBG_TAG, "TTSDBG onInit: failed, showing tts_not_available toast"); // TTSDBG
-                    pendingText = null;
-                    Toast.makeText(context, R.string.tts_not_available, Toast.LENGTH_SHORT).show();
-                }
-            });
-            Log.d(DBG_TAG, "TTSDBG initIfNeeded: constructor returned, initialized " + initialized + ", defaultEngine " + tts.getDefaultEngine() + ", engines " + tts.getEngines().size()); // TTSDBG
+        if (tts != null) {
+            return;
         }
+        int initGeneration = generation;
+        // When no engine is usable, TextToSpeech reports ERROR from inside its constructor, before
+        // tts is assigned. onInit then shuts down this generation, and the engine is dropped here.
+        TextToSpeech engine = new TextToSpeech(context, status -> onInit(initGeneration, status));
+        if (initGeneration == generation) {
+            tts = engine;
+        } else {
+            engine.shutdown();
+        }
+    }
+
+    private void onInit(int initGeneration, int status) {
+        if (initGeneration != generation) {
+            // shut down before init completed
+            return;
+        }
+        TextToSpeech engine = tts;
+        if (status != TextToSpeech.SUCCESS || engine == null || !setUsableLanguage(engine)) {
+            // No usable engine or voice. Release it so the next tap tries again, e.g. after one is
+            // installed or its voice data is downloaded.
+            shutdown();
+            Toast.makeText(context, R.string.tts_not_available, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        initialized = true;
+        String text = pendingText;
+        pendingText = null;
+        if (text != null) {
+            speak(text);
+        }
+    }
+
+    // False when the engine has no voice for the default locale or for US English, e.g. before
+    // its voice data has been downloaded. Speaking then would be silent.
+    private static boolean setUsableLanguage(TextToSpeech engine) {
+        int result = engine.setLanguage(Locale.getDefault());
+        if (isLanguageUsable(result)) {
+            return true;
+        }
+        result = engine.setLanguage(Locale.US);
+        return isLanguageUsable(result);
+    }
+
+    private static boolean isLanguageUsable(int setLanguageResult) {
+        return setLanguageResult != TextToSpeech.LANG_MISSING_DATA
+                && setLanguageResult != TextToSpeech.LANG_NOT_SUPPORTED;
     }
 
     public void speak(String text) {
         if (text == null || text.isEmpty()) {
             return;
         }
-        Log.d(DBG_TAG, "TTSDBG speak: length " + text.length() + ", initialized " + initialized); // TTSDBG
-        initIfNeeded();
-        if (!initialized) {
-            Log.d(DBG_TAG, "TTSDBG speak: not initialized, storing pendingText"); // TTSDBG
-            pendingText = text;
+        if (initialized && tts != null) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "readAloud");
             return;
         }
-        if (tts != null) {
-            int speakResult = tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "readAloud"); // TTSDBG
-            Log.d(DBG_TAG, "TTSDBG speak: tts.speak -> " + speakResult); // TTSDBG
-        }
+        // Queued before initIfNeeded(), which clears it again if init fails synchronously.
+        pendingText = text;
+        initIfNeeded();
     }
 
     public void stop() {
@@ -79,18 +95,17 @@ public class TextToSpeechHelper {
     }
 
     public boolean isSpeaking() {
-        Log.d(DBG_TAG, "TTSDBG isSpeaking: pendingText==null " + (pendingText == null) + ", tts==null " + (tts == null) + ", tts.isSpeaking " + (tts != null && tts.isSpeaking())); // TTSDBG
         return pendingText != null || (tts != null && tts.isSpeaking());
     }
 
     public void shutdown() {
-        Log.d(DBG_TAG, "TTSDBG shutdown: tts==null " + (tts == null)); // TTSDBG
         pendingText = null;
+        generation++;
+        initialized = false;
         if (tts != null) {
             tts.stop();
             tts.shutdown();
             tts = null;
-            initialized = false;
         }
     }
 }

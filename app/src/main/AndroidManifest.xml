@@ -6,6 +6,10 @@
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
+        <!-- Read Aloud: without this, TTS engines installed as apps (all of them on LineageOS) are invisible on Android 11+ -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
     </queries>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
