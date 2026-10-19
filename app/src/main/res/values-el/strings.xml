@@ -810,8 +810,6 @@
     <string name="settings_link_handler_value_internal_browser">"Εσωτερικός Περιηγητής"</string>
     <string name="settings_link_handler_value_specific_browser">"Ειδικό πρόγραμμα περιήγησης"</string>
     <string name="settings_specific_browser_title">"Ειδικό πρόγραμμα περιήγησης"</string>
-    <string name="settings_use_old_reddit_domain_title">"Χρησιμοποίησε old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Χρησιμοποίησε το old.reddit.com αντί του www.reddit.com για συνδέσμους Reddit που μοιράζεσαι, αντιγράφεις ή ανοίγεις εκτός της εφαρμογής"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Απαρχαιωμένο UI χειριστηρίου Βίντεο"</string>
     <string name="settings_custom_font_family_title">"Προσαρμοσμένη Γραμματοσειρά"</string>
     <string name="settings_custom_title_font_family_title">"Προσαρμοσμένη Γραμματοσειρά Τίτλων"</string>

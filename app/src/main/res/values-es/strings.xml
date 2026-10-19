@@ -817,8 +817,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_link_handler_value_internal_browser">"Navegador interno"</string>
     <string name="settings_link_handler_value_specific_browser">"Navegador específico"</string>
     <string name="settings_specific_browser_title">"Navegador específico"</string>
-    <string name="settings_use_old_reddit_domain_title">"Utilice old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Utilice old.reddit.com en lugar de www.reddit.com para Reddit enlaces que comparte, copia o abre fuera de la aplicación"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Interfaz del controlador de vídeo heredado"</string>
     <string name="settings_custom_font_family_title">"Familia de fuente personalizada"</string>
     <string name="settings_custom_title_font_family_title">"Familia de fuente del título personalizada"</string>

@@ -1023,7 +1023,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard != null) {
             ClipData clip = ClipData.newPlainText("simple text",
-                    RedditLinkUtils.applyLinkDomain(getDefaultSharedPreferences(), link));
+                    RedditLinkUtils.applyShareDomain(getDefaultSharedPreferences(), link));
             clipboard.setPrimaryClip(clip);
             if (android.os.Build.VERSION.SDK_INT < 33) {
                 Toast.makeText(this, R.string.copy_success, Toast.LENGTH_SHORT).show();
@@ -1036,7 +1036,7 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     public void shareLink(String link) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyLinkDomain(getDefaultSharedPreferences(), link));
+        intent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyShareDomain(getDefaultSharedPreferences(), link));
         try {
             startActivity(Intent.createChooser(intent, getString(R.string.share)));
         } catch (ActivityNotFoundException e) {

@@ -9,11 +9,15 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsService;
+import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
+import androidx.preference.Preference;
 import androidx.preference.SwitchPreference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,14 +30,19 @@ import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.account.AccountScope;
+import ml.docilealligator.infinityforreddit.activities.LinkResolverActivity;
 import ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceFragmentCompat;
 import ml.docilealligator.infinityforreddit.events.ChangeSavePostFeedScrolledPositionEvent;
 import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
+import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import org.greenrobot.eventbus.EventBus;
 
 public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmentCompat {
+
+    /** A list of embed fixers by site, for the "What are embed fixers?" row. */
+    private static final String EMBED_FIXERS_URL = "https://github.com/seriaati/embed-fixer";
 
     @Inject
     @Named("default")
@@ -61,6 +70,9 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         SwitchPreference savePostFeedScrolledPositionSwitch = findPreference(SharedPreferencesUtils.SAVE_FRONT_PAGE_SCROLLED_POSITION);
         SwitchPreference resumeWhereILeftOffSwitch = findPreference(SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF);
         ListPreference languageListPreference = findPreference(SharedPreferencesUtils.LANGUAGE);
+        ListPreference sharedLinkDomainListPreference = findPreference(SharedPreferencesUtils.SHARED_LINK_DOMAIN);
+        EditTextPreference sharedLinkCustomDomainPreference = findPreference(SharedPreferencesUtils.SHARED_LINK_CUSTOM_DOMAIN);
+        Preference embedFixersInfoPreference = findPreference(SharedPreferencesUtils.EMBED_FIXERS_INFO);
 
         List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
         boolean hasEphemeralBrowser = !ephemeralBrowsers.isEmpty();
@@ -126,6 +138,57 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
             } else {
                 specificBrowserListPreference.setVisible(false);
             }
+        }
+
+        if (sharedLinkDomainListPreference != null) {
+            // The XML has no default for this list; without a value, it would open with nothing
+            // selected rather than on the domain links already go out on.
+            String sharedLinkDomain = RedditLinkUtils.sharedLinkDomainChoice(mSharedPreferences);
+            sharedLinkDomainListPreference.setValue(sharedLinkDomain);
+            if (sharedLinkCustomDomainPreference != null) {
+                // Disabled rather than hidden, so picking Custom does not shift the rows below.
+                sharedLinkCustomDomainPreference.setEnabled(
+                        RedditLinkUtils.CUSTOM_SHARED_LINK_DOMAIN.equals(sharedLinkDomain));
+            }
+            sharedLinkDomainListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (sharedLinkCustomDomainPreference != null) {
+                    sharedLinkCustomDomainPreference.setEnabled(
+                            RedditLinkUtils.CUSTOM_SHARED_LINK_DOMAIN.equals(newValue));
+                }
+                return true;
+            });
+        }
+
+        if (sharedLinkCustomDomainPreference != null) {
+            sharedLinkCustomDomainPreference.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+                editText.setSingleLine(true);
+            });
+            sharedLinkCustomDomainPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                String typed = (String) newValue;
+                // Clearing the field is allowed, and leaves links on www.reddit.com.
+                String domain = typed.trim().isEmpty() ? "" : RedditLinkUtils.normalizeDomain(typed);
+                if (domain == null) {
+                    Toast.makeText(mActivity, R.string.settings_shared_link_custom_domain_invalid, Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                if (!domain.equals(typed)) {
+                    // Stored as the bare host it was cut down to, so the summary shows what links
+                    // will actually go out on.
+                    ((EditTextPreference) preference).setText(domain);
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        if (embedFixersInfoPreference != null) {
+            embedFixersInfoPreference.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
+                intent.setData(Uri.parse(EMBED_FIXERS_URL));
+                mActivity.startActivity(intent);
+                return true;
+            });
         }
 
         if (mainPageBackButtonActionListPreference != null) {

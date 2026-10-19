@@ -1460,7 +1460,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
         } else if (itemId == R.id.action_share_view_subreddit_detail_activity) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyLinkDomain(
+            shareIntent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyShareDomain(
                     getDefaultSharedPreferences(), APIUtils.API_BASE_URI + "/r/" + subredditName));
             if (shareIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));

@@ -63,6 +63,7 @@ class AccountScopedScreenKeysTest {
         "delete_account_resume_state",
         "delete_account_read_posts",
         "delete_account_user_tags",
+        "embed_fixers_info",
     )
 
     /** The screens under "This account" whose settings live in the default preferences file. */

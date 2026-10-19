@@ -817,8 +817,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_link_handler_value_internal_browser">"Browser Intern"</string>
     <string name="settings_link_handler_value_specific_browser">"Browser specific"</string>
     <string name="settings_specific_browser_title">"Browser specific"</string>
-    <string name="settings_use_old_reddit_domain_title">"Folosește old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Folosește old.reddit.com în loc de www.reddit.com pentru Reddit linkuri pe care le partajează, copiază sau deschide în afara aplicației"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"UI-ul Vechi al Controller-ului Video"</string>
     <string name="settings_custom_font_family_title">"Familie de Fonturi Personalizată"</string>
     <string name="settings_custom_title_font_family_title">"Familia de Fonturi Personalizată pentru Titlu"</string>

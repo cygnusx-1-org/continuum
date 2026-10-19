@@ -7,6 +7,7 @@ import androidx.preference.PreferenceManager
 import java.util.concurrent.Executor
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.utils.DisableNsfwForeverMigration
+import ml.docilealligator.infinityforreddit.utils.SharedLinkDomainMigration
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import ml.docilealligator.infinityforreddit.utils.SwipeActionSideMigration
 
@@ -185,6 +186,9 @@ object AccountSettingsMigration {
         // that are already by side. Its own marker, in the default file rather than here, because
         // that marker has to travel with a backup.
         SwipeActionSideMigration.migrate(PreferenceManager.getDefaultSharedPreferences(context))
+        // Also before the rest, for the same reason, and so a pre-account switch is already the
+        // list value by the time the seeding below copies it to each account.
+        SharedLinkDomainMigration.migrate(PreferenceManager.getDefaultSharedPreferences(context))
 
         if (internalSharedPreferences.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false) &&
             seedVersionOf(internalSharedPreferences) >= SEED_VERSION &&

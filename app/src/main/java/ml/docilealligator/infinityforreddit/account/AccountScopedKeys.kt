@@ -133,10 +133,12 @@ object AccountScopedKeys {
         "theme", "amoled_dark", "enable_material_you", "apply_material_you",
 
         // Miscellaneous. The link handler and browser pickers are absent on purpose: they are
-        // already per-account through AccountScope keys of their own.
-        "language", "use_old_reddit_domain", "main_page_back_button_action",
-        "save_front_page_scrolled_position", "resume_where_i_left_off", "enable_search_history",
-        "disable_profile_avatar_animation",
+        // already per-account through AccountScope keys of their own. use_old_reddit_domain is off
+        // the screen now, but an older backup still carries it, and it stays scoped so a restore
+        // gives each account its own copy for SharedLinkDomainMigration to convert.
+        "language", "use_old_reddit_domain", "shared_link_domain", "shared_link_custom_domain",
+        "main_page_back_button_action", "save_front_page_scrolled_position",
+        "resume_where_i_left_off", "enable_search_history", "disable_profile_avatar_animation",
     )
 
     /**

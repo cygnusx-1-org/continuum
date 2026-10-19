@@ -817,8 +817,6 @@ Reprodução automática de vídeos desativada."</string>
     <string name="settings_link_handler_value_internal_browser">"Browser interno"</string>
     <string name="settings_link_handler_value_specific_browser">"Navegador específico"</string>
     <string name="settings_specific_browser_title">"Navegador específico"</string>
-    <string name="settings_use_old_reddit_domain_title">"Utilize old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Utilize old.reddit.com em vez de www.reddit.com para Reddit links que partilha, copia ou abre fora da aplicação"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"UI do controlador de vídeo herdado"</string>
     <string name="settings_custom_font_family_title">"Família de tipos de letra personalizados"</string>
     <string name="settings_custom_title_font_family_title">"Família de tipos de letra de título personalizado"</string>

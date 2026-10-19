@@ -817,8 +817,6 @@
     <string name="settings_link_handler_value_internal_browser">"Внутрішній оглядач"</string>
     <string name="settings_link_handler_value_specific_browser">"Спеціальний браузер"</string>
     <string name="settings_specific_browser_title">"Спеціальний браузер"</string>
-    <string name="settings_use_old_reddit_domain_title">"Використовуй old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Використовувати old.reddit.com замість www.reddit.com для посилань Reddit, якими ти ділишся, які копіюєш або відкриваєш поза програмою"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Успадкований КІ керування відеозаписами"</string>
     <string name="settings_custom_font_family_title">"Власне сімейство шрифтів"</string>
     <string name="settings_custom_title_font_family_title">"Власне сімейство шрифтів для заголовку"</string>

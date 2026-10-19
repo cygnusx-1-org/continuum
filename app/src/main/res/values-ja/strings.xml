@@ -813,8 +813,6 @@
     <string name="settings_link_handler_value_internal_browser">"内部ブラウザ"</string>
     <string name="settings_link_handler_value_specific_browser">"特定のブラウザ"</string>
     <string name="settings_specific_browser_title">"特定のブラウザ"</string>
-    <string name="settings_use_old_reddit_domain_title">"old.reddit.com を使用する"</string>
-    <string name="settings_use_old_reddit_domain_summary">"アプリ外で共有、コピー、または開く Reddit リンクには、www.reddit.com の代わりに old.reddit.com を使用してください"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"レガシー ビデオ コントローラー UI"</string>
     <string name="settings_custom_font_family_title">"カスタム フォント ファミリー"</string>
     <string name="settings_custom_title_font_family_title">"カスタム タイトル フォント ファミリー"</string>

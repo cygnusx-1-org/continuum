@@ -817,8 +817,6 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_link_handler_value_internal_browser">"Interní prohlížeč"</string>
     <string name="settings_link_handler_value_specific_browser">"Specifický prohlížeč"</string>
     <string name="settings_specific_browser_title">"Specifický prohlížeč"</string>
-    <string name="settings_use_old_reddit_domain_title">"Použij old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Použij old.reddit.com místo www.reddit.com pro Reddit odkazů, které sdílíš, kopíruješ nebo otevíráš mimo aplikaci"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Staré UI ovládání videa"</string>
     <string name="settings_custom_font_family_title">"Vlastní rodina písem"</string>
     <string name="settings_custom_title_font_family_title">"Vlastní rodina nadpisových písem"</string>

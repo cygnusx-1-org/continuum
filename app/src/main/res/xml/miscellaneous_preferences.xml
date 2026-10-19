@@ -34,12 +34,24 @@
         app:title="@string/settings_specific_browser_title"
         app:useSimpleSummaryProvider="true" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
+    <!-- No defaultValue: MiscellaneousPreferenceFragment sets the value. -->
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:entries="@array/settings_shared_link_domain"
+        app:entryValues="@array/settings_shared_link_domain_values"
         app:icon="@drawable/ic_link_day_night_24dp"
-        app:key="use_old_reddit_domain"
-        app:summary="@string/settings_use_old_reddit_domain_summary"
-        app:title="@string/settings_use_old_reddit_domain_title" />
+        app:key="shared_link_domain"
+        app:title="@string/settings_shared_link_domain_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
+        app:key="shared_link_custom_domain"
+        app:title="@string/settings_shared_link_custom_domain_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        app:key="embed_fixers_info"
+        app:summary="@string/settings_embed_fixers_info_summary"
+        app:title="@string/settings_embed_fixers_info_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"

@@ -808,8 +808,6 @@
     <string name="settings_link_handler_value_internal_browser">"आंतरिक ब्राउज़र"</string>
     <string name="settings_link_handler_value_specific_browser">"विशिष्ट ब्राउज़र"</string>
     <string name="settings_specific_browser_title">"विशिष्ट ब्राउज़र"</string>
-    <string name="settings_use_old_reddit_domain_title">"Old.reddit.com का उपयोग करें"</string>
-    <string name="settings_use_old_reddit_domain_summary">"आपके द्वारा साझा किए गए, कॉपी किए गए, या ऐप के बाहर खोले गए Reddit लिंक के लिए www.reddit.com के बजाय Old.reddit.com का उपयोग करें"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"लीगेसी वीडियो नियंत्रक यूआई"</string>
     <string name="settings_custom_font_family_title">"कस्टम फ़ॉन्ट परिवार"</string>
     <string name="settings_custom_title_font_family_title">"कस्टम शीर्षक फ़ॉन्ट परिवार"</string>

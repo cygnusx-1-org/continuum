@@ -816,7 +816,7 @@ public class LinkResolverActivity extends AppCompatActivity {
 
         // Every link the app hands off instead of opening itself passes through here, so this is
         // the one place the configured Reddit domain has to be applied for outbound links.
-        uri = Uri.parse(RedditLinkUtils.applyLinkDomain(mSharedPreferences, uri.toString()));
+        uri = Uri.parse(RedditLinkUtils.applyBrowserDomain(mSharedPreferences, uri.toString()));
 
         String authority = uri.getAuthority();
         if(authority != null && (authority.contains("reddit.com") || authority.contains("redd.it") || authority.contains("reddit.app.link"))) {

@@ -8,18 +8,42 @@ import ml.docilealligator.infinityforreddit.Infinity
 /**
  * Helpers for the Reddit links the app reads in and hands out.
  *
- * [applyLinkDomain] rewrites the host of Reddit links on their way out of the app — shared,
- * copied, or handed to a browser — to old.reddit.com when Settings > Miscellaneous > Use
- * old.reddit.com is on. Off (the default) leaves every link on www.reddit.com.
+ * Settings > Miscellaneous > Domain for shared links picks the host Reddit links leave the app on.
+ * The default, www.reddit.com, leaves every link as it is. The other choices are of two kinds:
  *
- * Only hosts that serve the same paths as old.reddit.com are rewritten, so media (i.redd.it,
+ * - A domain of Reddit's own (old.reddit.com, or any reddit.com host typed in as a custom domain)
+ *   serves every path www.reddit.com does. [applyShareDomain] and [applyBrowserDomain] both use
+ *   it, for any link.
+ * - Anything else is taken for an embed fixer (fxreddit, vxReddit, EmbedEZ, …): a site that
+ *   serves chat apps a playable preview of a post. Those only understand posts and comments —
+ *   vxReddit answers a subreddit or a user link with an "Invalid post path" page — so
+ *   [applyShareDomain] uses one only for a `/comments/` link and leaves any other link on Reddit.
+ *   [applyBrowserDomain] never uses one: a browser tap gains nothing from the preview, only an
+ *   extra hop through someone else's server, and for EmbedEZ a download page instead of Reddit.
+ *
+ * Only hosts that serve the same paths as www.reddit.com are rewritten, so media (i.redd.it,
  * v.redd.it), share shorteners (s.reddit.com, redd.it, reddit.app.link) and non-Reddit links pass
  * through untouched. Permalinks stay canonical www.reddit.com in memory and API calls are
  * unaffected; only the outbound string changes, so the preference applies without a restart.
  */
 object RedditLinkUtils {
-    private const val OLD_REDDIT_HOST = "old.reddit.com"
-    private val REWRITABLE_HOSTS = setOf("www.reddit.com", "reddit.com")
+    const val WWW_REDDIT_HOST = "www.reddit.com"
+    const val OLD_REDDIT_HOST = "old.reddit.com"
+
+    /** The Domain for shared links value that defers to the custom domain typed in beside it. */
+    const val CUSTOM_SHARED_LINK_DOMAIN = "custom"
+
+    private val REWRITABLE_HOSTS = setOf(WWW_REDDIT_HOST, "reddit.com")
+
+    /** What may come before `/comments/<id>` in a post or comment link: `/r/<sub>`, `/u/<name>`, `/user/<name>`. */
+    private val POST_OWNER_SEGMENTS = setOf("r", "u", "user")
+
+    /**
+     * A hostname with at least two labels, each of letters, digits and inner hyphens, after
+     * [normalizeDomain] has lowercased it. No port: none of the embed fixers needs one, and a
+     * shared link carrying one is far more likely a typo than a choice.
+     */
+    private val HOSTNAME = Regex("^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$")
 
     /** The domains [ml.docilealligator.infinityforreddit.activities.LinkResolverActivity] opens itself. */
     private val REDDIT_DOMAINS = setOf("reddit.com", "redd.it", "reddit.app.link")
@@ -74,36 +98,102 @@ object RedditLinkUtils {
     }
 
     /**
+     * The Domain for shared links value: a host, or [CUSTOM_SHARED_LINK_DOMAIN]. The Use
+     * old.reddit.com switch it replaced is turned into this value at start-up, by
+     * [SharedLinkDomainMigration].
+     */
+    @JvmStatic
+    fun sharedLinkDomainChoice(sharedPreferences: SharedPreferences): String =
+        sharedPreferences.getString(SharedPreferencesUtils.SHARED_LINK_DOMAIN, null)
+            ?.takeIf { it.isNotEmpty() }
+            ?: WWW_REDDIT_HOST
+
+    /**
+     * [input] as a bare lowercase hostname, or null when it is not one. Takes what someone is
+     * likely to paste — `https://fxreddit.seria.moe/` or a whole example link — and keeps only the
+     * host, so the setting holds exactly what links will go out on.
+     */
+    @JvmStatic
+    fun normalizeDomain(input: String?): String? {
+        var domain = input?.trim()?.lowercase()
+        if (domain.isNullOrEmpty()) {
+            return null
+        }
+        domain = domain.substringAfter("://")
+        domain = domain.substringBefore('/').substringBefore('?').substringBefore('#')
+        return domain.takeIf { HOSTNAME.matches(it) }
+    }
+
+    /** The host links go out on, or null to leave them on www.reddit.com. */
+    private fun sharedLinkHost(sharedPreferences: SharedPreferences): String? {
+        val choice = sharedLinkDomainChoice(sharedPreferences)
+        val host = if (choice == CUSTOM_SHARED_LINK_DOMAIN) {
+            normalizeDomain(sharedPreferences.getString(SharedPreferencesUtils.SHARED_LINK_CUSTOM_DOMAIN, null))
+        } else {
+            normalizeDomain(choice)
+        }
+        return host?.takeUnless { it in REWRITABLE_HOSTS }
+    }
+
+    /** Whether [host] is one of Reddit's own, which serves every path www.reddit.com does. */
+    private fun isRedditHost(host: String): Boolean = host == "reddit.com" || host.endsWith(".reddit.com")
+
+    /**
      * For callers holding only a Context. Resolves the preferences through the application graph:
      * `PreferenceManager.getDefaultSharedPreferences` would hand back the unscoped file and quietly
      * ignore whichever account is signed in.
      */
     @JvmStatic
-    fun applyLinkDomain(context: Context, url: String): String {
+    fun applyShareDomain(context: Context, url: String): String {
         val application = context.applicationContext
         if (application !is Infinity) {
             return url
         }
-        return applyLinkDomain(application.appComponent.defaultSharedPreferences(), url)
+        return applyShareDomain(application.appComponent.defaultSharedPreferences(), url)
     }
 
+    /** [url] as it should be shared or copied, for someone else to open. */
     @JvmStatic
-    fun applyLinkDomain(sharedPreferences: SharedPreferences, url: String): String {
-        if (!sharedPreferences.getBoolean(SharedPreferencesUtils.USE_OLD_REDDIT_DOMAIN, false)) {
-            return url
-        }
+    fun applyShareDomain(sharedPreferences: SharedPreferences, url: String): String {
+        val host = sharedLinkHost(sharedPreferences) ?: return url
+        return rewriteHost(url, host, postsOnly = !isRedditHost(host))
+    }
 
+    /** [applyShareDomain] for the nullable permalink on [ml.docilealligator.infinityforreddit.comment.Comment]. */
+    @JvmStatic
+    fun applyShareDomainOrNull(sharedPreferences: SharedPreferences, url: String?): String? =
+        if (url == null) null else applyShareDomain(sharedPreferences, url)
+
+    /**
+     * [url] as it should be opened outside the app — in a browser, or from a QR code a phone
+     * camera scans. Only a domain of Reddit's own applies; an embed fixer is for chat previews.
+     */
+    @JvmStatic
+    fun applyBrowserDomain(sharedPreferences: SharedPreferences, url: String): String {
+        val host = sharedLinkHost(sharedPreferences)?.takeIf(::isRedditHost) ?: return url
+        return rewriteHost(url, host, postsOnly = false)
+    }
+
+    private fun rewriteHost(url: String, host: String, postsOnly: Boolean): String {
         val uri = url.toUri()
-        val host = uri.host?.lowercase() ?: return url
-        if (host !in REWRITABLE_HOSTS) {
+        val currentHost = uri.host?.lowercase() ?: return url
+        if (currentHost !in REWRITABLE_HOSTS) {
+            return url
+        }
+        if (postsOnly && !isPostPath(uri.pathSegments)) {
             return url
         }
 
-        return uri.buildUpon().authority(OLD_REDDIT_HOST).build().toString()
+        return uri.buildUpon().authority(host).build().toString()
     }
 
-    /** [applyLinkDomain] for the nullable permalink on [ml.docilealligator.infinityforreddit.comment.Comment]. */
-    @JvmStatic
-    fun applyLinkDomainOrNull(sharedPreferences: SharedPreferences, url: String?): String? =
-        if (url == null) null else applyLinkDomain(sharedPreferences, url)
+    /**
+     * Whether [segments] are a post or comment link: `/comments/<id>`, optionally after
+     * `/r/<sub>`, `/u/<name>` or `/user/<name>`, with anything after the id — slug, comment id.
+     */
+    private fun isPostPath(segments: List<String>): Boolean {
+        val commentsIndex = if (segments.size > 2 && segments[0].lowercase() in POST_OWNER_SEGMENTS) 2 else 0
+        return segments.size > commentsIndex + 1 &&
+            segments[commentsIndex].equals("comments", ignoreCase = true)
+    }
 }

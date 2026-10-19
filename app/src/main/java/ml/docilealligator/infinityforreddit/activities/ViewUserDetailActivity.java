@@ -1470,7 +1470,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
         } else if (itemId == R.id.action_share_view_user_detail_activity) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyLinkDomain(
+            shareIntent.putExtra(Intent.EXTRA_TEXT, RedditLinkUtils.applyShareDomain(
                     getDefaultSharedPreferences(), APIUtils.API_BASE_URI + "/user/" + username));
             if (shareIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));

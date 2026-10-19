@@ -818,8 +818,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_link_handler_value_internal_browser">"Browser interno"</string>
     <string name="settings_link_handler_value_specific_browser">"Browser specifico"</string>
     <string name="settings_specific_browser_title">"Browser specifico"</string>
-    <string name="settings_use_old_reddit_domain_title">"Utilizza old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Utilizza old.reddit.com invece di www.reddit.com per Reddit link che condividi, copi o apri all'esterno dell'app"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"UI legacy del controller video"</string>
     <string name="settings_custom_font_family_title">"Famiglia di caratteri personalizzati"</string>
     <string name="settings_custom_title_font_family_title">"Famiglia di caratteri titolo personalizzato"</string>

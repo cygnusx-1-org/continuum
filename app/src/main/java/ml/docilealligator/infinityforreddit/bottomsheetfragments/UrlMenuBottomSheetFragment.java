@@ -56,9 +56,12 @@ public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSh
         if (uri.getScheme() == null && uri.getHost() == null) {
             url = APIUtils.API_BASE_URI + url;
         }
-        url = RedditLinkUtils.applyLinkDomain(activity, url);
+        // Shown, copied and shared as it would go out to someone else. The open actions keep the
+        // link as tapped: an embed fixer's host is not one LinkResolverActivity recognizes, so
+        // handing it that would send a Reddit link to the browser instead of opening it here.
+        String sharedUrl = RedditLinkUtils.applyShareDomain(activity, url);
 
-        binding.linkTextViewUrlMenuBottomSheetFragment.setText(url);
+        binding.linkTextViewUrlMenuBottomSheetFragment.setText(sharedUrl);
 
         binding.openLinkTextViewUrlMenuBottomSheetFragment.setOnClickListener(view -> {
             Intent intent = new Intent(activity, LinkResolverActivity.class);
@@ -87,7 +90,7 @@ public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSh
         binding.copyLinkTextViewUrlMenuBottomSheetFragment.setOnClickListener(view -> {
             ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null) {
-                ClipData clip = ClipData.newPlainText("simple text", url);
+                ClipData clip = ClipData.newPlainText("simple text", sharedUrl);
                 clipboard.setPrimaryClip(clip);
                 if (android.os.Build.VERSION.SDK_INT < 33) {
                     Toast.makeText(activity, R.string.copy_success, Toast.LENGTH_SHORT).show();
@@ -101,7 +104,7 @@ public class UrlMenuBottomSheetFragment extends LandscapeExpandedRoundedBottomSh
         binding.shareLinkTextViewUrlMenuBottomSheetFragment.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, url);
+            intent.putExtra(Intent.EXTRA_TEXT, sharedUrl);
             try {
                 Intent shareIntent = Intent.createChooser(intent, null);
                 startActivity(shareIntent);

@@ -342,8 +342,10 @@ private fun getBitmapFromView(rootView: View): Bitmap {
 }
 
 private fun generateQRCode(baseActivity: BaseActivity, customThemeWrapper: CustomThemeWrapper, url: String): Drawable {
+    // The browser's domain, not the share one: a phone camera opens the code in a browser, where an
+    // embed fixer's chat preview does nothing.
     val data: QrData.Url = QrData.Url(
-        RedditLinkUtils.applyLinkDomain(baseActivity.defaultSharedPreferences, url)
+        RedditLinkUtils.applyBrowserDomain(baseActivity.defaultSharedPreferences, url)
     )
     return QrCodeDrawable(
         data, QrVectorOptions.Builder()

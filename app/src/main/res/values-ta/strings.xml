@@ -807,8 +807,6 @@
     <string name="settings_link_handler_value_internal_browser">"உள் உலாவி"</string>
     <string name="settings_link_handler_value_specific_browser">"குறிப்பிட்ட உலாவி"</string>
     <string name="settings_specific_browser_title">"குறிப்பிட்ட உலாவி"</string>
-    <string name="settings_use_old_reddit_domain_title">"old.reddit.com ஐப் பயன்படுத்தவும்"</string>
-    <string name="settings_use_old_reddit_domain_summary">"நீங்கள் பயன்பாட்டிற்கு வெளியே பகிரும், நகலெடுக்க அல்லது திறக்கும் Reddit இணைப்புகளுக்கு www.reddit.com க்குப் பதிலாக old.reddit.com ஐப் பயன்படுத்தவும்"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"லெகஸி வீடியோ கன்ட்ரோலர் UI"</string>
     <string name="settings_custom_font_family_title">"தனிப்பயன் எழுத்துரு குடும்பம்"</string>
     <string name="settings_custom_title_font_family_title">"தனிப்பயன் தலைப்பு எழுத்துரு குடும்பம்"</string>

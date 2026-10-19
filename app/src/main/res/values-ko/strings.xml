@@ -810,8 +810,6 @@
     <string name="settings_link_handler_value_internal_browser">"내부 브라우저"</string>
     <string name="settings_link_handler_value_specific_browser">"특정 브라우저"</string>
     <string name="settings_specific_browser_title">"특정 브라우저"</string>
-    <string name="settings_use_old_reddit_domain_title">"old.reddit.com을 사용하세요"</string>
-    <string name="settings_use_old_reddit_domain_summary">"앱 외부에서 공유, 복사 또는 열 수 있는 Reddit 링크에 www.reddit.com 대신 old.reddit.com을 사용하세요."</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"레거시 비디오 컨트롤러 UI"</string>
     <string name="settings_custom_font_family_title">"사용자 정의 글꼴 제품군"</string>
     <string name="settings_custom_title_font_family_title">"사용자 정의 제목 글꼴 모음"</string>

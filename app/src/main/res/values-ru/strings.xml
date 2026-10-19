@@ -816,8 +816,6 @@
     <string name="settings_link_handler_value_internal_browser">"Встроенный браузер"</string>
     <string name="settings_link_handler_value_specific_browser">"Специальный браузер"</string>
     <string name="settings_specific_browser_title">"Специальный браузер"</string>
-    <string name="settings_use_old_reddit_domain_title">"Используй old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Использовать old.reddit.com вместо www.reddit.com для ссылок Reddit, которыми ты делишься, которые копируешь или открываешь вне приложения"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Устаревший пользовательский интерфейс видеоконтроллера"</string>
     <string name="settings_custom_font_family_title">"Пользовательское семейство шрифтов"</string>
     <string name="settings_custom_title_font_family_title">"Пользовательское семейство шрифтов заголовка"</string>

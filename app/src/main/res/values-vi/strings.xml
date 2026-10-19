@@ -810,8 +810,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_link_handler_value_internal_browser">"Trình duyệt nội bộ"</string>
     <string name="settings_link_handler_value_specific_browser">"Trình duyệt cụ thể"</string>
     <string name="settings_specific_browser_title">"Trình duyệt cụ thể"</string>
-    <string name="settings_use_old_reddit_domain_title">"Sử dụng old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Sử dụng old.reddit.com thay vì www.reddit.com cho Reddit liên kết bạn chia sẻ, sao chép hoặc mở bên ngoài ứng dụng"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Giao diện Trình điều khiển Video cũ"</string>
     <string name="settings_custom_font_family_title">"Họ phông chữ tùy chỉnh"</string>
     <string name="settings_custom_title_font_family_title">"Họ phông chữ tiêu đề tùy chỉnh"</string>

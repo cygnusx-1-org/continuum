@@ -71,9 +71,9 @@ public class ShareBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
         FragmentShareLinkBottomSheetBinding binding = FragmentShareLinkBottomSheetBinding.inflate(inflater, container, false);
 
         SharedPreferences defaultSharedPreferences = activity.getDefaultSharedPreferences();
-        String postLink = RedditLinkUtils.applyLinkDomain(defaultSharedPreferences,
+        String postLink = RedditLinkUtils.applyShareDomain(defaultSharedPreferences,
                 java.util.Objects.requireNonNull(requireArguments().getString(EXTRA_POST_LINK)));
-        String mediaLink = RedditLinkUtils.applyLinkDomainOrNull(defaultSharedPreferences,
+        String mediaLink = RedditLinkUtils.applyShareDomainOrNull(defaultSharedPreferences,
                 getArguments().containsKey(EXTRA_MEDIA_LINK) ? getArguments().getString(EXTRA_MEDIA_LINK) : null);
         Post post = getArguments().getParcelable(EXTRA_POST);
         ArrayList<Comment> comments = getArguments().getParcelableArrayList(EXTRA_COMMENTS);

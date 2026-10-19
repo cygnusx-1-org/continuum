@@ -818,8 +818,6 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="settings_link_handler_value_internal_browser">"Navegador interno"</string>
     <string name="settings_link_handler_value_specific_browser">"Navegador específico"</string>
     <string name="settings_specific_browser_title">"Navegador específico"</string>
-    <string name="settings_use_old_reddit_domain_title">"Usar old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Use old.reddit.com em vez de www.reddit.com para Reddit links que você compartilha, copia ou abre fora do aplicativo"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"IU do controlador de vídeo antigo"</string>
     <string name="settings_custom_font_family_title">"Família da fonte customizada"</string>
     <string name="settings_custom_title_font_family_title">"Família da fonte de título customizada"</string>

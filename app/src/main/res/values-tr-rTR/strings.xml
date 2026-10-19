@@ -814,8 +814,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_link_handler_value_internal_browser">"Dahili Tarayıcı"</string>
     <string name="settings_link_handler_value_specific_browser">"Özel Tarayıcı"</string>
     <string name="settings_specific_browser_title">"Özel Tarayıcı"</string>
-    <string name="settings_use_old_reddit_domain_title">"old.reddit.com'u kullanın"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Paylaştığın, kopyaladığın veya uygulama dışında açtığın Reddit bağlantıları için www.reddit.com yerine old.reddit.com adresini kullan"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Eski Video Denetleyicisi Kullanıcı Arayüzü"</string>
     <string name="settings_custom_font_family_title">"Özel Yazı Tipi Ailesi"</string>
     <string name="settings_custom_title_font_family_title">"Özel Başlık Yazı Tipi Ailesi"</string>

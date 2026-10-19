@@ -789,6 +789,26 @@
         <item>4</item>
     </string-array>
 
+    <!-- The domains are names, not words, so only Custom is translated. -->
+    <string-array name="settings_shared_link_domain">
+        <item>www.reddit.com</item>
+        <item>old.reddit.com</item>
+        <item>fxreddit.seria.moe</item>
+        <item>www.vxreddit.com</item>
+        <item>www.redditez.com</item>
+        <item>@string/settings_shared_link_domain_custom</item>
+    </string-array>
+
+    <!-- Each value is the host links go out on, so a value a later version drops still works. -->
+    <string-array name="settings_shared_link_domain_values">
+        <item>www.reddit.com</item>
+        <item>old.reddit.com</item>
+        <item>fxreddit.seria.moe</item>
+        <item>www.vxreddit.com</item>
+        <item>www.redditez.com</item>
+        <item>custom</item>
+    </string-array>
+
     <string-array name="settings_reddit_video_default_resolution">
         <item>Auto</item>
         <item>1080p</item>

@@ -817,8 +817,6 @@ Reddit 视频分辨率较低。
     <string name="settings_link_handler_value_internal_browser">"内部浏览器"</string>
     <string name="settings_link_handler_value_specific_browser">"特定浏览器"</string>
     <string name="settings_specific_browser_title">"特定浏览器"</string>
-    <string name="settings_use_old_reddit_domain_title">"使用 old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"对于您在应用程序外部共享、复制或打开的 Reddit 链接，请使用 old.reddit.com 而不是 www.reddit.com"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"旧版视频控制栏界面"</string>
     <string name="settings_custom_font_family_title">"自定义字体"</string>
     <string name="settings_custom_title_font_family_title">"自定义标题字体"</string>

@@ -801,8 +801,6 @@
     <string name="settings_link_handler_value_internal_browser">"Interni preglednik"</string>
     <string name="settings_link_handler_value_specific_browser">"Poseban preglednik"</string>
     <string name="settings_specific_browser_title">"Poseban preglednik"</string>
-    <string name="settings_use_old_reddit_domain_title">"Koristi old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Koristi old.reddit.com umjesto www.reddit.com za Reddit veze koje dijeliš, kopirate ili otvarate izvan aplikacije"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Sučelje naslijeđenog videokontrolera"</string>
     <string name="settings_custom_font_family_title">"Obitelj prilagođenih fontova"</string>
     <string name="settings_custom_title_font_family_title">"Prilagođena obitelj fontova naslova"</string>

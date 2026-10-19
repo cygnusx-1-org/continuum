@@ -183,7 +183,7 @@ public class WebViewActivity extends BaseActivity {
         } else if (item.getItemId() == R.id.action_open_external_browser_web_view_activity) {
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(RedditLinkUtils.applyLinkDomain(getDefaultSharedPreferences(), url)));
+                intent.setData(Uri.parse(RedditLinkUtils.applyBrowserDomain(getDefaultSharedPreferences(), url)));
                 startActivity(intent);
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(this, R.string.no_activity_found_for_external_browser, Toast.LENGTH_SHORT).show();

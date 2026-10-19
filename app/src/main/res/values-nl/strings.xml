@@ -813,8 +813,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_link_handler_value_internal_browser">"Interne browser"</string>
     <string name="settings_link_handler_value_specific_browser">"specifieke browser"</string>
     <string name="settings_specific_browser_title">"specifieke browser"</string>
-    <string name="settings_use_old_reddit_domain_title">"Gebruik old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"old.reddit.com gebruiken in plaats van www.reddit.com voor Reddit-links die je deelt, kopieert of buiten de app opent"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Gebruikersinterface voor oudere videocontrollers"</string>
     <string name="settings_custom_font_family_title">"Aangepaste lettertypefamilie"</string>
     <string name="settings_custom_title_font_family_title">"Aangepaste titellettertypefamilie"</string>

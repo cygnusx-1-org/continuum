@@ -800,8 +800,6 @@
     <string name="settings_link_handler_value_internal_browser">"browser gudaha ah"</string>
     <string name="settings_link_handler_value_specific_browser">"browser gaar ah"</string>
     <string name="settings_specific_browser_title">"browser gaar ah"</string>
-    <string name="settings_use_old_reddit_domain_title">"Isticmaal old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Isticmaal old.reddit.com halkii aad ka isticmaali lahayd www.reddit.com Reddit xiriirinta aad la wadaagto, nuqul ka sameyso, ama ka furto meel ka baxsan abka"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Xakamaynta dib-u-ciyaarista fiidyaha dhaxalka ah"</string>
     <string name="settings_custom_font_family_title">"Farta Qoyska Gaarka ah"</string>
     <string name="settings_custom_title_font_family_title">"Cinwaanka Gaarka ah ee Farta Qoyska"</string>

@@ -810,8 +810,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_link_handler_value_internal_browser">"Wewnętrzna przeglądarka"</string>
     <string name="settings_link_handler_value_specific_browser">"Specjalna przeglądarka"</string>
     <string name="settings_specific_browser_title">"Specjalna przeglądarka"</string>
-    <string name="settings_use_old_reddit_domain_title">"Użyj old.reddit.com"</string>
-    <string name="settings_use_old_reddit_domain_summary">"Użyj old.reddit.com zamiast www.reddit.com, aby uzyskać Reddit linków, które udostępniasz, kopiujesz lub otwierasz poza aplikacją"</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Stary kontroler Video UI"</string>
     <string name="settings_custom_font_family_title">"Własna czcionka"</string>
     <string name="settings_custom_title_font_family_title">"Własna czcionka tytułu"</string>
