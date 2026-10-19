@@ -2,6 +2,27 @@
 
 ---
 
+8.3.3.4 / 2026-10-18
+=============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented Expand the "optionally use old reddit url for sharing" option into fully customizable sharing domain #453
+* Fixed TTS Button Does Nothing #456
+* Fixed Importing anon/backup from Infinity doesn't work #457
+* Fixed All tab showing Saved tab Contents #455
+
+# Notes
+`Settings > Miscellaneous > Domain for Shared Links` now lets you set different
+[embed fixer](https://github.com/seriaati/embed-fixer) hostnames, and custom
+hostnames.
+
+`Read Aloud` now supports third-party text-to-speech engines.
+
+`Infinity for Reddit` backups work again, but only for the `Anonymous` account. If
+you want to have the settings on more than the `Anonymous` account, use
+`Settings > Account Settings Management > Copy Settings from Another Account`.
+The reason is that most settings are global in `Infinity for Reddit`.
+
 8.3.3.3 / 2026-10-10
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.
