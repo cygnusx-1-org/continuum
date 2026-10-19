@@ -817,6 +817,11 @@ Reddit 视频分辨率较低。
     <string name="settings_link_handler_value_internal_browser">"内部浏览器"</string>
     <string name="settings_link_handler_value_specific_browser">"特定浏览器"</string>
     <string name="settings_specific_browser_title">"特定浏览器"</string>
+    <string name="settings_shared_link_domain_title">"分享链接的域名"</string>
+    <string name="settings_shared_link_domain_custom">"自定义"</string>
+    <string name="settings_shared_link_custom_domain_title">"自定义域名"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"不是有效的域名"</string>
+    <string name="settings_shared_link_domain_summary">包含非 Reddit 域名选项，参见 <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>。</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"旧版视频控制栏界面"</string>
     <string name="settings_custom_font_family_title">"自定义字体"</string>
     <string name="settings_custom_title_font_family_title">"自定义标题字体"</string>

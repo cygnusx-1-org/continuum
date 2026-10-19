@@ -800,6 +800,11 @@
     <string name="settings_link_handler_value_internal_browser">"browser gudaha ah"</string>
     <string name="settings_link_handler_value_specific_browser">"browser gaar ah"</string>
     <string name="settings_specific_browser_title">"browser gaar ah"</string>
+    <string name="settings_shared_link_domain_title">"Domain-ka Linkiyada la Wadaago"</string>
+    <string name="settings_shared_link_domain_custom">"Gaar ah"</string>
+    <string name="settings_shared_link_custom_domain_title">"Domain Gaar ah"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Domain sax ah maaha"</string>
+    <string name="settings_shared_link_domain_summary">Waxaa ku jira domain-no aan Reddit ahayn, eeg <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Xakamaynta dib-u-ciyaarista fiidyaha dhaxalka ah"</string>
     <string name="settings_custom_font_family_title">"Farta Qoyska Gaarka ah"</string>
     <string name="settings_custom_title_font_family_title">"Cinwaanka Gaarka ah ee Farta Qoyska"</string>

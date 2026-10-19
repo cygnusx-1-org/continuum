@@ -801,6 +801,11 @@
     <string name="settings_link_handler_value_internal_browser">"Interni preglednik"</string>
     <string name="settings_link_handler_value_specific_browser">"Poseban preglednik"</string>
     <string name="settings_specific_browser_title">"Poseban preglednik"</string>
+    <string name="settings_shared_link_domain_title">"Domena za dijeljene poveznice"</string>
+    <string name="settings_shared_link_domain_custom">"Prilagođeno"</string>
+    <string name="settings_shared_link_custom_domain_title">"Prilagođena domena"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Nije valjana domena"</string>
+    <string name="settings_shared_link_domain_summary">Uključuje i domene izvan Reddita, pogledajte <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Sučelje naslijeđenog videokontrolera"</string>
     <string name="settings_custom_font_family_title">"Obitelj prilagođenih fontova"</string>
     <string name="settings_custom_title_font_family_title">"Prilagođena obitelj fontova naslova"</string>

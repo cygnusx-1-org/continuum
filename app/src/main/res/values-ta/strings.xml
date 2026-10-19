@@ -807,6 +807,11 @@
     <string name="settings_link_handler_value_internal_browser">"உள் உலாவி"</string>
     <string name="settings_link_handler_value_specific_browser">"குறிப்பிட்ட உலாவி"</string>
     <string name="settings_specific_browser_title">"குறிப்பிட்ட உலாவி"</string>
+    <string name="settings_shared_link_domain_title">"பகிரப்படும் தொடுப்புகளுக்கான டொமைன்"</string>
+    <string name="settings_shared_link_domain_custom">"தனிப்பயன்"</string>
+    <string name="settings_shared_link_custom_domain_title">"தனிப்பயன் டொமைன்"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"சரியான டொமைன் அல்ல"</string>
+    <string name="settings_shared_link_domain_summary">Reddit அல்லாத டொமைன் தேர்வுகளும் அடங்கும், <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a> ஐப் பார்க்கவும்.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"லெகஸி வீடியோ கன்ட்ரோலர் UI"</string>
     <string name="settings_custom_font_family_title">"தனிப்பயன் எழுத்துரு குடும்பம்"</string>
     <string name="settings_custom_title_font_family_title">"தனிப்பயன் தலைப்பு எழுத்துரு குடும்பம்"</string>

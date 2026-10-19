@@ -810,6 +810,11 @@
     <string name="settings_link_handler_value_internal_browser">"Εσωτερικός Περιηγητής"</string>
     <string name="settings_link_handler_value_specific_browser">"Ειδικό πρόγραμμα περιήγησης"</string>
     <string name="settings_specific_browser_title">"Ειδικό πρόγραμμα περιήγησης"</string>
+    <string name="settings_shared_link_domain_title">"Τομέας για κοινοποιημένους συνδέσμους"</string>
+    <string name="settings_shared_link_domain_custom">"Προσαρμοσμένο"</string>
+    <string name="settings_shared_link_custom_domain_title">"Προσαρμοσμένος τομέας"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Μη έγκυρος τομέας"</string>
+    <string name="settings_shared_link_domain_summary">Περιλαμβάνει επιλογές τομέων εκτός Reddit, δείτε <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Απαρχαιωμένο UI χειριστηρίου Βίντεο"</string>
     <string name="settings_custom_font_family_title">"Προσαρμοσμένη Γραμματοσειρά"</string>
     <string name="settings_custom_title_font_family_title">"Προσαρμοσμένη Γραμματοσειρά Τίτλων"</string>

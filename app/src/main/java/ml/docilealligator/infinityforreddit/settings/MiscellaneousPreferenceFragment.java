@@ -10,14 +10,21 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.TextUtils;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
-import androidx.preference.Preference;
 import androidx.preference.SwitchPreference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,9 +47,6 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import org.greenrobot.eventbus.EventBus;
 
 public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmentCompat {
-
-    /** A list of embed fixers by site, for the "What are embed fixers?" row. */
-    private static final String EMBED_FIXERS_URL = "https://github.com/seriaati/embed-fixer";
 
     @Inject
     @Named("default")
@@ -72,7 +76,6 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
         ListPreference languageListPreference = findPreference(SharedPreferencesUtils.LANGUAGE);
         ListPreference sharedLinkDomainListPreference = findPreference(SharedPreferencesUtils.SHARED_LINK_DOMAIN);
         EditTextPreference sharedLinkCustomDomainPreference = findPreference(SharedPreferencesUtils.SHARED_LINK_CUSTOM_DOMAIN);
-        Preference embedFixersInfoPreference = findPreference(SharedPreferencesUtils.EMBED_FIXERS_INFO);
 
         List<String[]> ephemeralBrowsers = findEphemeralBrowsers(mActivity);
         boolean hasEphemeralBrowser = !ephemeralBrowsers.isEmpty();
@@ -145,6 +148,13 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
             // selected rather than on the domain links already go out on.
             String sharedLinkDomain = RedditLinkUtils.sharedLinkDomainChoice(mSharedPreferences);
             sharedLinkDomainListPreference.setValue(sharedLinkDomain);
+            // The chosen domain, as the other lists here show theirs, with the description under it
+            // after a blank line, the way the swipe threshold's summary sets its value apart.
+            CharSequence description = withLinksOpenedInApp(getText(R.string.settings_shared_link_domain_summary));
+            sharedLinkDomainListPreference.setSummaryProvider(preference -> {
+                CharSequence entry = ((ListPreference) preference).getEntry();
+                return entry == null ? description : TextUtils.concat(entry, "\n\n", description);
+            });
             if (sharedLinkCustomDomainPreference != null) {
                 // Disabled rather than hidden, so picking Custom does not shift the rows below.
                 sharedLinkCustomDomainPreference.setEnabled(
@@ -163,11 +173,23 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
             sharedLinkCustomDomainPreference.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
                 editText.setSingleLine(true);
+                // Never an empty box: with nothing typed in yet, links go out on www.reddit.com.
+                if (editText.getText().toString().trim().isEmpty()) {
+                    editText.setText(RedditLinkUtils.WWW_REDDIT_HOST);
+                    editText.setSelection(editText.length());
+                }
+            });
+            // Never "Not set" either, even for an empty value an older build let through: the
+            // row names the domain links actually go out on.
+            sharedLinkCustomDomainPreference.setSummaryProvider(preference -> {
+                String domain = RedditLinkUtils.normalizeDomain(((EditTextPreference) preference).getText());
+                return domain != null ? domain : RedditLinkUtils.WWW_REDDIT_HOST;
             });
             sharedLinkCustomDomainPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 String typed = (String) newValue;
-                // Clearing the field is allowed, and leaves links on www.reddit.com.
-                String domain = typed.trim().isEmpty() ? "" : RedditLinkUtils.normalizeDomain(typed);
+                // An empty field is refused like any other non-domain, so the row always names
+                // the domain links go out on.
+                String domain = RedditLinkUtils.normalizeDomain(typed);
                 if (domain == null) {
                     Toast.makeText(mActivity, R.string.settings_shared_link_custom_domain_invalid, Toast.LENGTH_SHORT).show();
                     return false;
@@ -178,15 +200,6 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
                     ((EditTextPreference) preference).setText(domain);
                     return false;
                 }
-                return true;
-            });
-        }
-
-        if (embedFixersInfoPreference != null) {
-            embedFixersInfoPreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
-                intent.setData(Uri.parse(EMBED_FIXERS_URL));
-                mActivity.startActivity(intent);
                 return true;
             });
         }
@@ -234,6 +247,35 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
             });
         }
 
+    }
+
+    /**
+     * {@code text} with each of its links opened through LinkResolverActivity, as every other link
+     * in the app is, rather than straight in a browser, and drawn in the theme's link color.
+     */
+    private CharSequence withLinksOpenedInApp(CharSequence text) {
+        SpannableStringBuilder linked = new SpannableStringBuilder(text);
+        for (URLSpan urlSpan : linked.getSpans(0, linked.length(), URLSpan.class)) {
+            int start = linked.getSpanStart(urlSpan);
+            int end = linked.getSpanEnd(urlSpan);
+            String url = urlSpan.getURL();
+            linked.removeSpan(urlSpan);
+            linked.setSpan(new ClickableSpan() {
+                @Override
+                public void onClick(@NonNull View widget) {
+                    Intent intent = new Intent(mActivity, LinkResolverActivity.class);
+                    intent.setData(Uri.parse(url));
+                    mActivity.startActivity(intent);
+                }
+
+                @Override
+                public void updateDrawState(@NonNull TextPaint textPaint) {
+                    super.updateDrawState(textPaint);
+                    textPaint.setColor(mActivity.customThemeWrapper.getLinkColor());
+                }
+            }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return linked;
     }
 
     private static List<String[]> findInstalledBrowsers(Context context) {

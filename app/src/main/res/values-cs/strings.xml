@@ -817,6 +817,11 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="settings_link_handler_value_internal_browser">"Interní prohlížeč"</string>
     <string name="settings_link_handler_value_specific_browser">"Specifický prohlížeč"</string>
     <string name="settings_specific_browser_title">"Specifický prohlížeč"</string>
+    <string name="settings_shared_link_domain_title">"Doména pro sdílené odkazy"</string>
+    <string name="settings_shared_link_domain_custom">"Vlastní"</string>
+    <string name="settings_shared_link_custom_domain_title">"Vlastní doména"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Neplatná doména"</string>
+    <string name="settings_shared_link_domain_summary">Zahrnuje i domény mimo Reddit, viz <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Staré UI ovládání videa"</string>
     <string name="settings_custom_font_family_title">"Vlastní rodina písem"</string>
     <string name="settings_custom_title_font_family_title">"Vlastní rodina nadpisových písem"</string>

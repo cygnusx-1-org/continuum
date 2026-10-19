@@ -818,6 +818,11 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_link_handler_value_internal_browser">"Browser interno"</string>
     <string name="settings_link_handler_value_specific_browser">"Browser specifico"</string>
     <string name="settings_specific_browser_title">"Browser specifico"</string>
+    <string name="settings_shared_link_domain_title">"Dominio per i link condivisi"</string>
+    <string name="settings_shared_link_domain_custom">"Personalizzato"</string>
+    <string name="settings_shared_link_custom_domain_title">"Dominio personalizzato"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Dominio non valido"</string>
+    <string name="settings_shared_link_domain_summary">Include domini esterni a Reddit, vedi <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"UI legacy del controller video"</string>
     <string name="settings_custom_font_family_title">"Famiglia di caratteri personalizzati"</string>
     <string name="settings_custom_title_font_family_title">"Famiglia di caratteri titolo personalizzato"</string>

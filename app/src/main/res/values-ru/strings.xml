@@ -816,6 +816,11 @@
     <string name="settings_link_handler_value_internal_browser">"Встроенный браузер"</string>
     <string name="settings_link_handler_value_specific_browser">"Специальный браузер"</string>
     <string name="settings_specific_browser_title">"Специальный браузер"</string>
+    <string name="settings_shared_link_domain_title">"Домен для отправляемых ссылок"</string>
+    <string name="settings_shared_link_domain_custom">"Свой"</string>
+    <string name="settings_shared_link_custom_domain_title">"Свой домен"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Недопустимый домен"</string>
+    <string name="settings_shared_link_domain_summary">Включает домены не от Reddit, см. <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Устаревший пользовательский интерфейс видеоконтроллера"</string>
     <string name="settings_custom_font_family_title">"Пользовательское семейство шрифтов"</string>
     <string name="settings_custom_title_font_family_title">"Пользовательское семейство шрифтов заголовка"</string>

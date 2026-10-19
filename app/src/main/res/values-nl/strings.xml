@@ -813,6 +813,11 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_link_handler_value_internal_browser">"Interne browser"</string>
     <string name="settings_link_handler_value_specific_browser">"specifieke browser"</string>
     <string name="settings_specific_browser_title">"specifieke browser"</string>
+    <string name="settings_shared_link_domain_title">"Domein voor gedeelde links"</string>
+    <string name="settings_shared_link_domain_custom">"Aangepast"</string>
+    <string name="settings_shared_link_custom_domain_title">"Aangepast domein"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Geen geldig domein"</string>
+    <string name="settings_shared_link_domain_summary">Bevat ook domeinen buiten Reddit, zie <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Gebruikersinterface voor oudere videocontrollers"</string>
     <string name="settings_custom_font_family_title">"Aangepaste lettertypefamilie"</string>
     <string name="settings_custom_title_font_family_title">"Aangepaste titellettertypefamilie"</string>

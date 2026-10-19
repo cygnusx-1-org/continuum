@@ -810,6 +810,11 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_link_handler_value_internal_browser">"Wewnętrzna przeglądarka"</string>
     <string name="settings_link_handler_value_specific_browser">"Specjalna przeglądarka"</string>
     <string name="settings_specific_browser_title">"Specjalna przeglądarka"</string>
+    <string name="settings_shared_link_domain_title">"Domena udostępnianych linków"</string>
+    <string name="settings_shared_link_domain_custom">"Własna"</string>
+    <string name="settings_shared_link_custom_domain_title">"Własna domena"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Nieprawidłowa domena"</string>
+    <string name="settings_shared_link_domain_summary">Obejmuje też domeny spoza Reddita, zobacz <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Stary kontroler Video UI"</string>
     <string name="settings_custom_font_family_title">"Własna czcionka"</string>
     <string name="settings_custom_title_font_family_title">"Własna czcionka tytułu"</string>

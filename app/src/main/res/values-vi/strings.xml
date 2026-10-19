@@ -810,6 +810,11 @@ Tự động phát video bị tắt."</string>
     <string name="settings_link_handler_value_internal_browser">"Trình duyệt nội bộ"</string>
     <string name="settings_link_handler_value_specific_browser">"Trình duyệt cụ thể"</string>
     <string name="settings_specific_browser_title">"Trình duyệt cụ thể"</string>
+    <string name="settings_shared_link_domain_title">"Tên miền cho liên kết chia sẻ"</string>
+    <string name="settings_shared_link_domain_custom">"Tùy chỉnh"</string>
+    <string name="settings_shared_link_custom_domain_title">"Tên miền tùy chỉnh"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Tên miền không hợp lệ"</string>
+    <string name="settings_shared_link_domain_summary">Bao gồm cả tên miền ngoài Reddit, xem <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Giao diện Trình điều khiển Video cũ"</string>
     <string name="settings_custom_font_family_title">"Họ phông chữ tùy chỉnh"</string>
     <string name="settings_custom_title_font_family_title">"Họ phông chữ tiêu đề tùy chỉnh"</string>

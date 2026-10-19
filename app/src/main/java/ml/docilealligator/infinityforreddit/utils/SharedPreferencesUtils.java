@@ -140,7 +140,6 @@ public class SharedPreferencesUtils {
     public static final String USE_OLD_REDDIT_DOMAIN = "use_old_reddit_domain";
     public static final String SHARED_LINK_DOMAIN = "shared_link_domain";
     public static final String SHARED_LINK_CUSTOM_DOMAIN = "shared_link_custom_domain";
-    public static final String EMBED_FIXERS_INFO = "embed_fixers_info";
     public static final String PLAY_SHORT_CLIP_HOSTS_INLINE = "play_short_clip_hosts_inline";
     public static final String VIDEO_AUTOPLAY = "video_autoplay";
     public static final String VIDEO_AUTOPLAY_VALUE_ALWAYS_ON = "2";

@@ -817,6 +817,11 @@
     <string name="settings_link_handler_value_internal_browser">"Внутрішній оглядач"</string>
     <string name="settings_link_handler_value_specific_browser">"Спеціальний браузер"</string>
     <string name="settings_specific_browser_title">"Спеціальний браузер"</string>
+    <string name="settings_shared_link_domain_title">"Домен для поширюваних ланок"</string>
+    <string name="settings_shared_link_domain_custom">"Власний"</string>
+    <string name="settings_shared_link_custom_domain_title">"Власний домен"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Недійсний домен"</string>
+    <string name="settings_shared_link_domain_summary">Містить домени поза Reddit, див. <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Успадкований КІ керування відеозаписами"</string>
     <string name="settings_custom_font_family_title">"Власне сімейство шрифтів"</string>
     <string name="settings_custom_title_font_family_title">"Власне сімейство шрифтів для заголовку"</string>

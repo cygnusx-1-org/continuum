@@ -817,6 +817,11 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_link_handler_value_internal_browser">"Browser Intern"</string>
     <string name="settings_link_handler_value_specific_browser">"Browser specific"</string>
     <string name="settings_specific_browser_title">"Browser specific"</string>
+    <string name="settings_shared_link_domain_title">"Domeniu pentru linkurile distribuite"</string>
+    <string name="settings_shared_link_domain_custom">"Personalizat"</string>
+    <string name="settings_shared_link_custom_domain_title">"Domeniu personalizat"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Domeniu nevalid"</string>
+    <string name="settings_shared_link_domain_summary">Include și domenii din afara Reddit, vezi <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"UI-ul Vechi al Controller-ului Video"</string>
     <string name="settings_custom_font_family_title">"Familie de Fonturi Personalizată"</string>
     <string name="settings_custom_title_font_family_title">"Familia de Fonturi Personalizată pentru Titlu"</string>

@@ -817,6 +817,11 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_link_handler_value_internal_browser">"Navegador interno"</string>
     <string name="settings_link_handler_value_specific_browser">"Navegador específico"</string>
     <string name="settings_specific_browser_title">"Navegador específico"</string>
+    <string name="settings_shared_link_domain_title">"Dominio para enlaces compartidos"</string>
+    <string name="settings_shared_link_domain_custom">"Personalizado"</string>
+    <string name="settings_shared_link_custom_domain_title">"Dominio personalizado"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"No es un dominio válido"</string>
+    <string name="settings_shared_link_domain_summary">Incluye opciones de dominios ajenos a Reddit, consulta <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Interfaz del controlador de vídeo heredado"</string>
     <string name="settings_custom_font_family_title">"Familia de fuente personalizada"</string>
     <string name="settings_custom_title_font_family_title">"Familia de fuente del título personalizada"</string>

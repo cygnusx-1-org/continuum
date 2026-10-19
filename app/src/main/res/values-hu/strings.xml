@@ -805,6 +805,11 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="settings_link_handler_value_internal_browser">"Belső böngésző "</string>
     <string name="settings_link_handler_value_specific_browser">"speciális böngésző"</string>
     <string name="settings_specific_browser_title">"speciális böngésző"</string>
+    <string name="settings_shared_link_domain_title">"Megosztott linkek domainje"</string>
+    <string name="settings_shared_link_domain_custom">"Egyedi"</string>
+    <string name="settings_shared_link_custom_domain_title">"Egyedi domain"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Érvénytelen domain"</string>
+    <string name="settings_shared_link_domain_summary">Nem Reddites domaineket is tartalmaz, lásd: <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Korábbi videolejátszási vezérlők"</string>
     <string name="settings_custom_font_family_title">"egyedi betűtípuscsalád"</string>
     <string name="settings_custom_title_font_family_title">"Egyedi cím betűtípuscsalád"</string>

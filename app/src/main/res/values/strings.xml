@@ -880,8 +880,7 @@
     <string name="settings_shared_link_domain_custom">Custom</string>
     <string name="settings_shared_link_custom_domain_title">Custom Domain</string>
     <string name="settings_shared_link_custom_domain_invalid">Not a valid domain</string>
-    <string name="settings_embed_fixers_info_title">What Are Embed Fixers?</string>
-    <string name="settings_embed_fixers_info_summary">old.reddit.com is used for every Reddit link you share, copy, or open outside the app. The others are embed fixers: sites that make shared posts play and show their images in Discord, Telegram and other chat apps. They are used only for post and comment links you share or copy.</string>
+    <string name="settings_shared_link_domain_summary">Includes non-Reddit domain choices, see <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">Legacy Video Controller UI</string>
     <string name="settings_custom_font_family_title">Custom Font Family</string>
     <string name="settings_custom_title_font_family_title">Custom Title Font Family</string>

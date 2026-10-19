@@ -34,24 +34,23 @@
         app:title="@string/settings_specific_browser_title"
         app:useSimpleSummaryProvider="true" />
 
-    <!-- No defaultValue: MiscellaneousPreferenceFragment sets the value. -->
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+    <!-- No defaultValue: MiscellaneousPreferenceFragment sets the value. The summary here is what
+         settings search indexes; on screen the fragment shows the chosen domain above it. -->
+    <ml.docilealligator.infinityforreddit.customviews.preference.LinkSummaryListPreference
         app:entries="@array/settings_shared_link_domain"
         app:entryValues="@array/settings_shared_link_domain_values"
         app:icon="@drawable/ic_link_day_night_24dp"
         app:key="shared_link_domain"
-        app:title="@string/settings_shared_link_domain_title"
-        app:useSimpleSummaryProvider="true" />
+        app:summary="@string/settings_shared_link_domain_summary"
+        app:title="@string/settings_shared_link_domain_title" />
 
+    <!-- Defaults to www.reddit.com, what links go out on until another domain is typed in.
+         MiscellaneousPreferenceFragment sets the summary, which shows the same for an empty
+         value. -->
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontEditTextPreference
+        app:defaultValue="www.reddit.com"
         app:key="shared_link_custom_domain"
-        app:title="@string/settings_shared_link_custom_domain_title"
-        app:useSimpleSummaryProvider="true" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:key="embed_fixers_info"
-        app:summary="@string/settings_embed_fixers_info_summary"
-        app:title="@string/settings_embed_fixers_info_title" />
+        app:title="@string/settings_shared_link_custom_domain_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="0"

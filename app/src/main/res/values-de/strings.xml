@@ -817,6 +817,11 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_link_handler_value_internal_browser">"Interner Browser"</string>
     <string name="settings_link_handler_value_specific_browser">"Spezifischer Browser"</string>
     <string name="settings_specific_browser_title">"Spezifischer Browser"</string>
+    <string name="settings_shared_link_domain_title">"Domain für geteilte Links"</string>
+    <string name="settings_shared_link_domain_custom">"Benutzerdefiniert"</string>
+    <string name="settings_shared_link_custom_domain_title">"Benutzerdefinierte Domain"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Keine gültige Domain"</string>
+    <string name="settings_shared_link_domain_summary">Enthält auch Domains außerhalb von Reddit, siehe <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Altes Video-Steuerungs UI"</string>
     <string name="settings_custom_font_family_title">"Benutzerdefinierte Schriftart-familie"</string>
     <string name="settings_custom_title_font_family_title">"Benutzerdefinierte Titelschriftart-familie"</string>

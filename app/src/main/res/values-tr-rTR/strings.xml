@@ -814,6 +814,11 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_link_handler_value_internal_browser">"Dahili Tarayıcı"</string>
     <string name="settings_link_handler_value_specific_browser">"Özel Tarayıcı"</string>
     <string name="settings_specific_browser_title">"Özel Tarayıcı"</string>
+    <string name="settings_shared_link_domain_title">"Paylaşılan Bağlantılar için Alan Adı"</string>
+    <string name="settings_shared_link_domain_custom">"Özel"</string>
+    <string name="settings_shared_link_custom_domain_title">"Özel Alan Adı"</string>
+    <string name="settings_shared_link_custom_domain_invalid">"Geçerli bir alan adı değil"</string>
+    <string name="settings_shared_link_domain_summary">Reddit dışı alan adı seçeneklerini de içerir, bkz. <a href="https://github.com/seriaati/embed-fixer">Embed Fixers</a>.</string>
     <string name="settings_legacy_autoplay_video_controller_ui_title">"Eski Video Denetleyicisi Kullanıcı Arayüzü"</string>
     <string name="settings_custom_font_family_title">"Özel Yazı Tipi Ailesi"</string>
     <string name="settings_custom_title_font_family_title">"Özel Başlık Yazı Tipi Ailesi"</string>
