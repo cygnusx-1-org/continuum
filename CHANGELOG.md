@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.5 / 2026-10-20
+=============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Some posts are missing image attachments #459
+* Fixed Flairs with images don't work #458
+
 8.3.3.4 / 2026-10-18
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.
