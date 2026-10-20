@@ -1237,19 +1237,25 @@ public class Post implements Parcelable {
         public String caption;
         public String captionUrl;
 
+        /**
+         * Whether a gallery item's MIME type is a still picture: anything under image/ except a gif.
+         * Spellings must not be listed. Twice now a list of them has turned stills into "video":
+         * imgchest supplies image/jpeg, and Reddit's own `m` field, after years of image/jpg, has
+         * started saying image/jpeg too (issue #459). In {@code ParsePost} that sent every such
+         * item looking for an `mp4` key, and the throw cost the post its whole gallery.
+         */
+        public static boolean isStillImage(String mimeType) {
+            return mimeType.startsWith("image/") && !mimeType.contains("gif");
+        }
+
         public Gallery(String mimeType, String url, String fallbackUrl, String fileName, String caption, String captionUrl) {
             this.mimeType = mimeType;
             this.url = url;
             this.fallbackUrl = fallbackUrl;
             this.fileName = fileName;
-            // Anything under image/ is a still, rather than the two spellings Reddit happens to
-            // use. Reddit's `m` field only ever says image/jpg, image/png, image/gif or video/mp4,
-            // so listing the first two was enough until an image host started supplying the type --
-            // and imgchest serves .jpeg, which matched neither and fell through to video. A whole
-            // album of stills then opened in the video player.
             if (mimeType.contains("gif")) {
                 mediaType = TYPE_GIF;
-            } else if (mimeType.startsWith("image/")) {
+            } else if (isStillImage(mimeType)) {
                 mediaType = TYPE_IMAGE;
             } else {
                 mediaType = TYPE_VIDEO;

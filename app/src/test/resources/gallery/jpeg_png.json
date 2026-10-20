@@ -1,0 +1,240 @@
+{
+  "approved_at_utc": null,
+  "subreddit": "lotr",
+  "selftext": "",
+  "user_reports": [],
+  "saved": false,
+  "mod_reason_title": null,
+  "gilded": 0,
+  "clicked": false,
+  "is_gallery": true,
+  "title": "Happy 68th birthday to our beloved Viggo Mortensen! 👑",
+  "link_flair_richtext": [
+    {
+      "e": "text",
+      "t": "Other"
+    }
+  ],
+  "subreddit_name_prefixed": "r/lotr",
+  "hidden": false,
+  "pwls": 6,
+  "link_flair_css_class": "",
+  "downs": 0,
+  "thumbnail_height": 102,
+  "top_awarded_type": null,
+  "name": "t3_1xaas0t",
+  "media_metadata": {
+    "zv2kb6000iwh1": {
+      "status": "valid",
+      "e": "Image",
+      "m": "image/jpeg",
+      "p": [
+        {
+          "y": 79,
+          "x": 108,
+          "u": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=108&crop=smart&auto=webp&s=1946ceafd290b1c4dd3b9c6f3df80e78857761f1"
+        },
+        {
+          "y": 158,
+          "x": 216,
+          "u": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=216&crop=smart&auto=webp&s=e5ef40589528dc5749c39cd84c7d8b19f16f255b"
+        },
+        {
+          "y": 234,
+          "x": 320,
+          "u": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=320&crop=smart&auto=webp&s=3fda7ff62ebbb6576faeafe00010b20812152f2f"
+        },
+        {
+          "y": 469,
+          "x": 640,
+          "u": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=640&crop=smart&auto=webp&s=f8bd99a97b51d2b5d16551af3694f6ab43e3ab69"
+        },
+        {
+          "y": 704,
+          "x": 960,
+          "u": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=960&crop=smart&auto=webp&s=fbb5979082a939f3381cf66c2100d4ccaeb8b8f7"
+        },
+        {
+          "y": 792,
+          "x": 1080,
+          "u": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=1080&crop=smart&auto=webp&s=d43fa9a76667df66ea1c2623b38990d0c7fd90c2"
+        }
+      ],
+      "s": {
+        "y": 1101,
+        "x": 1500,
+        "u": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=1500&format=pjpg&auto=webp&s=e4799394ead506da6b5eb19e6ab9bdfb6159d135"
+      },
+      "id": "zv2kb6000iwh1"
+    },
+    "k9f1jp700iwh1": {
+      "status": "valid",
+      "e": "Image",
+      "m": "image/jpeg",
+      "p": [
+        {
+          "y": 128,
+          "x": 108,
+          "u": "https://preview.redd.it/k9f1jp700iwh1.jpeg?width=108&crop=smart&auto=webp&s=897910a0d0be39421baef20f391fa8a3a06c0c14"
+        },
+        {
+          "y": 257,
+          "x": 216,
+          "u": "https://preview.redd.it/k9f1jp700iwh1.jpeg?width=216&crop=smart&auto=webp&s=35435bca078d78ee1455cff8233df280b83924ab"
+        },
+        {
+          "y": 381,
+          "x": 320,
+          "u": "https://preview.redd.it/k9f1jp700iwh1.jpeg?width=320&crop=smart&auto=webp&s=7d295717fe5b035ffea37aba8482c54537073820"
+        }
+      ],
+      "s": {
+        "y": 604,
+        "x": 507,
+        "u": "https://preview.redd.it/k9f1jp700iwh1.jpeg?width=507&format=pjpg&auto=webp&s=a5d72301c3b2931be67eba25f8139b7e70450c8c"
+      },
+      "id": "k9f1jp700iwh1"
+    },
+    "uiaucc900iwh1": {
+      "status": "valid",
+      "e": "Image",
+      "m": "image/png",
+      "p": [
+        {
+          "y": 97,
+          "x": 108,
+          "u": "https://preview.redd.it/uiaucc900iwh1.png?width=108&crop=smart&auto=webp&s=82aed51cdcc8c5ebc412cbdc316e6cc9b3bf3747"
+        },
+        {
+          "y": 195,
+          "x": 216,
+          "u": "https://preview.redd.it/uiaucc900iwh1.png?width=216&crop=smart&auto=webp&s=9bd2ce9394bb1bdfacbfd57fd39059649534ecf9"
+        },
+        {
+          "y": 289,
+          "x": 320,
+          "u": "https://preview.redd.it/uiaucc900iwh1.png?width=320&crop=smart&auto=webp&s=4cd4b2019be68bc974573f267fc276345b3e5aa1"
+        },
+        {
+          "y": 579,
+          "x": 640,
+          "u": "https://preview.redd.it/uiaucc900iwh1.png?width=640&crop=smart&auto=webp&s=26c1f287cc3469ec489b7dce5247fdbdad95230f"
+        }
+      ],
+      "s": {
+        "y": 724,
+        "x": 799,
+        "u": "https://preview.redd.it/uiaucc900iwh1.png?width=799&format=png&auto=webp&s=0e9569ea4663dfdf627239514d0e0f533103b95f"
+      },
+      "id": "uiaucc900iwh1"
+    }
+  },
+  "hide_score": false,
+  "quarantine": false,
+  "link_flair_text_color": "light",
+  "upvote_ratio": 0.98,
+  "author_flair_background_color": null,
+  "ups": 8480,
+  "domain": "reddit.com",
+  "media_embed": {},
+  "thumbnail_width": 140,
+  "author_flair_template_id": null,
+  "is_original_content": false,
+  "author_fullname": "t2_gdspks099",
+  "secure_media": null,
+  "is_reddit_media_domain": false,
+  "is_meta": false,
+  "category": null,
+  "secure_media_embed": {},
+  "gallery_data": {
+    "items": [
+      {
+        "is_deleted": false,
+        "media_id": "zv2kb6000iwh1",
+        "id": 1075093345
+      },
+      {
+        "is_deleted": false,
+        "media_id": "k9f1jp700iwh1",
+        "id": 1075093346
+      },
+      {
+        "is_deleted": false,
+        "media_id": "uiaucc900iwh1",
+        "id": 1075093347
+      }
+    ]
+  },
+  "link_flair_text": "Other",
+  "can_mod_post": false,
+  "score": 8480,
+  "approved_by": null,
+  "is_created_from_ads_ui": false,
+  "author_premium": false,
+  "thumbnail": "https://preview.redd.it/zv2kb6000iwh1.jpeg?width=140&height=102&auto=webp&s=48396d7f9152406f162bc85deac498da19bd728d",
+  "edited": false,
+  "author_flair_css_class": null,
+  "author_flair_richtext": [],
+  "gildings": {},
+  "content_categories": null,
+  "is_self": false,
+  "subreddit_type": "public",
+  "created": 1792447945.0,
+  "link_flair_type": "richtext",
+  "wls": 6,
+  "removed_by_category": null,
+  "banned_by": null,
+  "author_flair_type": "text",
+  "total_awards_received": 0,
+  "allow_live_comments": false,
+  "selftext_html": null,
+  "likes": null,
+  "suggested_sort": "confidence",
+  "banned_at_utc": null,
+  "url_overridden_by_dest": "https://www.reddit.com/gallery/1xaas0t",
+  "view_count": null,
+  "archived": false,
+  "no_follow": false,
+  "is_crosspostable": false,
+  "pinned": false,
+  "over_18": false,
+  "all_awardings": [],
+  "awarders": [],
+  "media_only": false,
+  "link_flair_template_id": "71c50f90-daac-11eb-946a-0e0fe7a45243",
+  "can_gild": false,
+  "spoiler": false,
+  "locked": false,
+  "author_flair_text": null,
+  "treatment_tags": [],
+  "visited": false,
+  "removed_by": null,
+  "mod_note": null,
+  "distinguished": null,
+  "subreddit_id": "t5_2rfb9",
+  "author_is_blocked": false,
+  "mod_reason_by": null,
+  "num_reports": null,
+  "removal_reason": null,
+  "link_flair_background_color": "#373c3f",
+  "id": "1xaas0t",
+  "is_robot_indexable": true,
+  "num_duplicates": 0,
+  "report_reasons": null,
+  "author": "Curious_Progress_",
+  "discussion_type": null,
+  "num_comments": 129,
+  "send_replies": false,
+  "media": null,
+  "contest_mode": false,
+  "author_patreon_flair": false,
+  "author_flair_text_color": null,
+  "permalink": "/r/lotr/comments/1xaas0t/happy_68th_birthday_to_our_beloved_viggo_mortensen/",
+  "stickied": false,
+  "url": "https://www.reddit.com/gallery/1xaas0t",
+  "subreddit_subscribers": 1352359,
+  "created_utc": 1792447945.0,
+  "num_crossposts": 0,
+  "mod_reports": [],
+  "is_video": false
+}

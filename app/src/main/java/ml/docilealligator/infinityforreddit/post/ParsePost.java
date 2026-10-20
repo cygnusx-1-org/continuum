@@ -3,7 +3,6 @@ package ml.docilealligator.infinityforreddit.post;
 import android.net.Uri;
 import android.os.Handler;
 import android.text.Html;
-import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -802,12 +801,18 @@ public class ParsePost {
                             continue;
                         }
                         String galleryItemUrl;
-                        if (mimeType.contains("jpg") || mimeType.contains("png")) {
-                            galleryItemUrl = sourceObject.getString(JSONUtils.U_KEY);
+                        if (Post.Gallery.isStillImage(mimeType)) {
+                            galleryItemUrl = sourceObject.optString(JSONUtils.U_KEY);
                         } else if (mimeType.contains("gif")) {
-                            galleryItemUrl = sourceObject.getString(JSONUtils.GIF_KEY);
+                            galleryItemUrl = sourceObject.optString(JSONUtils.GIF_KEY);
                         } else {
-                            galleryItemUrl = sourceObject.getString(JSONUtils.MP4_KEY);
+                            galleryItemUrl = sourceObject.optString(JSONUtils.MP4_KEY);
+                        }
+                        // A type this code reads wrongly lands on a key the source does not have.
+                        // Skip that one item: a throw here would reach the catch below with the
+                        // list half built, and the post would be demoted to text with no images.
+                        if (galleryItemUrl.isEmpty()) {
+                            continue;
                         }
 
                         JSONObject galleryItem = galleryIdsArray.getJSONObject(i);
@@ -821,7 +826,7 @@ public class ParsePost {
                             galleryItemCaptionUrl = galleryItem.getString(JSONUtils.CAPTION_URL_KEY).trim();
                         }
 
-                        if (previews.isEmpty() && (mimeType.contains("jpg") || mimeType.contains("png"))) {
+                        if (previews.isEmpty() && Post.Gallery.isStillImage(mimeType)) {
                             previews.add(new Post.Preview(galleryItemUrl, sourceObject.getInt(JSONUtils.X_KEY),
                                     sourceObject.getInt(JSONUtils.Y_KEY), galleryItemCaption, galleryItemCaptionUrl));
                         }
@@ -830,7 +835,7 @@ public class ParsePost {
 
                         // For issue #558
                         // Construct a fallback image url
-                        if (!TextUtils.isEmpty(galleryItemUrl) && !TextUtils.isEmpty(mimeType) && (mimeType.contains("jpg") || mimeType.contains("png"))) {
+                        if (Post.Gallery.isStillImage(mimeType)) {
                             postGalleryItem.setFallbackUrl("https://i.redd.it/" + galleryId + "." +  mimeType.substring(mimeType.lastIndexOf("/") + 1));
                             postGalleryItem.setHasFallback(true);
                         }
