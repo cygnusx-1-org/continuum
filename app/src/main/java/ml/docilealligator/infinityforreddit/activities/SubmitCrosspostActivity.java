@@ -59,6 +59,7 @@ import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.FlairUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -243,7 +244,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
             }
 
             if (flair != null) {
-                binding.flairCustomTextViewSubmitCrosspostActivity.setText(flair.getText());
+                FlairUtils.setFlairText(binding.flairCustomTextViewSubmitCrosspostActivity, flair, false);
                 binding.flairCustomTextViewSubmitCrosspostActivity.setBackgroundColor(flairBackgroundColor);
                 binding.flairCustomTextViewSubmitCrosspostActivity.setBorderColor(flairBackgroundColor);
                 binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(flairTextColor);
@@ -540,6 +541,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
         if (flair != null) return;
         boolean required = flairController != null && flairController.isFlairRequired();
         binding.flairCustomTextViewSubmitCrosspostActivity.setText(getString(required ? R.string.flair_required : R.string.flair));
+        binding.flairCustomTextViewSubmitCrosspostActivity.setContentDescription(null);
         binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
     }
 
@@ -819,6 +821,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
                 binding.flairCustomTextViewSubmitCrosspostActivity.setBackgroundColor(resources.getColor(android.R.color.transparent));
                 binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(primaryTextColor);
                 binding.flairCustomTextViewSubmitCrosspostActivity.setText(getString(R.string.flair));
+                binding.flairCustomTextViewSubmitCrosspostActivity.setContentDescription(null);
 
                 onSubredditChangedNotifyController(subredditName, subredditIsUser);
             }
@@ -834,7 +837,7 @@ public class SubmitCrosspostActivity extends BaseActivity implements FlairBottom
     @Override
     public void flairSelected(Flair flair) {
         this.flair = flair;
-        binding.flairCustomTextViewSubmitCrosspostActivity.setText(flair.getText());
+        FlairUtils.setFlairText(binding.flairCustomTextViewSubmitCrosspostActivity, flair, false);
         binding.flairCustomTextViewSubmitCrosspostActivity.setBackgroundColor(flairBackgroundColor);
         binding.flairCustomTextViewSubmitCrosspostActivity.setBorderColor(flairBackgroundColor);
         binding.flairCustomTextViewSubmitCrosspostActivity.setTextColor(flairTextColor);

@@ -60,6 +60,7 @@ import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
+import ml.docilealligator.infinityforreddit.utils.FlairUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -257,7 +258,7 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
             }
 
             if (flair != null) {
-                binding.flairCustomTextViewPostTextActivity.setText(flair.getText());
+                FlairUtils.setFlairText(binding.flairCustomTextViewPostTextActivity, flair, false);
                 binding.flairCustomTextViewPostTextActivity.setBackgroundColor(flairBackgroundColor);
                 binding.flairCustomTextViewPostTextActivity.setBorderColor(flairBackgroundColor);
                 binding.flairCustomTextViewPostTextActivity.setTextColor(flairTextColor);
@@ -531,6 +532,7 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
         if (flair != null) return;
         boolean required = flairController != null && flairController.isFlairRequired();
         binding.flairCustomTextViewPostTextActivity.setText(getString(required ? R.string.flair_required : R.string.flair));
+        binding.flairCustomTextViewPostTextActivity.setContentDescription(null);
         binding.flairCustomTextViewPostTextActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
     }
 
@@ -747,7 +749,7 @@ public class PostTextActivity extends BaseActivity implements FlairBottomSheetFr
     @Override
     public void flairSelected(Flair flair) {
         this.flair = flair;
-        binding.flairCustomTextViewPostTextActivity.setText(flair.getText());
+        FlairUtils.setFlairText(binding.flairCustomTextViewPostTextActivity, flair, false);
         binding.flairCustomTextViewPostTextActivity.setBackgroundColor(flairBackgroundColor);
         binding.flairCustomTextViewPostTextActivity.setBorderColor(flairBackgroundColor);
         binding.flairCustomTextViewPostTextActivity.setTextColor(flairTextColor);

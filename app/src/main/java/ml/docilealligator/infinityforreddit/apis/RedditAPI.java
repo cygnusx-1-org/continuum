@@ -121,7 +121,7 @@ public interface RedditAPI {
     @POST("api/media/asset.json?raw_json=1&gilding_detail=1")
     Call<String> uploadImage(@HeaderMap Map<String, String> headers, @FieldMap Map<String, String> params);
 
-    @GET("r/{subredditName}/api/link_flair.json?raw_json=1")
+    @GET("r/{subredditName}/api/link_flair_v2.json?raw_json=1")
     Call<String> getFlairs(@HeaderMap Map<String, String> headers, @Path("subredditName") @Nullable String subredditName);
 
     @GET("/r/{subredditName}/about/rules.json?raw_json=1")

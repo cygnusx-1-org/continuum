@@ -67,6 +67,7 @@ import ml.docilealligator.infinityforreddit.services.SubmitPostService;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
 import ml.docilealligator.infinityforreddit.utils.CameraCapturePermissionHelper;
+import ml.docilealligator.infinityforreddit.utils.FlairUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.videoautoplay.DurationAwareSeekPlayer;
@@ -297,7 +298,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
             }
 
             if (flair != null) {
-                binding.flairCustomTextViewPostVideoActivity.setText(flair.getText());
+                FlairUtils.setFlairText(binding.flairCustomTextViewPostVideoActivity, flair, false);
                 binding.flairCustomTextViewPostVideoActivity.setBackgroundColor(flairBackgroundColor);
                 binding.flairCustomTextViewPostVideoActivity.setBorderColor(flairBackgroundColor);
                 binding.flairCustomTextViewPostVideoActivity.setTextColor(flairTextColor);
@@ -595,6 +596,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
         if (flair != null) return;
         boolean required = flairController != null && flairController.isFlairRequired();
         binding.flairCustomTextViewPostVideoActivity.setText(getString(required ? R.string.flair_required : R.string.flair));
+        binding.flairCustomTextViewPostVideoActivity.setContentDescription(null);
         binding.flairCustomTextViewPostVideoActivity.setTextColor(required ? nsfwBackgroundColor : primaryTextColor);
     }
 
@@ -820,7 +822,7 @@ public class PostVideoActivity extends BaseActivity implements FlairBottomSheetF
     @Override
     public void flairSelected(Flair flair) {
         this.flair = flair;
-        binding.flairCustomTextViewPostVideoActivity.setText(flair.getText());
+        FlairUtils.setFlairText(binding.flairCustomTextViewPostVideoActivity, flair, false);
         binding.flairCustomTextViewPostVideoActivity.setBackgroundColor(flairBackgroundColor);
         binding.flairCustomTextViewPostVideoActivity.setBorderColor(flairBackgroundColor);
         binding.flairCustomTextViewPostVideoActivity.setTextColor(flairTextColor);

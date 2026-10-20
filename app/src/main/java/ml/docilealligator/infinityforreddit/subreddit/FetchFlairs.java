@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.FlairUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -58,11 +60,13 @@ public class FetchFlairs {
             List<Flair> flairs = new ArrayList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
                 try {
-                    String id = jsonArray.getJSONObject(i).getString(JSONUtils.ID_KEY);
-                    String text = jsonArray.getJSONObject(i).getString(JSONUtils.TEXT_KEY);
-                    boolean editable = jsonArray.getJSONObject(i).getBoolean(JSONUtils.TEXT_EDITABLE_KEY);
+                    JSONObject flairObject = jsonArray.getJSONObject(i);
+                    String id = flairObject.getString(JSONUtils.ID_KEY);
+                    String text = flairObject.getString(JSONUtils.TEXT_KEY);
+                    String htmlText = FlairUtils.richtextToHtml(flairObject.optJSONArray(JSONUtils.RICHTEXT_KEY));
+                    boolean editable = flairObject.getBoolean(JSONUtils.TEXT_EDITABLE_KEY);
 
-                    flairs.add(new Flair(id, text, editable));
+                    flairs.add(new Flair(id, text, htmlText, editable));
                 } catch (JSONException e) {
                     Log.e("FetchFlairs", "parseFlairs failed", e);
                 }

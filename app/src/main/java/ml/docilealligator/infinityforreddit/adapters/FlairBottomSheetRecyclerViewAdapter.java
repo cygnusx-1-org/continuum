@@ -14,6 +14,7 @@ import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemFlairBinding;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
+import ml.docilealligator.infinityforreddit.utils.FlairUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class FlairBottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<FlairBottomSheetRecyclerViewAdapter.FlairViewHolder> {
@@ -64,7 +65,7 @@ public class FlairBottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<Fl
             holder.itemView.setOnClickListener(view -> itemClickListener.onClick(flairs.get(holder.getBindingAdapterPosition())));
         }
 
-        holder.binding.flairTextViewItemFlair.setText(flairs.get(holder.getBindingAdapterPosition()).getText());
+        FlairUtils.setFlairText(holder.binding.flairTextViewItemFlair, flairs.get(holder.getBindingAdapterPosition()), true);
     }
 
     @Override

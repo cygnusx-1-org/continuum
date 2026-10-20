@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.user;
 
 import android.os.Handler;
-import android.text.Html;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
+import ml.docilealligator.infinityforreddit.utils.FlairUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,21 +63,9 @@ public class FetchUserFlairs {
                     boolean editable = userFlairObject.getBoolean(JSONUtils.TEXT_EDITABLE_KEY);
                     int maxEmojis = userFlairObject.getInt(JSONUtils.MAX_EMOJIS_KEY);
 
-                    StringBuilder authorFlairHTMLBuilder = new StringBuilder();
-                    if (userFlairObject.has(JSONUtils.RICHTEXT_KEY)) {
-                        JSONArray flairArray = userFlairObject.getJSONArray(JSONUtils.RICHTEXT_KEY);
-                        for (int j = 0; j < flairArray.length(); j++) {
-                            JSONObject flairObject = flairArray.getJSONObject(j);
-                            String e = flairObject.getString(JSONUtils.E_KEY);
-                            if (e.equals("text")) {
-                                authorFlairHTMLBuilder.append(Html.escapeHtml(flairObject.getString(JSONUtils.T_KEY)));
-                            } else if (e.equals("emoji")) {
-                                authorFlairHTMLBuilder.append("<img src=\"").append(Html.escapeHtml(flairObject.getString(JSONUtils.U_KEY))).append("\">");
-                            }
-                        }
-                    }
+                    String htmlText = FlairUtils.richtextToHtml(userFlairObject.optJSONArray(JSONUtils.RICHTEXT_KEY));
 
-                    userFlairs.add(new UserFlair(id, text, authorFlairHTMLBuilder.toString(), editable, maxEmojis));
+                    userFlairs.add(new UserFlair(id, text, htmlText, editable, maxEmojis));
                 } catch (JSONException e) {
                     Log.e("FetchUserFlairs", "parseUserFlairs failed", e);
                 }

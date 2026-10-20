@@ -85,7 +85,7 @@ public class FlairBottomSheetFragment extends LandscapeExpandedRoundedBottomShee
         if (getArguments().getBoolean(EXTRA_SHOW_REMOVE_FLAIR_OPTION, false)) {
             binding.removeFlairTextViewFlairBottomSheetFragment.setVisibility(View.VISIBLE);
             binding.removeFlairTextViewFlairBottomSheetFragment.setOnClickListener(view -> {
-                EventBus.getDefault().post(new FlairSelectedEvent(callingFragmentId, new Flair("", "", false)));
+                EventBus.getDefault().post(new FlairSelectedEvent(callingFragmentId, new Flair("", "", "", false)));
                 dismiss();
             });
         }

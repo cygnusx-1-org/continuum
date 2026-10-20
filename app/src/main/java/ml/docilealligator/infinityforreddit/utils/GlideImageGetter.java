@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -57,7 +58,8 @@ public class GlideImageGetter implements Html.ImageGetter {
                 TextView textView = container.get();
                 if (textView != null) {
                     Context context = textView.getContext();
-                    if (!(context instanceof Activity && (((Activity) context).isFinishing() || ((Activity) context).isDestroyed()))) {
+                    Activity activity = findActivity(context);
+                    if (!(activity != null && (activity.isFinishing() || activity.isDestroyed()))) {
                         Glide.with(context)
                                 .asBitmap()
                                 .load(source)
@@ -68,6 +70,23 @@ public class GlideImageGetter implements Html.ImageGetter {
         }
 
         return drawable;
+    }
+
+    /**
+     * The Activity behind {@code context}. A view in a dialog or bottom sheet has a
+     * ContextThemeWrapper around the Activity rather than the Activity itself, and Glide unwraps
+     * that wrapper and throws for a destroyed Activity, so the check above has to see through it.
+     */
+    @Nullable
+    private static Activity findActivity(Context context) {
+        @Nullable Context current = context;
+        while (current instanceof ContextWrapper) {
+            if (current instanceof Activity) {
+                return (Activity) current;
+            }
+            current = ((ContextWrapper) current).getBaseContext();
+        }
+        return null;
     }
 
     private class BitmapDrawablePlaceholder extends BitmapDrawable implements Target<Bitmap> {
