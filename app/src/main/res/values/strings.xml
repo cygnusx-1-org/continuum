@@ -785,6 +785,7 @@
     <string name="settings_save_read_posts_title">Save Read Posts</string>
     <string name="settings_limit_history_size_title">Limit History Size</string>
     <string name="settings_limit_history_size_hint">History Limit</string>
+    <string name="settings_limit_history_size_helper">Minimum %1$d</string>
     <!-- One line, and the same shape before and after the count arrives: the row is the last in
          its group, and a summary that grows from nothing once measured moves the group's edge. -->
     <string name="settings_read_posts_size_measuring">Size: … · Count: …</string>

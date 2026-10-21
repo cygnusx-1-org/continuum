@@ -86,14 +86,17 @@
             android:paddingEnd="16dp"
             android:paddingBottom="4dp">
 
+            <!-- Ten digits shows any int a limit could already hold; PostHistoryFragment caps what
+                 overflows one. -->
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/read_posts_limit_text_input_edit_text_post_history_fragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="?attr/font_family"
                 android:hint="@string/settings_limit_history_size_hint"
+                android:imeOptions="actionDone"
                 android:inputType="number"
-                android:maxLines="11"
+                android:maxLength="10"
                 android:textSize="?attr/font_default" />
 
         </com.google.android.material.textfield.TextInputLayout>
