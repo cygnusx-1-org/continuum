@@ -5,9 +5,13 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
@@ -19,6 +23,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import ml.docilealligator.infinityforreddit.Infinity;
+import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.AccountScope;
 import ml.docilealligator.infinityforreddit.activities.SettingsActivity;
@@ -29,6 +34,11 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 
 public class PostHistoryFragment extends Fragment {
+
+    // The history is trimmed 100 rows at a time (ReadPostDao.deleteOldestReadPosts), so a smaller
+    // limit would empty it on every trim.
+    private static final int MIN_READ_POSTS_LIMIT = 100;
+    private static final int DEFAULT_READ_POSTS_LIMIT = 500;
 
     private FragmentPostHistoryBinding binding;
     @Inject
@@ -76,7 +86,9 @@ public class PostHistoryFragment extends Fragment {
         binding.readPostsLimitSwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
                 AccountScope.key(mActivity.accountName, SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED), true));
         binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText(String.valueOf(postHistorySharedPreferences.getInt(
-                AccountScope.key(mActivity.accountName, SharedPreferencesUtils.READ_POSTS_LIMIT), 500)));
+                AccountScope.key(mActivity.accountName, SharedPreferencesUtils.READ_POSTS_LIMIT), DEFAULT_READ_POSTS_LIMIT)));
+        binding.readPostsLimitTextInputLayoutPostHistoryFragment.setHelperText(
+                getString(R.string.settings_limit_history_size_helper, MIN_READ_POSTS_LIMIT));
         binding.markPostsAsReadAfterVotingSwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
                 AccountScope.key(mActivity.accountName, SharedPreferencesUtils.MARK_POSTS_AS_READ_AFTER_VOTING_BASE), false));
         binding.markPostsAsReadOnScrollSwitchPostHistoryFragment.setChecked(postHistorySharedPreferences.getBoolean(
@@ -107,24 +119,41 @@ public class PostHistoryFragment extends Fragment {
             postHistorySharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.READ_POSTS_LIMIT_ENABLED), b).apply();
             updateOptions();
         });
+        binding.readPostsLimitTextInputEditTextPostHistoryFragment.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Saves as you type, but only a value that is already valid: clamping here would turn
+                // the "2" of "250" into "100" mid-entry. Losing focus settles whatever is left.
+                Integer readPostsLimit = parseReadPostsLimit(s.toString());
+                if (readPostsLimit != null && readPostsLimit >= MIN_READ_POSTS_LIMIT) {
+                    saveReadPostsLimit(readPostsLimit);
+                }
+            }
+        });
         binding.readPostsLimitTextInputEditTextPostHistoryFragment.setOnFocusChangeListener((view, b) -> {
             if (!b) {
-                CharSequence readPostsLimitText = binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText();
-                String readPostsLimitString = readPostsLimitText == null ? "" : readPostsLimitText.toString();
-                int readPostsLimit;
-                if (readPostsLimitString.isEmpty()) {
-                    readPostsLimit = 500;
-                    binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText("500");
-                } else {
-                    readPostsLimit = Integer.parseInt(readPostsLimitString);
-                    if (readPostsLimit < 100) {
-                        readPostsLimit = 100;
-                        binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText("100");
-                    }
-                }
-                postHistorySharedPreferences.edit().putInt(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.READ_POSTS_LIMIT),
-                        readPostsLimit).apply();
+                commitReadPostsLimit();
             }
+        });
+        // Without this, Done only hid the keyboard and left the field focused, so nothing settled
+        // until the screen was closed.
+        binding.readPostsLimitTextInputEditTextPostHistoryFragment.setOnEditorActionListener((textView, actionId, keyEvent) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE
+                    || (keyEvent != null && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_DOWN)) {
+                Utils.hideKeyboard(mActivity);
+                // Losing focus commits the value through the focus listener above.
+                textView.clearFocus();
+                return true;
+            }
+            return false;
         });
 
         binding.markPostsAsReadAfterVotingLinearLayoutPostHistoryFragment.setOnClickListener(view -> binding.markPostsAsReadAfterVotingSwitchPostHistoryFragment.performClick());
@@ -155,6 +184,38 @@ public class PostHistoryFragment extends Fragment {
         binding.hideReadPostsAutomaticallyInSearchSwitchPostHistoryFragment.setOnCheckedChangeListener((compoundButton, b) -> postHistorySharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE), b).apply());
 
         return binding.getRoot();
+    }
+
+    // Empty goes back to the default and anything under the minimum is raised to it. The field is
+    // then rewritten to exactly what was saved, so it never shows a value the setting doesn't hold.
+    private void commitReadPostsLimit() {
+        CharSequence readPostsLimitText = binding.readPostsLimitTextInputEditTextPostHistoryFragment.getText();
+        String readPostsLimitString = readPostsLimitText == null ? "" : readPostsLimitText.toString();
+        Integer parsedReadPostsLimit = parseReadPostsLimit(readPostsLimitString);
+        int readPostsLimit = parsedReadPostsLimit == null
+                ? DEFAULT_READ_POSTS_LIMIT : Math.max(parsedReadPostsLimit, MIN_READ_POSTS_LIMIT);
+        String savedReadPostsLimitString = String.valueOf(readPostsLimit);
+        if (!savedReadPostsLimitString.equals(readPostsLimitString)) {
+            binding.readPostsLimitTextInputEditTextPostHistoryFragment.setText(savedReadPostsLimitString);
+        }
+        saveReadPostsLimit(readPostsLimit);
+    }
+
+    // Ten digits can still overflow an int, so the value is capped instead. Null when the text is
+    // not a number at all: empty, or a non-digit value restored from a settings backup, which
+    // setText doesn't filter the way typing is.
+    @Nullable
+    private static Integer parseReadPostsLimit(String readPostsLimitString) {
+        try {
+            return (int) Math.min(Long.parseLong(readPostsLimitString), Integer.MAX_VALUE);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private void saveReadPostsLimit(int readPostsLimit) {
+        postHistorySharedPreferences.edit().putInt(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.READ_POSTS_LIMIT),
+                readPostsLimit).apply();
     }
 
     // Apply the mark-as-read toggles live to any visible post feed instead of requiring a restart.
@@ -193,6 +254,8 @@ public class PostHistoryFragment extends Fragment {
         binding.readPostsLimitTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.readPostsLimitTextInputLayoutPostHistoryFragment.setBoxStrokeColor(primaryTextColor);
         binding.readPostsLimitTextInputLayoutPostHistoryFragment.setDefaultHintTextColor(ColorStateList.valueOf(primaryTextColor));
+        binding.readPostsLimitTextInputLayoutPostHistoryFragment.setHelperTextColor(
+                ColorStateList.valueOf(mActivity.customThemeWrapper.getSecondaryTextColor()));
         binding.readPostsLimitTextInputEditTextPostHistoryFragment.setTextColor(primaryTextColor);
         binding.markPostsAsReadAfterVotingTextViewPostHistoryFragment.setTextColor(primaryTextColor);
         binding.markPostsAsReadOnScrollTextViewPostHistoryFragment.setTextColor(primaryTextColor);
