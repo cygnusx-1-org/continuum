@@ -10,9 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import ml.docilealligator.infinityforreddit.SingleLiveEvent
-import ml.docilealligator.infinityforreddit.utils.JSONUtils
 import ml.docilealligator.infinityforreddit.utils.UploadImageUtils
-import org.json.JSONObject
 import retrofit2.Retrofit
 import java.util.concurrent.Executor
 
@@ -49,10 +47,11 @@ class PostGalleryViewModel(
         _isUploading.value = true
         executor.execute {
             try {
-                val response = UploadImageUtils.uploadImage(
-                    oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, uri, true, false
+                // The uploaded object's S3 key is the item's media id (see
+                // UploadImageUtils.imageLeaseParams for why it is not the lease's asset_id).
+                val mediaId = UploadImageUtils.uploadImage(
+                    oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, uri, true
                 )
-                val mediaId = JSONObject(response).getJSONObject(JSONUtils.ASSET_KEY).getString(JSONUtils.ASSET_ID_KEY)
                 handler.post {
                     addOutcome(UploadOutcome.Uploaded(id, mediaId))
                     onUploadFinished()

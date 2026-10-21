@@ -19,12 +19,19 @@ import org.robolectric.annotation.Config
  * jpeg_png   1xaas0t  r/lotr               image/jpeg, image/jpeg, image/png  no body
  * jpeg_body  1xag53f  r/IllegallySmolCats  image/jpeg x10                     body text
  * jpg        1xahglw  r/mildlyinfuriating  image/jpg x2                       no body
+ * failed_png           1xbx33r  r/test        "failed" x2, png thumbnail         body text
+ * failed_no_thumbnail  1qo3jrv  r/Leathercraft "failed" x2, thumbnail "default" body text
  * ```
  *
  * Reddit's `m` field said image/jpg for years, and since October 2026 says image/jpeg for most new
  * uploads; both spellings are live at once. Matching only the old one read every image/jpeg item as
  * a video, the missing `mp4` key threw, and the post lost its whole gallery and was shown as a text
  * post with no images (issue #459).
+ *
+ * The two `failed_` posts are galleries whose images were leased with a `filepath`, as Continuum
+ * used to lease them. The listing reports every item as just `{"status": "failed"}` although
+ * Reddit's GraphQL calls them VALID and i.redd.it serves them (failed_png's are `.png`,
+ * failed_no_thumbnail's `.jpeg`); see [FailedRedditMedia].
  *
  * Re-fetch one with:
  * `python3 ~/git/support-scripts/reddit_fetch_comments.py https://reddit.com/comments/<id> --post`
@@ -128,5 +135,97 @@ class ParsePostGalleryTest {
         listOf("image/gif", "video/mp4").forEach {
             assertFalse(it, Post.Gallery.isStillImage(it))
         }
+    }
+
+    @Test
+    fun `a gallery the listing reports as failed stays a gallery`() {
+        val post = ParsePost.parseBasicData(json("failed_png"))
+
+        assertEquals(Post.GALLERY_TYPE, post.postType)
+        assertEquals("https://www.reddit.com/gallery/1xbx33r", post.url)
+        // Both from the thumbnail's .png: it names the first item, and the second is guessed the same.
+        assertEquals(
+            listOf("https://i.redd.it/54mwwhzxhvwh1.png", "https://i.redd.it/qpqpnggyhvwh1.png"),
+            post.gallery.map { it.url }
+        )
+        assertEquals(listOf("test-54mwwhzxhvwh1.png", "test-qpqpnggyhvwh1.png"), post.gallery.map { it.fileName })
+        post.gallery.forEach {
+            assertEquals(it.fileName, Post.Gallery.TYPE_IMAGE, it.mediaType)
+            assertFalse("the url is already the original", it.hasFallback())
+        }
+        assertEquals("Gallery post", post.selfText)
+    }
+
+    @Test
+    fun `a failed gallery takes its card size from the thumbnail`() {
+        val post = ParsePost.parseBasicData(json("failed_png"))
+
+        assertEquals(1, post.previews.size)
+        assertEquals("https://i.redd.it/54mwwhzxhvwh1.png", post.previews[0].previewUrl)
+        assertEquals(140, post.previews[0].previewWidth)
+        assertEquals(34, post.previews[0].previewHeight)
+    }
+
+    @Test
+    fun `a failed gallery with no thumbnail guesses jpeg and leaves the size unknown`() {
+        val post = ParsePost.parseBasicData(json("failed_no_thumbnail"))
+
+        assertEquals(Post.GALLERY_TYPE, post.postType)
+        assertEquals(
+            listOf("https://i.redd.it/2ik58hyditfg1.jpeg", "https://i.redd.it/1a9oi91fitfg1.jpeg"),
+            post.gallery.map { it.url }
+        )
+        assertEquals(0, post.previews[0].previewWidth)
+        assertEquals(0, post.previews[0].previewHeight)
+        assertEquals("I thought I'd share.", post.selfText)
+    }
+
+    @Test
+    fun `a thumbnail that names no item of the gallery is not read`() {
+        // A crosspost can carry its parent's thumbnail; nothing in it describes this gallery.
+        val json = json("failed_png")
+        json.put("thumbnail", "https://preview.redd.it/zzzzzzzzzzzzz.png?width=140&height=34&auto=webp&s=0")
+        val post = ParsePost.parseBasicData(json)
+
+        assertEquals(
+            listOf("https://i.redd.it/54mwwhzxhvwh1.jpeg", "https://i.redd.it/qpqpnggyhvwh1.jpeg"),
+            post.gallery.map { it.url }
+        )
+        assertEquals(0, post.previews[0].previewWidth)
+    }
+
+    @Test
+    fun `a failed item sits in its place among valid ones`() {
+        val json = json("jpeg_png")
+        json.getJSONObject("media_metadata").put("k9f1jp700iwh1", JSONObject().put("status", "failed"))
+        val post = ParsePost.parseBasicData(json)
+
+        assertEquals(Post.GALLERY_TYPE, post.postType)
+        assertEquals(3, post.gallery.size)
+        assertEquals("https://i.redd.it/k9f1jp700iwh1.jpeg", post.gallery[1].url)
+        assertEquals("lotr-k9f1jp700iwh1.jpeg", post.gallery[1].fileName)
+        // The card preview still comes from the first item, which is valid and sized.
+        assertEquals(sourceUrl(json, "zv2kb6000iwh1"), post.previews[0].previewUrl)
+    }
+
+    @Test
+    fun `a failed item flagged deleted is skipped`() {
+        val json = json("failed_png")
+        json.getJSONObject("gallery_data").getJSONArray("items").getJSONObject(1).put("is_deleted", true)
+        val post = ParsePost.parseBasicData(json)
+
+        assertEquals(listOf("https://i.redd.it/54mwwhzxhvwh1.png"), post.gallery.map { it.url })
+    }
+
+    @Test
+    fun `an entry with no data and another status is still skipped`() {
+        val json = json("failed_png")
+        val metadata = json.getJSONObject("media_metadata")
+        metadata.keys().asSequence().toList().forEach { metadata.put(it, JSONObject().put("status", "unprocessed")) }
+        val post = ParsePost.parseBasicData(json)
+
+        // Nothing left to show: the deleted-gallery demotion, url nulled.
+        assertEquals(Post.TEXT_TYPE, post.postType)
+        assertEquals(null, post.url)
     }
 }
