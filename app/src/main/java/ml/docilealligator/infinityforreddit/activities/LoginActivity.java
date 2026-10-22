@@ -155,7 +155,7 @@ public class LoginActivity extends BaseActivity {
         Uri.Builder uriBuilder = baseUri.buildUpon();
         uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
         uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);
-        uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, APIUtils.STATE);
+        uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, OAuthLoginHelper.newPendingState(this));
         uriBuilder.appendQueryParameter(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
         uriBuilder.appendQueryParameter(APIUtils.DURATION_KEY, APIUtils.DURATION);
         uriBuilder.appendQueryParameter(APIUtils.SCOPE_KEY, APIUtils.SCOPE);
@@ -220,8 +220,9 @@ public class LoginActivity extends BaseActivity {
                 }
 
                 Uri uri = Uri.parse(url);
-                OAuthLoginHelper.RedirectResult redirect = OAuthLoginHelper.classifyRedirect(
-                        uri.getQueryParameter("code"), uri.getQueryParameter("state"), uri.getQueryParameter("error"));
+                OAuthLoginHelper.RedirectResult redirect = OAuthLoginHelper.classifyRedirect(uri.getQueryParameter("code"),
+                        OAuthLoginHelper.consumePendingState(LoginActivity.this, uri.getQueryParameter("state")),
+                        uri.getQueryParameter("error"));
                 switch (redirect.action) {
                     case EXCHANGE_CODE: {
                         authCode = Objects.requireNonNull(redirect.authCode);

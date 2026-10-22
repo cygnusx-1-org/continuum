@@ -107,7 +107,10 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         Intent intent = getIntent();
         if (intent != null && intent.getData() != null) {
             handleRedirectUri(intent.getData());
-        } else {
+        } else if (savedInstanceState == null) {
+            // Not on a recreate (config change, or the process died while the user was in the
+            // browser): the attempt already open there is still live and its redirect arrives in
+            // onNewIntent, so opening the page again would replace its state and reject it.
             checkAndOpenLoginPage();
         }
 
@@ -159,8 +162,12 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
     private void handleRedirectUri(@NonNull Uri uri) {
         binding.openWebpageButtonLoginChromeCustomTabActivity.setVisibility(View.GONE);
 
-        OAuthLoginHelper.RedirectResult redirect = OAuthLoginHelper.classifyRedirect(
-                uri.getQueryParameter("code"), uri.getQueryParameter("state"), uri.getQueryParameter("error"));
+        // This activity is exported for every supported redirect URI, so any app or link can land
+        // here; only a redirect carrying the state of the attempt checkAndOpenLoginPage started is
+        // exchanged.
+        OAuthLoginHelper.RedirectResult redirect = OAuthLoginHelper.classifyRedirect(uri.getQueryParameter("code"),
+                OAuthLoginHelper.consumePendingState(this, uri.getQueryParameter("state")),
+                uri.getQueryParameter("error"));
         switch (redirect.action) {
             case EXCHANGE_CODE:
                 exchangeCodeForToken(Objects.requireNonNull(redirect.authCode));
@@ -254,7 +261,7 @@ public class LoginChromeCustomTabActivity extends BaseActivity {
         Uri.Builder uriBuilder = Uri.parse(APIUtils.OAUTH_URL).buildUpon();
         uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(getApplicationContext()));
         uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE);
-        uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, APIUtils.STATE);
+        uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, OAuthLoginHelper.newPendingState(this));
         uriBuilder.appendQueryParameter(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI);
         uriBuilder.appendQueryParameter(APIUtils.DURATION_KEY, APIUtils.DURATION);
         uriBuilder.appendQueryParameter(APIUtils.SCOPE_KEY, APIUtils.SCOPE);

@@ -667,6 +667,8 @@ public class SharedPreferencesUtils {
     public static final String ACCOUNT_SCOPE_SEEDED = "account_scope_seeded";
     public static final String BOTTOM_APP_BAR_SCOPE_MIGRATED = "bottom_app_bar_scope_migrated";
     public static final String ACCOUNT_SCOPE_SEED_VERSION = "account_scope_seed_version";
+    // The OAuth state of the login attempt in flight; see OAuthLoginHelper.newPendingState.
+    public static final String OAUTH_PENDING_STATE = "oauth_pending_state";
 
     public static final String PROXY_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.proxy";
     public static final String PROXY_ENABLED = "proxy_enabled";

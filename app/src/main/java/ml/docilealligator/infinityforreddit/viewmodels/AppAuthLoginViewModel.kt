@@ -19,6 +19,7 @@ import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.events.NewUserLoggedInEvent
 import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.JSONUtils
+import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import org.greenrobot.eventbus.EventBus
 import org.json.JSONException
@@ -51,7 +52,7 @@ class AppAuthLoginViewModel(
     fun setUpAccount(uri: Uri) {
         viewModelScope.launch {
             val state = uri.getQueryParameter("state")
-            if (state == APIUtils.STATE) {
+            if (OAuthLoginHelper.consumePendingState(mApplicationContext, state)) {
                 val authCode = uri.getQueryParameter("code")
                 authCode?.let {
                     val params: MutableMap<String, String> = HashMap()

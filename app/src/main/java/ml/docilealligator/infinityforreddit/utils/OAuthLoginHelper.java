@@ -1,14 +1,17 @@
 package ml.docilealligator.infinityforreddit.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.util.Base64;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Objects;
 import ml.docilealligator.infinityforreddit.R;
 import org.json.JSONException;
@@ -24,10 +27,18 @@ import retrofit2.Response;
  * which are Context-free and unit-testable. {@link #describeFailure} maps a classified result to a
  * friendly, localized message that includes a diagnostic code (HTTP status or Reddit error) when
  * one is available. The raw response body / throwable is always logged to logcat under {@link #TAG}.
+ *
+ * <p>It also owns the one piece of login state: the random {@code state} of the attempt in flight
+ * ({@link #newPendingState} / {@link #consumePendingState}), which every authorize URL carries and
+ * every redirect is checked against.
  */
 public final class OAuthLoginHelper {
 
     public static final String TAG = "OAuthLogin";
+
+    /** Random bytes in a login attempt's {@code state}: 128 bits, 22 URL-safe characters. */
+    private static final int STATE_BYTES = 16;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private OAuthLoginHelper() {
     }
@@ -205,9 +216,12 @@ public final class OAuthLoginHelper {
 
     /** What the OAuth redirect URI tells us to do. */
     public enum RedirectAction {
-        /** A valid {@code code} with a matching {@code state} — proceed to the token exchange. */
+        /** A valid {@code code} with the pending attempt's {@code state} — proceed to the token exchange. */
         EXCHANGE_CODE,
-        /** A {@code code} arrived but {@code state} was missing or did not match — possible CSRF. */
+        /**
+         * A {@code code} arrived but its {@code state} was missing or not the pending attempt's — a
+         * forged redirect (login CSRF), or one from an attempt that has since been replaced.
+         */
         STATE_MISMATCH,
         /** {@code error=access_denied} — the user declined, or Reddit auto-denied. */
         ACCESS_DENIED,
@@ -235,16 +249,59 @@ public final class OAuthLoginHelper {
     }
 
     /**
-     * Decides what to do with an OAuth redirect from its {@code code}, {@code state}, and
-     * {@code error} query parameters. Context-/Uri-free so both login activities can share it and it
-     * can be unit-tested directly. A present {@code code} takes precedence; {@code state} is matched
-     * null-safely (a missing state is a mismatch, not a crash).
+     * Starts a login attempt: makes a fresh, unguessable {@code state} for its authorize URL and
+     * remembers it, so {@link #consumePendingState} can tell the redirect this attempt causes from
+     * one another app or a web page forges. The Custom Tab activity is exported for every supported
+     * redirect URI, so with a fixed value anyone could hand the app an auth code for their own
+     * account and switch it to that account (OAuth login CSRF). Kept in the internal preferences, not
+     * in memory, because the process can die while the user is in the browser. A new attempt
+     * replaces any earlier one.
      */
     @NonNull
-    public static RedirectResult classifyRedirect(@Nullable String code, @Nullable String state,
+    public static String newPendingState(@NonNull Context context) {
+        byte[] bytes = new byte[STATE_BYTES];
+        SECURE_RANDOM.nextBytes(bytes);
+        String state = Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+        internalPreferences(context).edit().putString(SharedPreferencesUtils.OAUTH_PENDING_STATE, state).apply();
+        return state;
+    }
+
+    /**
+     * Whether a redirect's {@code state} is the one {@link #newPendingState} handed out for the login
+     * attempt in flight. A match ends that attempt — the state is cleared, so the same redirect cannot
+     * be replayed — while a mismatch leaves it in place, so a forged redirect cannot cancel a real
+     * login either.
+     */
+    public static boolean consumePendingState(@NonNull Context context, @Nullable String state) {
+        SharedPreferences preferences = internalPreferences(context);
+        if (!stateMatches(preferences.getString(SharedPreferencesUtils.OAUTH_PENDING_STATE, null), state)) {
+            return false;
+        }
+        preferences.edit().remove(SharedPreferencesUtils.OAUTH_PENDING_STATE).apply();
+        return true;
+    }
+
+    /** Null-safe: no attempt in flight, or a redirect without a {@code state}, never matches. */
+    static boolean stateMatches(@Nullable String pendingState, @Nullable String state) {
+        return pendingState != null && !pendingState.isEmpty() && pendingState.equals(state);
+    }
+
+    @NonNull
+    private static SharedPreferences internalPreferences(@NonNull Context context) {
+        return context.getSharedPreferences(SharedPreferencesUtils.INTERNAL_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Decides what to do with an OAuth redirect from its {@code code} and {@code error} query
+     * parameters and whether its {@code state} passed {@link #consumePendingState}. Context-/Uri-free
+     * so both login activities can share it and it can be unit-tested directly. A present
+     * {@code code} takes precedence, and is only exchanged when the state matched.
+     */
+    @NonNull
+    public static RedirectResult classifyRedirect(@Nullable String code, boolean stateMatches,
                                                   @Nullable String error) {
         if (code != null && !code.isEmpty()) {
-            if (APIUtils.STATE.equals(state)) {
+            if (stateMatches) {
                 return new RedirectResult(RedirectAction.EXCHANGE_CODE, code, null);
             }
             return new RedirectResult(RedirectAction.STATE_MISMATCH, null, null);

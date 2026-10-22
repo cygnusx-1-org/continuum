@@ -44,7 +44,6 @@ public class APIUtils {
     public static final String RESPONSE_TYPE_KEY = "response_type";
     public static final String RESPONSE_TYPE = "code";
     public static final String STATE_KEY = "state";
-    public static final String STATE = "23ro8xlxvzp4asqd";
     public static final String REDIRECT_URI_KEY = "redirect_uri";
     public static final String DEFAULT_REDIRECT_URI = "redreader://rr_oauth_redir";
     public static String REDIRECT_URI = DEFAULT_REDIRECT_URI;

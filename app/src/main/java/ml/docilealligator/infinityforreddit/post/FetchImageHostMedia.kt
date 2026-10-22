@@ -581,11 +581,17 @@ object FetchImageHostMedia {
         dirty = false
     }
 
-    /** Write now, on the calling thread, instead of waiting for the background write. */
+    /**
+     * Write now, behind any write already queued, and wait for it.
+     *
+     * Not on the calling thread: the fetch that resolved the album has already queued a save, and
+     * one left to run whenever its thread gets scheduled can land after the test has cleared the
+     * cache to simulate a restart, replacing the file just flushed with an empty one.
+     */
     @VisibleForTesting
     @JvmStatic
     fun flushForTest() {
-        save()
+        prefetchExecutor.submit(Runnable { save() }).get()
     }
 
     /** Drops what has expired, and everything else too if that was not enough. */

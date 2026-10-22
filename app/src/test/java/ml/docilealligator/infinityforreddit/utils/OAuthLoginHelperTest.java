@@ -132,54 +132,84 @@ class OAuthLoginHelperTest {
 
     @Test
     void codeWithMatchingStateExchanges() {
-        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", APIUtils.STATE, null);
+        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", true, null);
         assertEquals(RedirectAction.EXCHANGE_CODE, result.action);
         assertEquals("abc123", result.authCode);
     }
 
     @Test
     void codeWithWrongStateIsMismatch() {
-        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", "not-the-state", null);
+        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", false, null);
         assertEquals(RedirectAction.STATE_MISMATCH, result.action);
         assertNull(result.authCode);
     }
 
     @Test
-    void codeWithNullStateIsMismatchNotCrash() {
-        // The original WebView code did state.equals(STATE) and could NPE on a missing state.
-        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", null, null);
-        assertEquals(RedirectAction.STATE_MISMATCH, result.action);
-    }
-
-    @Test
     void emptyCodeIsTreatedAsAbsent() {
-        RedirectResult result = OAuthLoginHelper.classifyRedirect("", APIUtils.STATE, "access_denied");
+        RedirectResult result = OAuthLoginHelper.classifyRedirect("", true, "access_denied");
         assertEquals(RedirectAction.ACCESS_DENIED, result.action);
     }
 
     @Test
     void accessDeniedError() {
-        RedirectResult result = OAuthLoginHelper.classifyRedirect(null, null, "access_denied");
+        RedirectResult result = OAuthLoginHelper.classifyRedirect(null, false, "access_denied");
         assertEquals(RedirectAction.ACCESS_DENIED, result.action);
     }
 
     @Test
     void otherErrorIsOauthError() {
-        RedirectResult result = OAuthLoginHelper.classifyRedirect(null, null, "invalid_request");
+        RedirectResult result = OAuthLoginHelper.classifyRedirect(null, false, "invalid_request");
         assertEquals(RedirectAction.OAUTH_ERROR, result.action);
         assertEquals("invalid_request", result.errorValue);
     }
 
     @Test
     void noCodeNoErrorIsNone() {
-        assertEquals(RedirectAction.NONE, OAuthLoginHelper.classifyRedirect(null, null, null).action);
+        assertEquals(RedirectAction.NONE, OAuthLoginHelper.classifyRedirect(null, false, null).action);
     }
 
     @Test
     void codeTakesPrecedenceOverError() {
-        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", APIUtils.STATE, "access_denied");
+        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", true, "access_denied");
         assertEquals(RedirectAction.EXCHANGE_CODE, result.action);
         assertEquals("abc123", result.authCode);
+    }
+
+    @Test
+    void codeWithWrongStateIsMismatchEvenWithError() {
+        RedirectResult result = OAuthLoginHelper.classifyRedirect("abc123", false, "access_denied");
+        assertEquals(RedirectAction.STATE_MISMATCH, result.action);
+        assertNull(result.authCode);
+    }
+
+    // ---- State matching ----
+
+    @Test
+    void sameStateMatches() {
+        assertTrue(OAuthLoginHelper.stateMatches("Zm9vYmFy", "Zm9vYmFy"));
+    }
+
+    @Test
+    void differentStateDoesNotMatch() {
+        assertFalse(OAuthLoginHelper.stateMatches("Zm9vYmFy", "23ro8xlxvzp4asqd"));
+    }
+
+    @Test
+    void missingStateDoesNotMatchNotCrash() {
+        // The original WebView code did state.equals(STATE) and could NPE on a missing state.
+        assertFalse(OAuthLoginHelper.stateMatches("Zm9vYmFy", null));
+    }
+
+    @Test
+    void nothingPendingMatchesNothing() {
+        // No attempt in flight: a redirect must not get through by also leaving state out.
+        assertFalse(OAuthLoginHelper.stateMatches(null, null));
+        assertFalse(OAuthLoginHelper.stateMatches(null, "23ro8xlxvzp4asqd"));
+    }
+
+    @Test
+    void emptyPendingStateMatchesNothing() {
+        assertFalse(OAuthLoginHelper.stateMatches("", ""));
     }
 
     // ---- Error-page detection (the WebView "{}" dead-end) ----

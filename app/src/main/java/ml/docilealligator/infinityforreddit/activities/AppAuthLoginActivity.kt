@@ -61,6 +61,7 @@ import ml.docilealligator.infinityforreddit.customviews.compose.ThemedTopAppBar
 import ml.docilealligator.infinityforreddit.events.NewUserLoggedInEvent
 import ml.docilealligator.infinityforreddit.extensions.linkify
 import ml.docilealligator.infinityforreddit.utils.APIUtils
+import ml.docilealligator.infinityforreddit.utils.OAuthLoginHelper
 import ml.docilealligator.infinityforreddit.utils.getChromeCustomTabPackageName
 import ml.docilealligator.infinityforreddit.viewmodels.AppAuthLoginViewModel
 import ml.docilealligator.infinityforreddit.viewmodels.AppAuthLoginViewModel.Companion.provideFactory
@@ -262,7 +263,7 @@ class AppAuthLoginActivity : BaseActivity() {
             val uriBuilder = baseUri.buildUpon()
             uriBuilder.appendQueryParameter(APIUtils.CLIENT_ID_KEY, APIUtils.getClientId(this))
             uriBuilder.appendQueryParameter(APIUtils.RESPONSE_TYPE_KEY, APIUtils.RESPONSE_TYPE)
-            uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, APIUtils.STATE)
+            uriBuilder.appendQueryParameter(APIUtils.STATE_KEY, OAuthLoginHelper.newPendingState(this))
             uriBuilder.appendQueryParameter(APIUtils.REDIRECT_URI_KEY, APIUtils.REDIRECT_URI)
             uriBuilder.appendQueryParameter(APIUtils.DURATION_KEY, APIUtils.DURATION)
             uriBuilder.appendQueryParameter(APIUtils.SCOPE_KEY, APIUtils.SCOPE)
