@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.6 / 2026-10-21
+=============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed Gallery posting is broken #464
+* Fixed History Limit doesn't declare the minimum #461
+
 8.3.3.5 / 2026-10-20
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.

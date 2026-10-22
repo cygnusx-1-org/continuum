@@ -289,11 +289,26 @@ object FeedCache {
             }
 
         try {
-            File(dir, fileName(key)).writeText(body)
+            writeAtomically(File(dir, fileName(key)), body)
         } catch (e: java.io.IOException) {
             return
         }
         rootDir()?.let { evict(it) }
+    }
+
+    /**
+     * Writes [body] so that [file] only ever holds a whole entry. Written in place, the file exists
+     * from the first byte, so [has] said yes and [load] read a truncated entry -- a miss -- for as
+     * long as a large feed took to write.
+     */
+    @WorkerThread
+    private fun writeAtomically(file: File, body: String) {
+        val partial = File(file.parentFile, file.name + ".partial")
+        partial.writeText(body)
+        if (!partial.renameTo(file)) {
+            partial.delete()
+            throw java.io.IOException("Could not move ${partial.name} into place")
+        }
     }
 
     @JvmStatic
@@ -354,7 +369,7 @@ object FeedCache {
             }
 
         try {
-            file.writeText(body)
+            writeAtomically(file, body)
         } catch (e: java.io.IOException) {
             // A cache that could not be written just means no resume for this feed.
             return

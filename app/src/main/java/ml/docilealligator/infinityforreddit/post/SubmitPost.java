@@ -196,8 +196,8 @@ public class SubmitPost {
         try {
             Response<String> response = submitPostCall.execute();
             if (response.isSuccessful()) {
-                getSubmittedPost(executor, handler, response.body(), kind, oauthRetrofit, accessToken,
-                        submitPostListener);
+                getSubmittedPost(executor, handler, response.body(), kind, isRichTextJSON, oauthRetrofit,
+                        accessToken, submitPostListener);
             } else {
                 submitPostListener.submitFailed(response.message());
             }
@@ -208,7 +208,7 @@ public class SubmitPost {
     }
 
     private static void getSubmittedPost(Executor executor, Handler handler, @Nullable String response, @Nullable String kind,
-                                         Retrofit oauthRetrofit, @Nullable String accessToken,
+                                         boolean isRichTextJSON, Retrofit oauthRetrofit, @Nullable String accessToken,
                                          SubmitPostListener submitPostListener) throws JSONException, IOException {
         if (response == null) {
             submitPostListener.submitFailed(null);
@@ -237,6 +237,13 @@ public class SubmitPost {
             String postId = responseObject.getJSONObject(JSONUtils.DATA_KEY).getString(JSONUtils.ID_KEY);
 
             RedditAPI api = oauthRetrofit.create(RedditAPI.class);
+
+            // A richtext body is how inline images are sent; read right away, each is still a
+            // "Processing img" placeholder.
+            if (isRichTextJSON) {
+                SubmittedPostMedia.awaitProcessed(api, APIUtils.getOAuthHeader(accessToken),
+                        postId.startsWith("t3_") ? postId : "t3_" + postId);
+            }
 
             Call<String> getPostCall = api.getPostOauth(postId, APIUtils.getOAuthHeader(accessToken));
             Response<String> getPostCallResponse = getPostCall.execute();

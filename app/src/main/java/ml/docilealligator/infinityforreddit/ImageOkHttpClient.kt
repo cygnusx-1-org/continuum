@@ -4,6 +4,7 @@ import android.content.Context
 import java.util.concurrent.TimeUnit
 import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener
 import ml.docilealligator.infinityforreddit.network.PreferenceProxySelector
+import ml.docilealligator.infinityforreddit.network.RedditMediaExtensionInterceptor
 import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import okhttp3.OkHttpClient
@@ -71,6 +72,8 @@ object ImageOkHttpClient {
                         .build()
                 )
             }
+            // Gallery items Reddit's listing reports as failed carry a guessed extension.
+            .addInterceptor(RedditMediaExtensionInterceptor)
 
         // Instrument image retrieval so it shows up in API/media statistics. Glide builds its own
         // OkHttpClient, so the base-client EventListener does not reach it otherwise.

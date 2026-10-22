@@ -778,8 +778,22 @@ public class ParsePost {
                     JSONArray galleryIdsArray = data.getJSONObject(JSONUtils.GALLERY_DATA_KEY).getJSONArray(JSONUtils.ITEMS_KEY);
                     JSONObject galleryObject = data.getJSONObject(JSONUtils.MEDIA_METADATA_KEY);
                     ArrayList<Post.Gallery> gallery = new ArrayList<>();
+                    // Only read for items the listing reports as failed; see FailedRedditMedia.
+                    String thumbnailMediaId = FailedRedditMedia.thumbnailMediaId(thumbnailUrl, galleryIdsArray);
+                    String failedItemExtension = FailedRedditMedia.extension(thumbnailUrl, thumbnailMediaId);
                     for (int i = 0; i < galleryIdsArray.length(); i++) {
-                        String galleryId = galleryIdsArray.getJSONObject(i).getString(JSONUtils.MEDIA_ID_KEY);
+                        JSONObject galleryItem = galleryIdsArray.getJSONObject(i);
+                        String galleryId = galleryItem.getString(JSONUtils.MEDIA_ID_KEY);
+                        String galleryItemCaption = "";
+                        String galleryItemCaptionUrl = "";
+                        if (galleryItem.has(JSONUtils.CAPTION_KEY)) {
+                            galleryItemCaption = galleryItem.getString(JSONUtils.CAPTION_KEY).trim();
+                        }
+
+                        if (galleryItem.has(JSONUtils.CAPTION_URL_KEY)) {
+                            galleryItemCaptionUrl = galleryItem.getString(JSONUtils.CAPTION_URL_KEY).trim();
+                        }
+
                         // A deleted image keeps its `gallery_data` entry but loses its
                         // `media_metadata` one. getJSONObject would throw on the first such item and
                         // the catch below would discard the whole list, so a gallery that lost one
@@ -790,14 +804,36 @@ public class ParsePost {
                         if (singleGalleryObject == null) {
                             continue;
                         }
-                        // An entry can also be present but unusable: Reddit marks media whose
-                        // processing failed with a `status` other than "valid" and sends it without
-                        // the `m` and `s` keys the lines below need. Skip it exactly like a missing
-                        // entry -- reading it would throw and cost the gallery its good images too.
-                        // JSONUtils.parseMediaMetadata skips the same shape for the same reason.
+                        // An entry can also be present without the `m` and `s` keys the lines below
+                        // need. "failed" is the shape Reddit's listing gives an image leased with a
+                        // filepath (other API clients, and Continuum's own older galleries), though
+                        // the images are fine and served from i.redd.it: build those from the media
+                        // id (FailedRedditMedia). Skip any other such entry exactly like a missing
+                        // one -- reading it would throw and cost the gallery its good images too.
                         String mimeType = singleGalleryObject.optString(JSONUtils.M_KEY);
                         JSONObject sourceObject = singleGalleryObject.optJSONObject(JSONUtils.S_KEY);
                         if (mimeType.isEmpty() || sourceObject == null) {
+                            if (!FailedRedditMedia.isReportedFailed(singleGalleryObject)
+                                    || galleryItem.optBoolean(JSONUtils.IS_DELETED_KEY)) {
+                                continue;
+                            }
+                            String failedMimeType = "image/" + failedItemExtension;
+                            String failedItemUrl = FailedRedditMedia.sourceUrl(galleryId, failedItemExtension);
+                            if (previews.isEmpty() && Post.Gallery.isStillImage(failedMimeType)) {
+                                // The thumbnail is the only size the listing gives, and only for its
+                                // own item and when it is not a crop; 0x0 is the cards' "size unknown".
+                                boolean sizeKnown = galleryId.equals(thumbnailMediaId)
+                                        && FailedRedditMedia.thumbnailIsUncropped(thumbnailUrl);
+                                previews.add(new Post.Preview(failedItemUrl,
+                                        sizeKnown ? data.optInt(JSONUtils.THUMBNAIL_WIDTH_KEY) : 0,
+                                        sizeKnown ? data.optInt(JSONUtils.THUMBNAIL_HEIGHT_KEY) : 0,
+                                        galleryItemCaption, galleryItemCaptionUrl));
+                            }
+                            // No fallback: the url already is the i.redd.it original the fallback
+                            // would otherwise name, and downloads prefer the fallback when one is set.
+                            gallery.add(new Post.Gallery(failedMimeType, failedItemUrl, "",
+                                    subredditName + "-" + galleryId + "." + failedItemExtension,
+                                    galleryItemCaption, galleryItemCaptionUrl));
                             continue;
                         }
                         String galleryItemUrl;
@@ -813,17 +849,6 @@ public class ParsePost {
                         // list half built, and the post would be demoted to text with no images.
                         if (galleryItemUrl.isEmpty()) {
                             continue;
-                        }
-
-                        JSONObject galleryItem = galleryIdsArray.getJSONObject(i);
-                        String galleryItemCaption = "";
-                        String galleryItemCaptionUrl = "";
-                        if (galleryItem.has(JSONUtils.CAPTION_KEY)) {
-                            galleryItemCaption = galleryItem.getString(JSONUtils.CAPTION_KEY).trim();
-                        }
-
-                        if (galleryItem.has(JSONUtils.CAPTION_URL_KEY)) {
-                            galleryItemCaptionUrl = galleryItem.getString(JSONUtils.CAPTION_URL_KEY).trim();
                         }
 
                         if (previews.isEmpty() && Post.Gallery.isStillImage(mimeType)) {
@@ -989,9 +1014,21 @@ public class ParsePost {
     private static final Pattern INLINE_BODY_IMAGE_PATTERN = Pattern.compile(
             "!\\[[^\\]]*]\\((https://(?:preview|i)\\.redd\\.it/(\\w+)\\.(?:jpg|jpeg|png)[^)\\s]*)\\)");
 
-    /** Any Reddit-hosted image or gif URL, in the plain selftext where no markdown survives. */
+    /**
+     * Any Reddit-hosted image or gif URL, in the plain selftext where no markdown survives -- or the
+     * "Processing img &lt;id&gt;..." Reddit writes there instead for an image it reports as failed,
+     * which {@link FailedRedditMedia} turns back into the image. Read the id with
+     * {@link #inlineMediaId}.
+     */
     private static final Pattern INLINE_MEDIA_URL_PATTERN = Pattern.compile(
-            "https://(?:preview|i)\\.redd\\.it/(\\w+)\\.(?:jpg|jpeg|png|gif)(?:\\?\\S*)?");
+            "https://(?:preview|i)\\.redd\\.it/(\\w+)\\.(?:jpg|jpeg|png|gif)(?:\\?\\S*)?|Processing img (\\w+)\\.{3}");
+
+    /** The media id an {@link #INLINE_MEDIA_URL_PATTERN} match names, from whichever form matched. */
+    @Nullable
+    private static String inlineMediaId(Matcher matcher) {
+        String id = matcher.group(1);
+        return id != null ? id : matcher.group(2);
+    }
 
     /** A run of blank lines, left where a stripped URL had a paragraph to itself. */
     private static final Pattern BLANK_LINE_RUN_PATTERN = Pattern.compile("\\n[ \\t]*(?:\\n[ \\t]*){2,}");
@@ -1063,7 +1100,7 @@ public class ParsePost {
                                                      @Nullable Map<String, MediaMetadata> mediaMetadataMap) {
         Matcher matcher = INLINE_MEDIA_URL_PATTERN.matcher(selfTextPlain);
         while (matcher.find()) {
-            if (imageId.equals(matcher.group(1))) {
+            if (imageId.equals(inlineMediaId(matcher))) {
                 post.setSelfTextPlainTrimmedBeforeInlineImage(
                         snippet(selfTextPlain.substring(0, matcher.start()), mediaMetadataMap));
                 post.setSelfTextPlainTrimmedAfterInlineImage(
@@ -1105,7 +1142,7 @@ public class ParsePost {
         StringBuilder kept = new StringBuilder(selfTextPlain.length());
         int copied = -1;
         while (matcher.find()) {
-            String id = matcher.group(1);
+            String id = inlineMediaId(matcher);
             if (id == null || !mediaMetadataMap.containsKey(id)) {
                 continue;
             }

@@ -50,6 +50,7 @@ import ml.docilealligator.infinityforreddit.markdown.RichTextJSONConverter;
 import ml.docilealligator.infinityforreddit.network.AnyAccountAccessTokenAuthenticator;
 import ml.docilealligator.infinityforreddit.post.Post;
 import ml.docilealligator.infinityforreddit.post.SubmitPost;
+import ml.docilealligator.infinityforreddit.post.SubmittedPostMedia;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.thing.UploadedImage;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -454,7 +455,16 @@ public class SubmitPostService extends JobService {
                         handler.post(() -> EventBus.getDefault().post(new SubmitGalleryPostEvent(false, null, null)));
                     }
                 } else {
-                    String postUrl = responseObject.getJSONObject(JSONUtils.DATA_KEY).getString(JSONUtils.URL_KEY);
+                    JSONObject data = responseObject.getJSONObject(JSONUtils.DATA_KEY);
+                    String postUrl = data.getString(JSONUtils.URL_KEY);
+                    // The post is opened as soon as this reports success; give Reddit the moment it
+                    // needs to process the images first, or the post opens as text.
+                    String postId = data.optString(JSONUtils.ID_KEY);
+                    if (!postId.isEmpty()) {
+                        SubmittedPostMedia.awaitProcessed(newAuthenticatorOauthRetrofit.create(RedditAPI.class),
+                                APIUtils.getOAuthHeader(selectedAccount.getAccessToken()),
+                                postId.startsWith("t3_") ? postId : "t3_" + postId);
+                    }
                     handler.post(() -> {
                         EventBus.getDefault().post(new SubmitGalleryPostEvent(true, postUrl, null));
                     });

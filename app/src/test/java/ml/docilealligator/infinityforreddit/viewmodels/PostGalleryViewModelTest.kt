@@ -10,10 +10,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
@@ -54,8 +54,8 @@ class PostGalleryViewModelTest {
     fun successProducesOneUploadedOutcomeAndClearsInFlight() {
         Mockito.mockStatic(UploadImageUtils::class.java).use { mocked ->
             whenever(
-                UploadImageUtils.uploadImage(any(), any(), any(), anyOrNull(), any(), anyBoolean(), anyBoolean())
-            ).thenReturn("""{"asset":{"asset_id":"MEDIA123"}}""")
+                UploadImageUtils.uploadImage(any(), any(), any(), anyOrNull(), any(), eq(true))
+            ).thenReturn("MEDIA123")
 
             val vm = newViewModel()
             vm.uploadImage(uri, "img-1", "token")
@@ -76,7 +76,7 @@ class PostGalleryViewModelTest {
             vm.uploadOutcomes.observeForever { }
             idle()
             mocked.verify(
-                { UploadImageUtils.uploadImage(any(), any(), any(), anyOrNull(), any(), anyBoolean(), anyBoolean()) },
+                { UploadImageUtils.uploadImage(any(), any(), any(), anyOrNull(), any(), eq(true)) },
                 times(1)
             )
             assertEquals(1, vm.uploadOutcomes.value.orEmpty().size)
@@ -87,7 +87,7 @@ class PostGalleryViewModelTest {
     fun failureProducesFailedOutcomeAndSignalsUploadFailed() {
         Mockito.mockStatic(UploadImageUtils::class.java).use { mocked ->
             whenever(
-                UploadImageUtils.uploadImage(any(), any(), any(), anyOrNull(), any(), anyBoolean(), anyBoolean())
+                UploadImageUtils.uploadImage(any(), any(), any(), anyOrNull(), any(), eq(true))
             ).thenThrow(IOException("boom"))
 
             val vm = newViewModel()

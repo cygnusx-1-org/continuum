@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.utils;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 import androidx.annotation.Nullable;
@@ -31,11 +32,7 @@ public class UploadImageUtils {
                                                 @Nullable String accessToken, Bitmap image) throws IOException, JSONException, XmlPullParserException {
         RedditAPI api = oauthRetrofit.create(RedditAPI.class);
 
-        Map<String, String> uploadImageParams = new HashMap<>();
-        uploadImageParams.put(APIUtils.FILEPATH_KEY, "post_image.jpg");
-        uploadImageParams.put(APIUtils.MIMETYPE_KEY, "image/jpeg");
-
-        Call<String> uploadImageCall = api.uploadImage(APIUtils.getOAuthHeader(accessToken), uploadImageParams);
+        Call<String> uploadImageCall = api.uploadImage(APIUtils.getOAuthHeader(accessToken), imageLeaseParams("image/jpeg"));
         Response<String> uploadImageResponse = uploadImageCall.execute();
         if (uploadImageResponse.isSuccessful()) {
             Map<String, RequestBody> nameValuePairsMap = parseJSONResponseFromAWS(uploadImageResponse.body());
@@ -64,63 +61,80 @@ public class UploadImageUtils {
         return uploadImage(oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, imageUri, false);
     }
 
+    /**
+     * Uploads an image to Reddit's media bucket.
+     *
+     * @param getImageKey return the uploaded object's S3 key rather than its URL. The key is the
+     *                    media id a gallery item and an inline richtext image name; the URL is what
+     *                    an image post submits.
+     */
     public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
                                      @Nullable String accessToken, Uri imageUri, boolean getImageKey) throws IOException, JSONException, XmlPullParserException {
-        return uploadImage(oauthRetrofit, uploadMediaRetrofit, contentResolver, accessToken, imageUri, false, getImageKey);
-    }
-
-    public static String uploadImage(Retrofit oauthRetrofit, Retrofit uploadMediaRetrofit, ContentResolver contentResolver,
-                                     @Nullable String accessToken, Uri imageUri,
-                                     boolean returnResponseForGallerySubmission,
-                                     boolean getImageKey) throws IOException, JSONException, XmlPullParserException {
-        String mimeType = contentResolver.getType(imageUri);
-        String extension = "jpg";
-        if (mimeType != null) {
-            String extensionFromMimeType = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-            extension = extensionFromMimeType == null ? extension : extensionFromMimeType;
+        byte[] buf;
+        try (InputStream inputStream = contentResolver.openInputStream(imageUri)) {
+            if (inputStream == null) {
+                // Every other failure here throws; returning a sentinel would be handed on as
+                // the uploaded image's address and submitted as the post's URL.
+                throw new MediaUploadException("Cannot open the image to upload");
+            }
+            buf = IOUtils.toByteArray(inputStream);
         }
+
+        // The lease's mimetype, the uploaded part's name and the bytes all describe the same format.
+        String mimeType = resolveImageMimeType(contentResolver.getType(imageUri), buf);
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        String fileName = "post_image." + (extension == null ? "jpg" : extension);
 
         RedditAPI api = oauthRetrofit.create(RedditAPI.class);
 
-        Map<String, String> uploadImageParams = new HashMap<>();
-        uploadImageParams.put(APIUtils.FILEPATH_KEY, "post_image.jpg");
-        uploadImageParams.put(APIUtils.MIMETYPE_KEY, mimeType);
-
-        Call<String> uploadImageCall = api.uploadImage(APIUtils.getOAuthHeader(accessToken), uploadImageParams);
+        Call<String> uploadImageCall = api.uploadImage(APIUtils.getOAuthHeader(accessToken), imageLeaseParams(mimeType));
         Response<String> uploadImageResponse = uploadImageCall.execute();
-        if (uploadImageResponse.isSuccessful()) {
-            Map<String, RequestBody> nameValuePairsMap = parseJSONResponseFromAWS(uploadImageResponse.body());
-            try (InputStream inputStream = contentResolver.openInputStream(imageUri)) {
-                if (inputStream == null) {
-                    // Every other failure here throws; returning a sentinel would be handed on as
-                    // the uploaded image's address and submitted as the post's URL.
-                    throw new MediaUploadException("Cannot open the image to upload");
-                }
-                byte[] buf = IOUtils.toByteArray(inputStream);
-                RequestBody fileBody = RequestBody.create(buf, MediaType.parse("application/octet-stream"));
-                MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("file", "post_image." + extension, fileBody);
-
-                RedditAPI uploadMediaToAWSApi = uploadMediaRetrofit.create(RedditAPI.class);
-                Call<String> uploadMediaToAWS = uploadMediaToAWSApi.uploadMediaToAWS(nameValuePairsMap, fileToUpload);
-                Response<String> uploadMediaToAWSResponse = uploadMediaToAWS.execute();
-                if (!uploadMediaToAWSResponse.isSuccessful()) {
-                    throw uploadFailed(uploadMediaToAWSResponse);
-                }
-                if (returnResponseForGallerySubmission) {
-                    // The caller parses this as the asset JSON, so an empty body is a failed upload
-                    // rather than something to hand on.
-                    String assetResponse = uploadImageResponse.body();
-                    if (assetResponse == null) {
-                        throw new MediaUploadException("Empty response from Reddit's media asset request");
-                    }
-                    return assetResponse;
-                }
-                return requireParsed(parseImageFromXMLResponseFromAWS(uploadMediaToAWSResponse.body(), getImageKey));
-            }
-
-        } else {
+        if (!uploadImageResponse.isSuccessful()) {
             throw uploadFailed(uploadImageResponse);
         }
+        Map<String, RequestBody> nameValuePairsMap = parseJSONResponseFromAWS(uploadImageResponse.body());
+        RequestBody fileBody = RequestBody.create(buf, MediaType.parse("application/octet-stream"));
+        MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("file", fileName, fileBody);
+
+        RedditAPI uploadMediaToAWSApi = uploadMediaRetrofit.create(RedditAPI.class);
+        Call<String> uploadMediaToAWS = uploadMediaToAWSApi.uploadMediaToAWS(nameValuePairsMap, fileToUpload);
+        Response<String> uploadMediaToAWSResponse = uploadMediaToAWS.execute();
+        if (!uploadMediaToAWSResponse.isSuccessful()) {
+            throw uploadFailed(uploadMediaToAWSResponse);
+        }
+        return requireParsed(parseImageFromXMLResponseFromAWS(uploadMediaToAWSResponse.body(), getImageKey));
+    }
+
+    /**
+     * The form for {@code /api/media/asset.json}: the mimetype, and deliberately no filepath.
+     *
+     * <p>With a filepath, Reddit answers with an {@code args}/{@code asset} lease and records the
+     * upload as an asset that its listing JSON then reports as {@code "status": "failed"} once it
+     * is in a gallery or a body -- the gallery shows as a text post and the body says "Processing
+     * img" on old.reddit and in every API client, though reddit.com shows the images. Without one,
+     * Reddit answers with a bare {@code action}/{@code fields} upload form whose S3 key is a media
+     * id that processes normally: galleries, inline images and image posts all come out valid.
+     */
+    private static Map<String, String> imageLeaseParams(String mimeType) {
+        Map<String, String> params = new HashMap<>();
+        params.put(APIUtils.MIMETYPE_KEY, mimeType);
+        return params;
+    }
+
+    /**
+     * The image's real format, read from its header, so a provider that mislabels the file (or, like
+     * a cropping app's cache provider, reports no type at all) cannot lease it under the wrong one.
+     * Falls back to the provider's type for anything BitmapFactory cannot identify, and to JPEG when
+     * there is neither -- a null mimetype would make Retrofit reject the lease request outright.
+     */
+    static String resolveImageMimeType(@Nullable String providerMimeType, byte[] image) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(image, 0, image.length, options);
+        if (options.outMimeType != null) {
+            return options.outMimeType;
+        }
+        return providerMimeType == null ? "image/jpeg" : providerMimeType;
     }
 
     /**
@@ -178,7 +192,11 @@ public class UploadImageUtils {
             throw new JSONException("Empty response from Reddit's media asset request");
         }
         JSONObject responseObject = new JSONObject(response);
-        JSONArray nameValuePairs = responseObject.getJSONObject(JSONUtils.ARGS_KEY).getJSONArray(JSONUtils.FIELDS_KEY);
+        // The upload form arrives wrapped in `args` (a lease that names a filepath, as a video
+        // upload's does) or bare (an image lease; see imageLeaseParams).
+        JSONObject uploadForm = responseObject.has(JSONUtils.ARGS_KEY)
+                ? responseObject.getJSONObject(JSONUtils.ARGS_KEY) : responseObject;
+        JSONArray nameValuePairs = uploadForm.getJSONArray(JSONUtils.FIELDS_KEY);
 
         Map<String, RequestBody> nameValuePairsMap = new HashMap<>();
         for (int i = 0; i < nameValuePairs.length(); i++) {

@@ -54,6 +54,7 @@ import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.broadcastreceivers.DownloadedMediaDeleteActionBroadcastReceiver;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.events.ShareMediaEvent;
+import ml.docilealligator.infinityforreddit.network.RedditMediaExtensionInterceptor;
 import ml.docilealligator.infinityforreddit.post.FetchImageHostMedia;
 import ml.docilealligator.infinityforreddit.post.ImgurMedia;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -751,6 +752,8 @@ public class DownloadMediaService extends JobService {
                                 .header("User-Agent", APIUtils.USER_AGENT)
                                 .build()
                 ))
+                // Same guessed-extension gallery items the image viewer loads; see ImageOkHttpClient.
+                .addInterceptor(RedditMediaExtensionInterceptor.INSTANCE)
                 .build();
 
         // Keep this call's Retrofit local. A JobService instance is shared by every job routed to
@@ -857,6 +860,24 @@ public class DownloadMediaService extends JobService {
                     downloadFinished(params, builder, mediaType, randomNotificationIdOffset, mimeType, null,
                             ERROR_FILE_CANNOT_DOWNLOAD, multipleDownloads);
                     return false;
+                }
+
+                // A gallery item the listing reported as failed was named from a guessed extension
+                // (FailedRedditMedia), and the interceptor may have found the file under another
+                // one. Name it for the bytes that came back. Nothing has been created yet: the
+                // document and the share-cache file are both made below, under this name.
+                String servedExtension = RedditMediaExtensionInterceptor.substitutedExtension(
+                        fileUrl, response.raw().request().url());
+                if (servedExtension != null) {
+                    fileName = replaceExtension(fileName, servedExtension);
+                    String servedMimeType = DocumentTreeUtils.mimeTypeMatchingExtension(fileName);
+                    if (servedMimeType != null) {
+                        mimeType = servedMimeType;
+                        documentMimeType = servedMimeType;
+                    }
+                    if (!multipleDownloads) {
+                        builder.setContentTitle(fileName);
+                    }
                 }
 
                 if (isShare) {

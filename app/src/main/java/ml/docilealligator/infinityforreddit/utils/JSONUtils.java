@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import ml.docilealligator.infinityforreddit.post.FailedRedditMedia;
 import ml.docilealligator.infinityforreddit.thing.MediaMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -166,6 +167,9 @@ public class JSONUtils {
     public static final String STREAM_KEY = "stream";
     public static final String STREAM_ID_KEY = "stream_id";
     public static final String THUMBNAIL_KEY = "thumbnail";
+    public static final String IS_DELETED_KEY = "is_deleted";
+    public static final String THUMBNAIL_WIDTH_KEY = "thumbnail_width";
+    public static final String THUMBNAIL_HEIGHT_KEY = "thumbnail_height";
     public static final String PUBLISH_AT_KEY = "publish_at";
     public static final String STATE_KEY = "state";
     public static final String UPVOTES_KEY = "upvotes";
@@ -217,10 +221,22 @@ public class JSONUtils {
             if (data.has(JSONUtils.MEDIA_METADATA_KEY)) {
                 Map<String, MediaMetadata> mediaMetadataMap = new HashMap<>();
                 JSONObject mediaMetadataJSON = data.getJSONObject(JSONUtils.MEDIA_METADATA_KEY);
+                // Only read for entries the listing reports as failed; see FailedRedditMedia.
+                String thumbnailUrl = data.optString(JSONUtils.THUMBNAIL_KEY);
+                String failedExtension = FailedRedditMedia.extension(thumbnailUrl,
+                        FailedRedditMedia.thumbnailMediaId(thumbnailUrl, mediaMetadataJSON));
                 for (Iterator<String> it = mediaMetadataJSON.keys(); it.hasNext();) {
                     try {
                         String k = it.next();
                         JSONObject media = mediaMetadataJSON.getJSONObject(k);
+
+                        // An image leased with a filepath (see FailedRedditMedia): the listing says
+                        // "failed" and the body says "Processing img <id>...", but the file is on
+                        // i.redd.it. Kept, the placeholder below becomes that image.
+                        if (FailedRedditMedia.isReportedFailed(media)) {
+                            mediaMetadataMap.put(k, FailedRedditMedia.mediaMetadata(k, failedExtension));
+                            continue;
+                        }
 
                         // Handle giphy entries with "invalid" status by constructing direct Giphy URLs
                         if (media.has(STATUS_KEY) && "invalid".equals(media.getString(STATUS_KEY))) {
@@ -273,18 +289,6 @@ public class JSONUtils {
                         String id = media.getString(JSONUtils.ID_KEY);
                         mediaMetadataMap.put(id, new MediaMetadata(id, e, originalItem, downscaledItem));
                     } catch (JSONException e) {
-                        /*
-                        https://www.reddit.com/r/Leathercraft/comments/1qo3jrv/one_year_of_patina/.json?raw_json=1
-
-                        "media_metadata": {
-"1a9oi91fitfg1": {
-"status": "failed"
-},
-"2ik58hyditfg1": {
-"status": "failed"
-}
-}
-                         */
                         Log.e("JSONUtils", "parseMediaMetadata failed", e);
                     }
                 }
