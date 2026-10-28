@@ -368,7 +368,7 @@ public interface RedditAPI {
                                                                                       @Query("q") @Nullable String query, @Query("sort") SortType.Type sort,
                                                                                       @Query("t") @Nullable SortType.Time sortTime, @Query("after") @Nullable String after);
 
-    @GET("{multipath}?raw_json=1&limit=100&sr_detail=1")
+    @GET("{multipath}/{sortType}.json?raw_json=1&limit=100&sr_detail=1")
     ListenableFuture<Response<String>> getMultiRedditPostsListenableFuture(@Path(value = "multipath", encoded = true) @Nullable String multiPath,
                                                                            @Path(value = "sortType", encoded = true) SortType.Type sortType,
                                                                            @Query("after") @Nullable String after, @Query("t") @Nullable SortType.Time sortTime);

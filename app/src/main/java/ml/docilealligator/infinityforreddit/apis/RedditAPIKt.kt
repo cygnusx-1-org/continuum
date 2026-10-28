@@ -298,15 +298,17 @@ interface RedditAPIKt {
         @Query("t") sortTime: SortType.Time?, @Query("after") after: String?
     ): Response<String>
 
-    @GET("{multipath}?raw_json=1&limit=100")
+    @GET("{multipath}/{sortType}.json?raw_json=1&limit=100")
     suspend fun getMultiRedditPosts(
         @Path(value = "multipath", encoded = true) multiPath: String,
+        @Path("sortType") sortType: SortType.Type,
         @Query("after") after: String?, @Query("t") sortTime: SortType.Time?
     ): Response<String>
 
-    @GET("{multipath}.json?raw_json=1&limit=100")
+    @GET("{multipath}/{sortType}.json?raw_json=1&limit=100")
     suspend fun getMultiRedditPostsOauth(
         @Path(value = "multipath", encoded = true) multiPath: String,
+        @Path("sortType") sortType: SortType.Type,
         @Query("after") after: String?, @Query("t") sortTime: SortType.Time?,
         @HeaderMap headers: Map<String, String>
     ): Response<String>

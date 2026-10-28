@@ -183,10 +183,10 @@ class ViewPostDetailActivityViewModel(
 
                             PostType.MULTIREDDIT -> response = multiPath?.let {
                                 if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                                    api.getMultiRedditPosts(multiPath, afterKey, sortTime)
+                                    api.getMultiRedditPosts(multiPath, sortType, afterKey, sortTime)
                                 } else {
                                     api.getMultiRedditPostsOauth(
-                                        multiPath, afterKey,
+                                        multiPath, sortType, afterKey,
                                         sortTime, APIUtils.getOAuthHeader(accessToken)
                                     )
                                 }

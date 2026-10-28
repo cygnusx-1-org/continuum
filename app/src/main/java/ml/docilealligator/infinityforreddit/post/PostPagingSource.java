@@ -10,9 +10,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -136,9 +134,15 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     private final Set<String> existingPostIds = new HashSet<>();
     @Nullable
     private String previousLastItem;
-    @Nullable
-    private List<String> multiRedditUsernames;
     private boolean multiRedditUsernamesFetched = false;
+    // A multireddit with users in it, whose posts are merged in alongside its own; null while it
+    // has none. Its sources are the multireddit's own listing first, when it has subreddits, and
+    // then mergedUsers in order.
+    @Nullable
+    private MergedListing mergedListing;
+    private List<String> mergedUsers = new ArrayList<>();
+    private boolean mergedHasMain;
+    private int mergedPages;
     @Nullable
     private String subredditOnlyName;
 
@@ -177,6 +181,10 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
      */
     private static final int MAX_BARREN_PAGE_HOPS = 5;
     private static final int BARREN_PAGE_HOP_LOAD_SIZE = 100;
+
+    // Page sizes of a merged multireddit's own listing and of each user's listing in it.
+    private static final int MERGED_MAIN_PAGE_SIZE = 75;
+    private static final int MERGED_USER_PAGE_SIZE = 25;
 
     PostPagingSource(Executor executor, Retrofit retrofit, RedditDataRoomDatabase redditDataRoomDatabase,
                      @Nullable String accessToken, @NonNull String accountName, SharedPreferences sharedPreferences,
@@ -1068,244 +1076,162 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
             return catchErrors(pageFuture);
         }
 
-        // Parse composite after key
-        String multiAfterKey = getMainAfterKey(loadParams.getKey());
-        Map<String, String> currentUserAfterKeys = parseUserAfterKeys(loadParams.getKey());
-        final boolean isInitialLoad = loadParams.getKey() == null;
-
-        // Determine if we have users to merge (or might have on first load)
-        boolean hasUsers = multiRedditUsernames != null && !multiRedditUsernames.isEmpty();
-        boolean mightHaveUsers = !multiRedditUsernamesFetched && !accountName.equals(Account.ANONYMOUS_ACCOUNT);
-
-        // Fetch multi-reddit posts (use reduced limit when merging with user posts)
-        ListenableFuture<Response<String>> multiRedditPosts;
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            multiRedditPosts = api.getMultiRedditPostsListenableFuture(multiRedditPath, sortType.getType(), multiAfterKey, sortType.getTime());
-        } else if (hasUsers || mightHaveUsers) {
-            multiRedditPosts = api.getMultiRedditPostsOauthListenableFuture(multiRedditPath, sortType.getType(), multiAfterKey,
-                    sortType.getTime(), APIUtils.getOAuthHeader(accessToken), 75);
-        } else {
-            multiRedditPosts = api.getMultiRedditPostsOauthListenableFuture(multiRedditPath, sortType.getType(), multiAfterKey,
-                    sortType.getTime(), APIUtils.getOAuthHeader(accessToken), 100);
+        MergedListing merge = mergedListing;
+        if (merge != null) {
+            return catchErrors(loadMergedPage(api, merge, null));
         }
 
-        // On first load, fetch multi-reddit info to discover user entries, then fire user
-        // post requests as soon as usernames are known (without waiting for multi-reddit posts)
-        if (mightHaveUsers) {
-            multiRedditUsernamesFetched = true;
-            ListenableFuture<Response<String>> multiInfoFuture = api.getMultiRedditInfoListenableFuture(
-                    APIUtils.getOAuthHeader(accessToken), multiRedditPath);
-
-            // As soon as info returns, launch user post fetches immediately
-            ListenableFuture<List<Response<String>>> userPostsFuture = Futures.transformAsync(multiInfoFuture, infoResponse -> {
-                parseMultiRedditInfoResponse(infoResponse);
-                if (multiRedditUsernames == null || multiRedditUsernames.isEmpty()) {
-                    return Futures.immediateFuture(new ArrayList<>());
-                }
-                List<ListenableFuture<Response<String>>> userFutures = launchUserPostFetches(api, currentUserAfterKeys, isInitialLoad);
-                return Futures.successfulAsList(userFutures);
-            }, executor);
-
-            // Wait for multi-reddit posts AND user posts (both in flight simultaneously)
-            ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.whenAllSucceed(multiRedditPosts, userPostsFuture)
-                    .call(() -> {
-                        Response<String> mainResponse = Futures.getDone(multiRedditPosts);
-                        List<Response<String>> userResponses = Futures.getDone(userPostsFuture);
-                        return mergeResponses(mainResponse, userResponses, getUsersToFetch(currentUserAfterKeys, isInitialLoad));
-                    }, executor);
-
-            return catchErrors(pageFuture);
-        }
-
-        // Subsequent loads: fetch multi-reddit posts and user posts all in parallel
-        if (multiRedditUsernames != null && !multiRedditUsernames.isEmpty()) {
-            List<ListenableFuture<Response<String>>> userFutures = launchUserPostFetches(api, currentUserAfterKeys, isInitialLoad);
-            ListenableFuture<List<Response<String>>> allUserPosts = Futures.successfulAsList(userFutures);
-
-            ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.whenAllSucceed(multiRedditPosts, allUserPosts)
-                    .call(() -> {
-                        Response<String> mainResponse = Futures.getDone(multiRedditPosts);
-                        List<Response<String>> userResponses = Futures.getDone(allUserPosts);
-                        return mergeResponses(mainResponse, userResponses, getUsersToFetch(currentUserAfterKeys, isInitialLoad));
-                    }, executor);
-
-            return catchErrors(pageFuture);
-        }
-
-        // No users, just transform multi-reddit posts
-        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(multiRedditPosts, this::transformData, executor);
-        return catchErrors(pageFuture);
-    }
-
-    private List<String> getUsersToFetch(@Nullable Map<String, String> currentUserAfterKeys, boolean isInitialLoad) {
-        List<String> users = new ArrayList<>();
-        if (multiRedditUsernames == null) return users;
-        for (String username : multiRedditUsernames) {
-            if (!isInitialLoad && currentUserAfterKeys != null && !currentUserAfterKeys.containsKey(username)) {
-                continue;
-            }
-            users.add(username);
-        }
-        return users;
-    }
-
-    private List<ListenableFuture<Response<String>>> launchUserPostFetches(
-            RedditAPI api, @Nullable Map<String, String> currentUserAfterKeys, boolean isInitialLoad) {
-        List<ListenableFuture<Response<String>>> futures = new ArrayList<>();
-        if (multiRedditUsernames == null) {
-            return futures;
-        }
-        for (String username : multiRedditUsernames) {
-            if (!isInitialLoad && currentUserAfterKeys != null && !currentUserAfterKeys.containsKey(username)) {
-                continue;
-            }
-            String userAfter = (currentUserAfterKeys != null) ? currentUserAfterKeys.get(username) : null;
+        if (accountName.equals(Account.ANONYMOUS_ACCOUNT) || multiRedditUsernamesFetched) {
+            ListenableFuture<Response<String>> multiRedditPosts;
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                futures.add(api.getUserPostsListenableFuture(username, userAfter, sortType.getType(), sortType.getTime(), 25));
+                multiRedditPosts = api.getMultiRedditPostsListenableFuture(multiRedditPath, sortType.getType(),
+                        loadParams.getKey(), sortType.getTime());
             } else {
-                futures.add(api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken, username, "submitted",
-                        userAfter, sortType.getType(), sortType.getTime(), 25));
+                multiRedditPosts = api.getMultiRedditPostsOauthListenableFuture(multiRedditPath, sortType.getType(),
+                        loadParams.getKey(), sortType.getTime(), APIUtils.getOAuthHeader(accessToken), 100);
             }
+            return catchErrors(Futures.transform(multiRedditPosts, this::transformData, executor));
         }
-        return futures;
-    }
 
-    @Nullable
-    private String getMainAfterKey(@Nullable String compositeKey) {
-        if (compositeKey == null || !compositeKey.startsWith("{")) return compositeKey;
-        try {
-            String m = new JSONObject(compositeKey).optString("m");
-            return m.isEmpty() ? null : m;
-        } catch (JSONException e) {
-            return compositeKey;
-        }
-    }
-
-    @Nullable
-    private Map<String, String> parseUserAfterKeys(@Nullable String compositeKey) {
-        if (compositeKey == null || !compositeKey.startsWith("{")) return null;
-        try {
-            JSONObject users = new JSONObject(compositeKey).optJSONObject("u");
-            if (users == null) return null;
-            Map<String, String> result = new HashMap<>();
-            Iterator<String> keys = users.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String val = users.getString(key);
-                if (!val.isEmpty()) result.put(key, val);
+        // The first load asks the multireddit which users are in it while its first page is already
+        // on the way, so that one with no users in it costs no extra wait.
+        ListenableFuture<Response<String>> firstPage = fetchMergedMainPage(api, loadParams.getKey());
+        ListenableFuture<Response<String>> info = api.getMultiRedditInfoListenableFuture(
+                APIUtils.getOAuthHeader(accessToken), multiRedditPath);
+        return catchErrors(Futures.transformAsync(info, infoResponse -> {
+            List<String> users = parseMultiRedditUsernames(infoResponse);
+            multiRedditUsernamesFetched = true;
+            if (users.isEmpty()) {
+                return Futures.transform(firstPage, this::transformData, executor);
             }
-            return result;
-        } catch (JSONException e) {
-            return null;
-        }
+            mergedUsers = users;
+            mergedHasMain = true;
+            MergedListing newMerge = new MergedListing(1 + users.size(), sortType.getType());
+            mergedListing = newMerge;
+            return loadMergedPage(api, newMerge, firstPage);
+        }, executor));
     }
 
-    private void parseMultiRedditInfoResponse(Response<String> response) {
-        if (response == null || !response.isSuccessful() || response.body() == null) return;
+    // The users added to a multireddit, which lists them among its subreddits as u_<name>. None when
+    // its details did not load.
+    private static List<String> parseMultiRedditUsernames(@Nullable Response<String> response) {
+        List<String> users = new ArrayList<>();
+        String body = response == null || !response.isSuccessful() ? null : response.body();
+        if (body == null) {
+            return users;
+        }
         try {
-            JSONObject data = new JSONObject(response.body()).getJSONObject("data");
-            JSONArray subreddits = data.getJSONArray("subreddits");
-            multiRedditUsernames = new ArrayList<>();
+            JSONArray subreddits = new JSONObject(body).getJSONObject("data").getJSONArray("subreddits");
             for (int i = 0; i < subreddits.length(); i++) {
                 String name = subreddits.getJSONObject(i).getString("name");
                 if (name.startsWith("u_")) {
-                    multiRedditUsernames.add(name.substring(2));
+                    users.add(name.substring(2));
                 }
             }
         } catch (JSONException e) {
             // Failed to parse multi-reddit info
         }
+        return users;
     }
 
-    private LoadResult<String, Post> mergeResponses(
-            @Nullable Response<String> mainResponse, List<Response<String>> userResponses,
-            List<String> usersToFetch) {
-        int currentPostsSize = posts.size();
-
-        // Parse main multi-reddit response
-        String mainLastItem = null;
-        if (mainResponse != null && mainResponse.isSuccessful()) {
-            String responseString = mainResponse.body();
-            LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostsList);
-            mainLastItem = ParsePost.getLastItem(responseString);
-            if (newPosts != null) {
-                addNewPosts(newPosts);
+    /**
+     * Pages whichever listings of a merged multireddit have run dry and returns every post that can
+     * now be placed; see {@link MergedListing}. Nothing is queued unless the multireddit's own page
+     * came back, so a load that fails leaves the merge as it was and its retry asks again.
+     */
+    private ListenableFuture<LoadResult<String, Post>> loadMergedPage(RedditAPI api, MergedListing merge,
+                                                                      @Nullable ListenableFuture<Response<String>> firstMainPage) {
+        ListenableFuture<Response<String>> mainPage = immediateNullResponse();
+        List<Integer> userSources = new ArrayList<>();
+        List<ListenableFuture<Response<String>>> userPages = new ArrayList<>();
+        for (int source : merge.sourcesToFetch()) {
+            if (mergedHasMain && source == 0) {
+                mainPage = firstMainPage != null ? firstMainPage : fetchMergedMainPage(api, merge.cursor(0));
+            } else {
+                userSources.add(source);
+                userPages.add(fetchMergedUserPage(api, mergedUsers.get(mergedHasMain ? source - 1 : source),
+                        merge.cursor(source)));
             }
         }
 
-        // If no user responses, return main response only
-        if (userResponses == null || userResponses.isEmpty()) {
-            if (mainLastItem != null && mainLastItem.equals(previousLastItem)) {
-                mainLastItem = null;
+        // A user whose listing fails to load drops out of the merge. The multireddit's own failing
+        // fails the load, as it does for a multireddit with no users in it.
+        ListenableFuture<Response<String>> main = mainPage;
+        ListenableFuture<List<Response<String>>> users = Futures.successfulAsList(userPages);
+        return Futures.whenAllSucceed(main, users).call(() -> {
+            Response<String> mainResponse = Futures.getDone(main);
+            if (mainResponse != null) {
+                if (!mainResponse.isSuccessful()) {
+                    return transformData(mainResponse);
+                }
+                if (!addMergedPage(merge, 0, mainResponse)) {
+                    return new LoadResult.Error<String, Post>(new PostPagingSourceError(mainResponse.code(), "Error parsing posts"));
+                }
             }
-            previousLastItem = mainLastItem;
-            int newSize = posts.size();
-            if (newSize == currentPostsSize) {
-                return new LoadResult.Page<>(new ArrayList<>(), null, mainLastItem);
-            }
-            return new LoadResult.Page<>(new ArrayList<>(posts.subList(currentPostsSize, newSize)), null, mainLastItem);
-        }
-
-        try {
-            boolean hasMore = false;
-            JSONObject compositeAfter = new JSONObject();
-
-            if (mainLastItem != null && !mainLastItem.isEmpty()) {
-                compositeAfter.put("m", mainLastItem);
-                hasMore = true;
-            }
-
-            // Parse user post responses
-            JSONObject userAfters = new JSONObject();
-            for (int i = 0; i < usersToFetch.size(); i++) {
-                String username = usersToFetch.get(i);
-                Response<String> userResponse = (i < userResponses.size()) ? userResponses.get(i) : null;
-                if (userResponse != null && userResponse.isSuccessful()) {
-                    String responseString = userResponse.body();
-                    LinkedHashSet<Post> userPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, readPostsList);
-                    String userLastItem = ParsePost.getLastItem(responseString);
-                    if (userPosts != null) {
-                        addNewPosts(userPosts);
-                    }
-                    if (userLastItem != null && !userLastItem.isEmpty()) {
-                        userAfters.put(username, userLastItem);
-                        hasMore = true;
-                    }
+            List<Response<String>> userResponses = Futures.getDone(users);
+            for (int i = 0; i < userSources.size(); i++) {
+                Response<String> response = userResponses.get(i);
+                if (response == null || !response.isSuccessful() || !addMergedPage(merge, userSources.get(i), response)) {
+                    merge.endSource(userSources.get(i));
                 }
             }
 
-            if (userAfters.length() > 0) {
-                compositeAfter.put("u", userAfters);
+            List<Post> placed = merge.drain();
+            posts.addAll(placed);
+            // Where each listing has got to is kept on the merge, so the key only has to differ from
+            // the last one, which Paging requires.
+            return new LoadResult.Page<>(placed, null, merge.hasMore() ? "merged:" + ++mergedPages : null);
+        }, executor);
+    }
+
+    // Queues one listing's page on the merge, less what the feed already has. False when the page
+    // does not parse.
+    private boolean addMergedPage(MergedListing merge, int source, Response<String> response) {
+        JSONObject listing = parseListing(response.body());
+        LinkedHashSet<Post> parsed = ParsePost.parsePostsSync(listing, -1, postFilter, readPostsList);
+        if (parsed == null) {
+            return false;
+        }
+        if (Account.ANONYMOUS_ACCOUNT.equals(accountName)) {
+            setMetadataToAnonymousPosts(parsed);
+        }
+        List<Post> fresh = new ArrayList<>(parsed.size());
+        for (Post p : parsed) {
+            if (existingPostIds.add(p.getId())) {
+                fresh.add(p);
             }
-
-            String nextKey = hasMore ? compositeAfter.toString() : null;
-            return buildSortedPage(currentPostsSize, nextKey);
-        } catch (JSONException e) {
-            return new LoadResult.Error<>(e);
         }
+        String after = ParsePost.getLastItem(listing);
+        // A listing that answers with the cursor it was asked from would be paged forever.
+        if (after != null && after.equals(merge.cursor(source))) {
+            after = null;
+        }
+        merge.addPage(source, fresh, listing, after);
+        return true;
     }
 
-    private LoadResult<String, Post> buildSortedPage(int currentPostsSize, @Nullable String nextKey) {
-        int newSize = posts.size();
-        if (newSize == currentPostsSize) {
-            return new LoadResult.Page<>(new ArrayList<>(), null, nextKey);
+    private ListenableFuture<Response<String>> fetchMergedMainPage(RedditAPI api, @Nullable String after) {
+        if (postType == PostType.MULTIREDDIT) {
+            return api.getMultiRedditPostsOauthListenableFuture(multiRedditPath, sortType.getType(), after,
+                    sortType.getTime(), APIUtils.getOAuthHeader(accessToken), MERGED_MAIN_PAGE_SIZE);
         }
-        List<Post> resultPosts = new ArrayList<>(posts.subList(currentPostsSize, newSize));
-        resultPosts.sort((a, b) -> Long.compare(b.getPostTimeMillis(), a.getPostTimeMillis()));
-        return new LoadResult.Page<>(resultPosts, null, nextKey);
+        return api.getAnonymousFrontPageOrMultiredditPostsListenableFuture(subredditOnlyName, sortType.getType(),
+                sortType.getTime(), after, MERGED_MAIN_PAGE_SIZE, APIUtils.ANONYMOUS_USER_AGENT);
     }
 
-    private void addNewPosts(LinkedHashSet<Post> newPosts) {
-        for (Post p : newPosts) {
-            if (existingPostIds.contains(p.getId())) {
-                continue;
-            }
-            existingPostIds.add(p.getId());
-            posts.add(p);
+    private ListenableFuture<Response<String>> fetchMergedUserPage(RedditAPI api, String username, @Nullable String after) {
+        // A user's listing knows hot, new, top and controversial, and answers anything else newest
+        // first, which ranks nothing like the multireddit it is merged into.
+        SortType.Type type = sortType.getType() == SortType.Type.BEST || sortType.getType() == SortType.Type.RISING
+                ? SortType.Type.HOT : sortType.getType();
+        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            return api.getUserPostsListenableFuture(username, after, type, sortType.getTime(), MERGED_USER_PAGE_SIZE);
         }
+        return api.getUserPostsOauthListenableFuture(APIUtils.AUTHORIZATION_BASE + accessToken, username,
+                USER_WHERE_SUBMITTED, after, type, sortType.getTime(), MERGED_USER_PAGE_SIZE);
     }
 
-    // A future that yields a null "no main response" sentinel; mergeResponses handles the null.
+    // A future that yields a null "no main response" sentinel; loadMergedPage handles the null.
     // Isolated here because Futures.immediateFuture's value parameter is modeled @NonNull.
     @SuppressWarnings("NullAway")
     private static ListenableFuture<Response<String>> immediateNullResponse() {
@@ -1319,74 +1245,45 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private ListenableFuture<LoadResult<String, Post>> loadAnonymousFrontPageOrMultiredditPosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {
-        // For anonymous multireddit, extract user entries from concatenated name on first call
+        // An anonymous multireddit names its users among its subreddits, as u_<name>
         if (postType == PostType.ANONYMOUS_MULTIREDDIT && !multiRedditUsernamesFetched) {
             multiRedditUsernamesFetched = true;
             @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
             String[] parts = (subredditOrUserName == null ? "" : subredditOrUserName).split("\\+");
             List<String> subreddits = new ArrayList<>();
-            multiRedditUsernames = new ArrayList<>();
+            List<String> users = new ArrayList<>();
             for (String part : parts) {
                 if (part.startsWith("u_")) {
-                    multiRedditUsernames.add(part.substring(2));
-                } else {
+                    users.add(part.substring(2));
+                } else if (!part.isEmpty()) {
                     subreddits.add(part);
                 }
             }
-            if (!multiRedditUsernames.isEmpty() && !subreddits.isEmpty()) {
+            if (!users.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < subreddits.size(); i++) {
                     if (i > 0) sb.append("+");
                     sb.append(subreddits.get(i));
                 }
                 subredditOnlyName = sb.toString();
-            } else if (multiRedditUsernames.isEmpty()) {
-                subredditOnlyName = null;
-            } else {
-                // Only users, no subreddits
-                subredditOnlyName = "";
+                mergedUsers = users;
+                mergedHasMain = !subreddits.isEmpty();
+                mergedListing = new MergedListing((mergedHasMain ? 1 : 0) + users.size(), sortType.getType());
             }
         }
 
-        // If no users to merge, use original behavior
-        if (multiRedditUsernames == null || multiRedditUsernames.isEmpty()) {
-            ListenableFuture<Response<String>> anonymousHomePosts = api.getAnonymousFrontPageOrMultiredditPostsListenableFuture(
-                    subredditOrUserName, sortType.getType(), sortType.getTime(), loadParams.getKey(),
-                    APIUtils.subredditAPICallLimit(subredditOrUserName), APIUtils.ANONYMOUS_USER_AGENT);
-
-            ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(anonymousHomePosts, this::transformData, executor);
-            ListenableFuture<LoadResult<String, Post>> partialLoadResultFuture =
-                    Futures.catching(pageFuture, HttpException.class, LoadResult.Error::new, executor);
-            return Futures.catching(partialLoadResultFuture, IOException.class, LoadResult.Error::new, executor);
+        MergedListing merge = mergedListing;
+        if (merge != null) {
+            return catchErrors(loadMergedPage(api, merge, null));
         }
 
-        // Parse composite after key
-        String mainAfterKey = getMainAfterKey(loadParams.getKey());
-        Map<String, String> currentUserAfterKeys = parseUserAfterKeys(loadParams.getKey());
-        final boolean isInitialLoad = loadParams.getKey() == null;
+        ListenableFuture<Response<String>> anonymousHomePosts = api.getAnonymousFrontPageOrMultiredditPostsListenableFuture(
+                subredditOrUserName, sortType.getType(), sortType.getTime(), loadParams.getKey(),
+                APIUtils.subredditAPICallLimit(subredditOrUserName), APIUtils.ANONYMOUS_USER_AGENT);
 
-        boolean hasSubreddits = subredditOnlyName != null && !subredditOnlyName.isEmpty();
-
-        // Launch subreddit posts fetch (reduced limit since we're merging with user posts)
-        ListenableFuture<Response<String>> mainFuture;
-        if (hasSubreddits) {
-            mainFuture = api.getAnonymousFrontPageOrMultiredditPostsListenableFuture(
-                    subredditOnlyName, sortType.getType(), sortType.getTime(), mainAfterKey,
-                    75, APIUtils.ANONYMOUS_USER_AGENT);
-        } else {
-            mainFuture = immediateNullResponse();
-        }
-
-        // Launch user post fetches in parallel
-        List<ListenableFuture<Response<String>>> userFutures = launchUserPostFetches(api, currentUserAfterKeys, isInitialLoad);
-        ListenableFuture<List<Response<String>>> allUserPosts = Futures.successfulAsList(userFutures);
-
-        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.whenAllSucceed(mainFuture, allUserPosts)
-                .call(() -> {
-                    Response<String> mainResponse = Futures.getDone(mainFuture);
-                    List<Response<String>> userResponses = Futures.getDone(allUserPosts);
-                    return mergeResponses(mainResponse, userResponses, getUsersToFetch(currentUserAfterKeys, isInitialLoad));
-                }, executor);
-        return catchErrors(pageFuture);
+        ListenableFuture<LoadResult<String, Post>> pageFuture = Futures.transform(anonymousHomePosts, this::transformData, executor);
+        ListenableFuture<LoadResult<String, Post>> partialLoadResultFuture =
+                Futures.catching(pageFuture, HttpException.class, LoadResult.Error::new, executor);
+        return Futures.catching(partialLoadResultFuture, IOException.class, LoadResult.Error::new, executor);
     }
 }
