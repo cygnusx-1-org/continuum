@@ -97,6 +97,23 @@ interface RedditAPIKt {
         @HeaderMap headers: Map<String, String>
     ): Response<String>
 
+    @GET("/comments/{id}/placeholder/{commentId}.json?raw_json=1&context=0")
+    suspend fun getFocusedComment(
+        @Path("id") id: String,
+        @Path("commentId") commentId: String,
+        @Query("sort") sortType: SortType.Type?,
+        @Query("limit") limit: Int?
+    ): Response<String>
+
+    @GET("/comments/{id}/placeholder/{commentId}.json?raw_json=1&context=0")
+    suspend fun getFocusedCommentOauth(
+        @Path("id") id: String,
+        @Path("commentId") commentId: String,
+        @Query("sort") sortType: SortType.Type?,
+        @Query("limit") limit: Int?,
+        @HeaderMap headers: Map<String, String>
+    ): Response<String>
+
     @GET("r/{subredditName}/about.json?raw_json=1")
     suspend fun getSubredditData(@Path("subredditName") subredditName: String): Response<String>
 

@@ -6,7 +6,6 @@ import static ml.docilealligator.infinityforreddit.comment.Comment.VOTE_TYPE_UPV
 
 import android.os.Handler;
 import android.text.Html;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
@@ -52,100 +51,6 @@ public class ParseComment {
                 }
 
                 handler.post(() -> parseCommentListener.onParseCommentSuccess(newComments, commentData, parentId, moreChildrenIds));
-            } catch (JSONException | RuntimeException e) {
-                e.printStackTrace();
-                handler.post(parseCommentListener::onParseCommentFailed);
-            }
-        });
-    }
-
-    static void parseMoreComment(Executor executor, Handler handler, @Nullable String response, boolean expandChildren, ParseCommentListener parseCommentListener) {
-        executor.execute(() -> {
-            if (response == null) {
-                handler.post(parseCommentListener::onParseCommentFailed);
-                return;
-            }
-            try {
-                JSONArray childrenArray = new JSONObject(response).getJSONObject(JSONUtils.JSON_KEY)
-                        .getJSONObject(JSONUtils.DATA_KEY).getJSONArray(JSONUtils.THINGS_KEY);
-
-                ArrayList<Comment> newComments = new ArrayList<>();
-                ArrayList<Comment> expandedNewComments = new ArrayList<>();
-                ArrayList<String> moreChildrenIds = new ArrayList<>();
-
-                // api response is a flat list of comments tree
-                // process it in order and rebuild the tree
-                for (int i = 0; i < childrenArray.length(); i++) {
-                    JSONObject child = childrenArray.getJSONObject(i);
-                    JSONObject childData = child.getJSONObject(JSONUtils.DATA_KEY);
-                    if (child.getString(JSONUtils.KIND_KEY).equals(JSONUtils.KIND_VALUE_MORE)) {
-                        String parentFullName = childData.getString(JSONUtils.PARENT_ID_KEY);
-                        JSONArray childrenIds = childData.getJSONArray(JSONUtils.CHILDREN_KEY);
-
-                        if (childrenIds.length() != 0) {
-                            ArrayList<String> localMoreChildrenIds = new ArrayList<>(childrenIds.length());
-                            for (int j = 0; j < childrenIds.length(); j++) {
-                                localMoreChildrenIds.add(childrenIds.getString(j));
-                            }
-
-                            Comment parentComment = findCommentByFullName(newComments, parentFullName);
-                            if (parentComment != null) {
-                                parentComment.setHasReply(true);
-                                parentComment.setMoreChildrenIds(localMoreChildrenIds);
-                                parentComment.addChildren(new ArrayList<>()); // ensure children list is not null
-                            } else {
-                                // assume that it is parent of this call
-                                moreChildrenIds.addAll(localMoreChildrenIds);
-                            }
-                        } else {
-                            Comment continueThreadPlaceholder = new Comment(
-                                    parentFullName,
-                                    childData.getInt(JSONUtils.DEPTH_KEY),
-                                    Comment.PLACEHOLDER_CONTINUE_THREAD
-                            );
-
-                            Comment parentComment = findCommentByFullName(newComments, parentFullName);
-                            if (parentComment != null) {
-                                parentComment.setHasReply(true);
-                                parentComment.addChild(continueThreadPlaceholder, parentComment.getChildCount());
-                                parentComment.setChildCount(parentComment.getChildCount() + 1);
-                            } else {
-                                // assume that it is parent of this call
-                                newComments.add(continueThreadPlaceholder);
-                            }
-                        }
-                    } else {
-                        try {
-                            Comment comment = parseSingleComment(childData, 0);
-                            String parentFullName = comment.getParentId();
-
-                            Comment parentComment = parentFullName != null ? findCommentByFullName(newComments, parentFullName) : null;
-                            if (parentComment != null) {
-                                parentComment.setHasReply(true);
-                                parentComment.addChild(comment, parentComment.getChildCount());
-                                parentComment.setChildCount(parentComment.getChildCount() + 1);
-                            } else {
-                                // assume that it is parent of this call
-                                newComments.add(comment);
-                            }
-                        } catch (JSONException | RuntimeException e) {
-                            // Well we need to catch and ignore the exception to not show "error loading comments" to users
-                            Log.e("ParseComment", "parseMoreComment failed", e);
-                        }
-                    }
-                }
-
-                updateChildrenCount(newComments);
-                expandChildren(newComments, expandedNewComments, expandChildren);
-
-                ArrayList<Comment> commentData;
-                if (expandChildren) {
-                    commentData = expandedNewComments;
-                } else {
-                    commentData = newComments;
-                }
-
-                handler.post(() -> parseCommentListener.onParseCommentSuccess(newComments, commentData, null, moreChildrenIds));
             } catch (JSONException | RuntimeException e) {
                 e.printStackTrace();
                 handler.post(parseCommentListener::onParseCommentFailed);
@@ -233,6 +138,7 @@ public class ParseComment {
                         commentFilter);
                 singleComment.addChildren(children);
                 singleComment.setMoreChildrenIds(nextMoreChildrenIds);
+                singleComment.setMoreChildrenCount(moreCount(childrenArray));
                 singleComment.setChildCount(getChildCount(singleComment));
             }
 
@@ -241,15 +147,31 @@ public class ParseComment {
         }
     }
 
-    private static int getChildCount(Comment comment) {
+    /** The count a collapsed comment shows: every reply below it, loaded or not. */
+    public static int getChildCount(Comment comment) {
+        // Replies behind a "Load more comments" count too: a comment with nothing else below it would
+        // otherwise show no count at all while collapsed, as if it had no replies. The placeholder
+        // itself stands for them, so it is not counted as one.
+        int count = comment.getPendingReplyCount();
         if (comment.getChildren() == null) {
+            return count;
+        }
+        for (Comment c : comment.getChildren()) {
+            if (c.getPlaceholderType() != Comment.PLACEHOLDER_LOAD_MORE_COMMENTS) {
+                count += 1 + getChildCount(c);
+            }
+        }
+        return count;
+    }
+
+    /** Reddit's count for the `more` that ends a list of replies, or 0 if they end in a comment. */
+    private static int moreCount(JSONArray replies) {
+        JSONObject last = replies.optJSONObject(replies.length() - 1);
+        if (last == null || !JSONUtils.KIND_VALUE_MORE.equals(last.optString(JSONUtils.KIND_KEY))) {
             return 0;
         }
-        int count = 0;
-        for (Comment c : comment.getChildren()) {
-            count += getChildCount(c);
-        }
-        return comment.getChildren().size() + count;
+        JSONObject data = last.optJSONObject(JSONUtils.DATA_KEY);
+        return data == null ? 0 : data.optInt(JSONUtils.COUNT_KEY);
     }
 
     public static void expandChildren(ArrayList<Comment> comments, ArrayList<Comment> visibleComments,

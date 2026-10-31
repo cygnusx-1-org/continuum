@@ -205,6 +205,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                             && oldComment.isRecovered() == newComment.isRecovered()
                             && oldComment.isApproved() == newComment.isApproved()
                             && oldComment.hasReply() == newComment.hasReply()
+                            && oldComment.getChildCount() == newComment.getChildCount()
                             && oldComment.isSaved() == newComment.isSaved()
                             && oldComment.isSpam() == newComment.isSpam()
                             && oldComment.isLoadingMoreChildren() == newComment.isLoadingMoreChildren()

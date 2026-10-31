@@ -93,6 +93,7 @@ public class Comment implements Parcelable {
     private ArrayList<Comment> children = new ArrayList<>();
     @Nullable
     private ArrayList<String> moreChildrenIds;
+    private int moreChildrenCount;
     private int placeholderType;
     private boolean isLoadingMoreChildren;
     private boolean loadMoreChildrenFailed;
@@ -203,6 +204,7 @@ public class Comment implements Parcelable {
         this.isFilteredOut = commentToBeCopied.isFilteredOut;
         this.children = commentToBeCopied.children;
         this.moreChildrenIds = commentToBeCopied.moreChildrenIds;
+        this.moreChildrenCount = commentToBeCopied.moreChildrenCount;
         this.editedTimeMillis = commentToBeCopied.editedTimeMillis;
         this.mediaMetadataMap = commentToBeCopied.mediaMetadataMap;
         this.placeholderType = commentToBeCopied.placeholderType;
@@ -257,6 +259,7 @@ public class Comment implements Parcelable {
         placeholderType = in.readInt();
         isLoadingMoreChildren = in.readByte() != 0;
         loadMoreChildrenFailed = in.readByte() != 0;
+        moreChildrenCount = in.readInt();
         mediaMetadataMap = (Map<String, MediaMetadata>) in.readValue(getClass().getClassLoader());
     }
 
@@ -536,16 +539,20 @@ public class Comment implements Parcelable {
     }
 
     public void addChildren(ArrayList<Comment> moreChildren) {
-        if (children == null || children.size() == 0) {
+        if (children == null) {
             children = moreChildren;
+        } else if (!children.isEmpty() && children.get(children.size() - 1).placeholderType == PLACEHOLDER_LOAD_MORE_COMMENTS) {
+            children.addAll(children.size() - 1, moreChildren);
         } else {
-            if (children.size() > 1 && children.get(children.size() - 1).placeholderType == PLACEHOLDER_LOAD_MORE_COMMENTS) {
-                children.addAll(children.size() - 2, moreChildren);
-            } else {
-                children.addAll(moreChildren);
+            // Into this list even when it is empty: copies of this comment share it, and the thread's
+            // tree holds one of those copies.
+            children.addAll(moreChildren);
+        }
+        if (moreChildren != null) {
+            for (Comment child : moreChildren) {
+                childCount += 1 + child.childCount;
             }
         }
-        childCount += moreChildren == null ? 0 : moreChildren.size();
         assertChildrenDepth();
     }
 
@@ -580,6 +587,26 @@ public class Comment implements Parcelable {
 
     public void setMoreChildrenIds(ArrayList<String> moreChildrenIds) {
         this.moreChildrenIds = moreChildrenIds;
+    }
+
+    /** Reddit's count of the replies behind this comment's "Load more comments", at any depth. */
+    public int getMoreChildrenCount() {
+        return moreChildrenCount;
+    }
+
+    public void setMoreChildrenCount(int moreChildrenCount) {
+        this.moreChildrenCount = moreChildrenCount;
+    }
+
+    /**
+     * How many replies are still behind "Load more comments": Reddit's count, which takes in their own
+     * replies too, and never fewer than the ids left to load.
+     */
+    public int getPendingReplyCount() {
+        if (moreChildrenIds == null || moreChildrenIds.isEmpty()) {
+            return 0;
+        }
+        return Math.max(moreChildrenCount, moreChildrenIds.size());
     }
 
     public boolean hasMoreChildrenIds() {
@@ -680,6 +707,7 @@ public class Comment implements Parcelable {
         parcel.writeInt(placeholderType);
         parcel.writeByte((byte) (isLoadingMoreChildren ? 1 : 0));
         parcel.writeByte((byte) (loadMoreChildrenFailed ? 1 : 0));
+        parcel.writeInt(moreChildrenCount);
         parcel.writeValue(mediaMetadataMap);
     }
 }

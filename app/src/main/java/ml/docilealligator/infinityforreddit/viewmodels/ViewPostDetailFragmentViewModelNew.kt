@@ -33,6 +33,7 @@ import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.comment.Comment
 import ml.docilealligator.infinityforreddit.comment.FetchRemovedComment
+import ml.docilealligator.infinityforreddit.comment.MoreCommentsLoader
 import ml.docilealligator.infinityforreddit.comment.ParseComment
 import ml.docilealligator.infinityforreddit.comment.RecoverRemovedComments
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter
@@ -93,7 +94,8 @@ class ViewPostDetailFragmentViewModelNew(
     private val commentDefaultSortType: SortType.Type,
     private val markPostsAsRead: Boolean,
     private val expandChildren: Boolean,
-    private val contextNumber: String
+    private val contextNumber: String,
+    private val useLegacyMoreChildren: Boolean = false
 ) : ViewModel() {
     data class UiState(
         val sortType: SortType.Type?,
@@ -117,10 +119,12 @@ class ViewPostDetailFragmentViewModelNew(
             get() = children?.isEmpty() == false
     }
 
+    /** [childrenCount] is Reddit's count of the replies behind [children], when it gave one. */
     data class ParseCommentsResult(
         val comments: ArrayList<Comment>,
         val topLevelComments: ArrayList<Comment>,
-        val children: ArrayList<String>
+        val children: ArrayList<String>,
+        val childrenCount: Int? = null
     )
 
     /**
@@ -178,6 +182,7 @@ class ViewPostDetailFragmentViewModelNew(
     val dataState: LiveData<DataState> = _dataState.asLiveData()
 
     var commentFilter: CommentFilter? = null
+    private val moreCommentsSession = MoreCommentsLoader.Session()
 
     val postModerationEventLiveData: SingleLiveEvent<PostModerationEvent> = SingleLiveEvent()
     val commentModerationEventLiveData: SingleLiveEvent<CommentModerationEvent> = SingleLiveEvent()
@@ -782,7 +787,15 @@ class ViewPostDetailFragmentViewModelNew(
 
     fun fetchMoreComments() {
         viewModelScope.launch {
-            if (_uiState.value.isInitialLoading || _uiState.value.isLoadingMoreChildren || !_uiState.value.loadMoreChildrenSuccess) {
+            // A failed load is deliberately not refused here: this is also the footer's retry button.
+            // Scrolling is what must not retry on its own, and the fragment's listener checks for that.
+            if (_uiState.value.isInitialLoading || _uiState.value.isLoadingMoreChildren) {
+                return@launch
+            }
+
+            val childrenIds = _dataState.value.children
+            val postId = _dataState.value.post?.id
+            if (childrenIds.isNullOrEmpty() || postId == null) {
                 return@launch
             }
 
@@ -791,51 +804,27 @@ class ViewPostDetailFragmentViewModelNew(
                 loadMoreChildrenSuccess = true
             )
 
-            val childrenIds: String = _dataState.value.children?.let {
-                java.lang.String.join(",", it)
-            } ?: ""
-
-            if (childrenIds.isEmpty()) {
-                return@launch
-            }
-
             try {
-                val response: Response<String> = if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                    retrofit.create(RedditAPIKt::class.java).moreChildren(_dataState.value.post?.fullName, childrenIds, _uiState.value.sortType)
+                val parseCommentResult = if (useLegacyMoreChildren) {
+                    loadWithMoreChildren(childrenIds)
                 } else {
-                    oauthRetrofit.create(RedditAPIKt::class.java).moreChildrenOauth(
-                        _dataState.value.post?.fullName, childrenIds,
-                        _uiState.value.sortType, APIUtils.getOAuthHeader(accessToken)
-                    )
+                    parseMoreComments(moreCommentsLoader(postId).loadTopLevel(childrenIds))
                 }
-
-                if (response.isSuccessful) {
-                    val parseCommentResult = parseMoreComments(response.body(), expandChildren)
-                    when (parseCommentResult) {
-                        is AppResult.Success<ParseCommentsResult> -> {
-                            val updatedComments = _dataState.value.comments?.let {
-                                ArrayList(it)
-                            } ?: run {
-                                ArrayList()
-                            }
-                            updatedComments.addAll(parseCommentResult.data.comments)
-                            _dataState.value = _dataState.value.copy(
-                                comments = updatedComments,
-                                children = parseCommentResult.data.children
-                            )
-                            _uiState.value = _uiState.value.copy(
-                                isLoadingMoreChildren = false,
-                                loadMoreChildrenSuccess = true
-                            )
-                        }
-
-                        is AppResult.Error<*> -> {
-                            _uiState.value = _uiState.value.copy(
-                                isLoadingMoreChildren = false,
-                                loadMoreChildrenSuccess = false
-                            )
-                        }
+                if (parseCommentResult != null) {
+                    val updatedComments = _dataState.value.comments?.let {
+                        ArrayList(it)
+                    } ?: run {
+                        ArrayList()
                     }
+                    updatedComments.addAll(parseCommentResult.comments)
+                    _dataState.value = _dataState.value.copy(
+                        comments = updatedComments,
+                        children = parseCommentResult.children
+                    )
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingMoreChildren = false,
+                        loadMoreChildrenSuccess = true
+                    )
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isLoadingMoreChildren = false,
@@ -864,105 +853,122 @@ class ViewPostDetailFragmentViewModelNew(
                         return@launch
                     }
 
-                    it.isLoadingMoreChildren = true
-                    it.isLoadMoreChildrenFailed = false
-
-                    val childrenIds: String = parentComment.moreChildrenIds?.let {
-                        java.lang.String.join(",", it)
-                    } ?: ""
-
-                    if (childrenIds.isEmpty()) {
+                    val childrenIds = parentComment.moreChildrenIds
+                    val postId = _dataState.value.post?.id
+                    val parentCommentId = parentComment.id
+                    if (childrenIds.isNullOrEmpty() || postId == null || parentCommentId == null) {
                         return@launch
                     }
 
+                    it.isLoadingMoreChildren = true
+                    it.isLoadMoreChildrenFailed = false
+
                     try {
-                        val response: Response<String> = if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                            retrofit.create(RedditAPIKt::class.java).moreChildren(_dataState.value.post?.fullName, childrenIds, _uiState.value.sortType)
+                        val parseCommentResult = if (useLegacyMoreChildren) {
+                            loadWithMoreChildren(childrenIds)
                         } else {
-                            oauthRetrofit.create(RedditAPIKt::class.java).moreChildrenOauth(
-                                _dataState.value.post?.fullName, childrenIds,
-                                _uiState.value.sortType, APIUtils.getOAuthHeader(accessToken)
+                            parseMoreComments(
+                                moreCommentsLoader(postId).loadReplies(parentCommentId, parentComment.depth + 1, childrenIds)
                             )
                         }
+                        val currentParentCommentPosition = findCommentPosition(parentComment.fullName, parentPosition)
 
-                        if (response.isSuccessful) {
-                            val parseCommentResult = parseMoreComments(response.body(), expandChildren)
-                            val currentParentCommentPosition = findCommentPosition(parentComment.fullName, parentPosition)
-
-                            when (parseCommentResult) {
-                                is AppResult.Success<ParseCommentsResult> -> {
-                                    _dataState.value.comments?.getOrNull(currentParentCommentPosition)?.let { currentParentComment ->
-                                        if (currentParentComment.isExpanded) {
-                                            _dataState.value.comments?.let { comments ->
-                                                val copiedParentComment = Comment(currentParentComment)
-                                                val updatedComments = ArrayList(comments)
-                                                updatedComments[currentParentCommentPosition] = copiedParentComment
-
-                                                if (!parseCommentResult.data.children.isEmpty()) {
-                                                    copiedParentComment.moreChildrenIds = parseCommentResult.data.children
-                                                    copiedParentComment.children[copiedParentComment.children.size - 1].isLoadingMoreChildren = false
-                                                    copiedParentComment.children[copiedParentComment.children.size - 1].isLoadMoreChildrenFailed = false
-
-                                                    val placeholderPosition: Int =
-                                                        findLoadMoreCommentsPlaceholderPosition(
-                                                            copiedParentComment.fullName,
-                                                            position
-                                                        )
-
-                                                    if (placeholderPosition != -1) {
-                                                        updatedComments[placeholderPosition].isLoadingMoreChildren = false
-                                                        updatedComments[placeholderPosition].isLoadMoreChildrenFailed = false
-
-                                                        updatedComments.addAll(placeholderPosition, parseCommentResult.data.comments)
-                                                    }
-
-                                                    _dataState.value = _dataState.value.copy(
-                                                        comments = updatedComments
-                                                    )
-                                                } else {
-                                                    copiedParentComment.children.removeAt(copiedParentComment.children.size - 1)
-                                                    copiedParentComment.removeMoreChildrenIds()
-                                                    copiedParentComment.addChildren(parseCommentResult.data.topLevelComments)
-
-                                                    val placeholderPosition: Int =
-                                                        findLoadMoreCommentsPlaceholderPosition(
-                                                            copiedParentComment.fullName,
-                                                            position
-                                                        )
-
-                                                    if (placeholderPosition != -1) {
-                                                        updatedComments.removeAt(placeholderPosition)
-                                                        updatedComments.addAll(placeholderPosition, parseCommentResult.data.comments)
-                                                    }
-
-                                                    _dataState.value = _dataState.value.copy(
-                                                        comments = updatedComments
-                                                    )
-
-                                                    return@launch
-                                                }
-                                            }
-                                        } else {
-                                            if (currentParentComment.hasReply() && parseCommentResult.data.children.isEmpty()) {
-                                                currentParentComment.children.removeAt(currentParentComment.children.size - 1)
-                                                currentParentComment.removeMoreChildrenIds()
-                                            }
-                                        }
-
-                                        currentParentComment.addChildren(parseCommentResult.data.topLevelComments)
+                        val comments = _dataState.value.comments
+                        if (parseCommentResult != null && comments != null) {
+                            comments.getOrNull(currentParentCommentPosition)?.let { currentParentComment ->
+                                // Reddit's count for what is still unloaded where it gave one, otherwise
+                                // what was pending less the replies that just loaded.
+                                val pendingReplyCount = if (parseCommentResult.children.isEmpty()) {
+                                    0
+                                } else {
+                                    parseCommentResult.childrenCount ?: (currentParentComment.pendingReplyCount
+                                        - parseCommentResult.topLevelComments.sumOf { 1 + it.childCount })
+                                }
+                                // The row may be a copy of the comment the thread's tree holds, which is
+                                // the one collapsing and expanding an ancestor brings back, so both learn
+                                // what is still unloaded. Copies made below inherit it.
+                                for (comment in setOfNotNull(currentParentComment, findInThreadTree(comments, currentParentCommentPosition))) {
+                                    if (parseCommentResult.children.isEmpty()) {
+                                        comment.removeMoreChildrenIds()
+                                    } else {
+                                        comment.moreChildrenIds = parseCommentResult.children
+                                        comment.moreChildrenCount = pendingReplyCount
                                     }
                                 }
+                                if (currentParentComment.isExpanded) {
+                                    run {
+                                        val copiedParentComment = Comment(currentParentComment)
+                                        val updatedComments = ArrayList(comments)
+                                        updatedComments[currentParentCommentPosition] = copiedParentComment
 
-                                is AppResult.Error<*> -> {
-                                    fetchMoreChildCommentsFailed(parentComment, currentParentCommentPosition)
+                                        val placeholderPosition: Int =
+                                            findLoadMoreCommentsPlaceholderPosition(
+                                                copiedParentComment.fullName,
+                                                position
+                                            )
+
+                                        if (!parseCommentResult.children.isEmpty()) {
+                                            copiedParentComment.children[copiedParentComment.children.size - 1].isLoadingMoreChildren = false
+                                            copiedParentComment.children[copiedParentComment.children.size - 1].isLoadMoreChildrenFailed = false
+
+                                            if (placeholderPosition != -1) {
+                                                // A new object, as DiffUtil would find nothing to rebind if
+                                                // the placeholder were changed in place.
+                                                val copiedPlaceholder = Comment(updatedComments[placeholderPosition])
+                                                copiedPlaceholder.isLoadingMoreChildren = false
+                                                copiedPlaceholder.isLoadMoreChildrenFailed = false
+                                                updatedComments[placeholderPosition] = copiedPlaceholder
+                                                copiedParentComment.children[copiedParentComment.children.size - 1] = copiedPlaceholder
+
+                                                updatedComments.addAll(placeholderPosition, parseCommentResult.comments)
+                                            }
+                                        } else {
+                                            copiedParentComment.children.removeAt(copiedParentComment.children.size - 1)
+
+                                            if (placeholderPosition != -1) {
+                                                updatedComments.removeAt(placeholderPosition)
+                                                updatedComments.addAll(placeholderPosition, parseCommentResult.comments)
+                                            }
+                                        }
+                                        copiedParentComment.addChildren(parseCommentResult.topLevelComments)
+                                        recountReplies(updatedComments, currentParentCommentPosition)
+
+                                        _dataState.value = _dataState.value.copy(
+                                            comments = updatedComments
+                                        )
+                                    }
+                                } else {
+                                    // Collapsed, this row shows its count. DiffUtil compares the new row
+                                    // with this one, so the change goes on a copy and this one is left as
+                                    // it was drawn.
+                                    val copiedParentComment = Comment(currentParentComment)
+                                    if (!parseCommentResult.children.isEmpty()) {
+                                        copiedParentComment.children[copiedParentComment.children.size - 1].isLoadingMoreChildren = false
+                                        copiedParentComment.children[copiedParentComment.children.size - 1].isLoadMoreChildrenFailed = false
+                                    } else if (copiedParentComment.hasReply()) {
+                                        copiedParentComment.children.removeAt(copiedParentComment.children.size - 1)
+                                    }
+                                    copiedParentComment.addChildren(parseCommentResult.topLevelComments)
+                                    val updatedComments = ArrayList(comments)
+                                    updatedComments[currentParentCommentPosition] = copiedParentComment
+                                    recountReplies(updatedComments, currentParentCommentPosition)
+                                    _dataState.value = _dataState.value.copy(
+                                        comments = updatedComments
+                                    )
                                 }
                             }
                         } else {
-                            fetchMoreChildCommentsFailed(parentComment, findCommentPosition(parentComment.fullName, parentPosition))
+                            fetchMoreChildCommentsFailed(parentComment, currentParentCommentPosition)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
                         fetchMoreChildCommentsFailed(parentComment, findCommentPosition(parentComment.fullName, parentPosition))
+                    } finally {
+                        // Collapsed away mid-load, the parent has no row for this to land on. The
+                        // placeholder comes back with it, and must still answer a tap.
+                        if (findCommentPosition(parentComment.fullName, parentPosition) == -1) {
+                            it.isLoadingMoreChildren = false
+                        }
                     }
                 } ?: run {
                     _dataState.value.comments?.let { currentComments ->
@@ -977,6 +983,42 @@ class ViewPostDetailFragmentViewModelNew(
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * The thread's own object for the comment at [position], found under its top-level comment, which
+     * the row itself may be a copy of. Null for a top-level row, which no tree holds.
+     */
+    private fun findInThreadTree(comments: List<Comment>, position: Int): Comment? {
+        val fullName = comments[position].fullName
+        for (i in position - 1 downTo 0) {
+            val comment = comments[i]
+            if (comment.depth == 0 && comment.placeholderType == Comment.NOT_PLACEHOLDER) {
+                return ParseComment.findCommentByFullName(listOf(comment), fullName)
+            }
+        }
+        return null
+    }
+
+    /**
+     * Recounts the replies of the row at [position] and of each row it sits under, since a load
+     * changes what is below all of them. A row can be a copy the thread's tree does not hold, so the
+     * top-level comment's whole tree is recounted too.
+     */
+    private fun recountReplies(comments: List<Comment>, position: Int) {
+        var depth = Int.MAX_VALUE
+        for (i in position downTo 0) {
+            val comment = comments[i]
+            if (comment.placeholderType != Comment.NOT_PLACEHOLDER || comment.depth >= depth) {
+                continue
+            }
+            depth = comment.depth
+            if (depth == 0) {
+                ParseComment.updateChildrenCount(listOf(comment))
+                return
+            }
+            comment.childCount = ParseComment.getChildCount(comment)
         }
     }
 
@@ -1192,6 +1234,8 @@ class ViewPostDetailFragmentViewModelNew(
         commentFilter: CommentFilter,
         expandChildren: Boolean
     ): AppResult<ParseCommentsResult, JSONException> {
+        // A fresh thread's placeholders have not had a parent listing yet.
+        moreCommentsSession.onThreadReloaded()
         return withContext(Dispatchers.Default) {
             try {
                 var childrenArray = JSONArray(response)
@@ -1233,7 +1277,58 @@ class ViewPostDetailFragmentViewModelNew(
         }
     }
 
-    private suspend fun parseMoreComments(
+    /** The old route, kept behind a setting for the accounts Reddit does not block it on. */
+    private suspend fun loadWithMoreChildren(ids: List<String>): ParseCommentsResult? {
+        val childrenIds = java.lang.String.join(",", ids)
+        val response: Response<String> = if (accountName == Account.ANONYMOUS_ACCOUNT) {
+            retrofit.create(RedditAPIKt::class.java).moreChildren(_dataState.value.post?.fullName, childrenIds, _uiState.value.sortType)
+        } else {
+            oauthRetrofit.create(RedditAPIKt::class.java).moreChildrenOauth(
+                _dataState.value.post?.fullName, childrenIds,
+                _uiState.value.sortType, APIUtils.getOAuthHeader(accessToken)
+            )
+        }
+        if (!response.isSuccessful) {
+            return null
+        }
+        return when (val result = parseMoreChildrenResponse(response.body(), expandChildren)) {
+            is AppResult.Success<ParseCommentsResult> -> result.data
+            is AppResult.Error<*> -> null
+        }
+    }
+
+    private fun moreCommentsLoader(postId: String): MoreCommentsLoader {
+        val sortType = _uiState.value.sortType
+        return MoreCommentsLoader(commentFilter ?: CommentFilter(), moreCommentsSession, if (accountName == Account.ANONYMOUS_ACCOUNT) {
+            val api = retrofit.create(RedditAPIKt::class.java)
+            ({ commentId, limit -> api.getFocusedComment(postId, commentId, sortType, limit) })
+        } else {
+            val api = oauthRetrofit.create(RedditAPIKt::class.java)
+            val headers = APIUtils.getOAuthHeader(accessToken)
+            ({ commentId, limit -> api.getFocusedCommentOauth(postId, commentId, sortType, limit, headers) })
+        })
+    }
+
+    private suspend fun parseMoreComments(page: MoreCommentsLoader.Page?): ParseCommentsResult? {
+        if (page == null) {
+            return null
+        }
+        return withContext(Dispatchers.Default) {
+            val expandedNewComments = ArrayList<Comment>()
+            ParseComment.expandChildren(page.topLevelComments, expandedNewComments, expandChildren)
+            val commentData = if (expandChildren) {
+                expandedNewComments
+            } else {
+                page.topLevelComments
+            }
+
+            preRecoverComments(page.topLevelComments)
+
+            ParseCommentsResult(commentData, page.topLevelComments, page.remainingIds, page.remainingCount)
+        }
+    }
+
+    private suspend fun parseMoreChildrenResponse(
         response: String?,
         expandChildren: Boolean
     ): AppResult<ParseCommentsResult, JSONException> {
@@ -1246,6 +1341,7 @@ class ViewPostDetailFragmentViewModelNew(
                 val newComments = ArrayList<Comment>()
                 val expandedNewComments = ArrayList<Comment>()
                 val moreChildrenIds = ArrayList<String>()
+                var moreChildrenCount = 0
 
                 // api response is a flat list of comments tree
                 // process it in order and rebuild the tree
@@ -1268,10 +1364,12 @@ class ViewPostDetailFragmentViewModelNew(
                             if (parentComment != null) {
                                 parentComment.setHasReply(true)
                                 parentComment.moreChildrenIds = localMoreChildrenIds
+                                parentComment.moreChildrenCount = childData.optInt(JSONUtils.COUNT_KEY)
                                 parentComment.addChildren(java.util.ArrayList<Comment>()) // ensure children list is not null
                             } else {
                                 // assume that it is parent of this call
                                 moreChildrenIds.addAll(localMoreChildrenIds)
+                                moreChildrenCount += childData.optInt(JSONUtils.COUNT_KEY)
                             }
                         } else {
                             val continueThreadPlaceholder = Comment(
@@ -1330,7 +1428,7 @@ class ViewPostDetailFragmentViewModelNew(
                 preRecoverComments(newComments)
 
                 AppResult.Success(
-                    ParseCommentsResult(commentData, newComments, moreChildrenIds)
+                    ParseCommentsResult(commentData, newComments, moreChildrenIds, moreChildrenCount)
                 )
             } catch (e: JSONException) {
                 e.printStackTrace()
@@ -3148,7 +3246,8 @@ class ViewPostDetailFragmentViewModelNew(
                            saveCommentSort: Boolean,
                            commentDefaultSortType: SortType.Type,
                            markPostsAsRead: Boolean,
-                           expandChildren: Boolean, contextNumber: String) : ViewModelProvider.Factory {
+                           expandChildren: Boolean, contextNumber: String,
+                           useLegacyMoreChildren: Boolean) : ViewModelProvider.Factory {
             return object: ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(
@@ -3161,7 +3260,7 @@ class ViewPostDetailFragmentViewModelNew(
                         sortType, sortTypeSharedPreferences,
                         postHistorySharedPreferences, respectSubredditRecommendedSortType,
                         saveCommentSort, commentDefaultSortType,
-                        markPostsAsRead, expandChildren, contextNumber
+                        markPostsAsRead, expandChildren, contextNumber, useLegacyMoreChildren
                     ) as T
                 }
             }

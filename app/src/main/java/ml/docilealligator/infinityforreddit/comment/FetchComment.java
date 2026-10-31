@@ -70,73 +70,9 @@ public class FetchComment {
         });
     }
 
-    public static void fetchMoreComment(Executor executor, Handler handler, Retrofit retrofit,
-                                        @Nullable String accessToken, @NonNull String accountName,
-                                        ArrayList<String> allChildren,
-                                        boolean expandChildren, String postFullName,
-                                        SortType.Type sortType,
-                                        FetchMoreCommentListener fetchMoreCommentListener) {
-        if (allChildren == null) {
-            return;
-        }
-
-        String childrenIds = String.join(",", allChildren);
-
-        if (childrenIds.isEmpty()) {
-            return;
-        }
-
-        RedditAPI api = retrofit.create(RedditAPI.class);
-        Call<String> moreComments;
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            moreComments = api.moreChildren(postFullName, childrenIds, sortType);
-        } else {
-            moreComments = api.moreChildrenOauth(postFullName, childrenIds,
-                    sortType, APIUtils.getOAuthHeader(accessToken));
-        }
-
-        moreComments.enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
-                if (response.isSuccessful()) {
-                    ParseComment.parseMoreComment(executor, handler, response.body(),
-                            expandChildren, new ParseComment.ParseCommentListener() {
-                                @Override
-                                public void onParseCommentSuccess(ArrayList<Comment> topLevelComments,
-                                                                  ArrayList<Comment> expandedComments,
-                                                                  @Nullable String parentId, ArrayList<String> moreChildrenIds) {
-                                    fetchMoreCommentListener.onFetchMoreCommentSuccess(
-                                            topLevelComments, expandedComments, moreChildrenIds);
-                                }
-
-                                @Override
-                                public void onParseCommentFailed() {
-                                    fetchMoreCommentListener.onFetchMoreCommentFailed();
-                                }
-                            });
-                } else {
-                    fetchMoreCommentListener.onFetchMoreCommentFailed();
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                fetchMoreCommentListener.onFetchMoreCommentFailed();
-            }
-        });
-    }
-
     public interface FetchCommentListener {
         void onFetchCommentSuccess(ArrayList<Comment> expandedComments, @Nullable String parentId, ArrayList<String> children);
 
         void onFetchCommentFailed();
-    }
-
-    public interface FetchMoreCommentListener {
-        void onFetchMoreCommentSuccess(ArrayList<Comment> topLevelComments,
-                                       ArrayList<Comment> expandedComments,
-                                       ArrayList<String> moreChildrenIds);
-
-        void onFetchMoreCommentFailed();
     }
 }

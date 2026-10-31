@@ -77,4 +77,10 @@
         app:title="@string/settings_embedded_media_type_title"
         app:useSimpleSummaryProvider="true" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="use_legacy_more_children"
+        app:title="@string/settings_use_legacy_more_children_title"
+        app:summary="@string/settings_use_legacy_more_children_summary" />
+
 </PreferenceScreen>

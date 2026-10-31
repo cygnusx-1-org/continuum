@@ -90,7 +90,7 @@ object AccountScopedKeys {
         // Comments
         "show_top_level_comments_first", "show_comment_divider", "show_comment_top_padding",
         "comment_divider_type", "show_only_one_comment_level_indicator", "comment_toolbar_hidden",
-        "comment_toolbar_hide_on_click", "fully_collapse_comment", "show_author_avatar",
+        "comment_toolbar_hide_on_click", "fully_collapse_comment", "use_legacy_more_children", "show_author_avatar",
         "show_user_prefix", "hide_the_number_of_votes_in_comments",
         "show_fewer_toolbar_options_threshold", "embedded_media_type",
 

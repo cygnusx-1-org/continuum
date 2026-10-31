@@ -253,10 +253,10 @@ class ViewPostDetailActivityViewModel(
 
                 try {
                     val response = if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                        retrofit.create(RedditAPIKt::class.java).getInfo(ids.toString())
+                    } else {
                         oauthRetrofit.create(RedditAPIKt::class.java)
                             .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken))
-                    } else {
-                        retrofit.create(RedditAPIKt::class.java).getInfo(ids.toString())
                     }
 
                     if (response.isSuccessful) {
