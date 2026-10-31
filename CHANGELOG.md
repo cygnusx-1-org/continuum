@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.6 / 2026-10-31
+=============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Load more comments fails with 403 "blocked by network security" #475
+* Fixed Issues with using Top Day/Week in multireddit #469
+* Fixed OAuth login CSRF via hardcoded state in exported deep-link redirect handler
+
 8.3.3.6 / 2026-10-21
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.
