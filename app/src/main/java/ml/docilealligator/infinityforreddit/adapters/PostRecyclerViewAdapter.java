@@ -281,6 +281,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private float mScale;
     private int mCompactThumbnailSizeDp;
     private int mCompactThumbnailBoxSizePx;
+    // The inset the gallery grid's item decoration takes from each cell, for working out the cells'
+    // boxes before layout. Half the decoration's offset, as PostGalleryGridLayoutItemDecoration halves it.
+    private int mGalleryGridCellInsetPx;
     private boolean mDisplaySubredditName;
     private boolean mVoteButtonsOnTheRight;
     private boolean mNeedBlurNsfw;
@@ -331,6 +334,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private RecyclerView.RecycledViewPool mGalleryRecycledViewPool;
     private MultiPlayPlayerSelector multiPlayPlayerSelector;
     private int itemWidth;
+    // The same column in pixels, as laid out. Not itemWidth times the density: that is rounded to
+    // a whole dp, and a box a pixel off the view's is a decode at the wrong size.
+    private int itemWidthPx;
+    // Whether the feed is in more than one column, where its decoration cancels Card Layout 3's own
+    // margins (PostFragmentBase.StaggeredGridLayoutManagerItemOffsetDecoration).
+    private boolean multiColumn;
 
     // postHistorySharedPreferences will be null when being used in HistoryPostFragment.
     public PostRecyclerViewAdapter(BaseActivity activity, PostFragmentBase fragment, RedditDataRoomDatabase redditDataRoomDatabase,
@@ -420,7 +429,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mFixedHeightPreviewInCard = sharedPreferences.getBoolean(SharedPreferencesUtils.FIXED_HEIGHT_PREVIEW_IN_CARD, false);
             mHideTextPostContent = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_TEXT_POST_CONTENT, false);
             mEasierToWatchInFullScreen = sharedPreferences.getBoolean(SharedPreferencesUtils.EASIER_TO_WATCH_IN_FULL_SCREEN, false);
-            mShowGalleryMediaAsGrid = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false);
+            mShowGalleryMediaAsGrid = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, true);
             mShowToolbarItemsBasedOnSpace = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_POST_AND_COMMENT_TOOLBAR_ITEMS_BASED_ON_SPACE, false);
             mDataSavingModeDefaultResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION, "360");
             mNonDataSavingModeDefaultResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0");
@@ -475,6 +484,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE,
                     SharedPreferencesUtils.POST_COMPACT_THUMBNAIL_SIZE_DEFAULT_VALUE);
             mCompactThumbnailBoxSizePx = Math.round(mCompactThumbnailSizeDp * mScale);
+            mGalleryGridCellInsetPx = resources.getDimensionPixelSize(R.dimen.staggeredLayoutManagerItemOffset) / 2;
             mGlide = Glide.with(mActivity);
             mMaxResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, "5000000");
             mSaveMemoryCenterInsideDownsampleStrategy = new SaveMemoryCenterInisdeDownsampleStrategy(mMaxResolution);
@@ -1374,16 +1384,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             ((PostBaseGalleryTypeViewHolder) holder).galleryRecyclerView.setLayoutManager(layoutManager);
                         }
 
-                        int spanCount = gallerySize == 2 || gallerySize == 4 ? 2 : 3;
-                        ((GridLayoutManager) layoutManager).setSpanCount(spanCount);
-                        if (((PostBaseGalleryTypeViewHolder) holder).galleryRecyclerView.getItemDecorationCount() > 0) {
-                            RecyclerView.ItemDecoration itemDecoration = ((PostBaseGalleryTypeViewHolder) holder).galleryRecyclerView.getItemDecorationAt(0);
-                            if (itemDecoration instanceof PostGalleryGridLayoutItemDecoration) {
-                                ((PostGalleryGridLayoutItemDecoration) itemDecoration).setSpanCount(spanCount);
-                            }
-                        }
+                        applyGalleryGridShape((PostBaseGalleryTypeViewHolder) holder, gallerySize);
 
-                        int padding = (int) (8 * mScale);
+                        int padding = galleryGridPaddingPx();
                         ((PostBaseGalleryTypeViewHolder) holder).galleryRecyclerView.setPadding(
                                 0, (holder instanceof PostGalleryTypeViewHolder) ? 0 : padding,
                                 padding, (holder instanceof PostGalleryTypeViewHolder) ? 0 : padding);
@@ -1988,6 +1991,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     // another post while the page is still being read.
                     if (holder.fetchAlbumCancellable == cancellable) {
                         holder.fetchAlbumCancellable = null;
+                        // The grid was shaped for the single cover tile the card was seeded with.
+                        if (mShowGalleryMediaAsGrid) {
+                            applyGalleryGridShape(holder, post.getGallery().size());
+                        }
                         holder.adapter.setGalleryImages(post.getGallery());
                         // The page the user is on, not page one. The seeded card held a single
                         // tile, so a resume that reopened on image nine put the carousel back at
@@ -2409,17 +2416,19 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     /**
      * Width in pixels of the image a with-preview card draws.
      *
-     * {@code itemWidth} is the column in dp, which is the whole card in the card-1 layout; cards 2
-     * and 3 inset theirs by 16dp on each side. Zero until the feed has been laid out once, which is
-     * the signal to leave the size to the view.
+     * {@code itemWidthPx} is the item as laid out, which is the whole card in the card-1 layout.
+     * Card 2 draws inside a card with a 16dp margin on each side, resolved to pixels the way a
+     * layout resolves it. Card 3's item is the card itself, inset by those margins too -- except in
+     * a multi-column feed, whose decoration cancels them, leaving the item the card's width. Zero
+     * until the feed has been laid out once, which is the signal to leave the size to the view.
      */
     private int cardPreviewWidthPx() {
-        if (itemWidth <= 0) {
+        if (itemWidthPx <= 0) {
             return 0;
         }
-        int insetDp = (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2
-                || mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3) ? 32 : 0;
-        return Math.max(0, Math.round((itemWidth - insetDp) * mScale));
+        boolean inset = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2
+                || (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 && !multiColumn);
+        return Math.max(0, itemWidthPx - (inset ? 2 * Math.round(16 * mScale) : 0));
     }
 
     /**
@@ -2656,17 +2665,31 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
 
     /**
-     * The request and box that warming [post]'s row would need, or null when that row draws no
+     * The requests and boxes that warming [post]'s row would need, empty when that row draws no
      * picture this preloader can get ahead of.
      *
      * Covers both families, because the pop-in is the same on either: a compact row's square
-     * thumbnail, and a card's full-width picture -- its preview, a video card's still, or the
-     * gallery tile the card opens on. Everything comes from the builders the rows themselves use,
-     * which is what makes the warmed bitmap the one they find.
+     * thumbnail, and a card's full-width picture -- its preview, a video card's still, the gallery
+     * tile the card opens on, or every cell of its gallery grid. Everything comes from the builders
+     * the rows themselves use, which is what makes the warmed bitmap the one they find.
      */
-    @Nullable
-    public PreloadRequest previewPreloadRequest(Post post) {
+    public List<PreloadRequest> previewPreloadRequests(Post post) {
         int viewType = viewTypeFor(post);
+        if (viewType == VIEW_TYPE_POST_CARD_GALLERY_TYPE
+                || viewType == VIEW_TYPE_POST_CARD_2_GALLERY_TYPE
+                || viewType == VIEW_TYPE_POST_CARD_3_GALLERY_TYPE) {
+            return mShowGalleryMediaAsGrid ? galleryGridPreloadRequests(post) : asList(galleryPreloadRequest(post));
+        }
+        return asList(previewPreloadRequest(post, viewType));
+    }
+
+    private static List<PreloadRequest> asList(@Nullable PreloadRequest request) {
+        return request == null ? Collections.emptyList() : Collections.singletonList(request);
+    }
+
+    // previewPreloadRequests for every row but a gallery card's.
+    @Nullable
+    private PreloadRequest previewPreloadRequest(Post post, int viewType) {
         if (viewType == VIEW_TYPE_POST_COMPACT || viewType == VIEW_TYPE_POST_COMPACT_2
                 || viewType == VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
             if (!showsCompactThumbnailBox(post) || !postHasPreviews(post)) {
@@ -2675,12 +2698,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             RequestBuilder<Drawable> request = compactThumbnailRequest(post);
             return request == null ? null
                     : new PreloadRequest(request, mCompactThumbnailBoxSizePx, mCompactThumbnailBoxSizePx);
-        }
-
-        if (viewType == VIEW_TYPE_POST_CARD_GALLERY_TYPE
-                || viewType == VIEW_TYPE_POST_CARD_2_GALLERY_TYPE
-                || viewType == VIEW_TYPE_POST_CARD_3_GALLERY_TYPE) {
-            return galleryPreloadRequest(post);
         }
 
         boolean videoAutoplayType = viewType == VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE
@@ -2722,13 +2739,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     /**
      * The page a gallery card opens on, warmed at the tile's box through the tile's own builder,
      * so the card arrives with its picture in place. The page after it is the tile adapter's to
-     * warm once the card is bound; the grid's cells are only measured once laid out, so it has none.
+     * warm once the card is bound.
      */
     @Nullable
     private PreloadRequest galleryPreloadRequest(Post post) {
         ArrayList<Post.Gallery> gallery = post.getGallery();
-        if (mShowGalleryMediaAsGrid || (mDataSavingMode && mDisableImagePreview)
-                || gallery == null || gallery.isEmpty()) {
+        if ((mDataSavingMode && mDisableImagePreview) || gallery == null || gallery.isEmpty()) {
             return null;
         }
         Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
@@ -2748,6 +2764,81 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 false, shouldBlurGallery(post), preview == null || galleryTileIsSquare(preview),
                 mSaveMemoryCenterInsideDownsampleStrategy, width, height),
                 width, height);
+    }
+
+    /**
+     * Every cell of a gallery card's grid, warmed at its box through the cell's own builder: the
+     * grid shows them all at once, so the card arrives with none of them blank.
+     */
+    private List<PreloadRequest> galleryGridPreloadRequests(Post post) {
+        ArrayList<Post.Gallery> gallery = post.getGallery();
+        if ((mDataSavingMode && mDisableImagePreview) || gallery == null || gallery.isEmpty()) {
+            return Collections.emptyList();
+        }
+        int space = galleryGridSpacePx();
+        int spanCount = galleryGridSpanCount(gallery.size());
+        boolean blur = shouldBlurGallery(post);
+        int cells = galleryGridCellCount(gallery.size());
+        List<PreloadRequest> requests = new ArrayList<>(cells);
+        for (int i = 0; i < cells; i++) {
+            int cell = GalleryGridCell.widthPx(space, spanCount, i % spanCount, mGalleryGridCellInsetPx);
+            // The cell's own choice of still (PostGalleryTypeImageRecyclerViewAdapter.loadImage).
+            String still = GalleryTileStill.url(gallery.get(i), 0,
+                    mSaveMemoryCenterInsideDownsampleStrategy.getThreshold(), mDataSavingMode);
+            if (cell <= 0 || still == null) {
+                continue;
+            }
+            requests.add(new PreloadRequest(PostGalleryTypeImageRecyclerViewAdapter.gridCellRequest(
+                    mGlide, still, false, blur, mSaveMemoryCenterInsideDownsampleStrategy, cell), cell, cell));
+        }
+        return requests;
+    }
+
+    /**
+     * Shapes a gallery card's grid for {@code gallerySize} images: its columns, which the item
+     * decoration has to agree with, how many cells are bound while the card is prefetched off screen
+     * (all of them, rather than the two a nested list is given by default), and the cells' boxes,
+     * known before layout so each decodes off screen and finds what the preloader warmed. On every
+     * bind, and again when an image-host album arrives after the card was bound with its cover.
+     */
+    private void applyGalleryGridShape(PostBaseGalleryTypeViewHolder holder, int gallerySize) {
+        RecyclerView.LayoutManager layoutManager = holder.galleryRecyclerView.getLayoutManager();
+        if (!(layoutManager instanceof GridLayoutManager)) {
+            return;
+        }
+        int spanCount = galleryGridSpanCount(gallerySize);
+        ((GridLayoutManager) layoutManager).setSpanCount(spanCount);
+        ((GridLayoutManager) layoutManager).setInitialPrefetchItemCount(galleryGridCellCount(gallerySize));
+        if (holder.galleryRecyclerView.getItemDecorationCount() > 0) {
+            RecyclerView.ItemDecoration itemDecoration = holder.galleryRecyclerView.getItemDecorationAt(0);
+            if (itemDecoration instanceof PostGalleryGridLayoutItemDecoration) {
+                ((PostGalleryGridLayoutItemDecoration) itemDecoration).setSpanCount(spanCount);
+            }
+        }
+        holder.adapter.setGridGeometry(galleryGridSpacePx(), spanCount, mGalleryGridCellInsetPx);
+    }
+
+    // Columns of a gallery card's grid (GalleryGridCell.spanCount).
+    private static int galleryGridSpanCount(int gallerySize) {
+        return GalleryGridCell.spanCount(gallerySize);
+    }
+
+    // Cells a gallery card's grid shows (GalleryGridCell.cellCount).
+    private static int galleryGridCellCount(int gallerySize) {
+        return GalleryGridCell.cellCount(gallerySize);
+    }
+
+    /**
+     * The width a gallery card's grid divides between its columns: the card's picture width less
+     * the end padding the bind gives the grid, or 0 before the feed has been laid out.
+     */
+    private int galleryGridSpacePx() {
+        int width = cardPreviewWidthPx();
+        return width > 0 ? Math.max(0, width - galleryGridPaddingPx()) : 0;
+    }
+
+    private int galleryGridPaddingPx() {
+        return (int) (8 * mScale);
     }
 
     /**
@@ -3781,8 +3872,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         this.canPlayVideo = canPlayVideo;
     }
 
-    public void provideItemWidth(int width) {
-        itemWidth = width;
+    /**
+     * The feed's column in dp, the pixels an item is laid out across within it, and whether there is
+     * more than one column.
+     */
+    public void provideItemWidth(int widthDp, int widthPx, boolean multiColumn) {
+        itemWidth = widthDp;
+        itemWidthPx = widthPx;
+        this.multiColumn = multiColumn;
     }
 
     public abstract class PostViewHolder extends RecyclerView.ViewHolder {

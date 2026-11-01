@@ -1187,7 +1187,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     .observe(getViewLifecycleOwner(), hide -> applyMediaOnlyPosts());
         }
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false).observe(getViewLifecycleOwner(), showGalleryMediaAsGrid -> {
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, true).observe(getViewLifecycleOwner(), showGalleryMediaAsGrid -> {
             if (getPostAdapter() != null) {
                 if (getPostAdapter().setShowGalleryMediaAsGrid(showGalleryMediaAsGrid)) {
                     refreshAdapter();
@@ -2085,6 +2085,9 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
 
         if (mAdapter != null) {
             mAdapter.setPostLayout(postLayout);
+            // The columns may have changed with the layout, and the list's width has not, so its
+            // layout listener will not be the one to say so.
+            provideItemWidth(mAdapter);
             refreshAdapter();
         }
 

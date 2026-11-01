@@ -635,6 +635,9 @@ public class HistoryPostFragment extends PostFragmentBase implements FragmentCom
 
         if (mAdapter != null) {
             mAdapter.setPostLayout(postLayout);
+            // The columns may have changed with the layout, and the list's width has not, so its
+            // layout listener will not be the one to say so.
+            provideItemWidth(mAdapter);
             refreshAdapter();
         }
 

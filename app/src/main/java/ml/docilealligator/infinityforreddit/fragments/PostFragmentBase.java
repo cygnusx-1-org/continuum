@@ -300,12 +300,8 @@ public abstract class PostFragmentBase extends Fragment {
             recyclerViewWidth = width;
             PostRecyclerViewAdapter adapter = getPostAdapter();
             if (adapter != null) {
-                if (mStaggeredGridLayoutManager != null) {
-                    width /= mStaggeredGridLayoutManager.getSpanCount();
-                }
-                int finalWidth = width;
                 v.post(() -> {
-                    adapter.provideItemWidth(Utils.convertPxToDp(finalWidth, mActivity));
+                    provideItemWidth(adapter);
                     refreshAdapter();
                 });
             }
@@ -548,6 +544,30 @@ public abstract class PostFragmentBase extends Fragment {
     }
 
     protected abstract void refreshAdapter();
+
+    /**
+     * Tells {@code adapter} how wide a post is, from the list's width and the columns it is laid
+     * out in now -- on every change of either, since a change of post layout can change the columns
+     * without the width moving. The pixels are the item as laid out: a multi-column feed's
+     * decoration insets each one ({@link StaggeredGridLayoutManagerItemOffsetDecoration}), and a
+     * picture decoded for the column rather than the card is a decode at the wrong size.
+     *
+     * <p>Runs from a posted layout callback, which can land after the fragment has let go of its
+     * context, so its resources come from the activity rather than {@code getResources()}.
+     */
+    protected final void provideItemWidth(PostRecyclerViewAdapter adapter) {
+        if (recyclerViewWidth <= 0) {
+            return;
+        }
+        int columns = mStaggeredGridLayoutManager != null
+                ? Math.max(1, mStaggeredGridLayoutManager.getSpanCount()) : 1;
+        int columnWidth = recyclerViewWidth / columns;
+        int itemWidthPx = columns > 1
+                ? columnWidth - StaggeredGridLayoutManagerItemOffsetDecoration.totalHorizontalOffset(
+                        mActivity.getResources().getDimensionPixelSize(R.dimen.staggeredLayoutManagerItemOffset), columns)
+                : columnWidth;
+        adapter.provideItemWidth(Utils.convertPxToDp(columnWidth, mActivity), itemWidthPx, columns > 1);
+    }
 
     protected final int getNColumns(Resources resources) {
         final boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
@@ -1474,7 +1494,13 @@ public abstract class PostFragmentBase extends Fragment {
             // widths equal. The outer columns used to be a quarter-offset wider than the inner
             // ones, which made their cards a different height and drifted the columns out of
             // alignment as the feed was scrolled (#373).
-            mTotalHorizontalOffset = mHalfOffset * (mNColumns + 1) / mNColumns;
+            mTotalHorizontalOffset = totalHorizontalOffset(itemOffset, mNColumns);
+        }
+
+        /** What every item of an {@code nColumns}-column feed is inset by, left and right together. */
+        static int totalHorizontalOffset(int itemOffset, int nColumns) {
+            int columns = Math.max(1, nColumns);
+            return itemOffset / 2 * (columns + 1) / columns;
         }
 
         StaggeredGridLayoutManagerItemOffsetDecoration(@NonNull Context context, @DimenRes int itemOffsetId, int nColumns) {

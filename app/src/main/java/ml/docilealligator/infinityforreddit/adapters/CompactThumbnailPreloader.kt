@@ -10,7 +10,9 @@ import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.request.transition.Transition
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import java.util.concurrent.Executor
@@ -25,15 +27,15 @@ import ml.docilealligator.infinityforreddit.post.RefreshPrewarmer
  * picture already in the box rather than a blank that the picture then replaces.
  *
  * Both families, since the pop-in is the same on either: a compact row's square thumbnail and a
- * card's full-width picture -- its preview, a video card's still, or the gallery tile it opens on.
- * Which of them a post gets, and at what size, is
- * [PostRecyclerViewAdapter.previewPreloadRequest]'s answer, not this class's.
+ * card's full-width picture -- its preview, a video card's still, the gallery tile it opens on, or
+ * every cell of its gallery grid. Which of them a post gets, and at what size, is
+ * [PostRecyclerViewAdapter.previewPreloadRequests]'s answer, not this class's.
  *
  * It comes at that from two sides. While the list scrolls, the rows just past the edge it is moving
  * towards are warmed ([PreloadWindow]). And a refresh is held until the screen it opens on has been
  * warmed ([prewarm]), so a feed opens, or a pull-to-refresh swaps, with every thumbnail in place.
  *
- * Every request comes from [PostRecyclerViewAdapter.previewPreloadRequest], the builder the row's own
+ * Every request comes from [PostRecyclerViewAdapter.previewPreloadRequests], the builder the row's own
  * load uses, at the size the row will decode to. That is the whole trick: Glide's memory cache is keyed
  * on the url, the size and the transformation, so a bitmap warmed any other way would sit unused while
  * the row decoded its own.
@@ -51,10 +53,10 @@ class CompactThumbnailPreloader(
 
     /**
      * Scroll preloads for the rows in the current window, by post fullname, so the ones the list has
-     * moved away from can be cancelled. A preload that has finished has already handed its bitmap to
-     * the memory cache; clearing it then costs nothing.
+     * moved away from can be let go. Each holds its bitmap until then ([HoldTarget]); clearing one
+     * hands the bitmap to the memory cache, or cancels a load still under way.
      */
-    private val targets = HashMap<String, Target<Drawable>>()
+    private val targets = HashMap<String, List<Target<Drawable>>>()
 
     // What the window was last built from. onScrolled arrives on every frame of a scroll, and the
     // window only moves when a row crosses the edge of the viewport.
@@ -170,15 +172,18 @@ class CompactThumbnailPreloader(
             if (targets.containsKey(key)) {
                 continue
             }
-            val preload = adapter.previewPreloadRequest(post) ?: continue
-            targets[key] = preload.request.preload(preload.width, preload.height)
+            val preloads = adapter.previewPreloadRequests(post)
+            if (preloads.isEmpty()) {
+                continue
+            }
+            targets[key] = preloads.map { it.request.into(HoldTarget(it.width, it.height)) }
         }
 
         val iterator = targets.entries.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
             if (entry.key !in wanted) {
-                glide.clear(entry.value)
+                entry.value.forEach(glide::clear)
                 iterator.remove()
             }
         }
@@ -213,7 +218,7 @@ class CompactThumbnailPreloader(
         for (index in start until end) {
             adapter.prefetchImageHostAlbum(posts[index])
         }
-        val requests = (start until end).mapNotNull { adapter.previewPreloadRequest(posts[it]) }
+        val requests = (start until end).flatMap { adapter.previewPreloadRequests(posts[it]) }
         if (requests.isEmpty()) {
             done.set(Unit)
             return
@@ -296,8 +301,8 @@ class CompactThumbnailPreloader(
     }
 
     private fun clearTargets() {
-        for (target in targets.values) {
-            glide.clear(target)
+        for (rowTargets in targets.values) {
+            rowTargets.forEach(glide::clear)
         }
         targets.clear()
     }
@@ -309,6 +314,22 @@ class CompactThumbnailPreloader(
         // A resumed anchor can sit a little below the top edge, with part of the row above it showing.
         const val ANCHOR_ROWS_ABOVE = 1
     }
+}
+
+/**
+ * A preload that keeps its bitmap until it is cleared.
+ *
+ * Glide's own preload target lets go the moment the bitmap is decoded, leaving it to the memory
+ * cache's LRU, where it is the oldest entry by the time its row arrives: the rows warmed since, and
+ * the rows scrolled away from, all went in after it. A run of card pictures is more than that cache
+ * holds, so on a fast fling the next card's picture was the first evicted, and the card decoded it
+ * again from disk with its tiles blank on screen for that frame. Held, the bitmap stays one of
+ * Glide's active resources, which nothing evicts, until the row has bound to it.
+ */
+private class HoldTarget(width: Int, height: Int) : CustomTarget<Drawable>(width, height) {
+    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {}
+
+    override fun onLoadCleared(placeholder: Drawable?) {}
 }
 
 /**

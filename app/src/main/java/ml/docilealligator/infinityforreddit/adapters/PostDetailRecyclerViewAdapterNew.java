@@ -365,7 +365,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mHideSubredditAndUserPrefix = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
         mHideTheNumberOfVotes = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES, false);
         mHideTheNumberOfComments = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_COMMENTS, false);
-        mShowGalleryMediaAsGrid = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, false);
+        mShowGalleryMediaAsGrid = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, true);
 
         mPostHistorySharedPreferences = postHistorySharedPreferences;
 
@@ -1277,14 +1277,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
                 RecyclerView.LayoutManager layoutManager = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getLayoutManager();
                 if (layoutManager instanceof GridLayoutManager) {
-                    int spanCount = gallerySize == 2 || gallerySize == 4 ? 2 : 3;
-                    ((GridLayoutManager) layoutManager).setSpanCount(spanCount);
-                    if (((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getItemDecorationCount() > 0) {
-                        RecyclerView.ItemDecoration itemDecoration = ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.getItemDecorationAt(0);
-                        if (itemDecoration instanceof PostGalleryGridLayoutItemDecoration) {
-                            ((PostGalleryGridLayoutItemDecoration) itemDecoration).setSpanCount(spanCount);
-                        }
-                    }
+                    applyGalleryGridSpan((PostDetailGalleryViewHolder) holder, gallerySize);
 
                     int padding = (int) (8 * mScale);
                     ((PostDetailGalleryViewHolder) holder).binding.galleryRecyclerViewItemPostDetailGallery.setPadding(
@@ -1681,6 +1674,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     post.setResolvedImageHostGallery(FetchImageHostMedia.toGallery(
                             media, post.getSubredditName(), post.getId()));
                     if (mPost == post) {
+                        // The grid was given its columns for the single cover tile it was seeded with.
+                        applyGalleryGridSpan(holder, post.getGallery().size());
                         holder.adapter.setGalleryImages(post.getGallery());
                         // The remembered page, not page one: the seeded card held a single tile, so
                         // resolving it would otherwise snap a resumed album back to its cover.
@@ -1697,6 +1692,26 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                         }
                     }
                 });
+    }
+
+    /**
+     * Gives the header's gallery grid its columns for {@code gallerySize} images (GalleryGridCell),
+     * the item decoration agreeing; nothing for the pager. On every bind, and again when an
+     * image-host album arrives after the header was bound with its cover.
+     */
+    private static void applyGalleryGridSpan(PostDetailGalleryViewHolder holder, int gallerySize) {
+        RecyclerView galleryList = holder.binding.galleryRecyclerViewItemPostDetailGallery;
+        if (!(galleryList.getLayoutManager() instanceof GridLayoutManager)) {
+            return;
+        }
+        int spanCount = GalleryGridCell.spanCount(gallerySize);
+        ((GridLayoutManager) galleryList.getLayoutManager()).setSpanCount(spanCount);
+        if (galleryList.getItemDecorationCount() > 0) {
+            RecyclerView.ItemDecoration itemDecoration = galleryList.getItemDecorationAt(0);
+            if (itemDecoration instanceof PostGalleryGridLayoutItemDecoration) {
+                ((PostGalleryGridLayoutItemDecoration) itemDecoration).setSpanCount(spanCount);
+            }
+        }
     }
 
     public void provideItemWidth(int width) {

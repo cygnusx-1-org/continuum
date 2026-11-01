@@ -92,7 +92,7 @@
         app:title="@string/settings_fixed_height_preview_in_card_title" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="false"
+        app:defaultValue="true"
         app:key="show_gallery_media_as_grid"
         app:title="@string/settings_show_gallery_media_as_grid" />
 

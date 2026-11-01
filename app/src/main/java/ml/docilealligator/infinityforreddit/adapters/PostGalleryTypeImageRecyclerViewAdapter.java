@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStrategy;
 import ml.docilealligator.infinityforreddit.databinding.ItemGalleryImageInPostFeedBinding;
 import ml.docilealligator.infinityforreddit.post.Post;
@@ -71,6 +72,12 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     // laid out yet), and a tile is then sized from its own view once that has been laid out.
     private int tileWidthPx;
     private int tileHeightPx;
+    // The grid's equivalent: the space its columns divide, its column count and the inset its item
+    // decoration takes from each cell, from which every cell's box follows (GalleryGridCell). 0 when
+    // the host does not know them, and a cell is then sized from its own view once laid out.
+    private int gridSpacePx;
+    private int gridSpanCount;
+    private int gridCellInsetPx;
     private boolean dataSavingMode;
     // Swipe neighbours being warmed, by page. Kept so a change of pictures can cancel them; one that
     // has finished has already handed its bitmap to the memory cache.
@@ -129,6 +136,17 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         }
         holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
         holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
+        // Shown with the picture (onResourceReady), never over the spinner or the error icon that
+        // share the middle of the cell; a picture already in memory arrives within this bind.
+        // INVISIBLE rather than GONE, so the label is always measured and showing it needs no
+        // layout: a cell sized from its view loads from inside its own layout pass, where a
+        // request for another is dropped, and a label made VISIBLE from GONE there stayed 0x0.
+        holder.binding.moreImagesTextViewItemGalleryImageInPostFeed.setVisibility(View.INVISIBLE);
+        int moreImages = moreImagesAt(position);
+        if (moreImages > 0) {
+            holder.binding.moreImagesTextViewItemGalleryImageInPostFeed.setText(
+                    holder.itemView.getContext().getString(R.string.gallery_grid_more_images, moreImages));
+        }
 
         ImageView imageView = holder.binding.imageViewItemGalleryImageInPostFeed;
 
@@ -138,9 +156,10 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             holder.pendingLayoutListener = null;
         }
 
-        if (hasTileSize()) {
+        if (hasTileBox(position)) {
             // The box is known without the view, so the decode cannot pick up a size the view is
-            // about to lose, and a picture already warmed in memory is in place within this bind.
+            // about to lose, and a picture already warmed in memory is in place within this bind --
+            // which runs while the card is still off screen, so one that is not starts there too.
             loadImage(holder);
         } else if (hasUsableWidth(imageView) && !imageView.isLayoutRequested()) {
             // The recycled view is already laid out at its final size, so no layout change will
@@ -179,7 +198,20 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
 
     @Override
     public int getItemCount() {
-        return galleryImages == null ? 0 : galleryImages.size();
+        if (galleryImages == null) {
+            return 0;
+        }
+        // The grid is a 2x2 at most (GalleryGridCell); the row layout has a tile per image.
+        return isGridLayout ? GalleryGridCell.cellCount(galleryImages.size()) : galleryImages.size();
+    }
+
+    // How many images the cell at position stands for besides its own: the last cell of the grid
+    // counts the ones left out. 0 for every other cell.
+    private int moreImagesAt(int position) {
+        if (!isGridLayout || galleryImages == null || position != GalleryGridCell.MAX_CELLS - 1) {
+            return 0;
+        }
+        return Math.max(0, galleryImages.size() - GalleryGridCell.MAX_CELLS);
     }
 
     @Override
@@ -255,9 +287,10 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         // unaffected — it loads `url` directly.
         //
         // The still is picked for the tile's width (GalleryTileStill). The grid keeps the widest
-        // downscale it has always had: its cells are only measured once laid out.
-        int stillWidthPx = hasTileSize() ? tileWidthPx
-                : isGridLayout ? 0 : holder.binding.imageViewItemGalleryImageInPostFeed.getWidth();
+        // downscale it has always had: a cell crops to fill, which a downscale picked by its width
+        // alone can fall short of in height.
+        int stillWidthPx = isGridLayout ? 0
+                : hasTileBox(index) ? tileWidthPx : holder.binding.imageViewItemGalleryImageInPostFeed.getWidth();
         String still = GalleryTileStill.url(galleryImage, stillWidthPx,
                 saveMemoryCenterInisdeDownsampleStrategy.getThreshold(), dataSavingMode);
         boolean loadSource;
@@ -293,6 +326,9 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
                 holder.binding.errorImageViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
                 holder.binding.errorTextViewItemGalleryImageInPostFeed.setVisibility(View.GONE);
                 holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
+                if (moreImagesAt(holder.getBindingAdapterPosition()) > 0) {
+                    holder.binding.moreImagesTextViewItemGalleryImageInPostFeed.setVisibility(View.VISIBLE);
+                }
                 if (resource instanceof Animatable) {
                     // A gif with no usable still to fall back on lands here even when this tile is
                     // not the one playing. Glide starts the animation immediately after this
@@ -315,19 +351,37 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
                     .into(holder.binding.imageViewItemGalleryImageInPostFeed);
             return;
         }
-        RequestBuilder<Drawable> imageRequestBuilder = glide.load(loadUrl)
-                .diskCacheStrategy(animatedResource ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL)
-                .listener(listener);
-        if (blurImage) {
-            imageRequestBuilder
-                    .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0), new BlurTransformation(50, 2))))
-                    .into(holder.binding.imageViewItemGalleryImageInPostFeed);
+        // The grid's builder, shared with the feed's preloader the same way.
+        int cell = boxWidthPx(index);
+        gridCellRequest(glide, loadUrl, animatedResource, blurImage,
+                saveMemoryCenterInisdeDownsampleStrategy, cell)
+                .listener(listener)
+                .into(holder.binding.imageViewItemGalleryImageInPostFeed);
+    }
+
+    /**
+     * The request a cell of the grid layout draws with, for the cell's own load and for the feed's
+     * preloader warming the cells of a card about to scroll in -- one builder, so the bitmap the
+     * preload decoded is the one the cell finds in memory; see {@link #tileRequest}.
+     *
+     * @param cell the cell's edge in pixels ({@link GalleryGridCell}), or 0 to leave the size to
+     *             the view
+     */
+    public static RequestBuilder<Drawable> gridCellRequest(RequestManager glide, String url, boolean animated,
+                                                           boolean blur,
+                                                           SaveMemoryCenterInisdeDownsampleStrategy downsampleStrategy,
+                                                           int cell) {
+        // A still is worth caching decoded (ALL); an animated gif must not be -- see loadImage.
+        RequestBuilder<Drawable> builder = glide.load(url)
+                .diskCacheStrategy(animated ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL);
+        if (blur) {
+            builder = builder.apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0), new BlurTransformation(50, 2))));
         } else {
             // Filling, since the cell is centre-cropped: fitted inside it, the crop would enlarge it.
-            imageRequestBuilder
-                    .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0))))
-                    .downsample(saveMemoryCenterInisdeDownsampleStrategy.filling()).into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            builder = builder.apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0))))
+                    .downsample(downsampleStrategy.filling());
         }
+        return cell > 0 ? builder.override(cell, cell) : builder;
     }
 
     /**
@@ -368,7 +422,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
      */
     private void warmNextTile(int position) {
         int next = position + 1;
-        if (!hasTileSize() || galleryImages == null || position < 0 || next >= galleryImages.size()
+        if (isGridLayout || !hasTileBox(next) || galleryImages == null || position < 0 || next >= galleryImages.size()
                 || tilePreloads.containsKey(next)) {
             return;
         }
@@ -395,9 +449,24 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         return maxPreviewHeight > 0;
     }
 
-    // Whether the host gave this gallery its tile box ahead of layout. The grid never has one.
-    private boolean hasTileSize() {
-        return !isGridLayout && tileWidthPx > 0 && tileHeightPx > 0;
+    // Whether the host gave the tile at position its box ahead of layout.
+    private boolean hasTileBox(int position) {
+        return boxWidthPx(position) > 0 && boxHeightPx(position) > 0;
+    }
+
+    // The box the tile at position decodes to, or 0 when it is left to the view.
+    private int boxWidthPx(int position) {
+        if (!isGridLayout) {
+            return tileWidthPx;
+        }
+        return gridSpanCount > 0 && position >= 0
+                ? GalleryGridCell.widthPx(gridSpacePx, gridSpanCount, position % gridSpanCount, gridCellInsetPx)
+                : 0;
+    }
+
+    // Cells are square; a row tile has its own height.
+    private int boxHeightPx(int position) {
+        return isGridLayout ? boxWidthPx(position) : tileHeightPx;
     }
 
     /**
@@ -614,7 +683,37 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     }
 
     public void setIsGridLayout(boolean isGridLayout) {
+        if (this.isGridLayout == isGridLayout) {
+            return;
+        }
+        // Which cells there are depends on it, the grid showing four at most (getItemCount), and
+        // the pictures being the same means setGalleryImages will not say so.
+        int before = getItemCount();
         this.isGridLayout = isGridLayout;
+        notifyCellCountChanged(before);
+    }
+
+    /**
+     * Tells the list what changed when the cells went from {@code before} to {@link #getItemCount}
+     * with the same pictures: the cells added or removed at the end, and the last of the ones kept,
+     * which gains or loses the count of the rest ("+2"). The count only changes for a gallery
+     * longer than the grid shows, which is also the only time a cell carries that count, so an
+     * unchanged count needs nothing.
+     */
+    private void notifyCellCountChanged(int before) {
+        int after = getItemCount();
+        if (after == before) {
+            return;
+        }
+        if (after > before) {
+            notifyItemRangeInserted(before, after - before);
+        } else {
+            notifyItemRangeRemoved(after, before - after);
+        }
+        int lastKept = Math.min(before, after) - 1;
+        if (lastKept >= 0) {
+            notifyItemChanged(lastKept);
+        }
     }
 
     /**
@@ -625,6 +724,18 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     public void setTileSize(int tileWidthPx, int tileHeightPx) {
         this.tileWidthPx = tileWidthPx;
         this.tileHeightPx = tileHeightPx;
+    }
+
+    /**
+     * What the grid layout's cells are measured from, so each can decode to its box before it is
+     * laid out ({@link GalleryGridCell}): the width its columns divide (the list less its padding),
+     * the column count, and the inset the item decoration takes from each cell. 0 for the space to
+     * size cells from their views.
+     */
+    public void setGridGeometry(int spacePx, int spanCount, int cellInsetPx) {
+        this.gridSpacePx = spacePx;
+        this.gridSpanCount = spanCount;
+        this.gridCellInsetPx = cellInsetPx;
     }
 
     /** Data saving keeps every tile on its widest downscale, never the original upload. */
@@ -647,6 +758,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
 
             if (typeface != null) {
                 binding.errorTextViewItemGalleryImageInPostFeed.setTypeface(typeface);
+                binding.moreImagesTextViewItemGalleryImageInPostFeed.setTypeface(typeface, Typeface.BOLD);
             }
             binding.progressBarItemGalleryImageInPostFeed.setIndicatorColor(mColorAccent);
             binding.errorTextViewItemGalleryImageInPostFeed.setTextColor(mPrimaryTextColor);
