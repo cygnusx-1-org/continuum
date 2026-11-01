@@ -1160,9 +1160,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     if (preview == null) {
                         showNoPreviewPlaceholder(toroPlayer.previewImageView);
                     } else {
-                        mGlide.load(preview.getPreviewUrl())
-                                .centerInside()
-                                .downsample(mSaveMemoryCenterInsideDownsampleStrategy)
+                        // The with-preview card's request, at the box this card measures to: sized
+                        // by the view instead, a recycled card decoded the still into the shape the
+                        // previous video left on it. The same request lets the preloader warm it.
+                        // Never blurred: a video that would be is not given an autoplay card.
+                        cardPreviewRequest(preview, false, false)
                                 .listener(toroPlayer.previewRequestListener)
                                 .into(toroPlayer.previewImageView);
                     }
@@ -1341,19 +1343,23 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                             }
                         }
                         Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
-                        if (preview != null) {
-                            if (mFixedHeightPreviewInCard || (preview.getPreviewWidth() <= 0 || preview.getPreviewHeight() <= 0)) {
-                                ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
-                            ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
-                            } else {
-                                ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(0);
-                                ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
-                            }
-                        } else {
+                        // The tile adapter crops a square to fill it, and tells the two apart by
+                        // the height cap, which only the square gets.
+                        if (preview == null || galleryTileIsSquare(preview)) {
                             ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
                             ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
+                        } else {
+                            ((PostBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(0);
+                            ((PostBaseGalleryTypeViewHolder) holder).adapter.setRatio((float) preview.getPreviewHeight() / preview.getPreviewWidth());
                         }
-                        boolean blurGallery = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler);
+                        // The box every tile decodes to, from the column rather than from the view,
+                        // so a recycled tile cannot decode to the shape the last post left on it and
+                        // the preloader can warm the page this card opens on at the same size.
+                        int tileWidth = mShowGalleryMediaAsGrid ? 0 : cardPreviewWidthPx();
+                        ((PostBaseGalleryTypeViewHolder) holder).adapter.setTileSize(
+                                tileWidth, galleryTileHeightPx(preview, tileWidth));
+                        ((PostBaseGalleryTypeViewHolder) holder).adapter.setDataSavingMode(mDataSavingMode);
+                        boolean blurGallery = shouldBlurGallery(post);
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(blurGallery);
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setAutoplayGif(shouldAutoplayGalleryGif(post, blurGallery));
                         ((PostBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
@@ -1819,7 +1825,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setMaxPreviewHeight(getMaxPreviewHeight());
                             ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setRatio(SQUARE_PREVIEW_RATIO);
                     }
-                    boolean blurGallery = (post.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (post.isSpoiler() && mNeedBlurSpoiler);
+                    // No tile box: this layout's columns are only measured once laid out, so the
+                    // tiles size themselves from their views.
+                    ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setDataSavingMode(mDataSavingMode);
+                    boolean blurGallery = shouldBlurGallery(post);
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setBlurImage(blurGallery);
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setAutoplayGif(shouldAutoplayGalleryGif(post, blurGallery));
                     ((PostGalleryBaseGalleryTypeViewHolder) holder).adapter.setGalleryImages(post.getGallery());
@@ -2374,14 +2383,21 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * measure to. One builder for the row's own load and for the preload that warms it; Glide keys
      * its memory cache on url, size and transformation, so anything that differs between the two
      * costs a second decode and leaves the pop-in in place.
+     *
+     * @param crop whether the card centre-crops the picture to a square; see
+     *             {@link #cardPreviewCrops}
      */
-    private RequestBuilder<Drawable> cardPreviewRequest(Post.Preview preview, boolean blurImage) {
+    private RequestBuilder<Drawable> cardPreviewRequest(Post.Preview preview, boolean blurImage, boolean crop) {
         int width = cardPreviewWidthPx();
         int height = PostCardPreviewStyle.previewHeightPx(preview, mFixedHeightPreviewInCard,
                 getMaxPreviewHeight(), width);
         RequestBuilder<Drawable> builder = mGlide.load(preview.getPreviewUrl());
         if (blurImage) {
             builder = builder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)));
+        } else if (crop) {
+            // Decoded to cover the square and cut to it, so the card's centre crop is 1:1 rather
+            // than an enlargement of a picture fitted inside it.
+            builder = builder.centerCrop().downsample(mSaveMemoryCenterInsideDownsampleStrategy.filling());
         } else {
             builder = builder.centerInside().downsample(mSaveMemoryCenterInsideDownsampleStrategy);
         }
@@ -2404,6 +2420,14 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         int insetDp = (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2
                 || mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3) ? 32 : 0;
         return Math.max(0, Math.round((itemWidth - insetDp) * mScale));
+    }
+
+    /**
+     * Whether a with-preview card centre-crops {@code post}'s {@code preview} to its square, which
+     * decides how the picture is decoded. A video card's still is fitted, never cropped.
+     */
+    private boolean cardPreviewCrops(Post post, Post.Preview preview) {
+        return PostCardPreviewStyle.cropsSquare(preview, post, mFixedHeightPreviewInCard, mAutoplay);
     }
 
     /**
@@ -2495,7 +2519,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 // warming this row ahead of the scroll asks Glide for the same box and the bitmap
                 // it decoded is the one this load finds in the memory cache.
                 RequestBuilder<Drawable> imageRequestBuilder =
-                        cardPreviewRequest(preview, blurImage)
+                        cardPreviewRequest(preview, blurImage, cardPreviewCrops(post, preview))
                                 .listener(((PostWithPreviewTypeViewHolder) holder).glideRequestListener);
                 imageRequestBuilder.into(((PostWithPreviewTypeViewHolder) holder).imageView);
                 if (post.getPostType() == Post.GIF_TYPE) {
@@ -2636,8 +2660,9 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * picture this preloader can get ahead of.
      *
      * Covers both families, because the pop-in is the same on either: a compact row's square
-     * thumbnail, and a card's full-width preview. Everything comes from the builders the rows
-     * themselves use, which is what makes the warmed bitmap the one they find.
+     * thumbnail, and a card's full-width picture -- its preview, a video card's still, or the
+     * gallery tile the card opens on. Everything comes from the builders the rows themselves use,
+     * which is what makes the warmed bitmap the one they find.
      */
     @Nullable
     public PreloadRequest previewPreloadRequest(Post post) {
@@ -2652,7 +2677,20 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     : new PreloadRequest(request, mCompactThumbnailBoxSizePx, mCompactThumbnailBoxSizePx);
         }
 
-        if (viewType != VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE
+        if (viewType == VIEW_TYPE_POST_CARD_GALLERY_TYPE
+                || viewType == VIEW_TYPE_POST_CARD_2_GALLERY_TYPE
+                || viewType == VIEW_TYPE_POST_CARD_3_GALLERY_TYPE) {
+            return galleryPreloadRequest(post);
+        }
+
+        boolean videoAutoplayType = viewType == VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE
+                || viewType == VIEW_TYPE_POST_CARD_2_VIDEO_AUTOPLAY_TYPE
+                || viewType == VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE;
+        // Data saving builds a with-preview card for the autoplay type (onCreateViewHolder), so
+        // only without it is the row a video card drawing its unblurred still.
+        boolean videoStill = videoAutoplayType && !mDataSavingMode;
+        if (!videoAutoplayType
+                && viewType != VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE
                 && viewType != VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE
                 && viewType != VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE) {
             return null;
@@ -2676,7 +2714,73 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             // either and a preload could only miss.
             return null;
         }
-        return new PreloadRequest(cardPreviewRequest(preview, shouldBlurPreview(post)), width, height);
+        return new PreloadRequest(
+                cardPreviewRequest(preview, !videoStill && shouldBlurPreview(post),
+                        !videoStill && cardPreviewCrops(post, preview)), width, height);
+    }
+
+    /**
+     * The page a gallery card opens on, warmed at the tile's box through the tile's own builder,
+     * so the card arrives with its picture in place. The page after it is the tile adapter's to
+     * warm once the card is bound; the grid's cells are only measured once laid out, so it has none.
+     */
+    @Nullable
+    private PreloadRequest galleryPreloadRequest(Post post) {
+        ArrayList<Post.Gallery> gallery = post.getGallery();
+        if (mShowGalleryMediaAsGrid || (mDataSavingMode && mDisableImagePreview)
+                || gallery == null || gallery.isEmpty()) {
+            return null;
+        }
+        Post.Preview preview = getSuitablePreviewWithThumbnailFallback(post.getPreviews(), post.getThumbnailUrl());
+        int width = cardPreviewWidthPx();
+        int height = galleryTileHeightPx(preview, width);
+        if (width <= 0 || height <= 0) {
+            return null;
+        }
+        int page = Math.max(0, Math.min(post.getGalleryPageIndex(), gallery.size() - 1));
+        String still = GalleryTileStill.url(gallery.get(page), width,
+                mSaveMemoryCenterInsideDownsampleStrategy.getThreshold(), mDataSavingMode);
+        if (still == null) {
+            // Nothing but the animation, which is loaded only once autoplay settles on the tile.
+            return null;
+        }
+        return new PreloadRequest(PostGalleryTypeImageRecyclerViewAdapter.tileRequest(mGlide, still,
+                false, shouldBlurGallery(post), preview == null || galleryTileIsSquare(preview),
+                mSaveMemoryCenterInsideDownsampleStrategy, width, height),
+                width, height);
+    }
+
+    /**
+     * Height in pixels of a gallery card's tile {@code widthPx} wide, or 0 when the width is not
+     * known: the shape the bind gives the tile adapter -- the preview's own ratio, or the square
+     * capped at {@link #getMaxPreviewHeight()} under "Fixed Height in Card" or with no usable
+     * preview -- worked out the way {@code AspectRatioGifImageView.onMeasure} will measure it.
+     */
+    private int galleryTileHeightPx(@Nullable Post.Preview preview, int widthPx) {
+        if (widthPx <= 0) {
+            return 0;
+        }
+        if (preview == null) {
+            return Math.min(widthPx, getMaxPreviewHeight());
+        }
+        return PostCardPreviewStyle.previewHeightPx(preview, mFixedHeightPreviewInCard,
+                getMaxPreviewHeight(), widthPx);
+    }
+
+    /**
+     * Whether a gallery card's tiles are the capped square, cropped to fill, rather than the
+     * preview's own shape: "Fixed Height in Card", or a preview with no usable size. A card with no
+     * preview at all is square too.
+     */
+    private boolean galleryTileIsSquare(Post.Preview preview) {
+        return PostCardPreviewStyle.squarePreview(preview, mFixedHeightPreviewInCard);
+    }
+
+    /** Whether a gallery card blurs its tiles, which is part of each tile request's cache key. */
+    private boolean shouldBlurGallery(Post post) {
+        return (post.isNSFW() && mNeedBlurNsfw
+                && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit()))
+                || (post.isSpoiler() && mNeedBlurSpoiler);
     }
 
     /** A warmable image: the row's own request, and the box the row will decode it to. */

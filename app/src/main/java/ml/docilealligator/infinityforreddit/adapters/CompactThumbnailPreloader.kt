@@ -25,7 +25,8 @@ import ml.docilealligator.infinityforreddit.post.RefreshPrewarmer
  * picture already in the box rather than a blank that the picture then replaces.
  *
  * Both families, since the pop-in is the same on either: a compact row's square thumbnail and a
- * card's full-width preview. Which of them a post gets, and at what size, is
+ * card's full-width picture -- its preview, a video card's still, or the gallery tile it opens on.
+ * Which of them a post gets, and at what size, is
  * [PostRecyclerViewAdapter.previewPreloadRequest]'s answer, not this class's.
  *
  * It comes at that from two sides. While the list scrolls, the rows just past the edge it is moving

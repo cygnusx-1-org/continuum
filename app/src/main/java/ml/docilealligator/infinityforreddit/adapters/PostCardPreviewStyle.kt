@@ -96,6 +96,15 @@ object PostCardPreviewStyle {
         letterboxWithVideoBars(post, autoplay) || post.isInlineBodyImagePreview
 
     /**
+     * Whether the card crops [post]'s [preview] to fill its square -- the centre crop
+     * [applyPreviewShape] gives a square that is not letterboxed. The picture's request has to know,
+     * because a picture decoded to fit inside the square would be scaled up by the crop.
+     */
+    @JvmStatic
+    fun cropsSquare(preview: Post.Preview, post: Post, fixedHeightInCard: Boolean, autoplay: Boolean): Boolean =
+        squarePreview(preview, fixedHeightInCard) && !letterboxSquare(post, autoplay)
+
+    /**
      * Whether a letterboxed square is filled with the black an autoplaying video card shows around
      * its clip, rather than with the card colour. A gif stands in for a video and gets the video's
      * bars; a still out of a post's body is a picture on a card, and sits on the card.

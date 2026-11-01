@@ -9,9 +9,11 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
@@ -25,6 +27,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import io.noties.markwon.Markwon;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.Consumer;
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -63,6 +66,15 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
     private int currentPosition;
     @Nullable
     private RecyclerView attachedRecyclerView;
+    // The box, in pixels, every tile of the row layout decodes to, when the host knows it before
+    // layout -- the feed's cards do, from the column width. 0 otherwise (the post detail, a feed not
+    // laid out yet), and a tile is then sized from its own view once that has been laid out.
+    private int tileWidthPx;
+    private int tileHeightPx;
+    private boolean dataSavingMode;
+    // Swipe neighbours being warmed, by page. Kept so a change of pictures can cancel them; one that
+    // has finished has already handed its bitmap to the memory cache.
+    private final HashMap<Integer, Target<Drawable>> tilePreloads = new HashMap<>();
 
     public PostGalleryTypeImageRecyclerViewAdapter(RequestManager glide, @Nullable Typeface typeface,
                                                    SaveMemoryCenterInisdeDownsampleStrategy saveMemoryCenterInisdeDownsampleStrategy,
@@ -126,22 +138,28 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             holder.pendingLayoutListener = null;
         }
 
-        if (hasUsableWidth(imageView)) {
-            // The recycled view is already laid out at its final width, so no layout change will
+        if (hasTileSize()) {
+            // The box is known without the view, so the decode cannot pick up a size the view is
+            // about to lose, and a picture already warmed in memory is in place within this bind.
+            loadImage(holder);
+        } else if (hasUsableWidth(imageView) && !imageView.isLayoutRequested()) {
+            // The recycled view is already laid out at its final size, so no layout change will
             // fire. Load now — otherwise loadImage() would never run and the spinner spins forever.
+            //
+            // A pending layout means the size it has is not the one it is about to get: setRatio()
+            // above re-shapes the tile for this post, and the bounds still on it are the previous
+            // post's. Glide takes the view's current size as the decode box, so loading now would
+            // fit this image into the old tile -- a 2:1 tile left behind under a portrait
+            // screenshot decoded it at a third of the card's width or less, stretched across the
+            // card. Wait for the layout instead; the listener below runs once it has happened.
             loadImage(holder);
         } else {
             holder.pendingLayoutListener = new View.OnLayoutChangeListener() {
                 @Override
                 public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    int viewWidth = right - left;
                     // In split/weighted layouts, views get intermediate layout passes with
                     // incorrect (tiny) dimensions. Skip those and wait for the real size.
-                    ViewGroup parent = (ViewGroup) v.getParent();
-                    while (parent != null && !(parent instanceof RecyclerView)) {
-                        parent = (ViewGroup) parent.getParent();
-                    }
-                    if (parent != null && parent.getWidth() > 0 && viewWidth < parent.getWidth() / 2) {
+                    if (!isSettledWidth(v, right - left)) {
                         return;
                     }
                     v.removeOnLayoutChangeListener(this);
@@ -151,6 +169,8 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             };
             imageView.addOnLayoutChangeListener(holder.pendingLayoutListener);
         }
+
+        warmNextTile(holder.getBindingAdapterPosition());
 
         if (showCaption) {
             loadCaptionPreview(holder);
@@ -189,18 +209,34 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         glide.clear(holder.binding.imageViewItemGalleryImageInPostFeed);
     }
 
-    // Whether the view already has its final width, mirroring the guard in the layout listener: a
-    // width below half the RecyclerView width is an intermediate (split/weighted) layout pass.
+    // Whether the view's width is a real one, by the same rule as the layout listener.
     private boolean hasUsableWidth(View imageView) {
         int viewWidth = imageView.getWidth();
-        if (viewWidth <= 0) {
-            return false;
-        }
-        ViewGroup parent = (ViewGroup) imageView.getParent();
+        return viewWidth > 0 && isSettledWidth(imageView, viewWidth);
+    }
+
+    /**
+     * Whether {@code viewWidth} is the width a tile keeps, rather than an intermediate pass of a
+     * split or weighted layout, which can lay a view out at a fraction of its size first.
+     *
+     * A tile is as wide as one span of the gallery list -- the whole list in the pager, a half or a
+     * third of it in the grid -- and less than half of that is a pass to wait out. Measured against
+     * the whole list instead, every grid cell looked like one: a cell that missed loading on its
+     * first layout never loaded at all, its spinner turning for good.
+     */
+    private static boolean isSettledWidth(View view, int viewWidth) {
+        ViewParent parent = view.getParent();
         while (parent != null && !(parent instanceof RecyclerView)) {
-            parent = (ViewGroup) parent.getParent();
+            parent = parent.getParent();
         }
-        return parent == null || parent.getWidth() <= 0 || viewWidth >= parent.getWidth() / 2;
+        if (!(parent instanceof RecyclerView) || ((RecyclerView) parent).getWidth() <= 0) {
+            return true;
+        }
+        RecyclerView list = (RecyclerView) parent;
+        RecyclerView.LayoutManager layoutManager = list.getLayoutManager();
+        int spans = layoutManager instanceof GridLayoutManager
+                ? ((GridLayoutManager) layoutManager).getSpanCount() : 1;
+        return viewWidth >= list.getWidth() / spans / 2;
     }
 
     private void loadImage(ImageViewHolder holder) {
@@ -213,12 +249,26 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         }
 
         Post.Gallery galleryImage = galleryImages.get(index);
-        // Prefer the resolution-bounded feed preview, which for a gif is a static still. The source
-        // -- the animated gif itself, often tens of MB -- is loaded only for the one tile that is
-        // playing (issue #382), or when there is no usable preview to fall back on. The full-screen
-        // media view is unaffected — it loads `url` directly.
-        boolean loadSource = shouldAnimate(index) || galleryImage.feedPreviewUrl == null;
-        String loadUrl = loadSource ? galleryImage.url : galleryImage.feedPreviewUrl;
+        // Prefer a resolution-bounded still, which for a gif is a static frame. The source -- the
+        // animated gif itself, often tens of MB -- is loaded only for the one tile that is playing
+        // (issue #382), or when there is no still to fall back on. The full-screen media view is
+        // unaffected — it loads `url` directly.
+        //
+        // The still is picked for the tile's width (GalleryTileStill). The grid keeps the widest
+        // downscale it has always had: its cells are only measured once laid out.
+        int stillWidthPx = hasTileSize() ? tileWidthPx
+                : isGridLayout ? 0 : holder.binding.imageViewItemGalleryImageInPostFeed.getWidth();
+        String still = GalleryTileStill.url(galleryImage, stillWidthPx,
+                saveMemoryCenterInisdeDownsampleStrategy.getThreshold(), dataSavingMode);
+        boolean loadSource;
+        String loadUrl;
+        if (still == null || shouldAnimate(index)) {
+            loadSource = true;
+            loadUrl = galleryImage.url;
+        } else {
+            loadSource = false;
+            loadUrl = still;
+        }
 
         // A still is worth caching decoded (ALL); an animated gif must not be. Its decoded resource
         // is the animation library's GifDecoder, which has no Glide result encoder, so ALL fails
@@ -226,9 +276,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
         // still to fall back on showing the error tile. DATA caches the downloaded bytes instead,
         // which is the expensive half anyway.
         boolean animatedResource = loadSource && galleryImage.mediaType == Post.Gallery.TYPE_GIF;
-        RequestBuilder<Drawable> imageRequestBuilder = glide.load(loadUrl)
-                .diskCacheStrategy(animatedResource ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL)
-                .listener(new RequestListener<>() {
+        RequestListener<Drawable> listener = new RequestListener<>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 holder.binding.progressBarItemGalleryImageInPostFeed.setVisibility(View.GONE);
@@ -257,25 +305,99 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
                 }
                 return false;
             }
-        });
-        if (blurImage) {
-            if (isGridLayout) {
-                imageRequestBuilder
-                        .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0), new BlurTransformation(50, 2))))
-                        .into(holder.binding.imageViewItemGalleryImageInPostFeed);
-            } else {
-                imageRequestBuilder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)))
-                        .into(holder.binding.imageViewItemGalleryImageInPostFeed);
-            }
-        } else {
-            if (isGridLayout) {
-                imageRequestBuilder
-                        .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0))))
-                        .downsample(saveMemoryCenterInisdeDownsampleStrategy).into(holder.binding.imageViewItemGalleryImageInPostFeed);
-            } else {
-                imageRequestBuilder.centerInside().downsample(saveMemoryCenterInisdeDownsampleStrategy).into(holder.binding.imageViewItemGalleryImageInPostFeed);
-            }
+        };
+        if (!isGridLayout) {
+            // Through the one builder the swipe warm-up and the feed's preloader use, at the same
+            // box, so the bitmap either of them decoded is the one this finds in memory.
+            tileRequest(glide, loadUrl, animatedResource, blurImage, cropsTile(),
+                    saveMemoryCenterInisdeDownsampleStrategy, tileWidthPx, tileHeightPx)
+                    .listener(listener)
+                    .into(holder.binding.imageViewItemGalleryImageInPostFeed);
+            return;
         }
+        RequestBuilder<Drawable> imageRequestBuilder = glide.load(loadUrl)
+                .diskCacheStrategy(animatedResource ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL)
+                .listener(listener);
+        if (blurImage) {
+            imageRequestBuilder
+                    .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0), new BlurTransformation(50, 2))))
+                    .into(holder.binding.imageViewItemGalleryImageInPostFeed);
+        } else {
+            // Filling, since the cell is centre-cropped: fitted inside it, the crop would enlarge it.
+            imageRequestBuilder
+                    .apply(RequestOptions.bitmapTransform(new MultiTransformation<>(new CenterCrop(), new RoundedCornersTransformation(32, 0))))
+                    .downsample(saveMemoryCenterInisdeDownsampleStrategy.filling()).into(holder.binding.imageViewItemGalleryImageInPostFeed);
+        }
+    }
+
+    /**
+     * The request a tile of the row (pager) layout draws with -- one builder for the tile's own
+     * load, for the next page it warms, and for the feed's preloader warming the page a card opens
+     * on. Glide's memory cache is keyed on the url, the size and the transformation, so anything
+     * that differs between them is a second decode and the pop-in left in place.
+     *
+     * @param crop   whether the tile is the square that crops its picture to fill it, rather than
+     *               a shape the picture is fitted inside
+     * @param width  the tile's box in pixels, or 0 to leave the size to the view
+     * @param height the tile's box in pixels, or 0 to leave the size to the view
+     */
+    public static RequestBuilder<Drawable> tileRequest(RequestManager glide, String url, boolean animated,
+                                                       boolean blur, boolean crop,
+                                                       SaveMemoryCenterInisdeDownsampleStrategy downsampleStrategy,
+                                                       int width, int height) {
+        // A still is worth caching decoded (ALL); an animated gif must not be -- see loadImage.
+        RequestBuilder<Drawable> builder = glide.load(url)
+                .diskCacheStrategy(animated ? DiskCacheStrategy.DATA : DiskCacheStrategy.ALL);
+        if (blur) {
+            builder = builder.apply(RequestOptions.bitmapTransform(new BlurTransformation(50, 10)));
+        } else if (crop) {
+            // Decoded to cover the square and cut to it, so the tile's centre crop is 1:1 rather
+            // than an enlargement of a picture fitted inside it.
+            builder = builder.centerCrop().downsample(downsampleStrategy.filling());
+        } else {
+            builder = builder.centerInside().downsample(downsampleStrategy);
+        }
+        // Only when both are known: override(0, 0) is not a size.
+        return width > 0 && height > 0 ? builder.override(width, height) : builder;
+    }
+
+    /**
+     * Warms the page after {@code position} in Glide's memory cache at the tile's box, so a swipe
+     * finds it there rather than starting its download as the tile slides in. Only the next page:
+     * the one before was on screen a moment ago, and Glide keeps what a recycled tile let go of.
+     */
+    private void warmNextTile(int position) {
+        int next = position + 1;
+        if (!hasTileSize() || galleryImages == null || position < 0 || next >= galleryImages.size()
+                || tilePreloads.containsKey(next)) {
+            return;
+        }
+        String still = GalleryTileStill.url(galleryImages.get(next), tileWidthPx,
+                saveMemoryCenterInisdeDownsampleStrategy.getThreshold(), dataSavingMode);
+        if (still == null) {
+            // Nothing but the animation, which only the tile autoplay settles on ever loads.
+            return;
+        }
+        tilePreloads.put(next, tileRequest(glide, still, false, blurImage, cropsTile(),
+                saveMemoryCenterInisdeDownsampleStrategy, tileWidthPx, tileHeightPx)
+                .preload(tileWidthPx, tileHeightPx));
+    }
+
+    private void clearTilePreloads() {
+        for (Target<Drawable> target : tilePreloads.values()) {
+            glide.clear(target);
+        }
+        tilePreloads.clear();
+    }
+
+    // Whether a row-layout tile is the square that crops to fill (CENTER_CROP in onBindViewHolder).
+    private boolean cropsTile() {
+        return maxPreviewHeight > 0;
+    }
+
+    // Whether the host gave this gallery its tile box ahead of layout. The grid never has one.
+    private boolean hasTileSize() {
+        return !isGridLayout && tileWidthPx > 0 && tileHeightPx > 0;
     }
 
     /**
@@ -436,6 +558,7 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
             return;
         }
         this.galleryImages = incoming;
+        clearTilePreloads();
         // A recycled holder is showing a different post now, so its pager starts back at page one.
         currentPosition = 0;
         notifyDataSetChanged();
@@ -492,6 +615,21 @@ public class PostGalleryTypeImageRecyclerViewAdapter extends RecyclerView.Adapte
 
     public void setIsGridLayout(boolean isGridLayout) {
         this.isGridLayout = isGridLayout;
+    }
+
+    /**
+     * The box every tile of the row layout decodes to, in pixels, or 0 for either to size tiles
+     * from their views. Must be the box the tile measures to -- the width of the pager and
+     * {@link #setRatio}'s shape of it -- since the picture is fitted inside it.
+     */
+    public void setTileSize(int tileWidthPx, int tileHeightPx) {
+        this.tileWidthPx = tileWidthPx;
+        this.tileHeightPx = tileHeightPx;
+    }
+
+    /** Data saving keeps every tile on its widest downscale, never the original upload. */
+    public void setDataSavingMode(boolean dataSavingMode) {
+        this.dataSavingMode = dataSavingMode;
     }
 
     class ImageViewHolder extends RecyclerView.ViewHolder {

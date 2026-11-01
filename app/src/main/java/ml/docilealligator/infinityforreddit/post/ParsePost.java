@@ -873,22 +873,33 @@ public class ParsePost {
                         // autoplay picks that tile — only then is the source (often tens of MB)
                         // loaded, for that one tile. The full-screen media view is unaffected: it
                         // always loads `url` (the source) directly, never feedPreviewUrl.
+                        //
+                        // The largest is only the default. All of them are kept, with the source's
+                        // size, so a tile wider than 1080px can pick something that covers it --
+                        // see GalleryTileStill.
                         if (singleGalleryObject.has(JSONUtils.P_KEY)) {
                             JSONArray previewsArray = singleGalleryObject.getJSONArray(JSONUtils.P_KEY);
                             String bestPreviewUrl = null;
                             int bestPreviewWidth = -1;
+                            ArrayList<Post.Preview> downscales = new ArrayList<>();
                             for (int p = 0; p < previewsArray.length(); p++) {
                                 JSONObject previewObject = previewsArray.getJSONObject(p);
                                 if (previewObject.has(JSONUtils.U_KEY) && previewObject.has(JSONUtils.X_KEY)) {
                                     int previewWidth = previewObject.getInt(JSONUtils.X_KEY);
+                                    String previewUrl = previewObject.getString(JSONUtils.U_KEY);
+                                    downscales.add(new Post.Preview(previewUrl, previewWidth,
+                                            previewObject.optInt(JSONUtils.Y_KEY), "", ""));
                                     if (previewWidth > bestPreviewWidth) {
                                         bestPreviewWidth = previewWidth;
-                                        bestPreviewUrl = previewObject.getString(JSONUtils.U_KEY);
+                                        bestPreviewUrl = previewUrl;
                                     }
                                 }
                             }
                             postGalleryItem.feedPreviewUrl = bestPreviewUrl;
+                            postGalleryItem.downscales = downscales;
                         }
+                        postGalleryItem.sourceWidth = sourceObject.optInt(JSONUtils.X_KEY);
+                        postGalleryItem.sourceHeight = sourceObject.optInt(JSONUtils.Y_KEY);
 
                         gallery.add(postGalleryItem);
                     }

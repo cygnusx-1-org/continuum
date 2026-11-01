@@ -91,6 +91,22 @@ class ParsePostGalleryTest {
     }
 
     @Test
+    fun `a gallery item keeps every downscale and its source size`() {
+        val json = json("jpeg_png")
+        val item = ParsePost.parseBasicData(json).gallery[0]
+        val p = json.getJSONObject("media_metadata").getJSONObject("zv2kb6000iwh1").getJSONArray("p")
+
+        // All of them, not just the widest, so a tile wider than 1080px can see none covers it.
+        assertEquals(
+            (0 until p.length()).map { p.getJSONObject(it).getString("u") to p.getJSONObject(it).getInt("x") },
+            item.downscales.orEmpty().map { it.previewUrl to it.previewWidth }
+        )
+        assertEquals(p.getJSONObject(p.length() - 1).getString("u"), item.feedPreviewUrl)
+        assertEquals(1500, item.sourceWidth)
+        assertEquals(1101, item.sourceHeight)
+    }
+
+    @Test
     fun `an image-jpeg gallery with a body keeps both`() {
         val post = ParsePost.parseBasicData(json("jpeg_body"))
 

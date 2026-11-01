@@ -1216,6 +1216,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                     }
                     boolean blurGallery = (mPost.isNSFW() && mNeedBlurNsfw && !(mDoNotBlurNsfwInNsfwSubreddits && mFragment != null && mFragment.getIsNsfwSubreddit())) || (mPost.isSpoiler() && mNeedBlurSpoiler);
                     ((PostDetailGalleryViewHolder) holder).adapter.setBlurImage(blurGallery);
+                    // No tile box here: the header's tiles size themselves from their views once
+                    // laid out, and pick their still from that width -- never the original upload
+                    // under data saving.
+                    ((PostDetailGalleryViewHolder) holder).adapter.setDataSavingMode(mDataSavingMode);
                     // Same rule the feed follows for gallery gifs (issue #382): Video Autoplay on,
                     // not an autoplay-skipped NSFW/spoiler post, not blurred, not the grid layout.
                     ((PostDetailGalleryViewHolder) holder).adapter.setAutoplayGif(

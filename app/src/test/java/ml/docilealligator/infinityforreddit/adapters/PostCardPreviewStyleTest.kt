@@ -185,6 +185,41 @@ class PostCardPreviewStyleTest {
     }
 
     @Test
+    fun `the picture is decoded for a crop exactly where the card crops it`() {
+        // A picture fitted inside the square and then centre-cropped is enlarged by the crop, so
+        // the request (cropsSquare) and the view (applyPreviewShape) must agree on every card.
+        val og = Post.Preview("https://preview.redd.it/og.jpg", 1200, 630, "", "")
+        val linkPreviewPost = post(Post.TEXT_TYPE).apply { previews = arrayListOf(og) }
+        val gif = post(Post.GIF_TYPE).apply { previews = arrayListOf(og) }
+        val cards = listOf(
+            InlineBodyImageFixtures.post("text_image"),
+            InlineBodyImageFixtures.post("image_text"),
+            linkPreviewPost,
+            gif,
+        )
+        for (post in cards) {
+            for (autoplay in listOf(false, true)) {
+                val imageView = cardImageView()
+                val preview = post.previews[0]
+                PostCardPreviewStyle.applyPreviewShape(
+                    imageView, preview, post, fixedHeightInCard = true,
+                    autoplay = autoplay, maxPreviewHeight = MAX_PREVIEW_HEIGHT,
+                )
+                assertEquals(
+                    "${post.postType} autoplay=$autoplay",
+                    imageView.scaleType == ImageView.ScaleType.CENTER_CROP,
+                    PostCardPreviewStyle.cropsSquare(preview, post, fixedHeightInCard = true, autoplay = autoplay),
+                )
+            }
+            // With the setting off a sized preview takes its own shape, so there is nothing to crop.
+            assertFalse(PostCardPreviewStyle.cropsSquare(post.previews[0], post, fixedHeightInCard = false, autoplay = false))
+        }
+        // The two that crop at all: a link's preview, and a gif left as a still.
+        assertTrue(PostCardPreviewStyle.cropsSquare(og, linkPreviewPost, fixedHeightInCard = true, autoplay = true))
+        assertTrue(PostCardPreviewStyle.cropsSquare(og, gif, fixedHeightInCard = true, autoplay = false))
+    }
+
+    @Test
     fun `the square's cap does not follow a recycled view to the next post`() {
         val imageView = cardImageView()
         val post = InlineBodyImageFixtures.post("text_image")

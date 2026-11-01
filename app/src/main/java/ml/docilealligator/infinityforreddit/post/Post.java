@@ -1232,6 +1232,16 @@ public class Post implements Parcelable {
         // autoplay is animating. Null for items that have no usable preview.
         @Nullable
         public String feedPreviewUrl;
+        // Every downscale Reddit publishes for the item (its `p` array), so the inline gallery can
+        // take the smallest one as wide as the tile rather than always the largest -- which stops at
+        // 1080px and so is stretched on a wider screen. Null where none were parsed: other hosts,
+        // failed items, and posts restored from a FeedCache written before this field existed.
+        @Nullable
+        public ArrayList<Preview> downscales;
+        // The source's own size (`s.x` and `s.y`), 0 when unknown. Lets the inline gallery tell
+        // whether `url` is small enough to load in place of a downscale that is too narrow.
+        public int sourceWidth;
+        public int sourceHeight;
         public String fileName;
         public int mediaType;
         public String caption;
@@ -1270,6 +1280,9 @@ public class Post implements Parcelable {
             fallbackUrl = Objects.requireNonNull(in.readString());
             hasFallback = in.readByte() != 0;
             feedPreviewUrl = in.readString();
+            downscales = in.createTypedArrayList(Preview.CREATOR);
+            sourceWidth = in.readInt();
+            sourceHeight = in.readInt();
             fileName = Objects.requireNonNull(in.readString());
             mediaType = in.readInt();
             caption = Objects.requireNonNull(in.readString());
@@ -1300,6 +1313,9 @@ public class Post implements Parcelable {
             parcel.writeString(fallbackUrl);
             parcel.writeByte((byte) (hasFallback ? 1 : 0));
             parcel.writeString(feedPreviewUrl);
+            parcel.writeTypedList(downscales);
+            parcel.writeInt(sourceWidth);
+            parcel.writeInt(sourceHeight);
             parcel.writeString(fileName);
             parcel.writeInt(mediaType);
             parcel.writeString(caption);
