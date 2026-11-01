@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.8 / 2026-10-31
+=============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Added Anonymous comment saving
+* Fixed Saved posts for Anonymous
+
 8.3.3.7 / 2026-10-31
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.
