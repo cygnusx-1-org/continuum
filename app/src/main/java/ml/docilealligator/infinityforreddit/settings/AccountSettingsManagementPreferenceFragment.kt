@@ -29,7 +29,7 @@ import org.greenrobot.eventbus.EventBus
 
 /**
  * Everything that acts on this account's settings and data as a whole rather than on one of them:
- * copying another account's settings over, putting this one back to defaults, and throwing away one
+ * copying another account's settings over, copying this one's to every other account, putting this one back to defaults, and throwing away one
  * kind of accumulated data at a time.
  *
  * The two settings operations end by restarting the app: they rewrite preference files that the
@@ -54,30 +54,59 @@ class AccountSettingsManagementPreferenceFragment : CustomFontPreferenceFragment
 
         val copySettingsPreference =
             findPreference<Preference>(SharedPreferencesUtils.COPY_SETTINGS_FROM_ACCOUNT)
+        val copySettingsToAllPreference =
+            findPreference<Preference>(SharedPreferencesUtils.COPY_SETTINGS_TO_ALL_ACCOUNTS)
         val resetAccountSettingsPreference =
             findPreference<Preference>(SharedPreferencesUtils.RESET_ACCOUNT_SETTINGS)
 
-        if (copySettingsPreference != null) {
+        // Anonymous counts as an account here: it can be copied from, and copied to, like any other.
+        // So from a signed-in account there is always somebody else, and from Anonymous there is
+        // somebody only once an account has been added.
+        val isAnonymous = Account.isAnonymous(mActivity.accountName)
+        val accountViewModel = ViewModelProvider(this,
+            AccountViewModel.Factory(executor, redditDataRoomDatabase))[AccountViewModel::class.java]
+        accountViewModel.accountsExceptCurrentAccountLiveData.observe(this) { accounts ->
+            val hasAnother = !isAnonymous || !accounts.isNullOrEmpty()
+
             // Disabled rather than hidden when there is nobody to copy from: the row keeps its place
             // in the group, so the rounded corners below it do not move with the account count.
-            val accountViewModel = ViewModelProvider(this,
-                AccountViewModel.Factory(executor, redditDataRoomDatabase))[AccountViewModel::class.java]
-            accountViewModel.accountsExceptCurrentAccountLiveData.observe(this) { accounts ->
-                val hasAnother = !accounts.isNullOrEmpty()
-                copySettingsPreference.isEnabled = hasAnother
-                copySettingsPreference.setSummary(
-                    if (hasAnother) R.string.settings_copy_settings_from_account_summary
-                    else R.string.settings_copy_settings_from_account_no_other_summary)
-            }
+            copySettingsPreference?.isEnabled = hasAnother
+            copySettingsPreference?.setSummary(
+                if (hasAnother) R.string.settings_copy_settings_from_account_summary
+                else R.string.settings_copy_settings_from_account_no_other_summary)
 
-            copySettingsPreference.setOnPreferenceClickListener {
-                val fragment = AccountChooserBottomSheetFragment()
-                fragment.arguments = Bundle().apply {
-                    putBoolean(AccountChooserBottomSheetFragment.EXTRA_EXCLUDE_CURRENT_ACCOUNT, true)
-                }
-                fragment.show(parentFragmentManager, fragment.tag)
-                true
+            copySettingsToAllPreference?.isEnabled = hasAnother
+            copySettingsToAllPreference?.setSummary(
+                if (hasAnother) R.string.settings_copy_settings_to_all_accounts_summary
+                else R.string.settings_copy_settings_to_all_accounts_no_other_summary)
+        }
+
+        copySettingsPreference?.setOnPreferenceClickListener {
+            val fragment = AccountChooserBottomSheetFragment()
+            fragment.arguments = Bundle().apply {
+                putBoolean(AccountChooserBottomSheetFragment.EXTRA_EXCLUDE_CURRENT_ACCOUNT, true)
+                putBoolean(AccountChooserBottomSheetFragment.EXTRA_INCLUDE_ANONYMOUS, true)
             }
+            fragment.show(parentFragmentManager, fragment.tag)
+            true
+        }
+
+        copySettingsToAllPreference?.setOnPreferenceClickListener {
+            val source = mActivity.accountName
+            MaterialAlertDialogBuilder(mActivity, R.style.MaterialAlertDialogTheme)
+                .setTitle(R.string.settings_copy_settings_to_all_accounts_title)
+                .setMessage(getString(R.string.copy_settings_to_all_accounts_confirmation,
+                    displayName(source)))
+                .setPositiveButton(R.string.yes) { _, _ ->
+                    val context = mActivity.applicationContext
+                    executor.execute {
+                        AccountSettings.copyToAllAccounts(context, redditDataRoomDatabase, source)
+                        handler.post { AppRestartHelper.triggerAppRestart(context) }
+                    }
+                }
+                .setNegativeButton(R.string.no, null)
+                .show()
+            true
         }
 
         resetAccountSettingsPreference?.setOnPreferenceClickListener {

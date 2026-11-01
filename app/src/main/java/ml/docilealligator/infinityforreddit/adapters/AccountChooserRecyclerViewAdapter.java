@@ -43,11 +43,16 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
             Account account = accounts.get(position);
             AccountViewHolder accountViewHolder = (AccountViewHolder) holder;
 
-            glide.load(account.getProfileImageUrl())
+            boolean anonymous = Account.isAnonymous(account.getAccountName());
+            glide.load(anonymous ? null : account.getProfileImageUrl())
                     .error(glide.load(R.drawable.subreddit_default_icon))
                     .transform(new RoundedCornersTransformation(128, 0))
                     .into(accountViewHolder.binding.profileImageItemAccount);
-            accountViewHolder.binding.usernameTextViewItemAccount.setText(account.getAccountName());
+            if (anonymous) {
+                accountViewHolder.binding.usernameTextViewItemAccount.setText(R.string.anonymous_account);
+            } else {
+                accountViewHolder.binding.usernameTextViewItemAccount.setText(account.getAccountName());
+            }
         }
     }
 

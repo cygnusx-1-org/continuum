@@ -181,6 +181,66 @@ class AccountSettingsTest {
     }
 
     @Test
+    fun `anonymous can be copied from`() {
+        defaultPreferences.edit()
+            .putString(key(null, SharedPreferencesUtils.THEME_KEY), "2")
+            .commit()
+
+        AccountSettings.copyBetweenAccounts(context, database, Account.ANONYMOUS_ACCOUNT, "alice")
+
+        assertEquals("2", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals("the source is only ever read",
+            "2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
+    }
+
+    private fun addAccounts(vararg names: String) {
+        names.forEach {
+            database.accountDao().insert(Account(it, null, null, null, null, null, 0, false, false))
+        }
+    }
+
+    @Test
+    fun `copying to all accounts from anonymous reaches every signed in account`() {
+        addAccounts("alice", "bob")
+        defaultPreferences.edit()
+            .putString(key(null, SharedPreferencesUtils.THEME_KEY), "2")
+            .commit()
+
+        AccountSettings.copyToAllAccounts(context, database, Account.ANONYMOUS_ACCOUNT)
+
+        assertEquals("2", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals("2", defaultPreferences.getString(key("bob", SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals("2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
+    }
+
+    @Test
+    fun `copying to all accounts from an account reaches the others and anonymous`() {
+        addAccounts("alice", "bob")
+        defaultPreferences.edit()
+            .putString(key("alice", SharedPreferencesUtils.THEME_KEY), "2")
+            .putString(key("bob", SharedPreferencesUtils.THEME_KEY), "0")
+            .commit()
+
+        AccountSettings.copyToAllAccounts(context, database, "alice")
+
+        assertEquals("2", defaultPreferences.getString(key("bob", SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals("2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
+        assertEquals("the source is only ever read",
+            "2", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
+    }
+
+    @Test
+    fun `copying to all accounts leaves the main page tabs alone`() {
+        addAccounts("alice")
+        mainPageTabs.edit().putString(key("alice", "tabs"), "mine").commit()
+        mainPageTabs.edit().putString(key(null, "tabs"), "theirs").commit()
+
+        AccountSettings.copyToAllAccounts(context, database, Account.ANONYMOUS_ACCOUNT)
+
+        assertEquals("mine", mainPageTabs.getString(key("alice", "tabs"), null))
+    }
+
+    @Test
     fun `copying an account onto itself changes nothing`() {
         defaultPreferences.edit()
             .putString(key("alice", SharedPreferencesUtils.THEME_KEY), "2")

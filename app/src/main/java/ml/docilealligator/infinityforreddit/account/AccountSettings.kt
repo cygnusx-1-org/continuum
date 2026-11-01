@@ -81,8 +81,7 @@ object AccountSettings {
      * removed, so the two accounts end up agreeing rather than the destination keeping a setting
      * the source never had. Runs one way — the source file entries are only ever read.
      *
-     * Anonymous can be a destination but is never offered as a source, which is a rule of the
-     * picker rather than of this code; passing it as one would work.
+     * Anonymous works as a source and as a destination.
      *
      * Blocking. Call it off the main thread.
      */
@@ -108,6 +107,31 @@ object AccountSettings {
 
         copyFilters(redditDataRoomDatabase, sourceAccountName,
             destinationAccountName ?: Account.ANONYMOUS_ACCOUNT)
+    }
+
+    /**
+     * Gives every other account, Anonymous included, the settings [sourceAccountName] has.
+     *
+     * [copyBetweenAccounts] once per destination, so each one is a mirror and main page tabs stay
+     * as they are. The source itself is not changed.
+     *
+     * Blocking. Call it off the main thread.
+     */
+    @JvmStatic
+    fun copyToAllAccounts(
+        context: Context,
+        redditDataRoomDatabase: RedditDataRoomDatabase,
+        sourceAccountName: String,
+    ) {
+        val source = AccountScope.namespace(sourceAccountName)
+        val destinations = (redditDataRoomDatabase.accountDao().allAccounts.map { it.accountName } +
+                Account.ANONYMOUS_ACCOUNT)
+            .distinctBy { AccountScope.namespace(it) }
+            .filter { AccountScope.namespace(it) != source }
+
+        for (destination in destinations) {
+            copyBetweenAccounts(context, redditDataRoomDatabase, sourceAccountName, destination)
+        }
     }
 
     /**

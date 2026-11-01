@@ -2,6 +2,10 @@
 
 ---
 
+Unreleased
+=============
+* Anonymous settings can now be copied to an account, and any account's settings can be copied to all other accounts
+
 8.3.3.8 / 2026-10-31
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.

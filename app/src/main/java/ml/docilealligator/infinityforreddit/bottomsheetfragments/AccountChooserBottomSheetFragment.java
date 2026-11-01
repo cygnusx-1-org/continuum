@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -43,6 +44,11 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
      * out, because it is a browsing mode rather than an account to choose.
      */
     public static final String EXTRA_EXCLUDE_CURRENT_ACCOUNT = "EECA";
+    /**
+     * Adds the anonymous account to the list, unless it is the one in use and the current account
+     * is being excluded. Only the copy-settings screen asks for it.
+     */
+    public static final String EXTRA_INCLUDE_ANONYMOUS = "EIA";
 
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
@@ -151,7 +157,22 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
                         ? accountViewModel.getAccountsExceptCurrentAccountLiveData()
                         : accountViewModel.getAllAccountsLiveData();
 
-        accounts.observe(getViewLifecycleOwner(), adapter::changeAccountsDataset);
+        boolean includeAnonymous = arguments != null
+                && arguments.getBoolean(EXTRA_INCLUDE_ANONYMOUS, false)
+                && !Account.isAnonymous(activity.accountName);
+
+        accounts.observe(getViewLifecycleOwner(), list -> {
+            if (includeAnonymous) {
+                List<Account> withAnonymous = new ArrayList<>();
+                withAnonymous.add(new Account(Account.ANONYMOUS_ACCOUNT, null, null, null,
+                        null, null, 0, false, false));
+                if (list != null) {
+                    withAnonymous.addAll(list);
+                }
+                list = withAnonymous;
+            }
+            adapter.changeAccountsDataset(list);
+        });
     }
 
     @Override

@@ -10,6 +10,12 @@
         app:top="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        app:key="copy_settings_to_all_accounts"
+        app:icon="@drawable/ic_copy_day_night_24dp"
+        app:title="@string/settings_copy_settings_to_all_accounts_title"
+        app:summary="@string/settings_copy_settings_to_all_accounts_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:key="reset_account_settings"
         app:icon="@drawable/ic_refresh_day_night_24dp"
         app:title="@string/settings_reset_account_settings_title"

@@ -173,6 +173,7 @@ public class SharedPreferencesUtils {
     public static final String DELETE_ALL_LEGACY_SETTINGS = "delete_all_legacy_settings";
     public static final String RESET_ALL_SETTINGS = "reset_all_settings";
     public static final String COPY_SETTINGS_FROM_ACCOUNT = "copy_settings_from_account";
+    public static final String COPY_SETTINGS_TO_ALL_ACCOUNTS = "copy_settings_to_all_accounts";
     public static final String RESET_ACCOUNT_SETTINGS = "reset_account_settings";
     public static final String DELETE_ACCOUNT_SUBREDDITS = "delete_account_subreddits";
     public static final String DELETE_ACCOUNT_USERS = "delete_account_users";

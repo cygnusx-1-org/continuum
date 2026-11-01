@@ -18,8 +18,8 @@ import java.util.List;
  * literal is repeated rather than shared because a Room {@code @Query} cannot reference a constant.
  *
  * <p>Anonymous is therefore a browsing mode in the UI -- an entry beside "Add account" in the
- * switcher -- rather than a row in the account list, and is deliberately not offered as a source to
- * copy settings from. The stored settings underneath it are per-account like any other's.
+ * switcher -- rather than a row in the account list. The stored settings underneath it are
+ * per-account like any other's, so the settings copy screens offer it as a source themselves.
  */
 @Dao
 public interface AccountDao {
