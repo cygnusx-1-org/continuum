@@ -14,6 +14,7 @@ import ml.docilealligator.infinityforreddit.NetworkState;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.apis.RedditAPIKt;
 import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
 import ml.docilealligator.infinityforreddit.post.PostPagingSource;
 import ml.docilealligator.infinityforreddit.thing.SortType;
@@ -170,6 +171,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                         parseComments(response.body(), new ParseCommentsAsyncTaskListener() {
                             @Override
                             public void parseSuccessful(ArrayList<Comment> comments, String after) {
+                                markAnonymousSaves(comments);
                                 handler.post(() -> {
                                     if (comments.isEmpty()) {
                                         hasPostLiveData.postValue(false);
@@ -272,6 +274,7 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                         parseComments(response.body(), new ParseCommentsAsyncTaskListener() {
                             @Override
                             public void parseSuccessful(ArrayList<Comment> comments, String after) {
+                                markAnonymousSaves(comments);
                                 handler.post(() -> {
                                     if (after == null || after.isEmpty() || after.equals("null")) {
                                         callback.onResult(comments, null);
@@ -303,7 +306,8 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     /**
      * Loads a page of promoted local-saved comments (t1_) from Room and hydrates them via
      * /api/info. Runs on {@code executor}. Throws on any failure so the caller can post a
-     * FAILED state without mutating anything.
+     * FAILED state without mutating anything. For the anonymous account the page is its own saved
+     * comments instead, the only record of them there is: see {@link #loadLocalPage}.
      *
      * <p>When a search query is active it walks the whole local_saved comments listing (following the
      * time cursor to DB exhaustion), hydrates it, caches the full unfiltered result, and returns every
@@ -323,17 +327,12 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
             ArrayList<Comment> all = new ArrayList<>();
             Long before = null;
             while (true) {
-                List<LocalSavedThing> promoted =
-                        redditDataRoomDatabase.localSavedThingDao().getPromotedCommentsSync(accountName, before);
-                if (promoted.isEmpty()) {
-                    break;
-                }
-                long lastItem = hydrateLocalComments(promoted, all);
+                LocalPage page = loadLocalPage(before, all);
                 // Page by DB rows so removed/un-hydratable items don't stop pagination early.
-                if (promoted.size() < 25) {
+                if (page.rows < 25) {
                     break;
                 }
-                before = lastItem;
+                before = page.lastItem;
             }
             if (savedSearchCache != null) {
                 savedSearchCache.set(all);
@@ -342,16 +341,64 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
         }
 
         Long before = beforeKey != null ? Long.parseLong(beforeKey) : null;
+        ArrayList<Comment> comments = new ArrayList<>();
+        LocalPage page = loadLocalPage(before, comments);
+        // Page by DB rows so removed/un-hydratable items don't stop pagination early.
+        String nextKey = page.rows < 25 ? null : Long.toString(page.lastItem);
+        return new LocalSavedResult(comments, nextKey);
+    }
+
+    /**
+     * One page of the local list, rows older than {@code before}, hydrated into {@code out}.
+     *
+     * <p>Logged in, that is the promoted local_saved rows. Logged out it is the comments saved on
+     * this device, since there is no account on Reddit to have saved them to, fetched through
+     * {@link AnonymousCommentLookup} because anonymous /api/info is refused on some clients.
+     */
+    @WorkerThread
+    private LocalPage loadLocalPage(@Nullable Long before, List<Comment> out) throws Exception {
+        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            List<AnonymousSavedComment> saved =
+                    redditDataRoomDatabase.anonymousSavedCommentDao().getPage(accountName, before);
+            if (saved.isEmpty()) {
+                return new LocalPage(0, 0);
+            }
+            Response<String> response = AnonymousCommentLookup.forApi(retrofit.create(RedditAPIKt.class))
+                    .loadBlocking(saved);
+            String body = response.body();
+            if (!response.isSuccessful() || body == null) {
+                throw new java.io.IOException("Response failed");
+            }
+            parseHydratedComments(body, out);
+            return new LocalPage(saved.size(), saved.get(saved.size() - 1).getTime());
+        }
+
         List<LocalSavedThing> promoted =
                 redditDataRoomDatabase.localSavedThingDao().getPromotedCommentsSync(accountName, before);
         if (promoted.isEmpty()) {
-            return new LocalSavedResult(new ArrayList<>(), null);
+            return new LocalPage(0, 0);
         }
-        ArrayList<Comment> comments = new ArrayList<>();
-        long lastItem = hydrateLocalComments(promoted, comments);
-        // Page by DB rows so removed/un-hydratable items don't stop pagination early.
-        String nextKey = promoted.size() < 25 ? null : Long.toString(lastItem);
-        return new LocalSavedResult(comments, nextKey);
+        return new LocalPage(promoted.size(), hydrateLocalComments(promoted, out));
+    }
+
+    private static class LocalPage {
+        /** How many rows the page held, hydrated or not. */
+        final int rows;
+        /** The time of the page's last row, which the next page continues below. */
+        final long lastItem;
+
+        LocalPage(int rows, long lastItem) {
+            this.rows = rows;
+            this.lastItem = lastItem;
+        }
+    }
+
+    /** Marks a page of a user's comments with what the anonymous account has saved on the device. */
+    @WorkerThread
+    private void markAnonymousSaves(List<Comment> comments) {
+        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            AnonymousSavedComments.markSaved(redditDataRoomDatabase, accountName, comments);
+        }
     }
 
     /**
@@ -370,11 +417,19 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
 
         Response<String> response = retrofit.create(RedditAPI.class)
                 .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken)).execute();
-        if (!response.isSuccessful() || response.body() == null) {
+        String body = response.body();
+        if (!response.isSuccessful() || body == null) {
             throw new java.io.IOException("Response failed");
         }
 
-        JSONObject data = new JSONObject(response.body()).getJSONObject(JSONUtils.DATA_KEY);
+        parseHydratedComments(body, out);
+        return lastItem;
+    }
+
+    /** Appends the comments in an /api/info-shaped listing to {@code out}, all of them saved. */
+    @WorkerThread
+    private static void parseHydratedComments(String body, List<Comment> out) throws JSONException {
+        JSONObject data = new JSONObject(body).getJSONObject(JSONUtils.DATA_KEY);
         JSONArray children = data.getJSONArray(JSONUtils.CHILDREN_KEY);
         for (int i = 0; i < children.length(); i++) {
             try {
@@ -386,7 +441,6 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
                 Log.e("CommentDataSource", "hydrateLocalComments failed", e);
             }
         }
-        return lastItem;
     }
 
     /**

@@ -13,18 +13,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 import ml.docilealligator.infinityforreddit.Constants;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.RedditError;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
-import ml.docilealligator.infinityforreddit.readpost.ReadPost;
-import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsListInterface;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
@@ -669,28 +665,7 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private void setMetadataToAnonymousPosts(LinkedHashSet<Post> posts) {
-        List<ReadPost> readPostsInDatabase = redditDataRoomDatabase.readPostDao().getAllReadPostsForMetadata(
-                accountName, posts.stream().map(Post::getId).collect(Collectors.toList()));
-        Map<String, Post> existingPostsMap = posts.stream().collect(Collectors.toMap(Post::getId, post -> post));
-        for (ReadPost r : readPostsInDatabase) {
-            Post existingPost = existingPostsMap.get(r.getId());
-            if (existingPost != null) {
-                switch (r.getReadPostType()) {
-                    case ReadPostType.ANONYMOUS_UPVOTED_POSTS:
-                        existingPost.setVoteType(1);
-                        break;
-                    case ReadPostType.ANONYMOUS_DOWNVOTED_POSTS:
-                        existingPost.setVoteType(-1);
-                        break;
-                    case ReadPostType.ANONYMOUS_HIDDEN_POSTS:
-                        existingPost.setHidden(true);
-                        break;
-                    case ReadPostType.ANONYMOUS_SAVED_POSTS:
-                        existingPost.setSaved(true);
-                        break;
-                }
-            }
-        }
+        AnonymousPostState.apply(redditDataRoomDatabase.readPostDao(), accountName, posts);
     }
 
     private ListenableFuture<LoadResult<String, Post>> loadHomePosts(@NonNull LoadParams<String> loadParams, RedditAPI api) {

@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.ActivityToolbarInterface;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.adapters.CommentsListingRecyclerViewAdapter;
+import ml.docilealligator.infinityforreddit.comment.AnonymousSavedComments;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.comment.CommentViewModel;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
@@ -762,6 +763,17 @@ public class CommentsListingFragment extends Fragment implements FragmentCommuni
     }
 
     public void toggleSaveComment(Comment comment, int position) {
+        if (mActivity.accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+            // Logged out there is no account to save to, so the save is kept on the device and
+            // nothing is sent.
+            boolean saved = AnonymousSavedComments.toggle(mRedditDataRoomDatabase, mActivity.accountName, comment);
+            Toast.makeText(mActivity, saved ? R.string.comment_saved_success
+                    : R.string.comment_unsaved_success, Toast.LENGTH_SHORT).show();
+            if (mAdapter != null) {
+                mAdapter.toggleSaveComment(comment, position);
+            }
+            return;
+        }
         if (comment.isSaved()) {
             SaveThing.unsaveThing(mOauthRetrofit, mActivity.accessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
                 @Override

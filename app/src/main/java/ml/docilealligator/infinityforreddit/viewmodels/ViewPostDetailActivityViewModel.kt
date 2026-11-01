@@ -14,6 +14,7 @@ import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.comment.Comment
 import ml.docilealligator.infinityforreddit.post.AnonymousPostLookup
+import ml.docilealligator.infinityforreddit.post.AnonymousPostState
 import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
@@ -215,7 +216,7 @@ class ViewPostDetailActivityViewModel(
 
                         val cursorBeforePage = lastListingCursor
                         val addedPosts =
-                            finalizePosts(response, postFilter, mediaOnly, readPostsList, changePage)
+                            finalizePosts(response, accountName, postFilter, mediaOnly, readPostsList, changePage)
                         barrenPages++
                         // Stop on anything gained, on the end of the listing, on a cursor that did
                         // not move (asking again would re-read the same page), and on the cap. The
@@ -263,7 +264,7 @@ class ViewPostDetailActivityViewModel(
                     }
 
                     if (response.isSuccessful) {
-                        finalizePosts(response, postFilter, mediaOnly, readPostsList, changePage)
+                        finalizePosts(response, accountName, postFilter, mediaOnly, readPostsList, changePage)
                     } else {
                         _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.FAILED)
                     }
@@ -330,13 +331,19 @@ class ViewPostDetailActivityViewModel(
     /** Returns whether this page actually added anything to the swipe list. */
     private suspend fun finalizePosts(
         response: Response<String>,
+        accountName: String,
         postFilter: PostFilter?,
         mediaOnly: Boolean,
         readPostsList: ReadPostsListInterface?,
         changePage: Boolean
     ): Boolean {
         val newPosts = withContext(Dispatchers.Default) {
-            parsePostsSync(response.body(), postFilter, mediaOnly, readPostsList)
+            parsePostsSync(response.body(), postFilter, mediaOnly, readPostsList)?.also {
+                // As the feeds do, so a post swiped to shows the anonymous account's own save.
+                if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                    AnonymousPostState.apply(redditDataRoomDatabase.readPostDao(), accountName, it)
+                }
+            }
         }
         if (newPosts == null) {
             _loadMorePostsState.value = LoadMorePostsState(LoadingMorePostsStatus.NO_MORE_POSTS)

@@ -30,6 +30,7 @@ import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
+import ml.docilealligator.infinityforreddit.comment.AnonymousSavedComment;
 import ml.docilealligator.infinityforreddit.comment.CommentDraft;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
@@ -184,6 +185,10 @@ public class BackupSettings {
             String localSavedJson = new Gson().toJson(localSaved);
             boolean res25 = saveDatabaseTableToFile(localSavedJson, databaseDirFile.getAbsolutePath(), "/local_saved.json");
 
+            List<AnonymousSavedComment> anonymousSavedComments = redditDataRoomDatabase.anonymousSavedCommentDao().getAllForBackup();
+            String anonymousSavedCommentsJson = new Gson().toJson(anonymousSavedComments);
+            boolean res32 = saveDatabaseTableToFile(anonymousSavedCommentsJson, databaseDirFile.getAbsolutePath(), "/anonymous_saved_comments.json");
+
             List<CommentDraft> commentDrafts = redditDataRoomDatabase.commentDraftDao().getCommentDraftsForBackup();
             String commentDraftsJson = new Gson().toJson(commentDrafts);
             boolean res27 = saveDatabaseTableToFile(commentDraftsJson, databaseDirFile.getAbsolutePath(), "/comment_drafts.json");
@@ -216,7 +221,7 @@ public class BackupSettings {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
                         && res18 && res19 && res20 && res21 && res22 && res23 && res24 && res25 && res26
-                        && res27 && res28 && res29 && res30 && res31 && zipRes && resPrivate;
+                        && res27 && res28 && res29 && res30 && res31 && res32 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {

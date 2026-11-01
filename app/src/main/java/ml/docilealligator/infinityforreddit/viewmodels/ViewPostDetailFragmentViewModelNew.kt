@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.viewmodels
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.Nullable
+import androidx.annotation.WorkerThread
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -31,6 +32,7 @@ import ml.docilealligator.infinityforreddit.RedditError
 import ml.docilealligator.infinityforreddit.SingleLiveEvent
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
+import ml.docilealligator.infinityforreddit.comment.AnonymousSavedComments
 import ml.docilealligator.infinityforreddit.comment.Comment
 import ml.docilealligator.infinityforreddit.comment.FetchRemovedComment
 import ml.docilealligator.infinityforreddit.comment.MoreCommentsLoader
@@ -40,6 +42,7 @@ import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage
 import ml.docilealligator.infinityforreddit.moderation.CommentModerationEvent
 import ml.docilealligator.infinityforreddit.moderation.PostModerationEvent
+import ml.docilealligator.infinityforreddit.post.AnonymousPostState
 import ml.docilealligator.infinityforreddit.post.FetchRemovedPost
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
@@ -1180,7 +1183,7 @@ class ViewPostDetailFragmentViewModelNew(
 
                             if (response.isSuccessful) {
                                 val parsed = withContext(Dispatchers.Default) {
-                                    response.body()?.let { ParsePost.parsePostSync(it) }
+                                    response.body()?.let { ParsePost.parsePostSync(it) }?.let { withAnonymousState(it) }
                                 }
                                 parsed?.let { parsed ->
                                     val post = recoverRefreshedPost(parsed) ?: _dataState.value.post ?: parsed
@@ -1263,6 +1266,7 @@ class ViewPostDetailFragmentViewModelNew(
                     newComments
                 }
 
+                markAnonymousSavedComments(newComments)
                 preRecoverComments(newComments)
 
                 AppResult.Success(ParseCommentsResult(
@@ -1322,6 +1326,7 @@ class ViewPostDetailFragmentViewModelNew(
                 page.topLevelComments
             }
 
+            markAnonymousSavedComments(page.topLevelComments)
             preRecoverComments(page.topLevelComments)
 
             ParseCommentsResult(commentData, page.topLevelComments, page.remainingIds, page.remainingCount)
@@ -1425,6 +1430,7 @@ class ViewPostDetailFragmentViewModelNew(
                     newComments
                 }
 
+                markAnonymousSavedComments(newComments)
                 preRecoverComments(newComments)
 
                 AppResult.Success(
@@ -1447,8 +1453,25 @@ class ViewPostDetailFragmentViewModelNew(
                 null
             } else {
                 val data = allData.getJSONObject(0).getJSONObject(JSONUtils.DATA_KEY)
-                ParsePost.parseBasicData(data)
+                withAnonymousState(ParsePost.parseBasicData(data))
             }
+        }
+    }
+
+    /** [post] with the anonymous account's own votes, hides and saves on it: see [AnonymousPostState]. */
+    @WorkerThread
+    private fun withAnonymousState(post: Post): Post {
+        if (accountName == Account.ANONYMOUS_ACCOUNT) {
+            AnonymousPostState.apply(redditDataRoomDatabase.readPostDao(), accountName, listOf(post))
+        }
+        return post
+    }
+
+    /** Marks the comments saved on this device, which Reddit reports unsaved to an anonymous request. */
+    @WorkerThread
+    private fun markAnonymousSavedComments(comments: List<Comment>) {
+        if (accountName == Account.ANONYMOUS_ACCOUNT) {
+            AnonymousSavedComments.markSaved(redditDataRoomDatabase, accountName, comments)
         }
     }
 
@@ -1999,78 +2022,68 @@ class ViewPostDetailFragmentViewModelNew(
 
     fun toggleSaveComment(comment: Comment, position: Int) {
         viewModelScope.launch {
-            _dataState.value.comments?.let {
-                if (accessToken != null) {
-                    val updatedComments = ArrayList(it)
+            val comments = _dataState.value.comments ?: return@launch
+            // The thread can have moved since the menu opened, so the comment is looked up by
+            // name rather than taken to be at the position it was asked about at.
+            val index = if (comments.getOrNull(position)?.id == comment.id) {
+                position
+            } else {
+                findCommentPosition(comment.fullName, position)
+            }
+            val oldComment = comments.getOrNull(index) ?: return@launch
+            val updatedComment = Comment(oldComment)
 
-                    var oldComment: Comment? = it.getOrNull(position)
-                    if (!oldComment?.id.equals(comment.id)) {
-                        val currentPosition = findCommentPosition(comment.fullName, position)
-                        if (currentPosition >= 0 && currentPosition < it.size) {
-                            oldComment = it[currentPosition]
-                        }
+            if (Account.ANONYMOUS_ACCOUNT == accountName) {
+                // Logged out there is no account to save to, so the save is kept on the device and
+                // nothing is sent.
+                val saved = AnonymousSavedComments.toggle(redditDataRoomDatabase, accountName, updatedComment)
+                replaceComment(updatedComment, index)
+                commentModerationEventLiveData.postValue(
+                    if (saved) {
+                        CommentModerationEvent.Saved(oldComment, index)
+                    } else {
+                        CommentModerationEvent.Unsaved(oldComment, index)
                     }
+                )
+                return@launch
+            }
 
-                    oldComment?.let {
-                        if (oldComment.isSaved) {
-                            if (unsaveThing(
-                                    oauthRetrofit, accessToken, oldComment.fullName
-                                )) {
-                                val updatedComment = Comment(oldComment)
-                                updatedComment.isSaved = !oldComment.isSaved
-
-                                updatedComments[position] = updatedComment
-
-                                _dataState.value = _dataState.value.copy(
-                                    comments = updatedComments
-                                )
-
-                                commentModerationEventLiveData.postValue(
-                                    CommentModerationEvent.Unsaved(
-                                        oldComment,
-                                        position
-                                    )
-                                )
-                            } else {
-                                commentModerationEventLiveData.postValue(
-                                    CommentModerationEvent.UnsaveFailed(
-                                        oldComment,
-                                        position
-                                    )
-                                )
-                            }
-                        } else {
-                            if (saveThing(
-                                    oauthRetrofit, accessToken, oldComment.fullName
-                                )) {
-                                val updatedComment = Comment(oldComment)
-                                updatedComment.isSaved = !oldComment.isSaved
-
-                                updatedComments[position] = updatedComment
-
-                                _dataState.value = _dataState.value.copy(
-                                    comments = updatedComments
-                                )
-
-                                commentModerationEventLiveData.postValue(
-                                    CommentModerationEvent.Saved(
-                                        oldComment,
-                                        position
-                                    )
-                                )
-                            } else {
-                                commentModerationEventLiveData.postValue(
-                                    CommentModerationEvent.SaveFailed(
-                                        oldComment,
-                                        position
-                                    )
-                                )
-                            }
-                        }
-                    }
+            val token = accessToken ?: return@launch
+            if (oldComment.isSaved) {
+                if (unsaveThing(oauthRetrofit, token, oldComment.fullName)) {
+                    updatedComment.isSaved = false
+                    replaceComment(updatedComment, index)
+                    commentModerationEventLiveData.postValue(CommentModerationEvent.Unsaved(oldComment, index))
+                } else {
+                    commentModerationEventLiveData.postValue(CommentModerationEvent.UnsaveFailed(oldComment, index))
+                }
+            } else {
+                if (saveThing(oauthRetrofit, token, oldComment.fullName)) {
+                    updatedComment.isSaved = true
+                    replaceComment(updatedComment, index)
+                    commentModerationEventLiveData.postValue(CommentModerationEvent.Saved(oldComment, index))
+                } else {
+                    commentModerationEventLiveData.postValue(CommentModerationEvent.SaveFailed(oldComment, index))
                 }
             }
         }
+    }
+
+    /**
+     * Puts [comment] in place of the one with its name, in the thread as it is now rather than as it
+     * was before a request: it can have been reloaded or expanded in the meantime.
+     */
+    private fun replaceComment(comment: Comment, positionHint: Int) {
+        val comments = _dataState.value.comments ?: return
+        val index = findCommentPosition(comment.fullName, positionHint)
+        if (index < 0) {
+            return
+        }
+        val updatedComments = ArrayList(comments)
+        updatedComments[index] = comment
+        _dataState.value = _dataState.value.copy(
+            comments = updatedComments
+        )
     }
 
     fun editComment(comment: Comment, position: Int) {

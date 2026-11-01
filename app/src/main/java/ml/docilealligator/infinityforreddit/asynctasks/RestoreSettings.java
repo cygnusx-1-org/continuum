@@ -37,6 +37,7 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountSettingsMigration;
 import ml.docilealligator.infinityforreddit.account.AnonymousAccountRename;
+import ml.docilealligator.infinityforreddit.comment.AnonymousSavedComment;
 import ml.docilealligator.infinityforreddit.comment.CommentDraft;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilterUsage;
@@ -326,6 +327,7 @@ public class RestoreSettings {
         File accountsFile = new File(databaseDir.getAbsolutePath() + "/accounts.json");
         File readPostsFile = new File(databaseDir.getAbsolutePath() + "/read_posts.json");
         File localSavedFile = new File(databaseDir.getAbsolutePath() + "/local_saved.json");
+        File anonymousSavedCommentsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_saved_comments.json");
         File commentDraftsFile = new File(databaseDir.getAbsolutePath() + "/comment_drafts.json");
         File remindersFile = new File(databaseDir.getAbsolutePath() + "/reminders.json");
         File recentlyVisitedFile = new File(databaseDir.getAbsolutePath() + "/recently_visited.json");
@@ -478,6 +480,16 @@ public class RestoreSettings {
                     LocalSavedThing::getUsername, accountsInDatabase, "local_saved");
             if (!localSaved.isEmpty()) {
                 redditDataRoomDatabase.localSavedThingDao().insertAll(localSaved);
+            }
+        }
+
+        // Restore anonymous_saved_comments after accounts so the FK on username is satisfied.
+        if (anonymousSavedCommentsFile.exists()) {
+            List<AnonymousSavedComment> anonymousSavedComments = onAccountsInDatabase(
+                    getListFromFile(anonymousSavedCommentsFile, new TypeToken<List<AnonymousSavedComment>>() {}.getType()),
+                    AnonymousSavedComment::getUsername, accountsInDatabase, "anonymous_saved_comments");
+            if (!anonymousSavedComments.isEmpty()) {
+                redditDataRoomDatabase.anonymousSavedCommentDao().insertAll(anonymousSavedComments);
             }
         }
 

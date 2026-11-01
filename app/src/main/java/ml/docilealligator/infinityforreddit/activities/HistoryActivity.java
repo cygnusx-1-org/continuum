@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
+import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,6 +38,7 @@ import ml.docilealligator.infinityforreddit.fragments.PostFragment;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.Restorable;
+import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
@@ -46,6 +48,8 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
         PostLayoutBottomSheetFragment.PostLayoutSelectionCallback, Restorable {
 
     public static final String EXTRA_READ_POST_TYPE = "EHT";
+
+    private static final String STATE_RESUME_TAB = "RTB";
 
     @Inject
     @Named("default")
@@ -63,6 +67,8 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
     private final FeedResumeState resumeFeed = new FeedResumeState();
     @ReadPostType
     private int readPostType;
+    // The tab to open on, from a resume record; read before the pager is built.
+    private int resumeTab = -1;
     private FragmentManager fragmentManager;
     private SectionsPagerAdapter sectionsPagerAdapter;
     private ActivityHistoryBinding binding;
@@ -187,19 +193,34 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
         applyTabLayoutTheme(binding.tabLayoutTabLayoutHistoryActivityActivity);
     }
 
+    /**
+     * Whether this is the anonymous Saved screen, the one list here with a second tab: comments
+     * saved while logged out, which are kept on the device like the posts.
+     */
+    private boolean hasCommentsTab() {
+        return readPostType == ReadPostType.ANONYMOUS_SAVED_POSTS;
+    }
+
     private void initializeViewPager() {
         sectionsPagerAdapter = new SectionsPagerAdapter(this);
-        binding.tabLayoutTabLayoutHistoryActivityActivity.setVisibility(View.GONE);
         binding.viewPagerHistoryActivity.setAdapter(sectionsPagerAdapter);
-        //viewPager2.setUserInputEnabled(!mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false));
-        binding.viewPagerHistoryActivity.setUserInputEnabled(false);
-        /*new TabLayoutMediator(tabLayout, viewPager2, (tab, position) -> {
-            switch (position) {
-                case 0:
-                    Utils.setTitleWithCustomFontToTab(typeface, tab, getString(R.string.posts));
-                    break;
-            }
-        }).attach();*/
+        if (hasCommentsTab()) {
+            binding.tabLayoutTabLayoutHistoryActivityActivity.setVisibility(View.VISIBLE);
+            binding.viewPagerHistoryActivity.setUserInputEnabled(!mSharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_SWIPING_BETWEEN_TABS, false));
+            new TabLayoutMediator(binding.tabLayoutTabLayoutHistoryActivityActivity, binding.viewPagerHistoryActivity, (tab, position) -> {
+                switch (position) {
+                    case 0:
+                        Utils.setTitleWithCustomFontToTab(typeface, tab, getString(R.string.posts));
+                        break;
+                    case 1:
+                        Utils.setTitleWithCustomFontToTab(typeface, tab, getString(R.string.comments));
+                        break;
+                }
+            }).attach();
+        } else {
+            binding.tabLayoutTabLayoutHistoryActivityActivity.setVisibility(View.GONE);
+            binding.viewPagerHistoryActivity.setUserInputEnabled(false);
+        }
 
         binding.viewPagerHistoryActivity.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -209,10 +230,20 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
                 } else {
                     lockSwipeRightToGoBack();
                 }
+                // Paging between this screen's own tabs moves no activity, so nothing else
+                // writes the new one down until the next transition. A single-tab list has no
+                // tab to note, and the capture is a synchronous write on the main thread.
+                if (hasCommentsTab()) {
+                    ResumeState.noteStateChanged(HistoryActivity.this);
+                }
             }
         });
 
         fixViewPager2Sensitivity(binding.viewPagerHistoryActivity);
+
+        if (resumeTab > 0 && resumeTab < sectionsPagerAdapter.getItemCount()) {
+            binding.viewPagerHistoryActivity.setCurrentItem(resumeTab, false);
+        }
     }
 
     @Override
@@ -286,15 +317,28 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
 
     @Override
     public void saveResumeState(@NonNull Bundle out) {
-        Fragment fragment = fragmentManager == null ? null : fragmentManager.findFragmentByTag("f0");
-        if (fragment instanceof HistoryPostFragment
-                && ((HistoryPostFragment) fragment).captureResumeState(out)) {
-            saveResumeAppBarOffset(out);
+        if (fragmentManager == null) {
+            return;
         }
+        int tab = binding.viewPagerHistoryActivity.getCurrentItem();
+        Fragment fragment = fragmentManager.findFragmentByTag("f" + tab);
+        // The comments tab has no record of where it was, so a resume onto it restores the tab
+        // alone. Nothing is written when the posts tab is showing but cannot describe itself,
+        // rather than overwriting a good record with one that says nothing.
+        if (fragment instanceof HistoryPostFragment) {
+            if (!((HistoryPostFragment) fragment).captureResumeState(out)) {
+                return;
+            }
+        } else if (!(fragment instanceof CommentsListingFragment)) {
+            return;
+        }
+        out.putInt(STATE_RESUME_TAB, tab);
+        saveResumeAppBarOffset(out);
     }
 
     @Override
     public void restoreResumeState(@NonNull Bundle state) {
+        resumeTab = state.getInt(STATE_RESUME_TAB, -1);
         resumeFeed.read(state);
         restoreResumeAppBarOffset(state, binding.appbarLayoutHistoryActivity,
                 binding.viewPagerHistoryActivity);
@@ -309,6 +353,16 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
         @NonNull
         @Override
         public Fragment createFragment(int position) {
+            if (position == 1) {
+                // The comments the anonymous account saved, which CommentDataSource reads from the
+                // device when the local-saved list is asked for while logged out.
+                CommentsListingFragment fragment = new CommentsListingFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString(CommentsListingFragment.EXTRA_USERNAME, accountName);
+                bundle.putBoolean(CommentsListingFragment.EXTRA_ARE_LOCAL_SAVED_COMMENTS, true);
+                fragment.setArguments(bundle);
+                return fragment;
+            }
             HistoryPostFragment fragment = new HistoryPostFragment();
             Bundle bundle = new Bundle();
             bundle.putInt(HistoryPostFragment.EXTRA_READ_POST_TYPE, readPostType);
@@ -371,7 +425,7 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
 
         @Override
         public int getItemCount() {
-            return 1;
+            return hasCommentsTab() ? 2 : 1;
         }
     }
 }

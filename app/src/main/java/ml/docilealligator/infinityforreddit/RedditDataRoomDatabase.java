@@ -11,11 +11,15 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
+import java.util.ArrayList;
+import java.util.List;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountDao;
 import ml.docilealligator.infinityforreddit.account.AccountDaoKt;
 import ml.docilealligator.infinityforreddit.apimonitor.ApiCallRecord;
 import ml.docilealligator.infinityforreddit.apimonitor.ApiCallRecordDao;
+import ml.docilealligator.infinityforreddit.comment.AnonymousSavedComment;
+import ml.docilealligator.infinityforreddit.comment.AnonymousSavedCommentDao;
 import ml.docilealligator.infinityforreddit.comment.CommentDraft;
 import ml.docilealligator.infinityforreddit.comment.CommentDraftDao;
 import ml.docilealligator.infinityforreddit.commentfilter.CommentFilter;
@@ -63,7 +67,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
         LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class,
-        Reminder.class}, version = 43, exportSchema = false)
+        Reminder.class, AnonymousSavedComment.class}, version = 44, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -82,7 +86,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
                         MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40,
-                        MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43)
+                        MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43, MIGRATION_43_44)
                 .addCallback(ANONYMOUS_ACCOUNT_ROW)
                 .build();
     }
@@ -177,6 +181,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
     public abstract RecentlyVisitedDao recentlyVisitedDao();
 
     public abstract ReminderDao reminderDao();
+
+    public abstract AnonymousSavedCommentDao anonymousSavedCommentDao();
 
     /**
      * Gives every filter an owner.
@@ -334,10 +340,26 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
         }
     };
 
+    /** Comments saved while logged out: see {@link AnonymousSavedComment}. */
+    private static final Migration MIGRATION_43_44 = new Migration(43, 44) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `anonymous_saved_comments` "
+                    + "(`username` TEXT NOT NULL, `id` TEXT NOT NULL, `link_id` TEXT NOT NULL, "
+                    + "`time` INTEGER NOT NULL, "
+                    + "PRIMARY KEY(`username`, `id`), "
+                    + "FOREIGN KEY(`username`) REFERENCES `accounts`(`username`) "
+                    + "ON UPDATE NO ACTION ON DELETE CASCADE)");
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_anonymous_saved_comments_username` "
+                    + "ON `anonymous_saved_comments` (`username`)");
+        }
+    };
+
     /** Every table with a {@code username} column that means "which account". */
     @VisibleForTesting
     static final String[] ACCOUNT_NAME_TABLES = {
             "anonymous_multireddit_subreddits",
+            "anonymous_saved_comments",
             "comment_filter",
             "comment_filter_usage",
             "local_saved",
@@ -390,18 +412,23 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
      *
      * <p>{@code custom_themes} is deliberately absent: its {@code username} column is an
      * {@code int} holding a theme colour, not an account name.
+     *
+     * <p>Only the tables the database has are touched. {@link #MIGRATION_41_42} runs on a database
+     * that predates every table added after it, {@code anonymous_saved_comments} among them, and
+     * those are created by migrations that have not run yet.
      */
     public static void renameAnonymousAccount(@NonNull SupportSQLiteDatabase database) {
         database.beginTransaction();
         try {
+            List<String> tables = existingTables(database, ACCOUNT_NAME_TABLES);
             database.execSQL("PRAGMA defer_foreign_keys = ON");
             database.execSQL("UPDATE OR IGNORE accounts SET username = '.anonymous'"
                     + " WHERE username = '-'");
-            for (String table : ACCOUNT_NAME_TABLES) {
+            for (String table : tables) {
                 database.execSQL("UPDATE OR IGNORE " + table
                         + " SET username = '.anonymous' WHERE username = '-'");
             }
-            for (String table : ACCOUNT_NAME_TABLES) {
+            for (String table : tables) {
                 database.execSQL("DELETE FROM " + table + " WHERE username = '-'");
             }
             database.execSQL("DELETE FROM accounts WHERE username = '-'");
@@ -412,6 +439,21 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
         } finally {
             database.endTransaction();
         }
+    }
+
+    private static List<String> existingTables(@NonNull SupportSQLiteDatabase database,
+                                               @NonNull String[] names) {
+        List<String> existing = new ArrayList<>();
+        for (String name : names) {
+            try (Cursor cursor = database.query(
+                    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+                    new Object[]{name})) {
+                if (cursor.moveToFirst()) {
+                    existing.add(name);
+                }
+            }
+        }
+        return existing;
     }
 
     private static final Migration MIGRATION_1_2 = new Migration(1, 2) {

@@ -139,6 +139,25 @@ class AnonymousAccountRenameTest {
     }
 
     /**
+     * MIGRATION_41_42 renames on a database from before every table added since, and those tables
+     * are created by migrations that run after it. A listed table that is not there yet is skipped,
+     * not a "no such table" that fails the upgrade.
+     */
+    @Test
+    fun `a table a later migration creates is skipped rather than failing the rename`() {
+        asDatabaseBeingMigrated()
+        db().execSQL("DROP TABLE anonymous_saved_comments")
+        account("-")
+        db().execSQL("INSERT INTO read_posts (username, id, read_post_type, time)"
+            + " VALUES ('-', 't3_1', 0, 1)")
+
+        RedditDataRoomDatabase.renameAnonymousAccount(db())
+
+        assertEquals(listOf(".anonymous"), usernamesIn("read_posts"))
+        assertEquals(listOf(".anonymous"), usernamesIn("accounts"))
+    }
+
+    /**
      * The restore path. The new row already exists here, so the parent cannot simply be renamed
      * onto it -- the children have to be moved across and the old parent dropped.
      */
@@ -297,7 +316,7 @@ class AnonymousAccountRenameTest {
         val upgraded = RedditDataRoomDatabase.create(context)
         try {
             val upgradedDb = upgraded.openHelper.writableDatabase
-            assertEquals(43, upgradedDb.version)
+            assertEquals(44, upgradedDb.version)
             for (table in RedditDataRoomDatabase.ACCOUNT_NAME_TABLES + "accounts") {
                 assertFalse("left under the old name in $table", "-" in usernamesIn(table, upgradedDb))
             }

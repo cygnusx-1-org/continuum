@@ -53,6 +53,7 @@ import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.activities.ViewVideoActivity;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.CommentMoreBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.bottomsheetfragments.UrlMenuBottomSheetFragment;
+import ml.docilealligator.infinityforreddit.comment.AnonymousSavedComments;
 import ml.docilealligator.infinityforreddit.comment.Comment;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.CommentIndentationView;
@@ -1597,6 +1598,16 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 Comment comment = getItem(getBindingAdapterPosition());
                 if (comment != null) {
                     int position = getBindingAdapterPosition();
+                    if (mAccountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                        // Logged out there is no account to save to, so the save is kept on the
+                        // device and nothing is sent.
+                        boolean saved = AnonymousSavedComments.toggle(mActivity, mAccountName, comment);
+                        saveButton.setIconResource(saved
+                                ? R.drawable.ic_bookmark_grey_24dp : R.drawable.ic_bookmark_border_grey_24dp);
+                        Toast.makeText(mActivity, saved ? R.string.comment_saved_success
+                                : R.string.comment_unsaved_success, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     if (comment.isSaved()) {
                         comment.setSaved(false);
                         SaveThing.unsaveThing(mOauthRetrofit, mAccessToken, comment.getFullName(), new SaveThing.SaveThingListener() {
