@@ -19,13 +19,13 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.RedditError;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.apis.RedditAPIKt;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.NullReadPostsList;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.HttpException;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -76,24 +76,26 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
 
     public LoadResult<String, Post> transformData(List<ReadPost> readPosts) {
         StringBuilder ids = new StringBuilder();
+        List<String> postIds = new ArrayList<>();
         long lastItem = 0;
         for (ReadPost readPost : readPosts) {
             ids.append("t3_").append(readPost.getId()).append(",");
+            postIds.add(readPost.getId());
             lastItem = readPost.getTime();
         }
         if (ids.length() > 0) {
             ids.deleteCharAt(ids.length() - 1);
         }
 
-        Call<String> historyPosts;
-        if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-            historyPosts = retrofit.create(RedditAPI.class).getInfo(ids.toString());
-        } else {
-            historyPosts = retrofit.create(RedditAPI.class).getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken));
-        }
-
         try {
-            Response<String> response = historyPosts.execute();
+            Response<String> response;
+            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
+                // Reddit refuses anonymous /api/info (issue #476), so the lookup falls back to
+                // fetching each post on its own.
+                response = AnonymousPostLookup.forApi(retrofit.create(RedditAPIKt.class)).loadBlocking(postIds);
+            } else {
+                response = retrofit.create(RedditAPI.class).getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken)).execute();
+            }
             if (response.isSuccessful()) {
                 String responseString = response.body();
                 LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, NullReadPostsList.getInstance());

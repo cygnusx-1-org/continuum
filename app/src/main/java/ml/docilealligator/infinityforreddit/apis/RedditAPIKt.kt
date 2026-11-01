@@ -53,6 +53,11 @@ interface RedditAPIKt {
     @GET("comments/{id}.json?raw_json=1")
     suspend fun getPost(@Path("id") id: String): Response<String>
 
+    // The post with as little of its comment tree as Reddit will send: one sampled post came to 61 KB
+    // this way against 365 KB in full.
+    @GET("comments/{id}.json?raw_json=1&limit=1")
+    suspend fun getPostWithMinimalComments(@Path("id") id: String): Response<String>
+
     @GET("/comments/{id}/placeholder/{singleCommentId}.json?raw_json=1")
     suspend fun getPostAndCommentsSingleThreadByIdOauth(
         @Path("id") id: String, @Path("singleCommentId") singleCommentId: String,

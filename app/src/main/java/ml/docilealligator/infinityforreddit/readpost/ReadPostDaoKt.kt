@@ -10,8 +10,10 @@ interface ReadPostDaoKt {
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insert(readPost: ReadPost)
 
-    @Query("SELECT * FROM read_posts WHERE id = :id AND read_post_type = 0 LIMIT 1")
-    suspend fun getReadPost(id: String?): ReadPost?
+    // Scoped to one account's list of one kind: the swipe paging cursor is the row's time in the
+    // list being paged, and a read-history row for the same post is a different, unrelated time.
+    @Query("SELECT * FROM read_posts WHERE username = :username AND id = :id AND read_post_type = :readPostType LIMIT 1")
+    suspend fun getReadPost(username: String, id: String, @ReadPostType readPostType: Int): ReadPost?
 
     @Query("SELECT * FROM read_posts WHERE username = :username AND (:before IS NULL OR time < :before) AND read_post_type = :readPostType ORDER BY time DESC LIMIT 25")
     suspend fun getAllReadPosts(

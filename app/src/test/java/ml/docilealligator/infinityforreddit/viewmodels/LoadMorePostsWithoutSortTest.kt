@@ -7,7 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.TestInfinity
 import ml.docilealligator.infinityforreddit.account.Account
+import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.post.PostType
+import ml.docilealligator.infinityforreddit.readpost.ReadPost
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader
 import ml.docilealligator.infinityforreddit.utils.APIUtils
@@ -87,6 +89,7 @@ class LoadMorePostsWithoutSortTest {
         assertEquals(0, plainRequests.size)
         val request = oauthRequests.single()
         assertEquals("/api/info.json", request.url.encodedPath)
+        assertEquals("t3_older", request.url.queryParameter("id"))
         assertNotNull(request.header(APIUtils.AUTHORIZATION_KEY))
     }
 
@@ -97,6 +100,7 @@ class LoadMorePostsWithoutSortTest {
         assertEquals(0, oauthRequests.size)
         val request = plainRequests.single()
         assertEquals("/api/info.json", request.url.encodedPath)
+        assertEquals("t3_older", request.url.queryParameter("id"))
         assertNull(request.header(APIUtils.AUTHORIZATION_KEY))
     }
 
@@ -114,6 +118,13 @@ class LoadMorePostsWithoutSortTest {
                 Executor { it.run() }, Handler(Looper.getMainLooper()), db, plain, oauth
             )
         )
+        // A page with nothing on it sends no request for the anonymous account (AnonymousPostLookup),
+        // so the list holds one post with an older one recorded behind it.
+        db.accountDao().insert(Account(accountName, null, null, null, null, null, 0, false, false))
+        for ((postId, time) in listOf("shown" to 2_000L, "older" to 1_000L)) {
+            db.readPostDao().insert(ReadPost(accountName, postId, ReadPostType.READ_POSTS).apply { setTime(time) })
+        }
+        viewModel.posts = arrayListOf(post("shown"))
 
         viewModel.fetchMorePosts(
             accessToken, accountName, false, PostType.READ_POSTS,
@@ -124,6 +135,13 @@ class LoadMorePostsWithoutSortTest {
         awaitMainUntil { plainRequests.isNotEmpty() || oauthRequests.isNotEmpty() }
         return plainRequests to oauthRequests
     }
+
+    private fun post(id: String) = Post(
+        id, "t3_$id", "test", "r/test", "author", "t2_author", "", "", 0L,
+        "a post", "/r/test/comments/$id/", 0, Post.TEXT_TYPE, 0, 0, 100, "",
+        false, false, false, false, false, false, false, false,
+        false, false, false, 0L, null, false, false, "", null
+    )
 
     private fun recordingRetrofit(requests: MutableList<Request>): Retrofit {
         val client = OkHttpClient.Builder()

@@ -13,6 +13,7 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.comment.Comment
+import ml.docilealligator.infinityforreddit.post.AnonymousPostLookup
 import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
@@ -236,7 +237,7 @@ class ViewPostDetailActivityViewModel(
                 val lastItem: Long = posts?.let {
                     if (!it.isEmpty()) {
                         redditDataRoomDatabase.readPostDaoKt()
-                            .getReadPost(it.lastOrNull()?.id ?: "")?.time
+                            .getReadPost(accountName, it.lastOrNull()?.id ?: "", readPostType)?.time
                     } else {
                         0
                     }
@@ -253,7 +254,9 @@ class ViewPostDetailActivityViewModel(
 
                 try {
                     val response = if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                        retrofit.create(RedditAPIKt::class.java).getInfo(ids.toString())
+                        // Reddit refuses anonymous /api/info (issue #476).
+                        AnonymousPostLookup.forApi(retrofit.create(RedditAPIKt::class.java))
+                            .load(readPosts.map { it.id })
                     } else {
                         oauthRetrofit.create(RedditAPIKt::class.java)
                             .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken))
