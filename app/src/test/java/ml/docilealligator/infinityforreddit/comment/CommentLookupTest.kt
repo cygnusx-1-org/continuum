@@ -2,7 +2,7 @@ package ml.docilealligator.infinityforreddit.comment
 
 import android.app.Application
 import kotlinx.coroutines.runBlocking
-import ml.docilealligator.infinityforreddit.account.Account
+import ml.docilealligator.infinityforreddit.thing.InfoUse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.json.JSONArray
@@ -17,31 +17,31 @@ import retrofit2.Response
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Pins [AnonymousCommentLookup] against what Reddit returns while anonymous `/api/info` is blocked
- * (issue #476): a 403 HTML page from `/api/info`, and from a focused thread the post in the first
- * listing and the comment as the only child of the second, without the post's title.
+ * Pins [CommentLookup] against what Reddit returns while `/api/info` is blocked (issue #476): a 403
+ * HTML page from `/api/info`, and from a focused thread the post in the first listing and the
+ * comment as the only child of the second, without the post's title.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], application = Application::class)
-class AnonymousCommentLookupTest {
+class CommentLookupTest {
     private val infoRequests = ArrayList<String>()
     private val commentRequests = ArrayList<Pair<String, String>>()
     private val infoBlocked = AtomicBoolean(false)
 
     private fun lookup(
         info: (String) -> Response<String> = { blocked() },
-        comment: (String, String) -> Response<String> = { postId, commentId -> ok(thread(postId, commentId)) }
-    ) = AnonymousCommentLookup(
+        comment: (String, String) -> Response<String> = { postId, commentId -> ok(thread(postId, commentId)) },
+        infoUse: InfoUse = InfoUse.First(infoBlocked)
+    ) = CommentLookup(
         { fullnames -> synchronized(infoRequests) { infoRequests.add(fullnames) }; info(fullnames) },
         { postId, commentId ->
             synchronized(commentRequests) { commentRequests.add(postId to commentId) }
             comment(postId, commentId)
         },
-        infoBlocked
+        infoUse
     )
 
-    private fun saved(commentId: String, postId: String = "p_$commentId") =
-        AnonymousSavedComment(Account.ANONYMOUS_ACCOUNT, commentId, postId, 0L)
+    private fun saved(commentId: String, postId: String? = "p_$commentId") = CommentLookup.Ref(commentId, postId)
 
     @Test
     fun aWorkingInfoResponseIsReturnedAsItIs() = runBlocking {
@@ -82,6 +82,53 @@ class AnonymousCommentLookupTest {
 
         assertTrue(response.isSuccessful)
         assertEquals(listOf("a", "b"), commentIds(response))
+    }
+
+    @Test
+    fun aCommentSavedWithoutItsPostIsAskedOfInfoWhileItAnswers() = runBlocking {
+        lookup(info = { ok("""{"kind":"Listing","data":{"children":[],"after":null}}""") })
+            .load(listOf(saved("old", postId = null)))
+
+        assertEquals(listOf("t1_old"), infoRequests)
+    }
+
+    @Test
+    fun aCommentSavedWithoutItsPostIsLeftOutOnceInfoRefuses() = runBlocking {
+        val response = lookup().load(listOf(saved("a"), saved("old", postId = null), saved("b")))
+
+        assertTrue(response.isSuccessful)
+        assertEquals(listOf("a", "b"), commentIds(response))
+        assertEquals(setOf("a", "b"), commentRequests.map { it.second }.toSet())
+    }
+
+    @Test
+    fun onlyCommentsSavedWithoutTheirPostMakeAnEmptyListingRatherThanAnError() = runBlocking {
+        val response = lookup().load(listOf(saved("old", postId = null)))
+
+        assertTrue(response.isSuccessful)
+        assertEquals(emptyList<String>(), commentIds(response))
+        assertTrue(commentRequests.isEmpty())
+    }
+
+    @Test
+    fun withoutTheOldWayInfoIsNeverAskedAndACommentWithoutItsPostIsLeftOut() = runBlocking {
+        val response = lookup(info = { throw AssertionError("asked /api/info") }, infoUse = InfoUse.Never)
+            .load(listOf(saved("a"), saved("old", postId = null)))
+
+        assertTrue(response.isSuccessful)
+        assertEquals(listOf("a"), commentIds(response))
+        assertTrue(infoRequests.isEmpty())
+    }
+
+    @Test
+    fun theOldWayFindsACommentWithoutItsPostThroughInfo() = runBlocking {
+        val infoBody = """{"kind":"Listing","data":{"children":[],"after":null}}"""
+
+        val response = lookup(info = { ok(infoBody) }, infoUse = InfoUse.Only).load(listOf(saved("old", postId = null)))
+
+        assertEquals(infoBody, response.body())
+        assertEquals(listOf("t1_old"), infoRequests)
+        assertTrue(commentRequests.isEmpty())
     }
 
     @Test

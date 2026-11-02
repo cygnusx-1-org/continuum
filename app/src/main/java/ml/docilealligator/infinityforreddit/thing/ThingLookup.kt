@@ -15,26 +15,29 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Looks things up by fullname for the anonymous account's local lists, whose rows hold little more
- * than an id: posts through `AnonymousPostLookup`, comments through `AnonymousCommentLookup`.
+ * Looks things up by fullname for the lists whose rows hold little more than an id: posts through
+ * `PostLookup` (read history, Local Saved, and the anonymous account's saved and voted posts),
+ * comments through `CommentLookup`.
  *
- * `/api/info` does that in one request, but Reddit has answered it for anonymous requests with a 403
- * "blocked by network security" page since around 2026-10-29 (issue #476), the same block as
- * `/api/morechildren` in #475. A thing's own `/comments/...` listing still answers, so after a 403
- * each thing is fetched from there, and the results are put together into a listing shaped like the
- * one `/api/info` returns, which the callers parse as before. Once `/api/info` has refused, it is not
- * asked again for the rest of the process: every attempt costs a 403, a token refresh and a second
- * 403 in `AnonymousAccessTokenInterceptor`.
+ * `/api/info` does that in one request, but Reddit has answered it with a 403 "blocked by network
+ * security" page since around 2026-10-29 (issue #476), the same block as `/api/morechildren` in
+ * #475. The block follows the client ID, so it refuses logged-in and anonymous requests alike, and
+ * every form of the endpoint: `id=`, `sr_name=`, `url=`, `/r/<sub>/api/info` and `/by_id`. A thing's
+ * own `/comments/...` listing still answers, so each thing can be fetched from there instead, and the
+ * results are put together into a listing shaped like the one `/api/info` returns, which the callers
+ * parse as before. Which of the two is used is [infoUse]'s to say.
  *
+ * @param infoUse whether `/api/info` is asked first, alone, or not at all
  * @param fullname the name `/api/info` is asked for, `t3_` or `t1_` included
- * @param fetchOne the thing's own listing, for when `/api/info` has refused
+ * @param fetchOne the thing's own listing, for when `/api/info` has refused, or null when the thing
+ *   cannot be fetched on its own; it is then left out, as one that is gone would be
  * @param childOf the thing's listing child in a [fetchOne] response, or null when it is not there
  */
-internal class AnonymousThingLookup<T>(
+internal class ThingLookup<T>(
     private val fetchInfo: suspend (fullnames: String) -> Response<String>,
-    private val infoBlocked: AtomicBoolean,
+    private val infoUse: InfoUse,
     private val fullname: (T) -> String,
-    private val fetchOne: suspend (T) -> Response<String>,
+    private val fetchOne: suspend (T) -> Response<String>?,
     private val childOf: (body: String) -> JSONObject?
 ) {
     /**
@@ -45,14 +48,20 @@ internal class AnonymousThingLookup<T>(
         if (things.isEmpty()) {
             return Response.success(listing(JSONArray()))
         }
-        if (!infoBlocked.get()) {
-            val response = fetchInfo(things.joinToString(",", transform = fullname))
-            if (response.code() != 403) {
-                return response
+        return when (infoUse) {
+            InfoUse.Only -> fetchInfo(things.joinToString(",", transform = fullname))
+            InfoUse.Never -> loadIndividually(things)
+            is InfoUse.First -> {
+                if (!infoUse.blocked.get()) {
+                    val response = fetchInfo(things.joinToString(",", transform = fullname))
+                    if (response.code() != 403) {
+                        return response
+                    }
+                    infoUse.blocked.set(true)
+                }
+                loadIndividually(things)
             }
-            infoBlocked.set(true)
         }
-        return loadIndividually(things)
     }
 
     private suspend fun loadIndividually(things: List<T>): Response<String> = coroutineScope {
@@ -66,7 +75,7 @@ internal class AnonymousThingLookup<T>(
                     if (transientFailure.get() != null) {
                         null
                     } else {
-                        fetchOne(thing).also {
+                        fetchOne(thing)?.also {
                             if (it.code() == 429 || it.code() >= 500) {
                                 transientFailure.compareAndSet(null, it)
                             }
@@ -117,8 +126,11 @@ internal class AnonymousThingLookup<T>(
         private const val MAX_CONCURRENT_REQUESTS = 4
 
         /**
-         * Whether `/api/info` has refused this process already. Shared by every lookup, posts and
-         * comments alike, since it is the one endpoint.
+         * Whether `/api/info` has refused the anonymous account in this process already, for
+         * [InfoUse.First]: every attempt costs a 403, a token refresh and a second 403 in
+         * `AnonymousAccessTokenInterceptor`. Shared by every anonymous lookup, posts and comments
+         * alike, and by the random subreddit pick, since it is the one endpoint and the one client
+         * ID, which only changes across a restart.
          */
         @JvmField
         val INFO_BLOCKED = AtomicBoolean(false)

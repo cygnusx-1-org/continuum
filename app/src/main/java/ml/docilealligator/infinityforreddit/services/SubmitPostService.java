@@ -39,6 +39,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.apis.RedditAPIKt;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.events.SubmitCrosspostEvent;
 import ml.docilealligator.infinityforreddit.events.SubmitGalleryPostEvent;
@@ -461,9 +462,9 @@ public class SubmitPostService extends JobService {
                     // needs to process the images first, or the post opens as text.
                     String postId = data.optString(JSONUtils.ID_KEY);
                     if (!postId.isEmpty()) {
-                        SubmittedPostMedia.awaitProcessed(newAuthenticatorOauthRetrofit.create(RedditAPI.class),
+                        SubmittedPostMedia.awaitProcessed(newAuthenticatorOauthRetrofit.create(RedditAPIKt.class),
                                 APIUtils.getOAuthHeader(selectedAccount.getAccessToken()),
-                                postId.startsWith("t3_") ? postId : "t3_" + postId);
+                                postId.startsWith("t3_") ? postId.substring(3) : postId);
                     }
                     handler.post(() -> {
                         EventBus.getDefault().post(new SubmitGalleryPostEvent(true, postUrl, null));

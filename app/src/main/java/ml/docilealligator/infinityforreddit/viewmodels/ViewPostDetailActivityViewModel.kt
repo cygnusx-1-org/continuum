@@ -13,11 +13,11 @@ import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
 import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
 import ml.docilealligator.infinityforreddit.comment.Comment
-import ml.docilealligator.infinityforreddit.post.AnonymousPostLookup
 import ml.docilealligator.infinityforreddit.post.AnonymousPostState
 import ml.docilealligator.infinityforreddit.post.LoadingMorePostsStatus
 import ml.docilealligator.infinityforreddit.post.ParsePost
 import ml.docilealligator.infinityforreddit.post.Post
+import ml.docilealligator.infinityforreddit.post.PostLookup
 import ml.docilealligator.infinityforreddit.post.PostType
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter
 import ml.docilealligator.infinityforreddit.readpost.ReadPost
@@ -245,23 +245,17 @@ class ViewPostDetailActivityViewModel(
                 } ?: 0
                 val readPosts: MutableList<ReadPost> = redditDataRoomDatabase.readPostDaoKt()
                     .getAllReadPosts(accountName, lastItem, readPostType)
-                val ids = StringBuilder()
-                for (readPost in readPosts) {
-                    ids.append("t3_").append(readPost.id).append(",")
-                }
-                if (ids.isNotEmpty()) {
-                    ids.deleteCharAt(ids.length - 1)
-                }
-
                 try {
-                    val response = if (accountName == Account.ANONYMOUS_ACCOUNT) {
-                        // Reddit refuses anonymous /api/info (issue #476).
-                        AnonymousPostLookup.forApi(retrofit.create(RedditAPIKt::class.java))
-                            .load(readPosts.map { it.id })
+                    // Reddit refuses /api/info for some client IDs (issue #476).
+                    val lookup = if (accountName == Account.ANONYMOUS_ACCOUNT) {
+                        PostLookup.forApi(retrofit.create(RedditAPIKt::class.java))
                     } else {
-                        oauthRetrofit.create(RedditAPIKt::class.java)
-                            .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken))
+                        PostLookup.forOauthApi(
+                            oauthRetrofit.create(RedditAPIKt::class.java), APIUtils.getOAuthHeader(accessToken),
+                            APIUtils.useOldApiInfo()
+                        )
                     }
+                    val response = lookup.load(readPosts.map { it.id })
 
                     if (response.isSuccessful) {
                         finalizePosts(response, accountName, postFilter, mediaOnly, readPostsList, changePage)

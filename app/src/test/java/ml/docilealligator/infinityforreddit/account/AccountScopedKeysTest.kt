@@ -45,7 +45,8 @@ class AccountScopedKeysTest {
         for (key in listOf(SharedPreferencesUtils.APP_LOCK, SharedPreferencesUtils.SECURE_MODE,
             SharedPreferencesUtils.CLIENT_ID_PREF_KEY, SharedPreferencesUtils.IMAGE_DOWNLOAD_LOCATION,
             SharedPreferencesUtils.ENABLE_NOTIFICATION_KEY, SharedPreferencesUtils.ENABLE_FOLD_SUPPORT,
-            SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION)) {
+            SharedPreferencesUtils.POST_FEED_MAX_RESOLUTION, SharedPreferencesUtils.USE_OLD_API_INFO_PREF_KEY,
+            SharedPreferencesUtils.USE_LEGACY_MORE_CHILDREN)) {
             assertFalse(key, AccountScopedKeys.isScoped(AccountScopedKeys.DEFAULT_PREFERENCES, key))
         }
     }

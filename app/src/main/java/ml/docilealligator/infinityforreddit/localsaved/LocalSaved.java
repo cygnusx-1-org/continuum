@@ -47,10 +47,15 @@ public class LocalSaved {
         return ((Infinity) context.getApplicationContext()).mRedditDataRoomDatabase;
     }
 
-    /** Convenience overload for call sites (e.g. comment adapters) that lack an injected DB/Executor. */
+    /**
+     * Convenience overload for comment call sites, which lack an injected DB/Executor.
+     *
+     * @param linkId the id36 of the post the comment is on, without {@code t3_}: see
+     *               {@link LocalSavedThing#getLinkId()}
+     */
     public static void onSaved(Context context, Retrofit oauthRetrofit, @Nullable String accessToken,
-                               String accountName, String fullName) {
-        onSaved(getDatabase(context), LOCAL_EXECUTOR, oauthRetrofit, accessToken, accountName, fullName);
+                               String accountName, String fullName, @Nullable String linkId) {
+        onSaved(getDatabase(context), LOCAL_EXECUTOR, oauthRetrofit, accessToken, accountName, fullName, linkId);
     }
 
     /** Convenience overload for call sites that lack an injected DB/Executor. */
@@ -81,12 +86,24 @@ public class LocalSaved {
      */
     public static void onSaved(RedditDataRoomDatabase db, Executor executor, Retrofit oauthRetrofit,
                                @Nullable String accessToken, String accountName, String fullName) {
+        onSaved(db, executor, oauthRetrofit, accessToken, accountName, fullName, null);
+    }
+
+    /**
+     * {@link #onSaved(RedditDataRoomDatabase, Executor, Retrofit, String, String, String)} for a
+     * comment, which also records the post it is on.
+     */
+    public static void onSaved(RedditDataRoomDatabase db, Executor executor, Retrofit oauthRetrofit,
+                               @Nullable String accessToken, String accountName, String fullName,
+                               @Nullable String linkId) {
         if (!isEnabledForAccount(accountName) || fullName == null || fullName.isEmpty()) {
             return;
         }
         executor.execute(() -> {
-            db.localSavedThingDao().insert(new LocalSavedThing(accountName, fullName,
-                    LocalSavedState.PENDING, System.currentTimeMillis()));
+            LocalSavedThing thing = new LocalSavedThing(accountName, fullName,
+                    LocalSavedState.PENDING, System.currentTimeMillis());
+            thing.setLinkId(linkId == null || linkId.isEmpty() ? null : linkId);
+            db.localSavedThingDao().insert(thing);
             reconcile(db, oauthRetrofit, accessToken, accountName);
         });
     }

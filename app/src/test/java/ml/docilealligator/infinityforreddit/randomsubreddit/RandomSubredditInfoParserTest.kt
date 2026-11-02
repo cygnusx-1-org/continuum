@@ -10,10 +10,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * What survives one `/api/info?sr_name=` batch, which is the whole reason a random pick can be
- * trusted: the name lists are archive-derived and roughly one in six of the subreddits in the
- * source archive was already banned when it was checked, so the response -- not the file -- decides
- * where anyone is sent.
+ * What survives one `/api/info?sr_name=` batch, or one `/r/<name>/about` once that refuses, which is
+ * the whole reason a random pick can be trusted: the name lists are archive-derived and roughly one
+ * in six of the subreddits in the source archive was already banned when it was checked, so the
+ * response -- not the file -- decides where anyone is sent.
  *
  * Reddit says no in two different ways and only one of them is visible in the response, so the
  * absent-name case below is the one worth guarding: it looks like nothing at all.
@@ -119,6 +119,33 @@ class RandomSubredditInfoParserTest {
         assertEquals(emptyList<String>(), RandomSubredditInfoParser.parseLiveSubredditNames("", false))
         assertEquals(emptyList<String>(), RandomSubredditInfoParser.parseLiveSubredditNames("{\"error\": 404}", false))
         assertEquals(emptyList<String>(), RandomSubredditInfoParser.parseLiveSubredditNames(listing(), false))
+    }
+
+    @Test
+    fun anAboutPageIsHeldToTheSameRulesAsABatch() {
+        // What `/r/<name>/about` returns once `/api/info` refuses (issue #476): the same t5, alone.
+        val live = child("AskReddit", subscribers = "60039482", over18 = "false")
+        val nsfw = child("gonewild", subscribers = "5712035", over18 = "true")
+
+        assertEquals("AskReddit", RandomSubredditInfoParser.parseLiveSubredditName(live, requireOver18 = false))
+        assertEquals(null, RandomSubredditInfoParser.parseLiveSubredditName(live, requireOver18 = true))
+        assertEquals("gonewild", RandomSubredditInfoParser.parseLiveSubredditName(nsfw, requireOver18 = true))
+        assertEquals(null, RandomSubredditInfoParser.parseLiveSubredditName(nsfw, requireOver18 = false))
+        assertEquals(
+            null,
+            RandomSubredditInfoParser.parseLiveSubredditName(
+                child("random", subscribers = "null", over18 = "null"), requireOver18 = false
+            )
+        )
+    }
+
+    @Test
+    fun anAboutPageThatIsNotASubredditYieldsNothing() {
+        // A banned or deleted subreddit's about page is a 404 body, which the repository skips on
+        // its status; this is the parser's own guard should one reach it anyway.
+        for (body in listOf("", "{", """{"reason": "banned", "message": "Not Found", "error": 404}""", listing())) {
+            assertEquals(body, null, RandomSubredditInfoParser.parseLiveSubredditName(body, requireOver18 = false))
+        }
     }
 
     @Test

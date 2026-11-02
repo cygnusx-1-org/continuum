@@ -58,6 +58,12 @@ interface RedditAPIKt {
     @GET("comments/{id}.json?raw_json=1&limit=1")
     suspend fun getPostWithMinimalComments(@Path("id") id: String): Response<String>
 
+    @GET("comments/{id}.json?raw_json=1&limit=1")
+    suspend fun getPostWithMinimalCommentsOauth(
+        @Path("id") id: String,
+        @HeaderMap headers: Map<String, String>
+    ): Response<String>
+
     @GET("/comments/{id}/placeholder/{singleCommentId}.json?raw_json=1")
     suspend fun getPostAndCommentsSingleThreadByIdOauth(
         @Path("id") id: String, @Path("singleCommentId") singleCommentId: String,

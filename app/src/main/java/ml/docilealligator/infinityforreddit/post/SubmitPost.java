@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.apis.RedditAPIKt;
 import ml.docilealligator.infinityforreddit.subreddit.Flair;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.JSONUtils;
@@ -241,8 +242,8 @@ public class SubmitPost {
             // A richtext body is how inline images are sent; read right away, each is still a
             // "Processing img" placeholder.
             if (isRichTextJSON) {
-                SubmittedPostMedia.awaitProcessed(api, APIUtils.getOAuthHeader(accessToken),
-                        postId.startsWith("t3_") ? postId : "t3_" + postId);
+                SubmittedPostMedia.awaitProcessed(oauthRetrofit.create(RedditAPIKt.class),
+                        APIUtils.getOAuthHeader(accessToken), postId.startsWith("t3_") ? postId.substring(3) : postId);
             }
 
             Call<String> getPostCall = api.getPostOauth(postId, APIUtils.getOAuthHeader(accessToken));

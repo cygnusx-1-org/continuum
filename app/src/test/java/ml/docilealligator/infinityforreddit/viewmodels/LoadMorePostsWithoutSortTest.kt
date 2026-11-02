@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.viewmodels
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.room.Room
@@ -11,8 +12,10 @@ import ml.docilealligator.infinityforreddit.post.Post
 import ml.docilealligator.infinityforreddit.post.PostType
 import ml.docilealligator.infinityforreddit.readpost.ReadPost
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType
+import ml.docilealligator.infinityforreddit.thing.ThingLookup
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader
 import ml.docilealligator.infinityforreddit.utils.APIUtils
+import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -49,16 +52,27 @@ class LoadMorePostsWithoutSortTest {
 
     private lateinit var db: RedditDataRoomDatabase
 
+    private val context: Context = ApplicationProvider.getApplicationContext()
+
     @Before
     fun setUp() {
-        db = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(), RedditDataRoomDatabase::class.java
-        ).allowMainThreadQueries().build()
+        ThingLookup.INFO_BLOCKED.set(false)
+        APIUtils.initConfigurableFields(context)
+        db = Room.inMemoryDatabaseBuilder(context, RedditDataRoomDatabase::class.java).allowMainThreadQueries().build()
     }
 
     @After
     fun tearDown() {
+        ThingLookup.INFO_BLOCKED.set(false)
+        useOldApiInfo(false)
         db.close()
+    }
+
+    /** The switch, and Enable Overrides, without which it counts for nothing. */
+    private fun useOldApiInfo(on: Boolean, overrides: Boolean = on) {
+        context.getSharedPreferences(SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE, Context.MODE_PRIVATE).edit()
+            .putBoolean(SharedPreferencesUtils.ENABLE_API_KEY_OVERRIDES_PREF_KEY, overrides)
+            .putBoolean(SharedPreferencesUtils.USE_OLD_API_INFO_PREF_KEY, on).commit()
     }
 
     @Test
@@ -83,7 +97,20 @@ class LoadMorePostsWithoutSortTest {
     }
 
     @Test
-    fun `a logged-in account loads more read posts through its own OAuth client`() {
+    fun `a logged-in account loads each read post through its own OAuth client`() {
+        // Reddit refuses /api/info for the default client ID (issue #476), so it is not asked.
+        val (plainRequests, oauthRequests) = fetchMoreReadPosts("someone", "token")
+
+        assertEquals(0, plainRequests.size)
+        val request = oauthRequests.single()
+        assertEquals("/comments/older.json", request.url.encodedPath)
+        assertNotNull(request.header(APIUtils.AUTHORIZATION_KEY))
+    }
+
+    @Test
+    fun `the old way loads a logged-in account's read posts from api info through its own OAuth client`() {
+        useOldApiInfo(true)
+
         val (plainRequests, oauthRequests) = fetchMoreReadPosts("someone", "token")
 
         assertEquals(0, plainRequests.size)
@@ -118,8 +145,8 @@ class LoadMorePostsWithoutSortTest {
                 Executor { it.run() }, Handler(Looper.getMainLooper()), db, plain, oauth
             )
         )
-        // A page with nothing on it sends no request for the anonymous account (AnonymousPostLookup),
-        // so the list holds one post with an older one recorded behind it.
+        // A page with nothing on it sends no request (PostLookup), so the list holds one post with
+        // an older one recorded behind it.
         db.accountDao().insert(Account(accountName, null, null, null, null, null, 0, false, false))
         for ((postId, time) in listOf("shown" to 2_000L, "older" to 1_000L)) {
             db.readPostDao().insert(ReadPost(accountName, postId, ReadPostType.READ_POSTS).apply { setTime(time) })

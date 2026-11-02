@@ -787,7 +787,7 @@ public class ViewPostDetailActivity extends BaseActivity
                 @Override
                 public void success() {
                     LocalSaved.onSaved(ViewPostDetailActivity.this, mOauthRetrofit, accessToken,
-                            accountName, comment.getFullName());
+                            accountName, comment.getFullName(), comment.getLinkId());
                     SavedCommentCacheNotifier.onSavedCommentChanged();
                     ViewPostDetailFragmentNew fragment = mSectionsPagerAdapter.getCurrentFragment();
                     if (fragment != null) {

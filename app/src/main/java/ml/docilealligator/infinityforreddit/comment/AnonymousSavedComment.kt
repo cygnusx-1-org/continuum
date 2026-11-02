@@ -11,7 +11,7 @@ import ml.docilealligator.infinityforreddit.account.Account
  * whole save: written and deleted here, never sent to `/api/save`.
  *
  * The post id is kept alongside the comment's own because the Saved screen has to fetch the comment
- * to show it, and anonymous `/api/info` is refused on some clients (issue #476). The fallback is
+ * to show it, and `/api/info` is refused on some clients (issue #476). The fallback is
  * the comment's focused thread, `/comments/<post>/_/<comment>`, which needs both.
  */
 @Entity(

@@ -12,21 +12,20 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Executor;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
-import ml.docilealligator.infinityforreddit.apis.RedditAPI;
+import ml.docilealligator.infinityforreddit.apis.RedditAPIKt;
 import ml.docilealligator.infinityforreddit.localsaved.LocalSavedThing;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.NullReadPostsList;
 import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SavedSearchCache;
 import ml.docilealligator.infinityforreddit.utils.SavedThingSearchFilter;
-import retrofit2.Call;
 import retrofit2.HttpException;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
 /**
  * Paging source for the Local Saved "posts" tab. Reads promoted post fullnames (t3_) from the
- * local_saved table and hydrates them live via /api/info. Mirrors
+ * local_saved table and hydrates them live through {@link PostLookup}. Mirrors
  * {@link HistoryPostPagingSource} but is sourced from the local_saved table (logged-in only).
  */
 public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<String, Post> {
@@ -48,7 +47,7 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
     private volatile RefreshPrewarmer<Post> refreshPrewarmer;
 
     // /api/info accepts up to 100 fullnames per call; the load-all search path hydrates in batches
-    // of this size.
+    // of this size, which is also as many posts as one batch fetches one by one without it.
     private static final int INFO_BATCH_SIZE = 100;
 
     public LocalSavedPostPagingSource(Retrofit oauthRetrofit, Executor executor,
@@ -123,16 +122,7 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
 
         for (int start = 0; start < promotedPosts.size(); start += INFO_BATCH_SIZE) {
             int end = Math.min(start + INFO_BATCH_SIZE, promotedPosts.size());
-            StringBuilder ids = new StringBuilder();
-            for (int i = start; i < end; i++) {
-                ids.append(promotedPosts.get(i).getFullName()).append(",");
-            }
-            if (ids.length() > 0) {
-                ids.deleteCharAt(ids.length() - 1);
-            }
-
-            Response<String> response = oauthRetrofit.create(RedditAPI.class)
-                    .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken)).execute();
+            Response<String> response = lookUp(promotedPosts.subList(start, end));
             if (!response.isSuccessful()) {
                 return new LoadResult.Error<>(new Exception("Response failed"));
             }
@@ -164,27 +154,29 @@ public class LocalSavedPostPagingSource extends ListenableFuturePagingSource<Str
         return new LoadResult.Page<>(matches, null, null);
     }
 
-    private LoadResult<String, Post> transformData(List<LocalSavedThing> promotedPosts) {
-        StringBuilder ids = new StringBuilder();
-        long lastItem = 0;
-        for (LocalSavedThing t : promotedPosts) {
-            // Stored value is already a full name (t3_...).
-            ids.append(t.getFullName()).append(",");
-            lastItem = t.getTime();
+    /**
+     * The posts behind {@code things}, in order. Reddit refuses /api/info for some client IDs (issue
+     * #476), so the lookup can fetch each post on its own instead.
+     */
+    private Response<String> lookUp(List<LocalSavedThing> things) throws IOException {
+        List<String> postIds = new ArrayList<>(things.size());
+        for (LocalSavedThing t : things) {
+            // Stored value is a full name (t3_...); the lookup takes the bare id.
+            String fullName = t.getFullName();
+            postIds.add(fullName.startsWith("t3_") ? fullName.substring(3) : fullName);
         }
-        if (ids.length() > 0) {
-            ids.deleteCharAt(ids.length() - 1);
-        }
+        return PostLookup.forOauthApi(oauthRetrofit.create(RedditAPIKt.class),
+                APIUtils.getOAuthHeader(accessToken), APIUtils.useOldApiInfo()).loadBlocking(postIds);
+    }
 
-        if (ids.length() == 0) {
+    private LoadResult<String, Post> transformData(List<LocalSavedThing> promotedPosts) {
+        if (promotedPosts.isEmpty()) {
             return new LoadResult.Page<>(new ArrayList<>(), null, null);
         }
-
-        Call<String> call = oauthRetrofit.create(RedditAPI.class)
-                .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken));
+        long lastItem = promotedPosts.get(promotedPosts.size() - 1).getTime();
 
         try {
-            Response<String> response = call.execute();
+            Response<String> response = lookUp(promotedPosts);
             if (response.isSuccessful()) {
                 LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(response.body(), -1, postFilter,
                         NullReadPostsList.getInstance());

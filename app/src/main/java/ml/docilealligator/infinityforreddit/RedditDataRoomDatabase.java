@@ -67,7 +67,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
         LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class,
-        Reminder.class, AnonymousSavedComment.class}, version = 44, exportSchema = false)
+        Reminder.class, AnonymousSavedComment.class}, version = 45, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -86,7 +86,8 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33,
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
                         MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40,
-                        MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43, MIGRATION_43_44)
+                        MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43, MIGRATION_43_44,
+                        MIGRATION_44_45)
                 .addCallback(ANONYMOUS_ACCOUNT_ROW)
                 .build();
     }
@@ -352,6 +353,28 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                     + "ON UPDATE NO ACTION ON DELETE CASCADE)");
             database.execSQL("CREATE INDEX IF NOT EXISTS `index_anonymous_saved_comments_username` "
                     + "ON `anonymous_saved_comments` (`username`)");
+        }
+    };
+
+    /**
+     * The post a Local Saved comment is on: see {@link LocalSavedThing#getLinkId()}. Rows already
+     * there get null, which is all that can be known about them.
+     *
+     * <p>Skipped when the column is already there, as on a database that went back to an older
+     * version without losing it: SQLite has no ADD COLUMN IF NOT EXISTS.
+     */
+    private static final Migration MIGRATION_44_45 = new Migration(44, 45) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            try (Cursor cursor = database.query("PRAGMA table_info(`local_saved`)")) {
+                int name = cursor.getColumnIndexOrThrow("name");
+                while (cursor.moveToNext()) {
+                    if ("link_id".equals(cursor.getString(name))) {
+                        return;
+                    }
+                }
+            }
+            database.execSQL("ALTER TABLE `local_saved` ADD COLUMN `link_id` TEXT");
         }
     };
 

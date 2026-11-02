@@ -2,7 +2,8 @@ package ml.docilealligator.infinityforreddit.post
 
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
-import ml.docilealligator.infinityforreddit.apis.RedditAPI
+import ml.docilealligator.infinityforreddit.apis.RedditAPIKt
+import ml.docilealligator.infinityforreddit.utils.APIUtils
 import ml.docilealligator.infinityforreddit.utils.JSONUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -26,12 +27,19 @@ object SubmittedPostMedia {
 
     private const val STATUS_UNPROCESSED = "unprocessed"
 
+    /**
+     * @param api the posting account's OAuth Retrofit's
+     * @param postId the new post's id36, without the `t3_` prefix
+     */
     @JvmStatic
     @WorkerThread
-    fun awaitProcessed(api: RedditAPI, headers: Map<String, String>, postFullname: String) {
+    fun awaitProcessed(api: RedditAPIKt, headers: Map<String, String>, postId: String) {
+        // Reddit refuses /api/info for some client IDs (issue #476); the lookup can read the post's
+        // own listing instead.
+        val lookup = PostLookup.forOauthApi(api, headers, APIUtils.useOldApiInfo())
         awaitProcessed(INTERVAL_MILLIS) {
             try {
-                api.getInfoOauth(postFullname, headers).execute().body()
+                lookup.loadBlocking(listOf(postId)).body()
             } catch (e: IOException) {
                 null
             }
@@ -39,7 +47,7 @@ object SubmittedPostMedia {
     }
 
     /**
-     * Polls [fetchInfo] (an `/api/info` listing holding the post) until no gallery item is still
+     * Polls [fetchInfo] (an `/api/info`-shaped listing holding the post) until no gallery item is still
      * unprocessed, or the attempts run out. A reply that cannot be read ends the wait: the post
      * exists either way, and the wait is only there to make its first render right.
      *

@@ -1638,7 +1638,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                             public void success() {
                                 comment.setSaved(true);
                                 LocalSaved.onSaved(mActivity, mOauthRetrofit, mAccessToken,
-                                        mAccountName, comment.getFullName());
+                                        mAccountName, comment.getFullName(), comment.getLinkId());
                                 SavedCommentCacheNotifier.onSavedCommentChanged();
                                 if (getBindingAdapterPosition() == position) {
                                     saveButton.setIconResource(R.drawable.ic_bookmark_grey_24dp);

@@ -14,8 +14,12 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase
+import ml.docilealligator.infinityforreddit.account.Account
 import ml.docilealligator.infinityforreddit.apis.RedditAPI
+import ml.docilealligator.infinityforreddit.thing.InfoUse
 import ml.docilealligator.infinityforreddit.thing.SortType
+import ml.docilealligator.infinityforreddit.thing.ThingLookup
+import ml.docilealligator.infinityforreddit.utils.APIUtils
 import retrofit2.Retrofit
 
 /**
@@ -34,6 +38,11 @@ import retrofit2.Retrofit
  * So a pooled pick is cheap, not free. Both checks happen before the caller hears anything, which
  * is what makes a pick a single answer rather than a subreddit that gets swapped for a replacement
  * once someone is already looking at it.
+ *
+ * Reddit refuses `/api/info` for some client IDs (issue #476). Without it -- logged in with "Use
+ * /api/info the Old Way" off, or anonymous once it has refused -- the existence check reads each
+ * candidate's own `/r/<name>/about` instead, one at a time and only until one passes, so a pick then
+ * costs a request or two more rather than a hundred.
  *
  * [pickSubscribed] skips the first check only: the account's own subscriptions are already in Room
  * and are reachable by construction, so there is nothing for `/api/info` to learn about them.
@@ -67,6 +76,12 @@ class RandomSubredditRepository @Inject constructor(
          * never reached in practice; it exists so a pathological run cannot spend the whole list.
          */
         private const val MAX_CANDIDATES_PER_PICK = 5
+
+        /**
+         * How many candidates one refill confirms one by one, once `/api/info` has refused, before
+         * giving up. Each costs a request; most candidates pass, so the first usually does.
+         */
+        private const val MAX_INDIVIDUAL_CHECKS = 10
 
         /**
          * The draw itself, split from Room so it can be tested outright.
@@ -127,16 +142,18 @@ class RandomSubredditRepository @Inject constructor(
     /**
      * @param retrofit the account-appropriate instance -- `no_oauth` for anonymous, which
      *   authenticates itself, `oauth` with [headers] from `APIUtils.getOAuthHeader` otherwise.
+     * @param infoUse how the existence check uses `/api/info`
      */
-    fun pick(
+    private fun pick(
         list: RandomSubredditList,
         retrofit: Retrofit,
         headers: Map<String, String>,
+        infoUse: InfoUse,
         handler: Handler,
         listener: PickListener
     ) {
         executor.execute {
-            val picked = pickNonEmpty(list, retrofit, headers)
+            val picked = pickNonEmpty(list, retrofit, headers, infoUse)
             handler.post {
                 if (picked == null) {
                     listener.onRandomSubredditPickFailed()
@@ -155,10 +172,11 @@ class RandomSubredditRepository @Inject constructor(
     private fun pickNonEmpty(
         list: RandomSubredditList,
         retrofit: Retrofit,
-        headers: Map<String, String>
+        headers: Map<String, String>,
+        infoUse: InfoUse
     ): String? {
         repeat(MAX_CANDIDATES_PER_PICK) {
-            val candidate = takeFromPool(list) ?: refillPool(list, retrofit, headers) ?: return null
+            val candidate = takeFromPool(list) ?: refillPool(list, retrofit, headers, infoUse) ?: return null
             if (hasPosts(candidate, retrofit, headers)) {
                 return candidate
             }
@@ -171,9 +189,10 @@ class RandomSubredditRepository @Inject constructor(
     private fun refillPool(
         list: RandomSubredditList,
         retrofit: Retrofit,
-        headers: Map<String, String>
+        headers: Map<String, String>,
+        infoUse: InfoUse
     ): String? {
-        val survivors = validateBatch(list, retrofit, headers)
+        val survivors = validateBatch(list, retrofit, headers, infoUse)
         if (survivors.isEmpty()) {
             return null
         }
@@ -242,10 +261,15 @@ class RandomSubredditRepository @Inject constructor(
         handler: Handler,
         listener: PickListener
     ) {
+        val infoUse = if (accountName == Account.ANONYMOUS_ACCOUNT) {
+            InfoUse.First(ThingLookup.INFO_BLOCKED)
+        } else {
+            InfoUse.forAccount(APIUtils.useOldApiInfo())
+        }
         when (RandomSubredditNames.canonicalise(randomSubredditName)) {
             RandomSubredditNames.MYRANDOM -> pickSubscribed(accountName, retrofit, headers, handler, listener)
-            RandomSubredditNames.RANDNSFW -> pick(RandomSubredditList.NSFW, retrofit, headers, handler, listener)
-            RandomSubredditNames.RANDOM -> pick(RandomSubredditList.SFW, retrofit, headers, handler, listener)
+            RandomSubredditNames.RANDNSFW -> pick(RandomSubredditList.NSFW, retrofit, headers, infoUse, handler, listener)
+            RandomSubredditNames.RANDOM -> pick(RandomSubredditList.SFW, retrofit, headers, infoUse, handler, listener)
             else -> handler.post { listener.onRandomSubredditPickFailed() }
         }
     }
@@ -253,7 +277,8 @@ class RandomSubredditRepository @Inject constructor(
     private fun validateBatch(
         list: RandomSubredditList,
         retrofit: Retrofit,
-        headers: Map<String, String>
+        headers: Map<String, String>,
+        infoUse: InfoUse
     ): List<String> {
         // Sampling is inside the try, not before it: this runs on the shared executor, and an
         // exception that escapes `Executor.execute` goes to the thread's uncaught handler, which
@@ -272,18 +297,28 @@ class RandomSubredditRepository @Inject constructor(
                 return emptyList()
             }
 
-            val response = retrofit.create(RedditAPI::class.java)
-                .getSubredditsInfo(headers, candidates.joinToString(","))
-                .execute()
-            if (response.isSuccessful) {
-                RandomSubredditInfoParser.parseLiveSubredditNames(
-                    response.body().orEmpty(),
-                    list == RandomSubredditList.NSFW
-                )
-            } else {
-                Log.w(TAG, "Validating ${list.fileName} candidates returned HTTP ${response.code()}")
-                emptyList()
+            val askInfo = when (infoUse) {
+                InfoUse.Only -> true
+                InfoUse.Never -> false
+                is InfoUse.First -> !infoUse.blocked.get()
             }
+            if (askInfo) {
+                val response = retrofit.create(RedditAPI::class.java)
+                    .getSubredditsInfo(headers, candidates.joinToString(","))
+                    .execute()
+                if (response.isSuccessful) {
+                    return RandomSubredditInfoParser.parseLiveSubredditNames(
+                        response.body().orEmpty(),
+                        list == RandomSubredditList.NSFW
+                    )
+                }
+                Log.w(TAG, "Validating ${list.fileName} candidates returned HTTP ${response.code()}")
+                if (infoUse !is InfoUse.First || response.code() != 403) {
+                    return emptyList()
+                }
+                infoUse.blocked.set(true)
+            }
+            validateIndividually(list, candidates, retrofit, headers)
         } catch (e: IOException) {
             Log.w(TAG, "Validating ${list.fileName} candidates failed", e)
             emptyList()
@@ -291,6 +326,40 @@ class RandomSubredditRepository @Inject constructor(
             Log.w(TAG, "Validating ${list.fileName} candidates failed", e)
             emptyList()
         }
+    }
+
+    /**
+     * Confirms [candidates] one at a time from their own about pages, for when `/api/info` refuses,
+     * and stops at the first that passes: each costs a request, so pooling a whole batch this way
+     * would spend a hundred on one pick. The about page is held to the same rules as the batch.
+     * A banned, private, quarantined or deleted subreddit answers it with a 403 or 404 and is
+     * skipped; a 429 or a server error ends the refill, as the next candidate would get the same.
+     */
+    private fun validateIndividually(
+        list: RandomSubredditList,
+        candidates: List<String>,
+        retrofit: Retrofit,
+        headers: Map<String, String>
+    ): List<String> {
+        val api = retrofit.create(RedditAPI::class.java)
+        for (candidate in candidates.take(MAX_INDIVIDUAL_CHECKS)) {
+            val response = api.getSubredditDataOauth(candidate, headers).execute()
+            if (response.code() == 429 || response.code() >= 500) {
+                Log.w(TAG, "Checking $candidate returned HTTP ${response.code()}")
+                return emptyList()
+            }
+            if (!response.isSuccessful) {
+                continue
+            }
+            val name = RandomSubredditInfoParser.parseLiveSubredditName(
+                response.body().orEmpty(),
+                list == RandomSubredditList.NSFW
+            )
+            if (name != null) {
+                return listOf(name)
+            }
+        }
+        return emptyList()
     }
 
     /**

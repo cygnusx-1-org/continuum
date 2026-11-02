@@ -304,8 +304,8 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     }
 
     /**
-     * Loads a page of promoted local-saved comments (t1_) from Room and hydrates them via
-     * /api/info. Runs on {@code executor}. Throws on any failure so the caller can post a
+     * Loads a page of promoted local-saved comments (t1_) from Room and hydrates them through
+     * {@link CommentLookup}. Runs on {@code executor}. Throws on any failure so the caller can post a
      * FAILED state without mutating anything. For the anonymous account the page is its own saved
      * comments instead, the only record of them there is: see {@link #loadLocalPage}.
      *
@@ -352,8 +352,8 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
      * One page of the local list, rows older than {@code before}, hydrated into {@code out}.
      *
      * <p>Logged in, that is the promoted local_saved rows. Logged out it is the comments saved on
-     * this device, since there is no account on Reddit to have saved them to, fetched through
-     * {@link AnonymousCommentLookup} because anonymous /api/info is refused on some clients.
+     * this device, since there is no account on Reddit to have saved them to. Both are fetched
+     * through {@link CommentLookup}, because /api/info is refused on some clients (issue #476).
      */
     @WorkerThread
     private LocalPage loadLocalPage(@Nullable Long before, List<Comment> out) throws Exception {
@@ -363,8 +363,11 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
             if (saved.isEmpty()) {
                 return new LocalPage(0, 0);
             }
-            Response<String> response = AnonymousCommentLookup.forApi(retrofit.create(RedditAPIKt.class))
-                    .loadBlocking(saved);
+            List<CommentLookup.Ref> refs = new ArrayList<>(saved.size());
+            for (AnonymousSavedComment s : saved) {
+                refs.add(new CommentLookup.Ref(s.getId(), s.getLinkId()));
+            }
+            Response<String> response = CommentLookup.forApi(retrofit.create(RedditAPIKt.class)).loadBlocking(refs);
             String body = response.body();
             if (!response.isSuccessful() || body == null) {
                 throw new java.io.IOException("Response failed");
@@ -402,21 +405,24 @@ public class CommentDataSource extends PageKeyedDataSource<String, Comment> {
     }
 
     /**
-     * Hydrates one page of promoted local-saved comment rows via /api/info, appending the parsed
-     * (unfiltered) comments to {@code out}. Returns the time of the last row for cursor pagination.
+     * Hydrates one page of promoted local-saved comment rows through {@link CommentLookup},
+     * appending the parsed (unfiltered) comments to {@code out}. Returns the time of the last row
+     * for cursor pagination.
      */
     @WorkerThread
     private long hydrateLocalComments(List<LocalSavedThing> promoted, List<Comment> out) throws Exception {
-        StringBuilder ids = new StringBuilder();
+        List<CommentLookup.Ref> refs = new ArrayList<>(promoted.size());
         long lastItem = 0;
         for (LocalSavedThing t : promoted) {
-            ids.append(t.getFullName()).append(",");
+            // Stored value is a full name (t1_...); the lookup takes the bare id.
+            String fullName = t.getFullName();
+            refs.add(new CommentLookup.Ref(fullName.startsWith("t1_") ? fullName.substring(3) : fullName,
+                    t.getLinkId()));
             lastItem = t.getTime();
         }
-        ids.deleteCharAt(ids.length() - 1);
 
-        Response<String> response = retrofit.create(RedditAPI.class)
-                .getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken)).execute();
+        Response<String> response = CommentLookup.forOauthApi(retrofit.create(RedditAPIKt.class),
+                APIUtils.getOAuthHeader(accessToken), APIUtils.useOldApiInfo()).loadBlocking(refs);
         String body = response.body();
         if (!response.isSuccessful() || body == null) {
             throw new java.io.IOException("Response failed");

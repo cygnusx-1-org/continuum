@@ -1,11 +1,13 @@
 package ml.docilealligator.infinityforreddit.randomsubreddit
 
 import ml.docilealligator.infinityforreddit.utils.JSONUtils
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
 /**
- * Reads the survivors out of one `/api/info?sr_name=...` batch response.
+ * Reads the survivors out of one `/api/info?sr_name=...` batch response, or out of one
+ * `/r/<name>/about` response when `/api/info` refuses.
  *
  * Reddit answers a batch of names with a listing that carries only what it could resolve, and it
  * has two different ways of saying no:
@@ -81,5 +83,20 @@ object RandomSubredditInfoParser {
             }
         }
         return names
+    }
+
+    /**
+     * The name in one `/r/<name>/about` response, if it passes the checks [parseLiveSubredditNames]
+     * makes; else null. The response is the same `t5` an `/api/info` batch holds, so it is checked
+     * as a batch of one.
+     */
+    fun parseLiveSubredditName(aboutResponse: String, requireOver18: Boolean): String? {
+        val about = try {
+            JSONObject(aboutResponse)
+        } catch (e: JSONException) {
+            return null
+        }
+        val listing = JSONObject().put(JSONUtils.DATA_KEY, JSONObject().put(JSONUtils.CHILDREN_KEY, JSONArray().put(about)))
+        return parseLiveSubredditNames(listing.toString(), requireOver18).firstOrNull()
     }
 }

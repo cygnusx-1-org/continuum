@@ -161,6 +161,8 @@ public class SharedPreferencesUtils {
     public static final String COMMENT_TOOLBAR_HIDDEN = "comment_toolbar_hidden";
     public static final String COMMENT_TOOLBAR_HIDE_ON_CLICK = "comment_toolbar_hide_on_click";
     public static final String FULLY_COLLAPSE_COMMENT = "fully_collapse_comment";
+    // Per account, before it became the global USE_OLD_API_INFO_PREF_KEY; only
+    // OldApiInfoMigration reads it now.
     public static final String USE_LEGACY_MORE_CHILDREN = "use_legacy_more_children";
     public static final String SHOW_COMMENT_DIVIDER = "show_comment_divider";
     public static final String SHOW_COMMENT_TOP_PADDING = "show_comment_top_padding";
@@ -681,6 +683,8 @@ public class SharedPreferencesUtils {
     public static final String USER_AGENT_PREF_KEY = "user_agent_pref_key";
     public static final String REDIRECT_URI_PREF_KEY = "redirect_uri_pref_key";
     public static final String ENABLE_API_KEY_OVERRIDES_PREF_KEY = "enable_api_key_overrides_pref_key";
+    // On the API Keys screen, so in DEFAULT_PREFERENCES_FILE: read it through APIUtils.useOldApiInfo().
+    public static final String USE_OLD_API_INFO_PREF_KEY = "use_old_api_info_pref_key";
 
     public static final String COOKIE_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.cookie";
 

@@ -114,6 +114,7 @@ import ml.docilealligator.infinityforreddit.resume.ScrollAnchor;
 import ml.docilealligator.infinityforreddit.thing.SortType;
 import ml.docilealligator.infinityforreddit.user.UserMarks;
 import ml.docilealligator.infinityforreddit.user.UserProfileImagesBatchLoader;
+import ml.docilealligator.infinityforreddit.utils.APIUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.SwipeActionLevels;
 import ml.docilealligator.infinityforreddit.utils.SwipeActionPreferences;
@@ -631,7 +632,7 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
                         mPostHistorySharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.MARK_POSTS_AS_READ_BASE), false),
                         !mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_TOP_LEVEL_COMMENTS_FIRST, false),
                         getArguments().getString(EXTRA_CONTEXT_NUMBER, "8"),
-                        mSharedPreferences.getBoolean(SharedPreferencesUtils.USE_LEGACY_MORE_CHILDREN, false)
+                        APIUtils.useOldApiInfo()
                 )
         ).get(ViewPostDetailFragmentViewModelNew.class);
 

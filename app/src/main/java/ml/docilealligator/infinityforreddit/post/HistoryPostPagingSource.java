@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.RedditError;
 import ml.docilealligator.infinityforreddit.account.Account;
-import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.apis.RedditAPIKt;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.readpost.NullReadPostsList;
@@ -75,27 +74,21 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
     }
 
     public LoadResult<String, Post> transformData(List<ReadPost> readPosts) {
-        StringBuilder ids = new StringBuilder();
         List<String> postIds = new ArrayList<>();
         long lastItem = 0;
         for (ReadPost readPost : readPosts) {
-            ids.append("t3_").append(readPost.getId()).append(",");
             postIds.add(readPost.getId());
             lastItem = readPost.getTime();
         }
-        if (ids.length() > 0) {
-            ids.deleteCharAt(ids.length() - 1);
-        }
 
         try {
-            Response<String> response;
-            if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
-                // Reddit refuses anonymous /api/info (issue #476), so the lookup falls back to
-                // fetching each post on its own.
-                response = AnonymousPostLookup.forApi(retrofit.create(RedditAPIKt.class)).loadBlocking(postIds);
-            } else {
-                response = retrofit.create(RedditAPI.class).getInfoOauth(ids.toString(), APIUtils.getOAuthHeader(accessToken)).execute();
-            }
+            // Reddit refuses /api/info for some client IDs (issue #476), so the lookup can fetch
+            // each post on its own instead.
+            RedditAPIKt api = retrofit.create(RedditAPIKt.class);
+            PostLookup lookup = accountName.equals(Account.ANONYMOUS_ACCOUNT)
+                    ? PostLookup.forApi(api)
+                    : PostLookup.forOauthApi(api, APIUtils.getOAuthHeader(accessToken), APIUtils.useOldApiInfo());
+            Response<String> response = lookup.loadBlocking(postIds);
             if (response.isSuccessful()) {
                 String responseString = response.body();
                 LinkedHashSet<Post> newPosts = ParsePost.parsePostsSync(responseString, -1, postFilter, NullReadPostsList.getInstance());
@@ -106,7 +99,9 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
                         setMetadataToAnonymousPosts(newPosts);
                     }
 
-                    if (newPosts.size() < 25) {
+                    // By rows, not posts: a post that is gone, private or filtered out is left out
+                    // of the page, and must not end the history before the rows after it.
+                    if (readPosts.size() < 25) {
                         return new LoadResult.Page<>(new ArrayList<>(newPosts), null, null);
                     }
                     return new LoadResult.Page<>(new ArrayList<>(newPosts), null, Long.toString(lastItem));

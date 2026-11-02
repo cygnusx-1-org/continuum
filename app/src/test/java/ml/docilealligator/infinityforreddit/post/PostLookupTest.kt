@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.post
 
 import android.app.Application
 import kotlinx.coroutines.runBlocking
+import ml.docilealligator.infinityforreddit.thing.InfoUse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.json.JSONArray
@@ -17,25 +18,45 @@ import retrofit2.Response
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Pins [AnonymousPostLookup] against what Reddit returned while anonymous `/api/info` was blocked
- * (issue #476): a 403 HTML page from `/api/info`, the post as the only child of the first listing
+ * Pins [PostLookup] against what Reddit returned while `/api/info` was blocked (issue #476): a 403
+ * HTML page from `/api/info`, the post as the only child of the first listing
  * from `/comments/<id>`, and a 404 for a post that does not exist.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], application = Application::class)
-class AnonymousPostLookupTest {
+class PostLookupTest {
     private val infoRequests = ArrayList<String>()
     private val postRequests = ArrayList<String>()
     private val infoBlocked = AtomicBoolean(false)
 
     private fun lookup(
         info: (String) -> Response<String> = { blocked() },
-        post: (String) -> Response<String> = { ok(commentsListing(it)) }
-    ) = AnonymousPostLookup(
+        post: (String) -> Response<String> = { ok(commentsListing(it)) },
+        infoUse: InfoUse = InfoUse.First(infoBlocked)
+    ) = PostLookup(
         { fullnames -> synchronized(infoRequests) { infoRequests.add(fullnames) }; info(fullnames) },
         { postId -> synchronized(postRequests) { postRequests.add(postId) }; post(postId) },
-        infoBlocked
+        infoUse
     )
+
+    @Test
+    fun theOldWayAsksInfoAloneAndReportsItsRefusal() = runBlocking {
+        val response = lookup(infoUse = InfoUse.Only).load(listOf("a", "b"))
+
+        assertEquals(403, response.code())
+        assertEquals(listOf("t3_a,t3_b"), infoRequests)
+        assertTrue(postRequests.isEmpty())
+        assertFalse(infoBlocked.get())
+    }
+
+    @Test
+    fun withoutTheOldWayInfoIsNeverAsked() = runBlocking {
+        val response = lookup(info = { throw AssertionError("asked /api/info") }, infoUse = InfoUse.Never).load(listOf("b", "a"))
+
+        assertTrue(response.isSuccessful)
+        assertEquals(listOf("b", "a"), postIds(response))
+        assertTrue(infoRequests.isEmpty())
+    }
 
     @Test
     fun aWorkingInfoResponseIsReturnedAsItIs() = runBlocking {
