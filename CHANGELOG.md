@@ -2,6 +2,20 @@
 
 ---
 
+8.3.3.9.1 / 2026-11-2
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Fixed [BUG] Random Subreddit and Random NSFW Subreddit not working #479
+* Fixed logged-in History and Local Saved posts failing on blocked /api/info
+* Fixed History stopping early when a read post could not be fetched
+* Fixed Local Saved comments by storing each comment's post id
+* Converted Use Old Load More Comments Method into global Use /api/info the Old Way
+* Greyed out Use /api/info the Old Way unless Enable Overrides is enabled
+
+# Notes
+The `Settings > Interface > Comment > Use Old Load More Comments Method` per-account setting became the `Settings > API Keys > Use /api/info the Old Way` global setting.
+
 8.3.3.9 / 2026-11-2
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
