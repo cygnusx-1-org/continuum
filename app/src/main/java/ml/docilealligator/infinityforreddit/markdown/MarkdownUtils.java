@@ -1,7 +1,6 @@
 package ml.docilealligator.infinityforreddit.markdown;
 
 import android.content.Context;
-import android.text.util.Linkify;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.noties.markwon.Markwon;
@@ -11,7 +10,6 @@ import io.noties.markwon.inlineparser.BangInlineProcessor;
 import io.noties.markwon.inlineparser.CloseBracketInlineProcessor;
 import io.noties.markwon.inlineparser.HtmlInlineProcessor;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import io.noties.markwon.movement.MovementMethodPlugin;
 import io.noties.markwon.recycler.table.TableEntry;
 import io.noties.markwon.recycler.table.TableEntryPlugin;
@@ -65,7 +63,7 @@ public class MarkdownUtils {
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()
                         .setOnLinkLongClickListener(onLinkLongClickListener)))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(imageAndGifPlugin)
                 .usePlugin(emotePlugin)
                 .usePlugin(commentFacePlugin)
@@ -100,7 +98,7 @@ public class MarkdownUtils {
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()
                         .setOnLinkLongClickListener(onLinkLongClickListener)))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(imageAndGifPlugin)
                 .usePlugin(videoPlugin)
                 .usePlugin(emotePlugin)
@@ -122,7 +120,7 @@ public class MarkdownUtils {
                 .usePlugin(SpoilerParserPlugin.create(0, 0))
                 .usePlugin(RedditHeadingPlugin.create())
                 .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(uploadedImagePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
                 .usePlugin(new RedditListPlugin())
@@ -142,7 +140,7 @@ public class MarkdownUtils {
                 .usePlugin(SpoilerParserPlugin.create(0, 0))
                 .usePlugin(RedditHeadingPlugin.create())
                 .usePlugin(StrikethroughPlugin.create())
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(giphyGifPlugin)
                 .usePlugin(uploadedImagePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
@@ -166,7 +164,7 @@ public class MarkdownUtils {
                 .usePlugin(RedditHeadingPlugin.create())
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(TableEntryPlugin.create(context))
                 .usePlugin(new RedditListPlugin())
                 .build();
@@ -196,7 +194,7 @@ public class MarkdownUtils {
                 .usePlugin(RedditHeadingPlugin.create())
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(commentFacePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
                 .usePlugin(new RedditListPlugin())
@@ -217,7 +215,7 @@ public class MarkdownUtils {
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()
                         .setOnLinkLongClickListener(onLinkLongClickListener)))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(TableEntryPlugin.create(context))
                 .usePlugin(new RedditListPlugin())
                 .build();
@@ -238,7 +236,7 @@ public class MarkdownUtils {
                 }))
                 .usePlugin(miscPlugin)
                 .usePlugin(MovementMethodPlugin.create(EvenBetterLinkMovementMethod.newInstance().setOnLinkLongClickListener(onLinkLongClickListener)))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(new RedditListPlugin())
                 .build();
     }

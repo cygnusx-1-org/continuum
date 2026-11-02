@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,6 @@ import io.noties.markwon.inlineparser.BangInlineProcessor;
 import io.noties.markwon.inlineparser.CloseBracketInlineProcessor;
 import io.noties.markwon.inlineparser.HtmlInlineProcessor;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import io.noties.markwon.movement.MovementMethodPlugin;
 import java.util.Locale;
 import java.util.Objects;
@@ -39,6 +37,7 @@ import ml.docilealligator.infinityforreddit.customviews.RebindInPlaceItemAnimato
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterErrorBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemFooterLoadingBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemMessageBinding;
+import ml.docilealligator.infinityforreddit.markdown.RedditLinkifyPlugin;
 import ml.docilealligator.infinityforreddit.markdown.RedditListPlugin;
 import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaceContext;
 import ml.docilealligator.infinityforreddit.markdown.commentface.CommentFaces;
@@ -160,7 +159,7 @@ public class MessageRecyclerViewAdapter extends PagedListAdapter<Message, Recycl
                 .usePlugin(RedditHeadingPlugin.create())
                 .usePlugin(StrikethroughPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(mCommentFaces.getPlugin())
                 .usePlugin(new RedditListPlugin())
                 .build();

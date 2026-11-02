@@ -524,7 +524,6 @@ dependencies {
     def markwonVersion = "4.6.2"
     implementation "io.noties.markwon:core:$markwonVersion"
     implementation "io.noties.markwon:ext-strikethrough:$markwonVersion"
-    implementation "io.noties.markwon:linkify:$markwonVersion"
     implementation "io.noties.markwon:recycler-table:$markwonVersion"
     implementation "io.noties.markwon:simple-ext:$markwonVersion"
     implementation "io.noties.markwon:inline-parser:$markwonVersion"

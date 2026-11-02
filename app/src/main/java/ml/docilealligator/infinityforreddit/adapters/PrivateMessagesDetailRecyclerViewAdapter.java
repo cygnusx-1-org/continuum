@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.text.Spanned;
-import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,6 @@ import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.inlineparser.BangInlineProcessor;
 import io.noties.markwon.inlineparser.HtmlInlineProcessor;
 import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
 import io.noties.markwon.movement.MovementMethodPlugin;
 import java.util.Locale;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -38,6 +36,7 @@ import ml.docilealligator.infinityforreddit.activities.ViewUserDetailActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.databinding.ItemPrivateMessageReceivedBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPrivateMessageSentBinding;
+import ml.docilealligator.infinityforreddit.markdown.RedditLinkifyPlugin;
 import ml.docilealligator.infinityforreddit.markdown.RedditListPlugin;
 import ml.docilealligator.infinityforreddit.markdown.redditheading.RedditHeadingPlugin;
 import ml.docilealligator.infinityforreddit.markdown.spoiler.SpoilerAwareMovementMethod;
@@ -110,7 +109,7 @@ public class PrivateMessagesDetailRecyclerViewAdapter extends RecyclerView.Adapt
                 .usePlugin(SpoilerParserPlugin.create(commentColor, commentColor | 0xFF000000))
                 .usePlugin(RedditHeadingPlugin.create())
                 .usePlugin(MovementMethodPlugin.create(new SpoilerAwareMovementMethod()))
-                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(new RedditListPlugin())
                 .build();
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
