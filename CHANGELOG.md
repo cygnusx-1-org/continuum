@@ -2,6 +2,18 @@
 
 ---
 
+8.3.3.9 / 2026-11-2
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented allow automatic bullet pointing #447
+* Enabled gallery grids by default
+* Changed gallery grids to use a 1x2 or 2x2 grid, with +X on the fourth cell
+* Fixed low-res and stuck feed images, sharper galleries on wide screens
+
+# Notes
+Gallery grids with five or more images get a +X marker on the fourth image. If the you press the fourth image you get taken to the fourth image.
+
 8.3.3.8 / 2026-10-31
 =============
 Note v8a is the 64-bit build, and should be considered the default choice.
