@@ -108,31 +108,6 @@ object AccountSettings {
     }
 
     /**
-     * Gives every other account the settings [sourceAccountName] has.
-     *
-     * [copyBetweenAccounts] once per destination, so each one is a mirror and main page tabs stay
-     * as they are. The source itself is not changed.
-     *
-     * Blocking. Call it off the main thread.
-     */
-    @JvmStatic
-    fun copyToAllAccounts(
-        context: Context,
-        redditDataRoomDatabase: RedditDataRoomDatabase,
-        sourceAccountName: String,
-    ) {
-        val source = AccountScope.namespace(sourceAccountName)
-        val destinations = (redditDataRoomDatabase.accountDao().allAccounts.map { it.accountName } +
-                Account.ANONYMOUS_ACCOUNT)
-            .distinctBy { AccountScope.namespace(it) }
-            .filter { AccountScope.namespace(it) != source }
-
-        for (destination in destinations) {
-            copyBetweenAccounts(context, redditDataRoomDatabase, sourceAccountName, destination)
-        }
-    }
-
-    /**
      * The post and comment filters, which are rows rather than keys but are per-account settings all
      * the same. A mirror like the files: the destination's own filters go first.
      *

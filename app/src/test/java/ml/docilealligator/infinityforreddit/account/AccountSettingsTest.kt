@@ -185,98 +185,25 @@ class AccountSettingsTest {
         defaultPreferences.edit()
             .putString(key(null, SharedPreferencesUtils.THEME_KEY), "2")
             .commit()
+        database.postFilterDao().insert(postFilter("NSFW", Account.ANONYMOUS_ACCOUNT))
+        database.postFilterUsageDao().insert(
+            PostFilterUsage("NSFW", Account.ANONYMOUS_ACCOUNT, PostFilterUsage.HOME_TYPE, null))
+        database.commentFilterDao().insert(commentFilter("Rude", Account.ANONYMOUS_ACCOUNT))
+        database.postFilterDao().insert(postFilter("alice's own", "alice"))
 
         AccountSettings.copyBetweenAccounts(context, database, Account.ANONYMOUS_ACCOUNT, "alice")
 
         assertEquals("2", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
         assertEquals("the source is only ever read",
             "2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
-    }
-
-    private fun addAccounts(vararg names: String) {
-        names.forEach {
-            database.accountDao().insert(Account(it, null, null, null, null, null, 0, false, false))
-        }
-    }
-
-    @Test
-    fun `copying to all accounts from anonymous reaches every signed in account`() {
-        addAccounts("alice", "bob")
-        defaultPreferences.edit()
-            .putString(key(null, SharedPreferencesUtils.THEME_KEY), "2")
-            .commit()
-
-        AccountSettings.copyToAllAccounts(context, database, Account.ANONYMOUS_ACCOUNT)
-
-        assertEquals("2", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
-        assertEquals("2", defaultPreferences.getString(key("bob", SharedPreferencesUtils.THEME_KEY), null))
-        assertEquals("2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
-    }
-
-    @Test
-    fun `copying to all accounts from an account reaches the others and anonymous`() {
-        addAccounts("alice", "bob")
-        defaultPreferences.edit()
-            .putString(key("alice", SharedPreferencesUtils.THEME_KEY), "2")
-            .putString(key("bob", SharedPreferencesUtils.THEME_KEY), "0")
-            .commit()
-
-        AccountSettings.copyToAllAccounts(context, database, "alice")
-
-        assertEquals("2", defaultPreferences.getString(key("bob", SharedPreferencesUtils.THEME_KEY), null))
-        assertEquals("2", defaultPreferences.getString(key(null, SharedPreferencesUtils.THEME_KEY), null))
-        assertEquals("the source is only ever read",
-            "2", defaultPreferences.getString(key("alice", SharedPreferencesUtils.THEME_KEY), null))
-    }
-
-    @Test
-    fun `copying to all accounts gives every destination the filters`() {
-        addAccounts("alice", "bob", "carol")
-        database.postFilterDao().insert(postFilter("NSFW", "alice"))
-        database.postFilterUsageDao().insert(
-            PostFilterUsage("NSFW", "alice", PostFilterUsage.HOME_TYPE, null))
-        database.commentFilterDao().insert(commentFilter("Rude", "alice"))
-        database.postFilterDao().insert(postFilter("bob's own", "bob"))
-
-        AccountSettings.copyToAllAccounts(context, database, "alice")
-
-        for (destination in listOf("bob", "carol", Account.ANONYMOUS_ACCOUNT)) {
-            assertEquals(destination, listOf("NSFW"),
-                database.postFilterDao().getAllPostFilters(destination).map { it.name })
-            assertEquals(destination, listOf("Rude"),
-                database.commentFilterDao().getAllCommentFilters(destination).map { it.name })
-            assertEquals(destination, 1,
-                database.postFilterUsageDao().getAllPostFilterUsage("NSFW", destination).size)
-        }
+        assertEquals(listOf("NSFW"),
+            database.postFilterDao().getAllPostFilters("alice").map { it.name })
+        assertEquals(listOf("Rude"),
+            database.commentFilterDao().getAllCommentFilters("alice").map { it.name })
+        assertEquals("the usage follows the filter it belongs to", 1,
+            database.postFilterUsageDao().getAllPostFilterUsage("NSFW", "alice").size)
         assertEquals("the source keeps its own", 1,
-            database.postFilterDao().getAllPostFilters("alice").size)
-    }
-
-    @Test
-    fun `copying to all accounts from anonymous gives every account its filters`() {
-        addAccounts("alice", "bob")
-        database.postFilterDao().insert(postFilter("NSFW", Account.ANONYMOUS_ACCOUNT))
-        database.commentFilterDao().insert(commentFilter("Rude", Account.ANONYMOUS_ACCOUNT))
-
-        AccountSettings.copyToAllAccounts(context, database, Account.ANONYMOUS_ACCOUNT)
-
-        for (destination in listOf("alice", "bob")) {
-            assertEquals(destination, listOf("NSFW"),
-                database.postFilterDao().getAllPostFilters(destination).map { it.name })
-            assertEquals(destination, listOf("Rude"),
-                database.commentFilterDao().getAllCommentFilters(destination).map { it.name })
-        }
-    }
-
-    @Test
-    fun `copying to all accounts leaves the main page tabs alone`() {
-        addAccounts("alice")
-        mainPageTabs.edit().putString(key("alice", "tabs"), "mine").commit()
-        mainPageTabs.edit().putString(key(null, "tabs"), "theirs").commit()
-
-        AccountSettings.copyToAllAccounts(context, database, Account.ANONYMOUS_ACCOUNT)
-
-        assertEquals("mine", mainPageTabs.getString(key("alice", "tabs"), null))
+            database.postFilterDao().getAllPostFilters(Account.ANONYMOUS_ACCOUNT).size)
     }
 
     @Test

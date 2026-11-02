@@ -54,7 +54,6 @@ class AccountScopedScreenKeysTest {
         "customize_amoled_theme",
         "manage_themes",
         "copy_settings_from_account",
-        "copy_settings_to_all_accounts",
         "reset_account_settings",
         "delete_account_subreddits",
         "delete_account_users",
