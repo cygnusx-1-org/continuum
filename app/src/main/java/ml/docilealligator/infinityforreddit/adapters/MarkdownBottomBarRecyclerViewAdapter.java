@@ -7,12 +7,14 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputEditText;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.markdown.MarkdownListFormatter;
 
 public class MarkdownBottomBarRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -122,6 +124,13 @@ public class MarkdownBottomBarRecyclerViewAdapter extends RecyclerView.Adapter<R
     }
 
     public static void bindEditTextWithItemClickListener(Activity activity, EditText commentEditText, int item) {
+        int selectionStart = commentEditText.getSelectionStart();
+        int selectionEnd = commentEditText.getSelectionEnd();
+        if (selectionStart > selectionEnd) {
+            // Selecting backwards (Shift+Left) leaves the anchor after the edge, and every case below needs start <= end.
+            commentEditText.setSelection(Math.max(selectionEnd, 0), selectionStart);
+        }
+
         switch (item) {
             case MarkdownBottomBarRecyclerViewAdapter.BOLD: {
                 int start = Math.max(commentEditText.getSelectionStart(), 0);
@@ -257,9 +266,7 @@ public class MarkdownBottomBarRecyclerViewAdapter extends RecyclerView.Adapter<R
                 int start = Math.max(commentEditText.getSelectionStart(), 0);
                 int end = Math.max(commentEditText.getSelectionEnd(), 0);
                 if (end != start) {
-                    String currentSelection = commentEditText.getText().subSequence(start, end).toString();
-                    commentEditText.getText().replace(Math.min(start, end), Math.max(start, end),
-                            "1. " + currentSelection, 0, "1. ".length() + currentSelection.length());
+                    applyListEdit(commentEditText, MarkdownListFormatter.numberLines(commentEditText.getText(), start, end));
                 } else {
                     commentEditText.getText().replace(start, end,
                             "1. ", 0, "1. ".length());
@@ -270,9 +277,7 @@ public class MarkdownBottomBarRecyclerViewAdapter extends RecyclerView.Adapter<R
                 int start = Math.max(commentEditText.getSelectionStart(), 0);
                 int end = Math.max(commentEditText.getSelectionEnd(), 0);
                 if (end != start) {
-                    String currentSelection = commentEditText.getText().subSequence(start, end).toString();
-                    commentEditText.getText().replace(Math.min(start, end), Math.max(start, end),
-                            "* " + currentSelection, 0, "* ".length() + currentSelection.length());
+                    applyListEdit(commentEditText, MarkdownListFormatter.bulletLines(commentEditText.getText(), start, end));
                 } else {
                     commentEditText.getText().replace(start, end,
                             "* ", 0, "* ".length());
@@ -321,6 +326,13 @@ public class MarkdownBottomBarRecyclerViewAdapter extends RecyclerView.Adapter<R
                 }
                 break;
             }
+        }
+    }
+
+    private static void applyListEdit(EditText editText, @Nullable MarkdownListFormatter.Edit edit) {
+        if (edit != null) {
+            editText.getText().replace(edit.start, edit.end, edit.replacement);
+            editText.setSelection(edit.start + edit.replacement.length());
         }
     }
 
