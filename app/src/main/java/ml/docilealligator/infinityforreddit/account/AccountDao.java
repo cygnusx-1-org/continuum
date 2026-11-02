@@ -19,7 +19,7 @@ import java.util.List;
  *
  * <p>Anonymous is therefore a browsing mode in the UI -- an entry beside "Add account" in the
  * switcher -- rather than a row in the account list. The stored settings underneath it are
- * per-account like any other's, so the settings copy screens offer it as a source themselves.
+ * per-account like any other's.
  */
 @Dao
 public interface AccountDao {

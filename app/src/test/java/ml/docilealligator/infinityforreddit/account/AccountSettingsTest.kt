@@ -230,6 +230,45 @@ class AccountSettingsTest {
     }
 
     @Test
+    fun `copying to all accounts gives every destination the filters`() {
+        addAccounts("alice", "bob", "carol")
+        database.postFilterDao().insert(postFilter("NSFW", "alice"))
+        database.postFilterUsageDao().insert(
+            PostFilterUsage("NSFW", "alice", PostFilterUsage.HOME_TYPE, null))
+        database.commentFilterDao().insert(commentFilter("Rude", "alice"))
+        database.postFilterDao().insert(postFilter("bob's own", "bob"))
+
+        AccountSettings.copyToAllAccounts(context, database, "alice")
+
+        for (destination in listOf("bob", "carol", Account.ANONYMOUS_ACCOUNT)) {
+            assertEquals(destination, listOf("NSFW"),
+                database.postFilterDao().getAllPostFilters(destination).map { it.name })
+            assertEquals(destination, listOf("Rude"),
+                database.commentFilterDao().getAllCommentFilters(destination).map { it.name })
+            assertEquals(destination, 1,
+                database.postFilterUsageDao().getAllPostFilterUsage("NSFW", destination).size)
+        }
+        assertEquals("the source keeps its own", 1,
+            database.postFilterDao().getAllPostFilters("alice").size)
+    }
+
+    @Test
+    fun `copying to all accounts from anonymous gives every account its filters`() {
+        addAccounts("alice", "bob")
+        database.postFilterDao().insert(postFilter("NSFW", Account.ANONYMOUS_ACCOUNT))
+        database.commentFilterDao().insert(commentFilter("Rude", Account.ANONYMOUS_ACCOUNT))
+
+        AccountSettings.copyToAllAccounts(context, database, Account.ANONYMOUS_ACCOUNT)
+
+        for (destination in listOf("alice", "bob")) {
+            assertEquals(destination, listOf("NSFW"),
+                database.postFilterDao().getAllPostFilters(destination).map { it.name })
+            assertEquals(destination, listOf("Rude"),
+                database.commentFilterDao().getAllCommentFilters(destination).map { it.name })
+        }
+    }
+
+    @Test
     fun `copying to all accounts leaves the main page tabs alone`() {
         addAccounts("alice")
         mainPageTabs.edit().putString(key("alice", "tabs"), "mine").commit()

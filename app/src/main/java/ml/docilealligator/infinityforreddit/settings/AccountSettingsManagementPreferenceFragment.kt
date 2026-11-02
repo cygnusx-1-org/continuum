@@ -29,8 +29,8 @@ import org.greenrobot.eventbus.EventBus
 
 /**
  * Everything that acts on this account's settings and data as a whole rather than on one of them:
- * copying another account's settings over, copying this one's to every other account, putting this one back to defaults, and throwing away one
- * kind of accumulated data at a time.
+ * copying another account's settings over, copying this one's to every other account, putting this
+ * one back to defaults, and throwing away one kind of accumulated data at a time.
  *
  * The two settings operations end by restarting the app: they rewrite preference files that the
  * running process has already read, and a screen showing values from before the copy is worse than
@@ -59,7 +59,6 @@ class AccountSettingsManagementPreferenceFragment : CustomFontPreferenceFragment
         val resetAccountSettingsPreference =
             findPreference<Preference>(SharedPreferencesUtils.RESET_ACCOUNT_SETTINGS)
 
-        // Anonymous counts as an account here: it can be copied from, and copied to, like any other.
         // So from a signed-in account there is always somebody else, and from Anonymous there is
         // somebody only once an account has been added.
         val isAnonymous = Account.isAnonymous(mActivity.accountName)
@@ -101,7 +100,6 @@ class AccountSettingsManagementPreferenceFragment : CustomFontPreferenceFragment
                     val context = mActivity.applicationContext
                     executor.execute {
                         AccountSettings.copyToAllAccounts(context, redditDataRoomDatabase, source)
-                        handler.post { AppRestartHelper.triggerAppRestart(context) }
                     }
                 }
                 .setNegativeButton(R.string.no, null)

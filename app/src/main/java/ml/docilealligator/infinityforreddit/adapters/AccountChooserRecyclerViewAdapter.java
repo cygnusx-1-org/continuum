@@ -44,7 +44,7 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
             AccountViewHolder accountViewHolder = (AccountViewHolder) holder;
 
             boolean anonymous = Account.isAnonymous(account.getAccountName());
-            glide.load(anonymous ? null : account.getProfileImageUrl())
+            glide.load(anonymous ? R.drawable.ic_anonymous_day_night_24dp : account.getProfileImageUrl())
                     .error(glide.load(R.drawable.subreddit_default_icon))
                     .transform(new RoundedCornersTransformation(128, 0))
                     .into(accountViewHolder.binding.profileImageItemAccount);

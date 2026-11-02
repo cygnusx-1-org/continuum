@@ -164,11 +164,11 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
         accounts.observe(getViewLifecycleOwner(), list -> {
             if (includeAnonymous) {
                 List<Account> withAnonymous = new ArrayList<>();
-                withAnonymous.add(new Account(Account.ANONYMOUS_ACCOUNT, null, null, null,
-                        null, null, 0, false, false));
                 if (list != null) {
                     withAnonymous.addAll(list);
                 }
+                withAnonymous.add(new Account(Account.ANONYMOUS_ACCOUNT, null, null, null,
+                        null, null, 0, false, false));
                 list = withAnonymous;
             }
             adapter.changeAccountsDataset(list);

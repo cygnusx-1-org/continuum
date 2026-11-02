@@ -81,8 +81,6 @@ object AccountSettings {
      * removed, so the two accounts end up agreeing rather than the destination keeping a setting
      * the source never had. Runs one way — the source file entries are only ever read.
      *
-     * Anonymous works as a source and as a destination.
-     *
      * Blocking. Call it off the main thread.
      */
     @SuppressLint("ApplySharedPref")
@@ -110,7 +108,7 @@ object AccountSettings {
     }
 
     /**
-     * Gives every other account, Anonymous included, the settings [sourceAccountName] has.
+     * Gives every other account the settings [sourceAccountName] has.
      *
      * [copyBetweenAccounts] once per destination, so each one is a mirror and main page tabs stay
      * as they are. The source itself is not changed.
