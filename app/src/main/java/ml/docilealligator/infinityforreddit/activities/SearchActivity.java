@@ -55,6 +55,7 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQueryViewModel;
 import ml.docilealligator.infinityforreddit.search.IncognitoKeyboardState;
+import ml.docilealligator.infinityforreddit.subreddit.ExcludedSubreddits;
 import ml.docilealligator.infinityforreddit.subreddit.ParseSubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
@@ -80,6 +81,11 @@ public class SearchActivity extends BaseActivity {
     public static final String RETURN_EXTRA_SELECTED_SUBREDDITS = "RESS";
     public static final String RETURN_EXTRA_SELECTED_USERNAMES = "RESU";
     public static final String EXTRA_IS_MULTI_SELECTION = "EIMS";
+    /**
+     * With {@link #EXTRA_IS_MULTI_SELECTION}: a {@code String} list of subreddits the caller already
+     * has, left out of both the suggestions and the results.
+     */
+    public static final String EXTRA_ALREADY_ADDED_SUBREDDITS = "EAAS";
     public static final int SUICIDE_PREVENTION_ACTIVITY_REQUEST_CODE = 101;
 
     private static final String SEARCH_IN_SUBREDDIT_OR_NAME_STATE = "SNS";
@@ -121,6 +127,7 @@ public class SearchActivity extends BaseActivity {
     private boolean searchOnlySubreddits;
     private boolean searchOnlyUsers;
     private boolean searchSubredditsAndUsers;
+    private ExcludedSubreddits excludedSubreddits = ExcludedSubreddits.NONE;
     /**
      * The random picks open a subreddit outright, which is the wrong move when this screen was
      * opened to hand a name back to whoever launched it.
@@ -200,6 +207,10 @@ public class SearchActivity extends BaseActivity {
         searchOnlySubreddits = getIntent().getBooleanExtra(EXTRA_SEARCH_ONLY_SUBREDDITS, false);
         searchOnlyUsers = getIntent().getBooleanExtra(EXTRA_SEARCH_ONLY_USERS, false);
         searchSubredditsAndUsers = getIntent().getBooleanExtra(EXTRA_SEARCH_SUBREDDITS_AND_USERS, false);
+        ArrayList<String> alreadyAddedSubreddits = getIntent().getStringArrayListExtra(EXTRA_ALREADY_ADDED_SUBREDDITS);
+        if (alreadyAddedSubreddits != null) {
+            excludedSubreddits = new ExcludedSubreddits(alreadyAddedSubreddits);
+        }
 
         if (searchOnlySubreddits) {
             binding.searchEditTextSearchActivity.setHint(R.string.search_only_subreddits_hint);
@@ -292,7 +303,7 @@ public class SearchActivity extends BaseActivity {
                                                     public void onParseSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
                                                         binding.recentSearchQueryRecyclerViewSearchActivity.setVisibility(View.GONE);
                                                         binding.subredditAutocompleteRecyclerViewSearchActivity.setVisibility(View.VISIBLE);
-                                                        subredditAutocompleteRecyclerViewAdapter.setSubreddits(subredditData);
+                                                        subredditAutocompleteRecyclerViewAdapter.setSubreddits(excludedSubreddits.filter(subredditData));
                                                     }
 
                                                     @Override
@@ -528,6 +539,8 @@ public class SearchActivity extends BaseActivity {
             Intent intent = new Intent(SearchActivity.this, SearchSubredditsResultActivity.class);
             intent.putExtra(SearchSubredditsResultActivity.EXTRA_QUERY, query);
             intent.putExtra(SearchSubredditsResultActivity.EXTRA_IS_MULTI_SELECTION, getIntent().getBooleanExtra(EXTRA_IS_MULTI_SELECTION, false));
+            intent.putStringArrayListExtra(SearchSubredditsResultActivity.EXTRA_ALREADY_ADDED_SUBREDDITS,
+                    getIntent().getStringArrayListExtra(EXTRA_ALREADY_ADDED_SUBREDDITS));
             startActivityForResult(intent, SUBREDDIT_SEARCH_REQUEST_CODE);
         } else if (searchOnlyUsers) {
             Intent intent = new Intent(this, SearchUsersResultActivity.class);

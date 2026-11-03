@@ -7,6 +7,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -64,13 +68,48 @@ public class SelectedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<
         }
     }
 
-    public void addSubreddits(ArrayList<ExpandedSubredditInMultiReddit> newSubreddits) {
+    /** Reddit treats subreddit names case-insensitively, so the duplicate checks here do too. */
+    private static String key(String name) {
+        return name.toLowerCase(Locale.ROOT);
+    }
+
+    private boolean contains(String name) {
+        String key = key(name);
+        for (ExpandedSubredditInMultiReddit s : subreddits) {
+            if (key(s.getName()).equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Appends the subreddits that aren't listed yet. A repeat within {@code newSubreddits} is
+     * dropped too: the picker can return the same subreddit both ticked and found by search.
+     */
+    public void addSubreddits(List<ExpandedSubredditInMultiReddit> newSubreddits) {
+        Set<String> listed = new HashSet<>();
+        for (ExpandedSubredditInMultiReddit s : subreddits) {
+            listed.add(key(s.getName()));
+        }
+        List<ExpandedSubredditInMultiReddit> added = new ArrayList<>();
+        for (ExpandedSubredditInMultiReddit s : newSubreddits) {
+            if (listed.add(key(s.getName()))) {
+                added.add(s);
+            }
+        }
+        if (added.isEmpty()) {
+            return;
+        }
         int oldSize = subreddits.size();
-        subreddits.addAll(newSubreddits);
-        notifyItemRangeInserted(oldSize, newSubreddits.size());
+        subreddits.addAll(added);
+        notifyItemRangeInserted(oldSize, added.size());
     }
 
     public void addUserInSubredditType(String username) {
+        if (contains(username)) {
+            return;
+        }
         subreddits.add(new ExpandedSubredditInMultiReddit(username, null));
         // The appended item is at size() - 1; notifying at size() reports a position past the end,
         // which desyncs RecyclerView's bookkeeping against getItemCount().
@@ -79,6 +118,14 @@ public class SelectedSubredditsRecyclerViewAdapter extends RecyclerView.Adapter<
 
     public ArrayList<ExpandedSubredditInMultiReddit> getSubreddits() {
         return subreddits;
+    }
+
+    public ArrayList<String> getSubredditNames() {
+        ArrayList<String> names = new ArrayList<>(subreddits.size());
+        for (ExpandedSubredditInMultiReddit s : subreddits) {
+            names.add(s.getName());
+        }
+        return names;
     }
 
     class SubredditViewHolder extends RecyclerView.ViewHolder {

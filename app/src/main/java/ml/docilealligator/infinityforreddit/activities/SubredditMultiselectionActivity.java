@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import ml.docilealligator.infinityforreddit.adapters.SubredditMultiselectionRecy
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.ActivitySubscribedSubredditsMultiselectionBinding;
+import ml.docilealligator.infinityforreddit.subreddit.ExcludedSubreddits;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditWithSelection;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditViewModel;
@@ -40,9 +42,18 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
 
     static final String EXTRA_RETURN_SELECTED_SUBREDDITS = "ERSS";
 
+    /** Comma-separated names to start out ticked; the user can untick them. */
     public static final String EXTRA_GET_SELECTED_SUBREDDITS = "EGSS";
 
+    /**
+     * A {@code String} list of names the caller already has. They are left out of the list and of
+     * the search, so the picker cannot hand one back a second time.
+     */
+    public static final String EXTRA_ALREADY_ADDED_SUBREDDITS = "EAAS";
+
     private static final int SUBREDDIT_SEARCH_REQUEST_CODE = 1;
+
+    private static final String SELECTED_SUBREDDITS_STATE = "SSS";
 
     @Inject
     @Named("oauth")
@@ -62,6 +73,15 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
     private SubredditMultiselectionRecyclerViewAdapter mAdapter;
     private RequestManager mGlide;
     private ActivitySubscribedSubredditsMultiselectionBinding binding;
+    private boolean mSubscribedSubredditsLoaded;
+    /**
+     * A search result that came back before the subscriptions loaded. When the system destroyed
+     * this activity behind the search screens, it is recreated only as the result arrives: the
+     * ticks are restored at once, but the rows they belong to are still being read from Room, so
+     * returning straight away would drop every ticked subreddit.
+     */
+    @Nullable
+    private ArrayList<SubredditData> mPendingSearchedSubreddits;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -120,13 +140,38 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
 
         binding.swipeRefreshLayoutSubscribedSubscribedSubredditsMultiselectionActivity.setEnabled(false);
 
-        bindView();
+        // The ticks made before a recreation win over the caller's starting ticks.
+        List<String> savedSelection = savedInstanceState == null
+                ? null : savedInstanceState.getStringArrayList(SELECTED_SUBREDDITS_STATE);
+        List<String> selectedNames = savedSelection != null
+                ? savedSelection : parseSubredditNames(getIntent().getStringExtra(EXTRA_GET_SELECTED_SUBREDDITS));
+        List<String> alreadyAddedNames = getIntent().getStringArrayListExtra(EXTRA_ALREADY_ADDED_SUBREDDITS);
+
+        bindView(selectedNames, alreadyAddedNames == null
+                ? ExcludedSubreddits.NONE : new ExcludedSubreddits(alreadyAddedNames));
     }
 
-    private void bindView() {
+    private static List<String> parseSubredditNames(@Nullable String names) {
+        List<String> parsed = new ArrayList<>();
+        if (names == null || names.isEmpty()) {
+            return parsed;
+        }
+        @SuppressWarnings("StringSplitter") // String.split drops trailing empty fields, which is the behavior relied on here.
+        String[] parts = names.split(",");
+        for (String name : parts) {
+            String trimmed = name.trim();
+            if (!trimmed.isEmpty()) {
+                parsed.add(trimmed);
+            }
+        }
+        return parsed;
+    }
+
+    private void bindView(List<String> selectedNames, ExcludedSubreddits excludedSubreddits) {
         mLinearLayoutManager = new LinearLayoutManagerBugFixed(this);
         binding.recyclerViewSubscribedSubscribedSubredditsMultiselectionActivity.setLayoutManager(mLinearLayoutManager);
-        mAdapter = new SubredditMultiselectionRecyclerViewAdapter(this, mCustomThemeWrapper);
+        mAdapter = new SubredditMultiselectionRecyclerViewAdapter(this, mCustomThemeWrapper,
+                selectedNames, excludedSubreddits);
         binding.recyclerViewSubscribedSubscribedSubredditsMultiselectionActivity.setAdapter(mAdapter);
 
         mSubscribedSubredditViewModel = new ViewModelProvider(this,
@@ -134,7 +179,10 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
                 .get(SubscribedSubredditViewModel.class);
         mSubscribedSubredditViewModel.getAllSubscribedSubreddits().observe(this, subscribedSubredditData -> {
             binding.swipeRefreshLayoutSubscribedSubscribedSubredditsMultiselectionActivity.setRefreshing(false);
-            if (subscribedSubredditData.isEmpty()) {
+            mAdapter.setSubscribedSubreddits(subscribedSubredditData);
+            // Judged on the rows shown: when every subscription is already in the caller's list,
+            // there is nothing left to pick.
+            if (mAdapter.getItemCount() == 0) {
                 binding.recyclerViewSubscribedSubscribedSubredditsMultiselectionActivity.setVisibility(View.GONE);
                 binding.noSubscriptionsLinearLayoutSubscribedSubredditsMultiselectionActivity.setVisibility(View.VISIBLE);
             } else {
@@ -143,7 +191,12 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
                 mGlide.clear(binding.noSubscriptionsImageViewSubscribedSubredditsMultiselectionActivity);
             }
 
-            mAdapter.setSubscribedSubreddits(subscribedSubredditData, getIntent().getStringExtra(EXTRA_GET_SELECTED_SUBREDDITS));
+            mSubscribedSubredditsLoaded = true;
+            ArrayList<SubredditData> pendingSearchedSubreddits = mPendingSearchedSubreddits;
+            if (pendingSearchedSubreddits != null) {
+                mPendingSearchedSubreddits = null;
+                finishWithSearchedSubreddits(pendingSearchedSubreddits);
+            }
         });
     }
 
@@ -171,6 +224,8 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
             Intent intent = new Intent(this, SearchActivity.class);
             intent.putExtra(SearchActivity.EXTRA_SEARCH_ONLY_SUBREDDITS, true);
             intent.putExtra(SearchActivity.EXTRA_IS_MULTI_SELECTION, true);
+            intent.putStringArrayListExtra(SearchActivity.EXTRA_ALREADY_ADDED_SUBREDDITS,
+                    getIntent().getStringArrayListExtra(EXTRA_ALREADY_ADDED_SUBREDDITS));
             startActivityForResult(intent, SUBREDDIT_SEARCH_REQUEST_CODE);
         }
 
@@ -181,23 +236,33 @@ public class SubredditMultiselectionActivity extends BaseActivity implements Act
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SUBREDDIT_SEARCH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
-            Intent returnIntent = new Intent();
-            ArrayList<SubredditWithSelection> selectedSubreddits = mAdapter.getAllSelectedSubreddits();
             ArrayList<SubredditData> searchedSubreddits = data.getParcelableArrayListExtra(SearchActivity.RETURN_EXTRA_SELECTED_SUBREDDITS);
-            if (searchedSubreddits != null) {
-                selectedSubreddits.addAll(searchedSubreddits.stream().map(
-                        subredditData -> new SubredditWithSelection(subredditData.getName(), subredditData.getIconUrl())
-                ).collect(Collectors.toList()));
+            if (searchedSubreddits == null) {
+                searchedSubreddits = new ArrayList<>();
             }
-            returnIntent.putParcelableArrayListExtra(EXTRA_RETURN_SELECTED_SUBREDDITS, selectedSubreddits);
-            setResult(RESULT_OK, returnIntent);
-            finish();
+            if (mSubscribedSubredditsLoaded) {
+                finishWithSearchedSubreddits(searchedSubreddits);
+            } else {
+                mPendingSearchedSubreddits = searchedSubreddits;
+            }
         }
+    }
+
+    private void finishWithSearchedSubreddits(List<SubredditData> searchedSubreddits) {
+        ArrayList<SubredditWithSelection> selectedSubreddits = mAdapter.getAllSelectedSubreddits();
+        selectedSubreddits.addAll(searchedSubreddits.stream()
+                .map(subredditData -> new SubredditWithSelection(subredditData.getName(), subredditData.getIconUrl()))
+                .collect(Collectors.toList()));
+        Intent returnIntent = new Intent();
+        returnIntent.putParcelableArrayListExtra(EXTRA_RETURN_SELECTED_SUBREDDITS, selectedSubreddits);
+        setResult(RESULT_OK, returnIntent);
+        finish();
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putStringArrayList(SELECTED_SUBREDDITS_STATE, mAdapter.getSelectedNames());
     }
 
     @Override

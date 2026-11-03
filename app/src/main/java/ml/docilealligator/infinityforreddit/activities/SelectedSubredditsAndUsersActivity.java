@@ -140,6 +140,8 @@ public class SelectedSubredditsAndUsersActivity extends BaseActivity implements 
 
     public void selectSubreddits() {
         Intent intent = new Intent(this, SubredditMultiselectionActivity.class);
+        intent.putStringArrayListExtra(SubredditMultiselectionActivity.EXTRA_ALREADY_ADDED_SUBREDDITS,
+                adapter.getSubredditNames());
         startActivityForResult(intent, SUBREDDIT_SELECTION_REQUEST_CODE);
     }
 

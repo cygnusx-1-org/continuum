@@ -25,9 +25,10 @@ public class SubredditListingViewModel extends ViewModel {
 
     public SubredditListingViewModel(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
                                      @Nullable String query, SortType sortType,
-                                     @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
+                                     @Nullable String accessToken, @NonNull String accountName, boolean nsfw,
+                                     ExcludedSubreddits excludedSubreddits) {
         subredditListingDataSourceFactory = new SubredditListingDataSourceFactory(executor, handler,
-                retrofit, oauthRetrofit, query, sortType, accessToken, accountName, nsfw);
+                retrofit, oauthRetrofit, query, sortType, accessToken, accountName, nsfw, excludedSubreddits);
 
         initialLoadingState = Transformations.switchMap(subredditListingDataSourceFactory.getSubredditListingDataSourceMutableLiveData(),
                 SubredditListingDataSource::getInitialLoadStateLiveData);
@@ -97,10 +98,12 @@ public class SubredditListingViewModel extends ViewModel {
         @NonNull
         private final String accountName;
         private final boolean nsfw;
+        private final ExcludedSubreddits excludedSubreddits;
 
         public Factory(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
                        @Nullable String query, SortType sortType,
-                       @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
+                       @Nullable String accessToken, @NonNull String accountName, boolean nsfw,
+                       ExcludedSubreddits excludedSubreddits) {
             this.executor = executor;
             this.handler = handler;
             this.retrofit = retrofit;
@@ -110,13 +113,14 @@ public class SubredditListingViewModel extends ViewModel {
             this.accessToken = accessToken;
             this.accountName = accountName;
             this.nsfw = nsfw;
+            this.excludedSubreddits = excludedSubreddits;
         }
 
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
             return (T) new SubredditListingViewModel(executor, handler, retrofit, oauthRetrofit,
-                    query, sortType, accessToken,accountName, nsfw);
+                    query, sortType, accessToken,accountName, nsfw, excludedSubreddits);
         }
     }
 }

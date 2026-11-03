@@ -38,6 +38,7 @@ import ml.docilealligator.infinityforreddit.adapters.SubredditListingRecyclerVie
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.databinding.FragmentSubredditListingBinding;
+import ml.docilealligator.infinityforreddit.subreddit.ExcludedSubreddits;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditData;
 import ml.docilealligator.infinityforreddit.subreddit.SubredditListingViewModel;
 import ml.docilealligator.infinityforreddit.thing.SelectThingReturnKey;
@@ -55,6 +56,8 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
     public static final String EXTRA_QUERY = "EQ";
     public static final String EXTRA_IS_GETTING_SUBREDDIT_INFO = "EIGSI";
     public static final String EXTRA_IS_MULTI_SELECTION = "EIMS";
+    /** A {@code String} list of subreddits the caller already has, left out of the results. */
+    public static final String EXTRA_ALREADY_ADDED_SUBREDDITS = "EAAS";
 
     SubredditListingViewModel mSubredditListingViewModel;
     @Inject
@@ -125,6 +128,7 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
 
         String query = getArguments().getString(EXTRA_QUERY);
         boolean isGettingSubredditInfo = getArguments().getBoolean(EXTRA_IS_GETTING_SUBREDDIT_INFO);
+        List<String> alreadyAddedSubreddits = getArguments().getStringArrayList(EXTRA_ALREADY_ADDED_SUBREDDITS);
 
         String sort = Objects.requireNonNull(mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TYPE_SEARCH_SUBREDDIT, SortType.Type.RELEVANCE.value));
         sortType = new SortType(SortType.Type.valueOf(sort.toUpperCase(Locale.US)));
@@ -171,7 +175,8 @@ public class SubredditListingFragment extends Fragment implements FragmentCommun
         }
 
         SubredditListingViewModel.Factory factory = new SubredditListingViewModel.Factory(mExecutor,
-                new Handler(), mRetrofit, mOauthRetrofit, query, sortType, mActivity.accessToken, mActivity.accountName, nsfw);
+                new Handler(), mRetrofit, mOauthRetrofit, query, sortType, mActivity.accessToken, mActivity.accountName, nsfw,
+                alreadyAddedSubreddits == null ? ExcludedSubreddits.NONE : new ExcludedSubreddits(alreadyAddedSubreddits));
         mSubredditListingViewModel = new ViewModelProvider(this, factory).get(SubredditListingViewModel.class);
         mSubredditListingViewModel.getSubreddits().observe(getViewLifecycleOwner(), subredditData -> mAdapter.submitList(subredditData));
 

@@ -24,6 +24,7 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     @NonNull
     private final String accountName;
     private final boolean nsfw;
+    private final ExcludedSubreddits excludedSubreddits;
     private Handler handler;
 
     private final MutableLiveData<NetworkState> paginationNetworkStateLiveData;
@@ -37,7 +38,8 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
 
     SubredditListingDataSource(Executor executor, Handler handler, Retrofit retrofit, Retrofit oauthRetrofit,
                                @Nullable String query, SortType sortType,
-                               @Nullable String accessToken, @NonNull String accountName, boolean nsfw) {
+                               @Nullable String accessToken, @NonNull String accountName, boolean nsfw,
+                               ExcludedSubreddits excludedSubreddits) {
         this.executor = executor;
         this.retrofit = retrofit;
         this.oauthRetrofit = oauthRetrofit;
@@ -46,6 +48,7 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
         this.accessToken = accessToken;
         this.accountName = accountName;
         this.nsfw = nsfw;
+        this.excludedSubreddits = excludedSubreddits;
         this.handler = handler;
         paginationNetworkStateLiveData = new MutableLiveData<>();
         initialLoadStateLiveData = new MutableLiveData<>();
@@ -68,21 +71,19 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
     public void loadInitial(@NonNull LoadInitialParams<String> params, @NonNull LoadInitialCallback<String, SubredditData> callback) {
         initialLoadStateLiveData.postValue(NetworkState.LOADING);
 
-        FetchSubredditData.fetchSubredditListingData(executor, handler, retrofit, oauthRetrofit,
-                query, null, sortType.getType(), accessToken, accountName, nsfw,
-                new FetchSubredditData.FetchSubredditListingDataListener() {
-                    @Override
-                    public void onFetchSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
-                        hasSubredditLiveData.postValue(!subredditData.isEmpty());
-                        callback.onResult(subredditData, null, after);
-                        initialLoadStateLiveData.postValue(NetworkState.LOADED);
-                    }
+        fetchPage(null, new FetchSubredditData.FetchSubredditListingDataListener() {
+            @Override
+            public void onFetchSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
+                hasSubredditLiveData.postValue(!subredditData.isEmpty());
+                callback.onResult(subredditData, null, after);
+                initialLoadStateLiveData.postValue(NetworkState.LOADED);
+            }
 
-                    @Override
-                    public void onFetchSubredditListingDataFail() {
-                        initialLoadStateLiveData.postValue(new NetworkState(NetworkState.Status.FAILED, "Error retrieving subreddit list"));
-                    }
-                });
+            @Override
+            public void onFetchSubredditListingDataFail() {
+                initialLoadStateLiveData.postValue(new NetworkState(NetworkState.Status.FAILED, "Error retrieving subreddit list"));
+            }
+        });
     }
 
     @Override
@@ -99,18 +100,43 @@ public class SubredditListingDataSource extends PageKeyedDataSource<String, Subr
             return;
         }
 
+        fetchPage(params.key, new FetchSubredditData.FetchSubredditListingDataListener() {
+            @Override
+            public void onFetchSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
+                callback.onResult(subredditData, after);
+                paginationNetworkStateLiveData.postValue(NetworkState.LOADED);
+            }
+
+            @Override
+            public void onFetchSubredditListingDataFail() {
+                paginationNetworkStateLiveData.postValue(new NetworkState(NetworkState.Status.FAILED, "Error retrieving subreddit list"));
+            }
+        });
+    }
+
+    /**
+     * Fetches the page at {@code after} without the excluded subreddits. A page they emptied
+     * entirely is skipped for the one after it: Paging stops loading at the first empty page, so
+     * handing it back would end the list while Reddit still had results.
+     */
+    private void fetchPage(@Nullable String after, FetchSubredditData.FetchSubredditListingDataListener listener) {
         FetchSubredditData.fetchSubredditListingData(executor, handler, retrofit, oauthRetrofit,
-                query, params.key, sortType.getType(), accessToken, accountName, nsfw,
+                query, after, sortType.getType(), accessToken, accountName, nsfw,
                 new FetchSubredditData.FetchSubredditListingDataListener() {
                     @Override
-                    public void onFetchSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String after) {
-                        callback.onResult(subredditData, after);
-                        paginationNetworkStateLiveData.postValue(NetworkState.LOADED);
+                    public void onFetchSubredditListingDataSuccess(ArrayList<SubredditData> subredditData, String nextAfter) {
+                        ArrayList<SubredditData> kept = excludedSubreddits.filter(subredditData);
+                        if (kept.isEmpty() && !subredditData.isEmpty()
+                                && !nextAfter.isEmpty() && !nextAfter.equals("null")) {
+                            fetchPage(nextAfter, listener);
+                        } else {
+                            listener.onFetchSubredditListingDataSuccess(kept, nextAfter);
+                        }
                     }
 
                     @Override
                     public void onFetchSubredditListingDataFail() {
-                        paginationNetworkStateLiveData.postValue(new NetworkState(NetworkState.Status.FAILED, "Error retrieving subreddit list"));
+                        listener.onFetchSubredditListingDataFail();
                     }
                 });
     }

@@ -36,6 +36,7 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
 
     static final String EXTRA_QUERY = "EQ";
     static final String EXTRA_IS_MULTI_SELECTION = "EIMS";
+    static final String EXTRA_ALREADY_ADDED_SUBREDDITS = "EAAS";
     static final String RETURN_EXTRA_SELECTED_SUBREDDITS = "RESS";
 
     private static final String FRAGMENT_OUT_STATE = "FOS";
@@ -116,6 +117,8 @@ public class SearchSubredditsResultActivity extends BaseActivity implements Acti
             bundle.putString(SubredditListingFragment.EXTRA_QUERY, query);
             bundle.putBoolean(SubredditListingFragment.EXTRA_IS_GETTING_SUBREDDIT_INFO, true);
             bundle.putBoolean(SubredditListingFragment.EXTRA_IS_MULTI_SELECTION, getIntent().getBooleanExtra(EXTRA_IS_MULTI_SELECTION, false));
+            bundle.putStringArrayList(SubredditListingFragment.EXTRA_ALREADY_ADDED_SUBREDDITS,
+                    getIntent().getStringArrayListExtra(EXTRA_ALREADY_ADDED_SUBREDDITS));
             subredditListingFragment.setArguments(bundle);
             fragment = subredditListingFragment;
         }
