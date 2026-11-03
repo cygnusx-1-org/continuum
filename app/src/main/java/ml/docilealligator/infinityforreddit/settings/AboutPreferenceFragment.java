@@ -101,6 +101,16 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
             });
         }
 
+        Preference patchedditPreference = findPreference("patcheddit");
+        if (patchedditPreference != null) {
+            patchedditPreference.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
+                intent.setData(Uri.parse("https://reddit.com/r/patcheddit"));
+                mActivity.startActivity(intent);
+                return true;
+            });
+        }
+
         Preference checkForUpdatesPreference = findPreference("check_for_updates");
         if (checkForUpdatesPreference != null) {
             checkForUpdatesPreference.setOnPreferenceClickListener(preference -> {

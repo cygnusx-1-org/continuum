@@ -31,6 +31,7 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
     private final int secondaryTextColor;
     private boolean collapseSection;
     private boolean hideSection;
+    private final SharedPreferences navigationDrawerSharedPreferences;
     private final NavigationDrawerRecyclerViewMergedAdapter.ItemClickListener itemClickListener;
     private List<RecentSubreddits.Entry> recentSubreddits = new ArrayList<>();
 
@@ -42,6 +43,7 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
         this.glide = glide;
         primaryTextColor = customThemeWrapper.getPrimaryTextColor();
         secondaryTextColor = customThemeWrapper.getSecondaryTextColor();
+        this.navigationDrawerSharedPreferences = navigationDrawerSharedPreferences;
         collapseSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION, false);
         hideSection = navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_RECENT_SUBREDDITS_SECTION, false);
         this.itemClickListener = itemClickListener;
@@ -89,6 +91,9 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
 
             holder.itemView.setOnClickListener(view -> {
                 collapseSection = !collapseSection;
+                // Kept, so it is still collapsed (or not) after a restart.
+                navigationDrawerSharedPreferences.edit()
+                        .putBoolean(SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION, collapseSection).apply();
                 if (collapseSection) {
                     notifyItemRangeRemoved(holder.getBindingAdapterPosition() + 1, recentSubreddits.size());
                 } else {
@@ -99,7 +104,8 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
         } else if (holder instanceof RecentSubredditViewHolder) {
             RecentSubreddits.Entry subreddit = recentSubreddits.get(position - 1);
             ItemNavDrawerSubscribedThingBinding binding = ((RecentSubredditViewHolder) holder).binding;
-            binding.thingNameTextViewItemNavDrawerSubscribedThing.setText(subreddit.name);
+            binding.thingNameTextViewItemNavDrawerSubscribedThing.setText(
+                    subreddit.type == RecentSubreddits.TYPE_USER ? "u/" + subreddit.name : subreddit.name);
             if (subreddit.iconUrl != null && !subreddit.iconUrl.isEmpty()) {
                 glide.load(subreddit.iconUrl)
                         .transform(new RoundedCornersTransformation(72, 0))
@@ -112,7 +118,13 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
                         .into(binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
             }
 
-            holder.itemView.setOnClickListener(view -> itemClickListener.onSubscribedSubredditClick(subreddit.name));
+            holder.itemView.setOnClickListener(view -> {
+                if (subreddit.type == RecentSubreddits.TYPE_USER) {
+                    itemClickListener.onRecentUserClick(subreddit.name);
+                } else {
+                    itemClickListener.onSubscribedSubredditClick(subreddit.name);
+                }
+            });
         }
     }
 

@@ -532,6 +532,8 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     // Recorded once the data is in hand, so the name and icon are stored together
                     // and a profile that never loaded is never listed as visited.
                     mRecordedVisit = true;
+                    ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.recordUser(
+                            mSharedPreferences, accountName, userData.getName(), userData.getIconUrl());
                     RecordRecentlyVisited.recordUser(mExecutor, mRedditDataRoomDatabase,
                             mRecentlyVisitedSharedPreferences, accountName, userData.getName(),
                             userData.getIconUrl());

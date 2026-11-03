@@ -211,6 +211,7 @@ public class SharedPreferencesUtils {
     public static final String HIDE_SUBREDDIT_BANNER = "hide_subreddit_banner";
     public static final String COLLAPSE_AUTOMOD_AND_STICKIED_COMMENTS = "collapse_automod_and_stickied_comments";
     public static final String AUTO_CHECK_FOR_UPDATES = "auto_check_for_updates";
+    public static final String INCLUDE_PRERELEASES = "include_prereleases";
     public static final String LAST_UPDATE_CHECK_TIME = "last_update_check_time";
     public static final String DATA_SAVING_MODE_PREFERENCE = "data_saving_mode_preference";
     public static final String DATA_SAVING_MODE = "data_saving_mode";
@@ -299,6 +300,7 @@ public class SharedPreferencesUtils {
     public static final String MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT = "media_only_posts_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
     public static final String NSFW_IN_TYPE_BADGE = "nsfw_in_type_badge";
+    public static final String HIDE_NSFW_BADGE = "hide_nsfw_badge";
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
     public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
     public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";

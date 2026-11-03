@@ -10,8 +10,10 @@ package ml.docilealligator.infinityforreddit.decoder;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -68,11 +70,30 @@ public final class CommentDecoder {
         // Prevent instantiation
     }
 
+    // A comment is bound again every time it scrolls into view, and the scan is regex work over
+    // the whole body, so the results of recent bodies are kept.
+    private static final int CACHE_SIZE = 256;
+    private static final Map<String, String> CACHE = Collections.synchronizedMap(
+            new LinkedHashMap<String, String>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                    return size() > CACHE_SIZE;
+                }
+            });
+
     /**
      * Returns the Markdown with decoded blocks added, or the same string if nothing decoded.
      */
     public static String annotate(String markdown) {
         if (markdown == null) return null;
+        String cached = CACHE.get(markdown);
+        if (cached != null) return cached;
+        String result = annotateUncached(markdown);
+        CACHE.put(markdown, result);
+        return result;
+    }
+
+    private static String annotateUncached(String markdown) {
         String[] paragraphs = PARAGRAPH_BREAK.split(markdown, -1);
         Set<String> seen = new HashSet<>();
         StringBuilder out = new StringBuilder(markdown.length());

@@ -350,6 +350,12 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_NSFW_BADGE, false).observe(getViewLifecycleOwner(), hideNsfwBadge -> {
+            if (getPostAdapter() != null && getPostAdapter().setHideNsfwBadge(hideNsfwBadge)) {
+                refreshAdapter();
+            }
+        });
+
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_POST_TYPE_INDICATOR, false).observe(getViewLifecycleOwner(), hidePostTypeIndicator -> {
             if (getPostAdapter() != null && getPostAdapter().setHidePostTypeIndicator(hidePostTypeIndicator)) {
                 refreshAdapter();

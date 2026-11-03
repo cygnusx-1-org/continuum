@@ -1244,6 +1244,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                     }
 
                     @Override
+                    public void onRecentUserClick(String username) {
+                        Intent intent = new Intent(MainActivity.this, ViewUserDetailActivity.class);
+                        intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, username);
+                        startActivity(intent);
+                    }
+
+                    @Override
                     public void onAccountClick(@NonNull String accountName) {
                         AccountManagement.switchAccount(mRedditDataRoomDatabase, mCurrentAccountSharedPreferences,
                                 mExecutor, new Handler(), accountName, newAccount -> {

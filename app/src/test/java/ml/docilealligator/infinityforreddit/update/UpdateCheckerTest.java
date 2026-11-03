@@ -17,6 +17,14 @@ public class UpdateCheckerTest {
     }
 
     @Test
+    public void preReleaseRanksBelowItsFullVersion() {
+        assertTrue(UpdateChecker.compareVersions("8.3.3.9.1.8", "8.3.3.9.1.8-beta.1") > 0);
+        assertTrue(UpdateChecker.compareVersions("8.3.3.9.1.8-beta.2", "8.3.3.9.1.8-beta.1") > 0);
+        assertTrue(UpdateChecker.compareVersions("8.3.3.9.1.8-beta.10", "8.3.3.9.1.8-beta.9") > 0);
+        assertTrue(UpdateChecker.compareVersions("8.3.3.9.1.9-beta.1", "8.3.3.9.1.8") > 0);
+    }
+
+    @Test
     public void missingPartsCountAsZero() {
         assertEquals(0, UpdateChecker.compareVersions("8.3.3.9.1", "8.3.3.9.1.0"));
         assertTrue(UpdateChecker.compareVersions("8.3.3.10", "8.3.3.9.1.1") > 0);

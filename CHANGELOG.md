@@ -2,6 +2,18 @@
 
 ---
 
+8.3.3.9.1.7 / 2026-11-3
+============
+* Added `Settings > Post > Hide NSFW Badge`, which never shows the NSFW badge in the feed or the post
+* Fixed compact posts with no thumbnail, such as text posts, showing no post type at all when the Post Type Triangle Indicator is on. They now keep the text badge
+* The About screen now carries the notice the Patcheddit license requires, and the NOTICE file is in the repository
+* Update dialog now shows download progress with a Cancel button
+* Added `Settings > About > Include pre-release versions`. A release tag with a suffix, such as `-beta.1`, is published as a pre-release
+* Recents now also lists users, and remembers whether the section is collapsed
+* The decoder remembers its results for recent comments, so scrolling back over a comment does not scan it again
+* Release builds skip the lint-vital pass and use the Gradle build cache, which makes them faster
+* Added a CI workflow that compiles every push to master and runs the unit tests
+
 8.3.3.9.1.6 / 2026-11-3
 ============
 * NSFW now shows inside the post type badge ("Image · NSFW") instead of as a badge of its own, in the feed and in the post. Added `Settings > Post > Show NSFW in the Post Type Badge` to turn it off

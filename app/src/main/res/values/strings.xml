@@ -509,6 +509,11 @@
     <string name="settings_hide_subreddit_banner_summary">Hide the banner image at the top of a subreddit page and use the space for content</string>
     <string name="settings_auto_check_for_updates_title">Check for updates automatically</string>
     <string name="settings_auto_check_for_updates_summary">Look for a new Reddit Jr. release on GitHub at most once a day</string>
+    <string name="settings_patcheddit_title" translatable="false">Patcheddit</string>
+    <!-- Wording required by the Patcheddit NOTICE file, section 7b: do not change it. -->
+    <string name="settings_patcheddit_notice" translatable="false">This app uses code from Patcheddit. To learn more, visit https://reddit.com/r/patcheddit</string>
+    <string name="settings_include_prereleases_title">Include pre-release versions</string>
+    <string name="settings_include_prereleases_summary">Also offer test builds, such as 8.3.3.9.1.8-beta.1, before they become a full release</string>
     <string name="settings_check_for_updates_title">Check for updates now</string>
     <string name="update_available_title">Update available</string>
     <string name="update_available_message">Version %1$s is available (you have %2$s).
@@ -840,6 +845,8 @@
     <string name="settings_media_only_posts_in_gallery_layout_title">Media Posts Only</string>
     <string name="settings_media_only_posts_in_gallery_layout_summary">In gallery layout, show only image, GIF, video and gallery posts. Text, poll and link posts are hidden</string>
     <string name="settings_hide_post_type">Hide Post Type</string>
+    <string name="settings_hide_nsfw_badge_title">Hide NSFW Badge</string>
+    <string name="settings_hide_nsfw_badge_summary">Never show the NSFW badge on posts, in the feed or in the post, and use the space</string>
     <string name="settings_nsfw_in_type_badge_title">Show NSFW in the Post Type Badge</string>
     <string name="settings_nsfw_in_type_badge_summary">Show NSFW inside the post type badge, like "Image · NSFW", instead of as a badge of its own. Has no effect while the post type is hidden</string>
     <string name="settings_post_type_triangle_indicator">Post Type Triangle Indicator</string>
