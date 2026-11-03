@@ -44,6 +44,18 @@
         app:title="@string/settings_hide_post_type" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
+        app:key="post_type_card_border"
+        app:title="@string/settings_post_type_card_border_title"
+        app:summary="@string/settings_post_type_card_border_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="collapse_stickied_posts"
+        app:title="@string/settings_collapse_stickied_posts_title"
+        app:summary="@string/settings_collapse_stickied_posts_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="hide_nsfw_badge"
         app:title="@string/settings_hide_nsfw_badge_title"

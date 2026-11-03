@@ -39,7 +39,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import app.futured.hauler.DragDirection;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
@@ -326,19 +326,22 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             binding.playBadgeImageViewItemShadowboxGallery.setVisibility(video ? View.VISIBLE : View.GONE);
 
             String still = item.feedPreviewUrl;
-            // A video's url is the mp4, which an ImageView cannot show; its still stands in.
-            String main = video ? still : item.url;
+            // The resolution-bounded still Reddit publishes, for every type: the source is several
+            // thousand pixels wide and decoding a screenful of those is what made the list stutter.
+            // A video's url is the mp4, which an ImageView cannot show, and a gif is only a still
+            // here, since a list of running gifs is the other thing that stutters; the viewer a tap
+            // opens plays it.
+            String main = video ? still : (still != null ? still : item.url);
             if (main == null) {
                 Glide.with(ViewRedditGalleryActivity.this).clear(binding.imageViewItemShadowboxGallery);
                 binding.imageViewItemShadowboxGallery.setImageDrawable(null);
                 binding.playBadgeImageViewItemShadowboxGallery.setVisibility(View.GONE);
                 binding.errorImageViewItemShadowboxGallery.setVisibility(View.VISIBLE);
             } else {
-                RequestBuilder<Drawable> request = Glide.with(ViewRedditGalleryActivity.this).load(main);
-                if (still != null && !still.equals(main)) {
-                    request = request.thumbnail(Glide.with(ViewRedditGalleryActivity.this).load(still));
-                }
-                request.into(binding.imageViewItemShadowboxGallery);
+                // Decoded at the screen's width, whatever size the file is.
+                Glide.with(ViewRedditGalleryActivity.this).load(main)
+                        .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL)
+                        .into(binding.imageViewItemShadowboxGallery);
             }
 
             if (TextUtils.isEmpty(item.caption)) {

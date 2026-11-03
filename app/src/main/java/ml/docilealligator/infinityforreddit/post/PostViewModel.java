@@ -102,6 +102,8 @@ public class PostViewModel extends ViewModel {
 
     private final LiveData<PagingData<Post>> posts;
     private final LiveData<PagingData<Post>> filteredPosts;
+    // Posts hidden from this feed since it was opened; read on the paging executor by the filter.
+    private final java.util.Set<String> hiddenInFeed = java.util.concurrent.ConcurrentHashMap.newKeySet();
     // Saved-screen search. Only the Saved tab sets this; when non-empty the paging source loads the
     // whole saved listing, filters by the query, and returns every match at once (see
     // PostPagingSource#loadAllUserPostsFiltered). Read on the paging executor when a source is built,
@@ -363,7 +365,22 @@ public class PostViewModel extends ViewModel {
                                 postPagingData, executor, this::isPostVisible))), ViewModelKt.getViewModelScope(this));
     }
 
+    /**
+     * Takes a post out of the feed on screen, or puts it back, as the user hides or unhides it.
+     * The rows are filtered rather than removed, so the filter runs again; the post list itself is
+     * untouched and a refresh asks Reddit, which leaves hidden posts out.
+     */
+    public void setPostHiddenInFeed(String fullName, boolean hidden) {
+        boolean changed = hidden ? hiddenInFeed.add(fullName) : hiddenInFeed.remove(fullName);
+        if (changed) {
+            hideReadPostsAndMediaOnlyLiveData.refilter();
+        }
+    }
+
     private boolean isPostVisible(Post post) {
+        if (hiddenInFeed.contains(post.getFullName())) {
+            return false;
+        }
         if (Boolean.TRUE.equals(hideReadPostsValue.getValue()) && post.isRead() && !isPinnedHere(post)) {
             return false;
         }
@@ -924,6 +941,14 @@ public class PostViewModel extends ViewModel {
         void release() {
             held = false;
             update();
+        }
+
+        /**
+         * Rebuilds the filtered stream although neither flag changed, for a filter that reads
+         * something else. Still a single emission, so it is the safe one-rebuild case.
+         */
+        void refilter() {
+            setValue(Pair.create(hideReadPostsValue.getValue(), mediaOnlyValue.getValue()));
         }
 
         private void update() {

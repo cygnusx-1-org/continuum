@@ -2,6 +2,16 @@
 
 ---
 
+8.3.3.9.1.13 / 2026-11-3
+============
+* Hiding a post now takes it out of the feed straight away, instead of leaving it there until you refresh
+* Added `Settings > Post > Collapse Stickied Posts`, which shows a subreddit's stickied posts as a single line. Tap one to open it
+* Added `Settings > Post > Post Type Card Border`, a thin line across the top of Card Layout 1 and 3 cards in the post type's color
+* Card Layout 1 and 3 have a smaller gap between cards
+* The vertical gallery list loads screen-sized pictures instead of full-size ones, and shows GIFs as stills, so it scrolls smoothly. Tap one to see it play
+* Collapsed comments with the old green background, saved in your applied theme, now show no background too
+* `Check for updates` moved out of About to the top level of Settings
+
 8.3.3.9.1.12 / 2026-11-3
 ============
 * Collapsed comments no longer have a bright green background. The built-in themes now give them none, since the collapsed row and its text already say so. A custom theme you made keeps its own color, which you can change under the theme's `Fully Collapsed Comment Background`

@@ -472,9 +472,18 @@ public class CustomThemeWrapper {
                 getDefaultColor("#4185F4", "#4185F4", "#4185F4"));
     }
 
+    /**
+     * The applied theme is stored in preferences, so a theme applied before the built-in colour
+     * became transparent still holds the old green. Those two greens are the old built-in
+     * defaults, and are shown as no background; any other colour is the user's own.
+     */
     public int getFullyCollapsedCommentBackgroundColor() {
-        return getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.FULLY_COLLAPSED_COMMENT_BACKGROUND_COLOR,
-                getDefaultColor("#8EDFBA", "#21C561", "#21C561"));
+        int color = getThemeSharedPreferences().getInt(CustomThemeSharedPreferencesUtils.FULLY_COLLAPSED_COMMENT_BACKGROUND_COLOR,
+                Color.TRANSPARENT);
+        if (color == Color.parseColor("#8EDFBA") || color == Color.parseColor("#21C561")) {
+            return Color.TRANSPARENT;
+        }
+        return color;
     }
 
     public int getNavBarColor() {

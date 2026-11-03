@@ -2295,6 +2295,13 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     }
 
     @Override
+    protected void onPostHiddenChanged(String fullName, boolean hidden) {
+        if (mPostViewModel != null) {
+            mPostViewModel.setPostHiddenInFeed(fullName, hidden);
+        }
+    }
+
+    @Override
     protected void refreshAdapter() {
         int previousPosition = -1;
         if (mLinearLayoutManager != null) {

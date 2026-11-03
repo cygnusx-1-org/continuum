@@ -303,6 +303,8 @@ public class SharedPreferencesUtils {
     public static final String HIDE_POST_TYPE = "hide_post_type";
     public static final String NSFW_IN_TYPE_BADGE = "nsfw_in_type_badge";
     public static final String HIDE_NSFW_BADGE = "hide_nsfw_badge";
+    public static final String COLLAPSE_STICKIED_POSTS = "collapse_stickied_posts";
+    public static final String POST_TYPE_CARD_BORDER = "post_type_card_border";
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
     public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
     public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";
