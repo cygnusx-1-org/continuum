@@ -2,6 +2,12 @@
 
 ---
 
+8.3.3.9.1.12 / 2026-11-3
+============
+* Collapsed comments no longer have a bright green background. The built-in themes now give them none, since the collapsed row and its text already say so. A custom theme you made keeps its own color, which you can change under the theme's `Fully Collapsed Comment Background`
+* Shadowbox now always autoplays its videos and GIFs, whatever `Video Autoplay` is set to. `Mute Autoplaying Videos` still applies
+* Added TODO.md, which tracks what is left to rename and the features put off
+
 8.3.3.9.1.11 / 2026-11-3
 ============
 * Gallery posts opened from the feed or a post now show every image in one continuous vertical list. Tap an image to open the swipe viewer on it, with zoom, download and share, and press back to return to the list
