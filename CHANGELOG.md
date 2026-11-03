@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.9 / 2026-11-3
+============
+**Installs as a new app, again.** The application ID changed from `org.cygnusx1.redditjr` to `io.github.jayblah.redditjr`, which is yours instead of Continuum's namespace. Android treats it as a different app, so it does not update the previous one. Back up your settings in the old app under `Settings > Backup & Restore`, install this, and restore them.
+
 8.3.3.9.1.8 / 2026-11-3
 ============
 **Installs as a new app.** The application ID changed from `org.cygnusx1.continuumjr` to `org.cygnusx1.redditjr`, and the repository from `continuumjr` to `redditjr`. Android treats it as a different app, so it does not update the old one. Back up your settings in the old app under `Settings > Backup & Restore`, install this, and restore them. APK files are now named `redditjr-<abi>-<version>.apk`.
