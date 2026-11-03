@@ -39,10 +39,6 @@
         app:summary="@string/settings_include_prereleases_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        android:key="check_for_updates"
-        app:title="@string/settings_check_for_updates_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         android:key="version"
         app:title="@string/settings_version_title"
         app:summary="@string/settings_version_summary" />

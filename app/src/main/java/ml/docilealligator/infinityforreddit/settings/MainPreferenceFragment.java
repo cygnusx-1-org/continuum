@@ -59,6 +59,14 @@ public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
             });
         }
 
+        Preference checkForUpdatesPreference = findPreference("check_for_updates");
+        if (checkForUpdatesPreference != null) {
+            checkForUpdatesPreference.setOnPreferenceClickListener(preference -> {
+                ml.docilealligator.infinityforreddit.update.UpdateUi.check(mActivity, true);
+                return true;
+            });
+        }
+
         if (privacyPolicyPreference != null) {
             privacyPolicyPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override

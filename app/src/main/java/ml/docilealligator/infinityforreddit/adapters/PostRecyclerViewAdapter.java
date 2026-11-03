@@ -18,6 +18,7 @@ import android.text.SpannableStringBuilder;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -199,6 +200,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private static final int VIEW_TYPE_POST_CARD_3_GALLERY_TYPE = 15;
     private static final int VIEW_TYPE_POST_CARD_3_TEXT_TYPE = 16;
     private static final int VIEW_TYPE_POST_CARD_2_COMPACT_LINK = 17;
+    private static final int VIEW_TYPE_STICKIED_COLLAPSED = 18;
 
     private static final DiffUtil.ItemCallback<Post> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
         @Override
@@ -312,6 +314,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mHidePostType;
     private boolean mNsfwInTypeBadge = true;
     private boolean mHideNsfwBadge;
+    private boolean mCollapseStickiedPosts;
+    private boolean mPostTypeCardBorder = true;
+    // Stickied posts the user opened up this session, so they stay open as the list rebinds.
+    private final java.util.Set<String> mExpandedStickiedPosts = new java.util.HashSet<>();
     private boolean mPostTypeTriangleIndicator;
     private boolean mHidePostFlair;
     private boolean mHideSubredditAndUserPrefix;
@@ -424,6 +430,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mHidePostType = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
             mNsfwInTypeBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_IN_TYPE_BADGE, true);
             mHideNsfwBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_NSFW_BADGE, false);
+            mCollapseStickiedPosts = sharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_STICKIED_POSTS, false);
+            mPostTypeCardBorder = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_TYPE_CARD_BORDER, true);
             mPostTypeTriangleIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false);
             mHidePostFlair = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
             mHideSubredditAndUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
@@ -509,7 +517,100 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     @Override
     public int getItemViewType(int position) {
-        return viewTypeFor(getItem(position));
+        Post post = getItem(position);
+        if (isCollapsedSticky(post)) {
+            return VIEW_TYPE_STICKIED_COLLAPSED;
+        }
+        return viewTypeFor(post);
+    }
+
+    /**
+     * Whether {@code post} is a subreddit's stickied post drawn as a one-line row: only on a
+     * subreddit's own page, where the pin means something, and until the user taps it open.
+     */
+    private boolean isCollapsedSticky(@Nullable Post post) {
+        return mCollapseStickiedPosts && post != null && post.isStickied()
+                && mPostType == PostType.SUBREDDIT && !mDisplaySubredditName
+                && !mExpandedStickiedPosts.contains(post.getFullName());
+    }
+
+    // return true if the current value is not the same as the new value
+    public boolean setPostTypeCardBorder(boolean border) {
+        if (mPostTypeCardBorder != border) {
+            mPostTypeCardBorder = border;
+            return true;
+        }
+        return false;
+    }
+
+    private static final String TOP_BORDER_TAG = "post_type_top_border";
+
+    /**
+     * A thin line across the top of a Card Layout 1 or 3 card, in the post type's colour: the card
+     * layouts' version of the compact layout's triangle. The card is a FrameLayout, so the line is
+     * one more child laid over its top edge, which the card's rounded corners clip.
+     */
+    private void applyCardTopBorder(PostViewHolder holder) {
+        if ((mPostLayout != SharedPreferencesUtils.POST_LAYOUT_CARD
+                && mPostLayout != SharedPreferencesUtils.POST_LAYOUT_CARD_3)
+                || !(holder.itemView instanceof FrameLayout) || holder.post == null) {
+            return;
+        }
+        FrameLayout card = (FrameLayout) holder.itemView;
+        View last = card.getChildAt(card.getChildCount() - 1);
+        View border = last != null && TOP_BORDER_TAG.equals(last.getTag()) ? last : null;
+        if (!mPostTypeCardBorder || mHidePostType) {
+            if (border != null) {
+                border.setVisibility(View.GONE);
+            }
+            return;
+        }
+        if (border == null) {
+            border = new View(card.getContext());
+            border.setTag(TOP_BORDER_TAG);
+            int height = Math.round(3 * card.getResources().getDisplayMetrics().density);
+            card.addView(border, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, height, Gravity.TOP));
+        }
+        border.setVisibility(View.VISIBLE);
+        border.setBackgroundColor(getTypeColor(holder.post.getPostType()));
+    }
+
+    // return true if the current value is not the same as the new value
+    public boolean setCollapseStickiedPosts(boolean collapse) {
+        if (mCollapseStickiedPosts != collapse) {
+            mCollapseStickiedPosts = collapse;
+            return true;
+        }
+        return false;
+    }
+
+    private class StickiedCollapsedViewHolder extends RecyclerView.ViewHolder {
+        final ml.docilealligator.infinityforreddit.databinding.ItemPostStickiedCollapsedBinding binding;
+
+        StickiedCollapsedViewHolder(ml.docilealligator.infinityforreddit.databinding.ItemPostStickiedCollapsedBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            if (mActivity.titleTypeface != null) {
+                binding.titleTextViewItemPostStickiedCollapsed.setTypeface(mActivity.titleTypeface);
+            }
+        }
+
+        void bind(Post post) {
+            itemView.setBackgroundColor(mCardViewBackgroundColor);
+            binding.titleTextViewItemPostStickiedCollapsed.setText(post.getTitle());
+            binding.titleTextViewItemPostStickiedCollapsed.setTextColor(post.isRead() && mHandleReadPost
+                    ? mReadPostTitleColor : mPostTitleColor);
+            binding.pinImageViewItemPostStickiedCollapsed.setColorFilter(mStickiedPostIconTint, PorterDuff.Mode.SRC_IN);
+            binding.expandImageViewItemPostStickiedCollapsed.setColorFilter(mSecondaryTextColor, PorterDuff.Mode.SRC_IN);
+            itemView.setOnClickListener(view -> {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    mExpandedStickiedPosts.add(post.getFullName());
+                    notifyItemChanged(position);
+                }
+            });
+        }
     }
 
     /**
@@ -752,6 +853,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_STICKIED_COLLAPSED) {
+            return new StickiedCollapsedViewHolder(ml.docilealligator.infinityforreddit.databinding.ItemPostStickiedCollapsedBinding
+                    .inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        }
         if (viewType == VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE) {
             if (mDataSavingMode) {
                 return new PostWithPreviewTypeViewHolder(ItemPostWithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -838,6 +943,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      */
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof StickiedCollapsedViewHolder) {
+            Post post = getItem(position);
+            if (post != null) {
+                ((StickiedCollapsedViewHolder) holder).bind(post);
+            }
+            return;
+        }
         bindPostViewHolder(holder, position);
         // After the bind, so the post type badge's text is final.
         if (holder instanceof PostViewHolder) {
@@ -845,6 +957,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (postHolder.post != null) {
                 ml.docilealligator.infinityforreddit.utils.NsfwBadge.fold(postHolder.typeTextView,
                         postHolder.nsfwTextView, mNsfwInTypeBadge && !mHideNsfwBadge && postHolder.post.isNSFW());
+                applyCardTopBorder(postHolder);
             }
         }
     }

@@ -350,6 +350,18 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.POST_TYPE_CARD_BORDER, true).observe(getViewLifecycleOwner(), border -> {
+            if (getPostAdapter() != null && getPostAdapter().setPostTypeCardBorder(border)) {
+                refreshAdapter();
+            }
+        });
+
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.COLLAPSE_STICKIED_POSTS, false).observe(getViewLifecycleOwner(), collapse -> {
+            if (getPostAdapter() != null && getPostAdapter().setCollapseStickiedPosts(collapse)) {
+                refreshAdapter();
+            }
+        });
+
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_NSFW_BADGE, false).observe(getViewLifecycleOwner(), hideNsfwBadge -> {
             if (getPostAdapter() != null && getPostAdapter().setHideNsfwBadge(hideNsfwBadge)) {
                 refreshAdapter();
@@ -1136,8 +1148,16 @@ public abstract class PostFragmentBase extends Fragment {
                     post.markAsRead();
                 }
                 getPostAdapter().notifyItemChanged(event.positionInList);
+                onPostHiddenChanged(post.getFullName(), post.isHidden());
             }
         }
+    }
+
+    /**
+     * A post in this feed was hidden or unhidden. Feeds that filter their rows take it out (or put
+     * it back) now instead of leaving it until the next refresh.
+     */
+    protected void onPostHiddenChanged(String fullName, boolean hidden) {
     }
 
     @Subscribe

@@ -155,6 +155,11 @@
         app:top="true" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
+        android:key="check_for_updates"
+        app:icon="@drawable/ic_refresh_day_night_24dp"
+        app:title="@string/settings_check_for_updates_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         android:key="privacy_policy"
         app:icon="@drawable/ic_privacy_policy_day_night_24dp"
         app:title="@string/settings_privacy_policy_title" />
