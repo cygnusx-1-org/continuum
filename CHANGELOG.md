@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.9.2 / 2026-11-3
+============
+Note v8a is the 64-bit build, and should be considered the default choice.
+
+* Implemented [Enhancement] Show existing subreddits as selected (or hide them) when editing a multireddit to prevent duplicates #483
+* Fixed [BUG] Disabled Main Tabs still allowing invisible Navigation when swiped. #482
+* Fixed Incorrect handling of parentheses in links #480
+
 8.3.3.9.1 / 2026-11-2
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.
