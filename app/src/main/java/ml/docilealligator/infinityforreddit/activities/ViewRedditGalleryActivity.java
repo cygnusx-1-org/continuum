@@ -102,7 +102,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     Executor executor;
     @Nullable
     public Typeface typeface;
-    private SectionsPagerAdapter sectionsPagerAdapter;
     // Assigned from the required EXTRA_POST intent extra after a finish()+return guard, so its
     // initialization along the early-return path can't be proven; live paths always set it.
     @SuppressWarnings("NullAway.Init")
@@ -360,7 +359,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         backToList.setEnabled(false);
         binding.viewPagerViewRedditGalleryActivity.setVisibility(View.GONE);
         binding.viewPagerViewRedditGalleryActivity.setAdapter(null);
-        sectionsPagerAdapter = null;
         binding.recyclerViewViewRedditGalleryActivity.setVisibility(View.VISIBLE);
         if (binding.recyclerViewViewRedditGalleryActivity.getAdapter() == null) {
             binding.recyclerViewViewRedditGalleryActivity.setLayoutManager(new LinearLayoutManager(this));
@@ -384,7 +382,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     }
 
     private void createPagerAdapter() {
-        sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
         binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
     }
