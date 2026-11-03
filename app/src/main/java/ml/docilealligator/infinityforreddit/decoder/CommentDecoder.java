@@ -40,8 +40,11 @@ public final class CommentDecoder {
 
     private static final Pattern PARAGRAPH_BREAK = Pattern.compile("\\n[ \\t]*\\n");
     private static final Pattern TOKEN_SEPARATOR = Pattern.compile("[\\s,+/]+");
-    private static final Pattern BINARY = Pattern.compile("\\b(?:[01]{8} ?){2,}\\b");
+    private static final Pattern BINARY = Pattern.compile("\\b(?:[01]{8}\\s*){2,}\\b");
     private static final Pattern LETTER = Pattern.compile("[a-zA-Z]");
+    // A link's host and path, and a leading label such as "TikTok and IG: ".
+    private static final Pattern LINK_PREFIX = Pattern.compile("^.*/");
+    private static final Pattern LABEL_PREFIX = Pattern.compile("^.*:\\s+");
 
     private static final Map<String, String> NATO_ALPHABET = new HashMap<>();
 
@@ -120,13 +123,24 @@ public final class CommentDecoder {
         if (decoded == null) return false;
         decoded = decoded.replaceAll("\\s+", " ").trim();
         if (decoded.isEmpty() || !seen.add(label + ":" + decoded)) return false;
+        String term = searchTerm(decoded);
 
         out.append("\n\n> **").append(label).append("** ").append(codeSpan(decoded))
                 .append("\n>\n> [📋](").append(COPY_URL_PREFIX).append(encode(decoded)).append(')')
-                .append(" · [🏷️](").append(simpCityUrl(decoded, true)).append(')')
-                .append(" · [🌐](").append(simpCityUrl(decoded, false)).append(')')
-                .append(" · [🔍](").append(socialSearchUrl(decoded)).append(')');
+                .append(" · [🏷️](").append(simpCityUrl(term, true)).append(')')
+                .append(" · [🌐](").append(simpCityUrl(term, false)).append(')')
+                .append(" · [🔍](").append(socialSearchUrl(term)).append(')');
         return true;
+    }
+
+    /**
+     * Only the handle is worth searching: drops a link's host and path (https://link.me/name)
+     * or a leading label ("TikTok and IG: name"). Copy still carries the full text.
+     */
+    static String searchTerm(String decoded) {
+        String term = LINK_PREFIX.matcher(decoded).replaceFirst("");
+        term = LABEL_PREFIX.matcher(term).replaceFirst("").trim();
+        return term.isEmpty() ? decoded : term;
     }
 
     /**

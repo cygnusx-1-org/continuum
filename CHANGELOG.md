@@ -2,6 +2,11 @@
 
 ---
 
+8.3.3.9.1.3 / 2026-11-3
+============
+* Decoder search links now use only the handle, dropping a link's host and path or a leading label such as "TikTok and IG:". Copy still copies the full decoded text
+* Decoder now reads 8-bit binary split across lines
+
 8.3.3.9.1.2 / 2026-11-3
 ============
 First Continuumjr release, a fork of Continuum 8.3.3.9.1. Note arm64-v8a is the 64-bit build, and should be considered the default choice.

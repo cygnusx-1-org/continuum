@@ -55,6 +55,27 @@ public class CommentDecoderTest {
     }
 
     @Test
+    public void searchTermDropsLinkAndLabel() {
+        assertEquals("name", CommentDecoder.searchTerm("https://link.me/name"));
+        assertEquals("name", CommentDecoder.searchTerm("TikTok and IG: name"));
+        assertEquals("name", CommentDecoder.searchTerm("name"));
+        assertEquals("a/", CommentDecoder.searchTerm("a/"));
+    }
+
+    @Test
+    public void searchLinksUseTheHandle() {
+        String annotated = CommentDecoder.annotate("01010100 01101001 01101011 00111010 00100000 01101110");
+        assertTrue(annotated, annotated.contains("**BIN** `Tik: n`"));
+        assertTrue(annotated, annotated.contains("q=n&") && annotated.contains("q=n+%28site"));
+    }
+
+    @Test
+    public void decodesBinaryWrappedAcrossLines() {
+        String annotated = CommentDecoder.annotate("01001000\n01101001");
+        assertTrue(annotated, annotated.contains("**BIN** `Hi`"));
+    }
+
+    @Test
     public void returnsSameStringWhenNothingDecodes() {
         String body = "just a normal comment";
         assertSame(body, CommentDecoder.annotate(body));
