@@ -792,6 +792,13 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
     }
 
     protected void setToolbarGoToTop(Toolbar toolbar) {
+        // A tap on the toolbar's own area (title, blank space) goes to top, same as the long
+        // press. Its buttons and menu items take their own taps, so they are unaffected.
+        toolbar.setOnClickListener(view -> {
+            if (BaseActivity.this instanceof ActivityToolbarInterface) {
+                ((ActivityToolbarInterface) BaseActivity.this).onLongPress();
+            }
+        });
         toolbar.setOnLongClickListener(view -> {
             if (BaseActivity.this instanceof ActivityToolbarInterface) {
                 ((ActivityToolbarInterface) BaseActivity.this).onLongPress();

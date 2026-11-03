@@ -44,11 +44,14 @@
             android:src="@drawable/ic_copy_day_night_24dp" />
     </LinearLayout>
 
-    <LinearLayout
+    <!-- A flow layout, so the buttons wrap onto a second line on a narrow screen. -->
+    <com.nex3z.flowlayout.FlowLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:orientation="horizontal">
+        app:flChildSpacing="4dp"
+        app:flRowSpacing="0dp">
 
         <TextView
             android:id="@+id/simpcity_titles_text_view_markdown_decoder_block"
@@ -64,5 +67,5 @@
             android:id="@+id/social_text_view_markdown_decoder_block"
             style="@style/DecoderAction"
             android:text="@string/decoder_social_search" />
-    </LinearLayout>
+    </com.nex3z.flowlayout.FlowLayout>
 </LinearLayout>

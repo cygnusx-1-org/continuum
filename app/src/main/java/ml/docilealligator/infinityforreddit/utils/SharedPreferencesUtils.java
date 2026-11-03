@@ -298,6 +298,7 @@ public class SharedPreferencesUtils {
     public static final String CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT = "click_to_show_media_in_gallery_layout";
     public static final String MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT = "media_only_posts_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
+    public static final String NSFW_IN_TYPE_BADGE = "nsfw_in_type_badge";
     public static final String POST_TYPE_TRIANGLE_INDICATOR = "post_type_triangle_indicator";
     public static final String HIDE_POST_TYPE_INDICATOR = "hide_post_type_indicator";
     public static final String HIDE_IMAGE_COUNT_IN_GALLERY = "hide_image_count_in_gallery";

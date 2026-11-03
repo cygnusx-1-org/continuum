@@ -2,6 +2,12 @@
 
 ---
 
+8.3.3.9.1.6 / 2026-11-3
+============
+* NSFW now shows inside the post type badge ("Image · NSFW") instead of as a badge of its own, in the feed and in the post. Added `Settings > Post > Show NSFW in the Post Type Badge` to turn it off
+* Tapping the toolbar now scrolls to top on post and comment screens, like a long press already did
+* Larger text on the decoder card's buttons, which now wrap on a narrow screen
+
 8.3.3.9.1.5 / 2026-11-3
 ============
 * Fixed the update dialog's button text being hard to read in Dark Mode

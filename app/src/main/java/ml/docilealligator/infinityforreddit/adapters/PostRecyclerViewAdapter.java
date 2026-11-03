@@ -310,6 +310,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mMarkPostsAsReadAfterVoting;
     private boolean mMarkPostsAsReadOnScroll;
     private boolean mHidePostType;
+    private boolean mNsfwInTypeBadge = true;
     private boolean mPostTypeTriangleIndicator;
     private boolean mHidePostFlair;
     private boolean mHideSubredditAndUserPrefix;
@@ -420,6 +421,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             mHidePostType = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
+            mNsfwInTypeBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_IN_TYPE_BADGE, true);
             mPostTypeTriangleIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false);
             mHidePostFlair = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
             mHideSubredditAndUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
@@ -832,10 +834,22 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      * removing the gallery branches' getItem(position) clears the error, the text branch's does
      * not.
      */
-    @SuppressLint("RecyclerView")
-    @OptIn(markerClass = UnstableApi.class)
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
+        bindPostViewHolder(holder, position);
+        // After the bind, so the post type badge's text is final.
+        if (holder instanceof PostViewHolder) {
+            PostViewHolder postHolder = (PostViewHolder) holder;
+            if (postHolder.post != null) {
+                ml.docilealligator.infinityforreddit.utils.NsfwBadge.fold(postHolder.typeTextView,
+                        postHolder.nsfwTextView, mNsfwInTypeBadge && postHolder.post.isNSFW());
+            }
+        }
+    }
+
+    @SuppressLint("RecyclerView")
+    @OptIn(markerClass = UnstableApi.class)
+    private void bindPostViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof PostViewHolder) {
             Post post = getItem(position);
             if (post == null) {

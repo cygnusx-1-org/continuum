@@ -840,6 +840,8 @@
     <string name="settings_media_only_posts_in_gallery_layout_title">Media Posts Only</string>
     <string name="settings_media_only_posts_in_gallery_layout_summary">In gallery layout, show only image, GIF, video and gallery posts. Text, poll and link posts are hidden</string>
     <string name="settings_hide_post_type">Hide Post Type</string>
+    <string name="settings_nsfw_in_type_badge_title">Show NSFW in the Post Type Badge</string>
+    <string name="settings_nsfw_in_type_badge_summary">Show NSFW inside the post type badge, like "Image · NSFW", instead of as a badge of its own. Has no effect while the post type is hidden</string>
     <string name="settings_post_type_triangle_indicator">Post Type Triangle Indicator</string>
     <string name="settings_post_type_triangle_indicator_summary">Show post type as a colored triangle on the thumbnail in compact layout instead of a text badge</string>
     <string name="settings_hide_post_type_indicator_title">Hide Post Type Icon</string>
