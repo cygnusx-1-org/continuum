@@ -53,7 +53,7 @@ fi
 
 # Nothing here builds the APKs, so a set left over from the previous release passes every check
 # above and would be uploaded under this release's tag. Each build replaces the folder's APKs
-# with "continuum-<abi>-<versionName>.apk" (RenameApksTask), so the name says which version it is.
+# with "redditjr-<abi>-<versionName>.apk" (RenameApksTask), so the name says which version it is.
 VERSION_NAME=$(grep '^[[:space:]]*versionName[[:space:]]*"' app/build.gradle | head -n1 | awk '{ print $2 }' | tr -d '"')
 if [ -z "${VERSION_NAME}" ]; then
   echo "Error: Could not find versionName in app/build.gradle"
@@ -61,7 +61,7 @@ if [ -z "${VERSION_NAME}" ]; then
 fi
 for APK in "${ARM64_APKS[0]}" "${ARMEABI_APKS[0]}"; do
   case "$(basename "${APK}")" in
-    continuum-arm64-v8a-"${VERSION_NAME}".apk|continuum-armeabi-v7a-"${VERSION_NAME}".apk) ;;
+    redditjr-arm64-v8a-"${VERSION_NAME}".apk|redditjr-armeabi-v7a-"${VERSION_NAME}".apk) ;;
     *)
       echo "Error: ${APK} is not a ${VERSION_NAME} build."
       echo "Build it first with: scripts/release-builds.sh ${VARIANT} 2"

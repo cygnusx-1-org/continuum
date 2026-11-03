@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -27,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.noties.markwon.Markwon;
 import ml.docilealligator.infinityforreddit.BuildConfig;
 import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
@@ -81,11 +83,14 @@ public final class UpdateUi {
     }
 
     private static void showUpdateDialog(Activity activity, UpdateChecker.Release release) {
+        // The notes are Markdown, so they are rendered rather than shown with their markup.
         // A long message scrolls inside the dialog.
+        CharSequence message = TextUtils.concat(
+                activity.getString(R.string.update_available_header, release.version, BuildConfig.VERSION_NAME),
+                "\n\n", Markwon.create(activity).toMarkdown(release.notes.trim()));
         new MaterialAlertDialogBuilder(activity, R.style.MaterialAlertDialogTheme)
                 .setTitle(R.string.update_available_title)
-                .setMessage(activity.getString(R.string.update_available_message,
-                        release.version, BuildConfig.VERSION_NAME, release.notes))
+                .setMessage(message)
                 .setPositiveButton(R.string.update_download_and_install, (dialog, which) -> downloadAndInstall(activity, release))
                 .setNegativeButton(R.string.update_later, null)
                 .show();
@@ -158,7 +163,7 @@ public final class UpdateUi {
         try {
             connection.setConnectTimeout(15000);
             connection.setReadTimeout(30000);
-            connection.setRequestProperty("User-Agent", "continuumjr-updater");
+            connection.setRequestProperty("User-Agent", "redditjr-updater");
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 throw new IOException("Download returned " + connection.getResponseCode());
             }

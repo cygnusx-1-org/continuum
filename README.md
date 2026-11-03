@@ -6,8 +6,8 @@ A personal fork of [Continuum](https://github.com/cygnusx-1-org/continuum), an a
 
 <div align="center">
 
-[Releases](https://github.com/jayblah/continuumjr/releases)
-[License](https://github.com/jayblah/continuumjr/blob/master/LICENSE)
+[Releases](https://github.com/jayblah/redditjr/releases)
+[License](https://github.com/jayblah/redditjr/blob/master/LICENSE)
 [Upstream: Continuum](https://github.com/cygnusx-1-org/continuum)
 
 </div>
@@ -15,20 +15,20 @@ A personal fork of [Continuum](https://github.com/cygnusx-1-org/continuum), an a
 ---
 # What is different from Continuum
 - **NATO and binary decoder.** Comments and post bodies that spell something in the NATO phonetic alphabet or in 8-bit binary get the decoded text added below the paragraph, with links to copy it and to search for it. Turn it off in `Settings > Miscellaneous > Decode NATO and binary`.
-- **In-app updates.** The app checks the [latest release](https://github.com/jayblah/continuumjr/releases/latest) of this repository, at most once a day, and offers to download and install it. Turn it off in `Settings > Miscellaneous > Check for updates automatically`, or check by hand with `Check for updates now`.
-- **Installs beside Continuum.** The application ID is `org.cygnusx1.continuumjr` and the app is named Reddit Jr., so it does not replace or share data with Continuum.
+- **In-app updates.** The app checks the [latest release](https://github.com/jayblah/redditjr/releases/latest) of this repository, at most once a day, and offers to download and install it. Turn it off in `Settings > Miscellaneous > Check for updates automatically`, or check by hand with `Check for updates now`.
+- **Installs beside Continuum.** The application ID is `org.cygnusx1.redditjr` and the app is named Reddit Jr., so it does not replace or share data with Continuum.
 
 Everything else is Continuum. Changes are kept small and in new files where possible so upstream merges stay clean.
 
 # Installation
-1. Open the [latest release](https://github.com/jayblah/continuumjr/releases/latest) on your phone.
+1. Open the [latest release](https://github.com/jayblah/redditjr/releases/latest) on your phone.
 2. Download the APK with `arm64-v8a` in its name. That is the 64-bit build and the right choice for almost every phone. Use `armeabi-v7a` only on an old 32-bit phone.
 3. Open the file and allow installs from your browser when Android asks.
 
 After that the app updates itself from new releases.
 
 ## Verification
-org.cygnusx1.continuumjr 1B:6C:E8:BD:8A:42:C4:9D:98:20:D5:A5:DF:D6:53:1A:D2:06:BD:81:51:0C:6D:42:FE:AC:81:FD:42:CE:71:9B
+org.cygnusx1.redditjr 1B:6C:E8:BD:8A:42:C4:9D:98:20:D5:A5:DF:D6:53:1A:D2:06:BD:81:51:0C:6D:42:FE:AC:81:FD:42:CE:71:9B
 
 You can verify it with [AppVerifier](https://github.com/soupslurpr/AppVerifier).
 

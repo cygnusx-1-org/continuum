@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.8 / 2026-11-3
+============
+**Installs as a new app.** The application ID changed from `org.cygnusx1.continuumjr` to `org.cygnusx1.redditjr`, and the repository from `continuumjr` to `redditjr`. Android treats it as a different app, so it does not update the old one. Back up your settings in the old app under `Settings > Backup & Restore`, install this, and restore them. APK files are now named `redditjr-<abi>-<version>.apk`.
+
+* The update dialog now renders the release notes instead of showing their Markdown markup, such as `**Full Changelog**`
+* Release notes now come from this changelog, so the update dialog shows what changed instead of a list of pull requests
+
 8.3.3.9.1.7 / 2026-11-3
 ============
 * Added `Settings > Post > Hide NSFW Badge`, which never shows the NSFW badge in the feed or the post

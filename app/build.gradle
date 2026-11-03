@@ -71,7 +71,7 @@ android {
     compileSdk 37
 
     defaultConfig {
-        applicationId "org.cygnusx1.continuumjr"
+        applicationId "org.cygnusx1.redditjr"
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = [eventBusIndex: 'ml.docilealligator.infinityforreddit.EventBusIndex']
@@ -80,8 +80,8 @@ android {
 
         minSdk 24
         targetSdk 36
-        versionCode 240
-        versionName "8.3.3.9.1.7"
+        versionCode 241
+        versionName "8.3.3.9.1.8"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         // The fallback must be 22 characters (APIKeysPreferenceFragment.CLIENT_ID_LENGTH) and must
         // not be R.string.default_client_id, or the API Keys dialog leaves its OK button disabled
@@ -648,7 +648,7 @@ spotless {
 
 // Replaces the legacy applicationVariants APK-renaming (removed by AGP 9's new DSL). For each
 // variant, transforms the APK artifact so each per-ABI output becomes
-// "continuum-<abi>-<versionName><-dirty?>.apk". versionName carries only the build-type suffix
+// "redditjr-<abi>-<versionName><-dirty?>.apk". versionName carries only the build-type suffix
 // (e.g. "-debug"); the "-dirty" marker is appended at execution time in RenameApksTask.taskAction.
 androidComponents {
     onVariants(selector().all()) { variant ->
@@ -847,7 +847,7 @@ abstract class RenameApksTask extends DefaultTask {
                     it.filterType == FilterConfiguration.FilterType.ABI
                 }?.identifier
                 def abiPart = abi ? "-${abi}" : ""
-                def newName = "continuum${abiPart}-${builtArtifact.versionName}${dirty}.apk"
+                def newName = "redditjr${abiPart}-${builtArtifact.versionName}${dirty}.apk"
                 params.inputApkFile.set(new File(builtArtifact.outputFile))
                 params.outputApkFile.set(new File(outputLocation.asFile, newName as String))
                 return params.outputApkFile.get().asFile
