@@ -1,0 +1,29 @@
+Patcheddit NOTICE
+
+https://reddit.com/r/patcheddit
+
+=============
+
+This file contains Section 7 notices of the GNU General Public License v3
+as they apply to Patcheddit code. These notices apply to all code authored for
+Patcheddit, including any modifications of code that may have originated
+outside this repository, and do not change the terms of the GPLv3 license.
+For the full license text, see the LICENSE file or:
+https://www.gnu.org/licenses/gpl-3.0.html
+
+7b. Attribution Requirement
+---------------------------
+
+Any application or derivative work that uses Patcheddit code must include
+an easily accessible, user-facing message with the exact wording:
+
+    This app uses code from Patcheddit. To learn more, visit https://reddit.com/r/patcheddit
+
+The message must be displayed in a manner that is clearly visible to users, such as in an "About" section or a toast during app startup. The message should not be hidden or obscured in any way.
+
+7c. Project Name Restriction
+----------------------------
+
+The project name "Patcheddit" may not be used for derivative works.
+Derivatives must adopt a completely different identity that is not related
+to or similar to the name "Patcheddit".

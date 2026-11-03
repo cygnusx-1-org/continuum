@@ -62,15 +62,19 @@ jobs:
         run: git clone --depth 1 https://github.com/cygnusx-1-org/subreddit-lists.git "$GITHUB_WORKSPACE/../subreddit-lists"
 
       - name: Build release APKs
-        run: ./gradlew assembleRelease --no-daemon -Dlint.baselines.continue=true
+        run: ./gradlew assembleRelease --build-cache -Dlint.baselines.continue=true
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # A tag with a suffix, such as v8.3.3.9.1.8-beta.1, is a pre-release: it never becomes
+          # "latest", and the app only offers it to people who turned on pre-release updates.
+          PRERELEASE=""
+          case "$GITHUB_REF_NAME" in *-*) PRERELEASE="--prerelease" ;; esac
           gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk \
-            --title "Reddit Jr. ${GITHUB_REF_NAME#v}" --generate-notes
+            --title "Reddit Jr. ${GITHUB_REF_NAME#v}" --generate-notes $PRERELEASE
 
       - name: Upload APKs (manual runs)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}

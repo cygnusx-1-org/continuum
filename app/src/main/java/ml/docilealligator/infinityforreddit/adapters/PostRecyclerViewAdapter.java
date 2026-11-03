@@ -311,6 +311,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mMarkPostsAsReadOnScroll;
     private boolean mHidePostType;
     private boolean mNsfwInTypeBadge = true;
+    private boolean mHideNsfwBadge;
     private boolean mPostTypeTriangleIndicator;
     private boolean mHidePostFlair;
     private boolean mHideSubredditAndUserPrefix;
@@ -422,6 +423,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
             mHidePostType = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
             mNsfwInTypeBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_IN_TYPE_BADGE, true);
+            mHideNsfwBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_NSFW_BADGE, false);
             mPostTypeTriangleIndicator = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false);
             mHidePostFlair = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
             mHideSubredditAndUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
@@ -842,7 +844,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             PostViewHolder postHolder = (PostViewHolder) holder;
             if (postHolder.post != null) {
                 ml.docilealligator.infinityforreddit.utils.NsfwBadge.fold(postHolder.typeTextView,
-                        postHolder.nsfwTextView, mNsfwInTypeBadge && postHolder.post.isNSFW());
+                        postHolder.nsfwTextView, mNsfwInTypeBadge && !mHideNsfwBadge && postHolder.post.isNSFW());
             }
         }
     }
@@ -1062,7 +1064,10 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             if (((PostViewHolder) holder).typeTextView != null) {
-                if (mHidePostType || (mPostTypeTriangleIndicator && holder instanceof PostCompactBaseViewHolder)) {
+                // The triangle sits on the thumbnail, so a row with no thumbnail box (a text post, or
+                // a link with no preview) keeps the text badge, or its type would show nowhere.
+                if (mHidePostType || (mPostTypeTriangleIndicator && holder instanceof PostCompactBaseViewHolder
+                        && showsCompactThumbnailBox(post))) {
                     ((PostViewHolder) holder).typeTextView.setVisibility(View.GONE);
                 } else {
                     ((PostViewHolder) holder).typeTextView.setVisibility(View.VISIBLE);
@@ -1073,7 +1078,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 ((PostViewHolder) holder).lockedImageView.setVisibility(View.VISIBLE);
             }
 
-            if (((PostViewHolder) holder).nsfwTextView != null && post.isNSFW()) {
+            if (((PostViewHolder) holder).nsfwTextView != null && post.isNSFW() && !mHideNsfwBadge) {
                 ((PostViewHolder) holder).nsfwTextView.setVisibility(View.VISIBLE);
             }
 
@@ -3052,6 +3057,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setOnlyDisablePreviewInVideoPosts(boolean onlyDisablePreviewInVideoAndGifPosts) {
         mOnlyDisablePreviewInVideoAndGifPosts = onlyDisablePreviewInVideoAndGifPosts;
+    }
+
+    // return true if the current value is not the same as the new value
+    public boolean setHideNsfwBadge(boolean hideNsfwBadge) {
+        if (mHideNsfwBadge != hideNsfwBadge) {
+            mHideNsfwBadge = hideNsfwBadge;
+            return true;
+        }
+
+        return false;
     }
 
     public void setHidePostType(boolean hidePostType) {

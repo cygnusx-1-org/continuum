@@ -41,11 +41,22 @@
         app:title="@string/settings_share_title"
         app:summary="@string/settings_share_summary" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
+        android:key="patcheddit"
+        app:title="@string/settings_patcheddit_title"
+        app:summary="@string/settings_patcheddit_notice" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
         app:key="auto_check_for_updates"
         app:title="@string/settings_auto_check_for_updates_title"
         app:summary="@string/settings_auto_check_for_updates_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="include_prereleases"
+        app:title="@string/settings_include_prereleases_title"
+        app:summary="@string/settings_include_prereleases_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         android:key="check_for_updates"

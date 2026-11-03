@@ -190,6 +190,9 @@ android {
         // therefore correct here, and the check only produced noise -- 183 entries of it already
         // sit in the baseline.
         disable 'LogNotTimber'
+        // Release builds skip the lint-vital pass: it re-ran lint for over a minute on every
+        // release. Lint still runs through the `lint` and `check` tasks.
+        checkReleaseBuilds = false
     }
 
     namespace = 'ml.docilealligator.infinityforreddit'

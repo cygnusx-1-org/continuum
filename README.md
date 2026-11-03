@@ -48,7 +48,9 @@ Releases are built and signed by GitHub Actions ([build.yml](/.github/workflows/
 2. Commit and push to `master`.
 3. Tag the commit with `v` plus the version name and push the tag, for example `git tag v8.3.3.9.1.3 && git push origin v8.3.3.9.1.3`.
 
-The workflow checks that the tag matches `versionName`, builds the APKs, and publishes the release. It needs the repository secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`. Every release must be signed with the same key, or Android will refuse to install it over the previous one. The version must also be higher than the last release, because the in-app updater compares version numbers.
+The workflow checks that the tag matches `versionName`, builds the APKs, and publishes the release. A tag with a suffix, such as `v8.3.3.9.1.8-beta.1` (with the same `versionName`), is published as a pre-release. It never becomes the latest release, and the app only offers it to people who turn on `Settings > About > Include pre-release versions`.
+
+Every push to `master` and every pull request is compiled and unit-tested by [ci.yml](/.github/workflows/ci.yml), so a broken change shows up there instead of in a release build. It needs the repository secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`. Every release must be signed with the same key, or Android will refuse to install it over the previous one. The version must also be higher than the last release, because the in-app updater compares version numbers.
 
 # Staying current with Continuum
 The `upstream` remote points at Continuum.
@@ -61,7 +63,7 @@ git merge upstream/master
 Expect conflicts in `app/build.gradle` (keep your version, based on theirs, and keep the `applicationId` and app name) and in `.github/workflows/build.yml` (keep this fork's).
 
 # License
-Distributed under the AGPL-3.0 License. See [LICENSE](/LICENSE) for more information. The decoder code is by wchill ([patcheddit](https://github.com/wchill/patcheddit)) and carries its own notice in the file headers.
+Distributed under the AGPL-3.0 License. See [LICENSE](/LICENSE) for more information. The decoder code is by wchill ([patcheddit](https://github.com/wchill/patcheddit)) and is covered by the section 7 terms in [NOTICE](/NOTICE). They require the app to say, in its About screen, that it uses Patcheddit code, which Reddit Jr. does under `Settings > About`.
 
 # Credits and upstream
 - [Continuum](https://github.com/cygnusx-1-org/continuum) by u/edgan, whose [Discord](https://discord.gg/vDuSpJEDrW) and [subreddit](https://old.reddit.com/r/continuumreddit/) are the place for questions about the parts this fork did not change.

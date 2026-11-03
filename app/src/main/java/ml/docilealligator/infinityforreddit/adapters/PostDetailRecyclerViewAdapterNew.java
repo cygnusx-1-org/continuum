@@ -215,6 +215,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final boolean mOnlyDisablePreviewInVideoAndGifPosts;
     private final boolean mHidePostType;
     private final boolean mNsfwInTypeBadge;
+    private final boolean mHideNsfwBadge;
     private final boolean mHidePostFlair;
     private final boolean mHideUpvoteRatio;
     private final boolean mHideSubredditAndUserPrefix;
@@ -364,6 +365,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
 
         mHidePostType = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
         mNsfwInTypeBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_IN_TYPE_BADGE, true);
+        mHideNsfwBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_NSFW_BADGE, false);
         mHidePostFlair = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
         mHideUpvoteRatio = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_UPVOTE_RATIO, false);
         mHideSubredditAndUserPrefix = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
@@ -699,7 +701,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         // After the bind, so the post type badge's text is final.
         if (holder instanceof PostDetailBaseViewHolder && mPost != null) {
             ml.docilealligator.infinityforreddit.utils.NsfwBadge.fold(((PostDetailBaseViewHolder) holder).typeTextView,
-                    ((PostDetailBaseViewHolder) holder).nsfwTextView, mNsfwInTypeBadge && mPost.isNSFW());
+                    ((PostDetailBaseViewHolder) holder).nsfwTextView, mNsfwInTypeBadge && !mHideNsfwBadge && mPost.isNSFW());
         }
     }
 
@@ -922,7 +924,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 ((PostDetailBaseViewHolder) holder).upvoteRatioTextView.setText(mPost.getUpvoteRatio() + "%");
             }
 
-            if (mPost.isNSFW()) {
+            if (mPost.isNSFW() && !mHideNsfwBadge) {
                 ((PostDetailBaseViewHolder) holder).nsfwTextView.setVisibility(View.VISIBLE);
             } else {
                 ((PostDetailBaseViewHolder) holder).nsfwTextView.setVisibility(View.GONE);

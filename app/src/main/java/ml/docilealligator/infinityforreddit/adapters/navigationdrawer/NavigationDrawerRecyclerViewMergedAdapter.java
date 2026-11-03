@@ -204,6 +204,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         void onMenuClick(int stringId);
         void onMenuLongClick(int stringId);
         void onSubscribedSubredditClick(String subredditName);
+        void onRecentUserClick(String username);
         void onAccountClick(@NonNull String accountName);
         void onAccountLongClick(@NonNull String accountName);
     }
