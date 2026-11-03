@@ -1,5 +1,5 @@
 name: Bug report
-description: Create a report to help us improve. **DO NOT REPORT MORE THAN ONE BUG PER ISSUE**
+description: Create a report to help us improve. **DO NOT REPORT MORE THAN ONE BUG PER ISSUE**  **DO NOT REPORT A BUG UNTIL YOU HAVE TESTED THE LATEST VERSION**
 labels: ['bug']
 
 body:
@@ -7,7 +7,7 @@ body:
     id: description
     attributes:
       label: Describe the bug
-      description: A clear and concise description of what the bug is. **DO NOT REPORT MORE THAN ONE BUG PER ISSUE**
+      description: A clear and concise description of what the bug is. **DO NOT REPORT MORE THAN ONE BUG PER ISSUE** **DO NOT REPORT A BUG UNTIL YOU HAVE TESTED THE LATEST VERSION**
     validations:
       required: true
 
