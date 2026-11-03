@@ -222,7 +222,7 @@
     <string name="follow_failed">"关注失败"</string>
     <string name="unfollowed">"已取消关注"</string>
     <string name="unfollow_failed">"取消关注失败"</string>
-    <string name="app_label">"Continuum"</string>
+    <string name="app_label">"Reddit Jr."</string>
     <string name="search_hint">"搜索您要找的"</string>
     <string name="search_only_subreddits_hint">"搜索版块"</string>
     <string name="search_only_users_hint">"搜索用户"</string>
@@ -568,12 +568,12 @@
     <string name="settings_reddit_account_title">"Reddit 帐户"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"版块"</string>
-    <string name="settings_subreddit_summary">"r/continuumreddit"</string>
+    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"分享"</string>
     <string name="settings_share_summary">"如果您喜欢此应用，可以分享给其他人"</string>
     <string name="settings_privacy_policy_title">"隐私政策"</string>
     <string name="settings_debug_title">"调试"</string>
-    <string name="settings_version_title">"Continuum"</string>
+    <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"版本 %s"</string>
     <string name="settings_screen_width_dp_title">"屏幕宽度"</string>
     <string name="settings_screen_width_dp_summary">"%d dp"</string>
@@ -594,9 +594,9 @@
 “Material You Amoled”。
 否则，您需要在启用 Material You 之前先为它们重命名。"</string>
     <string name="settings_enable_material_you_title">"启用 Material You"</string>
-    <string name="settings_enable_material_you_summary">"根据 Your Wallpaper 个性化 Continuum"</string>
+    <string name="settings_enable_material_you_summary">"根据 Your Wallpaper 个性化 Reddit Jr."</string>
     <string name="settings_apply_material_you_title">"应用 Material You"</string>
-    <string name="settings_apply_material_you_summary">"如果 Continuum 未更改主题"</string>
+    <string name="settings_apply_material_you_summary">"如果 Reddit Jr. 未更改主题"</string>
     <string name="settings_global_settings_management_title">"全局设置管理"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"删除数据库中的所有版块"</string>
     <string name="settings_delete_all_users_data_in_database_title">"删除数据库中的所有用户"</string>
@@ -961,7 +961,7 @@ Reddit 视频分辨率较低。
     <string name="error_getting_multi_reddit_data">"获取 MultiReddit 数据错误"</string>
     <string name="error_loading_multi_reddit_list">"无法同步 MultiReddit"</string>
     <string name="error_loading_subscriptions">"无法同步订阅"</string>
-    <string name="share_this_app">"看看 Continuum，一个很棒的 Reddit 客户端！\nhttps://play.google.com/store/"</string>
+    <string name="share_this_app">"看看 Reddit Jr.，一个很棒的 Reddit 客户端！\nhttps://play.google.com/store/"</string>
     <string name="error_getting_subreddit_name">"获取版块名称错误"</string>
     <string name="share_post_link">"分享帖子链接"</string>
     <string name="share_image_link">"分享图片链接"</string>
@@ -1278,7 +1278,7 @@ Reddit 视频分辨率较低。
     <string name="delete_all_legacy_settings_success">"成功删除所有旧版设置"</string>
     <string name="reset_all_settings_success">"成功重置所有设置"</string>
     <string name="username_preview">"u/edgan"</string>
-    <string name="subreddit_preview">"r/continuumreddit"</string>
+    <string name="subreddit_preview">"r/redditjr"</string>
     <string name="primary_text_preview">"主要文字"</string>
     <string name="secondary_text_preview">"次要文字"</string>
     <string name="post_title_preview">"这是一个帖子"</string>
@@ -1635,7 +1635,7 @@ Reddit 视频分辨率较低。
     <string name="reddit_gallery_item_url_hint">"URL"</string>
     <string name="user_agreement_dialog_title">"用户协议"</string>
     <string name="user_agreement_message">"登录前，您需要同意 Reddit 用户协议（%1$s）和 Infinity for Reddit 的隐私政策（%2$s）。\n\n从现在开始，您需要按月订阅才能在 Infinity for Reddit 中访问 Reddit API，这是因为 Reddit 自 2023 年 7 月 1 日起开始对 API 访问收费。"</string>
-    <string name="warning_message_nsfw_content">"Continuum 既不宣传也不推荐 NSFW 内容。由于Reddit的政策，您不太可能在应用程序中遇到NSFW内容。在更改这些设置之前，您需要同意Reddit用户协议（%1$s）和Continuum的隐私政策（%2$s）。"</string>
+    <string name="warning_message_nsfw_content">"Reddit Jr. 既不宣传也不推荐 NSFW 内容。由于Reddit的政策，您不太可能在应用程序中遇到NSFW内容。在更改这些设置之前，您需要同意Reddit用户协议（%1$s）和Reddit Jr.的隐私政策（%2$s）。"</string>
     <string name="agree">"同意"</string>
     <string name="do_not_agree">"不同意"</string>
     <string name="option_1_hint">"选项 1（必须）"</string>
@@ -1664,8 +1664,8 @@ Reddit 视频分辨率较低。
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"未授予通知权限"</string>
     <string name="go_to_settings">"设置"</string>
-    <string name="welcome_to_continuum">"欢迎使用 Continuum，浏览 Reddit 社区的全新方式！"</string>
-    <string name="subscription_prompt">"在您深入了解此应用程序提供的无数可能性之前，\n我想坦率且透明地说明我所实施的一项重大更改，以确保为您提供最好的服务。\n\n\n从现在开始，您将需要每月订阅才能在Continuum内访问RedditAPI而\n这是因为Reddit自2023年7月1日起开始对API访问收费。\n\n\n所有级别的工作方式相同。如果您想支持Continuum，您可以订阅更高的级别。\n最低级别的大部分资金都会流向Reddit。\n    "</string>
+    <string name="welcome_to_continuum">"欢迎使用 Reddit Jr.，浏览 Reddit 社区的全新方式！"</string>
+    <string name="subscription_prompt">"在您深入了解此应用程序提供的无数可能性之前，\n我想坦率且透明地说明我所实施的一项重大更改，以确保为您提供最好的服务。\n\n\n从现在开始，您将需要每月订阅才能在Reddit Jr.内访问RedditAPI而\n这是因为Reddit自2023年7月1日起开始对API访问收费。\n\n\n所有级别的工作方式相同。如果您想支持Reddit Jr.，您可以订阅更高的级别。\n最低级别的大部分资金都会流向Reddit。\n    "</string>
     <string name="monthly">"每月"</string>
     <string name="yearly">"每年"</string>
     <string name="weekly">"每周"</string>
@@ -1684,7 +1684,7 @@ Reddit 视频分辨率较低。
     <string name="subscription_plan_description_monthly_499">"黄金"</string>
     <string name="subscription_plan_description_monthly_699">"白金"</string>
     <string name="subscription_plan_description_monthly_899">"钻石"</string>
-    <string name="subscription_plan_description_monthly_999">"Continuum"</string>
+    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
     <string name="acknowledge_purchase_failed">"无法确认购买"</string>
     <string name="connect_to_billing_system_failed">"连接支付系统失败"</string>
     <string name="connecting_to_billing_system">"正在连接支付系统。请稍候。"</string>
@@ -1692,12 +1692,12 @@ Reddit 视频分辨率较低。
     <string name="load_subscription_options">"加载订阅选项"</string>
     <string name="acknowledging_subscription">"正在确认您的订阅。请稍候。"</string>
     <string name="acknowledgement_purchase_failed_description">"糟糕，确认您的购买时出错。如果此问题持续三天，您将自动获得退款。
-别担心，您仍然可以使用 IContinuum。"</string>
+别担心，您仍然可以使用 IReddit Jr.。"</string>
     <string name="continue_to_app">"继续前往应用"</string>
     <string name="restore_subscription_purchase_details">"已经付费订阅了？"</string>
     <string name="restore_subscription_purchase">"恢复订阅购买"</string>
     <string name="important_info_title">"请重新登录您的帐户"</string>
-    <string name="important_info">"Continuum 使用 Reddit 中的客户端 ID（API 密钥），您必须重新登录才能继续使用该应用程序。\n\n只需打开导航抽屉并单击您的帐户标题，然后选择“添加帐户”即可使用同一帐户再次登录Reddit。否则，Continuum可能根本无法加载帖子。带来不便敬请谅解。"</string>
+    <string name="important_info">"Reddit Jr. 使用 Reddit 中的客户端 ID（API 密钥），您必须重新登录才能继续使用该应用程序。\n\n只需打开导航抽屉并单击您的帐户标题，然后选择“添加帐户”即可使用同一帐户再次登录Reddit。否则，Reddit Jr.可能根本无法加载帖子。带来不便敬请谅解。"</string>
     <string name="i_understand">"我明白了"</string>
     <string name="add_to_comment_filter">"添加到评论过滤器"</string>
     <string name="cannot_edit_post_with_images">"不允许编辑带有图像的帖子。"</string>

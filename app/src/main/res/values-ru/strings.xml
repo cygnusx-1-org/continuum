@@ -221,7 +221,7 @@
     <string name="follow_failed">"Невозможно начать следить"</string>
     <string name="unfollowed">"Ты отписался от пользователя"</string>
     <string name="unfollow_failed">"Невозможно отписаться"</string>
-    <string name="app_label">"Continuum"</string>
+    <string name="app_label">"Reddit Jr."</string>
     <string name="search_hint">"Ищи что угодно"</string>
     <string name="search_only_subreddits_hint">"Искать сабреддиты"</string>
     <string name="search_only_users_hint">"Искать пользователя"</string>
@@ -567,12 +567,12 @@
     <string name="settings_reddit_account_title">"Аккаунт Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Сабреддит"</string>
-    <string name="settings_subreddit_summary">"r/continuumreddit"</string>
+    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Поделиться"</string>
     <string name="settings_share_summary">"Поделись этим приложением с другими людьми, если оно тебе нравится"</string>
     <string name="settings_privacy_policy_title">"Политика конфиденциальности"</string>
     <string name="settings_debug_title">"Отладка"</string>
-    <string name="settings_version_title">"Continuum"</string>
+    <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Версия %s"</string>
     <string name="settings_screen_width_dp_title">"Ширина экрана"</string>
     <string name="settings_screen_width_dp_summary">"%d dp"</string>
@@ -593,9 +593,9 @@
 «Material You Amoled».
 В противном случае переименуй их перед включением «Material You»."</string>
     <string name="settings_enable_material_you_title">"Включить «Material You»"</string>
-    <string name="settings_enable_material_you_summary">"Персонализация Continuum на основе фонового изображения рабочего экрана"</string>
+    <string name="settings_enable_material_you_summary">"Персонализация Reddit Jr. на основе фонового изображения рабочего экрана"</string>
     <string name="settings_apply_material_you_title">"Применить «Material You»"</string>
-    <string name="settings_apply_material_you_summary">"В случае, если приложение Continuum не изменило тему"</string>
+    <string name="settings_apply_material_you_summary">"В случае, если приложение Reddit Jr. не изменило тему"</string>
     <string name="settings_global_settings_management_title">"Управление глобальными настройками"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Удалить все сабреддиты из базы данных"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Удалить всех пользователей из базы данных"</string>
@@ -802,7 +802,7 @@
     <string name="settings_swap_post_and_comments_in_split_mode_summary">"Показывать комментарии слева и публикацию справа в режиме разделенного экрана."</string>
     <string name="settings_navigation_drawer_enable_hide_karma_title">"Скрыть карму аккаунта"</string>
     <string name="settings_secure_mode_title">"Безопасный режим"</string>
-    <string name="settings_secure_mode_summary">"Снимки и запись экрана запрещены. Continuum не отображается в списке недавних приложений."</string>
+    <string name="settings_secure_mode_summary">"Снимки и запись экрана запрещены. Reddit Jr. не отображается в списке недавних приложений."</string>
     <string name="settings_credits_lock_screen_animation_title">"Анимация экрана блокировки"</string>
     <string name="settings_app_lock_title">"Блокировка приложения"</string>
     <string name="settings_app_lock_summary">"Перед использованием приложения требуется аутентификация"</string>
@@ -960,7 +960,7 @@
     <string name="error_getting_multi_reddit_data">"Ошибка при получении данных о MultiReddit"</string>
     <string name="error_loading_multi_reddit_list">"Невозможно синхронизировать MultiReddit"</string>
     <string name="error_loading_subscriptions">"Невозможно синхронизировать подписки"</string>
-    <string name="share_this_app">"Попробуй «Continuum», отличный клиент для Reddit!
+    <string name="share_this_app">"Попробуй «Reddit Jr.», отличный клиент для Reddit!
 https://play.google.com/store/"</string>
     <string name="error_getting_subreddit_name">"Ошибка при получении названия сабреддита"</string>
     <string name="share_post_link">"Поделиться ссылкой на пост"</string>
@@ -1281,7 +1281,7 @@ https://play.google.com/store/"</string>
     <string name="delete_all_legacy_settings_success">"Все устаревшие настройки успешно удалены"</string>
     <string name="reset_all_settings_success">"Все настройки успешно сброшены"</string>
     <string name="username_preview">"u/edgan"</string>
-    <string name="subreddit_preview">"r/continuumreddit"</string>
+    <string name="subreddit_preview">"r/redditjr"</string>
     <string name="primary_text_preview">"Основной текст"</string>
     <string name="secondary_text_preview">"Дополнительный текст"</string>
     <string name="post_title_preview">"Это пост"</string>
@@ -1644,7 +1644,7 @@ https://play.google.com/store/"</string>
     <string name="reddit_gallery_item_url_hint">"URL"</string>
     <string name="user_agreement_dialog_title">"Пользовательское соглашение"</string>
     <string name="user_agreement_message">"Перед входом в систему тебе необходимо согласиться с Reddit Пользовательским соглашением (%1$s) и Политикой конфиденциальности Infinity for Reddit (%2$s).\n\nС этого момента тебе потребуется ежемесячная подписка для доступа к Reddit API в Infinity for Reddit, и это потому, что Reddit начала взимать плату за доступ к API с 1 июля 2023 года."</string>
-    <string name="warning_message_nsfw_content">"Continuum не продвигает и не рекомендует контент NSFW. В соответствии с политикой Reddit ты вряд ли встретишь контент NSFW в приложении. Ты должен принять Пользовательское соглашение Reddit (%1$s) и Политику конфиденциальности Continuum (%2$s), прежде чем менять эти настройки."</string>
+    <string name="warning_message_nsfw_content">"Reddit Jr. не продвигает и не рекомендует контент NSFW. В соответствии с политикой Reddit ты вряд ли встретишь контент NSFW в приложении. Ты должен принять Пользовательское соглашение Reddit (%1$s) и Политику конфиденциальности Reddit Jr. (%2$s), прежде чем менять эти настройки."</string>
     <string name="agree">"Принимаю"</string>
     <string name="do_not_agree">"Не принимаю"</string>
     <string name="option_1_hint">"Вариант 1 (обязательно)"</string>
@@ -1673,8 +1673,8 @@ https://play.google.com/store/"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Разрешение на отображение уведомлений не предоставлено"</string>
     <string name="go_to_settings">"Настройки"</string>
-    <string name="welcome_to_continuum">"Добро пожаловать в Continuum, твои ворота в совершенно новое измерение просмотра Reddit!"</string>
-    <string name="subscription_prompt">"Прежде чем ты погрузишься в бесчисленные возможности этого приложения, \n я хочу открыто и открыто рассказать о значительных изменениях, которые я внедрил, чтобы обеспечить тебе наилучший сервис. \n \n\nС этого момента тебе потребуется ежемесячная подписка для доступа к Reddit API в течение Continuum и\n это потому, что Reddit начала взимать плату за доступ к API с 1 июля 2023 года. \n \n\nВсе уровни работают одинаково. Если ты хочешь поддержать Continuum, ты можешь подписаться на более высокий уровень.\n Большая часть денег с самого низкого уровня поступает на Reddit.\n    "</string>
+    <string name="welcome_to_continuum">"Добро пожаловать в Reddit Jr., твои ворота в совершенно новое измерение просмотра Reddit!"</string>
+    <string name="subscription_prompt">"Прежде чем ты погрузишься в бесчисленные возможности этого приложения, \n я хочу открыто и открыто рассказать о значительных изменениях, которые я внедрил, чтобы обеспечить тебе наилучший сервис. \n \n\nС этого момента тебе потребуется ежемесячная подписка для доступа к Reddit API в течение Reddit Jr. и\n это потому, что Reddit начала взимать плату за доступ к API с 1 июля 2023 года. \n \n\nВсе уровни работают одинаково. Если ты хочешь поддержать Reddit Jr., ты можешь подписаться на более высокий уровень.\n Большая часть денег с самого низкого уровня поступает на Reddit.\n    "</string>
     <string name="monthly">"Ежемесячно"</string>
     <string name="yearly">"Ежегодно"</string>
     <string name="weekly">"Еженедельно"</string>
@@ -1693,19 +1693,19 @@ https://play.google.com/store/"</string>
     <string name="subscription_plan_description_monthly_499">"Золото – идеальный выбор!"</string>
     <string name="subscription_plan_description_monthly_699">"Платина"</string>
     <string name="subscription_plan_description_monthly_899">"Алмаз"</string>
-    <string name="subscription_plan_description_monthly_999">"Continuum"</string>
+    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
     <string name="acknowledge_purchase_failed">"Невозможно подтвердить покупку."</string>
     <string name="connect_to_billing_system_failed">"Не удалось подключиться к биллинговой системе."</string>
     <string name="connecting_to_billing_system">"Подключение к биллинговой системе. Пожалуйста, подожди."</string>
     <string name="thank_you_for_subscription">"Спасибо за подписку"</string>
     <string name="load_subscription_options">"Загрузить варианты подписки"</string>
     <string name="acknowledging_subscription">"Подтверждение твоей подписки. Пожалуйста, подожди."</string>
-    <string name="acknowledgement_purchase_failed_description">"К сожалению, при подтверждении покупки произошла ошибка. Если проблема не исчезнет в течение трёх дней, ты автоматически получишь возврат средств.\nНе волнуйся, ты по-прежнему можешь пользоваться Continuum."</string>
+    <string name="acknowledgement_purchase_failed_description">"К сожалению, при подтверждении покупки произошла ошибка. Если проблема не исчезнет в течение трёх дней, ты автоматически получишь возврат средств.\nНе волнуйся, ты по-прежнему можешь пользоваться Reddit Jr.."</string>
     <string name="continue_to_app">"Продолжить работу с приложением"</string>
     <string name="restore_subscription_purchase_details">"Уже оплатили подписку?"</string>
     <string name="restore_subscription_purchase">"Восстановление покупки подписки"</string>
     <string name="important_info_title">"Пожалуйста, войди в свою учётную запись заново"</string>
-    <string name="important_info">"Continuum использует идентификатор клиента (ключ API) от Reddit, и тебе необходимо повторно войти в систему, чтобы продолжить использование приложения. \n\nПросто открой панель навигации, щёлкни заголовок своей учетной записи и выбери «Добавить учетную запись», чтобы снова войти в Reddit, используя ту же учетную запись. В противном случае Continuum может вообще не загружать посты. Приносим извинения за неудобства."</string>
+    <string name="important_info">"Reddit Jr. использует идентификатор клиента (ключ API) от Reddit, и тебе необходимо повторно войти в систему, чтобы продолжить использование приложения. \n\nПросто открой панель навигации, щёлкни заголовок своей учетной записи и выбери «Добавить учетную запись», чтобы снова войти в Reddit, используя ту же учетную запись. В противном случае Reddit Jr. может вообще не загружать посты. Приносим извинения за неудобства."</string>
     <string name="i_understand">"Я понимаю"</string>
     <string name="add_to_comment_filter">"Добавить в фильтр комментариев"</string>
     <string name="cannot_edit_post_with_images">"Редактирование сообщений с изображениями запрещено."</string>

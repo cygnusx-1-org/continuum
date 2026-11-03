@@ -230,7 +230,7 @@
     <string name="unfollowed">Unfollowed</string>
     <string name="unfollow_failed">Unfollowing Failed</string>
 
-    <string name="app_label">Continuum</string>
+    <string name="app_label">Reddit Jr.</string>
     <string name="search_hint">Search anything</string>
     <string name="search_only_subreddits_hint">Search subreddits</string>
     <string name="search_only_users_hint">Search users</string>
@@ -511,9 +511,6 @@
     <string name="settings_hide_subreddit_banner_summary">Hide the banner image at the top of a subreddit page and use the space for content</string>
     <string name="settings_auto_check_for_updates_title">Check for updates automatically</string>
     <string name="settings_auto_check_for_updates_summary">Look for a new Reddit Jr. release on GitHub at most once a day</string>
-    <string name="settings_patcheddit_title" translatable="false">Patcheddit</string>
-    <!-- Wording required by the Patcheddit NOTICE file, section 7b: do not change it. -->
-    <string name="settings_patcheddit_notice" translatable="false">This app uses code from Patcheddit. To learn more, visit https://reddit.com/r/patcheddit</string>
     <string name="settings_include_prereleases_title">Include pre-release versions</string>
     <string name="settings_include_prereleases_summary">Also offer test builds, such as 8.3.3.9.1.8-beta.1, before they become a full release</string>
     <string name="settings_check_for_updates_title">Check for updates now</string>
@@ -635,12 +632,12 @@
     <string name="settings_reddit_account_title">Reddit Account</string>
     <string name="settings_reddit_account_summary">u/edgan</string>
     <string name="settings_subreddit_title">Subreddit</string>
-    <string name="settings_subreddit_summary">r/continuumreddit</string>
+    <string name="settings_subreddit_summary">r/redditjr</string>
     <string name="settings_share_title">Share</string>
     <string name="settings_share_summary">Share this app to other people if you enjoy it</string>
     <string name="settings_privacy_policy_title">Privacy Policy</string>
     <string name="settings_debug_title">Debug</string>
-    <string name="settings_version_title">Continuum</string>
+    <string name="settings_version_title">Reddit Jr.</string>
     <string name="settings_version_summary">Version %s</string>
     <string name="settings_screen_width_dp_title">Screen Width</string>
     <string name="settings_screen_width_dp_summary">%d dp</string>
@@ -657,9 +654,9 @@
     <string name="settings_category_material_you_title">Material You</string>
     <string name="settings_enable_material_you_warning_summary">Make sure you don\'t have themes named\n\"Material You\",\n\"Material You Dark\" or\n\"Material You Amoled\".\nOtherwise, rename them before enabling Material You.</string>
     <string name="settings_enable_material_you_title">Enable Material You</string>
-    <string name="settings_enable_material_you_summary">Personalize Continuum based on Your Wallpaper</string>
+    <string name="settings_enable_material_you_summary">Personalize Reddit Jr. based on Your Wallpaper</string>
     <string name="settings_apply_material_you_title">Apply Material You</string>
-    <string name="settings_apply_material_you_summary">In case Continuum did not change the theme</string>
+    <string name="settings_apply_material_you_summary">In case Reddit Jr. did not change the theme</string>
     <string name="settings_global_settings_management_title">Global Settings Management</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">Delete All Subreddits</string>
     <string name="settings_delete_all_users_data_in_database_title">Delete All Users</string>
@@ -1091,7 +1088,7 @@
     <string name="error_loading_multi_reddit_list">Cannot sync multireddits</string>
     <string name="error_loading_subscriptions">Cannot sync subscriptions</string>
 
-    <string name="share_this_app">Check out Continuum, an awesome Reddit client!\nhttps://play.google.com/store/</string>
+    <string name="share_this_app">Check out Reddit Jr., an awesome Reddit client!\nhttps://github.com/jayblah/redditjr/releases</string>
 
     <string name="error_getting_subreddit_name">Error getting subreddit name</string>
 
@@ -1422,7 +1419,7 @@
     <string name="reset_all_settings_success">Reset all settings successfully</string>
 
     <string name="username_preview">u/edgan</string>
-    <string name="subreddit_preview">r/continuumreddit</string>
+    <string name="subreddit_preview">r/redditjr</string>
     <string name="primary_text_preview">Primary Text</string>
     <string name="secondary_text_preview">Secondary Text</string>
     <string name="post_title_preview">This is a post</string>
@@ -1875,7 +1872,7 @@
 
     <string name="user_agreement_dialog_title">User Agreement</string>
     <string name="user_agreement_message">You need to agree to Reddit User Agreement (%1$s) and Infinity for Reddit\'s Privacy Policy (%2$s) before logging in.\n\nFrom now on, you will need a monthly subscription to access the Reddit API within Infinity for Reddit and this is because Reddit has started charging for API access since July 1st, 2023.</string>
-    <string name="warning_message_nsfw_content">Continuum neither promotes nor recommends NSFW content. Due to Reddit\'s policy, you are unlikely to encounter NSFW content within the app. You need to agree to Reddit User Agreement (%1$s) and Continuum\'s Privacy Policy (%2$s) before changing these settings.</string>
+    <string name="warning_message_nsfw_content">Reddit Jr. neither promotes nor recommends NSFW content. Due to Reddit\'s policy, you are unlikely to encounter NSFW content within the app. You need to agree to Reddit User Agreement (%1$s) and Reddit Jr.\'s Privacy Policy (%2$s) before changing these settings.</string>
     <string name="agree">Agree</string>
     <string name="do_not_agree">Don\'t Agree</string>
 
@@ -1914,12 +1911,12 @@
     <string name="denied_notification_permission">Notification permission is not granted</string>
     <string name="go_to_settings">Settings</string>
 
-    <string name="welcome_to_continuum">Welcome to Continuum, your gateway to a whole new dimension of Reddit browsing!</string>
+    <string name="welcome_to_continuum">Welcome to Reddit Jr., your gateway to a whole new dimension of Reddit browsing!</string>
     <string name="subscription_prompt">Before you dive into the countless possibilities this app offers,
         I want to be upfront and transparent about a significant change I\'ve implemented to ensure the best possible service for you.
-        \n\nFrom now on, you will need a monthly subscription to access the Reddit API within Continuum and
+        \n\nFrom now on, you will need a monthly subscription to access the Reddit API within Reddit Jr. and
         this is because Reddit has started charging for API access since July 1st, 2023.
-        \n\nAll the tiers work the same. If you want to support Continuum, you can subscribe to a higher tier.
+        \n\nAll the tiers work the same. If you want to support Reddit Jr., you can subscribe to a higher tier.
         Most of the money from the lowest tier goes to Reddit.
     </string>
     <string name="monthly">Monthly</string>
@@ -1940,20 +1937,20 @@
     <string name="subscription_plan_description_monthly_499">Gold - Perfect Choice!</string>
     <string name="subscription_plan_description_monthly_699">Platinum</string>
     <string name="subscription_plan_description_monthly_899">Diamond</string>
-    <string name="subscription_plan_description_monthly_999">Continuum</string>
+    <string name="subscription_plan_description_monthly_999">Reddit Jr.</string>
     <string name="acknowledge_purchase_failed">Cannot acknowledge purchase</string>
     <string name="connect_to_billing_system_failed">Failed to connect to the billing system</string>
     <string name="connecting_to_billing_system">Connecting to the billing system. Please wait.</string>
     <string name="thank_you_for_subscription">Thank you for your subscription</string>
     <string name="load_subscription_options">Load subscription options</string>
     <string name="acknowledging_subscription">Acknowledging your subscription. Please wait.</string>
-    <string name="acknowledgement_purchase_failed_description">Oops, there was an error when acknowledging your purchase. If this problem persists for three days, you will automatically get a refund.\nDon\'t worry, you can still enjoy Continuum.</string>
+    <string name="acknowledgement_purchase_failed_description">Oops, there was an error when acknowledging your purchase. If this problem persists for three days, you will automatically get a refund.\nDon\'t worry, you can still enjoy Reddit Jr..</string>
     <string name="continue_to_app">Continue to app</string>
     <string name="restore_subscription_purchase_details">Already paid for the subscription?</string>
     <string name="restore_subscription_purchase">Restore subscription purchase</string>
 
     <string name="important_info_title">Please re-login your account</string>
-    <string name="important_info">Continuum uses a Client ID(API key) from Reddit and you have to re-login to continue using the app.\n\nJust open the navigation drawer and click your account header and select \"Add an account\" to login to Reddit using the same account again. Otherwise, Continuum may not load posts at all. Sorry for the inconvenience.</string>
+    <string name="important_info">Reddit Jr. uses a Client ID(API key) from Reddit and you have to re-login to continue using the app.\n\nJust open the navigation drawer and click your account header and select \"Add an account\" to login to Reddit using the same account again. Otherwise, Reddit Jr. may not load posts at all. Sorry for the inconvenience.</string>
     <string name="i_understand">I understand</string>
 
     <string name="add_to_comment_filter">Add to Comment Filter</string>

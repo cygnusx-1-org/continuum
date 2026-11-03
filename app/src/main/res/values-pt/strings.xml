@@ -222,7 +222,7 @@ Toque para tentar novamente."</string>
     <string name="follow_failed">"Falhou ao Seguir"</string>
     <string name="unfollowed">"Deixado de Seguir"</string>
     <string name="unfollow_failed">"Falhou ao Deixar de Seguir"</string>
-    <string name="app_label">"Continuum"</string>
+    <string name="app_label">"Reddit Jr."</string>
     <string name="search_hint">"Pesquisar por qualquer coisa"</string>
     <string name="search_only_subreddits_hint">"Pesquisar comunidades"</string>
     <string name="search_only_users_hint">"Pesquisar utilizadores"</string>
@@ -568,12 +568,12 @@ Toque para tentar novamente."</string>
     <string name="settings_reddit_account_title">"Conta do Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Comunidade"</string>
-    <string name="settings_subreddit_summary">"r/continuumreddit"</string>
+    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Partilhar"</string>
     <string name="settings_share_summary">"Se aprecia esta aplicação, partilhe-a com outros"</string>
     <string name="settings_privacy_policy_title">"Política de Privacidade"</string>
     <string name="settings_debug_title">"Depuração"</string>
-    <string name="settings_version_title">"Continuum"</string>
+    <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Versão %s"</string>
     <string name="settings_screen_width_dp_title">"Largura do ecrã"</string>
     <string name="settings_screen_width_dp_summary">"%d dp"</string>
@@ -594,9 +594,9 @@ Toque para tentar novamente."</string>
 \"Material You Amoled\"
 Caso contrário, altere o nome antes de ativar Material You"</string>
     <string name="settings_enable_material_you_title">"Ativar Material You"</string>
-    <string name="settings_enable_material_you_summary">"Personalizar Continuum baseado na imagem de fundo"</string>
+    <string name="settings_enable_material_you_summary">"Personalizar Reddit Jr. baseado na imagem de fundo"</string>
     <string name="settings_apply_material_you_title">"Aplicar Material You"</string>
-    <string name="settings_apply_material_you_summary">"Em caso do Continuum não alterar o tema"</string>
+    <string name="settings_apply_material_you_summary">"Em caso do Reddit Jr. não alterar o tema"</string>
     <string name="settings_global_settings_management_title">"Gestão de configurações globais"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Eliminar Todas as Comunidades da BD"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Eliminar Todos os Utilizadores da BD"</string>
@@ -961,7 +961,7 @@ Reprodução automática de vídeos desativada."</string>
     <string name="error_getting_multi_reddit_data">"Erro ao obter dados do multireddit"</string>
     <string name="error_loading_multi_reddit_list">"Não foi possível sincronizar multireddits"</string>
     <string name="error_loading_subscriptions">"Não foi possível sincronizar as subscrições"</string>
-    <string name="share_this_app">"Confira Continuum, um cliente Reddit incrível!\nhttps://play.google.com/store/"</string>
+    <string name="share_this_app">"Confira Reddit Jr., um cliente Reddit incrível!\nhttps://play.google.com/store/"</string>
     <string name="error_getting_subreddit_name">"Erro ao obter o nome da comunidade"</string>
     <string name="share_post_link">"Partilhar Endereço da Publicação"</string>
     <string name="share_image_link">"Partilhar Endereço da Imagem"</string>
@@ -1281,7 +1281,7 @@ com base no Tema Indigo Amoled"</string>
     <string name="delete_all_legacy_settings_success">"A eliminação das definições antigas foi bem sucedida"</string>
     <string name="reset_all_settings_success">"Todas as definições repostas com sucesso"</string>
     <string name="username_preview">"u/edgan"</string>
-    <string name="subreddit_preview">"r/continuumreddit"</string>
+    <string name="subreddit_preview">"r/redditjr"</string>
     <string name="primary_text_preview">"Texto Principal"</string>
     <string name="secondary_text_preview">"Texto Secundário"</string>
     <string name="post_title_preview">"Isto é uma publicação"</string>
@@ -1642,7 +1642,7 @@ Toque para tentar novamente."</string>
     <string name="reddit_gallery_item_url_hint">"URL"</string>
     <string name="user_agreement_dialog_title">"Contrato do utilizador"</string>
     <string name="user_agreement_message">"Precisa de concordar com o Contrato de Utilizador Reddit (%1$s) e a Política de Privacidade do Infinity para Reddit (%2$s) antes de iniciar sessão.\n\nA partir de agora, necessitará de uma subscrição mensal para aceder ao Reddit API no Infinity para Reddit e isto porque o Reddit começou a cobrar pelo acesso API desde 1 de julho de 2023."</string>
-    <string name="warning_message_nsfw_content">"Continuum não promove nem recomenda conteúdos NSFW. Devido à política do Reddit, é improvável que encontre conteúdo do NSFW na aplicação. É necessário concordar com o Contrato do Utilizador Reddit (%1$s) e com a Política de Privacidade do Continuum (%2$s) antes de alterar estas definições."</string>
+    <string name="warning_message_nsfw_content">"Reddit Jr. não promove nem recomenda conteúdos NSFW. Devido à política do Reddit, é improvável que encontre conteúdo do NSFW na aplicação. É necessário concordar com o Contrato do Utilizador Reddit (%1$s) e com a Política de Privacidade do Reddit Jr. (%2$s) antes de alterar estas definições."</string>
     <string name="agree">"Concordo"</string>
     <string name="do_not_agree">"Não concordo"</string>
     <string name="option_1_hint">"Opção 1 (obrigatório)"</string>
@@ -1670,8 +1670,8 @@ Toque para tentar novamente."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"A permissão de notificação não foi concedida"</string>
     <string name="go_to_settings">"Definições"</string>
-    <string name="welcome_to_continuum">"Bem-vindo ao Continuum, a sua porta de entrada para uma nova dimensão de navegação Reddit!"</string>
-    <string name="subscription_prompt">"Antes de mergulhar nas inúmeras possibilidades que esta aplicação oferece,\n Quero ser franco e transparente sobre uma mudança significativa que implementei para garantir o melhor serviço possível para si.\n \n\nA partir de agora, precisará de uma subscrição mensal para aceder ao Reddit API dentro de Continuum e \n isto deve-se ao facto de Reddit ter começado a cobrar pelo acesso API desde 1 de julho de 2023.\n \n\nTodas as camadas funcionam da mesma forma. Se quiser apoiar o Continuum, pode candidatar-se a um nível superior.\n A maior parte do dinheiro do nível mais baixo vai para o Reddit.\n    "</string>
+    <string name="welcome_to_continuum">"Bem-vindo ao Reddit Jr., a sua porta de entrada para uma nova dimensão de navegação Reddit!"</string>
+    <string name="subscription_prompt">"Antes de mergulhar nas inúmeras possibilidades que esta aplicação oferece,\n Quero ser franco e transparente sobre uma mudança significativa que implementei para garantir o melhor serviço possível para si.\n \n\nA partir de agora, precisará de uma subscrição mensal para aceder ao Reddit API dentro de Reddit Jr. e \n isto deve-se ao facto de Reddit ter começado a cobrar pelo acesso API desde 1 de julho de 2023.\n \n\nTodas as camadas funcionam da mesma forma. Se quiser apoiar o Reddit Jr., pode candidatar-se a um nível superior.\n A maior parte do dinheiro do nível mais baixo vai para o Reddit.\n    "</string>
     <string name="monthly">"Mensalmente"</string>
     <string name="yearly">"Anualmente"</string>
     <string name="weekly">"Semanalmente"</string>
@@ -1690,19 +1690,19 @@ Toque para tentar novamente."</string>
     <string name="subscription_plan_description_monthly_499">"Ouro – Escolha Perfeita!"</string>
     <string name="subscription_plan_description_monthly_699">"Platina"</string>
     <string name="subscription_plan_description_monthly_899">"Diamante"</string>
-    <string name="subscription_plan_description_monthly_999">"Continuum"</string>
+    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
     <string name="acknowledge_purchase_failed">"Não é possível confirmar a compra"</string>
     <string name="connect_to_billing_system_failed">"Falha na ligação ao sistema de faturação"</string>
     <string name="connecting_to_billing_system">"Ligação ao sistema de faturação. Por favor, aguarde."</string>
     <string name="thank_you_for_subscription">"Obrigado pela sua subscrição"</string>
     <string name="load_subscription_options">"Carregar opções de subscrição"</string>
     <string name="acknowledging_subscription">"Reconhecendo a sua assinatura. Por favor, aguarde."</string>
-    <string name="acknowledgement_purchase_failed_description">"Ups, ocorreu um erro ao confirmar a sua compra. Se o problema persistir durante três dias, receberá automaticamente um reembolso.\nNão se preocupe, ainda pode usufruir do Continuum."</string>
+    <string name="acknowledgement_purchase_failed_description">"Ups, ocorreu um erro ao confirmar a sua compra. Se o problema persistir durante três dias, receberá automaticamente um reembolso.\nNão se preocupe, ainda pode usufruir do Reddit Jr.."</string>
     <string name="continue_to_app">"Continuar para a aplicação"</string>
     <string name="restore_subscription_purchase_details">"Já pagou a subscrição?"</string>
     <string name="restore_subscription_purchase">"Restaurar compra de subscrição"</string>
     <string name="important_info_title">"Iniciar sessão novamente na sua conta"</string>
-    <string name="important_info">"Continuum utiliza um ID de cliente (chave API) de Reddit e é necessário iniciar sessão novamente para continuar a utilizar a aplicação.\n\nBasta abrir a gaveta de navegação e clicar no cabeçalho da sua conta e selecionar \"Adicionar uma conta\" para iniciar sessão em Reddit utilizando novamente a mesma conta. Caso contrário, o Continuum poderá não carregar as publicações. Desculpe pela inconveniência."</string>
+    <string name="important_info">"Reddit Jr. utiliza um ID de cliente (chave API) de Reddit e é necessário iniciar sessão novamente para continuar a utilizar a aplicação.\n\nBasta abrir a gaveta de navegação e clicar no cabeçalho da sua conta e selecionar \"Adicionar uma conta\" para iniciar sessão em Reddit utilizando novamente a mesma conta. Caso contrário, o Reddit Jr. poderá não carregar as publicações. Desculpe pela inconveniência."</string>
     <string name="i_understand">"Compreendo"</string>
     <string name="add_to_comment_filter">"Adicionar ao filtro de comentários"</string>
     <string name="cannot_edit_post_with_images">"Não é permitido editar publicações com imagens."</string>

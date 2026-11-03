@@ -3888,6 +3888,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, post);
                 intent.putExtra(ViewRedditGalleryActivity.EXTRA_GALLERY_ITEM_INDEX, galleryItemIndex);
+                intent.putExtra(ViewRedditGalleryActivity.EXTRA_SCROLL_LIST, true);
                 mActivity.startActivity(intent);
             } else {
                 // Text posts have no media viewer (they can still carry a preview image). Releasing

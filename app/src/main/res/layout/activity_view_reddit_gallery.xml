@@ -28,6 +28,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
+                <!-- Every item stacked top to bottom; a tap opens the pager on that item. -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_view_reddit_gallery_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:visibility="gone" />
+
                 <com.google.android.material.appbar.AppBarLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -24,10 +24,6 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         setPreferencesFromResource(R.xml.about_preferences, rootKey);
 
         Preference openSourcePreference = findPreference(SharedPreferencesUtils.OPEN_SOURCE_KEY);
-        Preference ratePreference = findPreference(SharedPreferencesUtils.RATE_KEY);
-        Preference emailPreference = findPreference(SharedPreferencesUtils.EMAIL_KEY);
-        Preference redditAccountPreference = findPreference(SharedPreferencesUtils.REDDIT_ACCOUNT_KEY);
-        Preference subredditPreference = findPreference(SharedPreferencesUtils.SUBREDDIT_KEY);
         Preference sharePreference = findPreference(SharedPreferencesUtils.SHARE_KEY);
         Preference versionPreference = findPreference(SharedPreferencesUtils.VERSION_KEY);
 
@@ -35,53 +31,7 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
         if (openSourcePreference != null) {
             openSourcePreference.setOnPreferenceClickListener(preference -> {
                 Intent intent = new Intent(mActivity, LinkResolverActivity.class);
-                intent.setData(Uri.parse("https://github.com/cygnusx-1-org/continuum"));
-                mActivity.startActivity(intent);
-                return true;
-            });
-        }
-
-        if (ratePreference != null) {
-            ratePreference.setOnPreferenceClickListener(preference -> {
-                Intent playStoreIntent = new Intent(Intent.ACTION_VIEW);
-                playStoreIntent.setData(Uri.parse("market://details?id=ml.docilealligator.infinityforreddit.plus"));
-                if (playStoreIntent.resolveActivity(mActivity.getPackageManager()) != null) {
-                    mActivity.startActivity(playStoreIntent);
-                } else {
-                    Intent intent = new Intent(mActivity, LinkResolverActivity.class);
-                    intent.setData(Uri.parse("https://play.google.com/store/apps/details?id=ml.docilealligator.infinityforreddit"));
-                    mActivity.startActivity(intent);
-                }
-                return true;
-            });
-        }
-
-        if (emailPreference != null) {
-            emailPreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("mailto:continuum@cygnusx-1.org"));
-                try {
-                    mActivity.startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(mActivity, R.string.no_email_client, Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            });
-        }
-
-        if (redditAccountPreference != null) {
-            redditAccountPreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
-                intent.setData(Uri.parse("https://www.reddit.com/user/edgan"));
-                mActivity.startActivity(intent);
-                return true;
-            });
-        }
-
-        if (subredditPreference != null) {
-            subredditPreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
-                intent.setData(Uri.parse("https://www.reddit.com/r/continuumreddit"));
+                intent.setData(Uri.parse("https://github.com/jayblah/redditjr"));
                 mActivity.startActivity(intent);
                 return true;
             });
@@ -97,16 +47,6 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
                 } else {
                     Toast.makeText(mActivity, R.string.no_app, Toast.LENGTH_SHORT).show();
                 }
-                return true;
-            });
-        }
-
-        Preference patchedditPreference = findPreference("patcheddit");
-        if (patchedditPreference != null) {
-            patchedditPreference.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(mActivity, LinkResolverActivity.class);
-                intent.setData(Uri.parse("https://reddit.com/r/patcheddit"));
-                mActivity.startActivity(intent);
                 return true;
             });
         }

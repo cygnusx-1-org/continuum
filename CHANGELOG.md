@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.11 / 2026-11-3
+============
+* Gallery posts opened from the feed or a post now show every image in one continuous vertical list. Tap an image to open the swipe viewer on it, with zoom, download and share, and press back to return to the list
+* Fixed `Hide Subreddit Icon`, which left the icon in place
+* Removed the remaining Continuum names, links and art from the app: the About screen's email, Reddit account and subreddit rows, the splash screen astronaut, and the name in the text
+* Removed the Patcheddit notice, since the decoder is original work
+
 8.3.3.9.1.10 / 2026-11-3
 ============
 * Added reverse image search (Google, Yandex or both) to the post options menu for image, GIF and gallery posts, so it works from the feed
@@ -24,7 +31,6 @@
 ============
 * Added `Settings > Post > Hide NSFW Badge`, which never shows the NSFW badge in the feed or the post
 * Fixed compact posts with no thumbnail, such as text posts, showing no post type at all when the Post Type Triangle Indicator is on. They now keep the text badge
-* The About screen now carries the notice the Patcheddit license requires, and the NOTICE file is in the repository
 * Update dialog now shows download progress with a Cancel button
 * Added `Settings > About > Include pre-release versions`. A release tag with a suffix, such as `-beta.1`, is published as a pre-release
 * Recents now also lists users, and remembers whether the section is collapsed

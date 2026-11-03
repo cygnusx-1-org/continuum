@@ -216,7 +216,7 @@
     <string name="follow_failed">"Η παρακολούθηση απέτυχε"</string>
     <string name="unfollowed">"Καταργήθηκε η παρακολούθηση"</string>
     <string name="unfollow_failed">"Η κατάργηση παρακολούθησης απέτυχε"</string>
-    <string name="app_label">"Continuum"</string>
+    <string name="app_label">"Reddit Jr."</string>
     <string name="search_hint">"Αναζήτηση"</string>
     <string name="search_only_subreddits_hint">"Αναζήτηση subreddits"</string>
     <string name="search_only_users_hint">"Αναζήτηση χρηστών"</string>
@@ -561,12 +561,12 @@
     <string name="settings_reddit_account_title">"Λογαριασμός Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/continuumreddit"</string>
+    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Κοινοποίηση"</string>
     <string name="settings_share_summary">"Κοινοποίησε την εφαρμογή για να τη χαρούν κι άλλα άτομα"</string>
     <string name="settings_privacy_policy_title">"Πολιτική Απορρήτου"</string>
     <string name="settings_debug_title">"Εντοπισμός σφαλμάτων"</string>
-    <string name="settings_version_title">"Continuum"</string>
+    <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Έκδοση %s"</string>
     <string name="settings_screen_width_dp_title">"Πλάτος οθόνης"</string>
     <string name="settings_screen_width_dp_summary">"%d dp"</string>
@@ -589,7 +589,7 @@
     <string name="settings_enable_material_you_title">"Ενεργοποίηση Material You"</string>
     <string name="settings_enable_material_you_summary">"Κάνε το Infinty πιο προσωπικό βάσει της Ταπετσαρίας Σου"</string>
     <string name="settings_apply_material_you_title">"Εφαρμογή Material You"</string>
-    <string name="settings_apply_material_you_summary">"Σε περίπτωση που το Continuum δεν άλλαξε το θέμα"</string>
+    <string name="settings_apply_material_you_summary">"Σε περίπτωση που το Reddit Jr. δεν άλλαξε το θέμα"</string>
     <string name="settings_global_settings_management_title">"Διαχείριση καθολικών ρυθμίσεων"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Διαγραφή Όλων των Subreddits στη Βάση Δεδομένων"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Διαγραφή Όλων των Χρηστών από την Βάση Δεδομένων"</string>
@@ -954,7 +954,7 @@
     <string name="error_getting_multi_reddit_data">"Αδυναμία απόκτησης δεδομένων multireddit"</string>
     <string name="error_loading_multi_reddit_list">"Αδυναμία συγχρονισμού multireddits"</string>
     <string name="error_loading_subscriptions">"Αδυναμία συγχρονισμού συνδρομών"</string>
-    <string name="share_this_app">"Ρίξε μια ματιά στο Continuum, ένας φοβερός Reddit πελάτης!\nhttps://play.google.com/store/"</string>
+    <string name="share_this_app">"Ρίξε μια ματιά στο Reddit Jr., ένας φοβερός Reddit πελάτης!\nhttps://play.google.com/store/"</string>
     <string name="error_getting_subreddit_name">"Αδυναμία απόκτησης ονόματος subreddit"</string>
     <string name="share_post_link">"Κοινοποίηση Συνδέσμου Ανάρτησης"</string>
     <string name="share_image_link">"Κοινοποίηση Συνδέσμου Εικόνας"</string>
@@ -1274,7 +1274,7 @@
     <string name="delete_all_legacy_settings_success">"Διαγραφή όλων των απαρχαιωμένων ρυθμίσεων με επιτυχία"</string>
     <string name="reset_all_settings_success">"Έγινε επαναφορά ρυθμίσεων επιτυχώς"</string>
     <string name="username_preview">"u/edgan"</string>
-    <string name="subreddit_preview">"r/continuumreddit"</string>
+    <string name="subreddit_preview">"r/redditjr"</string>
     <string name="primary_text_preview">"Κυρίως Κείμενο"</string>
     <string name="secondary_text_preview">"Δευτερεύον Κείμενο"</string>
     <string name="post_title_preview">"Αυτό είναι μια ανάρτηση"</string>
@@ -1633,7 +1633,7 @@
     <string name="reddit_gallery_item_url_hint">"Url"</string>
     <string name="user_agreement_dialog_title">"Συμφωνία χρήστη"</string>
     <string name="user_agreement_message">"Πρέπει να συμφωνήσεις με τη Συμφωνία χρήστη Reddit (%1$s) και το Infinity για την Πολιτική Απορρήτου του Reddit (%2$s) πριν συνδεθείς.\n\nΑπό εδώ και στο εξής, θα χρειαστείς μια μηνιαία συνδρομή για να αποκτήσεις πρόσβαση στο Reddit API εντός του Infinity για Reddit και αυτό συμβαίνει επειδή το Reddit έχει αρχίσει να χρεώνει για πρόσβαση API από την 1η Ιουλίου 2023."</string>
-    <string name="warning_message_nsfw_content">"Το Continuum ούτε προωθεί ούτε συνιστά περιεχόμενο NSFW. Λόγω της πολιτικής του Reddit, είναι απίθανο να συναντήσεις περιεχόμενο NSFW στην εφαρμογή. Πρέπει να συμφωνήσεις με τη Reddit Συμφωνία χρήστη (%1$s) και την Πολιτική απορρήτου του Continuum (%2$s) πριν αλλάξεις αυτές τις ρυθμίσεις."</string>
+    <string name="warning_message_nsfw_content">"Το Reddit Jr. ούτε προωθεί ούτε συνιστά περιεχόμενο NSFW. Λόγω της πολιτικής του Reddit, είναι απίθανο να συναντήσεις περιεχόμενο NSFW στην εφαρμογή. Πρέπει να συμφωνήσεις με τη Reddit Συμφωνία χρήστη (%1$s) και την Πολιτική απορρήτου του Reddit Jr. (%2$s) πριν αλλάξεις αυτές τις ρυθμίσεις."</string>
     <string name="agree">"Συμφωνώ"</string>
     <string name="do_not_agree">"Δεν Συμφωνώ"</string>
     <string name="option_1_hint">"Επιλογή 1 (Απαιτείται)"</string>
@@ -1662,8 +1662,8 @@
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Δεν χορηγήθηκε άδεια για ειδοποιήσεις"</string>
     <string name="go_to_settings">"Ρυθμίσεις"</string>
-    <string name="welcome_to_continuum">"Καλώς ήρθες στο Continuum, η πύλη σου για μια νέα διάσταση περιήγησης στο Reddit!"</string>
-    <string name="subscription_prompt">"Πριν βουτήξεις στις αμέτρητες δυνατότητες που προσφέρει αυτή η εφαρμογή,\n        Θέλω να είμαι εκ των προτέρων και διαφανής σχετικά με μια σημαντική αλλαγή που έχω εφαρμόσει για να εξασφαλίσω την καλύτερη δυνατή εξυπηρέτηση για εσάς.\n        \n\nΑπό εδώ και στο εξής, θα χρειάζεσαι μια μηνιαία συνδρομή για να αποκτήσεις πρόσβαση στο Reddit API εντός Continuum και\n        Αυτό συμβαίνει επειδή το Reddit έχει αρχίσει να χρεώνει για πρόσβαση API από την 1η Ιουλίου 2023.\n        \n\nΌλες οι βαθμίδες λειτουργούν το ίδιο. Εάν θέλεις να υποστηρίξεις το Continuum, μπορείς να εγγραφείς σε υψηλότερο επίπεδο.\n        Τα περισσότερα χρήματα από το χαμηλότερο επίπεδο πηγαίνουν στο Reddit.\n    "</string>
+    <string name="welcome_to_continuum">"Καλώς ήρθες στο Reddit Jr., η πύλη σου για μια νέα διάσταση περιήγησης στο Reddit!"</string>
+    <string name="subscription_prompt">"Πριν βουτήξεις στις αμέτρητες δυνατότητες που προσφέρει αυτή η εφαρμογή,\n        Θέλω να είμαι εκ των προτέρων και διαφανής σχετικά με μια σημαντική αλλαγή που έχω εφαρμόσει για να εξασφαλίσω την καλύτερη δυνατή εξυπηρέτηση για εσάς.\n        \n\nΑπό εδώ και στο εξής, θα χρειάζεσαι μια μηνιαία συνδρομή για να αποκτήσεις πρόσβαση στο Reddit API εντός Reddit Jr. και\n        Αυτό συμβαίνει επειδή το Reddit έχει αρχίσει να χρεώνει για πρόσβαση API από την 1η Ιουλίου 2023.\n        \n\nΌλες οι βαθμίδες λειτουργούν το ίδιο. Εάν θέλεις να υποστηρίξεις το Reddit Jr., μπορείς να εγγραφείς σε υψηλότερο επίπεδο.\n        Τα περισσότερα χρήματα από το χαμηλότερο επίπεδο πηγαίνουν στο Reddit.\n    "</string>
     <string name="monthly">"Μηνιαία"</string>
     <string name="yearly">"Ετήσια"</string>
     <string name="weekly">"Εβδομαδιαία"</string>
@@ -1682,7 +1682,7 @@
     <string name="subscription_plan_description_monthly_499">"Χρυσό - Τέλεια Επιλογή!"</string>
     <string name="subscription_plan_description_monthly_699">"Πλατινένιο"</string>
     <string name="subscription_plan_description_monthly_899">"Διαμάντι"</string>
-    <string name="subscription_plan_description_monthly_999">"Continuum"</string>
+    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
     <string name="acknowledge_purchase_failed">"Δεν είναι δυνατή η αναγνώριση χρέωσης"</string>
     <string name="connect_to_billing_system_failed">"Αποτυχία σύνδεσης στο σύστημα χρέωσης"</string>
     <string name="connecting_to_billing_system">"Σύνδεση στο σύστημα χρέωσης. Παρακαλώ περίμενε."</string>
@@ -1690,12 +1690,12 @@
     <string name="load_subscription_options">"Φόρτωση επιλογών συνδρομής"</string>
     <string name="acknowledging_subscription">"Αναγνώριση της συνδρομής σου. Παρακαλώ περίμενε."</string>
     <string name="acknowledgement_purchase_failed_description">"Ουψ, υπήρξε ένα σφάλμα κατά την αναγνώριση της αγοράς σου. Αν το πρόβλημα παραμένει για 3 μέρες, θα λάβεις αυτόματα επιστροφή χρημάτων.
-Μην ανησυχείς, μπορείς και πάλι να απολαμβάνεις το Continuum. "</string>
+Μην ανησυχείς, μπορείς και πάλι να απολαμβάνεις το Reddit Jr.. "</string>
     <string name="continue_to_app">"Συνέχεια στην εφαρμογή"</string>
     <string name="restore_subscription_purchase_details">"Πληρώσατε ήδη για τη συνδρομή;"</string>
     <string name="restore_subscription_purchase">"Επαναφορά αγοράς συνδρομής"</string>
     <string name="important_info_title">"Συνδέσου ξανά στο λογαριασμό σου"</string>
-    <string name="important_info">"Το Continuum χρησιμοποιεί ένα Client ID(API κλειδί) από το Reddit και πρέπει να συνδεθείς ξανά για να συνεχίσεις να χρησιμοποιείς την εφαρμογή.\n\nΑπλώς άνοιξε το συρτάρι πλοήγησης και κάνε κλικ στην κεφαλίδα του λογαριασμού σου και επίλεξε \"Προσθήκη λογαριασμού\" για να συνδεθείς στο Reddit χρησιμοποιώντας ξανά τον ίδιο λογαριασμό. Διαφορετικά, το Continuum ενδέχεται να μην φορτώνει καθόλου αναρτήσεις. Συγγνώμη για την ταλαιπωρία."</string>
+    <string name="important_info">"Το Reddit Jr. χρησιμοποιεί ένα Client ID(API κλειδί) από το Reddit και πρέπει να συνδεθείς ξανά για να συνεχίσεις να χρησιμοποιείς την εφαρμογή.\n\nΑπλώς άνοιξε το συρτάρι πλοήγησης και κάνε κλικ στην κεφαλίδα του λογαριασμού σου και επίλεξε \"Προσθήκη λογαριασμού\" για να συνδεθείς στο Reddit χρησιμοποιώντας ξανά τον ίδιο λογαριασμό. Διαφορετικά, το Reddit Jr. ενδέχεται να μην φορτώνει καθόλου αναρτήσεις. Συγγνώμη για την ταλαιπωρία."</string>
     <string name="i_understand">"Καταλαβαίνω"</string>
     <string name="add_to_comment_filter">"Φίλτρο Προσθήκη στο Σχόλιο"</string>
     <string name="cannot_edit_post_with_images">"Δεν επιτρέπεται η επεξεργασία αναρτήσεων με εικόνες."</string>

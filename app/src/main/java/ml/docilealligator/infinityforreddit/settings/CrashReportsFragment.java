@@ -131,7 +131,7 @@ public class CrashReportsFragment extends Fragment {
             return false;
         }
         Uri githubIssueUri = Uri.parse(String.format(
-                "https://github.com/cygnusx-1-org/continuum/issues/new?template=bug_report.yml&labels=bug"
+                "https://github.com/jayblah/redditjr/issues/new?template=bug_report.yml&labels=bug"
                         + "&device=%s&android_version=%s&version=%s&logs=%s",
                 device, androidVersion, version, logs));
         intent.setData(githubIssueUri);
