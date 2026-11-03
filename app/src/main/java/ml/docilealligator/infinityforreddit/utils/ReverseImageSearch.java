@@ -8,8 +8,11 @@ import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Objects;
 
 import ml.docilealligator.infinityforreddit.R;
 
@@ -32,7 +35,12 @@ public final class ReverseImageSearch {
     /**
      * Asks which engine to search with, anchored to the button that was tapped.
      */
-    public static void showChooser(Context context, View anchor, String imageUrl) {
+    public static void showChooser(Context context, View anchor, @Nullable String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            Toast.makeText(context, R.string.reverse_image_search_failed, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final String url = Objects.requireNonNull(imageUrl);
         PopupMenu menu = new PopupMenu(context, anchor);
         menu.getMenu().add(0, 0, 0, R.string.reverse_image_search_google);
         menu.getMenu().add(0, 1, 1, R.string.reverse_image_search_yandex);
@@ -40,13 +48,13 @@ public final class ReverseImageSearch {
         menu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case 0:
-                    open(context, imageUrl, googleUrl(imageUrl));
+                    open(context, googleUrl(url));
                     break;
                 case 1:
-                    open(context, imageUrl, yandexUrl(imageUrl));
+                    open(context, yandexUrl(url));
                     break;
                 default:
-                    open(context, imageUrl, googleUrl(imageUrl), yandexUrl(imageUrl));
+                    open(context, googleUrl(url), yandexUrl(url));
                     break;
             }
             return true;
@@ -55,11 +63,7 @@ public final class ReverseImageSearch {
     }
 
     // Opens each search in the browser, in order.
-    private static void open(Context context, String imageUrl, String... searchUrls) {
-        if (imageUrl == null || imageUrl.isEmpty()) {
-            Toast.makeText(context, R.string.reverse_image_search_failed, Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private static void open(Context context, String... searchUrls) {
         try {
             for (String url : searchUrls) {
                 context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))
