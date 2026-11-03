@@ -75,7 +75,7 @@ public final class UpdateUi {
     }
 
     private static void showUpdateDialog(Activity activity, UpdateChecker.Release release) {
-        new MaterialAlertDialogBuilder(activity)
+        new MaterialAlertDialogBuilder(activity, R.style.MaterialAlertDialogTheme)
                 .setTitle(R.string.update_available_title)
                 .setMessage(activity.getString(R.string.update_available_message,
                         release.version, BuildConfig.VERSION_NAME, release.notes))

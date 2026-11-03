@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.9.1.5 / 2026-11-3
+============
+* Fixed the update dialog's button text being hard to read in Dark Mode
+* Settings is now pinned at the bottom of the navigation drawer instead of being in the Preferences section
+* Renamed Show Subreddit Banner to Hide Subreddit Banner and moved it above Hide Subreddit Description
+* Update settings moved from Miscellaneous to About
+* New icon: solid orange background and a smaller alien
+
 8.3.3.9.1.4 / 2026-11-3
 ============
 Renamed to Reddit Jr. with a new icon. The application ID is unchanged, so this updates the existing install.

@@ -463,7 +463,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                                 allInsets.right,
                                 BaseActivity.IGNORE_MARGIN);
 
-                        binding.navDrawerRecyclerViewMainActivity.setPadding(0, 0, 0, allInsets.bottom);
+                        binding.navDrawerFooterMainActivity.setPadding(0, 0, 0, allInsets.bottom);
                         return insets;
                     }
                 });
@@ -1073,6 +1073,24 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         navigationWrapper.setInboxCount(this, InboxCount.get(mCurrentAccountSharedPreferences));
     }
 
+    // The Settings row, pinned below the scrolling drawer list.
+    private void bindNavigationDrawerFooter() {
+        binding.navDrawerFooterDividerMainActivity.setBackgroundColor(mCustomThemeWrapper.getDividerColor());
+        binding.navDrawerSettingsMainActivity.textViewItemNavDrawerMenuItem.setText(R.string.settings);
+        binding.navDrawerSettingsMainActivity.textViewItemNavDrawerMenuItem.setTextColor(mCustomThemeWrapper.getPrimaryTextColor());
+        if (typeface != null) {
+            binding.navDrawerSettingsMainActivity.textViewItemNavDrawerMenuItem.setTypeface(typeface);
+        }
+        binding.navDrawerSettingsMainActivity.imageViewItemNavDrawerMenuItem.setImageResource(R.drawable.ic_settings_day_night_24dp);
+        binding.navDrawerSettingsMainActivity.imageViewItemNavDrawerMenuItem.setColorFilter(
+                mCustomThemeWrapper.getPrimaryIconColor(), android.graphics.PorterDuff.Mode.SRC_IN);
+        binding.navDrawerSettingsMainActivity.getRoot().setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            binding.drawerLayout.closeDrawers();
+        });
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -1264,6 +1282,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences,
                         SharedPreferencesUtils.RESUME_WHERE_I_LEFT_OFF, false)
                 .observe(this, enabled -> adapter.setResumeWhereILeftOff(enabled));
+        bindNavigationDrawerFooter();
         binding.navDrawerRecyclerViewMainActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
         binding.navDrawerRecyclerViewMainActivity.setAdapter(adapter.getConcatAdapter());
 

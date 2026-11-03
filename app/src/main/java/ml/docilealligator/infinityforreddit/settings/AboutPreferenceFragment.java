@@ -101,6 +101,14 @@ public class AboutPreferenceFragment extends CustomFontPreferenceFragmentCompat 
             });
         }
 
+        Preference checkForUpdatesPreference = findPreference("check_for_updates");
+        if (checkForUpdatesPreference != null) {
+            checkForUpdatesPreference.setOnPreferenceClickListener(preference -> {
+                ml.docilealligator.infinityforreddit.update.UpdateUi.check(mActivity, true);
+                return true;
+            });
+        }
+
         if (versionPreference != null) {
             String summary = String.format("%s (%s)", BuildConfig.VERSION_NAME, BuildConfig.APPLICATION_ID);
             versionPreference.setSummary(summary);

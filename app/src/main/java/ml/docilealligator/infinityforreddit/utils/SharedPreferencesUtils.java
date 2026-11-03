@@ -208,7 +208,7 @@ public class SharedPreferencesUtils {
     // one skips past what was read, this one goes back to it.
     public static final String RESUME_WHERE_I_LEFT_OFF = "resume_where_i_left_off";
     public static final String DECODE_NATO_BINARY = "decode_nato_binary";
-    public static final String SHOW_SUBREDDIT_BANNER = "show_subreddit_banner";
+    public static final String HIDE_SUBREDDIT_BANNER = "hide_subreddit_banner";
     public static final String COLLAPSE_AUTOMOD_AND_STICKIED_COMMENTS = "collapse_automod_and_stickied_comments";
     public static final String AUTO_CHECK_FOR_UPDATES = "auto_check_for_updates";
     public static final String LAST_UPDATE_CHECK_TIME = "last_update_check_time";

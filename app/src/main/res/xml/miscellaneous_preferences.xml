@@ -92,14 +92,4 @@
         app:title="@string/settings_collapse_automod_and_stickied_title"
         app:summary="@string/settings_collapse_automod_and_stickied_summary" />
 
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="true"
-        app:key="auto_check_for_updates"
-        app:title="@string/settings_auto_check_for_updates_title"
-        app:summary="@string/settings_auto_check_for_updates_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        app:key="check_for_updates"
-        app:title="@string/settings_check_for_updates_title" />
-
 </PreferenceScreen>

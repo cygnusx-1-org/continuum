@@ -19,12 +19,39 @@
         android:layout_height="match_parent"
         android:layout_gravity="start">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/nav_drawer_recycler_view_main_activity"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            android:clipToPadding="false" />
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/nav_drawer_recycler_view_main_activity"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scrollbars="vertical"
+                android:clipToPadding="false" />
+
+            <!-- Pinned below the scrolling list. The bottom system inset is applied to the
+                 container, so the Settings row clears the navigation bar. -->
+            <LinearLayout
+                android:id="@+id/nav_drawer_footer_main_activity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:id="@+id/nav_drawer_footer_divider_main_activity"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp" />
+
+                <include
+                    android:id="@+id/nav_drawer_settings_main_activity"
+                    layout="@layout/item_nav_drawer_menu_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
 
     </com.google.android.material.navigation.NavigationView>
 

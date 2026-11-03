@@ -73,7 +73,8 @@ object AccountScopedKeys {
         // per-account file: without it here an account could arrange its own bar and then have
         // another account switch the bar off for everyone.
         "bottom_app_bar",
-        "hide_fab_in_post_feed", "hide_subreddit_description", "default_search_result_tab",
+        "hide_fab_in_post_feed", "hide_subreddit_banner", "hide_subreddit_description",
+        "default_search_result_tab",
         "lazy_mode_interval", "shadowbox_hide_text_and_previewless_posts",
         "vote_buttons_on_the_right", "show_absolute_number_of_votes",
         "show_post_and_comment_toolbar_items_based_on_space", "force_max_refresh_rate",
@@ -139,6 +140,7 @@ object AccountScopedKeys {
         "language", "use_old_reddit_domain", "shared_link_domain", "shared_link_custom_domain",
         "main_page_back_button_action", "save_front_page_scrolled_position",
         "resume_where_i_left_off", "enable_search_history", "disable_profile_avatar_animation",
+        "decode_nato_binary", "collapse_automod_and_stickied_comments",
     )
 
     /**

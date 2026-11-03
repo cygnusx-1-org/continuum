@@ -27,11 +27,10 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
     private static final int ROW_NSFW = 1;
     private static final int ROW_THUMBNAIL = 2;
     private static final int ROW_RESUME = 3;
-    private static final int ROW_SETTINGS = 4;
 
     // Canonical top-to-bottom order of the rows. visibleRows is always a subsequence of this,
     // which lets refreshVisibleRows() dispatch minimal insert/remove notifications.
-    private static final int[] ROW_ORDER = {ROW_THEME, ROW_NSFW, ROW_THUMBNAIL, ROW_RESUME, ROW_SETTINGS};
+    private static final int[] ROW_ORDER = {ROW_THEME, ROW_NSFW, ROW_THUMBNAIL, ROW_RESUME};
 
     private final BaseActivity baseActivity;
     private final Resources resources;
@@ -81,8 +80,6 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
                 return showThumbnailToggle;
             case ROW_RESUME:
                 return showResumeToggle;
-            case ROW_SETTINGS:
-                return true;
             default:
                 return false;
         }
@@ -200,11 +197,6 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
                     itemHolder.itemView.setOnClickListener(view ->
                             itemClickListener.onMenuClick(R.string.enable_resume_where_i_left_off));
                     break;
-                case ROW_SETTINGS:
-                    stringId = R.string.settings;
-                    drawableId = R.drawable.ic_settings_day_night_24dp;
-                    itemHolder.itemView.setOnClickListener(view -> itemClickListener.onMenuClick(R.string.settings));
-                    break;
                 default:
                     throw new IllegalStateException("Unexpected preference row: " + row);
             }
@@ -220,6 +212,11 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
 
     @Override
     public int getItemCount() {
+        // Settings lives in the drawer's pinned footer, so with every toggle hidden there is
+        // nothing to put under the title and the section goes away.
+        if (visibleRows.isEmpty()) {
+            return 0;
+        }
         return collapsePreferencesSection ? 1 : visibleRows.size() + 1;
     }
 
@@ -262,11 +259,17 @@ public class PreferenceSectionRecyclerViewAdapter extends RecyclerView.Adapter<R
             // Only the title is shown while collapsed (item count stays 1), so just rebuild the
             // list; the correct rows appear when the section is next expanded.
             buildVisibleRows();
+            notifyDataSetChanged();
             return;
         }
 
         List<Integer> oldRows = new ArrayList<>(visibleRows);
         buildVisibleRows();
+        if (oldRows.isEmpty() != visibleRows.isEmpty()) {
+            // The title appears or disappears with the rows, which the walk below does not model.
+            notifyDataSetChanged();
+            return;
+        }
         // Both lists are subsequences of ROW_ORDER, so a single walk yields the minimal set of
         // insert/remove notifications (offset by 1 for the always-present title at position 0).
         int oldIndex = 0;

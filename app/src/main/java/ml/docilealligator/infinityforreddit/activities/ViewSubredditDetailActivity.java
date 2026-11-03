@@ -260,7 +260,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
      * scrolls away like it does with a banner.
      */
     private void applyBannerSetting() {
-        if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_SUBREDDIT_BANNER, true)) {
+        if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_BANNER, false)) {
             return;
         }
         TypedValue tv = new TypedValue();
@@ -585,7 +585,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                             subredditData.getIconUrl());
                 }
 
-                if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_SUBREDDIT_BANNER, true)) {
+                if (mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_BANNER, false)) {
                     // Banner is off: the view stays as the spacer under the toolbar.
                     binding.bannerImageViewViewSubredditDetailActivity.setOnClickListener(null);
                 } else if (subredditData.getBannerUrl().equals("")) {

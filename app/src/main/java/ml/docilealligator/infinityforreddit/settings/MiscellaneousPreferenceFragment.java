@@ -67,15 +67,6 @@ public class MiscellaneousPreferenceFragment extends CustomFontPreferenceFragmen
 
         ((Infinity) mActivity.getApplication()).getAppComponent().inject(this);
 
-        androidx.preference.Preference checkForUpdatesPreference = findPreference("check_for_updates");
-        if (checkForUpdatesPreference != null) {
-            checkForUpdatesPreference.setSummary(getString(R.string.application_name) + " " + ml.docilealligator.infinityforreddit.BuildConfig.VERSION_NAME);
-            checkForUpdatesPreference.setOnPreferenceClickListener(preference -> {
-                ml.docilealligator.infinityforreddit.update.UpdateUi.check(mActivity, true);
-                return true;
-            });
-        }
-
         ListPreference linkHandlerListPreference = findPreference(SharedPreferencesUtils.LINK_HANDLER);
         ListPreference ephemeralBrowserListPreference = findPreference(SharedPreferencesUtils.EPHEMERAL_CUSTOM_TAB_PACKAGE);
         ListPreference specificBrowserListPreference = findPreference(SharedPreferencesUtils.SPECIFIC_BROWSER_PACKAGE);

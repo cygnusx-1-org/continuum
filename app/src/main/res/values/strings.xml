@@ -505,8 +505,8 @@
     <string name="settings_decode_nato_binary_summary">Show the decoded text, with Copy and search buttons, under comments and posts in NSFW communities that spell something in the NATO alphabet or 8-bit binary</string>
     <string name="settings_collapse_automod_and_stickied_title">Collapse AutoModerator and stickied comments</string>
     <string name="settings_collapse_automod_and_stickied_summary">Show them as a collapsed row until tapped open. Applies the next time a post is opened</string>
-    <string name="settings_show_subreddit_banner_title">Show subreddit banner</string>
-    <string name="settings_show_subreddit_banner_summary">Turn off to hide the banner image at the top of a subreddit page and use the space for content</string>
+    <string name="settings_hide_subreddit_banner_title">Hide Subreddit Banner</string>
+    <string name="settings_hide_subreddit_banner_summary">Hide the banner image at the top of a subreddit page and use the space for content</string>
     <string name="settings_auto_check_for_updates_title">Check for updates automatically</string>
     <string name="settings_auto_check_for_updates_summary">Look for a new Reddit Jr. release on GitHub at most once a day</string>
     <string name="settings_check_for_updates_title">Check for updates now</string>
