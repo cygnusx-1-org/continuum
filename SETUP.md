@@ -17,20 +17,20 @@ A Reddit Client ID is needed to access Reddit from 3rd party clients.
 > It is recommended not to delete any existing client IDs. You can swap an existing client IDs from one application to another by changing
 > the redirect URI, and using the update button.
 >
-> Continuum now allows you to enter any client ID, redirect URI, and user agent. When using a client ID need to using the matching
+> Continuumjr now allows you to enter any client ID, redirect URI, and user agent. When using a client ID need to using the matching
 > redirect URI. It is also wise to use the matching user agent.
 >
 > If you have no client ID, look [here](https://old.reddit.com/r/continuumreddit/comments/1scwgcx/custom_api_workaround/).
 
-### Adding a Reddit Client ID to Continuum
-The method of adding a Client ID to Continuum depends on whether this is the
+### Adding a Reddit Client ID to Continuumjr
+The method of adding a Client ID to Continuumjr depends on whether this is the
 first time the app is being set up.
 
 **Initial setup:**
-1. Open Continuum and press `GET STARTED`
+1. Open Continuumjr and press `GET STARTED`
 2. Select your theme colors, if you like, and press `DONE`
 3. Enter your Client ID and press `OK`
-4. Wait for Continuum to restart
+4. Wait for Continuumjr to restart
 
 **Changing the Client ID:**
 1. Go to `Settings in the side bar`
@@ -46,7 +46,7 @@ first time the app is being set up.
 <img src="/assets/screenshots/enter_client_id.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>
 It is best to copy and paste it.
 
-6. Press `OK` and Wait for Continuum to restart
+6. Press `OK` and Wait for Continuumjr to restart
 
 > [!NOTE]
 >
@@ -63,7 +63,7 @@ It is best to copy and paste it.
 
 
 ### Correct username and password does not work
-Continuum depends on
+Continuumjr depends on
 [Android System Webview](https://play.google.com/store/apps/details?id=com.google.android.webview)
 by default for logging into Reddit. So if having the login issue, your best
 course of action would be to upgraded to the latest version of Android

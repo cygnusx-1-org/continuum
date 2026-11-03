@@ -2,6 +2,17 @@
 
 ---
 
+8.3.3.9.1.2 / 2026-11-3
+============
+First Continuumjr release, a fork of Continuum 8.3.3.9.1. Note arm64-v8a is the 64-bit build, and should be considered the default choice.
+
+* Added decoding of NATO phonetic alphabet and 8-bit binary in comments and post bodies, with Copy and search links
+* Added `Settings > Miscellaneous > Decode NATO and binary` to turn the decoder off
+* Added an in-app updater that checks the latest GitHub release of this repository
+* Added `Settings > Miscellaneous > Check for updates automatically` and `Check for updates now`
+* Changed the application ID to `org.cygnusx1.continuumjr` and the app name to Continuumjr, so it installs beside Continuum
+* Replaced the build workflow with one that signs and publishes a release when a version tag is pushed
+
 8.3.3.9.1 / 2026-11-2
 ============
 Note v8a is the 64-bit build, and should be considered the default choice.

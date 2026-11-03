@@ -59,7 +59,7 @@ Things to try:
   </picture>
 </p>
 
-### Continuum
+### Continuumjr
 <p align="center">
   <picture>
     <source

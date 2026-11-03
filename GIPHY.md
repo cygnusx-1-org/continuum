@@ -1,5 +1,5 @@
 # Giphy API key creation
-Continuum has to use a BYOK(Bring your own key) model. Continuum is open source, and [Giphy](https://giphy.com/)(now owned by [Shutterstock](https://www.shutterstock.com/)) charges crazy money for apps to use their API. This is very akin to [Reddit](https://www.reddit.com/) API costs, but much worse.
+Continuumjr has to use a BYOK(Bring your own key) model. Continuumjr is open source, and [Giphy](https://giphy.com/)(now owned by [Shutterstock](https://www.shutterstock.com/)) charges crazy money for apps to use their API. This is very akin to [Reddit](https://www.reddit.com/) API costs, but much worse.
 
 ## Instructions
 1. Go [here](https://developers.giphy.com/)
@@ -12,7 +12,7 @@ Continuum has to use a BYOK(Bring your own key) model. Continuum is open source,
 5. Click `Select API` to pick `API` instead of `SDK`
 6. Click the `Next Step` button
 <img src="/assets/screenshots/giphy_sdk_api.png" alt="drawing"/>
-7. Set `Your App Name` to `Continuum`
+7. Set `Your App Name` to `Continuumjr`
 8. Set `Platform` to `Android`
 9. Set the `App Description` to `Reddit Android client with Giphy support`
 10. Check the box for `By checking this box, I am confirming that I have read & agree to the GIPHY API Terms`

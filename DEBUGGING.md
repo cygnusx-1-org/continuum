@@ -2,7 +2,7 @@
 
 ## adb logcat commands, run from a computer
 Linux and macOS:
-`adb logcat --pid=$(adb shell pidof org.cygnusx1.continuum)`
+`adb logcat --pid=$(adb shell pidof org.cygnusx1.continuumjr)`
 
 Windows CMD:
 `FOR /F "tokens=*" %i IN ('adb shell pidof org.cygnusx1.continuum') DO set APP_PID=%i adb logcat --pid=%APP_PID%`

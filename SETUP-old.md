@@ -11,8 +11,8 @@ A Reddit Client ID is needed to access Reddit from 3rd party clients.
 1. Go to [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps) and login if
 necessary
 2. Click `create another app...`. Do not re-use any Client ID for any app other
-than Continuum.
-3. Set the name to Continuum
+than Continuumjr.
+3. Set the name to Continuumjr
 4. Set the type to `installed app`
 5. Set redirect uri to `continuum://localhost`. If the redirect uri is set
 incorrectly it won't work.
@@ -28,15 +28,15 @@ in the notes of your entry for Reddit in your password manager.
 > This is just an example Client ID. It was created and deleted. Keep
 > yours private.
 
-### Adding a Reddit Client ID to Continuum
-The method of adding a Client ID to Continuum depends on whether this is the
+### Adding a Reddit Client ID to Continuumjr
+The method of adding a Client ID to Continuumjr depends on whether this is the
 first time the app is being set up.
 
 **Initial setup:**
-1. Open Continuum and press `GET STARTED`
+1. Open Continuumjr and press `GET STARTED`
 2. Select your theme colors, if you like, and press `DONE`
 3. Enter your Client ID and press `OK`
-4. Wait for Continuum to restart
+4. Wait for Continuumjr to restart
 
 **Changing the Client ID:**
 1. Go to `Settings in the side bar` 
@@ -52,14 +52,14 @@ first time the app is being set up.
 <img src="/assets/screenshots/enter_client_id-old.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>
 It is best to copy and paste it.
 
-5. Press `OK` and Wait for Continuum to restart
+5. Press `OK` and Wait for Continuumjr to restart
 
 # Common errors
 The most likely cause for this is the `redirect uri` is set incorrectly. The
 big tell is if you can view Reddit in guest mode, aka without logging in.
 
 ## Correct username and password does not work
-Continuum depends on
+Continuumjr depends on
 [Android System Webview](https://play.google.com/store/apps/details?id=com.google.android.webview)
 by default for logging into Reddit. So if having the login issue, your best
 course of action would be to upgraded to the latest version of Android

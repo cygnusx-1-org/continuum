@@ -9,7 +9,7 @@ REDDIT_CLIENT_ID=4vj5qn9RkC4i3WLv5OsuFb
 ```
 
 ## Usage
-This has been tested with a real phone connected via a USB cable. I needs to be unlocked and USB debugging allowed. It will very likely work with an emulator. It installs a debug build of `Continuum` as the first step. Then it runs the tests, and then uninstalls the debug build of `Continuum`. This means it will replace your "normal" debug build, and wipe all it's settings. It also means tests need to be written to expect a fresh install each time. This means dealing with the `client ID`, system dialogs like permissions, etc.
+This has been tested with a real phone connected via a USB cable. I needs to be unlocked and USB debugging allowed. It will very likely work with an emulator. It installs a debug build of `Continuumjr` as the first step. Then it runs the tests, and then uninstalls the debug build of `Continuumjr`. This means it will replace your "normal" debug build, and wipe all it's settings. It also means tests need to be written to expect a fresh install each time. This means dealing with the `client ID`, system dialogs like permissions, etc.
 
 ```
 ./gradlew connectedAndroidTest

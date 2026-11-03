@@ -1,4 +1,4 @@
-<h1 align="center">Continuum</h1>
+<h1 align="center">Continuumjr</h1>
 
 <p align="center">
   <picture>
@@ -14,65 +14,72 @@
   </picture>
 </p>
 
-<hr style="display: inline-block; width: 100%; border: 1px dotted #ff00cc;">
-
-<p align="center" style="margin-top: -2em;">
-<a href="https://discord.gg/vDuSpJEDrW"><picture><source height="24px" media="(prefers-color-scheme: dark)" srcset="/assets/icons/Discord.png" /><img height="24px" src="/assets/icons/Discord.png" /></picture></a>
-&nbsp;
-<a href="https://old.reddit.com/r/continuumreddit/"><picture><source height="24px" media="(prefers-color-scheme: dark)" srcset="/assets/icons/Reddit.png" /><img height="24px" src="/assets/icons/Reddit.png" /></picture></a>
-</p>
-
-
-A Reddit client on Android written in Java. It does not have any ads and it features a clean UI and smooth browsing experience
+A personal fork of [Continuum](https://github.com/cygnusx-1-org/continuum), an ad-free Reddit client for Android written in Java. Continuum is itself a fork of [Infinity for Reddit](https://github.com/Docile-Alligator/Infinity-For-Reddit).
 
 <br>
 
 <div align="center">
 
-[Releases](https://github.com/cygnusx-1-org/continuum/releases)
-[License](https://github.com/cygnusx-1-org/continuum/blob/master/LICENSE)
-[GitHub issues](https://github.com/cygnusx-1-org/continuum/issues)
+[Releases](https://github.com/jayblah/continuumjr/releases)
+[License](https://github.com/jayblah/continuumjr/blob/master/LICENSE)
+[Upstream: Continuum](https://github.com/cygnusx-1-org/continuum)
 
 </div>
 
 ---
-# Fork
-This project is a fork of [Infinity for Reddit](https://github.com/Docile-Alligator/Infinity-For-Reddit).
+# What is different from Continuum
+- **NATO and binary decoder.** Comments and post bodies that spell something in the NATO phonetic alphabet or in 8-bit binary get the decoded text added below the paragraph, with links to copy it and to search for it. Turn it off in `Settings > Miscellaneous > Decode NATO and binary`.
+- **In-app updates.** The app checks the [latest release](https://github.com/jayblah/continuumjr/releases/latest) of this repository, at most once a day, and offers to download and install it. Turn it off in `Settings > Miscellaneous > Check for updates automatically`, or check by hand with `Check for updates now`.
+- **Installs beside Continuum.** The application ID is `org.cygnusx1.continuumjr` and the app is named Continuumjr, so it does not replace or share data with Continuum.
 
-One major enhancement is that it lets you set your own `Client ID` as a setting.
-This means you don't need to recompile it each time, or to use [ReVanced Manager](https://github.com/ReVanced/revanced-manager).
+Everything else is Continuum. Changes are kept small and in new files where possible so upstream merges stay clean.
+
+# Installation
+1. Open the [latest release](https://github.com/jayblah/continuumjr/releases/latest) on your phone.
+2. Download the APK with `arm64-v8a` in its name. That is the 64-bit build and the right choice for almost every phone. Use `armeabi-v7a` only on an old 32-bit phone.
+3. Open the file and allow installs from your browser when Android asks.
+
+After that the app updates itself from new releases.
+
+## Verification
+org.cygnusx1.continuumjr 1B:6C:E8:BD:8A:42:C4:9D:98:20:D5:A5:DF:D6:53:1A:D2:06:BD:81:51:0C:6D:42:FE:AC:81:FD:42:CE:71:9B
+
+You can verify it with [AppVerifier](https://github.com/soupslurpr/AppVerifier).
 
 # Setup
-See [SETUP.md](/SETUP.md)
+Continuumjr needs your own Reddit `Client ID`, like Continuum. See [SETUP.md](/SETUP.md).
 
 # FAQ
 See [FAQ.md](/FAQ.md)
 
-# DEBUGGING
-See [DEBUGGING](/DEBUGGING.md)
+# Debugging
+See [DEBUGGING.md](/DEBUGGING.md)
 
-# Installation
-You can easily install and update Continuum with [Discoverium](https://github.com/cygnusx-1-org/Discoverium/) via its search button.
-<p align="left">
-<a href="https://github.com/cygnusx-1-org/Discoverium/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/badges/discoverium.png" height="60"><img alt="Get it on Discoverium" src="assets/badges/discoverium.png" height="60"></picture></a>
-<a href="https://github.com/cygnusx-1-org/continuum/releases/latest"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/badges/github.png" height="60"><img alt="Get it on Github" src="assets/badges/github.png" height="60"></picture></a>
-</p>
+# Releasing
+Releases are built and signed by GitHub Actions ([build.yml](/.github/workflows/build.yml)).
 
-## Verification
-org.cygnusx1.continuum 4F:34:BF:D2:0C:C4:84:15:10:E7:EF:FB:75:CB:FB:C2:3A:09:C2:CA:92:D0:4C:ED:5B:33:6C:8F:25:A0:D3:E3
+1. Raise `versionName` and `versionCode` in `app/build.gradle`.
+2. Commit and push to `master`.
+3. Tag the commit with `v` plus the version name and push the tag, for example `git tag v8.3.3.9.1.3 && git push origin v8.3.3.9.1.3`.
 
-You can verify it with [AppVerifier](https://github.com/soupslurpr/AppVerifier).
+The workflow checks that the tag matches `versionName`, builds the APKs, and publishes the release. It needs the repository secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`. Every release must be signed with the same key, or Android will refuse to install it over the previous one. The version must also be higher than the last release, because the in-app updater compares version numbers.
 
+# Staying current with Continuum
+The `upstream` remote points at Continuum.
 
-# About The Project
-Unique features of **Continuum**:
+```
+git fetch upstream
+git merge upstream/master
+```
 
-- Ability to use your own `Client ID`.
-- Ability to use your own Giphy gifs API key.
-- Ability to backup your accounts with your own password.
-- The max number of main page tabs has been increased to six.
-- Sensible download names.
-- Bug fixes and more...
+Expect conflicts in `app/build.gradle` (keep your version, based on theirs, and keep the `applicationId` and app name) and in `.github/workflows/build.yml` (keep this fork's).
+
+# License
+Distributed under the AGPL-3.0 License. See [LICENSE](/LICENSE) for more information. The decoder code is by wchill ([patcheddit](https://github.com/wchill/patcheddit)) and carries its own notice in the file headers.
+
+# Credits and upstream
+- [Continuum](https://github.com/cygnusx-1-org/continuum) by u/edgan, whose [Discord](https://discord.gg/vDuSpJEDrW) and [subreddit](https://old.reddit.com/r/continuumreddit/) are the place for questions about the parts this fork did not change.
+- [Infinity for Reddit](https://github.com/Docile-Alligator/Infinity-For-Reddit) by Docile-Alligator.
 
 <details>
 <summary>Features from <b>Infinity</b></summary>
@@ -93,42 +100,3 @@ Unique features of **Continuum**:
 * etc...
 
 </details>
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-# Contributing
-First off, thanks for taking the time to contribute! Contributions are what makes the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request.
-It's better to also open an issue describing the issue you want to fix. But it is not required.
-
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch from `master` (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request to the `master` Branch
-
-Here are other ways you can help:
-
-- [Report Bugs](https://github.com/cygnusx-1-org/continuum/issues/new?template=bug_report.md)
-
-- [Request Features](https://github.com/cygnusx-1-org/continuum/issues/new?template=feature_request.md)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-# Related project
-[Slide](https://github.com/cygnusx-1-org/Slide) is another Android [Reddit](https://www.reddit.com/) client app. It is a fork of the original project.
-
-# License
-Distributed under the AGPL-3.0 License. See <a href="https://github.com/cygnusx-1-org/continuum/blob/master/LICENSE">LICENSE</a> for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-# Contact
-[u/edgan](https://www.reddit.com/user/edgan) -
-continuum@cygnusx-1.org (Owner)
-
-Project Link: [https://github.com/cygnusx-1-org/continuum](https://github.com/cygnusx-1-org/continuum)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
