@@ -2,6 +2,11 @@
 
 ---
 
+8.3.3.9.1.8 / 2026-11-3
+============
+* The update dialog now renders the release notes instead of showing their Markdown markup, such as `**Full Changelog**`
+* Release notes now come from this changelog, so the update dialog shows what changed instead of a list of pull requests
+
 8.3.3.9.1.7 / 2026-11-3
 ============
 * Added `Settings > Post > Hide NSFW Badge`, which never shows the NSFW badge in the feed or the post

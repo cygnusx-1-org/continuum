@@ -73,8 +73,22 @@ jobs:
           # "latest", and the app only offers it to people who turned on pre-release updates.
           PRERELEASE=""
           case "$GITHUB_REF_NAME" in *-*) PRERELEASE="--prerelease" ;; esac
+          # The release notes are this version's section of CHANGELOG.md, which is what the app
+          # shows in its update dialog. GitHub's generated notes are the fallback.
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v v="$VERSION" '
+            index($0, v " / ") == 1 { found = 1; next }
+            found && /^[0-9][0-9.]* \/ / { exit }
+            found && /^=+$/ { next }
+            found { print }
+          ' CHANGELOG.md | tr -d '\r' > "$RUNNER_TEMP/notes.md"
+          if grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md"; then
+            NOTES="--notes-file $RUNNER_TEMP/notes.md"
+          else
+            NOTES="--generate-notes"
+          fi
           gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk \
-            --title "Reddit Jr. ${GITHUB_REF_NAME#v}" --generate-notes $PRERELEASE
+            --title "Reddit Jr. ${GITHUB_REF_NAME#v}" $NOTES $PRERELEASE
 
       - name: Upload APKs (manual runs)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}

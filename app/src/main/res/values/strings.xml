@@ -516,9 +516,7 @@
     <string name="settings_include_prereleases_summary">Also offer test builds, such as 8.3.3.9.1.8-beta.1, before they become a full release</string>
     <string name="settings_check_for_updates_title">Check for updates now</string>
     <string name="update_available_title">Update available</string>
-    <string name="update_available_message">Version %1$s is available (you have %2$s).
-
-%3$s</string>
+    <string name="update_available_header">Version %1$s is available (you have %2$s).</string>
     <string name="update_download_and_install">Download and install</string>
     <string name="update_later">Later</string>
     <string name="update_up_to_date">Reddit Jr. is up to date</string>
