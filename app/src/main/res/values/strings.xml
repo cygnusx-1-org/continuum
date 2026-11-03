@@ -1,5 +1,5 @@
 <resources>
-    <string name="application_name" translatable="false">Continuum</string>
+    <string name="application_name" translatable="false">Continuumjr</string>
     <string name="login_activity_label">Login</string>
     <string name="search_activity_label" translatable="false"> </string>
     <string name="comment_activity_label">Send Comment</string>
@@ -496,6 +496,22 @@
     <string name="settings_gestures_and_buttons_title">Gestures &amp; Buttons</string>
     <string name="settings_save_front_page_scrolled_position_title">Save Scrolled Position in HOME</string>
     <string name="settings_save_front_page_scrolled_position_summary">Browse new posts after refreshing in HOME (Front Page, sort type: Best)</string>
+    <string name="settings_decode_nato_binary_title">Decode NATO and binary</string>
+    <string name="settings_decode_nato_binary_summary">Show the decoded text, with Copy and search links, under comments and posts that spell something in the NATO alphabet or 8-bit binary</string>
+    <string name="settings_auto_check_for_updates_title">Check for updates automatically</string>
+    <string name="settings_auto_check_for_updates_summary">Look for a new Continuumjr release on GitHub at most once a day</string>
+    <string name="settings_check_for_updates_title">Check for updates now</string>
+    <string name="update_available_title">Update available</string>
+    <string name="update_available_message">Version %1$s is available (you have %2$s).
+
+%3$s</string>
+    <string name="update_download_and_install">Download and install</string>
+    <string name="update_later">Later</string>
+    <string name="update_up_to_date">Continuumjr is up to date</string>
+    <string name="update_check_failed">Could not check for updates</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_download_failed">Update download failed</string>
+    <string name="update_allow_installs">Allow Continuumjr to install apps, then tap Download and install again</string>
     <string name="settings_resume_where_i_left_off_title">Resume where I left off</string>
     <string name="settings_resume_where_i_left_off_summary">Reopen on the same screen, at the same place, showing what was already loaded instead of refreshing. Takes precedence over Save Scrolled Position in HOME</string>
     <string name="settings_link_handler_title">Link Handler (Per-account)</string>

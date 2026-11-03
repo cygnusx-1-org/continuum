@@ -329,6 +329,10 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        if (savedInstanceState == null) {
+            ml.docilealligator.infinityforreddit.update.UpdateUi.checkAutomatically(this);
+        }
+
         // The screens of the replay are on their way up, and this one is what the launcher started
         // -- so without this the feed draws first and the user reads it for about a quarter of a
         // second before the screen they actually left replaces it. Holding this frame back leaves

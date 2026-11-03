@@ -128,6 +128,11 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     @Nullable
     private final String mSingleCommentId;
     private final boolean mVoteButtonsOnTheRight;
+    private final boolean mDecodeNatoBinary;
+
+    private String decodeIfEnabled(String markdown) {
+        return mDecodeNatoBinary ? ml.docilealligator.infinityforreddit.decoder.CommentDecoder.annotate(markdown) : markdown;
+    }
     private final boolean mShowElapsedTime;
     private final String mTimeFormatPattern;
     private final boolean mCommentToolbarHidden;
@@ -374,6 +379,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
         mSingleCommentId = singleCommentId;
 
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
+        mDecodeNatoBinary = sharedPreferences.getBoolean(SharedPreferencesUtils.DECODE_NATO_BINARY, true);
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
         mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mCommentToolbarHidden = sharedPreferences.getBoolean(SharedPreferencesUtils.COMMENT_TOOLBAR_HIDDEN, true);
@@ -640,7 +646,7 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
                 mVideoEntry.setCurrentPostId(comment.getLinkId());
                 mVideoEntry.setCurrentPostTitle(linkTitle);
                 mVideoPlugin.setMediaMetadataMap(comment.getMediaMetadataMap());
-                ((CommentBaseViewHolder) holder).mMarkwonAdapter.setMarkdown(mCommentMarkwon, java.util.Objects.requireNonNullElse(comment.getCommentMarkdown(), ""));
+                ((CommentBaseViewHolder) holder).mMarkwonAdapter.setMarkdown(mCommentMarkwon, decodeIfEnabled(java.util.Objects.requireNonNullElse(comment.getCommentMarkdown(), "")));
                 // noinspection NotifyDataSetChanged
                 ((CommentBaseViewHolder) holder).mMarkwonAdapter.notifyDataSetChanged();
 

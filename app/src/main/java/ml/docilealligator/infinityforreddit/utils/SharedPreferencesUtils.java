@@ -207,6 +207,9 @@ public class SharedPreferencesUtils {
     // already loaded. Overrides SAVE_FRONT_PAGE_SCROLLED_POSITION on Home when both are on: that
     // one skips past what was read, this one goes back to it.
     public static final String RESUME_WHERE_I_LEFT_OFF = "resume_where_i_left_off";
+    public static final String DECODE_NATO_BINARY = "decode_nato_binary";
+    public static final String AUTO_CHECK_FOR_UPDATES = "auto_check_for_updates";
+    public static final String LAST_UPDATE_CHECK_TIME = "last_update_check_time";
     public static final String DATA_SAVING_MODE_PREFERENCE = "data_saving_mode_preference";
     public static final String DATA_SAVING_MODE = "data_saving_mode";
     public static final String DATA_SAVING_MODE_OFF = "0";

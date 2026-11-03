@@ -201,6 +201,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private boolean mDoNotBlurNsfwInNsfwSubreddits;
     private boolean mNeedBlurSpoiler;
     private final boolean mVoteButtonsOnTheRight;
+    private final boolean mDecodeNatoBinary;
     private final boolean mShowElapsedTime;
     private final String mTimeFormatPattern;
     private final boolean mShowAbsoluteNumberOfVotes;
@@ -328,6 +329,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mDoNotBlurNsfwInNsfwSubreddits = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.DO_NOT_BLUR_NSFW_IN_NSFW_SUBREDDITS), false);
         mNeedBlurSpoiler = nsfwAndSpoilerSharedPreferences.getBoolean(AccountScope.key(mAccountName, SharedPreferencesUtils.BLUR_SPOILER_BASE), false);
         mVoteButtonsOnTheRight = sharedPreferences.getBoolean(SharedPreferencesUtils.VOTE_BUTTONS_ON_THE_RIGHT_KEY, false);
+        mDecodeNatoBinary = sharedPreferences.getBoolean(SharedPreferencesUtils.DECODE_NATO_BINARY, true);
         mShowElapsedTime = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ELAPSED_TIME_KEY, false);
         mTimeFormatPattern = java.util.Objects.requireNonNull(sharedPreferences.getString(SharedPreferencesUtils.TIME_FORMAT_KEY, SharedPreferencesUtils.TIME_FORMAT_DEFAULT_VALUE));
         mShowAbsoluteNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_ABSOLUTE_NUMBER_OF_VOTES, true);
@@ -944,7 +946,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 mVideoEntry.setCurrentCommentId(null);
                 mVideoEntry.setCurrentPostId(mPost.getId());
                 mVideoEntry.setCurrentPostTitle(mPost.getTitle());
-                mMarkwonAdapter.setMarkdown(mPostDetailMarkwon, mPost.getSelfText());
+                mMarkwonAdapter.setMarkdown(mPostDetailMarkwon, mDecodeNatoBinary ? ml.docilealligator.infinityforreddit.decoder.CommentDecoder.annotate(mPost.getSelfText()) : mPost.getSelfText());
                 // noinspection NotifyDataSetChanged
                 mMarkwonAdapter.notifyDataSetChanged();
             }

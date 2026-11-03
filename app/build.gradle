@@ -71,7 +71,7 @@ android {
     compileSdk 37
 
     defaultConfig {
-        applicationId "org.cygnusx1.continuum"
+        applicationId "org.cygnusx1.continuumjr"
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = [eventBusIndex: 'ml.docilealligator.infinityforreddit.EventBusIndex']
@@ -80,8 +80,8 @@ android {
 
         minSdk 24
         targetSdk 36
-        versionCode 233
-        versionName "8.3.3.9.1"
+        versionCode 234
+        versionName "8.3.3.9.1.1"
         testInstrumentationRunner "com.kaspersky.kaspresso.runner.KaspressoRunner"
         // The fallback must be 22 characters (APIKeysPreferenceFragment.CLIENT_ID_LENGTH) and must
         // not be R.string.default_client_id, or the API Keys dialog leaves its OK button disabled
@@ -103,7 +103,7 @@ android {
             }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            resValue "string", "app_name", "Continuum"
+            resValue "string", "app_name", "Continuumjr"
         }
         minifiedRelease {
             initWith buildTypes.release
@@ -122,7 +122,7 @@ android {
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
-            resValue "string", "app_name", "Continuum Debug"
+            resValue "string", "app_name", "Continuumjr Debug"
         }
     }
 
