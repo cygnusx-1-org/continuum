@@ -271,7 +271,7 @@ public class BackupSettings {
         boolean result = false;
         try {
             String time = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.US).format(LocalDateTime.now(ZoneId.systemDefault()));
-            String fileName = "Continuum_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
+            String fileName = "RedditJr_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
             String filePath = cacheDir + "/Backup/" + fileName;
             try (ZipFile zip = new ZipFile(filePath, password.toCharArray())) {
                 ZipParameters zipParameters = new ZipParameters();

@@ -216,7 +216,7 @@
     <string name="follow_failed">"Követés sikertelen"</string>
     <string name="unfollowed">"Követés megszüntetve"</string>
     <string name="unfollow_failed">"Követés megszüntetése sikertelen"</string>
-    <string name="app_label">"Continuum"</string>
+    <string name="app_label">"Reddit Jr."</string>
     <string name="search_hint">"Keressen bármire"</string>
     <string name="search_only_subreddits_hint">"Subredditek keresése"</string>
     <string name="search_only_users_hint">"Felhasználók keresése"</string>
@@ -560,12 +560,12 @@
     <string name="settings_reddit_account_title">"Reddit fiók"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/continuumreddit"</string>
+    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Megosztás"</string>
     <string name="settings_share_summary">"Ha tetszik az app oszd meg másokkal is"</string>
     <string name="settings_privacy_policy_title">"Adatvédelmi nyilatkozat"</string>
     <string name="settings_debug_title">"hibakeresés"</string>
-    <string name="settings_version_title">"Continuum"</string>
+    <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Verzió %s"</string>
     <string name="settings_screen_width_dp_title">"képernyő szélesség"</string>
     <string name="settings_screen_width_dp_summary">"%d dp"</string>
@@ -582,9 +582,9 @@
     <string name="settings_category_material_you_title">"Material You"</string>
     <string name="settings_enable_material_you_warning_summary">"Győződj meg arról, hogy nincsenek\n„Material You”,\n„Material You Dark” vagy\n„Material You Amoled” nevű témái.\nEgyébként nevezze át őket a Material You engedélyezése előtt."</string>
     <string name="settings_enable_material_you_title">"Material You engedélyezése"</string>
-    <string name="settings_enable_material_you_summary">"Szabd testre a Continuumot a háttérképed alapján"</string>
+    <string name="settings_enable_material_you_summary">"Szabd testre a Reddit Jr.ot a háttérképed alapján"</string>
     <string name="settings_apply_material_you_title">"Material You alkalmazása"</string>
-    <string name="settings_apply_material_you_summary">"Abban az esetben, ha a Continuum nem változtatta meg a témát"</string>
+    <string name="settings_apply_material_you_summary">"Abban az esetben, ha a Reddit Jr. nem változtatta meg a témát"</string>
     <string name="settings_global_settings_management_title">"Globális beállítások kezelése"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Adatbázisban szereplő összes subreddit törlése"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Adatbázisban szereplő összes felhasználó törlése"</string>
@@ -949,7 +949,7 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="error_getting_multi_reddit_data">"Hiba multireddit adatok megszerzésekor"</string>
     <string name="error_loading_multi_reddit_list">"Nem lehet szinkronizálni a multiredditeket"</string>
     <string name="error_loading_subscriptions">"Nem lehet szinkronizálni a feliratkozásokat"</string>
-    <string name="share_this_app">"Nézz rá az Continuum, ami egy remek Reddit kliens!
+    <string name="share_this_app">"Nézz rá az Reddit Jr., ami egy remek Reddit kliens!
 https://play.google.com/store/"</string>
     <string name="error_getting_subreddit_name">"Hiba subreddit nevének megszerzésekor"</string>
     <string name="share_post_link">"Poszt link megosztása"</string>
@@ -1270,7 +1270,7 @@ Az alap az indigó amoled téma"</string>
     <string name="delete_all_legacy_settings_success">"Összes elavult beállítás törlése sikeres"</string>
     <string name="reset_all_settings_success">"Összes beállítás visszaállítása sikeres"</string>
     <string name="username_preview">"u/edgan"</string>
-    <string name="subreddit_preview">"r/continuumreddit"</string>
+    <string name="subreddit_preview">"r/redditjr"</string>
     <string name="primary_text_preview">"Elsődleges szöveg"</string>
     <string name="secondary_text_preview">"Másodlagos szöveg"</string>
     <string name="post_title_preview">"Ez egy poszt"</string>
@@ -1626,7 +1626,7 @@ Az alap az indigó amoled téma"</string>
     <string name="reddit_gallery_item_url_hint">"Webcím"</string>
     <string name="user_agreement_dialog_title">"Felhasználói szerződés"</string>
     <string name="user_agreement_message">"A bejelentkezés előtt el kell fogadnia a Reddit Felhasználói szerződést (%1$s) és az Infinity for Reddit adatvédelmi szabályzatát (%2$s).\n\nMostantól havi előfizetésre lesz szüksége, hogy elérje a Reddit API-t az Infinity-n belül a Reddit számmal, és ennek oka, hogy a Reddit 2023. július 1-je óta elkezdte számlázni a API hozzáférést."</string>
-    <string name="warning_message_nsfw_content">"Continuum nem reklámoz és nem ajánl NSFW tartalmat. A Reddit irányelvei miatt nem valószínű, hogy NSFW tartalommal fog találkozni az alkalmazásban. A beállítások módosítása előtt el kell fogadnia a Reddit Felhasználói megállapodást (%1$s) és a Continuum adatvédelmi szabályzatát (%2$s)."</string>
+    <string name="warning_message_nsfw_content">"Reddit Jr. nem reklámoz és nem ajánl NSFW tartalmat. A Reddit irányelvei miatt nem valószínű, hogy NSFW tartalommal fog találkozni az alkalmazásban. A beállítások módosítása előtt el kell fogadnia a Reddit Felhasználói megállapodást (%1$s) és a Reddit Jr. adatvédelmi szabályzatát (%2$s)."</string>
     <string name="agree">"Egyetértek"</string>
     <string name="do_not_agree">"Nem értek egyet"</string>
     <string name="option_1_hint">"1. lehetőség (szükséges)"</string>
@@ -1654,8 +1654,8 @@ Az alap az indigó amoled téma"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Az értesítési engedély nincs megadva"</string>
     <string name="go_to_settings">"Beállítások"</string>
-    <string name="welcome_to_continuum">"Üdvözöljük a Continuum webhelyen, amely az Reddit böngészés egy teljesen új dimenziójához vezető kapu!"</string>
-    <string name="subscription_prompt">"Mielőtt belevetnéd magad az alkalmazás által kínált számtalan lehetőségbe,\n        szeretnék előre és átláthatóan nyilatkozni egy jelentős változásról, amelyet azért vezettem be, hogy a lehető legjobb szolgáltatást nyújthassam neked.\n        \n\nMostantól havi előfizetésre lesz szükséged ahhoz, hogy a Continuumon belül hozzáférj a Reddit API-hoz, és\n        ez azért van, mert a Reddit 2023. július 1. óta díjat számít fel az API-hozzáférésért.\n        \n\nMinden szint ugyanúgy működik. Ha támogatni szeretnéd a Continuumot, előfizethetsz magasabb szintre is.\n        A legalacsonyabb szintből befolyó pénz nagy része a Reddithez kerül.\n    "</string>
+    <string name="welcome_to_continuum">"Üdvözöljük a Reddit Jr. webhelyen, amely az Reddit böngészés egy teljesen új dimenziójához vezető kapu!"</string>
+    <string name="subscription_prompt">"Mielőtt belevetnéd magad az alkalmazás által kínált számtalan lehetőségbe,\n        szeretnék előre és átláthatóan nyilatkozni egy jelentős változásról, amelyet azért vezettem be, hogy a lehető legjobb szolgáltatást nyújthassam neked.\n        \n\nMostantól havi előfizetésre lesz szükséged ahhoz, hogy a Reddit Jr.on belül hozzáférj a Reddit API-hoz, és\n        ez azért van, mert a Reddit 2023. július 1. óta díjat számít fel az API-hozzáférésért.\n        \n\nMinden szint ugyanúgy működik. Ha támogatni szeretnéd a Reddit Jr.ot, előfizethetsz magasabb szintre is.\n        A legalacsonyabb szintből befolyó pénz nagy része a Reddithez kerül.\n    "</string>
     <string name="monthly">"Havonta"</string>
     <string name="yearly">"Évente"</string>
     <string name="weekly">"Heti"</string>
@@ -1674,19 +1674,19 @@ Az alap az indigó amoled téma"</string>
     <string name="subscription_plan_description_monthly_499">"Gold – tökéletes választás!"</string>
     <string name="subscription_plan_description_monthly_699">"Platina"</string>
     <string name="subscription_plan_description_monthly_899">"gyémánt"</string>
-    <string name="subscription_plan_description_monthly_999">"Continuum"</string>
+    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
     <string name="acknowledge_purchase_failed">"A vásárlást nem lehet nyugtázni"</string>
     <string name="connect_to_billing_system_failed">"Nem sikerült csatlakozni a számlázási rendszerhez"</string>
     <string name="connecting_to_billing_system">"Csatlakozás a számlázási rendszerhez. Kérjük, várj."</string>
     <string name="thank_you_for_subscription">"Köszönjük előfizetését"</string>
     <string name="load_subscription_options">"Az előfizetési lehetőségek betöltése"</string>
     <string name="acknowledging_subscription">"Az előfizetés elismerése. Kérjük, várj."</string>
-    <string name="acknowledgement_purchase_failed_description">"Hoppá, hiba történt a vásárlás visszaigazolásakor. Ha ez a probléma három napig fennáll, automatikusan visszatérítést kap.\nNe aggódj, továbbra is élvezheti az Continuum."</string>
+    <string name="acknowledgement_purchase_failed_description">"Hoppá, hiba történt a vásárlás visszaigazolásakor. Ha ez a probléma három napig fennáll, automatikusan visszatérítést kap.\nNe aggódj, továbbra is élvezheti az Reddit Jr.."</string>
     <string name="continue_to_app">"Tovább a kb"</string>
     <string name="restore_subscription_purchase_details">"Már kifizette az előfizetést?"</string>
     <string name="restore_subscription_purchase">"Az előfizetés visszaállítása"</string>
     <string name="important_info_title">"Kérjük, jelentkezzen be újra fiókjába"</string>
-    <string name="important_info">"A Continuum egy ügyfél-azonosítót (API kulcs) használ a Reddit-től, és az alkalmazás használatának folytatásához újra be kell jelentkeznie.\n\nCsak nyisd meg a navigációs fiókot, kattints fiókja fejlécére, és válaszd a „Fiók hozzáadása” lehetőséget, hogy újra bejelentkezzen a Reddit címre ugyanazzal a fiókkal. Ellenkező esetben előfordulhat, hogy az Continuum egyáltalán nem tölti be a bejegyzéseket. Elnézést a kellemetlenségért."</string>
+    <string name="important_info">"A Reddit Jr. egy ügyfél-azonosítót (API kulcs) használ a Reddit-től, és az alkalmazás használatának folytatásához újra be kell jelentkeznie.\n\nCsak nyisd meg a navigációs fiókot, kattints fiókja fejlécére, és válaszd a „Fiók hozzáadása” lehetőséget, hogy újra bejelentkezzen a Reddit címre ugyanazzal a fiókkal. Ellenkező esetben előfordulhat, hogy az Reddit Jr. egyáltalán nem tölti be a bejegyzéseket. Elnézést a kellemetlenségért."</string>
     <string name="i_understand">"Értem"</string>
     <string name="add_to_comment_filter">"Hozzáadás a hozzászólásszűrőhöz"</string>
     <string name="cannot_edit_post_with_images">"A képeket tartalmazó bejegyzések szerkesztése nem engedélyezett."</string>

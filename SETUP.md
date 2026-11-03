@@ -37,10 +37,10 @@ first time the app is being set up.
 <img src="/assets/screenshots/settings.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>
   
 2. Select `Reddit API Client ID`
-<img src="/assets/screenshots/continuum_client_id1.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>
+<img src="/assets/screenshots/redirect_uri1.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>
   
 3. Press `Reddit API Client ID`
-<img src="/assets/screenshots/continuum_client_id2.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>
+<img src="/assets/screenshots/redirect_uri2.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>
   
 4. Enter your `Client ID`
 <img src="/assets/screenshots/enter_client_id.png" alt="drawing" width="189.5" height="400" style="object-fit: contain;"/>

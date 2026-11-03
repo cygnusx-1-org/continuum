@@ -11,9 +11,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -32,7 +35,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import app.futured.hauler.DragDirection;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
@@ -46,6 +53,7 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.SetAsWallpaperCallback;
 import ml.docilealligator.infinityforreddit.WallpaperSetter;
 import ml.docilealligator.infinityforreddit.databinding.ActivityViewRedditGalleryBinding;
+import ml.docilealligator.infinityforreddit.databinding.ItemShadowboxGalleryBinding;
 import ml.docilealligator.infinityforreddit.events.FinishViewMediaActivityEvent;
 import ml.docilealligator.infinityforreddit.font.ContentFontFamily;
 import ml.docilealligator.infinityforreddit.font.ContentFontStyle;
@@ -76,9 +84,16 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
      */
     public static final String EXTRA_POST_JSON = "EPJ";
     public static final String EXTRA_GALLERY_ITEM_INDEX = "EGII";
+    /**
+     * Open on a vertical list of every item rather than the swipe viewer; a tap on an item opens
+     * the viewer on it, and back returns to the list.
+     */
+    public static final String EXTRA_SCROLL_LIST = "ESL";
 
     /** Which item of the gallery the user was on. See {@link #saveResumeState}. */
     private static final String STATE_RESUME_PAGE = "RP";
+    private static final String STATE_SHOWING_LIST = "SSL";
+    private static final String STATE_CAME_FROM_LIST = "SCFL";
 
     @Inject
     @Named("default")
@@ -87,7 +102,6 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     Executor executor;
     @Nullable
     public Typeface typeface;
-    private SectionsPagerAdapter sectionsPagerAdapter;
     // Assigned from the required EXTRA_POST intent extra after a finish()+return guard, so its
     // initialization along the early-return path can't be proven; live paths always set it.
     @SuppressWarnings("NullAway.Init")
@@ -101,6 +115,14 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     // Resume where I left off: which item of the gallery was open. The gallery itself replays in the
     // extras, so this needs no network of its own.
     private int resumePage = -1;
+    private boolean showingList = false;
+    // Enabled while the pager is open over the list, so back returns to the list instead of leaving.
+    private final OnBackPressedCallback backToList = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            showList(binding.viewPagerViewRedditGalleryActivity.getCurrentItem());
+        }
+    };
     private ActivityViewRedditGalleryBinding binding;
     ViewGalleryViewModel viewGalleryViewModel;
 
@@ -188,6 +210,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
                 params.topMargin = allInsets.top;
                 binding.toolbarViewRedditGalleryActivity.setLayoutParams(params);
 
+                binding.recyclerViewViewRedditGalleryActivity.setPadding(allInsets.left, allInsets.top, allInsets.right, allInsets.bottom);
+
                 viewGalleryViewModel.setInsets(allInsets);
                 return WindowInsetsCompat.CONSUMED;
             }
@@ -231,13 +255,147 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             binding.haulerViewViewRedditGalleryActivity.setDragEnabled(false);
         }
 
-        setupViewPager(savedInstanceState);
+        getOnBackPressedDispatcher().addCallback(this, backToList);
+        boolean scrollList = getIntent().getBooleanExtra(EXTRA_SCROLL_LIST, false);
+        if (savedInstanceState != null && savedInstanceState.getBoolean(STATE_SHOWING_LIST)) {
+            showList(0);
+        } else if (savedInstanceState == null && scrollList) {
+            Bundle resumeState = ResumeState.claim(this);
+            if (resumeState != null) {
+                restoreResumeState(resumeState);
+            }
+            int index = getIntent().getIntExtra(EXTRA_GALLERY_ITEM_INDEX, 0);
+            if (index == 0 && resumePage > 0 && resumePage < gallery.size()) {
+                index = resumePage;
+            }
+            showList(index);
+        } else {
+            setupViewPager(savedInstanceState);
+            backToList.setEnabled(savedInstanceState != null
+                    && savedInstanceState.getBoolean(STATE_CAME_FROM_LIST));
+        }
+    }
+
+    private class GalleryListAdapter extends RecyclerView.Adapter<GalleryListViewHolder> {
+        @NonNull
+        @Override
+        public GalleryListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new GalleryListViewHolder(ItemShadowboxGalleryBinding.inflate(getLayoutInflater(), parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull GalleryListViewHolder holder, int position) {
+            holder.bind(gallery.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return gallery.size();
+        }
+
+        @Override
+        public void onViewRecycled(@NonNull GalleryListViewHolder holder) {
+            Glide.with(ViewRedditGalleryActivity.this).clear(holder.binding.imageViewItemShadowboxGallery);
+        }
+    }
+
+    private class GalleryListViewHolder extends RecyclerView.ViewHolder {
+        final ItemShadowboxGalleryBinding binding;
+
+        GalleryListViewHolder(ItemShadowboxGalleryBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            if (typeface != null) {
+                binding.captionTextViewItemShadowboxGallery.setTypeface(typeface);
+            }
+            itemView.setOnClickListener(view -> {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    showPager(position);
+                }
+            });
+        }
+
+        void bind(Post.Gallery item) {
+            // The source's own size reserves the row's height before the picture arrives, so the
+            // list does not jump as items load; without it the row sizes to the picture.
+            binding.imageViewItemShadowboxGallery.setRatio(
+                    item.sourceWidth > 0 && item.sourceHeight > 0 ? (float) item.sourceHeight / item.sourceWidth : 0f);
+            binding.errorImageViewItemShadowboxGallery.setVisibility(View.GONE);
+            boolean video = item.mediaType == Post.Gallery.TYPE_VIDEO;
+            binding.playBadgeImageViewItemShadowboxGallery.setVisibility(video ? View.VISIBLE : View.GONE);
+
+            String still = item.feedPreviewUrl;
+            // A video's url is the mp4, which an ImageView cannot show; its still stands in.
+            String main = video ? still : item.url;
+            if (main == null) {
+                Glide.with(ViewRedditGalleryActivity.this).clear(binding.imageViewItemShadowboxGallery);
+                binding.imageViewItemShadowboxGallery.setImageDrawable(null);
+                binding.playBadgeImageViewItemShadowboxGallery.setVisibility(View.GONE);
+                binding.errorImageViewItemShadowboxGallery.setVisibility(View.VISIBLE);
+            } else {
+                RequestBuilder<Drawable> request = Glide.with(ViewRedditGalleryActivity.this).load(main);
+                if (still != null && !still.equals(main)) {
+                    request = request.thumbnail(Glide.with(ViewRedditGalleryActivity.this).load(still));
+                }
+                request.into(binding.imageViewItemShadowboxGallery);
+            }
+
+            if (TextUtils.isEmpty(item.caption)) {
+                binding.captionTextViewItemShadowboxGallery.setVisibility(View.GONE);
+            } else {
+                binding.captionTextViewItemShadowboxGallery.setVisibility(View.VISIBLE);
+                binding.captionTextViewItemShadowboxGallery.setText(item.caption);
+            }
+        }
+    }
+
+    /**
+     * Lays every item out in one vertical list. The pager is not created until an item is tapped,
+     * so no fragment (and no video) starts while the list is up.
+     */
+    private void showList(int scrollTo) {
+        showingList = true;
+        backToList.setEnabled(false);
+        binding.viewPagerViewRedditGalleryActivity.setVisibility(View.GONE);
+        binding.viewPagerViewRedditGalleryActivity.setAdapter(null);
+        binding.recyclerViewViewRedditGalleryActivity.setVisibility(View.VISIBLE);
+        if (binding.recyclerViewViewRedditGalleryActivity.getAdapter() == null) {
+            binding.recyclerViewViewRedditGalleryActivity.setLayoutManager(new LinearLayoutManager(this));
+            binding.recyclerViewViewRedditGalleryActivity.setAdapter(new GalleryListAdapter());
+        }
+        if (scrollTo > 0 && scrollTo < gallery.size()) {
+            binding.recyclerViewViewRedditGalleryActivity.scrollToPosition(scrollTo);
+        }
+    }
+
+    /**
+     * Opens the swipe viewer, with zoom, download and share, on one item of the list.
+     */
+    private void showPager(int index) {
+        showingList = false;
+        backToList.setEnabled(true);
+        binding.recyclerViewViewRedditGalleryActivity.setVisibility(View.GONE);
+        binding.viewPagerViewRedditGalleryActivity.setVisibility(View.VISIBLE);
+        createPagerAdapter();
+        binding.viewPagerViewRedditGalleryActivity.setCurrentItem(index, false);
+    }
+
+    private void createPagerAdapter() {
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
+        binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_SHOWING_LIST, showingList);
+        outState.putBoolean(STATE_CAME_FROM_LIST, backToList.isEnabled());
     }
 
     private void setupViewPager(@Nullable Bundle savedInstanceState) {
-        sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        binding.viewPagerViewRedditGalleryActivity.setAdapter(sectionsPagerAdapter);
-        binding.viewPagerViewRedditGalleryActivity.setOffscreenPageLimit(3);
+        createPagerAdapter();
         if (savedInstanceState == null) {
             Bundle resumeState = ResumeState.claim(this);
             if (resumeState != null) {

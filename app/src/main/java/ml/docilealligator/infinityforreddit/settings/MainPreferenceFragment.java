@@ -64,7 +64,7 @@ public class MainPreferenceFragment extends CustomFontPreferenceFragmentCompat {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent intent = new Intent(mActivity, LinkResolverActivity.class);
-                    intent.setData(Uri.parse("https://github.com/cygnusx-1-org/continuum"));
+                    intent.setData(Uri.parse("https://github.com/jayblah/redditjr"));
                     mActivity.startActivity(intent);
                     return true;
                 }

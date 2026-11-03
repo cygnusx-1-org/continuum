@@ -95,7 +95,7 @@ echo "Test class: $test_class"
 
 # assembleDebug splits per ABI and stamps the versionName (and "-dirty") into the filename, so glob
 # rather than guess. arm64 runs fine on the x86_64 emulators here; there is no x86_64 split.
-app_apk="$(ls -t app/build/outputs/apk/debug/continuum-arm64-v8a-*.apk 2>/dev/null | head -1)"
+app_apk="$(ls -t app/build/outputs/apk/debug/redditjr-arm64-v8a-*.apk 2>/dev/null | head -1)"
 test_apk="app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
 
 if [ -z "$app_apk" ] || [ ! -f "$test_apk" ]; then

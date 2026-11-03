@@ -22,29 +22,9 @@
         app:summary="@string/settings_open_source_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        android:key="email"
-        app:title="@string/settings_email_title"
-        app:summary="@string/settings_email_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        android:key="reddit_account"
-        app:title="@string/settings_reddit_account_title"
-        app:summary="@string/settings_reddit_account_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        android:key="subreddit"
-        app:title="@string/settings_subreddit_title"
-        app:summary="@string/settings_subreddit_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
         android:key="share"
         app:title="@string/settings_share_title"
         app:summary="@string/settings_share_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreference
-        android:key="patcheddit"
-        app:title="@string/settings_patcheddit_title"
-        app:summary="@string/settings_patcheddit_notice" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"

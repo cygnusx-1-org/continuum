@@ -255,16 +255,19 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
     /**
-     * With the icon hidden, its view collapses to no width and the name and Join button start at
-     * the left. Its height stays, since the name and button are anchored to it.
+     * With the icon hidden, its view collapses to a sliver and the name and Join button start at
+     * the left. Its height stays, since the name and button are anchored to it. The width is one
+     * pixel, not 0: in a ConstraintLayout 0dp means "match constraints", which with only a start
+     * constraint falls back to the image's own size, so the icon stayed.
      */
     private void applyIconSetting() {
         if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_ICON, false)) {
             return;
         }
         ViewGroup.LayoutParams iconParams = binding.iconGifImageViewViewSubredditDetailActivity.getLayoutParams();
-        iconParams.width = 0;
+        iconParams.width = 1;
         binding.iconGifImageViewViewSubredditDetailActivity.setLayoutParams(iconParams);
+        binding.iconGifImageViewViewSubredditDetailActivity.setVisibility(View.INVISIBLE);
         for (View view : new View[]{binding.subredditNameTextViewViewSubredditDetailActivity,
                 binding.subscribeSubredditChipViewSubredditDetailActivity}) {
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();

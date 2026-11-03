@@ -64,7 +64,7 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/exclude_chip_item_post_filter_rules_header"
-            style="@style/Widget.Continuum.Chip.Filter"
+            style="@style/Widget.RedditJr.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/post_filter_rule_exclude"
@@ -73,7 +73,7 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/include_chip_item_post_filter_rules_header"
-            style="@style/Widget.Continuum.Chip.Filter"
+            style="@style/Widget.RedditJr.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/post_filter_rule_include"

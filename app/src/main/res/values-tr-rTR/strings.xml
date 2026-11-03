@@ -223,7 +223,7 @@ Tekrar denemek için tıklayın."</string>
     <string name="follow_failed">"Takip edilemedi"</string>
     <string name="unfollowed">"Takip bırakıldı"</string>
     <string name="unfollow_failed">"Takip bırakılamadı"</string>
-    <string name="app_label">"Continuum"</string>
+    <string name="app_label">"Reddit Jr."</string>
     <string name="search_hint">"Bir şey arayın"</string>
     <string name="search_only_subreddits_hint">"Subreddit'leri ara"</string>
     <string name="search_only_users_hint">"Kullanıcıları ara"</string>
@@ -569,12 +569,12 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_reddit_account_title">"Reddit Hesabı"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
-    <string name="settings_subreddit_summary">"r/continuumreddit"</string>
+    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"Paylaş"</string>
     <string name="settings_share_summary">"Bu uygulamayı beğendiyseniz başkalarıyla paylaşın"</string>
     <string name="settings_privacy_policy_title">"Gizlilik Politikası"</string>
     <string name="settings_debug_title">"Hata Ayıklama"</string>
-    <string name="settings_version_title">"Continuum"</string>
+    <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"%s Sürümü"</string>
     <string name="settings_screen_width_dp_title">"Ekran Genişliği"</string>
     <string name="settings_screen_width_dp_summary">"%d dp"</string>
@@ -591,9 +591,9 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_category_material_you_title">"Material You"</string>
     <string name="settings_enable_material_you_warning_summary">"Şu adda temaların olmadığından emin ol;\n\"Material You\",\n\"Material You Dark\" ya da\n\"Material You Amoled\".\nYoksa, Material You’yu etkinleştirmeden önce bunları yeniden adlandır."</string>
     <string name="settings_enable_material_you_title">"Material You'yu Etkinleştir"</string>
-    <string name="settings_enable_material_you_summary">"Continuum'yi Duvar Kağıdına Göre Kişiselleştir"</string>
+    <string name="settings_enable_material_you_summary">"Reddit Jr.'yi Duvar Kağıdına Göre Kişiselleştir"</string>
     <string name="settings_apply_material_you_title">"Material You'yu Uygula"</string>
-    <string name="settings_apply_material_you_summary">"Continuum'nin temayı değiştirmemesi durumunda"</string>
+    <string name="settings_apply_material_you_summary">"Reddit Jr.'nin temayı değiştirmemesi durumunda"</string>
     <string name="settings_global_settings_management_title">"Genel Ayarlar Yönetimi"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"Veritabanındaki Tüm Subredditleri Sil"</string>
     <string name="settings_delete_all_users_data_in_database_title">"Veritabanındaki Tüm Kullanıcıları Sil"</string>
@@ -958,7 +958,7 @@ Otomatik video oynatma kapatılır."</string>
     <string name="error_getting_multi_reddit_data">"MultiReddit verileri alınırken hata oluştu"</string>
     <string name="error_loading_multi_reddit_list">"MultiReddit senkronize edilemiyor"</string>
     <string name="error_loading_subscriptions">"Abonelikler senkronize edilemiyor"</string>
-    <string name="share_this_app">"Harika bir Reddit uygulaması olan Continuum'e bir göz atın!
+    <string name="share_this_app">"Harika bir Reddit uygulaması olan Reddit Jr.'e bir göz atın!
 https://play.google.com/store/"</string>
     <string name="error_getting_subreddit_name">"Subreddit adı alınırken hata oluştu"</string>
     <string name="share_post_link">"Gönderi Bağlantısını Paylaş"</string>
@@ -1279,7 +1279,7 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="delete_all_legacy_settings_success">"Tüm eski ayarlar başarıyla silindi"</string>
     <string name="reset_all_settings_success">"Tüm ayarlar başarıyla sıfırlandı"</string>
     <string name="username_preview">"u/edgan"</string>
-    <string name="subreddit_preview">"r/continuumreddit"</string>
+    <string name="subreddit_preview">"r/redditjr"</string>
     <string name="primary_text_preview">"Birincil Metin"</string>
     <string name="secondary_text_preview">"İkincil Metin"</string>
     <string name="post_title_preview">"Bu bir gönderidir"</string>
@@ -1637,7 +1637,7 @@ Tekrar denemek için tıklayın."</string>
     <string name="reddit_gallery_item_url_hint">"Bağlantı Adresi"</string>
     <string name="user_agreement_dialog_title">"Kullanıcı Sözleşmesi"</string>
     <string name="user_agreement_message">"Oturum açmadan önce Reddit Kullanıcı Sözleşmesi’ni (%1$s) ve Infinity for Reddit Gizlilik Politikası’nı (%2$s) kabul etmen gerekir.\n\nBundan sonra, Infinity for Reddit içinde Reddit API’ye erişmek için aylık bir aboneliğe ihtiyacın olacak; bunun nedeni Reddit’in 1 Temmuz 2023’ten beri API erişimi için ücret almasıdır."</string>
-    <string name="warning_message_nsfw_content">"Continuum NSFW içeriğini tanıtmaz veya önermez. Reddit’in politikası nedeniyle uygulama içinde NSFW içeriğiyle karşılaşma olasılığın düşüktür. Bu ayarları değiştirmeden önce Reddit Kullanıcı Sözleşmesi’ni (%1$s) ve Continuum Gizlilik Politikası’nı (%2$s) kabul etmen gerekir."</string>
+    <string name="warning_message_nsfw_content">"Reddit Jr. NSFW içeriğini tanıtmaz veya önermez. Reddit’in politikası nedeniyle uygulama içinde NSFW içeriğiyle karşılaşma olasılığın düşüktür. Bu ayarları değiştirmeden önce Reddit Kullanıcı Sözleşmesi’ni (%1$s) ve Reddit Jr. Gizlilik Politikası’nı (%2$s) kabul etmen gerekir."</string>
     <string name="agree">"Kabul et"</string>
     <string name="do_not_agree">"Kabul etme"</string>
     <string name="option_1_hint">"Seçenek 1 (Zorunlu)"</string>
@@ -1666,8 +1666,8 @@ Tekrar denemek için dokun."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Bildirim izni verilmemiştir"</string>
     <string name="go_to_settings">"Ayarlar"</string>
-    <string name="welcome_to_continuum">"Reddit’e açılan kapın Continuum’a hoş geldin!"</string>
-    <string name="subscription_prompt">"Bu uygulamanın sunduğu sayısız olasılığa dalmadan önce,\n sana mümkün olan en iyi hizmeti sağlamak için uyguladığım önemli bir değişiklik konusunda açık ve şeffaf olmak istiyorum.\n \n\nŞu andan itibaren Continuum içinde Reddit API’ye erişmek için aylık bir aboneliğe ihtiyacın olacak;\n bunun nedeni Reddit’in 1 Temmuz 2023’ten beri API erişimi için ücret almasıdır.\n \n\nTüm kademeler aynı şekilde çalışır. Continuum’u desteklemek istersen daha yüksek bir kademeye abone olabilirsin.\n En düşük kademeden gelen paranın büyük kısmı Reddit’e gider.\n    "</string>
+    <string name="welcome_to_continuum">"Reddit’e açılan kapın Reddit Jr.’a hoş geldin!"</string>
+    <string name="subscription_prompt">"Bu uygulamanın sunduğu sayısız olasılığa dalmadan önce,\n sana mümkün olan en iyi hizmeti sağlamak için uyguladığım önemli bir değişiklik konusunda açık ve şeffaf olmak istiyorum.\n \n\nŞu andan itibaren Reddit Jr. içinde Reddit API’ye erişmek için aylık bir aboneliğe ihtiyacın olacak;\n bunun nedeni Reddit’in 1 Temmuz 2023’ten beri API erişimi için ücret almasıdır.\n \n\nTüm kademeler aynı şekilde çalışır. Reddit Jr.’u desteklemek istersen daha yüksek bir kademeye abone olabilirsin.\n En düşük kademeden gelen paranın büyük kısmı Reddit’e gider.\n    "</string>
     <string name="monthly">"Aylık"</string>
     <string name="yearly">"Yıllık"</string>
     <string name="weekly">"Haftalık"</string>
@@ -1686,19 +1686,19 @@ Tekrar denemek için dokun."</string>
     <string name="subscription_plan_description_monthly_499">"Altın - Harika Seçim!"</string>
     <string name="subscription_plan_description_monthly_699">"Platinyum"</string>
     <string name="subscription_plan_description_monthly_899">"Elmas"</string>
-    <string name="subscription_plan_description_monthly_999">"Continuum"</string>
+    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
     <string name="acknowledge_purchase_failed">"Satın alma işlemi onaylanamıyor"</string>
     <string name="connect_to_billing_system_failed">"Billing sistemine bağlanılamadı"</string>
     <string name="connecting_to_billing_system">"Billing sistemine bağlanılıyor. Lütfen bekleyin."</string>
     <string name="thank_you_for_subscription">"Abone olduğun için sağ ol reis"</string>
     <string name="load_subscription_options">"Abonelik seçeneklerini yükle"</string>
     <string name="acknowledging_subscription">"Aboneliğin onaylanıyor. Lütfen bekle."</string>
-    <string name="acknowledgement_purchase_failed_description">"Hay aksi! Satın alma işlemin onaylanırken bir hata oluştu. Bu sorun üç gün boyunca devam ederse otomatik olarak paran iade edilecek.\nEndişelenme, Continuum’un keyfini çıkarmaya devam edebilirsin."</string>
+    <string name="acknowledgement_purchase_failed_description">"Hay aksi! Satın alma işlemin onaylanırken bir hata oluştu. Bu sorun üç gün boyunca devam ederse otomatik olarak paran iade edilecek.\nEndişelenme, Reddit Jr.’un keyfini çıkarmaya devam edebilirsin."</string>
     <string name="continue_to_app">"Uygulamaya devam et"</string>
     <string name="restore_subscription_purchase_details">"Abonelik için ödeme yaptın mı?"</string>
     <string name="restore_subscription_purchase">"Satın alınan aboneliği geri yükle"</string>
     <string name="important_info_title">"Lütfen hesabınıza yeniden giriş yapın"</string>
-    <string name="important_info">"Continuum, Reddit'den bir Müşteri Kimliği (API anahtarı) kullanır ve uygulamayı kullanmaya devam etmek için yeniden giriş yapmanız gerekir.\n\n Aynı hesabı kullanarak Reddit'de tekrar oturum açmak için gezinme çekmecesini açın ve hesap başlığınıza tıklayın ve \"Hesap ekle\"yi seçin. Aksi halde Continuum gönderileri hiç yüklemeyebilir. Rahatsızlıktan dolayı özür dileriz."</string>
+    <string name="important_info">"Reddit Jr., Reddit'den bir Müşteri Kimliği (API anahtarı) kullanır ve uygulamayı kullanmaya devam etmek için yeniden giriş yapmanız gerekir.\n\n Aynı hesabı kullanarak Reddit'de tekrar oturum açmak için gezinme çekmecesini açın ve hesap başlığınıza tıklayın ve \"Hesap ekle\"yi seçin. Aksi halde Reddit Jr. gönderileri hiç yüklemeyebilir. Rahatsızlıktan dolayı özür dileriz."</string>
     <string name="i_understand">"Anlıyorum"</string>
     <string name="add_to_comment_filter">"Yoruma Ekle Filtre"</string>
     <string name="cannot_edit_post_with_images">"Resimli gönderilerin düzenlenmesine izin verilmiyor."</string>

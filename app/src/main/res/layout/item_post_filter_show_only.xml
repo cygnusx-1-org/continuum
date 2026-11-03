@@ -46,7 +46,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/only_nsfw_chip_item_post_filter_show_only"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/only_nsfw_content"
@@ -55,7 +55,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/only_spoiler_chip_item_post_filter_show_only"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/only_spoiler"

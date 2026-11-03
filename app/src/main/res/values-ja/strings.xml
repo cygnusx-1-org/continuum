@@ -221,7 +221,7 @@
     <string name="follow_failed">"フォローに失敗しました"</string>
     <string name="unfollowed">"フォローを解除しました"</string>
     <string name="unfollow_failed">"フォローの解除に失敗しました"</string>
-    <string name="app_label">"Continuum"</string>
+    <string name="app_label">"Reddit Jr."</string>
     <string name="search_hint">"何でも検索してみてください"</string>
     <string name="search_only_subreddits_hint">"Subredditを検索"</string>
     <string name="search_only_users_hint">"ユーザーを検索"</string>
@@ -567,12 +567,12 @@
     <string name="settings_reddit_account_title">"Redditアカウント"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"サブレディット"</string>
-    <string name="settings_subreddit_summary">"r/continuumreddit"</string>
+    <string name="settings_subreddit_summary">"r/redditjr"</string>
     <string name="settings_share_title">"共有"</string>
     <string name="settings_share_summary">"このアプリが気に入ったようでしたら、ぜひ他の方々にもご紹介ください"</string>
     <string name="settings_privacy_policy_title">"プライバシーポリシー"</string>
     <string name="settings_debug_title">"デバッグ"</string>
-    <string name="settings_version_title">"Continuum"</string>
+    <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"バージョン %s"</string>
     <string name="settings_screen_width_dp_title">"画面幅"</string>
     <string name="settings_screen_width_dp_summary">"%d dp"</string>
@@ -593,9 +593,9 @@
 という名前のテーマが既にないか確認してください。
 あればMaterial Youを有効化するまえにそれらをリネームしてください。"</string>
     <string name="settings_enable_material_you_title">"Material Youを有効化"</string>
-    <string name="settings_enable_material_you_summary">"壁紙に基いてContinuumをパーソナライズ"</string>
+    <string name="settings_enable_material_you_summary">"壁紙に基いてReddit Jr.をパーソナライズ"</string>
     <string name="settings_apply_material_you_title">"Material Youを適用"</string>
-    <string name="settings_apply_material_you_summary">"Continuum でテーマが変更されなかった場合"</string>
+    <string name="settings_apply_material_you_summary">"Reddit Jr. でテーマが変更されなかった場合"</string>
     <string name="settings_global_settings_management_title">"グローバル設定管理"</string>
     <string name="settings_delete_all_subreddits_data_in_database_title">"データベース中の全てのSubreddit情報を削除"</string>
     <string name="settings_delete_all_users_data_in_database_title">"データベース中の全てのユーザー情報を削除"</string>
@@ -957,7 +957,7 @@
     <string name="error_getting_multi_reddit_data">"MultiReddit のデータを取得中にエラーが発生しました"</string>
     <string name="error_loading_multi_reddit_list">"MultiReddit の同期ができませんでした"</string>
     <string name="error_loading_subscriptions">"登録済み情報を同期できませんでした"</string>
-    <string name="share_this_app">"便利なRedditアプリを見つけました。Continuumを試してみて！
+    <string name="share_this_app">"便利なRedditアプリを見つけました。Reddit Jr.を試してみて！
 https://play.google.com/store/"</string>
     <string name="error_getting_subreddit_name">"Subreddit名を取得中にエラーが発生しました"</string>
     <string name="share_post_link">"投稿リンクを共有"</string>
@@ -1278,7 +1278,7 @@ https://play.google.com/store/"</string>
     <string name="delete_all_legacy_settings_success">"古い設定データを削除しました"</string>
     <string name="reset_all_settings_success">"全ての設定をリセットしました"</string>
     <string name="username_preview">"u/edgan"</string>
-    <string name="subreddit_preview">"r/continuumreddit"</string>
+    <string name="subreddit_preview">"r/redditjr"</string>
     <string name="primary_text_preview">"プライマリーテキスト"</string>
     <string name="secondary_text_preview">"セカンダリーテキスト"</string>
     <string name="post_title_preview">"これが投稿タイトルです"</string>
@@ -1631,7 +1631,7 @@ https://play.google.com/store/"</string>
     <string name="reddit_gallery_item_url_hint">"URL"</string>
     <string name="user_agreement_dialog_title">"ユーザー同意書"</string>
     <string name="user_agreement_message">"ログインする前に、Reddit ユーザー同意書 (%1$s) および Infinity の Reddit のプライバシー ポリシー (%2$s) に同意する必要があります。\n\n 今後、Infinity 内のReddit API にアクセスするには、月額サブスクリプションが必要になります。 Reddit そしてこれは、2023 年 7 月 1 日以降、Reddit が API のアクセスに対して課金を開始したためです。"</string>
-    <string name="warning_message_nsfw_content">"Continuum は、NSFW コンテンツを宣伝または推奨するものではありません。 Reddit のポリシーにより、アプリ内で NSFW のコンテンツが表示される可能性はほとんどありません。これらの設定を変更する前に、Reddit ユーザー同意書 (%1$s) および Continuum のプライバシー ポリシー (%2$s) に同意する必要があります。"</string>
+    <string name="warning_message_nsfw_content">"Reddit Jr. は、NSFW コンテンツを宣伝または推奨するものではありません。 Reddit のポリシーにより、アプリ内で NSFW のコンテンツが表示される可能性はほとんどありません。これらの設定を変更する前に、Reddit ユーザー同意書 (%1$s) および Reddit Jr. のプライバシー ポリシー (%2$s) に同意する必要があります。"</string>
     <string name="agree">"同意"</string>
     <string name="do_not_agree">"同意しない"</string>
     <string name="option_1_hint">"選択肢1（必須）"</string>
@@ -1659,8 +1659,8 @@ https://play.google.com/store/"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"通知権限が付与されていません"</string>
     <string name="go_to_settings">"設定"</string>
-    <string name="welcome_to_continuum">"Continuum へようこそ。まったく新しい次元の Reddit 閲覧へのゲートウェイです。"</string>
-    <string name="subscription_prompt">"このアプリが提供する無数の可能性を検討する前に、\n 皆様に最高のサービスを提供するために実施した重要な変更について、率直かつ透明性を持ってお伝えしたいと思います。\n \n\n 今後、Continuum 以内にReddit API にアクセスするには、月額サブスクリプションが必要になります。そして\n これは、Reddit が 2023 年 7 月 1 日以降、API のアクセスに対して課金を開始したためです。\n \n\n すべての層は同じように機能します。 Continuum をサポートしたい場合は、より高いティアに登録できます。\n 最下位ティアからの資金のほとんどは Reddit に使われます。\n    "</string>
+    <string name="welcome_to_continuum">"Reddit Jr. へようこそ。まったく新しい次元の Reddit 閲覧へのゲートウェイです。"</string>
+    <string name="subscription_prompt">"このアプリが提供する無数の可能性を検討する前に、\n 皆様に最高のサービスを提供するために実施した重要な変更について、率直かつ透明性を持ってお伝えしたいと思います。\n \n\n 今後、Reddit Jr. 以内にReddit API にアクセスするには、月額サブスクリプションが必要になります。そして\n これは、Reddit が 2023 年 7 月 1 日以降、API のアクセスに対して課金を開始したためです。\n \n\n すべての層は同じように機能します。 Reddit Jr. をサポートしたい場合は、より高いティアに登録できます。\n 最下位ティアからの資金のほとんどは Reddit に使われます。\n    "</string>
     <string name="monthly">"毎月"</string>
     <string name="yearly">"毎年"</string>
     <string name="weekly">"ウィークリー"</string>
@@ -1679,19 +1679,19 @@ https://play.google.com/store/"</string>
     <string name="subscription_plan_description_monthly_499">"ゴールド - 完璧な選択!"</string>
     <string name="subscription_plan_description_monthly_699">"プラチナ"</string>
     <string name="subscription_plan_description_monthly_899">"ダイヤモンド"</string>
-    <string name="subscription_plan_description_monthly_999">"Continuum"</string>
+    <string name="subscription_plan_description_monthly_999">"Reddit Jr."</string>
     <string name="acknowledge_purchase_failed">"購入を承認できません"</string>
     <string name="connect_to_billing_system_failed">"課金システムへの接続に失敗しました"</string>
     <string name="connecting_to_billing_system">"課金システムに接続しています。お待ちください。"</string>
     <string name="thank_you_for_subscription">"ご購読いただきありがとうございます"</string>
     <string name="load_subscription_options">"サブスクリプション オプションの読み込み"</string>
     <string name="acknowledging_subscription">"サブスクリプションを承認しています。お待ちください。"</string>
-    <string name="acknowledgement_purchase_failed_description">"購入の確認時にエラーが発生しました。この問題が 3 日間続く場合は、自動的に返金されます。\nご心配なく、Continuum をお楽しみいただけます。"</string>
+    <string name="acknowledgement_purchase_failed_description">"購入の確認時にエラーが発生しました。この問題が 3 日間続く場合は、自動的に返金されます。\nご心配なく、Reddit Jr. をお楽しみいただけます。"</string>
     <string name="continue_to_app">"アプリに進む"</string>
     <string name="restore_subscription_purchase_details">"サブスクリプションの料金はすでに支払い済みですか?"</string>
     <string name="restore_subscription_purchase">"サブスクリプションの購入を復元する"</string>
     <string name="important_info_title">"アカウントに再ログインしてください"</string>
-    <string name="important_info">"Continuum は Reddit のクライアント ID (API キー) を使用しており、アプリの使用を続けるには再ログインする必要があります。\n\n ナビゲーションドロワーを開いてアカウントヘッダーをクリックし、[アカウントの追加] を選択するだけで、同じアカウントを使用してReddit に再度ログインできます。そうしないと、Continuum が投稿をまったく読み込まない可能性があります。ご不便をおかけして申し訳ありません。"</string>
+    <string name="important_info">"Reddit Jr. は Reddit のクライアント ID (API キー) を使用しており、アプリの使用を続けるには再ログインする必要があります。\n\n ナビゲーションドロワーを開いてアカウントヘッダーをクリックし、[アカウントの追加] を選択するだけで、同じアカウントを使用してReddit に再度ログインできます。そうしないと、Reddit Jr. が投稿をまったく読み込まない可能性があります。ご不便をおかけして申し訳ありません。"</string>
     <string name="i_understand">"わかりました"</string>
     <string name="add_to_comment_filter">"コメントフィルターに追加"</string>
     <string name="cannot_edit_post_with_images">"画像を含む投稿の編集は許可されていません。"</string>

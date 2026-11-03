@@ -59,7 +59,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Continuum version
+      label: Reddit Jr. version
       description: >-
         The exact version number found on the settings screen. Do not write "latest" or "current".
         State the actual version number.

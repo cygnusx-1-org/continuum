@@ -63,7 +63,7 @@ git merge upstream/master
 Expect conflicts in `app/build.gradle` (keep your version, based on theirs, and keep the `applicationId` and app name) and in `.github/workflows/build.yml` (keep this fork's).
 
 # License
-Distributed under the AGPL-3.0 License. See [LICENSE](/LICENSE) for more information. The decoder code is by wchill ([patcheddit](https://github.com/wchill/patcheddit)) and is covered by the section 7 terms in [NOTICE](/NOTICE). They require the app to say, in its About screen, that it uses Patcheddit code, which Reddit Jr. does under `Settings > About`.
+Distributed under the AGPL-3.0 License. See [LICENSE](/LICENSE) for more information.
 
 # Credits and upstream
 - [Continuum](https://github.com/cygnusx-1-org/continuum) by u/edgan, whose [Discord](https://discord.gg/vDuSpJEDrW) and [subreddit](https://old.reddit.com/r/continuumreddit/) are the place for questions about the parts this fork did not change.

@@ -46,7 +46,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/post_type_text_chip_item_post_filter_post_types"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/bottom_sheet_post_text"
@@ -55,7 +55,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/post_type_link_chip_item_post_filter_post_types"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/bottom_sheet_post_link"
@@ -64,7 +64,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/post_type_image_chip_item_post_filter_post_types"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/bottom_sheet_post_image"
@@ -73,7 +73,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/post_type_gif_chip_item_post_filter_post_types"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/post_type_gif"
@@ -82,7 +82,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/post_type_video_chip_item_post_filter_post_types"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/bottom_sheet_post_video"
@@ -91,7 +91,7 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/post_type_gallery_chip_item_post_filter_post_types"
-                style="@style/Widget.Continuum.Chip.Filter"
+                style="@style/Widget.RedditJr.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/post_type_gallery"
