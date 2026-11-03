@@ -57,6 +57,10 @@ jobs:
             echo "keyPassword=$KEY_PASSWORD"
           } > keystore.properties
 
+      # app/src/main/assets/random_subreddits/*.txt are symlinks to a sibling checkout.
+      - name: Fetch subreddit lists
+        run: git clone --depth 1 https://github.com/cygnusx-1-org/subreddit-lists.git "$GITHUB_WORKSPACE/../subreddit-lists"
+
       - name: Build release APKs
         run: ./gradlew assembleRelease --no-daemon
 
