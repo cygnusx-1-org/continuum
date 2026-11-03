@@ -226,28 +226,11 @@ abstract class ShadowboxPageFragment : Fragment() {
     }
 
     /**
-     * The app's autoplay rule, the one the feed applies in PostRecyclerViewAdapter: "Video
-     * Autoplay" set to Never, or to Wi-Fi only while on mobile data, means nothing starts by
-     * itself, and "Autoplay NSFW Videos" excludes NSFW posts on top of that.
-     *
-     * Read after [post] is set, which is anywhere from [onCreateMediaView] onwards. A blurred page
-     * needs no rule of its own: it loads no media at all until the overlay is tapped away.
+     * Shadowbox always plays its videos and gifs, whatever the feed's "Video Autoplay" and
+     * "Autoplay NSFW Videos" settings say: opening a post here is already a request to watch it.
+     * "Mute Autoplaying Videos" still decides whether the sound starts on.
      */
-    protected fun shouldAutoplay(): Boolean {
-        val setting = sharedPreferences.getString(
-            SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER
-        )
-        val autoplayAllowed = when (setting) {
-            SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON -> true
-            SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI ->
-                Utils.getConnectedNetwork(requireContext()) == Utils.NETWORK_TYPE_WIFI
-            else -> false
-        }
-        if (!autoplayAllowed) {
-            return false
-        }
-        return !post.isNSFW || sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true)
-    }
+    protected fun shouldAutoplay(): Boolean = true
 
     /** Redraws the panel from the post after something outside this page changed it. */
     fun rebindPanel() {
