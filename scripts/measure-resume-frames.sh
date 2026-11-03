@@ -40,7 +40,7 @@ set -uo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root" || exit 1
 
-pkg="org.cygnusx1.redditjr.debug"
+pkg="io.github.jayblah.redditjr.debug"
 prefs_file="${pkg}_preferences.xml"
 account_prefs="ml.docilealligator.infinityforreddit.current_account.xml"
 setting_base="resume_where_i_left_off"
