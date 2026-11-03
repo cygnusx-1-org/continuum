@@ -50,6 +50,7 @@ import ml.docilealligator.infinityforreddit.services.DownloadMediaService;
 import ml.docilealligator.infinityforreddit.services.DownloadRedditVideoService;
 import ml.docilealligator.infinityforreddit.utils.MediaFileNameUtils;
 import ml.docilealligator.infinityforreddit.utils.NewWindowUtils;
+import ml.docilealligator.infinityforreddit.utils.ReverseImageSearch;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
 import ml.docilealligator.infinityforreddit.utils.Utils;
@@ -171,6 +172,32 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                 : null;
     }
 
+    /**
+     * The address of the image on screen, for the reverse image search row: a single image, a
+     * GIF that is not an MP4, or the gallery item the caller said is showing. Null for everything
+     * else, which hides the row.
+     */
+    @Nullable
+    private String reverseSearchUrl() {
+        switch (mPost.getPostType()) {
+            case Post.IMAGE_TYPE:
+                return mPost.getUrl();
+            case Post.GIF_TYPE:
+                String url = mPost.getUrl();
+                return url != null && !url.toLowerCase(java.util.Locale.US).contains(".mp4") ? url : null;
+            case Post.GALLERY_TYPE:
+                int index = requireArguments().getInt(EXTRA_GALLERY_INDEX, -1);
+                ArrayList<Post.Gallery> gallery = mPost.getGallery();
+                if (gallery == null || index < 0 || index >= gallery.size()) {
+                    return null;
+                }
+                Post.Gallery item = gallery.get(index);
+                return item.mediaType == Post.Gallery.TYPE_VIDEO ? null : item.url;
+            default:
+                return null;
+        }
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -284,6 +311,14 @@ public class PostOptionsBottomSheetFragment extends LandscapeExpandedRoundedBott
                     isDownloadingGallery = true;
                     requestPermissionAndDownloadGallery();
                 });
+            }
+
+            String reverseSearchUrl = reverseSearchUrl();
+            if (reverseSearchUrl != null) {
+                binding.reverseImageSearchTextViewPostOptionsBottomSheetFragment.setVisibility(View.VISIBLE);
+                // The sheet closes once the engine chooser does, since the chooser hangs off this row.
+                binding.reverseImageSearchTextViewPostOptionsBottomSheetFragment.setOnClickListener(view ->
+                        ReverseImageSearch.showChooser(mBaseActivity, view, reverseSearchUrl, this::dismiss));
             }
 
             binding.shareTextViewPostOptionsBottomSheetFragment.setOnClickListener(view -> {

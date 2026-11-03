@@ -1095,10 +1095,19 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     protected void onResume() {
         super.onResume();
         // Back from a subreddit page: pick up the one just visited.
-        if (adapter != null) {
-            adapter.setRecentSubreddits(ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits
-                    .get(mSharedPreferences, accountName));
+        refreshRecents();
+    }
+
+    private void refreshRecents() {
+        if (adapter == null) {
+            return;
         }
+        int limit = SharedPreferencesUtils.getInt(mNavigationDrawerSharedPreferences,
+                SharedPreferencesUtils.RECENT_SUBREDDITS_LIMIT,
+                String.valueOf(ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.DEFAULT_LIMIT));
+        adapter.setRecentSubreddits(ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.visible(
+                ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.get(mSharedPreferences, accountName),
+                limit));
     }
 
     @ExperimentalBadgeUtils
@@ -1241,6 +1250,20 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
                         Intent intent = new Intent(MainActivity.this, ViewSubredditDetailActivity.class);
                         intent.putExtra(ViewSubredditDetailActivity.EXTRA_SUBREDDIT_NAME_KEY, subredditName);
                         startActivity(intent);
+                    }
+
+                    @Override
+                    public void onRecentPinToggle(String name, int type, boolean pin) {
+                        ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.setPinned(
+                                mSharedPreferences, accountName, name, type, pin);
+                        refreshRecents();
+                    }
+
+                    @Override
+                    public void onRecentDismiss(String name, int type) {
+                        ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.remove(
+                                mSharedPreferences, accountName, name, type);
+                        refreshRecents();
                     }
 
                     @Override
@@ -1980,6 +2003,8 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     public void onChangeNavigationDrawerSectionsEvent(ChangeNavigationDrawerSectionsEvent event) {
         if (adapter != null) {
             adapter.refreshNavigationDrawerSections(mNavigationDrawerSharedPreferences);
+            // The number of Recents is one of these settings.
+            refreshRecents();
         }
     }
 

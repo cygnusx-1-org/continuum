@@ -25,4 +25,30 @@
         android:fontFamily="?attr/font_family"
         android:layout_gravity="center_vertical" />
 
+    <!-- Only the Recents section turns these on. The negative margins keep them from making
+         the row taller than the other sections' rows. -->
+    <ImageView
+        android:id="@+id/pin_image_view_item_nav_drawer_subscribed_thing"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="-6dp"
+        android:layout_marginBottom="-6dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="6dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/dismiss_image_view_item_nav_drawer_subscribed_thing"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="-6dp"
+        android:layout_marginBottom="-6dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/recents_dismiss"
+        android:padding="6dp"
+        android:src="@drawable/ic_close_24dp"
+        android:visibility="gone" />
+
 </LinearLayout>

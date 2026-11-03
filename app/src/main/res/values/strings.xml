@@ -501,10 +501,12 @@
     <string name="decoder_simpcity_titles">SimpCity titles</string>
     <string name="decoder_simpcity_all">SimpCity all</string>
     <string name="decoder_social_search">Social search</string>
-    <string name="settings_decode_nato_binary_title">Decode NATO and binary</string>
-    <string name="settings_decode_nato_binary_summary">Show the decoded text, with Copy and search buttons, under comments and posts in NSFW communities that spell something in the NATO alphabet or 8-bit binary</string>
+    <string name="settings_decode_nato_binary_title">Decode binary</string>
+    <string name="settings_decode_nato_binary_summary">Show the decoded text, with Copy and search buttons, under comments and posts in NSFW communities that contain 8-bit binary</string>
     <string name="settings_collapse_automod_and_stickied_title">Collapse AutoModerator and stickied comments</string>
     <string name="settings_collapse_automod_and_stickied_summary">Show them as a collapsed row until tapped open. Applies the next time a post is opened</string>
+    <string name="settings_hide_subreddit_icon_title">Hide Subreddit Icon</string>
+    <string name="settings_hide_subreddit_icon_summary">Hide the subreddit icon in the header of a subreddit page, so the name and Join button start at the left</string>
     <string name="settings_hide_subreddit_banner_title">Hide Subreddit Banner</string>
     <string name="settings_hide_subreddit_banner_summary">Hide the banner image at the top of a subreddit page and use the space for content</string>
     <string name="settings_auto_check_for_updates_title">Check for updates automatically</string>
@@ -1045,6 +1047,10 @@
     <string name="favorites">Favorites</string>
     <string name="recents">Recents</string>
     <string name="settings_collapse_recent_subreddits_section_title">Collapse Recents Section</string>
+    <string name="settings_recent_subreddits_limit_title">Number of Recents</string>
+    <string name="recents_pin">Pin</string>
+    <string name="recents_unpin">Unpin</string>
+    <string name="recents_dismiss">Remove from Recents</string>
     <string name="settings_hide_recent_subreddits_section_title">Hide Recents Section</string>
     <string name="all">All</string>
 
@@ -2027,6 +2033,7 @@
     <string name="content_description_download">Download</string>
     <string name="content_description_share">Share</string>
     <string name="content_description_reverse_image_search">Reverse image search on Google and Yandex</string>
+    <string name="reverse_image_search_title">Reverse image search</string>
     <string name="reverse_image_search_google">Google</string>
     <string name="reverse_image_search_yandex">Yandex</string>
     <string name="reverse_image_search_both">Both</string>

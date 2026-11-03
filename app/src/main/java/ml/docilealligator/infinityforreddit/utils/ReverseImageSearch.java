@@ -36,8 +36,17 @@ public final class ReverseImageSearch {
      * Asks which engine to search with, anchored to the button that was tapped.
      */
     public static void showChooser(Context context, View anchor, @Nullable String imageUrl) {
+        showChooser(context, anchor, imageUrl, null);
+    }
+
+    /**
+     * @param onDone runs when the chooser closes, whatever was chosen.
+     */
+    public static void showChooser(Context context, View anchor, @Nullable String imageUrl,
+                                   @Nullable Runnable onDone) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             Toast.makeText(context, R.string.reverse_image_search_failed, Toast.LENGTH_SHORT).show();
+            if (onDone != null) onDone.run();
             return;
         }
         final String url = Objects.requireNonNull(imageUrl);
@@ -59,6 +68,9 @@ public final class ReverseImageSearch {
             }
             return true;
         });
+        if (onDone != null) {
+            menu.setOnDismissListener(m -> onDone.run());
+        }
         menu.show();
     }
 

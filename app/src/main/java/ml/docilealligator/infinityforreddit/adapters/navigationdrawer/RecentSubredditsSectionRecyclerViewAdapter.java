@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.adapters.navigationdrawer;
 
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -117,6 +118,21 @@ public class RecentSubredditsSectionRecyclerViewAdapter extends RecyclerView.Ada
                         .transform(new RoundedCornersTransformation(72, 0))
                         .into(binding.thingIconGifImageViewItemNavDrawerSubscribedThing);
             }
+
+            binding.pinImageViewItemNavDrawerSubscribedThing.setVisibility(View.VISIBLE);
+            binding.pinImageViewItemNavDrawerSubscribedThing.setImageResource(subreddit.pinned
+                    ? R.drawable.ic_pin_filled_24dp : R.drawable.ic_pin_outline_24dp);
+            binding.pinImageViewItemNavDrawerSubscribedThing.setContentDescription(baseActivity.getString(
+                    subreddit.pinned ? R.string.recents_unpin : R.string.recents_pin));
+            binding.pinImageViewItemNavDrawerSubscribedThing.setColorFilter(
+                    subreddit.pinned ? primaryTextColor : secondaryTextColor, android.graphics.PorterDuff.Mode.SRC_IN);
+            binding.pinImageViewItemNavDrawerSubscribedThing.setOnClickListener(view ->
+                    itemClickListener.onRecentPinToggle(subreddit.name, subreddit.type, !subreddit.pinned));
+            binding.dismissImageViewItemNavDrawerSubscribedThing.setVisibility(View.VISIBLE);
+            binding.dismissImageViewItemNavDrawerSubscribedThing.setColorFilter(
+                    secondaryTextColor, android.graphics.PorterDuff.Mode.SRC_IN);
+            binding.dismissImageViewItemNavDrawerSubscribedThing.setOnClickListener(view ->
+                    itemClickListener.onRecentDismiss(subreddit.name, subreddit.type));
 
             holder.itemView.setOnClickListener(view -> {
                 if (subreddit.type == RecentSubreddits.TYPE_USER) {

@@ -255,6 +255,25 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
     /**
+     * With the icon hidden, its view collapses to no width and the name and Join button start at
+     * the left. Its height stays, since the name and button are anchored to it.
+     */
+    private void applyIconSetting() {
+        if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_ICON, false)) {
+            return;
+        }
+        ViewGroup.LayoutParams iconParams = binding.iconGifImageViewViewSubredditDetailActivity.getLayoutParams();
+        iconParams.width = 0;
+        binding.iconGifImageViewViewSubredditDetailActivity.setLayoutParams(iconParams);
+        for (View view : new View[]{binding.subredditNameTextViewViewSubredditDetailActivity,
+                binding.subscribeSubredditChipViewSubredditDetailActivity}) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            params.setMarginStart(0);
+            view.setLayoutParams(params);
+        }
+    }
+
+    /**
      * With the banner off, its view shrinks to the strip the pinned toolbar covers (the status bar
      * and the toolbar), so the name row starts below the toolbar and the whole header still
      * scrolls away like it does with a banner.
@@ -284,6 +303,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
         // Up front, so the 160dp banner never shows while the subreddit info loads.
         applyBannerSetting();
+        applyIconSetting();
 
         // Before the claim below, which reads the recorded offset back through the same field.
         trackAppBarOffsetForResume(binding.appbarLayoutViewSubredditDetailActivity);
