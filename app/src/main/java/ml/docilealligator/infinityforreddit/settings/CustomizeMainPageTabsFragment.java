@@ -13,6 +13,7 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,6 +25,7 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,6 +41,9 @@ import ml.docilealligator.infinityforreddit.utils.Utils;
 
 public class CustomizeMainPageTabsFragment extends Fragment {
 
+    /** Material's alpha for a disabled control. */
+    private static final float DISABLED_ALPHA = 0.38f;
+
     private FragmentCustomizeMainPageTabsBinding binding;
     @Inject
     @Named("main_activity_tabs")
@@ -48,6 +53,9 @@ public class CustomizeMainPageTabsFragment extends Fragment {
     private OnBackPressedCallback mRestartOnBackCallback;
     private boolean mSettingsChanged = false;
     private ActivityResultLauncher<Intent> editTabsLauncher;
+    // The "Show ..." rows and their switches, which "Enable Tabs" disables. Rebuilt with the view.
+    private final List<View> groupToggleRows = new ArrayList<>();
+    private final List<CompoundButton> groupToggleSwitches = new ArrayList<>();
 
     public CustomizeMainPageTabsFragment() {
         // Required empty public constructor
@@ -122,6 +130,8 @@ public class CustomizeMainPageTabsFragment extends Fragment {
         binding.tabsLinearLayoutCustomizeMainPageTabsFragment.setOnClickListener(view ->
                 editTabsLauncher.launch(new Intent(mActivity, CustomizeTabsOrderActivity.class)));
 
+        groupToggleRows.clear();
+        groupToggleSwitches.clear();
         setupShowToggle(binding.showFavoriteMultiredditsSwitchMaterialCustomizeMainPageTabsFragment,
                 binding.showFavoriteMultiredditsLinearLayoutCustomizeMainPageTabsFragment,
                 SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS);
@@ -141,11 +151,14 @@ public class CustomizeMainPageTabsFragment extends Fragment {
                 binding.showSubscribedSubredditsLinearLayoutCustomizeMainPageTabsFragment,
                 SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_SUBSCRIBED_SUBREDDITS);
 
-        // "Enable Tabs" maps directly to MAIN_PAGE_SHOW_TAB_NAMES (checked = show the tab bar), default on.
+        // "Enable Tabs" is MAIN_PAGE_SHOW_TAB_NAMES, default on. Off is no tab bar and a single main
+        // page, the first user-added tab in the list above (MainPageTabsUtils.singlePage).
         boolean showTabNames = mainActivityTabsSharedPreferences.getBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), true);
         binding.showTabNamesSwitchMaterialCustomizeMainPageTabsFragment.setChecked(showTabNames);
+        setGroupTogglesEnabled(showTabNames);
         binding.showTabNamesSwitchMaterialCustomizeMainPageTabsFragment.setOnCheckedChangeListener((compoundButton, checked) -> {
             mainActivityTabsSharedPreferences.edit().putBoolean(AccountScope.key(mActivity.accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), checked).apply();
+            setGroupTogglesEnabled(checked);
             mSettingsChanged = true;
             updateRestartButtonVisibility();
         });
@@ -155,7 +168,7 @@ public class CustomizeMainPageTabsFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private void setupShowToggle(android.widget.CompoundButton switchMaterial, View row, int source) {
+    private void setupShowToggle(CompoundButton switchMaterial, View row, int source) {
         String key = MainPageTabsUtils.toggleKeyForGroupSource(source);
         if (key == null) {
             // Not a group source, so there is no toggle to persist. Previously this concatenated
@@ -178,6 +191,24 @@ public class CustomizeMainPageTabsFragment extends Fragment {
             updateRestartButtonVisibility();
         });
         row.setOnClickListener(view -> switchMaterial.performClick());
+        groupToggleRows.add(row);
+        groupToggleSwitches.add(switchMaterial);
+    }
+
+    /**
+     * With tabs off the main page is a single page that the "Show ..." toggles add nothing to (see
+     * MainActivity#showsTabGroup), so they are shown disabled, keeping whatever was saved for when
+     * tabs come back on. Enabled state and alpha only: nothing on the screen moves.
+     */
+    private void setGroupTogglesEnabled(boolean enabled) {
+        for (View row : groupToggleRows) {
+            row.setEnabled(enabled);
+            row.setAlpha(enabled ? 1f : DISABLED_ALPHA);
+        }
+        // Not dimmed themselves: the row's alpha already covers them.
+        for (CompoundButton switchMaterial : groupToggleSwitches) {
+            switchMaterial.setEnabled(enabled);
+        }
     }
 
     private void updateRestartButtonVisibility() {

@@ -471,6 +471,8 @@ public class SharedPreferencesUtils {
     public static final String SUBSCRIBE_TO_SUB_WHEN_SCROLLING_THROUGH_POSTS_AFTER_SUB_BROWSING_HISTORY_KEY = "subscribe_to_subs_when_scrolling_through_posts_after_sub_browsing_history";
     public static final String MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.main_page_tabs";
     public static final String MAIN_PAGE_TAB_COUNT = "_main_page_tab_count";
+    // "Enable Tabs". Named for upstream's "Show Tab Names", which only hid the strip; off here also
+    // leaves the main page a single page (issue #482).
     public static final String MAIN_PAGE_SHOW_TAB_NAMES = "_main_page_show_tab_names";
     public static final String MAIN_PAGE_TAB_1_TITLE = "_main_page_tab_1_title";
     public static final String MAIN_PAGE_TAB_2_TITLE = "_main_page_tab_2_title";

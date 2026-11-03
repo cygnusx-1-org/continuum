@@ -220,6 +220,21 @@ public class MainPageTabsUtils {
         return out.isEmpty() ? defaultTabs() : out;
     }
 
+    /**
+     * The one page the main screen shows when "Enable Tabs" is off: the first user-added tab in the
+     * saved order, or the first default tab when the order holds none. Items the "Show ..." toggles
+     * pulled in are passed over, wherever they were dragged to -- with tabs off those toggles have no
+     * say in the main page. Hiding the strip alone left every tab one swipe away (issue #482).
+     */
+    public static MainPageTabInput singlePage(List<MainPageTabInput> order) {
+        for (MainPageTabInput tab : order) {
+            if (!tab.isGroup()) {
+                return tab;
+            }
+        }
+        return defaultTabs().get(0);
+    }
+
     public static List<MainPageTabInput> fromMultiReddits(List<MultiReddit> multiReddits, int source) {
         List<MainPageTabInput> out = new ArrayList<>();
         if (multiReddits != null) {

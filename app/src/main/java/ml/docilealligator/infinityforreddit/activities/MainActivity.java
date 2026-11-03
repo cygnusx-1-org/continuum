@@ -286,6 +286,11 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     private int mBackButtonAction;
     private boolean mLockBottomAppBar;
     private boolean mDisableSwipingBetweenTabs;
+    /**
+     * "Enable Tabs". Off, the pager holds a single page -- {@link MainPageTabsUtils#singlePage} --
+     * and the "Show ..." toggles below are all false whatever was saved for them.
+     */
+    private boolean mTabsEnabled;
     private boolean mShowFavoriteMultiReddits;
     private boolean mShowMultiReddits;
     private boolean mShowFavoriteUsersMultiReddits;
@@ -1253,18 +1258,20 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         binding.navDrawerRecyclerViewMainActivity.setLayoutManager(new LinearLayoutManagerBugFixed(this));
         binding.navDrawerRecyclerViewMainActivity.setAdapter(adapter.getConcatAdapter());
 
-        mShowFavoriteMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS), false);
-        mShowMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_MULTIREDDITS), false);
-        mShowFavoriteUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS), false);
-        mShowUsersMultiReddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_USERS_MULTIREDDITS), false);
-        mShowFavoriteSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS), false);
-        mShowSubscribedSubreddits = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS), false);
+        // Read before the "Show ..." toggles, which it overrides.
+        mTabsEnabled = mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), true);
+        mShowFavoriteMultiReddits = showsTabGroup(SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_MULTIREDDITS);
+        mShowMultiReddits = showsTabGroup(SharedPreferencesUtils.MAIN_PAGE_SHOW_MULTIREDDITS);
+        mShowFavoriteUsersMultiReddits = showsTabGroup(SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_USERS_MULTIREDDITS);
+        mShowUsersMultiReddits = showsTabGroup(SharedPreferencesUtils.MAIN_PAGE_SHOW_USERS_MULTIREDDITS);
+        mShowFavoriteSubscribedSubreddits = showsTabGroup(SharedPreferencesUtils.MAIN_PAGE_SHOW_FAVORITE_SUBSCRIBED_SUBREDDITS);
+        mShowSubscribedSubreddits = showsTabGroup(SharedPreferencesUtils.MAIN_PAGE_SHOW_SUBSCRIBED_SUBREDDITS);
         sectionsPagerAdapter = new SectionsPagerAdapter(this,
                 MainPageTabsUtils.load(mMainActivityTabsSharedPreferences, accountName));
         binding.includedAppBar.viewPagerMainActivity.setAdapter(sectionsPagerAdapter);
         applyResumeTab();
         binding.includedAppBar.viewPagerMainActivity.setUserInputEnabled(!mDisableSwipingBetweenTabs);
-        if (mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES), true)) {
+        if (mTabsEnabled) {
             // Always scrollable so tabs render at their natural width and never wrap.
             binding.includedAppBar.tabLayoutMainActivity.setTabMode(TabLayout.MODE_SCROLLABLE);
             // autoRefresh off. The mediator's answer to a data set change is to drop every tab and
@@ -2101,6 +2108,16 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
     }
 
     /**
+     * Whether the "Show ..." toggle saved under {@code key} adds its items to the pager. Never while
+     * tabs are off: the main page is then a single page, and a toggle that still fed it would put its
+     * subreddits or multireddits one swipe away behind a strip that isn't there (issue #482).
+     */
+    private boolean showsTabGroup(String key) {
+        return mTabsEnabled
+                && mMainActivityTabsSharedPreferences.getBoolean(AccountScope.key(accountName, key), false);
+    }
+
+    /**
      * Move to the tab a resume asked for, once it exists.
      *
      * Called after the adapter is built and again after every tab refresh: the dynamic tabs arrive
@@ -2608,6 +2625,13 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         }
 
         private List<ResolvedTab> buildResolvedTabs() {
+            if (!mTabsEnabled) {
+                MainPageTabInput page = MainPageTabsUtils.singlePage(tabInputs);
+                List<ResolvedTab> single = new ArrayList<>();
+                single.add(new ResolvedTab(page.postType, page.name,
+                        MainPageTabsUtils.getEffectiveTabLabel(MainActivity.this, page)));
+                return single;
+            }
             java.util.Map<Integer, List<MainPageTabInput>> live = new java.util.HashMap<>();
             java.util.Set<Integer> enabled = new java.util.HashSet<>();
             collectSource(live, enabled, SharedPreferencesUtils.MAIN_PAGE_TAB_SOURCE_GROUP_FAVORITE_MULTIREDDITS,
