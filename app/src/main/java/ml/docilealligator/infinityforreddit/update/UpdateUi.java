@@ -163,7 +163,7 @@ public final class UpdateUi {
         try {
             connection.setConnectTimeout(15000);
             connection.setReadTimeout(30000);
-            connection.setRequestProperty("User-Agent", "continuumjr-updater");
+            connection.setRequestProperty("User-Agent", "redditjr-updater");
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 throw new IOException("Download returned " + connection.getResponseCode());
             }

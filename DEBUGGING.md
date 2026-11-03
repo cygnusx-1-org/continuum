@@ -2,10 +2,10 @@
 
 ## adb logcat commands, run from a computer
 Linux and macOS:
-`adb logcat --pid=$(adb shell pidof org.cygnusx1.continuumjr)`
+`adb logcat --pid=$(adb shell pidof org.cygnusx1.redditjr)`
 
 Windows CMD:
-`FOR /F "tokens=*" %i IN ('adb shell pidof org.cygnusx1.continuum') DO set APP_PID=%i adb logcat --pid=%APP_PID%`
+`FOR /F "tokens=*" %i IN ('adb shell pidof org.cygnusx1.redditjr') DO set APP_PID=%i adb logcat --pid=%APP_PID%`
 
 ## adb install and setup instructions:
 https://github.com/cygnusx-1-org/Slide/blob/master/docs/DEBUGGING.md

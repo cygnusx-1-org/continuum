@@ -121,7 +121,7 @@ for apk in "$app_apk" "$test_apk"; do
       echo "That is a downgrade: the device has a newer versionCode than this build. Installing"
       echo "over it would leave the newer Room schema behind and the app would not start."
       echo "Uninstall first if that is really what you want:"
-      echo "  adb -s $serial uninstall org.cygnusx1.continuum.debug"
+      echo "  adb -s $serial uninstall org.cygnusx1.redditjr.debug"
     fi
     exit 1
   fi
@@ -132,7 +132,7 @@ trap 'rm -f "$output"' EXIT
 
 adb -s "$serial" shell am instrument -w -r \
   -e class "$test_class" \
-  org.cygnusx1.continuum.debug.test/com.kaspersky.kaspresso.runner.KaspressoRunner \
+  org.cygnusx1.redditjr.debug.test/com.kaspersky.kaspresso.runner.KaspressoRunner \
   2>&1 | tee "$output" | grep -E "^INSTRUMENTATION_STATUS: test=" | sed 's/^.*test=/  /' | awk '!seen[$0]++'
 
 echo

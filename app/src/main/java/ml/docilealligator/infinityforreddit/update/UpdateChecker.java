@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
  * Looks up the latest GitHub release of this fork and compares it with the running version.
  */
 public final class UpdateChecker {
-    static final String REPO = "jayblah/continuumjr";
+    static final String REPO = "jayblah/redditjr";
     private static final String API = "https://api.github.com/repos/" + REPO + "/releases";
 
     private UpdateChecker() {
@@ -87,7 +87,7 @@ public final class UpdateChecker {
             connection.setConnectTimeout(15000);
             connection.setReadTimeout(15000);
             connection.setRequestProperty("Accept", "application/vnd.github+json");
-            connection.setRequestProperty("User-Agent", "continuumjr-updater");
+            connection.setRequestProperty("User-Agent", "redditjr-updater");
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 throw new IOException("GitHub returned " + connection.getResponseCode());
             }
