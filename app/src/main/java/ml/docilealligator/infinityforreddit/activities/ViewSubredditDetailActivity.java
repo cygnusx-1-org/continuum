@@ -17,7 +17,9 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
@@ -252,6 +254,25 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @SuppressWarnings("NullAway.Init") // See mSubredditViewModel above.
     private ActivityResultLauncher<Intent> requestMultiredditSelectionLauncher;
 
+    /**
+     * With the banner off, its view shrinks to the strip the pinned toolbar covers (the status bar
+     * and the toolbar), so the name row starts below the toolbar and the whole header still
+     * scrolls away like it does with a banner.
+     */
+    private void applyBannerSetting() {
+        if (mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_SUBREDDIT_BANNER, true)) {
+            return;
+        }
+        TypedValue tv = new TypedValue();
+        int toolbarHeight = 0;
+        if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            toolbarHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+        ViewGroup.LayoutParams params = binding.bannerImageViewViewSubredditDetailActivity.getLayoutParams();
+        params.height = toolbarHeight + topSystemBarHeight;
+        binding.bannerImageViewViewSubredditDetailActivity.setLayoutParams(params);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         ((Infinity) getApplication()).getAppComponent().inject(this);
@@ -260,6 +281,9 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
 
         binding = ActivityViewSubredditDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Up front, so the 160dp banner never shows while the subreddit info loads.
+        applyBannerSetting();
 
         // Before the claim below, which reads the recorded offset back through the same field.
         trackAppBarOffsetForResume(binding.appbarLayoutViewSubredditDetailActivity);
@@ -363,6 +387,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                                 allInsets.top,
                                 allInsets.right,
                                 BaseActivity.IGNORE_MARGIN);
+                        applyBannerSetting();
 
                         binding.tabLayoutViewSubredditDetailActivity.setPadding(allInsets.left, 0, allInsets.right, 0);
 
@@ -553,12 +578,17 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                     // Recorded once the data is in hand, so the name and icon are stored together
                     // and a subreddit that never loaded is never listed as visited.
                     mRecordedVisit = true;
+                    ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.record(
+                            mSharedPreferences, accountName, subredditData.getName(), subredditData.getIconUrl());
                     RecordRecentlyVisited.recordSubreddit(mExecutor, mRedditDataRoomDatabase,
                             mRecentlyVisitedSharedPreferences, accountName, subredditData.getName(),
                             subredditData.getIconUrl());
                 }
 
-                if (subredditData.getBannerUrl().equals("")) {
+                if (!mSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_SUBREDDIT_BANNER, true)) {
+                    // Banner is off: the view stays as the spacer under the toolbar.
+                    binding.bannerImageViewViewSubredditDetailActivity.setOnClickListener(null);
+                } else if (subredditData.getBannerUrl().equals("")) {
                     binding.iconGifImageViewViewSubredditDetailActivity.setOnClickListener(view -> {
                         //Do nothing as it has no image
                     });

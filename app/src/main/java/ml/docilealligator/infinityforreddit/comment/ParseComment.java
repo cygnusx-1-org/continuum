@@ -22,6 +22,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ParseComment {
+    // Whether stickied and AutoModerator comments start collapsed. Set from the setting when a
+    // thread screen opens, because every parse path below reads it.
+    private static volatile boolean collapseAutoModAndStickied = false;
+
+    public static void setCollapseAutoModAndStickied(boolean collapse) {
+        collapseAutoModAndStickied = collapse;
+    }
+
     public static void parseComment(Executor executor, Handler handler, @Nullable String response,
                                     boolean expandChildren, CommentFilter commentFilter,
                                     ParseCommentListener parseCommentListener) {
@@ -126,6 +134,13 @@ public class ParseComment {
                     continue;
                 }
 
+                isFilteredOut = true;
+            }
+
+            // A filtered-out comment already shows as a collapsed row until it is tapped open, so
+            // stickied and AutoModerator comments reuse that.
+            if (collapseAutoModAndStickied && (data.optBoolean(JSONUtils.STICKIED_KEY)
+                    || "AutoModerator".equalsIgnoreCase(singleComment.getAuthor()))) {
                 isFilteredOut = true;
             }
 

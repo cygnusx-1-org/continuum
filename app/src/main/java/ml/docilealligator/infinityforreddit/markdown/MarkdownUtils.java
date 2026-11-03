@@ -30,6 +30,9 @@ import ml.docilealligator.infinityforreddit.markdown.superscript.SuperscriptPlug
 import ml.docilealligator.infinityforreddit.markdown.uploadedimage.UploadedImagePlugin;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoBlock;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoEntry;
+import ml.docilealligator.infinityforreddit.decoder.DecoderBlock;
+import ml.docilealligator.infinityforreddit.decoder.DecoderEntry;
+import ml.docilealligator.infinityforreddit.decoder.DecoderPlugin;
 import ml.docilealligator.infinityforreddit.markdown.video.VideoPlugin;
 import org.commonmark.ext.gfm.tables.TableBlock;
 
@@ -101,6 +104,7 @@ public class MarkdownUtils {
                 .usePlugin(RedditLinkifyPlugin.create())
                 .usePlugin(imageAndGifPlugin)
                 .usePlugin(videoPlugin)
+                .usePlugin(new DecoderPlugin())
                 .usePlugin(emotePlugin)
                 .usePlugin(commentFacePlugin)
                 .usePlugin(TableEntryPlugin.create(context))
@@ -264,6 +268,7 @@ public class MarkdownUtils {
                         .textLayoutIsRoot(R.layout.view_table_entry_cell)))
                 .include(ImageAndGifBlock.class, imageAndGifEntry)
                 .include(VideoBlock.class, videoEntry)
+                .include(DecoderBlock.class, new DecoderEntry(activity))
                 .build();
     }
 

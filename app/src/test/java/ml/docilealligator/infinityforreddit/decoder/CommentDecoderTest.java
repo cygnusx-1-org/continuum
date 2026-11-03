@@ -1,5 +1,6 @@
 package ml.docilealligator.infinityforreddit.decoder;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -29,29 +30,24 @@ public class CommentDecoderTest {
     }
 
     @Test
-    public void insertsBlockAfterMatchingParagraph() {
+    public void insertsMarkerAfterMatchingParagraph() {
         String annotated = CommentDecoder.annotate("charlie delta echo\n\nnothing here");
-        assertTrue(annotated, annotated.startsWith(
-                "charlie delta echo\n\n> **NATO** `CDE`\n>\n> [📋](" + CommentDecoder.COPY_URL_PREFIX + "CDE)"));
-        assertTrue(annotated, annotated.contains(" · [🏷️](") && annotated.contains(" · [🌐](")
-                && annotated.contains(" · [🔍]("));
-        assertTrue(annotated, annotated.endsWith("\n\nnothing here"));
-        assertTrue(annotated, annotated.contains("&c%5Btitle_only%5D=1"));
+        assertEquals("charlie delta echo\n\n{{decoded:NATO:CDE}}\n\nnothing here", annotated);
     }
 
     @Test
-    public void copyLinksRoundTrip() {
+    public void markerRoundTrips() {
         String annotated = CommentDecoder.annotate("01001000 01101001 00100000 00100110");
-        int start = annotated.indexOf(CommentDecoder.COPY_URL_PREFIX);
-        String url = annotated.substring(start, annotated.indexOf(')', start));
-        assertEquals("Hi &", CommentDecoder.copyText(url));
-        assertNull(CommentDecoder.copyText("https://www.reddit.com/r/pics"));
+        String marker = annotated.substring(annotated.indexOf(CommentDecoder.MARKER_PREFIX));
+        assertArrayEquals(new String[]{"BIN", "Hi &"}, CommentDecoder.parseMarker(marker));
+        assertNull(CommentDecoder.parseMarker("just a line"));
+        assertNull(CommentDecoder.parseMarker("{{decoded:OTHER:x}}"));
     }
 
     @Test
     public void addsEachDecodedValueOnce() {
         String annotated = CommentDecoder.annotate("kilo lima mike\n\nkilo lima mike");
-        assertEquals(annotated.indexOf("**NATO**"), annotated.lastIndexOf("**NATO**"));
+        assertEquals(annotated.indexOf("{{decoded:NATO"), annotated.lastIndexOf("{{decoded:NATO"));
     }
 
     @Test
@@ -63,16 +59,16 @@ public class CommentDecoderTest {
     }
 
     @Test
-    public void searchLinksUseTheHandle() {
-        String annotated = CommentDecoder.annotate("01010100 01101001 01101011 00111010 00100000 01101110");
-        assertTrue(annotated, annotated.contains("**BIN** `Tik: n`"));
-        assertTrue(annotated, annotated.contains("q=n&") && annotated.contains("q=n+%28site"));
+    public void searchUrlsCarryTheQuery() {
+        assertTrue(CommentDecoder.simpCityUrl("n", true).contains("q=n&c%5Btitle_only%5D=1"));
+        assertTrue(CommentDecoder.simpCityUrl("n", false).contains("q=n&o=relevance"));
+        assertTrue(CommentDecoder.socialSearchUrl("n").contains("q=n+%28site%3Ainstagram.com"));
     }
 
     @Test
     public void decodesBinaryWrappedAcrossLines() {
         String annotated = CommentDecoder.annotate("01001000\n01101001");
-        assertTrue(annotated, annotated.contains("**BIN** `Hi`"));
+        assertTrue(annotated, annotated.endsWith("{{decoded:BIN:Hi}}"));
     }
 
     @Test

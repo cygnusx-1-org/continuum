@@ -2,10 +2,18 @@
 
 ---
 
-8.3.3.9.1.3 / 2026-11-3
+8.3.3.9.1.4 / 2026-11-3
 ============
+Renamed to Reddit Jr. with a new icon. The application ID is unchanged, so this updates the existing install.
+
+* Decoder results are now a card with a Copy button and SimpCity and social search buttons, instead of a quote with emoji links
+* Decoder only runs under NSFW posts
 * Decoder search links now use only the handle, dropping a link's host and path or a leading label such as "TikTok and IG:". Copy still copies the full decoded text
 * Decoder now reads 8-bit binary split across lines
+* Added reverse image search (Google, Yandex or both) to the bottom bar of the image, gallery and Imgur viewers, for images and GIFs
+* AutoModerator and stickied comments now start collapsed. Added `Settings > Miscellaneous > Collapse AutoModerator and stickied comments`
+* Added `Settings > Interface > Show subreddit banner`. With it off, the header keeps only the strip under the toolbar
+* Added a Recents section to the navigation drawer with the last 5 subreddits visited. Added `Collapse Recents Section` and `Hide Recents Section` to `Settings > Navigation Drawer`
 
 8.3.3.9.1.2 / 2026-11-3
 ============

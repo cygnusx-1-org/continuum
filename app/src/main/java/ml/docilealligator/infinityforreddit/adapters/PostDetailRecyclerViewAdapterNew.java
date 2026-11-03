@@ -946,7 +946,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
                 mVideoEntry.setCurrentCommentId(null);
                 mVideoEntry.setCurrentPostId(mPost.getId());
                 mVideoEntry.setCurrentPostTitle(mPost.getTitle());
-                mMarkwonAdapter.setMarkdown(mPostDetailMarkwon, mDecodeNatoBinary ? ml.docilealligator.infinityforreddit.decoder.CommentDecoder.annotate(mPost.getSelfText()) : mPost.getSelfText());
+                mMarkwonAdapter.setMarkdown(mPostDetailMarkwon, mDecodeNatoBinary && mPost.isNSFW() ? ml.docilealligator.infinityforreddit.decoder.CommentDecoder.annotate(mPost.getSelfText()) : mPost.getSelfText());
                 // noinspection NotifyDataSetChanged
                 mMarkwonAdapter.notifyDataSetChanged();
             }

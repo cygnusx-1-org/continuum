@@ -250,6 +250,8 @@ public class ViewRedditGalleryImageOrGifFragment extends Fragment {
                 shareImage();
             }
         });
+        binding.reverseImageSearchImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(
+                view -> ml.docilealligator.infinityforreddit.utils.ReverseImageSearch.showChooser(activity, view, media.url));
         binding.wallpaperImageViewViewRedditGalleryImageOrGifFragment.setOnClickListener(view -> {
             setWallpaper();
         });

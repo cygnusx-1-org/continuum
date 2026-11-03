@@ -88,6 +88,12 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="true"
+        app:key="collapse_automod_and_stickied_comments"
+        app:title="@string/settings_collapse_automod_and_stickied_title"
+        app:summary="@string/settings_collapse_automod_and_stickied_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="true"
         app:key="auto_check_for_updates"
         app:title="@string/settings_auto_check_for_updates_title"
         app:summary="@string/settings_auto_check_for_updates_summary" />

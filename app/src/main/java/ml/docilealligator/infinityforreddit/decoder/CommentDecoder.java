@@ -20,12 +20,12 @@ import java.util.regex.Pattern;
 
 /**
  * Finds NATO phonetic spelling and 8-bit binary in comment and post Markdown and appends the
- * decoded text, with Copy and search links, below the paragraph it appears in.
+ * decoded text, as a marker line DecoderBlockParser turns into a card, below the paragraph it
+ * appears in.
  */
 public final class CommentDecoder {
-    // A private scheme so EvenBetterLinkMovementMethod can route taps to DecoderLinkHandler, which
-    // copies the text instead of opening a page.
-    static final String COPY_URL_PREFIX = "continuum-decoder://copy?text=";
+    static final String MARKER_PREFIX = "{{decoded:";
+    private static final Pattern MARKER = Pattern.compile("^\\{\\{decoded:(NATO|BIN):([^}]*)\\}\\}$");
 
     private static final String[] SOCIAL_SITES = {
             "instagram.com",
@@ -123,51 +123,42 @@ public final class CommentDecoder {
         if (decoded == null) return false;
         decoded = decoded.replaceAll("\\s+", " ").trim();
         if (decoded.isEmpty() || !seen.add(label + ":" + decoded)) return false;
-        String term = searchTerm(decoded);
-
-        out.append("\n\n> **").append(label).append("** ").append(codeSpan(decoded))
-                .append("\n>\n> [📋](").append(COPY_URL_PREFIX).append(encode(decoded)).append(')')
-                .append(" · [🏷️](").append(simpCityUrl(term, true)).append(')')
-                .append(" · [🌐](").append(simpCityUrl(term, false)).append(')')
-                .append(" · [🔍](").append(socialSearchUrl(term)).append(')');
+        out.append("\n\n").append(MARKER_PREFIX).append(label).append(':').append(encode(decoded)).append("}}");
         return true;
+    }
+
+    /**
+     * Returns {label, decoded text} if the line is a marker annotate added, else null.
+     */
+    public static String[] parseMarker(String line) {
+        if (line == null || !line.startsWith(MARKER_PREFIX)) return null;
+        Matcher matcher = MARKER.matcher(line.trim());
+        if (!matcher.matches()) return null;
+        try {
+            return new String[]{matcher.group(1), URLDecoder.decode(matcher.group(2), "UTF-8")};
+        } catch (UnsupportedEncodingException | IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     /**
      * Only the handle is worth searching: drops a link's host and path (https://link.me/name)
      * or a leading label ("TikTok and IG: name"). Copy still carries the full text.
      */
-    static String searchTerm(String decoded) {
+    public static String searchTerm(String decoded) {
         String term = LINK_PREFIX.matcher(decoded).replaceFirst("");
         term = LABEL_PREFIX.matcher(term).replaceFirst("").trim();
         return term.isEmpty() ? decoded : term;
     }
 
-    /**
-     * Returns the text a Copy link carries, or null if the URL is not a Copy link.
-     */
-    public static String copyText(String url) {
-        if (url == null || !url.startsWith(COPY_URL_PREFIX)) return null;
-        try {
-            return URLDecoder.decode(url.substring(COPY_URL_PREFIX.length()), "UTF-8");
-        } catch (UnsupportedEncodingException | IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
-    private static String codeSpan(String text) {
-        return text.contains("`") ? "`` " + text + " ``" : "`" + text + "`";
-    }
-
     // XenForo re-runs the query from q= when the search ID in the path isn't one
-    // it has stored for you, so a dummy ID works. Brackets are encoded so they
-    // can't end the Markdown link early.
-    private static String simpCityUrl(String query, boolean titleOnly) {
+    // it has stored for you, so a dummy ID works.
+    public static String simpCityUrl(String query, boolean titleOnly) {
         return "https://simpcity.cr/search/1/?q=" + encode(query)
                 + (titleOnly ? "&c%5Btitle_only%5D=1" : "") + "&o=relevance";
     }
 
-    private static String socialSearchUrl(String query) {
+    public static String socialSearchUrl(String query) {
         StringBuilder sites = new StringBuilder();
         for (String site : SOCIAL_SITES) {
             if (sites.length() > 0) sites.append(" OR ");

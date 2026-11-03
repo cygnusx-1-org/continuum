@@ -70,7 +70,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk \
-            --title "Continuumjr ${GITHUB_REF_NAME#v}" --generate-notes
+            --title "Reddit Jr. ${GITHUB_REF_NAME#v}" --generate-notes
 
       - name: Upload APKs (manual runs)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}

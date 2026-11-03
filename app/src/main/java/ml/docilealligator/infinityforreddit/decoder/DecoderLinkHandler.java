@@ -12,27 +12,23 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.widget.Toast;
 
+import ml.docilealligator.infinityforreddit.R;
+
 /**
- * Handles taps on the decoder's Copy links before a link is opened.
+ * Copies decoded text for the decoder card's Copy button.
  */
 public final class DecoderLinkHandler {
     private DecoderLinkHandler() {
         // Prevent instantiation
     }
 
-    /**
-     * @return true if the link was a Copy link and has been handled.
-     */
-    public static boolean handleLink(Context context, String url) {
-        String text = CommentDecoder.copyText(url);
-        if (text == null) return false;
+    public static void copy(Context context, String text) {
         try {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
             clipboard.setPrimaryClip(ClipData.newPlainText("Decoded text", text));
-            Toast.makeText(context, "Copied " + text, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.decoder_copied, text), Toast.LENGTH_SHORT).show();
         } catch (Exception ignored) {
-            // Copying is best effort; the tap is still ours.
+            // Copying is best effort.
         }
-        return true;
     }
 }

@@ -208,6 +208,8 @@ public class SharedPreferencesUtils {
     // one skips past what was read, this one goes back to it.
     public static final String RESUME_WHERE_I_LEFT_OFF = "resume_where_i_left_off";
     public static final String DECODE_NATO_BINARY = "decode_nato_binary";
+    public static final String SHOW_SUBREDDIT_BANNER = "show_subreddit_banner";
+    public static final String COLLAPSE_AUTOMOD_AND_STICKIED_COMMENTS = "collapse_automod_and_stickied_comments";
     public static final String AUTO_CHECK_FOR_UPDATES = "auto_check_for_updates";
     public static final String LAST_UPDATE_CHECK_TIME = "last_update_check_time";
     public static final String DATA_SAVING_MODE_PREFERENCE = "data_saving_mode_preference";
@@ -639,6 +641,8 @@ public class SharedPreferencesUtils {
     public static final String COLLAPSE_REDDIT_SECTION = "collapse_reddit_section";
     public static final String COLLAPSE_POST_SECTION = "collapse_post_section";
     public static final String COLLAPSE_PREFERENCES_SECTION = "collapse_preferences_section";
+    public static final String COLLAPSE_RECENT_SUBREDDITS_SECTION = "collapse_recent_subreddits_section";
+    public static final String HIDE_RECENT_SUBREDDITS_SECTION = "hide_recent_subreddits_section";
     public static final String COLLAPSE_FAVORITE_SUBREDDITS_SECTION = "collapse_favorite_subreddits_section";
     public static final String COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION = "collapse_subscribed_subreddits_section";
     public static final String HIDE_FAVORITE_SUBREDDITS_SECTION = "hide_favorite_subreddits_sections";

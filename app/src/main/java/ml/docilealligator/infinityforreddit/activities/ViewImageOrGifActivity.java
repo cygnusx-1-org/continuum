@@ -226,6 +226,8 @@ public class ViewImageOrGifActivity extends AppCompatActivity
             else
                 shareImage();
         });
+        binding.reverseImageSearchImageViewViewImageOrGifActivity.setOnClickListener(
+                view -> ml.docilealligator.infinityforreddit.utils.ReverseImageSearch.showChooser(this, view, mImageUrl));
         binding.wallpaperImageViewViewImageOrGifActivity.setOnClickListener(view -> {
             setWallpaper();
         });

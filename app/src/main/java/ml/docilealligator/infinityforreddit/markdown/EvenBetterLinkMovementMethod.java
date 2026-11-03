@@ -393,9 +393,6 @@ public class EvenBetterLinkMovementMethod extends LinkMovementMethod {
 
     protected void dispatchUrlClick(TextView textView, ClickableSpan clickableSpan) {
         ClickableSpanWithText clickableSpanWithText = ClickableSpanWithText.ofSpan(textView, clickableSpan);
-        if (ml.docilealligator.infinityforreddit.decoder.DecoderLinkHandler.handleLink(textView.getContext(), clickableSpanWithText.text())) {
-            return;
-        }
         boolean handled = onLinkClickListener != null && onLinkClickListener.onClick(textView, clickableSpanWithText.text());
 
         if (!handled) {

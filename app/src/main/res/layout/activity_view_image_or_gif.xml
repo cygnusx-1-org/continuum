@@ -124,6 +124,17 @@
                     android:contentDescription="@string/content_description_share" />
 
                 <ImageView
+                    android:id="@+id/reverse_image_search_image_view_view_image_or_gif_activity"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="12dp"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_reverse_image_search_white_24dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/content_description_reverse_image_search" />
+
+                <ImageView
                     android:id="@+id/wallpaper_image_view_view_image_or_gif_activity"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

@@ -10,6 +10,7 @@ import java.util.List;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
+import ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 
@@ -19,6 +20,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
     private final RedditSectionRecyclerViewAdapter redditSectionRecyclerViewAdapter;
     private final PostSectionRecyclerViewAdapter postSectionRecyclerViewAdapter;
     private final PreferenceSectionRecyclerViewAdapter preferenceSectionRecyclerViewAdapter;
+    private final RecentSubredditsSectionRecyclerViewAdapter recentSubredditsSectionRecyclerViewAdapter;
     private final FavoriteSubscribedSubredditsSectionRecyclerViewAdapter favoriteSubscribedSubredditsSectionRecyclerViewAdapter;
     private final SubscribedSubredditsRecyclerViewAdapter subscribedSubredditsRecyclerViewAdapter;
     private final AccountManagementSectionRecyclerViewAdapter accountManagementSectionRecyclerViewAdapter;
@@ -56,6 +58,8 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 navigationDrawerSharedPreferences, itemClickListener);
         preferenceSectionRecyclerViewAdapter = new PreferenceSectionRecyclerViewAdapter(baseActivity, customThemeWrapper,
                 accountName, sharedPreferences, nsfwAndSpoilerSharedPreferences, navigationDrawerSharedPreferences, itemClickListener);
+        recentSubredditsSectionRecyclerViewAdapter = new RecentSubredditsSectionRecyclerViewAdapter(
+                baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences, itemClickListener);
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter = new FavoriteSubscribedSubredditsSectionRecyclerViewAdapter(
                 baseActivity, glide, customThemeWrapper, navigationDrawerSharedPreferences, itemClickListener);
         subscribedSubredditsRecyclerViewAdapter = new SubscribedSubredditsRecyclerViewAdapter(baseActivity, glide,
@@ -69,6 +73,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 redditSectionRecyclerViewAdapter,
                 postSectionRecyclerViewAdapter,
                 preferenceSectionRecyclerViewAdapter,
+                recentSubredditsSectionRecyclerViewAdapter,
                 favoriteSubscribedSubredditsSectionRecyclerViewAdapter,
                 subscribedSubredditsRecyclerViewAdapter);
     }
@@ -82,6 +87,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         mainPageConcatAdapter.removeAdapter(redditSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(postSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(preferenceSectionRecyclerViewAdapter);
+        mainPageConcatAdapter.removeAdapter(recentSubredditsSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(favoriteSubscribedSubredditsSectionRecyclerViewAdapter);
         mainPageConcatAdapter.removeAdapter(subscribedSubredditsRecyclerViewAdapter);
 
@@ -107,6 +113,7 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         mainPageConcatAdapter.addAdapter(redditSectionRecyclerViewAdapter);
         mainPageConcatAdapter.addAdapter(postSectionRecyclerViewAdapter);
         mainPageConcatAdapter.addAdapter(preferenceSectionRecyclerViewAdapter);
+        mainPageConcatAdapter.addAdapter(recentSubredditsSectionRecyclerViewAdapter);
         mainPageConcatAdapter.addAdapter(favoriteSubscribedSubredditsSectionRecyclerViewAdapter);
         mainPageConcatAdapter.addAdapter(subscribedSubredditsRecyclerViewAdapter);
 
@@ -151,6 +158,10 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
         preferenceSectionRecyclerViewAdapter.setResumeWhereILeftOff(resumeWhereILeftOff);
     }
 
+    public void setRecentSubreddits(List<RecentSubreddits.Entry> recentSubreddits) {
+        recentSubredditsSectionRecyclerViewAdapter.setRecentSubreddits(recentSubreddits);
+    }
+
     public void setFavoriteSubscribedSubreddits(List<SubscribedSubredditData> favoriteSubscribedSubreddits) {
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setFavoriteSubscribedSubreddits(favoriteSubscribedSubreddits);
     }
@@ -174,6 +185,10 @@ public class NavigationDrawerRecyclerViewMergedAdapter {
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_POST_SECTION, false));
         preferenceSectionRecyclerViewAdapter.setCollapsePreferencesSection(
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION, false));
+        recentSubredditsSectionRecyclerViewAdapter.setCollapseSection(
+                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION, false));
+        recentSubredditsSectionRecyclerViewAdapter.setHideSection(
+                navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_RECENT_SUBREDDITS_SECTION, false));
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setCollapseFavoriteSubredditsSection(
                 navigationDrawerSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_FAVORITE_SUBREDDITS_SECTION, false));
         favoriteSubscribedSubredditsSectionRecyclerViewAdapter.setHideFavoriteSubredditsSection(

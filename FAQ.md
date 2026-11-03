@@ -59,7 +59,7 @@ Things to try:
   </picture>
 </p>
 
-### Continuumjr
+### Reddit Jr.
 <p align="center">
   <picture>
     <source

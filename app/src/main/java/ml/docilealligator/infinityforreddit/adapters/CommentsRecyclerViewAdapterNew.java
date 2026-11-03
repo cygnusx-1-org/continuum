@@ -131,7 +131,9 @@ public class CommentsRecyclerViewAdapterNew extends ListAdapter<Comment, Recycle
     private final boolean mDecodeNatoBinary;
 
     private String decodeIfEnabled(String markdown) {
-        return mDecodeNatoBinary ? ml.docilealligator.infinityforreddit.decoder.CommentDecoder.annotate(markdown) : markdown;
+        // Only under NSFW posts, which Reddit marks for every post in an NSFW community.
+        boolean nsfw = mPost != null && mPost.isNSFW();
+        return mDecodeNatoBinary && nsfw ? ml.docilealligator.infinityforreddit.decoder.CommentDecoder.annotate(markdown) : markdown;
     }
     private final boolean mShowElapsedTime;
     private final String mTimeFormatPattern;

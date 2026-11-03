@@ -61,6 +61,8 @@ public class NavigationDrawerPreferenceFragment extends CustomFontPreferenceFrag
             SharedPreferencesUtils.COLLAPSE_REDDIT_SECTION,
             SharedPreferencesUtils.COLLAPSE_POST_SECTION,
             SharedPreferencesUtils.COLLAPSE_PREFERENCES_SECTION,
+            SharedPreferencesUtils.COLLAPSE_RECENT_SUBREDDITS_SECTION,
+            SharedPreferencesUtils.HIDE_RECENT_SUBREDDITS_SECTION,
             SharedPreferencesUtils.COLLAPSE_FAVORITE_SUBREDDITS_SECTION,
             SharedPreferencesUtils.COLLAPSE_SUBSCRIBED_SUBREDDITS_SECTION,
             SharedPreferencesUtils.HIDE_FAVORITE_SUBREDDITS_SECTION,

@@ -1,18 +1,4 @@
-<h1 align="center">Continuumjr</h1>
-
-<p align="center">
-  <picture>
-    <source
-      width="256px"
-      media="(prefers-color-scheme: dark)"
-      srcset="assets/logo/space_alien.png"
-    >
-    <img
-      width="256px"
-      src="assets/logo/space_alien.png"
-    >
-  </picture>
-</p>
+<h1 align="center">Reddit Jr.</h1>
 
 A personal fork of [Continuum](https://github.com/cygnusx-1-org/continuum), an ad-free Reddit client for Android written in Java. Continuum is itself a fork of [Infinity for Reddit](https://github.com/Docile-Alligator/Infinity-For-Reddit).
 
@@ -30,7 +16,7 @@ A personal fork of [Continuum](https://github.com/cygnusx-1-org/continuum), an a
 # What is different from Continuum
 - **NATO and binary decoder.** Comments and post bodies that spell something in the NATO phonetic alphabet or in 8-bit binary get the decoded text added below the paragraph, with links to copy it and to search for it. Turn it off in `Settings > Miscellaneous > Decode NATO and binary`.
 - **In-app updates.** The app checks the [latest release](https://github.com/jayblah/continuumjr/releases/latest) of this repository, at most once a day, and offers to download and install it. Turn it off in `Settings > Miscellaneous > Check for updates automatically`, or check by hand with `Check for updates now`.
-- **Installs beside Continuum.** The application ID is `org.cygnusx1.continuumjr` and the app is named Continuumjr, so it does not replace or share data with Continuum.
+- **Installs beside Continuum.** The application ID is `org.cygnusx1.continuumjr` and the app is named Reddit Jr., so it does not replace or share data with Continuum.
 
 Everything else is Continuum. Changes are kept small and in new files where possible so upstream merges stay clean.
 
@@ -47,7 +33,7 @@ org.cygnusx1.continuumjr 1B:6C:E8:BD:8A:42:C4:9D:98:20:D5:A5:DF:D6:53:1A:D2:06:B
 You can verify it with [AppVerifier](https://github.com/soupslurpr/AppVerifier).
 
 # Setup
-Continuumjr needs your own Reddit `Client ID`, like Continuum. See [SETUP.md](/SETUP.md).
+Reddit Jr. needs your own Reddit `Client ID`, like Continuum. See [SETUP.md](/SETUP.md).
 
 # FAQ
 See [FAQ.md](/FAQ.md)

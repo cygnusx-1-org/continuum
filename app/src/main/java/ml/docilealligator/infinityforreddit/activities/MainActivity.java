@@ -1073,6 +1073,16 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
         navigationWrapper.setInboxCount(this, InboxCount.get(mCurrentAccountSharedPreferences));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Back from a subreddit page: pick up the one just visited.
+        if (adapter != null) {
+            adapter.setRecentSubreddits(ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits
+                    .get(mSharedPreferences, accountName));
+        }
+    }
+
     @ExperimentalBadgeUtils
     private void bindNavigationDrawerAndTabs() {
         adapter = new NavigationDrawerRecyclerViewMergedAdapter(this, mSharedPreferences,

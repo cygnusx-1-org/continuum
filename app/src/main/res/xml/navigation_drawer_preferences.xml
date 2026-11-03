@@ -28,6 +28,16 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
+        app:key="collapse_recent_subreddits_section"
+        app:title="@string/settings_collapse_recent_subreddits_section_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
+        app:key="hide_recent_subreddits_section"
+        app:title="@string/settings_hide_recent_subreddits_section_title" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
         app:key="collapse_favorite_subreddits_section"
         app:title="@string/settings_collapse_favorite_subreddits_section_title" />
 

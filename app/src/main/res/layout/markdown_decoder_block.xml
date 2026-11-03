@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_markdown_decoder_block"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="4dp"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/label_text_view_markdown_decoder_block"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:letterSpacing="0.08"
+            android:textAllCaps="true"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/result_text_view_markdown_decoder_block"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="monospace"
+            android:textIsSelectable="true"
+            android:textSize="15sp" />
+
+        <ImageButton
+            android:id="@+id/copy_button_markdown_decoder_block"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/decoder_copy"
+            android:src="@drawable/ic_copy_day_night_24dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/simpcity_titles_text_view_markdown_decoder_block"
+            style="@style/DecoderAction"
+            android:text="@string/decoder_simpcity_titles" />
+
+        <TextView
+            android:id="@+id/simpcity_all_text_view_markdown_decoder_block"
+            style="@style/DecoderAction"
+            android:text="@string/decoder_simpcity_all" />
+
+        <TextView
+            android:id="@+id/social_text_view_markdown_decoder_block"
+            style="@style/DecoderAction"
+            android:text="@string/decoder_social_search" />
+    </LinearLayout>
+</LinearLayout>

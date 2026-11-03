@@ -620,6 +620,8 @@ public class ViewPostDetailFragmentNew extends Fragment implements FragmentCommu
             commentDefaultSortType = SortType.Type.CONFIDENCE;
         }
 
+        ml.docilealligator.infinityforreddit.comment.ParseComment.setCollapseAutoModAndStickied(
+                mSharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_AUTOMOD_AND_STICKIED_COMMENTS, true));
         viewPostDetailFragmentViewModel = new ViewModelProvider(
                 this,
                 ViewPostDetailFragmentViewModelNew.Companion.provideFactory(

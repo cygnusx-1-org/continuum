@@ -215,6 +215,8 @@ public class ViewImgurImageFragment extends Fragment {
         binding.shareImageViewViewImgurImageFragment.setOnClickListener(view -> {
             shareImage();
         });
+        binding.reverseImageSearchImageViewViewImgurImageFragment.setOnClickListener(
+                view -> ml.docilealligator.infinityforreddit.utils.ReverseImageSearch.showChooser(requireContext(), view, imgurMedia.getLink()));
         binding.wallpaperImageViewViewImgurImageFragment.setOnClickListener(view -> {
             setWallpaper();
         });
