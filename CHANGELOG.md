@@ -2,6 +2,13 @@
 
 ---
 
+8.3.3.9.1.10 / 2026-11-3
+============
+* Added reverse image search (Google, Yandex or both) to the post options menu for image, GIF and gallery posts, so it works from the feed
+* Recents: each row has a pin button, to keep it at the top, and an X button, to remove it. `Settings > Navigation Drawer > Number of Recents` sets how many of the rest are shown
+* Added `Settings > Interface > Hide Subreddit Icon`
+* The decoder now only decodes binary. NATO phonetic decoding is gone, and the setting is now `Decode binary`
+
 8.3.3.9.1.9 / 2026-11-3
 ============
 **Installs as a new app, again.** The application ID changed from `org.cygnusx1.redditjr` to `io.github.jayblah.redditjr`, which is yours instead of Continuum's namespace. Android treats it as a different app, so it does not update the previous one. Back up your settings in the old app under `Settings > Backup & Restore`, install this, and restore them.

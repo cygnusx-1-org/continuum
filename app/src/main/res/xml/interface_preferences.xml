@@ -43,6 +43,12 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
+        app:key="hide_subreddit_icon"
+        app:title="@string/settings_hide_subreddit_icon_title"
+        app:summary="@string/settings_hide_subreddit_icon_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
         app:key="hide_subreddit_description"
         app:title="@string/settings_hide_subreddit_description_title" />
 

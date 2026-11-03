@@ -48,6 +48,10 @@ public class NavigationDrawerPreferenceFragment extends CustomFontPreferenceFrag
             new Handler(Looper.getMainLooper()).post(() -> EventBus.getDefault().post(new ChangeNavigationDrawerSectionsEvent()));
             return true;
         };
+        androidx.preference.ListPreference recentLimit = findPreference(SharedPreferencesUtils.RECENT_SUBREDDITS_LIMIT);
+        if (recentLimit != null) {
+            recentLimit.setOnPreferenceChangeListener(sectionListener);
+        }
         for (String key : NAVIGATION_DRAWER_SECTION_KEYS) {
             SwitchPreference sectionSwitch = findPreference(key);
             if (sectionSwitch != null) {

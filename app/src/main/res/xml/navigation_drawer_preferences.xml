@@ -36,6 +36,14 @@
         app:key="hide_recent_subreddits_section"
         app:title="@string/settings_hide_recent_subreddits_section_title" />
 
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
+        app:defaultValue="5"
+        app:entries="@array/recent_subreddits_limit"
+        app:entryValues="@array/recent_subreddits_limit"
+        app:key="recent_subreddits_limit"
+        app:title="@string/settings_recent_subreddits_limit_title"
+        app:useSimpleSummaryProvider="true" />
+
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="collapse_favorite_subreddits_section"

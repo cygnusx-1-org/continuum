@@ -10,16 +10,6 @@ import org.junit.Test;
 
 public class CommentDecoderTest {
     @Test
-    public void decodesNato() {
-        assertEquals("AB1", CommentDecoder.natoToText("Alpha, bravo one"));
-    }
-
-    @Test
-    public void ignoresFewerThanThreeCodeWords() {
-        assertNull(CommentDecoder.natoToText("alpha bravo"));
-    }
-
-    @Test
     public void decodesBinary() {
         assertEquals("Hi", CommentDecoder.binaryToText("01001000 01101001"));
     }
@@ -31,8 +21,8 @@ public class CommentDecoderTest {
 
     @Test
     public void insertsMarkerAfterMatchingParagraph() {
-        String annotated = CommentDecoder.annotate("charlie delta echo\n\nnothing here");
-        assertEquals("charlie delta echo\n\n{{decoded:NATO:CDE}}\n\nnothing here", annotated);
+        String annotated = CommentDecoder.annotate("01001000 01101001\n\nnothing here");
+        assertEquals("01001000 01101001\n\n{{decoded:BIN:Hi}}\n\nnothing here", annotated);
     }
 
     @Test
@@ -45,9 +35,15 @@ public class CommentDecoderTest {
     }
 
     @Test
+    public void doesNotDecodeNato() {
+        String body = "kilo lima mike";
+        assertSame(body, CommentDecoder.annotate(body));
+    }
+
+    @Test
     public void addsEachDecodedValueOnce() {
-        String annotated = CommentDecoder.annotate("kilo lima mike\n\nkilo lima mike");
-        assertEquals(annotated.indexOf("{{decoded:NATO"), annotated.lastIndexOf("{{decoded:NATO"));
+        String annotated = CommentDecoder.annotate("01001000 01101001\n\n01001000 01101001");
+        assertEquals(annotated.indexOf("{{decoded:BIN"), annotated.lastIndexOf("{{decoded:BIN"));
     }
 
     @Test

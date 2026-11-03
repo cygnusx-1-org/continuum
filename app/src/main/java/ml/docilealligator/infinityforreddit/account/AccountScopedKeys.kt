@@ -74,7 +74,7 @@ object AccountScopedKeys {
         // per-account file: without it here an account could arrange its own bar and then have
         // another account switch the bar off for everyone.
         "bottom_app_bar",
-        "hide_fab_in_post_feed", "hide_subreddit_banner", "hide_subreddit_description",
+        "hide_fab_in_post_feed", "hide_subreddit_banner", "hide_subreddit_icon", "hide_subreddit_description",
         "default_search_result_tab",
         "lazy_mode_interval", "shadowbox_hide_text_and_previewless_posts",
         "vote_buttons_on_the_right", "show_absolute_number_of_votes",
