@@ -48,7 +48,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# A machine that keeps several emulators up needs to say which one is Continuum's. local.properties
+# A machine that keeps several emulators up needs to say which one is Reddit Jr.'s. local.properties
 # is already the per-machine, never-committed config file, so the serial lives there:
 #     deviceSerial=emulator-5556
 if [ -z "$serial" ] && [ -f local.properties ]; then

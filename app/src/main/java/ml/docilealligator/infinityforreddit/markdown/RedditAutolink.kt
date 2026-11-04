@@ -7,7 +7,7 @@ import java.util.regex.Pattern
  * (`src/autolink.c`: `sd_autolink__subreddit`, `sd_autolink__username`,
  * `check_reddit_autolink_prefix`).
  *
- * Slide renders Reddit's own `body_html` and inherits this for free. Continuum renders the raw
+ * Slide renders Reddit's own `body_html` and inherits this for free. Reddit Jr. renders the raw
  * `body` markdown through Markwon, a CommonMark engine with no concept of a subreddit, so the
  * references have to be rewritten into explicit `[label](url)` links before Markwon sees them.
  * Matching snudown exactly is the point — anything looser or tighter renders the text differently
@@ -337,7 +337,7 @@ object RedditAutolink {
         return consumePath(markdown, position, limit, requireSlash = false)
     }
 
-    /** Consumes the trailing path, the part continuum was previously dropping (issue #356). */
+    /** Consumes the trailing path, the part Reddit Jr. was previously dropping (issue #356). */
     private fun consumePath(markdown: String, from: Int, limit: Int, requireSlash: Boolean): Int {
         var position = from
         if (requireSlash && (position >= limit || markdown[position] != '/')) {

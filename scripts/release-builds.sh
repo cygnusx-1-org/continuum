@@ -8,15 +8,15 @@ if [ -z "$VERSION_NAME" ]; then
   exit 1
 fi
 
-# Release variant: "release" (default; publishes to the continuum repo) or "beta" (builds the
-# beta variant and publishes to the continuum-beta repo). Set from the optional leading CLI
+# Release variant: "release" (default; publishes to the redditjr repo) or "beta" (builds the
+# beta variant and publishes to the redditjr-beta repo). Set from the optional leading CLI
 # argument in the dispatch section at the bottom.
 VARIANT="release"
 
-# The beta GitHub release is published in the separate continuum-beta repo, which requires the
-# release's git tag to exist there. continuum-beta is a placeholder (not a fork), so pushing the
-# tag also uploads the commit it points at. Tags still go to origin (continuum) as well.
-BETA_GIT_REMOTE="git@github.com:cygnusx-1-org/continuum-beta.git"
+# The beta GitHub release is published in the separate redditjr-beta repo, which requires the
+# release's git tag to exist there. redditjr-beta is a placeholder (not a fork), so pushing the
+# tag also uploads the commit it points at. Tags still go to origin (redditjr) as well.
+BETA_GIT_REMOTE="git@github.com:jayblah/redditjr-beta.git"
 
 # build.gradle
 BUILD_GRADLE_FILENAME="app/build.gradle"
@@ -87,11 +87,11 @@ ${RELEVANT_COMMIT_MESSAGES}"
   # Creating new tag for the new release
   git tag -a "${VERSION_NAME}" -m "Version ${VERSION_NAME}"
 
-  # Push tags to the git repository (origin = the non-beta continuum repo)
+  # Push tags to the git repository (origin = the non-beta redditjr repo)
   git push --tags
 
-  # A beta release is published as a GitHub release in the separate continuum-beta repo, which
-  # needs this tag to exist there too. Push it (and the commit it points at) to continuum-beta.
+  # A beta release is published as a GitHub release in the separate redditjr-beta repo, which
+  # needs this tag to exist there too. Push it (and the commit it points at) to redditjr-beta.
   if [ "${VARIANT}" = "beta" ]; then
     git push "${BETA_GIT_REMOTE}" "refs/tags/${VERSION_NAME}"
   fi
@@ -116,16 +116,16 @@ ${RELEVANT_COMMIT_MESSAGES}"
 
 # Section 3: everything after "./gradlew assembleRelease"
 3() {
-  # Upload the APKs built in section 2 to GitHub as a new release (continuum for release,
-  # continuum-beta for beta). release-github.sh does not build them itself.
+  # Upload the APKs built in section 2 to GitHub as a new release (redditjr for release,
+  # redditjr-beta for beta). release-github.sh does not build them itself.
   scripts/release-github.sh "${VARIANT}" "${RELEVANT_COMMIT_MESSAGES}"
 
-  # Push the release commit (e.g. the CHANGELOG update) to origin, the non-beta continuum repo.
+  # Push the release commit (e.g. the CHANGELOG update) to origin, the non-beta redditjr repo.
   git push
 }
 
 # Optional leading variant argument (release|beta). Defaults to release; "beta" builds the beta
-# variant and publishes to the continuum-beta repo.
+# variant and publishes to the redditjr-beta repo.
 case "${1}" in
   release|beta)
     VARIANT="${1}"

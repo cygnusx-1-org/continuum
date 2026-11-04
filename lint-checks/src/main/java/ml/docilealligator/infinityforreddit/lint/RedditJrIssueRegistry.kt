@@ -6,11 +6,11 @@ import com.android.tools.lint.detector.api.CURRENT_API
 import com.android.tools.lint.detector.api.Issue
 
 /**
- * Registry for Continuum's own lint checks. Referenced from the jar manifest
+ * Registry for Reddit Jr.'s own lint checks. Referenced from the jar manifest
  * (`Lint-Registry-v2`, see lint-checks/build.gradle) and loaded by the app module's
  * `lintChecks project(':lint-checks')` dependency.
  */
-class ContinuumIssueRegistry : IssueRegistry() {
+class RedditJrIssueRegistry : IssueRegistry() {
 
     override val issues: List<Issue> = listOf(LayoutVariantIdParityDetector.ISSUE)
 
@@ -24,8 +24,8 @@ class ContinuumIssueRegistry : IssueRegistry() {
     override val minApi: Int = 10
 
     override val vendor: Vendor = Vendor(
-        vendorName = "Continuum",
-        identifier = "continuum",
-        feedbackUrl = "https://github.com/cygnusx-1-org/continuum/issues",
+        vendorName = "Reddit Jr.",
+        identifier = "redditjr",
+        feedbackUrl = "https://github.com/jayblah/redditjr/issues",
     )
 }

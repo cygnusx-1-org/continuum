@@ -171,7 +171,7 @@ public class ViewImgurMediaActivity extends AppCompatActivity
 
         handler = new Handler(Looper.getMainLooper());
 
-        // Continuum dropped the "use bottom toolbar in media viewer" option and made the bottom
+        // Reddit Jr. dropped the "use bottom toolbar in media viewer" option and made the bottom
         // bar the default (it carries the rotate action), so the top toolbar upstream reinstated
         // never shows here.
         binding.toolbarViewImgurMediaActivity.setVisibility(View.GONE);

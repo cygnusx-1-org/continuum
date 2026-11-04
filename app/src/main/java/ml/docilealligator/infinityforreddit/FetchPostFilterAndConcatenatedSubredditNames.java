@@ -21,7 +21,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
      * {@link PostFilter#isPostAllowed} reads for them.
      *
      * <p>Wildcard "Exclude subreddits" terms only run on
-     * {@link Constants#CONTINUUM_ALL_SUBREDDIT}, so the flag that enables them is set here, where
+     * {@link Constants#REDDITJR_ALL_SUBREDDIT}, so the flag that enables them is set here, where
      * the feed is still known — {@code isPostAllowed} itself is static and sees only a post and a
      * filter. When the resolved filter has no wildcard term (the overwhelmingly common case) the
      * supporting lookups are skipped entirely, so nothing pays for a feature it is not using.
@@ -60,7 +60,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
         PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
         mergedPostFilter.username = accountName;
         mergedPostFilter.wildcardSubredditMatchingEnabled =
-                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(nameOfUsage);
+                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isRedditJrAll(nameOfUsage);
         return mergedPostFilter;
     }
 

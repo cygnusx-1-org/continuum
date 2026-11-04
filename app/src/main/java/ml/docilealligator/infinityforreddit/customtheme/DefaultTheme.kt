@@ -8,7 +8,7 @@ import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUt
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 
 /**
- * Continuum ships with Solarized Amoled as its default theme, applied on the first launch of an
+ * Reddit Jr. ships with Solarized Amoled as its default theme, applied on the first launch of an
  * install that has nothing to preserve. It is applied by writing the theme out rather than by
  * changing the fallbacks in [CustomThemeWrapper], so that upgrading users keep whatever they are
  * already looking at.

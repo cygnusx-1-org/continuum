@@ -11,7 +11,7 @@ import org.json.JSONObject
  * Reddit-hosted images the listing JSON reports as failed when they are actually fine.
  *
  * Images uploaded through the API's media lease with a `filepath` (`/api/media/asset.json`, as
- * Infinity, PRAW and Apollo still do and Continuum did until `UploadImageUtils.imageLeaseParams`)
+ * Infinity, PRAW and Apollo still do and Reddit Jr. did until `UploadImageUtils.imageLeaseParams`)
  * come back in `media_metadata` as just `{"status": "failed"}` -- no `m`, no `s`, no previews -- and
  * a body that embeds one says `*Processing img <id>...*` where the image should be. Reddit's own
  * clients read the same posts through GraphQL, which reports those items `VALID`, and the files are

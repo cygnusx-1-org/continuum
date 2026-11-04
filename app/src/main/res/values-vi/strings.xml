@@ -537,7 +537,6 @@ Nhấn để thử lại."</string>
     <string name="settings_open_source_title">"Mã nguồn mở"</string>
     <string name="settings_open_source_summary">"Gắn sao trên Github nếu bạn thích ứng dụng này"</string>
     <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Tài khoản Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1457,7 +1456,7 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="post_filter_rule_error_asterisk">"Chọn loại đối sánh thay vì nhập *."</string>
     <string name="post_filter_match_explanation">"Một kết quả khớp không phải là 'Chính xác' chỉ áp dụng trên r/%1$s, do đó, một từ rộng không thể làm trống các nguồn cấp dữ liệu khác của bạn. Nó sẽ được thêm vào 'Áp dụng cho' cho bạn."</string>
     <string name="post_filter_applies_to_summary_locked">"Quy tắc 'Bắt đầu bằng', 'Kết thúc bằng' hoặc 'Chứa' chỉ chạy trên r/ContinuumAll, vì vậy bộ lọc này được ghim vào đó. Hãy xóa quy tắc đó để chọn các nguồn cấp dữ liệu khác."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s được thêm vào 'Áp dụng cho'"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s được thêm vào 'Áp dụng cho'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Bị chặn bởi %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits quy tắc này có các bài đăng bị ẩn. Bạn không thể biết trước danh sách này nên nó được xây dựng khi bạn duyệt qua."</string>
@@ -1628,7 +1627,7 @@ Nhấn để thử lại."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Quyền thông báo không được cấp"</string>
     <string name="go_to_settings">"Cài đặt"</string>
-    <string name="welcome_to_continuum">"Chào mừng bạn đến với Reddit Jr., cánh cổng dẫn bạn đến một chiều hướng hoàn toàn mới về duyệt web Reddit!"</string>
+    <string name="welcome_to_redditjr">"Chào mừng bạn đến với Reddit Jr., cánh cổng dẫn bạn đến một chiều hướng hoàn toàn mới về duyệt web Reddit!"</string>
     <string name="subscription_prompt">"Trước khi bạn đi sâu vào vô số khả năng mà ứng dụng này mang lại,\n Tôi muốn thẳng thắn và minh bạch về một thay đổi quan trọng mà tôi đã thực hiện để đảm bảo dịch vụ tốt nhất có thể cho bạn.\n \n\nTừ giờ trở đi, bạn sẽ cần đăng ký hàng tháng để truy cập Reddit API trong vòng Reddit Jr. và\n điều này là do Reddit đã bắt đầu tính phí cho quyền truy cập API kể từ ngày 1 tháng 7 năm 2023.\n \n\nTất cả các cấp đều hoạt động như nhau. Nếu bạn muốn hỗ trợ Reddit Jr., bạn có thể đăng ký cấp cao hơn.\n Phần lớn số tiền từ cấp thấp nhất sẽ chuyển đến Reddit.\n    "</string>
     <string name="monthly">"hàng tháng"</string>
     <string name="yearly">"hàng năm"</string>

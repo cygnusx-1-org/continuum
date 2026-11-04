@@ -1060,9 +1060,9 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
         }
     };
 
-    // Upstream numbers the reminders table as migration 32 -> 33, but Continuum already used
+    // Upstream numbers the reminders table as migration 32 -> 33, but Reddit Jr. already used
     // 32 -> 33 for api_call_records and its chain is at 39, so the table lands on the end of
-    // Continuum's chain instead. The schema itself is upstream's, unchanged.
+    // Reddit Jr.'s chain instead. The schema itself is upstream's, unchanged.
     private static final Migration MIGRATION_39_40 = new Migration(39, 40) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {

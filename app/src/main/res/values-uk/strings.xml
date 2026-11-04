@@ -544,7 +544,6 @@
     <string name="settings_open_source_title">"Відкритий код"</string>
     <string name="settings_open_source_summary">"Поклади зірочку на Github, якщо тобі подобається цей застосунок"</string>
     <string name="settings_email_title">"Ел. пошта"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Обліківка Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Сабредит"</string>
@@ -1467,7 +1466,7 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_asterisk">"Вибери тип відповідності замість введення *."</string>
     <string name="post_filter_match_explanation">"Збіг, відмінний від \"Точно\", застосовується лише до r/%1$s, тому широке слово не може спорожнити інші канали. Його буде додано до списку \"Застосовується до\"."</string>
     <string name="post_filter_applies_to_summary_locked">"Правило «Починається з», «Закінчується на» або «Містить» працює лише на r/ContinuumAll, тому цей фільтр закріплено за ним. Видали це правило, щоб вибрати інші канали."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s додано до \"Застосовується до\""</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s додано до \"Застосовується до\""</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Заблоковано %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits це правило приховує дописи. ти не можеш знати цей список заздалегідь, тому він створюється під час перегляду."</string>
@@ -1641,7 +1640,7 @@ https://play.google.com/store/"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Дозвіл на сповіщення не надано"</string>
     <string name="go_to_settings">"Налаштування"</string>
-    <string name="welcome_to_continuum">"Ласкаво просимо до Reddit Jr., твого доступу до абсолютно нового виміру Reddit перегляду!"</string>
+    <string name="welcome_to_redditjr">"Ласкаво просимо до Reddit Jr., твого доступу до абсолютно нового виміру Reddit перегляду!"</string>
     <string name="subscription_prompt">"Перш ніж зануритися в незліченні можливості, які пропонує ця програма,\n я хочу бути відкритим і прозорим щодо суттєвих змін, які я впровадив, щоб забезпечити тобі найкраще обслуговування.\n \n\nВідтепер тобі знадобиться місячна підписка, щоб отримати доступ до Reddit API у межах Reddit Jr. та \n це тому, що Reddit почав стягувати плату за доступ API з 1 липня 2023 року.\n \n\nУсі рівні працюють однаково. Якщо ти хочеш підтримувати Reddit Jr., ти можеш підписатися на вищий рівень.\n Більшість грошей із найнижчого рівня йде на Reddit.\n    "</string>
     <string name="monthly">"Щомісяця"</string>
     <string name="yearly">"Щорічно"</string>

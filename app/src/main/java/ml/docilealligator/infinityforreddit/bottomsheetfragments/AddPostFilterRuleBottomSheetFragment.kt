@@ -289,10 +289,10 @@ class AddPostFilterRuleBottomSheetFragment : LandscapeExpandedRoundedBottomSheet
         val summary = binding.matchSummaryTextViewAddPostFilterRuleBottomSheetFragment
         val text = when {
             !subredditRule -> null
-            !plainAllowed -> getString(R.string.post_filter_match_required, Constants.CONTINUUM_ALL_SUBREDDIT)
-            !wildcardAllowed -> getString(R.string.post_filter_match_unavailable, Constants.CONTINUUM_ALL_SUBREDDIT)
+            !plainAllowed -> getString(R.string.post_filter_match_required, Constants.REDDITJR_ALL_SUBREDDIT)
+            !wildcardAllowed -> getString(R.string.post_filter_match_unavailable, Constants.REDDITJR_ALL_SUBREDDIT)
             matchMode.isWildcard ->
-                getString(R.string.post_filter_match_explanation, Constants.CONTINUUM_ALL_SUBREDDIT)
+                getString(R.string.post_filter_match_explanation, Constants.REDDITJR_ALL_SUBREDDIT)
             else -> null
         }
         summary.text = text.orEmpty()

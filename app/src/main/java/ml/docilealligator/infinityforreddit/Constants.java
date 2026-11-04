@@ -22,38 +22,43 @@ public class Constants {
      *
      * <p>Registered on Reddit as a placeholder subreddit, so its About tab and the subscribe button
      * resolve like any other subreddit; only the post listing is redirected.
+     *
+     * <p>The name is the one upstream registered, and it has to stay until a subreddit with a new
+     * name exists on Reddit: a name Reddit does not know would 404 the About tab and the subscribe
+     * button. Everything in code refers to it through this constant and {@link #isRedditJrAll}, so
+     * changing the name later is this one value plus a migration of saved post filters.
      */
-    public static final String CONTINUUM_ALL_SUBREDDIT = "ContinuumAll";
+    public static final String REDDITJR_ALL_SUBREDDIT = "ContinuumAll";
 
-    /** The subreddit whose post listing {@link #CONTINUUM_ALL_SUBREDDIT} actually fetches. */
-    public static final String CONTINUUM_ALL_SOURCE_SUBREDDIT = "all";
+    /** The subreddit whose post listing {@link #REDDITJR_ALL_SUBREDDIT} actually fetches. */
+    public static final String REDDITJR_ALL_SOURCE_SUBREDDIT = "all";
 
     private static final String POPULAR_SUBREDDIT = "popular";
 
-    /** True when {@code subredditName} is {@link #CONTINUUM_ALL_SUBREDDIT}, in any casing. */
-    public static boolean isContinuumAll(@Nullable String subredditName) {
-        return CONTINUUM_ALL_SUBREDDIT.equalsIgnoreCase(subredditName);
+    /** True when {@code subredditName} is {@link #REDDITJR_ALL_SUBREDDIT}, in any casing. */
+    public static boolean isRedditJrAll(@Nullable String subredditName) {
+        return REDDITJR_ALL_SUBREDDIT.equalsIgnoreCase(subredditName);
     }
 
     /**
      * True for the undifferentiated firehose feeds — r/all, r/popular and
-     * {@link #CONTINUUM_ALL_SUBREDDIT}. These carry posts from subreddits the user never chose, so
+     * {@link #REDDITJR_ALL_SUBREDDIT}. These carry posts from subreddits the user never chose, so
      * they default to a different sort, always display the source subreddit on each post, and hide
      * read posts without needing the per-subreddit preference.
      */
     public static boolean isFirehoseSubreddit(@Nullable String subredditName) {
-        return CONTINUUM_ALL_SOURCE_SUBREDDIT.equalsIgnoreCase(subredditName)
+        return REDDITJR_ALL_SOURCE_SUBREDDIT.equalsIgnoreCase(subredditName)
                 || POPULAR_SUBREDDIT.equalsIgnoreCase(subredditName)
-                || isContinuumAll(subredditName);
+                || isRedditJrAll(subredditName);
     }
 
     /**
      * The name to put in the API path for {@code subredditName}. Only
-     * {@link #CONTINUUM_ALL_SUBREDDIT} differs from its in-app name: it fetches r/all. Everything
+     * {@link #REDDITJR_ALL_SUBREDDIT} differs from its in-app name: it fetches r/all. Everything
      * else in the app — the toolbar, the post filter's "applies to", the sort preference key —
-     * keeps the ContinuumAll name, which is what lets a filter target it separately from r/all.
+     * keeps its own name, which is what lets a filter target it separately from r/all.
      */
     public static @Nullable String apiSubredditName(@Nullable String subredditName) {
-        return isContinuumAll(subredditName) ? CONTINUUM_ALL_SOURCE_SUBREDDIT : subredditName;
+        return isRedditJrAll(subredditName) ? REDDITJR_ALL_SOURCE_SUBREDDIT : subredditName;
     }
 }

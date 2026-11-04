@@ -18,7 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Hard-TTL cache for the Profile "Saved" tab (server-side saved posts). Continuum has no per-post
+ * Hard-TTL cache for the Profile "Saved" tab (server-side saved posts). Reddit Jr. has no per-post
  * offline body store to reuse (unlike Slide's {@code OfflineSubreddit}) and {@link Post} has no
  * JSON serializer, so bodies are cached as the raw {@code /saved} listing JSON in the app cache dir
  * and rebuilt through the existing {@link ParsePost#parsePostsSync} on load. A small per-(account,

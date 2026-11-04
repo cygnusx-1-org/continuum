@@ -121,7 +121,7 @@ class PostFilterRulesRecyclerViewAdapter(
      * the two kinds apart. The way out is the same either way: delete the wildcard rule, which the
      * summary says, and the feeds become editable again.
      */
-    private val isPinnedToContinuumAll: Boolean
+    private val isPinnedToRedditJrAll: Boolean
         get() = PostFilterRuleKinds.hasWildcard(rules)
 
     /** Display-only: which header chips the user has checked. Never affects what gets saved. */
@@ -264,7 +264,7 @@ class PostFilterRulesRecyclerViewAdapter(
     // region Applies to
 
     private fun bindUsageChips(binding: ItemPostFilterAppliesToBinding) {
-        val locked = isPinnedToContinuumAll
+        val locked = isPinnedToRedditJrAll
         binding.summaryTextViewItemPostFilterAppliesTo.setText(
             if (locked) R.string.post_filter_applies_to_summary_locked else R.string.post_filter_applies_to_summary
         )

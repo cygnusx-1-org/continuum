@@ -535,7 +535,6 @@
     <string name="settings_open_source_title">"Otvoreni kod"</string>
     <string name="settings_open_source_summary">"Ostavi zvijezdicu na Githubu ako Tebi se sviđa ova aplikacija"</string>
     <string name="settings_email_title">"E-pošta"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Reddit račun"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1448,7 +1447,7 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="post_filter_rule_error_asterisk">"Odaberi vrstu podudaranja umjesto upisivanja *."</string>
     <string name="post_filter_match_explanation">"Podudaranje koje nije 'Točno' primjenjuje se samo na r/%1$s, tako da široka riječ ne može isprazniti vaše druge feedove. Bit će dodan u 'Odnosi se na' za vas."</string>
     <string name="post_filter_applies_to_summary_locked">"Pravilo 'Počinje s', 'Završava s' ili 'Sadrži' radi samo na r/ContinuumAll, pa je ovaj filtar prikvačen na njega. Ukloni to pravilo da odabereš druge feedove."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s dodan u 'Odnosi se na'"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s dodan u 'Odnosi se na'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blokirao %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits iz kojih su ovo pravilo sakrile objave. Ovaj popis ne možeš znati unaprijed, stoga se sastavlja dok pregledavate."</string>
@@ -1618,7 +1617,7 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Dopuštenje za obavijesti nije dodijeljeno"</string>
     <string name="go_to_settings">"Postavke"</string>
-    <string name="welcome_to_continuum">"Dobro došli u Reddit Jr., vaš pristup potpuno novoj dimenziji Reddit pregledavanja!"</string>
+    <string name="welcome_to_redditjr">"Dobro došli u Reddit Jr., vaš pristup potpuno novoj dimenziji Reddit pregledavanja!"</string>
     <string name="subscription_prompt">"Prije nego što zaroniš u bezbrojne mogućnosti koje ova aplikacija nudi,\n želim biti otvoren i transparentan u vezi značajne promjene koju sam implementirao kako bih vam osigurao najbolju moguću uslugu.\n \n\nOd sada će vam trebati mjesečna pretplata za pristup Reddit API unutar Reddit Jr. i\n to je zato što je Reddit počeo naplaćivati pristup API od 1. srpnja 2023.\n \n\nSve razine rade isto. Ako želiš podržati Reddit Jr., možeš se pretplatiti na višu razinu.\n Većina novca s najniže razine ide na Reddit.\n    "</string>
     <string name="monthly">"mjesečno"</string>
     <string name="yearly">"Godišnje"</string>

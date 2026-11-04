@@ -359,14 +359,14 @@ if (githubPropertiesFile.exists()) {
                 .getOrElse("")).trim() ?: "Automated release of version ${android.defaultConfig.versionName ?: "default-version"}"
 
         // RELEASE_VARIANT (set by scripts/release-github.sh) selects where the release is
-        // published: "beta" targets the separate continuum-beta repo with the beta APKs;
-        // anything else is a normal release to the continuum repo.
+        // published: "beta" targets the separate redditjr-beta repo with the beta APKs;
+        // anything else is a normal release to the redditjr repo.
         def isBeta = (System.getenv("RELEASE_VARIANT") ?: "release") == "beta"
         def apkDirName = isBeta ? "beta" : "release"
 
         token = githubProperties["githubToken"]
-        owner = "cygnusx-1-org"
-        repo = isBeta ? "continuum-beta" : "continuum"
+        owner = "jayblah"
+        repo = isBeta ? "redditjr-beta" : "redditjr"
         tagName = android.defaultConfig.versionName ?: "default-version"
         targetCommitish = "master"
         releaseName = "Release ${android.defaultConfig.versionName ?: "default-version"}"
@@ -459,7 +459,7 @@ dependencies {
     // classpath (debug-scoping this would break release/beta/minifiedRelease compilation).
     compileOnly 'org.jspecify:jspecify:1.0.0'
 
-    // Continuum's own lint checks, loaded into every lint run for this module. Currently just
+    // Reddit Jr.'s own lint checks, loaded into every lint run for this module. Currently just
     // InconsistentLayoutVariantIds, which covers the ViewBinding-shaped gap in AGP's built-in
     // InconsistentLayout that let issue #369 ship. See lint-checks/build.gradle.
     lintChecks project(':lint-checks')

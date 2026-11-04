@@ -608,7 +608,6 @@
     <string name="settings_open_source_title">Open Source</string>
     <string name="settings_open_source_summary">Star it on Github if you like this app</string>
     <string name="settings_email_title">Email</string>
-    <string name="settings_email_summary">continuum@cygnusx-1.org</string>
     <string name="settings_reddit_account_title">Reddit Account</string>
     <string name="settings_reddit_account_summary">u/edgan</string>
     <string name="settings_subreddit_title">Subreddit</string>
@@ -1651,7 +1650,7 @@
     <string name="post_filter_rule_refused_wildcard_filter_named">%1$s holds nothing but \'Starts with\', \'Ends with\' and \'Contains\' subreddit rules. Add this to a different filter.</string>
     <string name="post_filter_rule_refused_mixed_filter">This filter holds both \'Starts with\', \'Ends with\' or \'Contains\' subreddit rules and ordinary ones. Remove one kind before adding more.</string>
     <string name="post_filter_applies_to_summary_locked">A \'Starts with\', \'Ends with\' or \'Contains\' rule only runs on r/ContinuumAll, so this filter is pinned to it. Remove that rule to choose other feeds.</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">r/%1$s added to \'Applies to\'</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">r/%1$s added to \'Applies to\'</string>
 
     <!-- What a rule actually blocked -->
     <string name="subreddit_name_prefixed">r/%1$s</string>
@@ -1883,7 +1882,7 @@
     <string name="denied_notification_permission">Notification permission is not granted</string>
     <string name="go_to_settings">Settings</string>
 
-    <string name="welcome_to_continuum">Welcome to Reddit Jr., your gateway to a whole new dimension of Reddit browsing!</string>
+    <string name="welcome_to_redditjr">Welcome to Reddit Jr., your gateway to a whole new dimension of Reddit browsing!</string>
     <string name="subscription_prompt">Before you dive into the countless possibilities this app offers,
         I want to be upfront and transparent about a significant change I\'ve implemented to ensure the best possible service for you.
         \n\nFrom now on, you will need a monthly subscription to access the Reddit API within Reddit Jr. and

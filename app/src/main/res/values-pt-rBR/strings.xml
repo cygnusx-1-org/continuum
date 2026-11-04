@@ -545,7 +545,6 @@ Toque para tentar de novo."</string>
     <string name="settings_open_source_title">"Código aberto"</string>
     <string name="settings_open_source_summary">"Favorite-o no GitHub se você gosta deste aplicativo"</string>
     <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Conta Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1467,7 +1466,7 @@ Ela não está doente ou algo assim, mas definitivamente poderia melhorar."</str
     <string name="post_filter_rule_error_asterisk">"Escolha um tipo de correspondência em vez de digitar *."</string>
     <string name="post_filter_match_explanation">"Uma correspondência diferente de 'Exato' só se aplica a r/%1$s, portanto, uma palavra ampla não pode esvaziar seus outros feeds. Ele será adicionado a 'Aplica-se a' para você."</string>
     <string name="post_filter_applies_to_summary_locked">"Uma regra 'Começa com', 'Termina com' ou 'Contém' só é executada em r/ContinuumAll, portanto, este filtro está fixado nela. Remova essa regra para escolher outros feeds."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s adicionado a 'Aplica-se a'"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s adicionado a 'Aplica-se a'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"bloqueado por %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits dos quais esta regra ocultou postagens. Você não pode conhecer essa lista com antecedência, então ela é construída conforme você navega."</string>
@@ -1641,7 +1640,7 @@ Toque para tentar novamente."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"A permissão para notificação não foi concedida"</string>
     <string name="go_to_settings">"Configurações"</string>
-    <string name="welcome_to_continuum">"Bem-vindo ao Reddit Jr., sua porta de entrada para uma nova dimensão de navegação Reddit!"</string>
+    <string name="welcome_to_redditjr">"Bem-vindo ao Reddit Jr., sua porta de entrada para uma nova dimensão de navegação Reddit!"</string>
     <string name="subscription_prompt">"Antes de mergulhar nas inúmeras possibilidades que este aplicativo oferece,\n Quero ser franco e transparente sobre uma mudança significativa que implementei para garantir o melhor serviço possível para você.\n \n\nA partir de agora, você precisará de uma assinatura mensal para acessar o Reddit API dentro de Reddit Jr. e \n isso ocorre porque Reddit começou a cobrar pelo acesso API desde 1º de julho de 2023.\n \n\nTodas as camadas funcionam da mesma forma. Se quiser apoiar Reddit Jr., você pode se inscrever em um nível superior.\n A maior parte do dinheiro do nível mais baixo vai para Reddit.\n    "</string>
     <string name="monthly">"Mensalmente"</string>
     <string name="yearly">"Anualmente"</string>

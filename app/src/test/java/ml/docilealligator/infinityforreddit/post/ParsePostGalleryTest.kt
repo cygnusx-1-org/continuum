@@ -28,7 +28,7 @@ import org.robolectric.annotation.Config
  * a video, the missing `mp4` key threw, and the post lost its whole gallery and was shown as a text
  * post with no images (issue #459).
  *
- * The two `failed_` posts are galleries whose images were leased with a `filepath`, as Continuum
+ * The two `failed_` posts are galleries whose images were leased with a `filepath`, as Reddit Jr.
  * used to lease them. The listing reports every item as just `{"status": "failed"}` although
  * Reddit's GraphQL calls them VALID and i.redd.it serves them (failed_png's are `.png`,
  * failed_no_thumbnail's `.jpeg`); see [FailedRedditMedia].

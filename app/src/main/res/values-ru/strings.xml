@@ -543,7 +543,6 @@
     <string name="settings_open_source_title">"Открытый исходный код"</string>
     <string name="settings_open_source_summary">"Оцени его на Github, если тебе нравится это приложение"</string>
     <string name="settings_email_title">"Электронная почта"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Аккаунт Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Сабреддит"</string>
@@ -1466,7 +1465,7 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_asterisk">"Выбери тип соответствия вместо ввода *."</string>
     <string name="post_filter_match_explanation">"Соответствие, отличное от «Точный», применяется только к r/%1$s, поэтому широкое слово не может очистить другие каналы. Он будет добавлен в раздел «Применяется к» для тебя."</string>
     <string name="post_filter_applies_to_summary_locked">"Правило «Начинается с», «Заканчивается на» или «Содержит» работает только на r/ContinuumAll, поэтому этот фильтр закреплен за ним. Удали это правило, чтобы выбрать другие каналы."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s добавлено в «Применяется к»"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s добавлено в «Применяется к»"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Заблокировано %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Субреддиты, из которых это правило скрыло сообщения. ты не можешь знать этот список заранее, поэтому он формируется по мере твоего просмотра."</string>
@@ -1641,7 +1640,7 @@ https://play.google.com/store/"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Разрешение на отображение уведомлений не предоставлено"</string>
     <string name="go_to_settings">"Настройки"</string>
-    <string name="welcome_to_continuum">"Добро пожаловать в Reddit Jr., твои ворота в совершенно новое измерение просмотра Reddit!"</string>
+    <string name="welcome_to_redditjr">"Добро пожаловать в Reddit Jr., твои ворота в совершенно новое измерение просмотра Reddit!"</string>
     <string name="subscription_prompt">"Прежде чем ты погрузишься в бесчисленные возможности этого приложения, \n я хочу открыто и открыто рассказать о значительных изменениях, которые я внедрил, чтобы обеспечить тебе наилучший сервис. \n \n\nС этого момента тебе потребуется ежемесячная подписка для доступа к Reddit API в течение Reddit Jr. и\n это потому, что Reddit начала взимать плату за доступ к API с 1 июля 2023 года. \n \n\nВсе уровни работают одинаково. Если ты хочешь поддержать Reddit Jr., ты можешь подписаться на более высокий уровень.\n Большая часть денег с самого низкого уровня поступает на Reddit.\n    "</string>
     <string name="monthly">"Ежемесячно"</string>
     <string name="yearly">"Ежегодно"</string>

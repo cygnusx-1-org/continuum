@@ -539,7 +539,6 @@
     <string name="settings_open_source_title">"खुला श्रोत "</string>
     <string name="settings_open_source_summary">"यदि आपको यह एप्प पसंद आई तो Github पर इसे तारांकित करें "</string>
     <string name="settings_email_title">"ई मेल "</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"रैडिट खाता "</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"सबरेडिट"</string>
@@ -1455,7 +1454,7 @@
     <string name="post_filter_rule_error_asterisk">"* टाइप करने के बजाय मिलान प्रकार चुनें।"</string>
     <string name="post_filter_match_explanation">"'सटीक' के अलावा कोई मिलान केवल r/%1$s पर लागू होता है, इसलिए एक व्यापक शब्द आपके अन्य फ़ीड को खाली नहीं कर सकता है। इसे आपके लिए 'पर लागू होता है' में जोड़ दिया जाएगा."</string>
     <string name="post_filter_applies_to_summary_locked">"'से प्रारंभ होता है', 'के साथ समाप्त होता है' या 'शामिल है' नियम केवल r/ContinuumAll पर चलता है, इसलिए यह फ़िल्टर इस पर पिन किया गया है। अन्य फ़ीड चुनने के लिए उस नियम को हटा दें।"</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s 'पर लागू होता है' में जोड़ा गया"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s 'पर लागू होता है' में जोड़ा गया"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"%1$s द्वारा ब्लॉक किया गया"</string>
     <string name="post_filter_blocked_subreddits_summary">"सबरेडिट्स इस नियम से पोस्ट छुपे हुए हैं। आप इस सूची को पहले से नहीं जान सकते, इसलिए यह आपके ब्राउज़ करते ही बन जाती है।"</string>
@@ -1624,7 +1623,7 @@
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"अधिसूचना की अनुमति नहीं दी गई है"</string>
     <string name="go_to_settings">"सेटिंग"</string>
-    <string name="welcome_to_continuum">"Reddit Jr. में आपका स्वागत है, Reddit ब्राउज़िंग के एक बिल्कुल नए आयाम के लिए आपका प्रवेश द्वार!"</string>
+    <string name="welcome_to_redditjr">"Reddit Jr. में आपका स्वागत है, Reddit ब्राउज़िंग के एक बिल्कुल नए आयाम के लिए आपका प्रवेश द्वार!"</string>
     <string name="subscription_prompt">"इससे पहले कि आप इस ऐप द्वारा प्रदान की जाने वाली अनगिनत संभावनाओं के बारे में जानें,\n मैं आपके लिए सर्वोत्तम संभव सेवा सुनिश्चित करने के लिए लागू किए गए एक महत्वपूर्ण बदलाव के बारे में स्पष्ट और पारदर्शी होना चाहता हूं।\n \n\nअब से, आपको Reddit Jr. के भीतर Reddit API तक पहुंचने के लिए मासिक सदस्यता की आवश्यकता होगी। और\n ऐसा इसलिए है क्योंकि Reddit ने 1 जुलाई, 2023 से API एक्सेस के लिए शुल्क लेना शुरू कर दिया है।\n \n\nसभी स्तर समान रूप से काम करते हैं। यदि आप Reddit Jr. का समर्थन करना चाहते हैं, तो आप उच्च स्तर की सदस्यता ले सकते हैं। \n सबसे निचले स्तर से अधिकांश पैसा Reddit को जाता है।\n    "</string>
     <string name="monthly">"मासिक"</string>
     <string name="yearly">"वार्षिक"</string>

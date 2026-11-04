@@ -366,7 +366,7 @@ public class ViewVideoActivity extends AppCompatActivity
 
         Resources resources = getResources();
 
-        // Continuum dropped the "use bottom toolbar in media viewer" option and made the bottom
+        // Reddit Jr. dropped the "use bottom toolbar in media viewer" option and made the bottom
         // bar the default: rotate, share and playback speed live there, so the top toolbar
         // upstream reinstated never shows.
         binding.getToolbar().setVisibility(View.GONE);

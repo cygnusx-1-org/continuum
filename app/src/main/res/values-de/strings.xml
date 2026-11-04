@@ -544,7 +544,6 @@ Tippen für Neuversuch."</string>
     <string name="settings_open_source_title">"Quelloffen"</string>
     <string name="settings_open_source_summary">"Wenn du diese App magst, gib ihr einen Stern auf GitHub"</string>
     <string name="settings_email_title">"E-Mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Reddit-Konto"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1464,7 +1463,7 @@ Sie ist nicht krank oder so, aber sie könnte sich definitiv bessern."</string>
     <string name="post_filter_rule_error_asterisk">"Wähle einen Übereinstimmungstyp, statt * einzugeben."</string>
     <string name="post_filter_match_explanation">"Eine andere Übereinstimmung als „Genau“ gilt nur für r/%1$s, sodass ein breites Wort deine anderen Feeds nicht leeren kann. Sie wird für dich zu „Gilt für“ hinzugefügt."</string>
     <string name="post_filter_applies_to_summary_locked">"Eine Regel „Beginnt mit“, „Endet mit“ oder „Enthält“ läuft nur auf r/ContinuumAll, daher ist dieser Filter daran angeheftet. Entferne diese Regel, um andere Feeds zu wählen."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s hinzugefügt zu „Gilt für“"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s hinzugefügt zu „Gilt für“"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blockiert von %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits, aus denen diese Regel Beiträge ausgeblendet hat. Diese Liste lässt sich nicht im Voraus kennen, daher wird sie beim Stöbern aufgebaut."</string>
@@ -1637,7 +1636,7 @@ Tippe zum Wiederholen."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Benachrichtigungs-Berechtigung nicht erteilt"</string>
     <string name="go_to_settings">"Einstellungen"</string>
-    <string name="welcome_to_continuum">"Willkommen bei Reddit Jr., deinem Tor zu einer ganz neuen Dimension des Reddit-Browsing!"</string>
+    <string name="welcome_to_redditjr">"Willkommen bei Reddit Jr., deinem Tor zu einer ganz neuen Dimension des Reddit-Browsing!"</string>
     <string name="subscription_prompt">"Bevor du in die unzähligen Möglichkeiten eintauchst, die diese App bietet,\n möchte ich offen und transparent über eine bedeutende Änderung sprechen, die ich vorgenommen habe, um dir den bestmöglichen Dienst zu bieten.\n \n\nVon nun an brauchst du ein monatliches Abonnement, um in Reddit Jr. auf die Reddit-API zuzugreifen,\n und das liegt daran, dass Reddit seit dem 1. Juli 2023 Gebühren für den API-Zugriff erhebt.\n \n\nAlle Stufen funktionieren gleich. Wenn du Reddit Jr. unterstützen möchtest, kannst du eine höhere Stufe abonnieren.\n Der größte Teil des Geldes aus der niedrigsten Stufe geht an Reddit.\n    "</string>
     <string name="monthly">"Monatlich"</string>
     <string name="yearly">"Jährlich"</string>

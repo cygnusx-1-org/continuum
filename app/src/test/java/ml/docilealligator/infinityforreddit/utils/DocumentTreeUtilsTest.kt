@@ -52,7 +52,7 @@ class DocumentTreeUtilsTest {
 
     /** The tree a user picks with `ACTION_OPEN_DOCUMENT_TREE`, as it is stored in preferences. */
     private val treeUri: Uri =
-        Uri.parse("content://$EXTERNAL_STORAGE/tree/primary%3ADownload%2FContinuumDL")
+        Uri.parse("content://$EXTERNAL_STORAGE/tree/primary%3ADownload%2FRedditJrDL")
 
     @Before
     fun setUp() {
@@ -203,7 +203,7 @@ class DocumentTreeUtilsTest {
 
     @Test
     fun `listing a directory reads the names out of one query`() {
-        givenChildren("primary:Download/ContinuumDL/pics" to "pics", "…%2Fa.jpg" to "A.jpg")
+        givenChildren("primary:Download/RedditJrDL/pics" to "pics", "…%2Fa.jpg" to "A.jpg")
 
         val names = DocumentTreeUtils.listChildDisplayNamesLowercase(context, directoryUri())
 
@@ -234,8 +234,8 @@ class DocumentTreeUtilsTest {
     @Test
     fun `finding a child addresses the child itself, not the tree it came from`() {
         givenChildren(
-            "primary:Download/ContinuumDL/other" to "other",
-            "primary:Download/ContinuumDL/pics" to "pics"
+            "primary:Download/RedditJrDL/other" to "other",
+            "primary:Download/RedditJrDL/pics" to "pics"
         )
 
         val child = DocumentTreeUtils.findChildDocumentUri(context, directoryUri(), "pics")
@@ -244,16 +244,16 @@ class DocumentTreeUtilsTest {
         // segment is the child's own id. Resolving to the parent here is the failure that made
         // downloads land in the wrong folder with nothing thrown.
         assertEquals(
-            "content://$EXTERNAL_STORAGE/tree/primary%3ADownload%2FContinuumDL" +
-                "/document/primary%3ADownload%2FContinuumDL%2Fpics",
+            "content://$EXTERNAL_STORAGE/tree/primary%3ADownload%2FRedditJrDL" +
+                "/document/primary%3ADownload%2FRedditJrDL%2Fpics",
             child.toString()
         )
-        assertEquals("primary:Download/ContinuumDL/pics", DocumentsContract.getDocumentId(child))
+        assertEquals("primary:Download/RedditJrDL/pics", DocumentsContract.getDocumentId(child))
     }
 
     @Test
     fun `finding a child is case-sensitive and answers null when there is no match`() {
-        givenChildren("primary:Download/ContinuumDL/pics" to "pics")
+        givenChildren("primary:Download/RedditJrDL/pics" to "pics")
 
         assertNull(DocumentTreeUtils.findChildDocumentUri(context, directoryUri(), "Pics"))
         assertNull(DocumentTreeUtils.findChildDocumentUri(context, directoryUri(), "aww"))
