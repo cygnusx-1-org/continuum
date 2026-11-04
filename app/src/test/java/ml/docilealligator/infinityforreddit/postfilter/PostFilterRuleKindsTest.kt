@@ -8,7 +8,7 @@ import org.junit.Test
  * A filter holds wildcard subreddit rules or ordinary ones, never both.
  *
  * Issue #426: a filter of 1008 exact subreddit rules and 42 title words took one 'Contains' rule
- * and was pinned to r/ContinuumAll for it — every other rule in it silently stopped running on
+ * and was pinned to r/RedditJrAll for it — every other rule in it silently stopped running on
  * Home, and the "Applies to" controls that could have said so were locked away by the same pin.
  */
 class PostFilterRuleKindsTest {
@@ -106,7 +106,7 @@ class PostFilterRuleKindsTest {
 
     @Test
     fun `a mixed filter is pinned too`() {
-        // Its wildcard rule runs on r/ContinuumAll and nowhere else, so the feeds stay locked until
+        // Its wildcard rule runs on r/RedditJrAll and nowhere else, so the feeds stay locked until
         // that rule is deleted — the same way out as any other pinned filter.
         assertTrue(PostFilterRuleKinds.hasWildcard(listOf(contains("india"), titleWord("spoiler"))))
     }

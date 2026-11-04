@@ -46,9 +46,11 @@ public interface PostFilterDao {
 
     @Query("SELECT * FROM post_filter WHERE post_filter.username = :username AND post_filter.name IN " +
             "(SELECT post_filter_usage.name FROM post_filter_usage WHERE post_filter_usage.username = :username " +
-            "AND ((usage = :usage AND name_of_usage = :nameOfUsage COLLATE NOCASE) " +
+            "AND ((usage = :usage AND (name_of_usage = :nameOfUsage COLLATE NOCASE " +
+            "OR name_of_usage = :alternateNameOfUsage COLLATE NOCASE)) " +
             "OR (usage = :usage AND name_of_usage = '--')))")
-    List<PostFilter> getValidPostFilters(int usage, @Nullable String nameOfUsage, String username);
+    List<PostFilter> getValidPostFilters(int usage, @Nullable String nameOfUsage,
+                                         @Nullable String alternateNameOfUsage, String username);
 
     @Transaction
     @Query("SELECT * FROM post_filter WHERE username = :username ORDER BY name")

@@ -6,7 +6,9 @@
 ============
 * Renamed the remaining Continuum names in the code: the lint checks, the post filter code, the comments, the release scripts and the Gradle release settings
 * The login redirect entry for custom API keys is now `redditjr://localhost` instead of `continuum://localhost`. The built-in RedReader login is unchanged
-* The `r/ContinuumAll` feed keeps its name for now, because it is a real subreddit on Reddit and a new name would break its About tab and Subscribe button. See TODO.md
+* Renamed the `r/ContinuumAll` feed to `r/RedditJrAll`. Saved post filters are moved to the new name, and the old name still opens the same feed
+* Decoder: a link with a trailing slash, such as `https://link.me/name/`, now searches for `name` instead of the whole link
+* Decoder buttons are now `TITLE`, `ALL` and `SOCIALS`
 
 8.3.3.9.1.16 / 2026-11-3
 ============

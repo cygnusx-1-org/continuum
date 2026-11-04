@@ -1446,7 +1446,7 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Koristi najmanje %1$d znakova. Kraće riječi odgovaraju daleko većem broju subreditova nego što biste očekivali."</string>
     <string name="post_filter_rule_error_asterisk">"Odaberi vrstu podudaranja umjesto upisivanja *."</string>
     <string name="post_filter_match_explanation">"Podudaranje koje nije 'Točno' primjenjuje se samo na r/%1$s, tako da široka riječ ne može isprazniti vaše druge feedove. Bit će dodan u 'Odnosi se na' za vas."</string>
-    <string name="post_filter_applies_to_summary_locked">"Pravilo 'Počinje s', 'Završava s' ili 'Sadrži' radi samo na r/ContinuumAll, pa je ovaj filtar prikvačen na njega. Ukloni to pravilo da odabereš druge feedove."</string>
+    <string name="post_filter_applies_to_summary_locked">"Pravilo 'Počinje s', 'Završava s' ili 'Sadrži' radi samo na r/RedditJrAll, pa je ovaj filtar prikvačen na njega. Ukloni to pravilo da odabereš druge feedove."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s dodan u 'Odnosi se na'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blokirao %1$s"</string>

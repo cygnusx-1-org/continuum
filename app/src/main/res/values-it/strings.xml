@@ -1461,7 +1461,7 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Utilizzare almeno %1$d caratteri. Le parole più brevi corrispondono a molti più subreddit di quanto ti aspetteresti."</string>
     <string name="post_filter_rule_error_asterisk">"Scegli un tipo di corrispondenza invece di digitare *."</string>
     <string name="post_filter_match_explanation">"Una corrispondenza diversa da \"Esatto\" si applica solo su r/%1$s, quindi una parola generica non può svuotare gli altri feed. Verrà aggiunto a \"Si applica a\" per te."</string>
-    <string name="post_filter_applies_to_summary_locked">"Una regola \"Inizia con\", \"Termina con\" o \"Contiene\" viene eseguita solo su r/ContinuumAll, quindi questo filtro è bloccato su di esso. Rimuovi quella regola per scegliere altri feed."</string>
+    <string name="post_filter_applies_to_summary_locked">"Una regola \"Inizia con\", \"Termina con\" o \"Contiene\" viene eseguita solo su r/RedditJrAll, quindi questo filtro è bloccato su di esso. Rimuovi quella regola per scegliere altri feed."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s aggiunto a 'Si applica a'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Bloccato da %1$s"</string>

@@ -402,7 +402,7 @@ public class PostViewModel extends ViewModel {
      * subreddit that pinned it, so the flag alone would also exempt a post pinned somewhere else
      * entirely. Hence the rest of the test: Home and a multireddit are their own post types, and the
      * two {@link PostType#SUBREDDIT} feeds carrying subreddits the reader never opened are ruled out
-     * separately -- a firehose (r/all, r/popular, ContinuumAll) by name, and a random tab by {@link
+     * separately -- a firehose (r/all, r/popular, RedditJrAll) by name, and a random tab by {@link
      * #randomSubredditFeed}, whose {@link #name} is whichever subreddit the roll landed on. Each of
      * those labels every post with its own subreddit and draws no pin, so a read post lingering
      * there would have nothing on screen to explain it.

@@ -1451,7 +1451,7 @@ Az alap az indigó amoled téma"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Legalább %1$d karaktert használj. A rövidebb szavak sokkal több alredditnek felelnek meg, mint azt várná."</string>
     <string name="post_filter_rule_error_asterisk">"A * beírása helyett válassz egyezési típust."</string>
     <string name="post_filter_match_explanation">"A „Pontosan”-tól eltérő egyezés csak a r/%1$s esetén érvényes, ezért egy széles szó nem ürítheti ki a többi hírcsatornát. A rendszer hozzáadja az „Érvényes” közé."</string>
-    <string name="post_filter_applies_to_summary_locked">"A „Ezzel kezdődik”, „Ezzel végződik” vagy „Tartalmaz” szabály csak r/ContinuumAll esetén fut, ezért ez a szűrő erre van rögzítve. Más hírcsatornák kiválasztásához távolítsd el ezt a szabályt."</string>
+    <string name="post_filter_applies_to_summary_locked">"A „Ezzel kezdődik”, „Ezzel végződik” vagy „Tartalmaz” szabály csak r/RedditJrAll esetén fut, ezért ez a szűrő erre van rögzítve. Más hírcsatornák kiválasztásához távolítsd el ezt a szabályt."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s hozzáadva az „Érvényes” listához"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Letiltotta: %1$s"</string>

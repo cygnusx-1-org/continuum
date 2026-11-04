@@ -1455,7 +1455,7 @@
     <string name="post_filter_rule_error_wildcard_too_short">"Χρησιμοποίησε τουλάχιστον %1$d χαρακτήρες. Οι πιο σύντομες λέξεις ταιριάζουν με πολύ περισσότερα subreddits από ό,τι θα περίμενες."</string>
     <string name="post_filter_rule_error_asterisk">"Επίλεξε έναν τύπο αντιστοίχισης αντί να πληκτρολογήσεις *."</string>
     <string name="post_filter_match_explanation">"Μια αντιστοίχιση διαφορετική από την \"Ακριβώς\" ισχύει μόνο στο r/%1$s, επομένως μια ευρεία λέξη δεν μπορεί να αδειάσει τις άλλες ροές σου. Θα προστεθεί στο \"Ισχύει για\" για εσάς."</string>
-    <string name="post_filter_applies_to_summary_locked">"Ένας κανόνας \"Ξεκινά με\", \"Τελειώνει με\" ή \"Περιέχει\" εκτελείται μόνο στο r/ContinuumAll, επομένως αυτό το φίλτρο είναι καρφιτσωμένο σε αυτό. Κατάργησε αυτόν τον κανόνα για να επιλέξεις άλλες ροές."</string>
+    <string name="post_filter_applies_to_summary_locked">"Ένας κανόνας \"Ξεκινά με\", \"Τελειώνει με\" ή \"Περιέχει\" εκτελείται μόνο στο r/RedditJrAll, επομένως αυτό το φίλτρο είναι καρφιτσωμένο σε αυτό. Κατάργησε αυτόν τον κανόνα για να επιλέξεις άλλες ροές."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"Το r/%1$s προστέθηκε στο \"Ισχύει για\""</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Αποκλείστηκε από %1$s"</string>

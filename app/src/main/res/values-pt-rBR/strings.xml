@@ -1465,7 +1465,7 @@ Ela não está doente ou algo assim, mas definitivamente poderia melhorar."</str
     <string name="post_filter_rule_error_wildcard_too_short">"Use pelo menos %1$d caracteres. Palavras mais curtas correspondem a muito mais subreddits do que você esperaria."</string>
     <string name="post_filter_rule_error_asterisk">"Escolha um tipo de correspondência em vez de digitar *."</string>
     <string name="post_filter_match_explanation">"Uma correspondência diferente de 'Exato' só se aplica a r/%1$s, portanto, uma palavra ampla não pode esvaziar seus outros feeds. Ele será adicionado a 'Aplica-se a' para você."</string>
-    <string name="post_filter_applies_to_summary_locked">"Uma regra 'Começa com', 'Termina com' ou 'Contém' só é executada em r/ContinuumAll, portanto, este filtro está fixado nela. Remova essa regra para escolher outros feeds."</string>
+    <string name="post_filter_applies_to_summary_locked">"Uma regra 'Começa com', 'Termina com' ou 'Contém' só é executada em r/RedditJrAll, portanto, este filtro está fixado nela. Remova essa regra para escolher outros feeds."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s adicionado a 'Aplica-se a'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"bloqueado por %1$s"</string>

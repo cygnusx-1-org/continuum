@@ -1464,7 +1464,7 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Используй не менее %1$d символов. Более короткие слова соответствуют гораздо большему количеству субреддитов, чем можно было бы ожидать."</string>
     <string name="post_filter_rule_error_asterisk">"Выбери тип соответствия вместо ввода *."</string>
     <string name="post_filter_match_explanation">"Соответствие, отличное от «Точный», применяется только к r/%1$s, поэтому широкое слово не может очистить другие каналы. Он будет добавлен в раздел «Применяется к» для тебя."</string>
-    <string name="post_filter_applies_to_summary_locked">"Правило «Начинается с», «Заканчивается на» или «Содержит» работает только на r/ContinuumAll, поэтому этот фильтр закреплен за ним. Удали это правило, чтобы выбрать другие каналы."</string>
+    <string name="post_filter_applies_to_summary_locked">"Правило «Начинается с», «Заканчивается на» или «Содержит» работает только на r/RedditJrAll, поэтому этот фильтр закреплен за ним. Удали это правило, чтобы выбрать другие каналы."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s добавлено в «Применяется к»"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Заблокировано %1$s"</string>

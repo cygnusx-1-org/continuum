@@ -1448,7 +1448,7 @@
     <string name="post_filter_rule_error_wildcard_too_short">"குறைந்தது %1$d எழுத்துகளைப் பயன்படுத்தவும். நீங்கள் எதிர்பார்ப்பதை விட குறுகிய சொற்கள் அதிக சப்ரெடிட்களுடன் பொருந்துகின்றன."</string>
     <string name="post_filter_rule_error_asterisk">"* தட்டச்சு செய்வதற்குப் பதிலாக பொருத்த வகையைத் தேர்ந்தெடுக்கவும்."</string>
     <string name="post_filter_match_explanation">"'துல்லியமானது' தவிர வேறு ஒரு பொருத்தம் r/%1$s இல் மட்டுமே பொருந்தும், எனவே ஒரு பரந்த வார்த்தையால் உங்கள் மற்ற ஊட்டங்களை காலி செய்ய முடியாது. இது உங்களுக்காக 'இதற்குப் பொருந்தும்' என்பதில் சேர்க்கப்படும்."</string>
-    <string name="post_filter_applies_to_summary_locked">"A 'இதனுடன் தொடங்குகிறது', 'உடன் முடிகிறது' அல்லது 'கொண்டுள்ளது' விதி r/ContinuumAll இல் மட்டுமே இயங்கும், எனவே இந்த வடிப்பான் அதில் பின் செய்யப்பட்டுள்ளது. பிற ஊட்டங்களைத் தேர்ந்தெடுக்க அந்த விதியை அகற்றவும்."</string>
+    <string name="post_filter_applies_to_summary_locked">"A 'இதனுடன் தொடங்குகிறது', 'உடன் முடிகிறது' அல்லது 'கொண்டுள்ளது' விதி r/RedditJrAll இல் மட்டுமே இயங்கும், எனவே இந்த வடிப்பான் அதில் பின் செய்யப்பட்டுள்ளது. பிற ஊட்டங்களைத் தேர்ந்தெடுக்க அந்த விதியை அகற்றவும்."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s 'இதற்குப் பொருந்தும்' என்பதில் சேர்க்கப்பட்டது"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"%1$s ஆல் தடுக்கப்பட்டது"</string>

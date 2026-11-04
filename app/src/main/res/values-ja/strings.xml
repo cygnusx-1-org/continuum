@@ -1457,7 +1457,7 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"少なくとも %1$d 文字を使用してください。短い単語は、予想よりもはるかに多くのサブレディットに一致します。"</string>
     <string name="post_filter_rule_error_asterisk">"* を入力する代わりに、一致タイプを選択します。"</string>
     <string name="post_filter_match_explanation">"「完全一致」以外の一致は r/%1$s にのみ適用されるため、広範な単語で他のフィードを空にすることはできません。 「に適用されます」に追加されます。"</string>
-    <string name="post_filter_applies_to_summary_locked">"「次で始まる」、「次で終わる」、または「次を含む」ルールは r/ContinuumAll でのみ実行されるため、このフィルターはそれに固定されます。他のフィードを選択するには、そのルールを削除してください。"</string>
+    <string name="post_filter_applies_to_summary_locked">"「次で始まる」、「次で終わる」、または「次を含む」ルールは r/RedditJrAll でのみ実行されるため、このフィルターはそれに固定されます。他のフィードを選択するには、そのルールを削除してください。"</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s が「に適用されます」に追加されました"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"%1$s によってブロックされました"</string>

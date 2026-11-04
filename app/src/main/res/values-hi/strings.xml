@@ -1453,7 +1453,7 @@
     <string name="post_filter_rule_error_wildcard_too_short">"कम से कम %1$d अक्षर का प्रयोग करें। छोटे शब्द आपकी अपेक्षा से कहीं अधिक सबरेडिट से मेल खाते हैं।"</string>
     <string name="post_filter_rule_error_asterisk">"* टाइप करने के बजाय मिलान प्रकार चुनें।"</string>
     <string name="post_filter_match_explanation">"'सटीक' के अलावा कोई मिलान केवल r/%1$s पर लागू होता है, इसलिए एक व्यापक शब्द आपके अन्य फ़ीड को खाली नहीं कर सकता है। इसे आपके लिए 'पर लागू होता है' में जोड़ दिया जाएगा."</string>
-    <string name="post_filter_applies_to_summary_locked">"'से प्रारंभ होता है', 'के साथ समाप्त होता है' या 'शामिल है' नियम केवल r/ContinuumAll पर चलता है, इसलिए यह फ़िल्टर इस पर पिन किया गया है। अन्य फ़ीड चुनने के लिए उस नियम को हटा दें।"</string>
+    <string name="post_filter_applies_to_summary_locked">"'से प्रारंभ होता है', 'के साथ समाप्त होता है' या 'शामिल है' नियम केवल r/RedditJrAll पर चलता है, इसलिए यह फ़िल्टर इस पर पिन किया गया है। अन्य फ़ीड चुनने के लिए उस नियम को हटा दें।"</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s 'पर लागू होता है' में जोड़ा गया"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"%1$s द्वारा ब्लॉक किया गया"</string>

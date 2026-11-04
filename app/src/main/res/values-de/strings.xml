@@ -1462,7 +1462,7 @@ Sie ist nicht krank oder so, aber sie könnte sich definitiv bessern."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Verwende mindestens %1$d Zeichen. Kürzere Wörter treffen auf weitaus mehr Subreddits zu, als du erwarten würdest."</string>
     <string name="post_filter_rule_error_asterisk">"Wähle einen Übereinstimmungstyp, statt * einzugeben."</string>
     <string name="post_filter_match_explanation">"Eine andere Übereinstimmung als „Genau“ gilt nur für r/%1$s, sodass ein breites Wort deine anderen Feeds nicht leeren kann. Sie wird für dich zu „Gilt für“ hinzugefügt."</string>
-    <string name="post_filter_applies_to_summary_locked">"Eine Regel „Beginnt mit“, „Endet mit“ oder „Enthält“ läuft nur auf r/ContinuumAll, daher ist dieser Filter daran angeheftet. Entferne diese Regel, um andere Feeds zu wählen."</string>
+    <string name="post_filter_applies_to_summary_locked">"Eine Regel „Beginnt mit“, „Endet mit“ oder „Enthält“ läuft nur auf r/RedditJrAll, daher ist dieser Filter daran angeheftet. Entferne diese Regel, um andere Feeds zu wählen."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s hinzugefügt zu „Gilt für“"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blockiert von %1$s"</string>

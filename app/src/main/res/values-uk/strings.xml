@@ -1465,7 +1465,7 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Використовуй щонайменше %1$d символів. Коротші слова збігаються з набагато більшою кількістю субредітів, ніж ти очікуєш."</string>
     <string name="post_filter_rule_error_asterisk">"Вибери тип відповідності замість введення *."</string>
     <string name="post_filter_match_explanation">"Збіг, відмінний від \"Точно\", застосовується лише до r/%1$s, тому широке слово не може спорожнити інші канали. Його буде додано до списку \"Застосовується до\"."</string>
-    <string name="post_filter_applies_to_summary_locked">"Правило «Починається з», «Закінчується на» або «Містить» працює лише на r/ContinuumAll, тому цей фільтр закріплено за ним. Видали це правило, щоб вибрати інші канали."</string>
+    <string name="post_filter_applies_to_summary_locked">"Правило «Починається з», «Закінчується на» або «Містить» працює лише на r/RedditJrAll, тому цей фільтр закріплено за ним. Видали це правило, щоб вибрати інші канали."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s додано до \"Застосовується до\""</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Заблоковано %1$s"</string>

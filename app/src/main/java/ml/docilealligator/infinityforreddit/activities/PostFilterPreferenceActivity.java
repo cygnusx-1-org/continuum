@@ -258,7 +258,7 @@ public class PostFilterPreferenceActivity extends BaseActivity {
         for (FilterRule rule : newRules) {
             // "Add to post filter" only ever produces whole names, so a wildcard filter can take
             // none of them. Mixing the two kinds is what pins an otherwise ordinary filter to
-            // r/ContinuumAll and leaves the rest of it inert everywhere else (issue #426).
+            // r/RedditJrAll and leaves the rest of it inert everywhere else (issue #426).
             if (!PostFilterRuleKinds.accepts(rules, rule)) {
                 String message = PostFilterRuleKinds.isMixed(rules)
                         ? getString(R.string.post_filter_rule_refused_mixed_filter)

@@ -1457,7 +1457,7 @@ Nie jest chora ani nic, ale na pewno może stać się lepsza."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Użyj co najmniej %1$d znaków. Krótsze słowa pasują do znacznie większej liczby subredditów, niż można by się spodziewać."</string>
     <string name="post_filter_rule_error_asterisk">"Wybierz typ dopasowania zamiast wpisywać *."</string>
     <string name="post_filter_match_explanation">"Dopasowanie inne niż „Dokładnie” ma zastosowanie tylko w r/%1$s, więc szerokie słowo nie może opróżnić pozostałych kanałów. Zostanie on dodany do sekcji „Dotyczy”."</string>
-    <string name="post_filter_applies_to_summary_locked">"Reguły „Zaczyna się od”, „Kończy się na” lub „Zawiera” działają tylko na r/ContinuumAll, więc ten filtr jest do niej przypięty. Usuń tę regułę, aby wybrać inne kanały."</string>
+    <string name="post_filter_applies_to_summary_locked">"Reguły „Zaczyna się od”, „Kończy się na” lub „Zawiera” działają tylko na r/RedditJrAll, więc ten filtr jest do niej przypięty. Usuń tę regułę, aby wybrać inne kanały."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s dodano do „Dotyczy”"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Zablokowany przez %1$s"</string>

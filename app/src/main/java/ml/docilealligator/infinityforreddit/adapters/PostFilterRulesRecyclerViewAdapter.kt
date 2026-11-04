@@ -113,7 +113,7 @@ class PostFilterRulesRecyclerViewAdapter(
     private var blockedCounts: Map<String, Int> = emptyMap()
 
     /**
-     * A wildcard subreddit rule only ever runs on r/ContinuumAll, so a filter holding one is pinned
+     * A wildcard subreddit rule only ever runs on r/RedditJrAll, so a filter holding one is pinned
      * to that feed alone. Letting it also apply to Home would produce a filter that is half inert
      * there, with nothing on screen to say which half.
      *
@@ -297,7 +297,7 @@ class PostFilterRulesRecyclerViewAdapter(
             chip.text = label
             // While locked the feed can be neither removed nor renamed: with "Add feed" gone there
             // would be no way to put it back short of deleting the rules that caused the lock, which
-            // is the trap issue #426 was reported from — r/ContinuumAll edited to something else,
+            // is the trap issue #426 was reported from — r/RedditJrAll edited to something else,
             // and then nothing on screen to edit it back with.
             chip.isCloseIconVisible = !locked
             chip.setCloseIconContentDescription(

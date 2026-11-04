@@ -1450,7 +1450,7 @@ Basé sur le thème sombre Indigo"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Utilisez au moins %1$d caractères. Les mots plus courts correspondent à beaucoup plus de subreddits que prévu."</string>
     <string name="post_filter_rule_error_asterisk">"Choisissez un type de correspondance au lieu de saisir *."</string>
     <string name="post_filter_match_explanation">"Une correspondance autre que « Exact » ne s\'applique que sur r/%1$s, donc un mot large ne peut pas vider tes autres flux. Il sera ajouté à « S\'applique à » pour toi."</string>
-    <string name="post_filter_applies_to_summary_locked">"Une règle « Commence par », « Se termine par » ou « Contient » ne s'exécute que sur r/ContinuumAll, ce filtre y est donc épinglé. Supprimez cette règle pour choisir d’autres flux."</string>
+    <string name="post_filter_applies_to_summary_locked">"Une règle « Commence par », « Se termine par » ou « Contient » ne s'exécute que sur r/RedditJrAll, ce filtre y est donc épinglé. Supprimez cette règle pour choisir d’autres flux."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s ajouté à « S'applique à »"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Bloqué par %1$s"</string>

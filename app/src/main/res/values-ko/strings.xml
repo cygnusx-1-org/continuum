@@ -1450,7 +1450,7 @@
     <string name="post_filter_rule_error_wildcard_too_short">"최소 %1$d 문자를 사용하세요. 짧은 단어는 예상보다 훨씬 더 많은 하위 레딧과 일치합니다."</string>
     <string name="post_filter_rule_error_asterisk">"*를 입력하는 대신 일치 유형을 선택하세요."</string>
     <string name="post_filter_match_explanation">"'정확함' 이외의 일치는 r/%1$s에만 적용되므로 광범위한 단어는 다른 피드를 비울 수 없습니다. '적용 대상'에 추가됩니다."</string>
-    <string name="post_filter_applies_to_summary_locked">"'다음으로 시작', '다음으로 끝남' 또는 '포함' 규칙은 r/ContinuumAll에서만 실행되므로 이 필터가 여기에 고정되어 있습니다. 다른 피드를 선택하려면 해당 규칙을 삭제하세요."</string>
+    <string name="post_filter_applies_to_summary_locked">"'다음으로 시작', '다음으로 끝남' 또는 '포함' 규칙은 r/RedditJrAll에서만 실행되므로 이 필터가 여기에 고정되어 있습니다. 다른 피드를 선택하려면 해당 규칙을 삭제하세요."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s '적용 대상'에 추가됨"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"가 %1$s에 의해 차단됨"</string>

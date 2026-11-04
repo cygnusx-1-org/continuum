@@ -1464,7 +1464,7 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="post_filter_rule_error_wildcard_too_short">"Folosește cel puțin %1$d caractere. Cuvintele mai scurte se potrivesc cu mult mai multe subreddite decât te-ai aștepta."</string>
     <string name="post_filter_rule_error_asterisk">"Alege un tip de potrivire în loc să introduci *."</string>
     <string name="post_filter_match_explanation">"O potrivire diferită de „Exact” se aplică numai pe r/%1$s, așa că un cuvânt amplu nu poate goli celelalte fluxuri. Va fi adăugat la „Se aplică la” pentru tine."</string>
-    <string name="post_filter_applies_to_summary_locked">"O regulă „Începe cu”, „Se termină cu” sau „Conține” rulează numai pe r/ContinuumAll, deci acest filtru este fixat pe acesta. Elimină regula pentru a alege alte fluxuri."</string>
+    <string name="post_filter_applies_to_summary_locked">"O regulă „Începe cu”, „Se termină cu” sau „Conține” rulează numai pe r/RedditJrAll, deci acest filtru este fixat pe acesta. Elimină regula pentru a alege alte fluxuri."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s adăugat la „Se aplică la”"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blocat de %1$s"</string>

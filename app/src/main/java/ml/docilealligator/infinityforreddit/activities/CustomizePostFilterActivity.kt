@@ -528,12 +528,12 @@ class CustomizePostFilterActivity :
     }
 
     /**
-     * Scope the filter to r/ContinuumAll, the only feed wildcard subreddit terms run on. Adding it
+     * Scope the filter to r/RedditJrAll, the only feed wildcard subreddit terms run on. Adding it
      * for the user is what makes picking a match type the whole interaction — the alternative was
      * refusing the rule until they went and found the "Applies to" section themselves.
      */
     private fun scopeToRedditJrAll() {
-        // Pin the filter to r/ContinuumAll and drop everything else: a wildcard term is inert on any
+        // Pin the filter to r/RedditJrAll and drop everything else: a wildcard term is inert on any
         // other feed, so leaving Home or a subreddit attached would leave the filter doing only part
         // of what it says on the feeds it lists.
         val alreadyScoped = usages.size == 1 && isRedditJrAllUsage(usages[0])

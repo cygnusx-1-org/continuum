@@ -21,7 +21,7 @@ object PostFilterRuleKinds {
 
     /**
      * True when [rules] holds a wildcard subreddit rule. One is enough: it only runs on
-     * r/ContinuumAll, and a filter that runs there cannot also be pointed at other feeds without
+     * r/RedditJrAll, and a filter that runs there cannot also be pointed at other feeds without
      * being half inert on them. That is what pins a filter, mixed or not.
      */
     @JvmStatic

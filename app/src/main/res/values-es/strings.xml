@@ -1463,7 +1463,7 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Utilice al menos %1$d caracteres. Las palabras más cortas coinciden con muchos más subreddits de los que cabría esperar."</string>
     <string name="post_filter_rule_error_asterisk">"Elija un tipo de coincidencia en lugar de escribir *."</string>
     <string name="post_filter_match_explanation">"Una coincidencia que no sea 'Exacto' solo se aplica en r/%1$s, por lo que una palabra amplia no puede vaciar sus otros feeds. Se agregará a \"Se aplica a\" para usted."</string>
-    <string name="post_filter_applies_to_summary_locked">"Una regla 'Empieza con', 'Termina con' o 'Contiene' solo se ejecuta en r/ContinuumAll, por lo que este filtro está fijado a ella. Elimina esa regla para elegir otros feeds."</string>
+    <string name="post_filter_applies_to_summary_locked">"Una regla 'Empieza con', 'Termina con' o 'Contiene' solo se ejecuta en r/RedditJrAll, por lo que este filtro está fijado a ella. Elimina esa regla para elegir otros feeds."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s agregado a 'Se aplica a'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Bloqueado por %1$s"</string>

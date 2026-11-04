@@ -1464,7 +1464,7 @@ Chodí popředu."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Použij alespoň %1$d znaků. Kratší slova odpovídají mnohem více subredditům, než bys očekával."</string>
     <string name="post_filter_rule_error_asterisk">"Vyber typ shody místo psaní *."</string>
     <string name="post_filter_match_explanation">"Jiná shoda než 'Přesně' platí pouze pro r/%1$s, takže široké slovo nemůže vyprázdnit tvoje ostatní kanály. Bude přidáno do „Platí pro“."</string>
-    <string name="post_filter_applies_to_summary_locked">"Pravidlo 'Začíná na', 'Končí na' nebo 'Obsahuje' běží pouze na r/ContinuumAll, takže tento filtr je k němu připojen. Chceš-li vybrat jiné zdroje, toto pravidlo odstraň."</string>
+    <string name="post_filter_applies_to_summary_locked">"Pravidlo 'Začíná na', 'Končí na' nebo 'Obsahuje' běží pouze na r/RedditJrAll, takže tento filtr je k němu připojen. Chceš-li vybrat jiné zdroje, toto pravidlo odstraň."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s přidáno do „Platí pro“"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blokováno %1$s"</string>

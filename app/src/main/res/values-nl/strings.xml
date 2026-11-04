@@ -1459,7 +1459,7 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Gebruik minimaal %1$d tekens. Kortere woorden komen overeen met veel meer subreddits dan je zou verwachten."</string>
     <string name="post_filter_rule_error_asterisk">"Kies een zoektype in plaats van * te typen."</string>
     <string name="post_filter_match_explanation">"Een andere match dan 'Exact' geldt alleen op r/%1$s, dus een breed woord kan je andere feeds niet leegmaken. Het wordt voor je toegevoegd aan 'Geldt voor'."</string>
-    <string name="post_filter_applies_to_summary_locked">"Een regel 'Begint met', 'Eindigt met' of 'Bevat' werkt alleen op r/ContinuumAll, dus dit filter is eraan vastgemaakt. Verwijder die regel om andere feeds te kiezen."</string>
+    <string name="post_filter_applies_to_summary_locked">"Een regel 'Begint met', 'Eindigt met' of 'Bevat' werkt alleen op r/RedditJrAll, dus dit filter is eraan vastgemaakt. Verwijder die regel om andere feeds te kiezen."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s toegevoegd aan 'Geldt voor'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Geblokkeerd door %1$s"</string>

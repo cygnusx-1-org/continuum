@@ -1441,7 +1441,7 @@
     <string name="post_filter_rule_error_wildcard_too_short">"Isticmaal ugu yaraan %1$d xaraf. Erayada gaagaaban ayaa aad uga badan inta aad filan lahayd subreddits."</string>
     <string name="post_filter_rule_error_asterisk">"Dooro nooc kabriid intii aad ku qori lahayd *."</string>
     <string name="post_filter_match_explanation">"Ciyaar aan ahayn 'Sax' kaliya waxay quseysaa r/%1$s, markaa kelmad ballaaran ma faaruqi karto quudintaada kale. Waxaa lagugu dari doonaa 'ayaa ku habboon' adiga."</string>
-    <string name="post_filter_applies_to_summary_locked">"A 'Waxay ku bilaabataa', 'Ku dhammaata' ama 'Waxaa ku jira' qaanuunka waxa uu ku shaqeeyaa kaliya r/ContinuumAll, marka shaandhada ayaa lagu dhejiyaa. Ka saar sharcigaas si aad u doorato quudin kale."</string>
+    <string name="post_filter_applies_to_summary_locked">"A 'Waxay ku bilaabataa', 'Ku dhammaata' ama 'Waxaa ku jira' qaanuunka waxa uu ku shaqeeyaa kaliya r/RedditJrAll, marka shaandhada ayaa lagu dhejiyaa. Ka saar sharcigaas si aad u doorato quudin kale."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s lagu daray 'ayaa ku habboon'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"waxaa xannibay %1$s"</string>

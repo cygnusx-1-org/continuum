@@ -1455,7 +1455,7 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="post_filter_rule_error_wildcard_too_short">"Sử dụng ít nhất %1$d ký tự. Các từ ngắn hơn phù hợp với nhiều subreddits hơn bạn mong đợi."</string>
     <string name="post_filter_rule_error_asterisk">"Chọn loại đối sánh thay vì nhập *."</string>
     <string name="post_filter_match_explanation">"Một kết quả khớp không phải là 'Chính xác' chỉ áp dụng trên r/%1$s, do đó, một từ rộng không thể làm trống các nguồn cấp dữ liệu khác của bạn. Nó sẽ được thêm vào 'Áp dụng cho' cho bạn."</string>
-    <string name="post_filter_applies_to_summary_locked">"Quy tắc 'Bắt đầu bằng', 'Kết thúc bằng' hoặc 'Chứa' chỉ chạy trên r/ContinuumAll, vì vậy bộ lọc này được ghim vào đó. Hãy xóa quy tắc đó để chọn các nguồn cấp dữ liệu khác."</string>
+    <string name="post_filter_applies_to_summary_locked">"Quy tắc 'Bắt đầu bằng', 'Kết thúc bằng' hoặc 'Chứa' chỉ chạy trên r/RedditJrAll, vì vậy bộ lọc này được ghim vào đó. Hãy xóa quy tắc đó để chọn các nguồn cấp dữ liệu khác."</string>
     <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s được thêm vào 'Áp dụng cho'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Bị chặn bởi %1$s"</string>

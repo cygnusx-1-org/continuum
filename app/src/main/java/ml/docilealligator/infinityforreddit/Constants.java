@@ -20,15 +20,17 @@ public class Constants {
      * its own for post filtering. Wildcard "Exclude subreddits" terms only ever run here, so a broad
      * term like {@code *irl*} cannot reach Home, Search, a multireddit or a real subreddit page.
      *
-     * <p>Registered on Reddit as a placeholder subreddit, so its About tab and the subscribe button
-     * resolve like any other subreddit; only the post listing is redirected.
-     *
-     * <p>The name is the one upstream registered, and it has to stay until a subreddit with a new
-     * name exists on Reddit: a name Reddit does not know would 404 the About tab and the subscribe
-     * button. Everything in code refers to it through this constant and {@link #isRedditJrAll}, so
-     * changing the name later is this one value plus a migration of saved post filters.
+     * <p>Not a subreddit that exists on Reddit, so its About tab and subscribe button have nothing
+     * to show; only the post listing is redirected.
      */
-    public static final String REDDITJR_ALL_SUBREDDIT = "ContinuumAll";
+    public static final String REDDITJR_ALL_SUBREDDIT = "RedditJrAll";
+
+    /**
+     * What this feed was called before the app was renamed. Saved post filters were migrated off
+     * it, but a restored old backup, a saved tab or a stored sort preference can still carry it,
+     * so it still counts as the same feed.
+     */
+    public static final String LEGACY_ALL_SUBREDDIT = "ContinuumAll";
 
     /** The subreddit whose post listing {@link #REDDITJR_ALL_SUBREDDIT} actually fetches. */
     public static final String REDDITJR_ALL_SOURCE_SUBREDDIT = "all";
@@ -37,7 +39,8 @@ public class Constants {
 
     /** True when {@code subredditName} is {@link #REDDITJR_ALL_SUBREDDIT}, in any casing. */
     public static boolean isRedditJrAll(@Nullable String subredditName) {
-        return REDDITJR_ALL_SUBREDDIT.equalsIgnoreCase(subredditName);
+        return REDDITJR_ALL_SUBREDDIT.equalsIgnoreCase(subredditName)
+                || LEGACY_ALL_SUBREDDIT.equalsIgnoreCase(subredditName);
     }
 
     /**

@@ -63,7 +63,7 @@ import ml.docilealligator.infinityforreddit.user.UserData;
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
         CommentFilter.class, CommentFilterUsage.class, CommentDraft.class,
         LocalSavedThing.class, PostFilterBlockedSubreddit.class,
-        Reminder.class, AnonymousSavedComment.class}, version = 46, exportSchema = false)
+        Reminder.class, AnonymousSavedComment.class}, version = 47, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -83,7 +83,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
                         MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40,
                         MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43, MIGRATION_43_44,
-                        MIGRATION_44_45, MIGRATION_45_46)
+                        MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47)
                 .addCallback(ANONYMOUS_ACCOUNT_ROW)
                 .build();
     }
@@ -1084,6 +1084,21 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("DROP TABLE IF EXISTS `recently_visited`");
             database.execSQL("DROP TABLE IF EXISTS `api_call_records`");
+        }
+    };
+
+    /**
+     * Moves saved post filters from the all-feed's old name, {@code ContinuumAll}, to its new one.
+     * A filter can already name both, since the key includes the name; the row under the new name
+     * is the one kept, and what is left under the old name is deleted.
+     */
+    private static final Migration MIGRATION_46_47 = new Migration(46, 47) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("UPDATE OR IGNORE post_filter_usage SET name_of_usage = 'RedditJrAll'"
+                    + " WHERE usage = 2 AND name_of_usage = 'ContinuumAll' COLLATE NOCASE");
+            database.execSQL("DELETE FROM post_filter_usage"
+                    + " WHERE usage = 2 AND name_of_usage = 'ContinuumAll' COLLATE NOCASE");
         }
     };
 }
