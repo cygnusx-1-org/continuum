@@ -11,6 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.widget.ImageViewCompat;
 
+import java.util.List;
+import java.util.function.Function;
+
 import io.noties.markwon.Markwon;
 import io.noties.markwon.recycler.MarkwonAdapter;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
@@ -59,17 +62,23 @@ public class DecoderEntry extends MarkwonAdapter.Entry<DecoderBlock, DecoderEntr
         b.resultTextViewMarkdownDecoderBlock.setTextColor(primaryTextColor);
         ImageViewCompat.setImageTintList(b.copyButtonMarkdownDecoderBlock, ColorStateList.valueOf(primaryTextColor));
 
-        // Copy keeps the full decoded text; the searches use only the handle.
-        String term = CommentDecoder.searchTerm(node.text);
+        // Copy keeps the full decoded text; the searches use only the names in it, one search
+        // for each.
+        List<String> terms = CommentDecoder.extractSearchTerms(node.text);
         b.copyButtonMarkdownDecoderBlock.setOnClickListener(v -> DecoderLinkHandler.copy(activity, node.text));
-        bindSearch(b.simpcityTitlesTextViewMarkdownDecoderBlock, CommentDecoder.simpCityUrl(term, true));
-        bindSearch(b.simpcityAllTextViewMarkdownDecoderBlock, CommentDecoder.simpCityUrl(term, false));
-        bindSearch(b.socialTextViewMarkdownDecoderBlock, CommentDecoder.socialSearchUrl(term));
+        bindSearch(b.simpcityTitlesTextViewMarkdownDecoderBlock, terms, term -> CommentDecoder.simpCityUrl(term, true));
+        bindSearch(b.simpcityAllTextViewMarkdownDecoderBlock, terms, term -> CommentDecoder.simpCityUrl(term, false));
+        bindSearch(b.socialTextViewMarkdownDecoderBlock, terms, CommentDecoder::socialSearchUrl);
     }
 
-    private void bindSearch(TextView button, String url) {
+    // One tab for each term. The browser may ask to allow several to open at once.
+    private void bindSearch(TextView button, List<String> terms, Function<String, String> urlFor) {
         button.setTextColor(accentColor);
-        button.setOnClickListener(v -> activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))));
+        button.setOnClickListener(v -> {
+            for (String term : terms) {
+                activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(urlFor.apply(term))));
+            }
+        });
     }
 
     public static class Holder extends MarkwonAdapter.Holder {
