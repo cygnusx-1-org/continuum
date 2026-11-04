@@ -214,7 +214,6 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final boolean mDisableImagePreview;
     private final boolean mOnlyDisablePreviewInVideoAndGifPosts;
     private final boolean mHidePostType;
-    private final boolean mNsfwInTypeBadge;
     private final boolean mHideNsfwBadge;
     private final boolean mHidePostFlair;
     private final boolean mHideUpvoteRatio;
@@ -364,7 +363,6 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mDisableProfileAvatarAnimation = sharedPreferences.getBoolean(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false);
 
         mHidePostType = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
-        mNsfwInTypeBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_IN_TYPE_BADGE, true);
         mHideNsfwBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_NSFW_BADGE, false);
         mHidePostFlair = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
         mHideUpvoteRatio = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_UPVOTE_RATIO, false);
@@ -696,17 +694,8 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        bindPostDetailViewHolder(holder, position);
-        // After the bind, so the post type badge's text is final.
-        if (holder instanceof PostDetailBaseViewHolder && mPost != null) {
-            ml.docilealligator.infinityforreddit.utils.NsfwBadge.fold(((PostDetailBaseViewHolder) holder).typeTextView,
-                    ((PostDetailBaseViewHolder) holder).nsfwTextView, mNsfwInTypeBadge && !mHideNsfwBadge && mPost.isNSFW());
-        }
-    }
-
     @OptIn(markerClass = UnstableApi.class)
-    private void bindPostDetailViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof PostDetailBaseViewHolder) {
             if (mPost == null) {
                 return;

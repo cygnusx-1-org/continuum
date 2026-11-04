@@ -161,7 +161,6 @@ class RestoreSettingsTest {
             file("proxy_test"),
             nsfwAndSpoiler,
             file("post_history_test"),
-            file("recently_visited_test"),
             object : RestoreSettings.RestoreSettingsListener {
                 override fun success() = Unit
                 override fun failed(errorMessage: String) = Unit

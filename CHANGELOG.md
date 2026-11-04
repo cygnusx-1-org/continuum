@@ -2,6 +2,12 @@
 
 ---
 
+8.3.3.9.1.16 / 2026-11-3
+============
+* The card border gradient on NSFW posts no longer depends on `Hide NSFW Badge`
+* Removed `Show NSFW in the Post Type Badge`. The NSFW badge is a badge of its own again, and `Hide NSFW Badge` still hides it
+* Removed the unused Recently Visited and API recording settings files from Backup & Restore and the account settings. Backups that contain them still restore
+
 8.3.3.9.1.15 / 2026-11-3
 ============
 * Removed the API statistics feature: the screen, the code that recorded API calls, and its database table

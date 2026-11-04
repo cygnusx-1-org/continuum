@@ -62,12 +62,6 @@
         app:summary="@string/settings_hide_nsfw_badge_summary" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
-        app:defaultValue="true"
-        app:key="nsfw_in_type_badge"
-        app:title="@string/settings_nsfw_in_type_badge_title"
-        app:summary="@string/settings_nsfw_in_type_badge_summary" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
         app:key="post_type_triangle_indicator"
         app:title="@string/settings_post_type_triangle_indicator"

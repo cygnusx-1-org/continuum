@@ -312,7 +312,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mMarkPostsAsReadAfterVoting;
     private boolean mMarkPostsAsReadOnScroll;
     private boolean mHidePostType;
-    private boolean mNsfwInTypeBadge = true;
     private boolean mHideNsfwBadge;
     private boolean mCollapseStickiedPosts;
     private boolean mPostTypeCardBorder = true;
@@ -428,7 +427,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
 
             mHidePostType = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_TYPE, false);
-            mNsfwInTypeBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.NSFW_IN_TYPE_BADGE, true);
             mHideNsfwBadge = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_NSFW_BADGE, false);
             mCollapseStickiedPosts = sharedPreferences.getBoolean(SharedPreferencesUtils.COLLAPSE_STICKIED_POSTS, false);
             mPostTypeCardBorder = sharedPreferences.getBoolean(SharedPreferencesUtils.POST_TYPE_CARD_BORDER, true);
@@ -574,7 +572,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
         border.setVisibility(View.VISIBLE);
         int typeColor = getTypeColor(holder.post.getPostType());
-        if (holder.post.isNSFW() && !mHideNsfwBadge) {
+        if (holder.post.isNSFW()) {
             // The post type's colour on the left, blending into the NSFW colour on the right.
             border.setBackground(new android.graphics.drawable.GradientDrawable(
                     android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
@@ -990,14 +988,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             return;
         }
         bindPostViewHolder(holder, position);
-        // After the bind, so the post type badge's text is final.
-        if (holder instanceof PostViewHolder) {
-            PostViewHolder postHolder = (PostViewHolder) holder;
-            if (postHolder.post != null) {
-                ml.docilealligator.infinityforreddit.utils.NsfwBadge.fold(postHolder.typeTextView,
-                        postHolder.nsfwTextView, mNsfwInTypeBadge && !mHideNsfwBadge && postHolder.post.isNSFW());
-                applyCardTopBorder(postHolder);
-            }
+        if (holder instanceof PostViewHolder && ((PostViewHolder) holder).post != null) {
+            applyCardTopBorder((PostViewHolder) holder);
         }
     }
 

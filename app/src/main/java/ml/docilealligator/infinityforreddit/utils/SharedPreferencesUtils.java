@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
  */
 
 public class SharedPreferencesUtils {
-    public static final String API_MONITORING_ENABLED = "api_monitoring_enabled";
     public static final String ENABLE_NOTIFICATION_KEY = "enable_notification";
     public static final String NOTIFICATION_INTERVAL_KEY = "notificaiton_interval";
     public static final String LAZY_MODE_INTERVAL_KEY = "lazy_mode_interval";
@@ -297,7 +296,6 @@ public class SharedPreferencesUtils {
     public static final String CLICK_TO_SHOW_MEDIA_IN_GALLERY_LAYOUT = "click_to_show_media_in_gallery_layout";
     public static final String MEDIA_ONLY_POSTS_IN_GALLERY_LAYOUT = "media_only_posts_in_gallery_layout";
     public static final String HIDE_POST_TYPE = "hide_post_type";
-    public static final String NSFW_IN_TYPE_BADGE = "nsfw_in_type_badge";
     public static final String HIDE_NSFW_BADGE = "hide_nsfw_badge";
     public static final String COLLAPSE_STICKIED_POSTS = "collapse_stickied_posts";
     public static final String POST_TYPE_CARD_BORDER = "post_type_card_border";
@@ -623,8 +621,6 @@ public class SharedPreferencesUtils {
     public static final String HIDE_READ_POSTS_AUTOMATICALLY_IN_USERS_BASE = "_hide_read_posts_automatically_in_users";
     public static final String HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE = "_hide_read_posts_automatically_in_search";
 
-    public static final String RECENTLY_VISITED_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.recently_visited";
-    public static final String RECENTLY_VISITED_ENABLED_BASE = "_recently_visited_enabled";
 
     // ETag and check timestamps for the random-subreddit name lists. Its own file: the keys are
     // bookkeeping, not settings, and nothing on a preference screen reads them.

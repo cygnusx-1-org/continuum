@@ -816,8 +816,6 @@
     <string name="settings_collapse_stickied_posts_summary">Show a subreddit\'s stickied posts as a single line. Tap one to open it up</string>
     <string name="settings_hide_nsfw_badge_title">Hide NSFW Badge</string>
     <string name="settings_hide_nsfw_badge_summary">Never show the NSFW badge on posts, in the feed or in the post, and use the space</string>
-    <string name="settings_nsfw_in_type_badge_title">Show NSFW in the Post Type Badge</string>
-    <string name="settings_nsfw_in_type_badge_summary">Show NSFW inside the post type badge, like "Image · NSFW", instead of as a badge of its own. Has no effect while the post type is hidden</string>
     <string name="settings_post_type_triangle_indicator">Post Type Triangle Indicator</string>
     <string name="settings_post_type_triangle_indicator_summary">Show post type as a colored triangle on the thumbnail in compact layout instead of a text badge</string>
     <string name="settings_hide_post_type_indicator_title">Hide Post Type Icon</string>
