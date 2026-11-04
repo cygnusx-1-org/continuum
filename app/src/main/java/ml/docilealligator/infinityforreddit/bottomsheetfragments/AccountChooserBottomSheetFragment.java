@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
@@ -38,11 +39,17 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
 
     /**
      * Leaves the account in use out of the list, for callers that mean "an account other than this
-     * one". Anonymous is absent either way -- it is a row in the accounts table, but every query in
+     * one". Anonymous is not in the list unless {@link #EXTRA_INCLUDE_ANONYMOUS} adds it -- it is a
+     * row in the accounts table, but every query in
      * {@link ml.docilealligator.infinityforreddit.account.AccountDao} that lists accounts filters it
      * out, because it is a browsing mode rather than an account to choose.
      */
     public static final String EXTRA_EXCLUDE_CURRENT_ACCOUNT = "EECA";
+    /**
+     * Adds the anonymous account to the end of the list, unless it is the account in use. Only the
+     * copy-settings screen asks for it.
+     */
+    public static final String EXTRA_INCLUDE_ANONYMOUS = "EIA";
 
     @Inject
     RedditDataRoomDatabase redditDataRoomDatabase;
@@ -151,7 +158,22 @@ public class AccountChooserBottomSheetFragment extends LandscapeExpandedRoundedB
                         ? accountViewModel.getAccountsExceptCurrentAccountLiveData()
                         : accountViewModel.getAllAccountsLiveData();
 
-        accounts.observe(getViewLifecycleOwner(), adapter::changeAccountsDataset);
+        boolean includeAnonymous = arguments != null
+                && arguments.getBoolean(EXTRA_INCLUDE_ANONYMOUS, false)
+                && !Account.isAnonymous(activity.accountName);
+
+        accounts.observe(getViewLifecycleOwner(), list -> {
+            if (includeAnonymous) {
+                List<Account> withAnonymous = new ArrayList<>();
+                if (list != null) {
+                    withAnonymous.addAll(list);
+                }
+                withAnonymous.add(new Account(Account.ANONYMOUS_ACCOUNT, null, null, null,
+                        null, null, 0, false, false));
+                list = withAnonymous;
+            }
+            adapter.changeAccountsDataset(list);
+        });
     }
 
     @Override

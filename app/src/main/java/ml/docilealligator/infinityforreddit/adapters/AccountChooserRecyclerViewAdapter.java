@@ -20,6 +20,7 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
     private List<Account> accounts = new ArrayList<>();
     private final RequestManager glide;
     private final int primaryTextColor;
+    private final int primaryIconColor;
     private final ItemClickListener itemClickListener;
 
     public AccountChooserRecyclerViewAdapter(BaseActivity baseActivity, CustomThemeWrapper customThemeWrapper,
@@ -27,6 +28,7 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
         this.baseActivity = baseActivity;
         this.glide = glide;
         primaryTextColor = customThemeWrapper.getPrimaryTextColor();
+        primaryIconColor = customThemeWrapper.getPrimaryIconColor();
         this.itemClickListener = itemClickListener;
     }
 
@@ -43,11 +45,24 @@ public class AccountChooserRecyclerViewAdapter extends RecyclerView.Adapter<Recy
             Account account = accounts.get(position);
             AccountViewHolder accountViewHolder = (AccountViewHolder) holder;
 
-            glide.load(account.getProfileImageUrl())
+            boolean anonymous = Account.isAnonymous(account.getAccountName());
+            glide.load(anonymous ? R.drawable.ic_anonymous_day_night_24dp : account.getProfileImageUrl())
                     .error(glide.load(R.drawable.subreddit_default_icon))
                     .transform(new RoundedCornersTransformation(128, 0))
                     .into(accountViewHolder.binding.profileImageItemAccount);
-            accountViewHolder.binding.usernameTextViewItemAccount.setText(account.getAccountName());
+            // The drawable is a monochrome icon, so tint it like the drawer does. Clear the filter
+            // otherwise: a recycled holder may have been showing Anonymous.
+            if (anonymous) {
+                accountViewHolder.binding.profileImageItemAccount.setColorFilter(
+                        primaryIconColor, android.graphics.PorterDuff.Mode.SRC_IN);
+            } else {
+                accountViewHolder.binding.profileImageItemAccount.clearColorFilter();
+            }
+            if (anonymous) {
+                accountViewHolder.binding.usernameTextViewItemAccount.setText(R.string.anonymous_account);
+            } else {
+                accountViewHolder.binding.usernameTextViewItemAccount.setText(account.getAccountName());
+            }
         }
     }
 
