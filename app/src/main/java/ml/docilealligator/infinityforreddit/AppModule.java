@@ -25,7 +25,6 @@ import javax.inject.Singleton;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountScopedKeys;
 import ml.docilealligator.infinityforreddit.account.AccountScopedSharedPreferences;
-import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
 import ml.docilealligator.infinityforreddit.apis.RedditAPI;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.customviews.LoopAvailableExoCreator;
@@ -53,14 +52,6 @@ abstract class AppModule {
     @Singleton
     static RedditDataRoomDatabase provideRedditDataRoomDatabase(Application application) {
         return RedditDataRoomDatabase.create(application);
-    }
-
-    @Provides
-    @Singleton
-    static ApiCallTracker provideApiCallTracker(RedditDataRoomDatabase redditDataRoomDatabase,
-                                                @Named("default") SharedPreferences sharedPreferences,
-                                                Executor executor) {
-        return new ApiCallTracker(redditDataRoomDatabase, sharedPreferences, executor);
     }
 
     /**

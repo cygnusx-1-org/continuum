@@ -316,7 +316,7 @@ class AnonymousAccountRenameTest {
         val upgraded = RedditDataRoomDatabase.create(context)
         try {
             val upgradedDb = upgraded.openHelper.writableDatabase
-            assertEquals(45, upgradedDb.version)
+            assertEquals(46, upgradedDb.version)
             for (table in RedditDataRoomDatabase.ACCOUNT_NAME_TABLES + "accounts") {
                 assertFalse("left under the old name in $table", "-" in usernamesIn(table, upgradedDb))
             }
@@ -333,10 +333,9 @@ class AnonymousAccountRenameTest {
         // twelve removed insertIfNotExists() calls were standing in for.
         assertEquals(listOf(".anonymous"), usernamesIn("accounts"))
 
-        db().execSQL("INSERT INTO recently_visited (username, name, type, last_visited)"
-            + " VALUES ('.anonymous', 'pics', 0, 1)")
+        postFilter("f", ".anonymous")
 
-        assertEquals(listOf(".anonymous"), usernamesIn("recently_visited"))
+        assertEquals(listOf(".anonymous"), usernamesIn("post_filter"))
     }
 
     // --- the preferences half -------------------------------------------------------------------
