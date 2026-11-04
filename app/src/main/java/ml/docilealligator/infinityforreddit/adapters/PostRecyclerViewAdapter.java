@@ -321,6 +321,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private boolean mHidePostFlair;
     private boolean mHideSubredditAndUserPrefix;
     private boolean mHideTheNumberOfVotes;
+    private boolean mHideVoteButtons;
     private boolean mHideTheNumberOfComments;
     private boolean mLegacyAutoplayVideoControllerUI;
     private boolean mFixedHeightPreviewInCard;
@@ -434,6 +435,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mHidePostFlair = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_POST_FLAIR, false);
             mHideSubredditAndUserPrefix = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
             mHideTheNumberOfVotes = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES, false);
+            mHideVoteButtons = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_VOTE_BUTTONS, false);
             mHideTheNumberOfComments = sharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_COMMENTS, false);
             mLegacyAutoplayVideoControllerUI = sharedPreferences.getBoolean(SharedPreferencesUtils.LEGACY_AUTOPLAY_VIDEO_CONTROLLER_UI, false);
             mFixedHeightPreviewInCard = sharedPreferences.getBoolean(SharedPreferencesUtils.FIXED_HEIGHT_PREVIEW_IN_CARD, false);
@@ -1206,6 +1208,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             } else {
                 ((PostViewHolder) holder).scoreTextView.setText(mActivity.getString(R.string.vote));
             }
+            // Hide Vote Buttons: the buttons and the count go together. Set both ways, since the
+            // holder may have carried the other state for the post before.
+            int voteVisibility = mHideVoteButtons ? View.GONE : View.VISIBLE;
+            ((PostViewHolder) holder).upvoteButton.setVisibility(voteVisibility);
+            ((PostViewHolder) holder).scoreTextView.setVisibility(voteVisibility);
+            ((PostViewHolder) holder).downvoteButton.setVisibility(voteVisibility);
 
             if (((PostViewHolder) holder).typeTextView != null) {
                 // The triangle sits on the thumbnail, so a row with no thumbnail box (a text post, or
@@ -3317,6 +3325,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
     public void setHideSubredditAndUserPrefix(boolean hideSubredditAndUserPrefix) {
         mHideSubredditAndUserPrefix = hideSubredditAndUserPrefix;
+    }
+
+    // return true if the current value is not the same as the new value
+    public boolean setHideVoteButtons(boolean hideVoteButtons) {
+        if (mHideVoteButtons != hideVoteButtons) {
+            mHideVoteButtons = hideVoteButtons;
+            return true;
+        }
+        return false;
     }
 
     public void setHideTheNumberOfVotes(boolean hideTheNumberOfVotes) {

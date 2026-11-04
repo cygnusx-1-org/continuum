@@ -2,6 +2,12 @@
 
 ---
 
+8.3.3.9.1.18 / 2026-11-4
+============
+* Undoing a hide now puts the post back in the feed straight away, like hiding takes it out. In the Hidden list it works the other way round: unhiding takes the post out of the list
+* Post details: a new image button beside Save opens every image and GIF in the comments as the vertical list. Each one is captioned with the commenter
+* Added `Settings > Interface > Post > Hide Vote Buttons` and the same under `Post Details`, which hide the upvote and downvote buttons and the vote count. Swipe actions that vote still work
+
 8.3.3.9.1.17 / 2026-11-3
 ============
 * Renamed the remaining Continuum names in the code: the lint checks, the post filter code, the comments, the release scripts and the Gradle release settings
