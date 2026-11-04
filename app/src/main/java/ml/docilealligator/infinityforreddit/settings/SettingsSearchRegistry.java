@@ -86,7 +86,6 @@ public class SettingsSearchRegistry {
                 R.xml.global_settings_management_preferences);
         m.put(AboutPreferenceFragment.class, R.xml.about_preferences);
         m.put(CreditsPreferenceFragment.class, R.xml.credits_preferences);
-        m.put(DebugPreferenceFragment.class, R.xml.debug_preferences);
         SCREEN_RESOURCES = Collections.unmodifiableMap(m);
     }
 

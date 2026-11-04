@@ -268,6 +268,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
         super.onResume();
         if (mAdapter != null) {
             mAdapter.setCanStartActivity(true);
+            mAdapter.setFeedPaused(false);
         }
         if (isInLazyMode) {
             resumeLazyMode(false);
@@ -2355,6 +2356,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             pauseLazyMode(false);
         }
         if (mAdapter != null) {
+            mAdapter.setFeedPaused(true);
             binding.recyclerViewPostFragment.onWindowVisibilityChanged(View.GONE);
         }
     }

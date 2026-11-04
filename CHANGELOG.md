@@ -2,6 +2,17 @@
 
 ---
 
+8.3.3.9.1.14 / 2026-11-3
+============
+* The Post Type Card Border no longer depends on `Hide Post Type`
+* On NSFW posts the card border is a gradient from the post type's color on the left to the NSFW color on the right
+* The vertical gallery list now plays GIFs when `Video Autoplay` allows it, and preloads the next pictures
+* Removed `Settings > Debug`
+* `Privacy Policy` now opens a real policy, PRIVACY.md in the repository
+* With `Collapse Stickied Posts` on, tap the pin on an opened-up stickied post to fold it back into one line
+* Removed Recently Visited: the sidebar row, its screen and its Settings screen. Recents covers it. Your Backup & Restore files still work
+* GIF cards in the feed stop animating while a gallery or other screen is open over it
+
 8.3.3.9.1.13 / 2026-11-3
 ============
 * Hiding a post now takes it out of the feed straight away, instead of leaving it there until you refresh

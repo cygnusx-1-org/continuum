@@ -37,12 +37,6 @@
         app:fragment="ml.docilealligator.infinityforreddit.settings.PostHistoryFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:icon="@drawable/ic_access_time_day_night_24dp"
-        app:title="@string/settings_recently_visited_title"
-        app:summary="@string/settings_recently_visited_summary"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.RecentlyVisitedPreferenceFragment" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_nsfw_on_day_night_24dp"
         app:title="@string/settings_over_18_and_spoiler_title"
         app:summary="@string/settings_over_18_and_spoiler_summary"
@@ -163,11 +157,6 @@
         android:key="privacy_policy"
         app:icon="@drawable/ic_privacy_policy_day_night_24dp"
         app:title="@string/settings_privacy_policy_title" />
-
-    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
-        app:icon="@drawable/ic_info_preference_day_night_24dp"
-        app:title="@string/settings_debug_title"
-        app:fragment="ml.docilealligator.infinityforreddit.settings.DebugPreferenceFragment" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceWithBackground
         app:icon="@drawable/ic_report_day_night_24dp"

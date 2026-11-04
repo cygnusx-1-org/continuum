@@ -40,7 +40,6 @@ import ml.docilealligator.infinityforreddit.events.RecreateActivityEvent;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
 import ml.docilealligator.infinityforreddit.settings.APIKeysPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.AboutPreferenceFragment;
-import ml.docilealligator.infinityforreddit.settings.DebugPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.FontPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.GesturesAndButtonsPreferenceFragment;
 import ml.docilealligator.infinityforreddit.settings.GlobalSettingsManagementPreferenceFragment;
@@ -260,8 +259,6 @@ public class SettingsActivity extends BaseActivity implements
                     setTitle(R.string.settings_global_settings_management_title);
                 } else if (fragment instanceof APIKeysPreferenceFragment) {
                     setTitle(R.string.settings_api_keys_title);
-                } else if (fragment instanceof DebugPreferenceFragment) {
-                    setTitle(R.string.settings_debug_title);
                 } else if (fragment instanceof MainPreferenceFragment) {
                     setTitle(R.string.settings_activity_label);
                 }

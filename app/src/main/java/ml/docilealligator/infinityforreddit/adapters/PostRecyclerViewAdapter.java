@@ -559,7 +559,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         FrameLayout card = (FrameLayout) holder.itemView;
         View last = card.getChildAt(card.getChildCount() - 1);
         View border = last != null && TOP_BORDER_TAG.equals(last.getTag()) ? last : null;
-        if (!mPostTypeCardBorder || mHidePostType) {
+        if (!mPostTypeCardBorder) {
             if (border != null) {
                 border.setVisibility(View.GONE);
             }
@@ -573,7 +573,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ViewGroup.LayoutParams.MATCH_PARENT, height, Gravity.TOP));
         }
         border.setVisibility(View.VISIBLE);
-        border.setBackgroundColor(getTypeColor(holder.post.getPostType()));
+        int typeColor = getTypeColor(holder.post.getPostType());
+        if (holder.post.isNSFW() && !mHideNsfwBadge) {
+            // The post type's colour on the left, blending into the NSFW colour on the right.
+            border.setBackground(new android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                    new int[]{typeColor, mNSFWBackgroundColor}));
+        } else {
+            border.setBackgroundColor(typeColor);
+        }
     }
 
     // return true if the current value is not the same as the new value
@@ -583,6 +591,37 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             return true;
         }
         return false;
+    }
+
+    /**
+     * With Collapse Stickied Posts on, the pin on an opened-up stickied post folds it back into its
+     * one-line row. The pin is small, so its touch area is widened to a fingertip.
+     */
+    private void makePinCollapseStickiedPost(PostViewHolder holder, Post post) {
+        ImageView pin = holder.stickiedPostImageView;
+        if (!mCollapseStickiedPosts) {
+            pin.setOnClickListener(null);
+            pin.setClickable(false);
+            return;
+        }
+        pin.setOnClickListener(view -> {
+            int position = holder.getBindingAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                mExpandedStickiedPosts.remove(post.getFullName());
+                notifyItemChanged(position);
+            }
+        });
+        pin.post(() -> {
+            View parent = pin.getParent() instanceof View ? (View) pin.getParent() : null;
+            if (parent == null) {
+                return;
+            }
+            android.graphics.Rect area = new android.graphics.Rect();
+            pin.getHitRect(area);
+            int extra = Math.round(14 * pin.getResources().getDisplayMetrics().density);
+            area.inset(-extra, -extra);
+            parent.setTouchDelegate(new android.view.TouchDelegate(area, pin));
+        });
     }
 
     private class StickiedCollapsedViewHolder extends RecyclerView.ViewHolder {
@@ -1240,6 +1279,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (mPostType == PostType.SUBREDDIT && !mDisplaySubredditName && post.isStickied()) {
                 ((PostViewHolder) holder).stickiedPostImageView.setVisibility(View.VISIBLE);
                 mGlide.load(R.drawable.ic_thumbtack_24dp).into(((PostViewHolder) holder).stickiedPostImageView);
+                makePinCollapseStickiedPost((PostViewHolder) holder, post);
             }
 
             if (((PostViewHolder) holder).commentsCountButton != null ) {
@@ -2280,6 +2320,25 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     @Nullable
     private RecyclerView attachedRecyclerView;
 
+    // Set while another screen, such as the gallery list, is drawn over the feed. That screen is
+    // translucent, so the feed behind it keeps painting, and a gif card left animating there costs
+    // frames the screen in front needs. Videos are already paused by the fragment's onPause.
+    private boolean mFeedPaused;
+
+    /**
+     * Stops every animating gif card while the feed is covered, and lets them start again once
+     * it is back on screen.
+     */
+    public void setFeedPaused(boolean paused) {
+        if (mFeedPaused == paused) {
+            return;
+        }
+        mFeedPaused = paused;
+        if (attachedRecyclerView != null) {
+            updateAnimatedGifs(attachedRecyclerView);
+        }
+    }
+
     private final Runnable gifAutoplayUpdate = () -> {
         if (attachedRecyclerView != null) {
             updateAnimatedGifs(attachedRecyclerView);
@@ -2354,7 +2413,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             // Every gif card on screen is visited, not just the winners: one that has dropped below
             // the threshold has to be put back to its still.
-            boolean animate = ToroUtil.visibleAreaOffset(mediaView, recyclerView) >= mStartAutoplayVisibleAreaOffset
+            boolean animate = !mFeedPaused
+                    && ToroUtil.visibleAreaOffset(mediaView, recyclerView) >= mStartAutoplayVisibleAreaOffset
                     && (selected == null || selected.contains(holder.getBindingAdapterPosition()));
             setGifAnimating(holder, animate);
         }
@@ -3424,6 +3484,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mGlide.clear(((PostViewHolder) holder).iconGifImageView);
 
             ((PostViewHolder) holder).stickiedPostImageView.setVisibility(View.GONE);
+            ((PostViewHolder) holder).stickiedPostImageView.setOnClickListener(null);
+            ((PostViewHolder) holder).stickiedPostImageView.setClickable(false);
 
             if (((PostViewHolder) holder).crosspostImageView != null) {
                 ((PostViewHolder) holder).crosspostImageView.setVisibility(View.GONE);

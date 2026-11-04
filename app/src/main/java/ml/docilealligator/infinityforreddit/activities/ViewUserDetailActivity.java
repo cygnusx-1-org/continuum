@@ -104,7 +104,6 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
-import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
@@ -176,9 +175,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
     @Inject
     @Named("post_history")
     SharedPreferences mPostHistorySharedPreferences;
-    @Inject
-    @Named("recently_visited")
-    SharedPreferences mRecentlyVisitedSharedPreferences;
     @Inject
     @Named("post_layout")
     SharedPreferences mPostLayoutSharedPreferences;
@@ -534,9 +530,6 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
                     mRecordedVisit = true;
                     ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.recordUser(
                             mSharedPreferences, accountName, userData.getName(), userData.getIconUrl());
-                    RecordRecentlyVisited.recordUser(mExecutor, mRedditDataRoomDatabase,
-                            mRecentlyVisitedSharedPreferences, accountName, userData.getName(),
-                            userData.getIconUrl());
                 }
 
                 if (userData.getBanner().equals("")) {
