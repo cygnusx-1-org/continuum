@@ -108,7 +108,6 @@ class BackupSettingsTest {
             file("proxy_test"),
             file("nsfw_and_spoiler_test"),
             file("post_history_test"),
-            file("recently_visited_test"),
             object : BackupSettings.BackupSettingsListener {
                 override fun success() = Unit
                 override fun failed(errorMessage: String) = Unit

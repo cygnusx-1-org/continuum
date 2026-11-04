@@ -66,7 +66,6 @@ object AccountSettings {
         ScopedFile(SharedPreferencesUtils.POST_DETAILS_SHARED_PREFERENCES_FILE),
         ScopedFile(SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE),
         ScopedFile(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE),
-        ScopedFile(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE),
         ScopedFile(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE),
         // Tabs name subreddits and multireddits the destination account may not have, and a tab
         // pointing at something it cannot load is worse than the tabs it already had. A reset does

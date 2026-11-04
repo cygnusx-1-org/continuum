@@ -153,12 +153,6 @@ abstract class AppModule {
     }
 
     @Provides
-    @Named("recently_visited")
-    static SharedPreferences provideRecentlyVisitedSharedPreferences(Application application) {
-        return application.getSharedPreferences(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
-    }
-
-    @Provides
     @Named("random_subreddits")
     @Singleton
     static SharedPreferences provideRandomSubredditsSharedPreferences(Application application) {
