@@ -2,6 +2,11 @@
 
 ---
 
+8.3.3.9.1.15 / 2026-11-3
+============
+* Removed the API statistics feature: the screen, the code that recorded API calls, and its database table
+* Removed the `recently_visited` database table. Recents is unchanged, since it is kept in settings and never used that table. Old backups that contain the table still restore, and the table is simply skipped
+
 8.3.3.9.1.14 / 2026-11-3
 ============
 * The Post Type Card Border no longer depends on `Hide Post Type`

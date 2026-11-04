@@ -129,7 +129,6 @@ import ml.docilealligator.infinityforreddit.worker.PullNotificationWorker;
 @Singleton
 @Component(modules = {AppModule.class, NetworkModule.class})
 public interface AppComponent {
-    ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker apiCallTracker();
 
     /**
      * For the few helpers that have a Context but no injection point of their own. Going through
@@ -208,7 +207,6 @@ public interface AppComponent {
 
     void inject(SearchHistoryActivity searchHistoryActivity);
 
-    void inject(ml.docilealligator.infinityforreddit.activities.ApiStatisticsActivity apiStatisticsActivity);
 
     void inject(SettingsActivity settingsActivity);
 

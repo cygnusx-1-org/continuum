@@ -16,8 +16,6 @@ import java.util.List;
 import ml.docilealligator.infinityforreddit.account.Account;
 import ml.docilealligator.infinityforreddit.account.AccountDao;
 import ml.docilealligator.infinityforreddit.account.AccountDaoKt;
-import ml.docilealligator.infinityforreddit.apimonitor.ApiCallRecord;
-import ml.docilealligator.infinityforreddit.apimonitor.ApiCallRecordDao;
 import ml.docilealligator.infinityforreddit.comment.AnonymousSavedComment;
 import ml.docilealligator.infinityforreddit.comment.AnonymousSavedCommentDao;
 import ml.docilealligator.infinityforreddit.comment.CommentDraft;
@@ -47,8 +45,6 @@ import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsageDao;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostDao;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostDaoKt;
-import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisited;
-import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisitedDao;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQueryDao;
 import ml.docilealligator.infinityforreddit.reminder.Reminder;
@@ -65,9 +61,9 @@ import ml.docilealligator.infinityforreddit.user.UserData;
 @Database(entities = {Account.class, SubredditData.class, SubscribedSubredditData.class, UserData.class,
         SubscribedUserData.class, MultiReddit.class, CustomTheme.class, RecentSearchQuery.class,
         ReadPost.class, PostFilter.class, PostFilterUsage.class, AnonymousMultiredditSubreddit.class,
-        CommentFilter.class, CommentFilterUsage.class, CommentDraft.class, ApiCallRecord.class,
-        LocalSavedThing.class, PostFilterBlockedSubreddit.class, RecentlyVisited.class,
-        Reminder.class, AnonymousSavedComment.class}, version = 45, exportSchema = false)
+        CommentFilter.class, CommentFilterUsage.class, CommentDraft.class,
+        LocalSavedThing.class, PostFilterBlockedSubreddit.class,
+        Reminder.class, AnonymousSavedComment.class}, version = 46, exportSchema = false)
 @TypeConverters(Converters.class)
 public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
@@ -87,7 +83,7 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                         MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36,
                         MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40,
                         MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43, MIGRATION_43_44,
-                        MIGRATION_44_45)
+                        MIGRATION_44_45, MIGRATION_45_46)
                 .addCallback(ANONYMOUS_ACCOUNT_ROW)
                 .build();
     }
@@ -175,11 +171,9 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
 
     public abstract CommentDraftDao commentDraftDao();
 
-    public abstract ApiCallRecordDao apiCallRecordDao();
 
     public abstract LocalSavedThingDao localSavedThingDao();
 
-    public abstract RecentlyVisitedDao recentlyVisitedDao();
 
     public abstract ReminderDao reminderDao();
 
@@ -392,7 +386,6 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
             "post_filter_usage",
             "read_posts",
             "recent_search_queries",
-            "recently_visited",
             "reminders",
             "subscribed_subreddits",
             "subscribed_users",
@@ -1078,6 +1071,19 @@ public abstract class RedditDataRoomDatabase extends RoomDatabase {
                     + "created_at INTEGER DEFAULT 0 NOT NULL, reminder_time INTEGER DEFAULT 0 NOT NULL, "
                     + "PRIMARY KEY(post_id, comment_id, reminder_time), "
                     + "FOREIGN KEY(username) REFERENCES accounts(username) ON DELETE SET NULL)");
+        }
+    };
+
+    /**
+     * Drops the two tables whose screens are gone: {@code recently_visited}, which the Recents
+     * section replaced (Recents is kept in a preference and never used this table), and
+     * {@code api_call_records}, the API statistics screen's data. Their indexes go with them.
+     */
+    private static final Migration MIGRATION_45_46 = new Migration(45, 46) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("DROP TABLE IF EXISTS `recently_visited`");
+            database.execSQL("DROP TABLE IF EXISTS `api_call_records`");
         }
     };
 }

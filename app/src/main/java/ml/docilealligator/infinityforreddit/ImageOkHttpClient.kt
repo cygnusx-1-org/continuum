@@ -2,7 +2,6 @@ package ml.docilealligator.infinityforreddit
 
 import android.content.Context
 import java.util.concurrent.TimeUnit
-import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener
 import ml.docilealligator.infinityforreddit.network.PreferenceProxySelector
 import ml.docilealligator.infinityforreddit.network.RedditMediaExtensionInterceptor
 import ml.docilealligator.infinityforreddit.utils.APIUtils
@@ -74,13 +73,6 @@ object ImageOkHttpClient {
             }
             // Gallery items Reddit's listing reports as failed carry a guessed extension.
             .addInterceptor(RedditMediaExtensionInterceptor)
-
-        // Instrument image retrieval so it shows up in API/media statistics. Glide builds its own
-        // OkHttpClient, so the base-client EventListener does not reach it otherwise.
-        if (applicationContext is Infinity) {
-            val apiCallTracker = applicationContext.appComponent.apiCallTracker()
-            builder.eventListenerFactory(ApiMonitorEventListener.Factory(apiCallTracker))
-        }
 
         // Read per connection, as for the API clients: this one is built once for the process.
         val proxySelector = PreferenceProxySelector.get(

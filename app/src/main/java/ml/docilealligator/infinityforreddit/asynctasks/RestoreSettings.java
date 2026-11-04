@@ -50,7 +50,6 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
-import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisited;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.reminder.Reminder;
 import ml.docilealligator.infinityforreddit.resume.ResumeState;
@@ -330,7 +329,6 @@ public class RestoreSettings {
         File anonymousSavedCommentsFile = new File(databaseDir.getAbsolutePath() + "/anonymous_saved_comments.json");
         File commentDraftsFile = new File(databaseDir.getAbsolutePath() + "/comment_drafts.json");
         File remindersFile = new File(databaseDir.getAbsolutePath() + "/reminders.json");
-        File recentlyVisitedFile = new File(databaseDir.getAbsolutePath() + "/recently_visited.json");
         File recentSearchQueriesFile = new File(databaseDir.getAbsolutePath() + "/recent_search_queries.json");
 
         if (anonymousSubscribedSubredditsFile.exists()) {
@@ -516,15 +514,6 @@ public class RestoreSettings {
         // was here. They have to come back from the backup -- nothing on
         // Reddit can re-sync them -- and, like the tables above, only after
         // the accounts they reference exist again.
-        if (recentlyVisitedFile.exists()) {
-            List<RecentlyVisited> recentlyVisited = onAccountsInDatabase(
-                    getListFromFile(recentlyVisitedFile, new TypeToken<List<RecentlyVisited>>() {}.getType()),
-                    RecentlyVisited::getUsername, accountsInDatabase, "recently_visited");
-            if (!recentlyVisited.isEmpty()) {
-                redditDataRoomDatabase.recentlyVisitedDao().insertAll(recentlyVisited);
-            }
-        }
-
         if (recentSearchQueriesFile.exists()) {
             List<RecentSearchQuery> recentSearchQueries = onAccountsInDatabase(
                     getListFromFile(recentSearchQueriesFile, new TypeToken<List<RecentSearchQuery>>() {}.getType()),

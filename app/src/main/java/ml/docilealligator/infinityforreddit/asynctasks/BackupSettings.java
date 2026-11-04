@@ -41,7 +41,6 @@ import ml.docilealligator.infinityforreddit.multireddit.MultiReddit;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilter;
 import ml.docilealligator.infinityforreddit.postfilter.PostFilterUsage;
 import ml.docilealligator.infinityforreddit.readpost.ReadPost;
-import ml.docilealligator.infinityforreddit.recentlyvisited.RecentlyVisited;
 import ml.docilealligator.infinityforreddit.recentsearchquery.RecentSearchQuery;
 import ml.docilealligator.infinityforreddit.reminder.Reminder;
 import ml.docilealligator.infinityforreddit.subscribedsubreddit.SubscribedSubredditData;
@@ -197,14 +196,10 @@ public class BackupSettings {
             String remindersJson = new Gson().toJson(reminders);
             boolean res28 = saveDatabaseTableToFile(remindersJson, databaseDirFile.getAbsolutePath(), "/reminders.json");
 
-            // Recently visited and search history are local-only: nothing on Reddit can re-sync
-            // them, and restoring clears the accounts they hang off, so without these two they do
-            // not survive a restore at all. The recently_visited/search *settings* travel in the
-            // shared-preferences files above; this is the data they govern.
-            List<RecentlyVisited> recentlyVisited = redditDataRoomDatabase.recentlyVisitedDao().getAllForBackup();
-            String recentlyVisitedJson = new Gson().toJson(recentlyVisited);
-            boolean res29 = saveDatabaseTableToFile(recentlyVisitedJson, databaseDirFile.getAbsolutePath(), "/recently_visited.json");
-
+            // Search history is local-only: nothing on Reddit can re-sync it, and restoring clears
+            // the accounts it hangs off, so without this it does not survive a restore at all. The
+            // search *settings* travel in the shared-preferences files above; this is the data
+            // they govern.
             List<RecentSearchQuery> recentSearchQueries = redditDataRoomDatabase.recentSearchQueryDao().getAllForBackup();
             String recentSearchQueriesJson = new Gson().toJson(recentSearchQueries);
             boolean res30 = saveDatabaseTableToFile(recentSearchQueriesJson, databaseDirFile.getAbsolutePath(), "/recent_search_queries.json");
@@ -221,7 +216,7 @@ public class BackupSettings {
                 boolean finalResult = res && res1 && res2 && res3 && res4 && res5 && res6 && res7 && res8
                         && res9 && res10 && res11 && res12 && res13 && res14 && res15 && res16 && res17
                         && res18 && res19 && res20 && res21 && res22 && res23 && res24 && res25 && res26
-                        && res27 && res28 && res29 && res30 && res31 && res32 && zipRes && resPrivate;
+                        && res27 && res28 && res30 && res31 && res32 && zipRes && resPrivate;
                 if (finalResult) {
                     backupSettingsListener.success();
                 } else {

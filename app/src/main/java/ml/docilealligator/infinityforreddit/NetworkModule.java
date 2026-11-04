@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import ml.docilealligator.infinityforreddit.apimonitor.ApiCallTracker;
-import ml.docilealligator.infinityforreddit.apimonitor.ApiMonitorEventListener;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPI;
 import ml.docilealligator.infinityforreddit.apis.StreamableAPIKt;
 import ml.docilealligator.infinityforreddit.network.AccessTokenAuthenticator;
@@ -37,8 +35,7 @@ abstract class NetworkModule {
     @Provides
     @Named("base")
     @Singleton
-    static OkHttpClient provideBaseOkhttp(@Named("proxy") SharedPreferences mProxySharedPreferences,
-                                          ApiCallTracker apiCallTracker) {
+    static OkHttpClient provideBaseOkhttp(@Named("proxy") SharedPreferences mProxySharedPreferences) {
         // A selector rather than a fixed proxy: this client lives as long as the process, and the
         // proxy setting has to apply the moment it changes.
         PreferenceProxySelector proxySelector = PreferenceProxySelector.get(mProxySharedPreferences);
@@ -48,7 +45,6 @@ abstract class NetworkModule {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
-                .eventListenerFactory(new ApiMonitorEventListener.Factory(apiCallTracker))
                 .addInterceptor(chain -> {
                     if (chain.request().header("User-Agent") == null) {
                         return chain.proceed(
