@@ -593,6 +593,37 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         return false;
     }
 
+    /**
+     * With Collapse Stickied Posts on, the pin on an opened-up stickied post folds it back into its
+     * one-line row. The pin is small, so its touch area is widened to a fingertip.
+     */
+    private void makePinCollapseStickiedPost(PostViewHolder holder, Post post) {
+        ImageView pin = holder.stickiedPostImageView;
+        if (!mCollapseStickiedPosts) {
+            pin.setOnClickListener(null);
+            pin.setClickable(false);
+            return;
+        }
+        pin.setOnClickListener(view -> {
+            int position = holder.getBindingAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                mExpandedStickiedPosts.remove(post.getFullName());
+                notifyItemChanged(position);
+            }
+        });
+        pin.post(() -> {
+            View parent = pin.getParent() instanceof View ? (View) pin.getParent() : null;
+            if (parent == null) {
+                return;
+            }
+            android.graphics.Rect area = new android.graphics.Rect();
+            pin.getHitRect(area);
+            int extra = Math.round(14 * pin.getResources().getDisplayMetrics().density);
+            area.inset(-extra, -extra);
+            parent.setTouchDelegate(new android.view.TouchDelegate(area, pin));
+        });
+    }
+
     private class StickiedCollapsedViewHolder extends RecyclerView.ViewHolder {
         final ml.docilealligator.infinityforreddit.databinding.ItemPostStickiedCollapsedBinding binding;
 
@@ -1248,6 +1279,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             if (mPostType == PostType.SUBREDDIT && !mDisplaySubredditName && post.isStickied()) {
                 ((PostViewHolder) holder).stickiedPostImageView.setVisibility(View.VISIBLE);
                 mGlide.load(R.drawable.ic_thumbtack_24dp).into(((PostViewHolder) holder).stickiedPostImageView);
+                makePinCollapseStickiedPost((PostViewHolder) holder, post);
             }
 
             if (((PostViewHolder) holder).commentsCountButton != null ) {
@@ -3432,6 +3464,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mGlide.clear(((PostViewHolder) holder).iconGifImageView);
 
             ((PostViewHolder) holder).stickiedPostImageView.setVisibility(View.GONE);
+            ((PostViewHolder) holder).stickiedPostImageView.setOnClickListener(null);
+            ((PostViewHolder) holder).stickiedPostImageView.setClickable(false);
 
             if (((PostViewHolder) holder).crosspostImageView != null) {
                 ((PostViewHolder) holder).crosspostImageView.setVisibility(View.GONE);

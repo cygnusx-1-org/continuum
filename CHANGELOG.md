@@ -9,6 +9,7 @@
 * The vertical gallery list now plays GIFs when `Video Autoplay` allows it, and preloads the next pictures
 * Removed `Settings > Debug`
 * `Privacy Policy` now opens a real policy, PRIVACY.md in the repository
+* With `Collapse Stickied Posts` on, tap the pin on an opened-up stickied post to fold it back into one line
 
 8.3.3.9.1.13 / 2026-11-3
 ============
