@@ -559,7 +559,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         FrameLayout card = (FrameLayout) holder.itemView;
         View last = card.getChildAt(card.getChildCount() - 1);
         View border = last != null && TOP_BORDER_TAG.equals(last.getTag()) ? last : null;
-        if (!mPostTypeCardBorder || mHidePostType) {
+        if (!mPostTypeCardBorder) {
             if (border != null) {
                 border.setVisibility(View.GONE);
             }
@@ -573,7 +573,15 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     ViewGroup.LayoutParams.MATCH_PARENT, height, Gravity.TOP));
         }
         border.setVisibility(View.VISIBLE);
-        border.setBackgroundColor(getTypeColor(holder.post.getPostType()));
+        int typeColor = getTypeColor(holder.post.getPostType());
+        if (holder.post.isNSFW() && !mHideNsfwBadge) {
+            // The post type's colour on the left, blending into the NSFW colour on the right.
+            border.setBackground(new android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                    new int[]{typeColor, mNSFWBackgroundColor}));
+        } else {
+            border.setBackgroundColor(typeColor);
+        }
     }
 
     // return true if the current value is not the same as the new value

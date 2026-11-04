@@ -331,8 +331,6 @@
     <string name="search_history">"Ιστορικό αναζήτησης"</string>
     <string name="no_search_history">"Δεν υπάρχει ιστορικό αναζήτησης"</string>
     <string name="api_statistics_activity_label">"API Στατιστικά"</string>
-    <string name="settings_api_statistics_title">"στατιστικά API"</string>
-    <string name="settings_api_statistics_summary">"Χρόνοι απόκρισης των κλήσεων Reddit API και της ανάκτησης πολυμέσων (εικόνα/βίντεο), ανά τελικό σημείο"</string>
     <string name="api_statistics_empty">"Δεν έχει καταγραφεί τίποτα ακόμα. Περιηγήσου σε αναρτήσεις και πρόβαλε ορισμένα μέσα, μετά επίστρεψε — ή έλεγξε ότι η εγγραφή είναι ενεργοποιημένη στο μενού."</string>
     <string name="api_statistics_enable_monitoring">"Καταγραφή κλήσεων API"</string>
     <string name="api_statistics_clear">"Εκκαθάριση εγγεγραμμένων δεδομένων"</string>
@@ -565,16 +563,8 @@
     <string name="settings_share_title">"Κοινοποίηση"</string>
     <string name="settings_share_summary">"Κοινοποίησε την εφαρμογή για να τη χαρούν κι άλλα άτομα"</string>
     <string name="settings_privacy_policy_title">"Πολιτική Απορρήτου"</string>
-    <string name="settings_debug_title">"Εντοπισμός σφαλμάτων"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Έκδοση %s"</string>
-    <string name="settings_screen_width_dp_title">"Πλάτος οθόνης"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Μικρότερο πλάτος οθόνης"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Παραμετροποίηση"</string>
     <string name="settings_customize_light_theme_title">"Φωτεινό Θέμα"</string>
     <string name="settings_customize_dark_theme_title">"Σκοτεινό Θέμα"</string>

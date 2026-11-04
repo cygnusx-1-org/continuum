@@ -338,8 +338,6 @@
     <string name="search_history">"검색 기록"</string>
     <string name="no_search_history">"검색기록이 없습니다"</string>
     <string name="api_statistics_activity_label">"API 통계"</string>
-    <string name="settings_api_statistics_title">"API 통계"</string>
-    <string name="settings_api_statistics_summary">"엔드포인트별 Reddit API 호출 및 미디어(이미지/비디오) 검색 응답 시간"</string>
     <string name="api_statistics_empty">"아직 녹음된 내용이 없습니다. 게시물을 탐색하고 일부 미디어를 본 다음 다시 돌아오거나 메뉴에서 녹음이 활성화되어 있는지 확인하세요."</string>
     <string name="api_statistics_enable_monitoring">"API 호출 기록"</string>
     <string name="api_statistics_clear">"녹음된 데이터 지우기"</string>
@@ -572,16 +570,8 @@
     <string name="settings_share_title">"공유"</string>
     <string name="settings_share_summary">"이 앱이 마음에 든다면 다른 사람들과 공유하세요."</string>
     <string name="settings_privacy_policy_title">"개인 정보 보호 정책"</string>
-    <string name="settings_debug_title">"디버그"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"버전 %s"</string>
-    <string name="settings_screen_width_dp_title">"화면 너비"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"최소 화면 폭"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"사용자 정의"</string>
     <string name="settings_customize_light_theme_title">"라이트 테마"</string>
     <string name="settings_customize_dark_theme_title">"다크 테마"</string>

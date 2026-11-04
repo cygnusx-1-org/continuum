@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import app.futured.hauler.DragDirection;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -116,6 +117,8 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
     // extras, so this needs no network of its own.
     private int resumePage = -1;
     private boolean showingList = false;
+    // Whether the list may animate its GIFs, under the app's Video Autoplay settings.
+    private boolean autoplayGifs;
     // Enabled while the pager is open over the list, so back returns to the list instead of leaving.
     private final OnBackPressedCallback backToList = new OnBackPressedCallback(false) {
         @Override
@@ -244,6 +247,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         }
         subredditName = post.getSubredditName();
         isNsfw = post.isNSFW();
+        autoplayGifs = shouldAutoplayGifs();
 
         if (sharedPreferences.getBoolean(SharedPreferencesUtils.SWIPE_VERTICALLY_TO_GO_BACK_FROM_MEDIA, true)) {
             binding.haulerViewViewRedditGalleryActivity.setOnDragDismissedListener(dragDirection -> {
@@ -286,6 +290,17 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         @Override
         public void onBindViewHolder(@NonNull GalleryListViewHolder holder, int position) {
             holder.bind(gallery.get(position));
+            // Warm the next two pictures, so the first screenful after opening is not decoded
+            // while it scrolls into view.
+            for (int next = position + 1; next <= position + 2 && next < gallery.size(); next++) {
+                Post.Gallery item = gallery.get(next);
+                String url = urlFor(item);
+                if (url != null && !(item.mediaType == Post.Gallery.TYPE_GIF && autoplayGifs)) {
+                    Glide.with(ViewRedditGalleryActivity.this).load(url)
+                            .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL)
+                            .preload();
+                }
+            }
         }
 
         @Override
@@ -326,12 +341,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             binding.playBadgeImageViewItemShadowboxGallery.setVisibility(video ? View.VISIBLE : View.GONE);
 
             String still = item.feedPreviewUrl;
-            // The resolution-bounded still Reddit publishes, for every type: the source is several
-            // thousand pixels wide and decoding a screenful of those is what made the list stutter.
-            // A video's url is the mp4, which an ImageView cannot show, and a gif is only a still
-            // here, since a list of running gifs is the other thing that stutters; the viewer a tap
-            // opens plays it.
-            String main = video ? still : (still != null ? still : item.url);
+            String main = urlFor(item);
             if (main == null) {
                 Glide.with(ViewRedditGalleryActivity.this).clear(binding.imageViewItemShadowboxGallery);
                 binding.imageViewItemShadowboxGallery.setImageDrawable(null);
@@ -339,9 +349,14 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
                 binding.errorImageViewItemShadowboxGallery.setVisibility(View.VISIBLE);
             } else {
                 // Decoded at the screen's width, whatever size the file is.
-                Glide.with(ViewRedditGalleryActivity.this).load(main)
-                        .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL)
-                        .into(binding.imageViewItemShadowboxGallery);
+                RequestBuilder<Drawable> request = Glide.with(ViewRedditGalleryActivity.this).load(main)
+                        .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL);
+                if (still != null && !still.equals(main)) {
+                    // The still stands in while an animated GIF downloads.
+                    request = request.thumbnail(Glide.with(ViewRedditGalleryActivity.this).load(still)
+                            .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL));
+                }
+                request.into(binding.imageViewItemShadowboxGallery);
             }
 
             if (TextUtils.isEmpty(item.caption)) {
@@ -351,6 +366,37 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
                 binding.captionTextViewItemShadowboxGallery.setText(item.caption);
             }
         }
+    }
+
+    /**
+     * What the list loads for an item. The resolution-bounded still Reddit publishes, for every
+     * type: the source is several thousand pixels wide and decoding a screenful of those is what
+     * made the list stutter. A video's url is the mp4, which an ImageView cannot show, so its still
+     * stands in; a GIF plays only where the Video Autoplay settings allow, and is a still otherwise.
+     */
+    @Nullable
+    private String urlFor(Post.Gallery item) {
+        String still = item.feedPreviewUrl;
+        if (item.mediaType == Post.Gallery.TYPE_VIDEO) {
+            return still;
+        }
+        if (item.mediaType == Post.Gallery.TYPE_GIF && autoplayGifs) {
+            return item.url;
+        }
+        return still != null ? still : item.url;
+    }
+
+    /**
+     * The same rule the feed applies: Video Autoplay set to never, or to Wi-Fi only while on
+     * mobile data, means nothing plays by itself, and Autoplay NSFW Videos excludes NSFW posts.
+     */
+    private boolean shouldAutoplayGifs() {
+        String setting = sharedPreferences.getString(
+                SharedPreferencesUtils.VIDEO_AUTOPLAY, SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_NEVER);
+        boolean allowed = SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ALWAYS_ON.equals(setting)
+                || (SharedPreferencesUtils.VIDEO_AUTOPLAY_VALUE_ON_WIFI.equals(setting)
+                && Utils.getConnectedNetwork(this) == Utils.NETWORK_TYPE_WIFI);
+        return allowed && (!isNsfw || sharedPreferences.getBoolean(SharedPreferencesUtils.AUTOPLAY_NSFW_VIDEOS, true));
     }
 
     /**
@@ -365,6 +411,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         binding.recyclerViewViewRedditGalleryActivity.setVisibility(View.VISIBLE);
         if (binding.recyclerViewViewRedditGalleryActivity.getAdapter() == null) {
             binding.recyclerViewViewRedditGalleryActivity.setLayoutManager(new LinearLayoutManager(this));
+            binding.recyclerViewViewRedditGalleryActivity.setItemViewCacheSize(6);
             binding.recyclerViewViewRedditGalleryActivity.setAdapter(new GalleryListAdapter());
         }
         if (scrollTo > 0 && scrollTo < gallery.size()) {

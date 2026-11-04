@@ -331,8 +331,6 @@ Nhấn để thử lại."</string>
     <string name="search_history">"Lịch sử tìm kiếm"</string>
     <string name="no_search_history">"Không có lịch sử tìm kiếm"</string>
     <string name="api_statistics_activity_label">"API Thống kê"</string>
-    <string name="settings_api_statistics_title">"thống kê API"</string>
-    <string name="settings_api_statistics_summary">"Thời gian phản hồi của lệnh gọi API Reddit và truy xuất phương tiện (hình ảnh/video), theo điểm cuối"</string>
     <string name="api_statistics_empty">"Chưa có gì được ghi lại. Duyệt qua các bài đăng và xem một số phương tiện, sau đó quay lại — hoặc kiểm tra xem tính năng ghi đã được bật trong menu chưa."</string>
     <string name="api_statistics_enable_monitoring">"Ghi lại lệnh gọi API"</string>
     <string name="api_statistics_clear">"Xóa dữ liệu đã ghi"</string>
@@ -565,16 +563,8 @@ Nhấn để thử lại."</string>
     <string name="settings_share_title">"Chia sẻ"</string>
     <string name="settings_share_summary">"Hãy chia sẻ ứng dụng này với người khác nếu bạn thích nó"</string>
     <string name="settings_privacy_policy_title">"Chính sách riêng tư"</string>
-    <string name="settings_debug_title">"Gỡ lỗi"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Phiên bản %s"</string>
-    <string name="settings_screen_width_dp_title">"Chiều rộng màn hình"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Chiều rộng màn hình nhỏ nhất"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Tuỳ biến"</string>
     <string name="settings_customize_light_theme_title">"Chủ đề sáng"</string>
     <string name="settings_customize_dark_theme_title">"Chủ đề tối"</string>

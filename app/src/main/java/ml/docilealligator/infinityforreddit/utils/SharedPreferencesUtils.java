@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 
 public class SharedPreferencesUtils {
     public static final String API_MONITORING_ENABLED = "api_monitoring_enabled";
-    public static final String API_STATISTICS = "api_statistics";
     public static final String ENABLE_NOTIFICATION_KEY = "enable_notification";
     public static final String NOTIFICATION_INTERVAL_KEY = "notificaiton_interval";
     public static final String LAZY_MODE_INTERVAL_KEY = "lazy_mode_interval";
@@ -35,9 +34,6 @@ public class SharedPreferencesUtils {
     public static final String SHARE_KEY = "share";
     public static final String PRIVACY_POLICY_KEY = "privacy_policy";
     public static final String VERSION_KEY = "version";
-    public static final String SCREEN_WIDTH_DP_KEY = "screen_width_dp";
-    public static final String SMALLEST_SCREEN_WIDTH_DP_KEY = "smallest_screen_width_dp";
-    public static final String IS_TABLET_KEY = "is_tablet";
     public static final String FONT_SIZE_KEY = "font_size";
     public static final String TITLE_FONT_SIZE_KEY = "title_font_size";
     public static final String CONTENT_FONT_SIZE_KEY = "content_font_size";

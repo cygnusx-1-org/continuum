@@ -328,8 +328,6 @@
     <string name="search_history">"Taariikhda Raadinta"</string>
     <string name="no_search_history">"Taariikh raadin ma jirto"</string>
     <string name="api_statistics_activity_label">"API Tirakoobka"</string>
-    <string name="settings_api_statistics_title">"API tirakoobka"</string>
-    <string name="settings_api_statistics_summary">"Waqtiyada jawaabta ee codsiyada Reddit API iyo soo qaadista warbaahinta (sawir/fiidiyow), sida uu dhamaadku yahay"</string>
     <string name="api_statistics_empty">"Wax wali la duubay ma jiro. Baadh qoraalada oo arag qaar ka mid ah warbaahinta, ka dibna soo noqo - ama hubi in duubista ay karti u leedahay liiska."</string>
     <string name="api_statistics_enable_monitoring">"Diiwaangeli codsiyada API"</string>
     <string name="api_statistics_clear">"Nadiifi xogta la duubay"</string>
@@ -562,16 +560,8 @@
     <string name="settings_share_title">"La wadaag"</string>
     <string name="settings_share_summary">"La wadaag app kan dadka kale haddii aad ka hesho"</string>
     <string name="settings_privacy_policy_title">"Siyaasadda Qarsoonnimada"</string>
-    <string name="settings_debug_title">"Qalabaynta"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Nooca %s"</string>
-    <string name="settings_screen_width_dp_title">"Balaadhka Shaashada"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Ballaca Shaashada ugu yar"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Habaynta"</string>
     <string name="settings_customize_light_theme_title">"Mawduuca khafiifka ah ee"</string>
     <string name="settings_customize_dark_theme_title">"Mawduuca Madow"</string>

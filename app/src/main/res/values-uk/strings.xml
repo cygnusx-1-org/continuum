@@ -338,8 +338,6 @@
     <string name="search_history">"Історія пошуку"</string>
     <string name="no_search_history">"Немає історії пошуку"</string>
     <string name="api_statistics_activity_label">"API Статистика"</string>
-    <string name="settings_api_statistics_title">"API статистика"</string>
-    <string name="settings_api_statistics_summary">"Час відповіді на виклики Reddit API та отримання медіа (зображення/відео) за кінцевою точкою"</string>
     <string name="api_statistics_empty">"Ще нічого не записано. Переглянь публікації та медіафайли, а потім повернись — або перевір, чи ввімкнено запис у меню."</string>
     <string name="api_statistics_enable_monitoring">"Записувати виклики API"</string>
     <string name="api_statistics_clear">"Очистити записані дані"</string>
@@ -572,16 +570,8 @@
     <string name="settings_share_title">"Пошир"</string>
     <string name="settings_share_summary">"Поділися цим застосунком з іншими, якщо він тобі подобається"</string>
     <string name="settings_privacy_policy_title">"Політика приватності"</string>
-    <string name="settings_debug_title">"Налагодження"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Версія %s"</string>
-    <string name="settings_screen_width_dp_title">"Ширина екрана"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Найменша ширина екрана"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Пристосування"</string>
     <string name="settings_customize_light_theme_title">"Світла тема"</string>
     <string name="settings_customize_dark_theme_title">"Темна тема"</string>

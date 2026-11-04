@@ -333,8 +333,6 @@ Appuyez pour réessayer."</string>
     <string name="search_history">"Historique de recherche"</string>
     <string name="no_search_history">"Aucun historique de recherche"</string>
     <string name="api_statistics_activity_label">"API Statistiques"</string>
-    <string name="settings_api_statistics_title">"API statistiques"</string>
-    <string name="settings_api_statistics_summary">"Temps de réponse des appels à l’API Reddit et de la récupération des médias (image/vidéo), par point de terminaison"</string>
     <string name="api_statistics_empty">"Rien n'a encore été enregistré. Parcourez les publications et affichez certains médias, puis revenez – ou vérifiez que l'enregistrement est activé dans le menu."</string>
     <string name="api_statistics_enable_monitoring">"Enregistrer les appels API"</string>
     <string name="api_statistics_clear">"Effacer les données enregistrées"</string>
@@ -567,16 +565,8 @@ Appuyez pour réessayer."</string>
     <string name="settings_share_title">"Partager"</string>
     <string name="settings_share_summary">"Partage cette application avec d\'autres si tu l\'apprécies"</string>
     <string name="settings_privacy_policy_title">"Politique de confidentialité"</string>
-    <string name="settings_debug_title">"Débogage"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Version %s"</string>
-    <string name="settings_screen_width_dp_title">"Largeur d'écran"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Plus petite largeur d’écran"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Personnalisations"</string>
     <string name="settings_customize_light_theme_title">"Thème Clair"</string>
     <string name="settings_customize_dark_theme_title">"Thème Sombre"</string>

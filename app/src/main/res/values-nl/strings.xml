@@ -334,8 +334,6 @@ Druk om opnieuw te proberen."</string>
     <string name="search_history">"Zoekgeschiedenis"</string>
     <string name="no_search_history">"Geen zoekgeschiedenis"</string>
     <string name="api_statistics_activity_label">"API Statistieken"</string>
-    <string name="settings_api_statistics_title">"API statistieken"</string>
-    <string name="settings_api_statistics_summary">"Reactietijden van Reddit-API-aanroepen en het ophalen van media (afbeelding/video), per eindpunt"</string>
     <string name="api_statistics_empty">"Nog niets opgenomen. Blader door berichten, bekijk wat media en kom dan terug – of controleer of opnemen is ingeschakeld in het menu."</string>
     <string name="api_statistics_enable_monitoring">"API-aanroepen vastleggen"</string>
     <string name="api_statistics_clear">"Opgenomen gegevens wissen"</string>
@@ -568,16 +566,8 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_share_title">"Delen"</string>
     <string name="settings_share_summary">"Deel deze app met anderen als je hem graag gebruikt"</string>
     <string name="settings_privacy_policy_title">"Privacy Beleid"</string>
-    <string name="settings_debug_title">"Foutopsporing"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Versie %s"</string>
-    <string name="settings_screen_width_dp_title">"Schermbreedte"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Kleinste schermbreedte"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Vormgeving"</string>
     <string name="settings_customize_light_theme_title">"Licht thema"</string>
     <string name="settings_customize_dark_theme_title">"Donker thema"</string>

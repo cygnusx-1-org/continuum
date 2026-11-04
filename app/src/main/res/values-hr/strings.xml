@@ -329,8 +329,6 @@
     <string name="search_history">"Povijest pretraživanja"</string>
     <string name="no_search_history">"Nema povijesti pretraživanja"</string>
     <string name="api_statistics_activity_label">"API Statistika"</string>
-    <string name="settings_api_statistics_title">"API statistika"</string>
-    <string name="settings_api_statistics_summary">"Vremena odgovora poziva Reddit API-ja i dohvaćanja medija (slika/video), po krajnjoj točki"</string>
     <string name="api_statistics_empty">"Još ništa nije snimljeno. Pregledaj objave i pogledaj neke medije, a zatim se vrati — ili provjeri je li snimanje omogućeno u izborniku."</string>
     <string name="api_statistics_enable_monitoring">"Snimanje API poziva"</string>
     <string name="api_statistics_clear">"Obriši snimljene podatke"</string>
@@ -563,16 +561,8 @@
     <string name="settings_share_title">"Dijeljenje"</string>
     <string name="settings_share_summary">"Ako Tebi se aplikacija sviđa, podijeli ju s drugima"</string>
     <string name="settings_privacy_policy_title">"Politika privatnosti"</string>
-    <string name="settings_debug_title">"Debug"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Verzija %s"</string>
-    <string name="settings_screen_width_dp_title">"Širina zaslona"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Najmanja širina zaslona"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Prilagođavanje"</string>
     <string name="settings_customize_light_theme_title">"Svijetla tema"</string>
     <string name="settings_customize_dark_theme_title">"Tamna tema"</string>

@@ -338,8 +338,6 @@
     <string name="search_history">"搜索记录"</string>
     <string name="no_search_history">"无搜索记录"</string>
     <string name="api_statistics_activity_label">"API 统计"</string>
-    <string name="settings_api_statistics_title">"API 统计"</string>
-    <string name="settings_api_statistics_summary">"Reddit API 调用和媒体（图像/视频）检索的响应时间（按端点）"</string>
     <string name="api_statistics_empty">"尚未记录任何内容。浏览帖子并查看一些媒体，然后返回 - 或检查菜单中是否启用了录制。"</string>
     <string name="api_statistics_enable_monitoring">"记录 API 调用"</string>
     <string name="api_statistics_clear">"清除记录数据"</string>
@@ -572,16 +570,8 @@
     <string name="settings_share_title">"分享"</string>
     <string name="settings_share_summary">"如果您喜欢此应用，可以分享给其他人"</string>
     <string name="settings_privacy_policy_title">"隐私政策"</string>
-    <string name="settings_debug_title">"调试"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"版本 %s"</string>
-    <string name="settings_screen_width_dp_title">"屏幕宽度"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"最小屏幕宽度"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"自定义"</string>
     <string name="settings_customize_light_theme_title">"明亮主题"</string>
     <string name="settings_customize_dark_theme_title">"黑暗主题"</string>

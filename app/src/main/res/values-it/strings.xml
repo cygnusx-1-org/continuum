@@ -339,8 +339,6 @@ Tocca per riprovare."</string>
     <string name="search_history">"Cronologia ricerche"</string>
     <string name="no_search_history">"Nessuna cronologia di ricerca"</string>
     <string name="api_statistics_activity_label">"API Statistiche"</string>
-    <string name="settings_api_statistics_title">"API statistiche"</string>
-    <string name="settings_api_statistics_summary">"Tempi di risposta delle chiamate all’API di Reddit e del recupero dei contenuti multimediali (immagini/video), per endpoint"</string>
     <string name="api_statistics_empty">"Ancora niente registrato. Sfoglia i post e visualizza alcuni contenuti multimediali, quindi torna indietro oppure controlla che la registrazione sia abilitata nel menu."</string>
     <string name="api_statistics_enable_monitoring">"Registra le chiamate API"</string>
     <string name="api_statistics_clear">"Cancella i dati registrati"</string>
@@ -573,16 +571,8 @@ Tocca per riprovare."</string>
     <string name="settings_share_title">"Condividi"</string>
     <string name="settings_share_summary">"Condividi questa app con altre persone se la apprezzi"</string>
     <string name="settings_privacy_policy_title">"Informativa sulla privacy"</string>
-    <string name="settings_debug_title">"Debug"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Versione %s"</string>
-    <string name="settings_screen_width_dp_title">"Larghezza dello schermo"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Larghezza minima dello schermo"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Personalizzazione"</string>
     <string name="settings_customize_light_theme_title">"Tema Chiaro"</string>
     <string name="settings_customize_dark_theme_title">"Tema Scuro"</string>

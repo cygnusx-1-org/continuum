@@ -338,8 +338,6 @@ Toca para reintentar."</string>
     <string name="search_history">"Historial de búsqueda"</string>
     <string name="no_search_history">"Sin historial de búsqueda"</string>
     <string name="api_statistics_activity_label">"API Estadísticas"</string>
-    <string name="settings_api_statistics_title">"API estadísticas"</string>
-    <string name="settings_api_statistics_summary">"Tiempos de respuesta de las llamadas a la API de Reddit y de la recuperación de medios (imagen/vídeo), por punto final"</string>
     <string name="api_statistics_empty">"Aún no se ha registrado nada. Explore publicaciones y vea algunos medios, luego regrese o verifique que la grabación esté habilitada en el menú."</string>
     <string name="api_statistics_enable_monitoring">"Registrar las llamadas a la API"</string>
     <string name="api_statistics_clear">"Borrar datos grabados"</string>
@@ -572,16 +570,8 @@ Toca para reintentar."</string>
     <string name="settings_share_title">"Compartir"</string>
     <string name="settings_share_summary">"Si te gusta esta aplicación ¡Compártela!"</string>
     <string name="settings_privacy_policy_title">"Política de privacidad"</string>
-    <string name="settings_debug_title">"Depuración"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Versión %s"</string>
-    <string name="settings_screen_width_dp_title">"Ancho de pantalla"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Ancho de pantalla más pequeño"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Personalización"</string>
     <string name="settings_customize_light_theme_title">"Tema Claro"</string>
     <string name="settings_customize_dark_theme_title">"Tema Oscuro"</string>

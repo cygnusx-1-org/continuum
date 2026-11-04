@@ -338,8 +338,6 @@ Apasă pentru reîncărcare."</string>
     <string name="search_history">"Istoricul căutărilor"</string>
     <string name="no_search_history">"Nu există istoric de căutare"</string>
     <string name="api_statistics_activity_label">"API Statistici"</string>
-    <string name="settings_api_statistics_title">"API statistici"</string>
-    <string name="settings_api_statistics_summary">"Timpii de răspuns ai apelurilor Reddit API și ai preluării media (imagine/video), după punctul final"</string>
     <string name="api_statistics_empty">"Nu s-a înregistrat încă nimic. Răsfoiește postări și vezi unele media, apoi revii - sau verifică dacă înregistrarea este activată în meniu."</string>
     <string name="api_statistics_enable_monitoring">"Înregistrează apelurile API"</string>
     <string name="api_statistics_clear">"Șterge datele înregistrate"</string>
@@ -572,16 +570,8 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_share_title">"Distribuie"</string>
     <string name="settings_share_summary">"Distribuie această aplicație altor persoane dacă te place"</string>
     <string name="settings_privacy_policy_title">"Politica de Confidențialitate"</string>
-    <string name="settings_debug_title">"Depanare"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Versiunea %s"</string>
-    <string name="settings_screen_width_dp_title">"Lățimea ecranului"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Cea mai mică lățime a ecranului"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Personalizare"</string>
     <string name="settings_customize_light_theme_title">"Temă luminoasă"</string>
     <string name="settings_customize_dark_theme_title">"Temă întunecată"</string>

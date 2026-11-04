@@ -337,8 +337,6 @@
     <string name="search_history">"История поиска"</string>
     <string name="no_search_history">"Нет истории поиска"</string>
     <string name="api_statistics_activity_label">"API Статистика"</string>
-    <string name="settings_api_statistics_title">"API статистика"</string>
-    <string name="settings_api_statistics_summary">"Время ответа вызовов Reddit API и получения мультимедиа (изображений/видео) по конечной точке"</string>
     <string name="api_statistics_empty">"Пока ничего не записано. Просмотри сообщения и просмотри медиафайлы, затем вернись или проверь, включена ли запись в меню."</string>
     <string name="api_statistics_enable_monitoring">"Записывать вызовы API"</string>
     <string name="api_statistics_clear">"Очистить записанные данные"</string>
@@ -571,16 +569,8 @@
     <string name="settings_share_title">"Поделиться"</string>
     <string name="settings_share_summary">"Поделись этим приложением с другими людьми, если оно тебе нравится"</string>
     <string name="settings_privacy_policy_title">"Политика конфиденциальности"</string>
-    <string name="settings_debug_title">"Отладка"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Версия %s"</string>
-    <string name="settings_screen_width_dp_title">"Ширина экрана"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Наименьшая ширина экрана"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Персонализация"</string>
     <string name="settings_customize_light_theme_title">"Светлая тема"</string>
     <string name="settings_customize_dark_theme_title">"Тёмная тема"</string>

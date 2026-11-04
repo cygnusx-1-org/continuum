@@ -361,8 +361,6 @@
     <string name="search_history">Search History</string>
     <string name="no_search_history">No search history</string>
     <string name="api_statistics_activity_label">API Statistics</string>
-    <string name="settings_api_statistics_title">API statistics</string>
-    <string name="settings_api_statistics_summary">Response times of Reddit API calls and media (image/video) retrieval, by endpoint</string>
     <string name="api_statistics_empty">Nothing recorded yet. Browse posts and view some media, then come back — or check that recording is enabled in the menu.</string>
     <string name="api_statistics_enable_monitoring">Record API calls</string>
     <string name="api_statistics_clear">Clear recorded data</string>
@@ -636,16 +634,8 @@
     <string name="settings_share_title">Share</string>
     <string name="settings_share_summary">Share this app to other people if you enjoy it</string>
     <string name="settings_privacy_policy_title">Privacy Policy</string>
-    <string name="settings_debug_title">Debug</string>
     <string name="settings_version_title">Reddit Jr.</string>
     <string name="settings_version_summary">Version %s</string>
-    <string name="settings_screen_width_dp_title">Screen Width</string>
-    <string name="settings_screen_width_dp_summary">%d dp</string>
-    <string name="settings_smallest_screen_width_dp_title">Smallest Screen Width</string>
-    <string name="settings_smallest_screen_width_dp_summary">%d dp</string>
-    <string name="settings_is_tablet_title">isTablet (sw600dp)</string>
-    <string name="settings_is_tablet_summary_true">true</string>
-    <string name="settings_is_tablet_summary_false">false</string>
     <string name="settings_category_customization_title">Customization</string>
     <string name="settings_customize_light_theme_title">Light Theme</string>
     <string name="settings_customize_dark_theme_title">Dark Theme</string>
@@ -843,7 +833,7 @@
     <string name="settings_media_only_posts_in_gallery_layout_summary">In gallery layout, show only image, GIF, video and gallery posts. Text, poll and link posts are hidden</string>
     <string name="settings_hide_post_type">Hide Post Type</string>
     <string name="settings_post_type_card_border_title">Post Type Card Border</string>
-    <string name="settings_post_type_card_border_summary">A thin line across the top of each post in Card Layout 1 and 3, in the post type\'s color</string>
+    <string name="settings_post_type_card_border_summary">A thin line across the top of each post in Card Layout 1 and 3, in the post type\'s color, blending into the NSFW color on NSFW posts</string>
     <string name="settings_collapse_stickied_posts_title">Collapse Stickied Posts</string>
     <string name="settings_collapse_stickied_posts_summary">Show a subreddit\'s stickied posts as a single line. Tap one to open it up</string>
     <string name="settings_hide_nsfw_badge_title">Hide NSFW Badge</string>

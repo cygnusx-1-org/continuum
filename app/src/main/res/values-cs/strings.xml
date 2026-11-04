@@ -338,8 +338,6 @@
     <string name="search_history">"Historie vyhledávání"</string>
     <string name="no_search_history">"Žádná historie vyhledávání"</string>
     <string name="api_statistics_activity_label">"API Statistika"</string>
-    <string name="settings_api_statistics_title">"Statistika API"</string>
-    <string name="settings_api_statistics_summary">"Doba odezvy volání Reddit API a načítání médií (obrázků/videí), podle koncového bodu"</string>
     <string name="api_statistics_empty">"Zatím nic nenahráno. Procházej příspěvky a zobraz některá média a pak se vrať – nebo zkontroluj, zda je v nabídce povoleno nahrávání."</string>
     <string name="api_statistics_enable_monitoring">"Zaznamenávat volání API"</string>
     <string name="api_statistics_clear">"Vymazání zaznamenaných dat"</string>
@@ -572,16 +570,8 @@
     <string name="settings_share_title">"Sdílet"</string>
     <string name="settings_share_summary">"Pokud máš rádi tuto aplikaci, sdílej ji s ostatními lidmi"</string>
     <string name="settings_privacy_policy_title">"Ochrana údajů"</string>
-    <string name="settings_debug_title">"Ladění"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Verze %s"</string>
-    <string name="settings_screen_width_dp_title">"Šířka obrazovky"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Nejmenší šířka obrazovky"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Přizpůsobení"</string>
     <string name="settings_customize_light_theme_title">"Světlý motiv"</string>
     <string name="settings_customize_dark_theme_title">"Tmavý motiv"</string>

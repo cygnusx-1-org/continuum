@@ -335,8 +335,6 @@
     <string name="search_history">"தேடல் வரலாறு"</string>
     <string name="no_search_history">"தேடல் வரலாறு இல்லை"</string>
     <string name="api_statistics_activity_label">"API புள்ளிவிவரங்கள்"</string>
-    <string name="settings_api_statistics_title">"API புள்ளிவிவரங்கள்"</string>
-    <string name="settings_api_statistics_summary">"Reddit API அழைப்புகள் மற்றும் ஊடக (படம்/வீடியோ) மீட்டெடுப்பின் பதில் நேரங்கள், இறுதிப்புள்ளி வாரியாக"</string>
     <string name="api_statistics_empty">"இன்னும் எதுவும் பதிவு செய்யப்படவில்லை. இடுகைகளை உலாவவும் மற்றும் சில மீடியாக்களைப் பார்க்கவும், பின்னர் திரும்பி வரவும் - அல்லது மெனுவில் பதிவு இயக்கப்பட்டுள்ளதா எனச் சரிபார்க்கவும்."</string>
     <string name="api_statistics_enable_monitoring">"API அழைப்புகளைப் பதிவுசெய்"</string>
     <string name="api_statistics_clear">"பதிவுசெய்யப்பட்ட தரவை அழிக்கவும்"</string>
@@ -569,16 +567,8 @@
     <string name="settings_share_title">"பகிர்"</string>
     <string name="settings_share_summary">"இன்புறுகிறீர்களெனில் மற்ற மக்களுக்கும் இச்செயலியை அனுப்புக"</string>
     <string name="settings_privacy_policy_title">"தனியுரிமைக் கொள்கை"</string>
-    <string name="settings_debug_title">"பிழைத்திருத்தம்"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"பதிப்பு %s"</string>
-    <string name="settings_screen_width_dp_title">"திரை அகலம்"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"மிகச்சிறிய திரை அகலம்"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"தனிப்பயனாக்கம்"</string>
     <string name="settings_customize_light_theme_title">"ஒளிர்ந்த தோற்றம்"</string>
     <string name="settings_customize_dark_theme_title">"இருண்ட தோற்றம்"</string>

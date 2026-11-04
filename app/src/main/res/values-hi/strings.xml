@@ -333,8 +333,6 @@
     <string name="search_history">"खोज इतिहास"</string>
     <string name="no_search_history">"कोई खोज इतिहास नहीं"</string>
     <string name="api_statistics_activity_label">"API सांख्यिकी"</string>
-    <string name="settings_api_statistics_title">"API आँकड़े"</string>
-    <string name="settings_api_statistics_summary">"Reddit API कॉल और मीडिया (छवि/वीडियो) पुनर्प्राप्ति का प्रतिक्रिया समय, एंडपॉइंट द्वारा"</string>
     <string name="api_statistics_empty">"अभी तक कुछ भी रिकॉर्ड नहीं किया गया। पोस्ट ब्राउज़ करें और कुछ मीडिया देखें, फिर वापस आएं - या जांचें कि मेनू में रिकॉर्डिंग सक्षम है या नहीं।"</string>
     <string name="api_statistics_enable_monitoring">"API कॉल रिकॉर्ड करें"</string>
     <string name="api_statistics_clear">"रिकॉर्ड किया गया डेटा साफ़ करें"</string>
@@ -567,16 +565,8 @@
     <string name="settings_share_title">"साझा करें "</string>
     <string name="settings_share_summary">"यदि आप इसका आनंद लेते हैं तो एप्प को अन्य लोगों के साथ साझा करें "</string>
     <string name="settings_privacy_policy_title">"गोपनीयता नीति"</string>
-    <string name="settings_debug_title">"डिबग"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"संस्करण %s"</string>
-    <string name="settings_screen_width_dp_title">"स्क्रीन की चौड़ाई"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"सबसे छोटी स्क्रीन चौड़ाई"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"अनुकूलन "</string>
     <string name="settings_customize_light_theme_title">"हल्की थीम "</string>
     <string name="settings_customize_dark_theme_title">"गहरी थीम "</string>

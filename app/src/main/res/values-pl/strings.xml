@@ -331,8 +331,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="search_history">"Historia wyszukiwania"</string>
     <string name="no_search_history">"Brak historii wyszukiwania"</string>
     <string name="api_statistics_activity_label">"API Statystyki"</string>
-    <string name="settings_api_statistics_title">"API statystyki"</string>
-    <string name="settings_api_statistics_summary">"Czasy odpowiedzi wywołań Reddit API i pobierania multimediów (obrazów/wideo), według punktu końcowego"</string>
     <string name="api_statistics_empty">"Nic jeszcze nie zostało nagrane. Przeglądaj posty i przeglądaj multimedia, a następnie wróć lub sprawdź, czy w menu jest włączone nagrywanie."</string>
     <string name="api_statistics_enable_monitoring">"Rejestruj wywołania API"</string>
     <string name="api_statistics_clear">"Usuń zapisane dane"</string>
@@ -565,16 +563,8 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_share_title">"Udostępnij"</string>
     <string name="settings_share_summary">"Udostępnij tą aplikację, jeśli ci się ona podoba"</string>
     <string name="settings_privacy_policy_title">"Polityka prywatności"</string>
-    <string name="settings_debug_title">"Debugowanie"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Wersja %s"</string>
-    <string name="settings_screen_width_dp_title">"Szerokość ekranu"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"Najmniejsza szerokość ekranu"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Personalizacja"</string>
     <string name="settings_customize_light_theme_title">"Jasny motyw"</string>
     <string name="settings_customize_dark_theme_title">"Ciemny motyw"</string>

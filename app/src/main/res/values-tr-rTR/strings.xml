@@ -339,8 +339,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="search_history">"Arama Geçmişi"</string>
     <string name="no_search_history">"Arama geçmişi yok"</string>
     <string name="api_statistics_activity_label">"API İstatistikler"</string>
-    <string name="settings_api_statistics_title">"API istatistikleri"</string>
-    <string name="settings_api_statistics_summary">"Uç noktaya göre Reddit API çağrılarının ve medya (görüntü/video) alımının yanıt süreleri"</string>
     <string name="api_statistics_empty">"Henüz hiçbir şey kaydedilmedi. Gönderilere göz atın ve bazı medyaları görüntüleyin, ardından geri dönün veya menüde kaydın etkin olup olmadığını kontrol edin."</string>
     <string name="api_statistics_enable_monitoring">"API çağrılarını kaydet"</string>
     <string name="api_statistics_clear">"Kaydedilen verileri temizle"</string>
@@ -573,16 +571,8 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_share_title">"Paylaş"</string>
     <string name="settings_share_summary">"Bu uygulamayı beğendiyseniz başkalarıyla paylaşın"</string>
     <string name="settings_privacy_policy_title">"Gizlilik Politikası"</string>
-    <string name="settings_debug_title">"Hata Ayıklama"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"%s Sürümü"</string>
-    <string name="settings_screen_width_dp_title">"Ekran Genişliği"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"En Küçük Ekran Genişliği"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Özelleştirme"</string>
     <string name="settings_customize_light_theme_title">"Açık Tema"</string>
     <string name="settings_customize_dark_theme_title">"Koyu Tema"</string>

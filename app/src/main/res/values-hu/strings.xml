@@ -330,8 +330,6 @@
     <string name="search_history">"Keresési előzmények"</string>
     <string name="no_search_history">"Nincs keresési előzmény"</string>
     <string name="api_statistics_activity_label">"API Statisztika"</string>
-    <string name="settings_api_statistics_title">"API statisztikák"</string>
-    <string name="settings_api_statistics_summary">"A Reddit API-hívások és a média (kép/videó) lekérésének válaszideje végpontonként"</string>
     <string name="api_statistics_empty">"Még nincs rögzítve semmi. Böngéssz a bejegyzések között, nézz meg néhány médiát, majd térj vissza – vagy ellenőrizd, hogy a menüben engedélyezve van-e a rögzítés."</string>
     <string name="api_statistics_enable_monitoring">"API-hívások rögzítése"</string>
     <string name="api_statistics_clear">"Rögzített adatok törlése"</string>
@@ -564,16 +562,8 @@
     <string name="settings_share_title">"Megosztás"</string>
     <string name="settings_share_summary">"Ha tetszik az app oszd meg másokkal is"</string>
     <string name="settings_privacy_policy_title">"Adatvédelmi nyilatkozat"</string>
-    <string name="settings_debug_title">"hibakeresés"</string>
     <string name="settings_version_title">"Reddit Jr."</string>
     <string name="settings_version_summary">"Verzió %s"</string>
-    <string name="settings_screen_width_dp_title">"képernyő szélesség"</string>
-    <string name="settings_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_smallest_screen_width_dp_title">"A legkisebb képernyő szélesség"</string>
-    <string name="settings_smallest_screen_width_dp_summary">"%d dp"</string>
-    <string name="settings_is_tablet_title">"isTablet (sw600dp)"</string>
-    <string name="settings_is_tablet_summary_true">"true"</string>
-    <string name="settings_is_tablet_summary_false">"false"</string>
     <string name="settings_category_customization_title">"Testreszabás"</string>
     <string name="settings_customize_light_theme_title">"Világos téma"</string>
     <string name="settings_customize_dark_theme_title">"Sötét téma"</string>
