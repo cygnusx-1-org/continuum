@@ -48,7 +48,7 @@ object AccountScopedKeys {
     private val DEFAULT_FILE_SCOPED = setOf(
         // Post
         "default_post_layout", "default_post_layout_unfolded", "default_link_post_layout",
-        "hide_post_type", "hide_nsfw_badge", "collapse_stickied_posts", "post_type_card_border", "post_type_triangle_indicator",
+        "hide_post_type", "hide_nsfw_badge", "collapse_stickied_posts", "hide_vote_buttons", "post_type_card_border", "post_type_triangle_indicator",
         "hide_post_type_indicator",
         "hide_image_count_in_gallery", "hide_post_flair", "hide_subreddit_and_user_prefix",
         "hide_the_number_of_votes", "hide_the_number_of_comments", "hide_text_post_content",

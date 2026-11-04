@@ -96,6 +96,12 @@
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
         app:defaultValue="false"
+        app:key="hide_vote_buttons"
+        app:title="@string/settings_hide_vote_buttons_title"
+        app:summary="@string/settings_hide_vote_buttons_summary" />
+
+    <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontSwitchPreference
+        app:defaultValue="false"
         app:key="hide_the_number_of_comments"
         app:title="@string/settings_hide_the_number_of_comments" />
 

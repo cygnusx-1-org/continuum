@@ -350,6 +350,12 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_VOTE_BUTTONS, false).observe(getViewLifecycleOwner(), hideVoteButtons -> {
+            if (getPostAdapter() != null && getPostAdapter().setHideVoteButtons(hideVoteButtons)) {
+                refreshAdapter();
+            }
+        });
+
         SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.POST_TYPE_CARD_BORDER, true).observe(getViewLifecycleOwner(), border -> {
             if (getPostAdapter() != null && getPostAdapter().setPostTypeCardBorder(border)) {
                 refreshAdapter();
@@ -1078,6 +1084,11 @@ public abstract class PostFragmentBase extends Fragment {
             return;
         }
 
+        // Before the position check below: once a post has been taken out of the feed the row
+        // numbers have moved on, so the undo of a hide arrives with a position that now names a
+        // different post, and would otherwise never put it back.
+        onPostHiddenChanged(event.post.getFullName(), event.post.isHidden());
+
         ItemSnapshotList<Post> posts = getPostAdapter().snapshot();
         if (event.positionInList >= 0 && event.positionInList < posts.size()) {
             Post post = posts.get(event.positionInList);
@@ -1148,7 +1159,6 @@ public abstract class PostFragmentBase extends Fragment {
                     post.markAsRead();
                 }
                 getPostAdapter().notifyItemChanged(event.positionInList);
-                onPostHiddenChanged(post.getFullName(), post.isHidden());
             }
         }
     }

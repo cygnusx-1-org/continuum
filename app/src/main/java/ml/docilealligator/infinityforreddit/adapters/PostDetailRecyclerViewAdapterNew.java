@@ -219,6 +219,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
     private final boolean mHideUpvoteRatio;
     private final boolean mHideSubredditAndUserPrefix;
     private final boolean mHideTheNumberOfVotes;
+    private final boolean mHideVoteButtons;
     private final boolean mHideTheNumberOfComments;
     private final boolean mShowGalleryMediaAsGrid;
     private final boolean mSeparatePostAndComments;
@@ -368,6 +369,7 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
         mHideUpvoteRatio = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_UPVOTE_RATIO, false);
         mHideSubredditAndUserPrefix = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_AND_USER_PREFIX, false);
         mHideTheNumberOfVotes = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_VOTES, false);
+        mHideVoteButtons = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_VOTE_BUTTONS, false);
         mHideTheNumberOfComments = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_THE_NUMBER_OF_COMMENTS, false);
         mShowGalleryMediaAsGrid = postDetailsSharedPreferences.getBoolean(SharedPreferencesUtils.SHOW_GALLERY_MEDIA_AS_GRID, true);
 
@@ -924,6 +926,10 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             } else {
                 ((PostDetailBaseViewHolder) holder).scoreTextView.setText(mActivity.getString(R.string.vote));
             }
+            int voteVisibility = mHideVoteButtons ? View.GONE : View.VISIBLE;
+            ((PostDetailBaseViewHolder) holder).upvoteButton.setVisibility(voteVisibility);
+            ((PostDetailBaseViewHolder) holder).scoreTextView.setVisibility(voteVisibility);
+            ((PostDetailBaseViewHolder) holder).downvoteButton.setVisibility(voteVisibility);
 
             ((PostDetailBaseViewHolder) holder).commentsCountButton.setText(Integer.toString(mPost.getNComments()));
 
@@ -2626,7 +2632,67 @@ public class PostDetailRecyclerViewAdapterNew extends RecyclerView.Adapter<Recyc
             commentsCountButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
             saveButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
             shareButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
+            addCommentMediaButton();
         }
+
+        /**
+         * A button beside Save that opens every image in the comments as the vertical list. Built
+         * here rather than in each of the layouts, since every post type shares this row.
+         */
+        private void addCommentMediaButton() {
+            MaterialButton button = new MaterialButton(itemView.getContext(), null,
+                    com.google.android.material.R.attr.materialIconButtonOutlinedStyle);
+            button.setId(View.generateViewId());
+            button.setIconResource(R.drawable.ic_image_day_night_24dp);
+            button.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
+            button.setIconSize(Math.round(24 * itemView.getResources().getDisplayMetrics().density));
+            button.setStrokeWidth(0);
+            button.setContentDescription(itemView.getContext().getString(R.string.comment_media_button_description));
+            button.setOnClickListener(view -> openCommentMedia());
+
+            ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+            params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+            if (mVoteButtonsOnTheRight) {
+                // Share, Save, then this, then Comments: Comments moves along to make room.
+                params.startToEnd = saveButton.getId();
+                params.horizontalBias = 0f;
+                ConstraintLayout.LayoutParams commentsParams =
+                        (ConstraintLayout.LayoutParams) commentsCountButton.getLayoutParams();
+                commentsParams.startToEnd = button.getId();
+                commentsCountButton.setLayoutParams(commentsParams);
+            } else {
+                // Comments, this, Save, Share: right up against Save.
+                params.startToEnd = commentsCountButton.getId();
+                params.endToStart = saveButton.getId();
+                params.horizontalBias = 1f;
+            }
+            bottomConstraintLayout.addView(button, params);
+        }
+    }
+
+    /**
+     * Opens the images and GIFs in the comments that are on screen as the vertical list, the way
+     * a gallery post opens. The list is a copy of this post carrying them as its gallery.
+     */
+    private void openCommentMedia() {
+        if (mPost == null || mCommentsSupplier == null) {
+            return;
+        }
+        ArrayList<Post.Gallery> media = ml.docilealligator.infinityforreddit.comment.CommentMedia
+                .collect(mCommentsSupplier.get());
+        if (media.isEmpty()) {
+            Toast.makeText(mActivity, R.string.no_media_in_comments, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Post commentMedia = new Post(mPost);
+        commentMedia.setGallery(media);
+        commentMedia.setPostType(Post.GALLERY_TYPE);
+        Intent intent = new Intent(mActivity, ViewRedditGalleryActivity.class);
+        intent.putExtra(ViewRedditGalleryActivity.EXTRA_POST, commentMedia);
+        intent.putExtra(ViewRedditGalleryActivity.EXTRA_SCROLL_LIST, true);
+        mActivity.startActivity(intent);
     }
 
     @UnstableApi

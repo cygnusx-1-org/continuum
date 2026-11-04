@@ -2298,7 +2298,10 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
     @Override
     protected void onPostHiddenChanged(String fullName, boolean hidden) {
         if (mPostViewModel != null) {
-            mPostViewModel.setPostHiddenInFeed(fullName, hidden);
+            // The Hidden listing is the one feed where a hidden post belongs, so there it is
+            // unhiding that takes a post out.
+            boolean inHiddenListing = PostPagingSource.USER_WHERE_HIDDEN.equals(where);
+            mPostViewModel.setPostHiddenInFeed(fullName, inHiddenListing != hidden);
         }
     }
 

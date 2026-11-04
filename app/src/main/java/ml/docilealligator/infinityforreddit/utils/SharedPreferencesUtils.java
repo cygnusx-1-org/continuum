@@ -305,6 +305,7 @@ public class SharedPreferencesUtils {
     public static final String HIDE_POST_FLAIR = "hide_post_flair";
     public static final String HIDE_SUBREDDIT_AND_USER_PREFIX = "hide_subreddit_and_user_prefix";
     public static final String HIDE_THE_NUMBER_OF_VOTES = "hide_the_number_of_votes";
+    public static final String HIDE_VOTE_BUTTONS = "hide_vote_buttons";
     public static final String HIDE_THE_NUMBER_OF_COMMENTS = "hide_the_number_of_comments";
     public static final String BACKUP_SETTINGS = "backup_settings";
     public static final String RESTORE_SETTINGS = "restore_settings";
