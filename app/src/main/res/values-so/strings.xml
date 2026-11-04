@@ -534,7 +534,6 @@
     <string name="settings_open_source_title">"Isha Furan"</string>
     <string name="settings_open_source_summary">"Ku dheji Github haddii aad jeceshahay abkan"</string>
     <string name="settings_email_title">"iimaylka"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Koontada Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1442,8 +1441,8 @@
     <string name="post_filter_rule_error_wildcard_too_short">"Isticmaal ugu yaraan %1$d xaraf. Erayada gaagaaban ayaa aad uga badan inta aad filan lahayd subreddits."</string>
     <string name="post_filter_rule_error_asterisk">"Dooro nooc kabriid intii aad ku qori lahayd *."</string>
     <string name="post_filter_match_explanation">"Ciyaar aan ahayn 'Sax' kaliya waxay quseysaa r/%1$s, markaa kelmad ballaaran ma faaruqi karto quudintaada kale. Waxaa lagugu dari doonaa 'ayaa ku habboon' adiga."</string>
-    <string name="post_filter_applies_to_summary_locked">"A 'Waxay ku bilaabataa', 'Ku dhammaata' ama 'Waxaa ku jira' qaanuunka waxa uu ku shaqeeyaa kaliya r/ContinuumAll, marka shaandhada ayaa lagu dhejiyaa. Ka saar sharcigaas si aad u doorato quudin kale."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s lagu daray 'ayaa ku habboon'"</string>
+    <string name="post_filter_applies_to_summary_locked">"A 'Waxay ku bilaabataa', 'Ku dhammaata' ama 'Waxaa ku jira' qaanuunka waxa uu ku shaqeeyaa kaliya r/RedditJrAll, marka shaandhada ayaa lagu dhejiyaa. Ka saar sharcigaas si aad u doorato quudin kale."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s lagu daray 'ayaa ku habboon'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"waxaa xannibay %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits xeerkani wuxuu leeyahay qoraallo qarsoon. Liiskan hore uma ogaan kartid, sidaas darteed waxa la dhisay markaad baadhayso."</string>
@@ -1612,7 +1611,7 @@
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Ogolaanshaha ogeysiinta lama bixin"</string>
     <string name="go_to_settings">"Dejimaha"</string>
-    <string name="welcome_to_continuum">"Ku soo dhawoow Reddit Jr., albaabkaaga si aad u hesho cabbir cusub oo dhan Reddit browsing!"</string>
+    <string name="welcome_to_redditjr">"Ku soo dhawoow Reddit Jr., albaabkaaga si aad u hesho cabbir cusub oo dhan Reddit browsing!"</string>
     <string name="subscription_prompt">"Kahor intaadan u dhex galin fursadaha aan la tirin karin ee uu appkani bixiyo,\n        Waxaan rabaa inaan horudhac ka ahaado oo aan daah-furno isbeddelka muhiimka ah ee aan hirgeliyay si aan u xaqiijiyo adeegga ugu wanaagsan ee suurtogalka ah ee adiga kugu habboon.\n        \n\nHadda wixii ka dambeeya, waxaad u baahan doontaa rukhsad bille ah si aad u gasho Reddit API gudaha Reddit Jr. iyo\n        tani waa sababta oo ah Reddit wuxuu bilaabay dallacaadda API gelitaanka ilaa Luulyo 1, 2023.\n        \n\nDhammaan heerarka ayaa si isku mid ah u shaqeeya. Haddii aad rabto inaad taageerto Reddit Jr., waxaad iska qori kartaa heer sare.\n        Inta badan lacagta heerka ugu hooseeya waxay tagtaa Reddit.\n    "</string>
     <string name="monthly">"bishii"</string>
     <string name="yearly">"sanadkii"</string>

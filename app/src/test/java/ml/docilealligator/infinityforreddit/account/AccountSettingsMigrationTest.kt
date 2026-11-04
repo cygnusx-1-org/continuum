@@ -55,7 +55,6 @@ class AccountSettingsMigrationTest {
         for (preferences in listOf(
             bottomAppBar, defaultPreferences, nsfwAndSpoiler, postLayout,
             file(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE),
-            file(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE),
             file(SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE),
             file(SharedPreferencesUtils.SORT_TYPE_SHARED_PREFERENCES_FILE),
             file(SharedPreferencesUtils.NAVIGATION_DRAWER_SHARED_PREFERENCES_FILE),

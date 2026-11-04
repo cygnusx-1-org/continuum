@@ -34,6 +34,7 @@ public final class CommentDecoder {
     private static final Pattern PARAGRAPH_BREAK = Pattern.compile("\\n[ \\t]*\\n");
     private static final Pattern BINARY = Pattern.compile("\\b(?:[01]{8}\\s*){2,}\\b");
     // A link's host and path, and a leading label such as "TikTok and IG: ".
+    private static final Pattern TRAILING_SLASHES = Pattern.compile("/+$");
     private static final Pattern LINK_PREFIX = Pattern.compile("^.*/");
     private static final Pattern LABEL_PREFIX = Pattern.compile("^.*:\\s+");
 
@@ -122,7 +123,10 @@ public final class CommentDecoder {
      * or a leading label ("TikTok and IG: name"). Copy still carries the full text.
      */
     public static String searchTerm(String decoded) {
-        String term = LINK_PREFIX.matcher(decoded).replaceFirst("");
+        // A link's trailing slash (https://link.me/name/) is not part of the handle, and left in
+        // it made the prefix strip below eat the whole link.
+        String term = TRAILING_SLASHES.matcher(decoded.trim()).replaceFirst("");
+        term = LINK_PREFIX.matcher(term).replaceFirst("");
         term = LABEL_PREFIX.matcher(term).replaceFirst("").trim();
         return term.isEmpty() ? decoded : term;
     }

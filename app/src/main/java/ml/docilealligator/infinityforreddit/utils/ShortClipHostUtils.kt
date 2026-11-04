@@ -7,7 +7,7 @@ import android.net.Uri
  * where the MP4 behind one of their share pages lives.
  *
  * Reddit's own video host barely appears on r/soccer, r/formula1, r/MMA or r/baseball. Goals,
- * overtakes and knockouts go up on a rotating cast of free clip hosts instead, and Continuum used
+ * overtakes and knockouts go up on a rotating cast of free clip hosts instead, and Reddit Jr. used
  * to render every one of those posts as a link card that opened a browser tab. Five hosts carry
  * essentially all of that volume:
  *

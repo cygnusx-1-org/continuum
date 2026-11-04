@@ -696,8 +696,8 @@ public class PostPagingSource extends ListenableFuturePagingSource<String, Post>
     }
 
     private ListenableFuture<Response<String>> fetchSubredditPosts(LoadParams<String> loadParams, RedditAPI api, int limit) {
-        // r/ContinuumAll is a name the app gives r/all's listing so a post filter can target it on
-        // its own. Only the API path is rewritten; everything else keeps the ContinuumAll identity.
+        // r/RedditJrAll is a name the app gives r/all's listing so a post filter can target it on
+        // its own. Only the API path is rewritten; everything else keeps the RedditJrAll identity.
         String apiName = Constants.apiSubredditName(subredditOrUserName);
         if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {
             return api.getSubredditBestPostsListenableFuture(apiName, sortType.getType(),

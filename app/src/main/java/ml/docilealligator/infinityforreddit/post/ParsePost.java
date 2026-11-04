@@ -806,7 +806,7 @@ public class ParsePost {
                         }
                         // An entry can also be present without the `m` and `s` keys the lines below
                         // need. "failed" is the shape Reddit's listing gives an image leased with a
-                        // filepath (other API clients, and Continuum's own older galleries), though
+                        // filepath (other API clients, and Reddit Jr.'s own older galleries), though
                         // the images are fine and served from i.redd.it: build those from the media
                         // id (FailedRedditMedia). Skip any other such entry exactly like a missing
                         // one -- reading it would throw and cost the gallery its good images too.

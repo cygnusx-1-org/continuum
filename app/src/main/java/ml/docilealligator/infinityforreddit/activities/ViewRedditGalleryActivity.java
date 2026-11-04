@@ -196,7 +196,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
 
         EventBus.getDefault().register(this);
 
-        // Continuum dropped the "use bottom toolbar in media viewer" option and made the bottom
+        // Reddit Jr. dropped the "use bottom toolbar in media viewer" option and made the bottom
         // bar the default (it carries the rotate action), so the top toolbar upstream reinstated
         // never shows here.
         binding.toolbarViewRedditGalleryActivity.setVisibility(View.GONE);

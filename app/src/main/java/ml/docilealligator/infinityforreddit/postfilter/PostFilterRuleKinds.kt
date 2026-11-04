@@ -4,7 +4,7 @@ package ml.docilealligator.infinityforreddit.postfilter
  * Keeps wildcard subreddit rules and every other kind of rule in filters of their own.
  *
  * A wildcard term — 'Starts with', 'Ends with', 'Contains' — only runs on
- * [ml.docilealligator.infinityforreddit.Constants.CONTINUUM_ALL_SUBREDDIT], so a filter holding one
+ * [ml.docilealligator.infinityforreddit.Constants.REDDITJR_ALL_SUBREDDIT], so a filter holding one
  * is pinned to that feed. Everything else in the same filter is pinned there too and goes quietly
  * inert on Home and on the subreddits the user believes it covers: the filter reads as if it does
  * six things and does one. Issue #426 is that state, reached by adding a wildcard rule to a filter
@@ -21,7 +21,7 @@ object PostFilterRuleKinds {
 
     /**
      * True when [rules] holds a wildcard subreddit rule. One is enough: it only runs on
-     * r/ContinuumAll, and a filter that runs there cannot also be pointed at other feeds without
+     * r/RedditJrAll, and a filter that runs there cannot also be pointed at other feeds without
      * being half inert on them. That is what pins a filter, mixed or not.
      */
     @JvmStatic

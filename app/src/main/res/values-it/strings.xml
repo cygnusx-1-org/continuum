@@ -545,7 +545,6 @@ Tocca per riprovare."</string>
     <string name="settings_open_source_title">"Open Source"</string>
     <string name="settings_open_source_summary">"Se questa app ti piace, metti una stella al progetto su Github"</string>
     <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Account Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1462,8 +1461,8 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Utilizzare almeno %1$d caratteri. Le parole più brevi corrispondono a molti più subreddit di quanto ti aspetteresti."</string>
     <string name="post_filter_rule_error_asterisk">"Scegli un tipo di corrispondenza invece di digitare *."</string>
     <string name="post_filter_match_explanation">"Una corrispondenza diversa da \"Esatto\" si applica solo su r/%1$s, quindi una parola generica non può svuotare gli altri feed. Verrà aggiunto a \"Si applica a\" per te."</string>
-    <string name="post_filter_applies_to_summary_locked">"Una regola \"Inizia con\", \"Termina con\" o \"Contiene\" viene eseguita solo su r/ContinuumAll, quindi questo filtro è bloccato su di esso. Rimuovi quella regola per scegliere altri feed."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s aggiunto a 'Si applica a'"</string>
+    <string name="post_filter_applies_to_summary_locked">"Una regola \"Inizia con\", \"Termina con\" o \"Contiene\" viene eseguita solo su r/RedditJrAll, quindi questo filtro è bloccato su di esso. Rimuovi quella regola per scegliere altri feed."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s aggiunto a 'Si applica a'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Bloccato da %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddit da cui questa regola ha nascosto i post. Non puoi conoscere questo elenco in anticipo, quindi viene creato durante la navigazione."</string>
@@ -1637,7 +1636,7 @@ Tocca per riprovare."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Autorizzazione all'invio di notifiche non concessa"</string>
     <string name="go_to_settings">"Impostazioni"</string>
-    <string name="welcome_to_continuum">"Benvenuti su Reddit Jr., la vostra porta d'accesso a una nuova dimensione di navigazione su Reddit!"</string>
+    <string name="welcome_to_redditjr">"Benvenuti su Reddit Jr., la vostra porta d'accesso a una nuova dimensione di navigazione su Reddit!"</string>
     <string name="subscription_prompt">"Prima di immergerti nelle innumerevoli possibilità offerte da questa app, \n Voglio essere sincero e trasparente riguardo a un cambiamento significativo che ho implementato per assicurarti il miglior servizio possibile.\n \n\nD'ora in poi, avrai bisogno di un abbonamento mensile per accedere a Reddit API entro Reddit Jr. e\n questo perché Reddit ha iniziato a far pagare l'accesso a API dal 1° luglio 2023.\n \n\nTutti i livelli funzionano allo stesso modo. Se vuoi supportare Reddit Jr., puoi iscriverti a un livello superiore.\n La maggior parte del denaro del livello più basso va a Reddit.\n    "</string>
     <string name="monthly">"Mensile"</string>
     <string name="yearly">"Annuale"</string>

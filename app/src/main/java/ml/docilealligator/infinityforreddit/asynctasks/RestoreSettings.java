@@ -90,7 +90,6 @@ public class RestoreSettings {
                                 SharedPreferences proxySharedPreferences,
                                 SharedPreferences nsfwAndSpoilerSharedPreferencs,
                                 SharedPreferences postHistorySharedPreferences,
-                                SharedPreferences recentlyVisitedSharedPreferences,
                                 RestoreSettingsListener restoreSettingsListener) {
         executor.execute(() -> {
             try (InputStream zipFileInputStream = contentResolver.openInputStream(zipFileUri)) {
@@ -171,7 +170,6 @@ public class RestoreSettings {
                         targets.put(SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE,
                                 rawFile(context, SharedPreferencesUtils.BOTTOM_APP_BAR_SHARED_PREFERENCES_FILE));
                         targets.put(SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE, postHistorySharedPreferences);
-                        targets.put(SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE, recentlyVisitedSharedPreferences);
                         targets.put(SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE,
                                 rawFile(context, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE));
 

@@ -181,7 +181,7 @@ class AccountScopedScreenKeysTest {
      *
      * A fragment with no entry in [SettingsSearchRegistry]'s fragment-to-XML map is a leaf here, as
      * it is for the search index: the screens built in code rather than XML (NSFW and Spoiler, Post
-     * History, Recently Visited) have no preferences to read.
+     * History) have no preferences to read.
      */
     private fun perAccountScreens(): Set<Int> {
         val screens = mutableSetOf<Int>()

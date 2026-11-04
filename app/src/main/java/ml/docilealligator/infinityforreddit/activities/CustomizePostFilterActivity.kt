@@ -506,7 +506,7 @@ class CustomizePostFilterActivity :
         // pinned to a feed they never asked for. Judged on the filter rather than on the rule, so
         // that editing one wildcard rule of a filter that holds others does not re-scope it twice.
         if (PostFilterRuleKinds.hasWildcard(rules)) {
-            scopeToContinuumAll()
+            scopeToRedditJrAll()
         }
     }
 
@@ -528,37 +528,37 @@ class CustomizePostFilterActivity :
     }
 
     /**
-     * Scope the filter to r/ContinuumAll, the only feed wildcard subreddit terms run on. Adding it
+     * Scope the filter to r/RedditJrAll, the only feed wildcard subreddit terms run on. Adding it
      * for the user is what makes picking a match type the whole interaction — the alternative was
      * refusing the rule until they went and found the "Applies to" section themselves.
      */
-    private fun scopeToContinuumAll() {
-        // Pin the filter to r/ContinuumAll and drop everything else: a wildcard term is inert on any
+    private fun scopeToRedditJrAll() {
+        // Pin the filter to r/RedditJrAll and drop everything else: a wildcard term is inert on any
         // other feed, so leaving Home or a subreddit attached would leave the filter doing only part
         // of what it says on the feeds it lists.
-        val alreadyScoped = usages.size == 1 && isContinuumAllUsage(usages[0])
+        val alreadyScoped = usages.size == 1 && isRedditJrAllUsage(usages[0])
         if (alreadyScoped) {
             return
         }
-        usages.retainAll { isContinuumAllUsage(it) }
+        usages.retainAll { isRedditJrAllUsage(it) }
         addUsage(
             PostFilterUsage(
                 postFilter.name, accountName, PostFilterUsage.SUBREDDIT_TYPE,
-                Constants.CONTINUUM_ALL_SUBREDDIT
+                Constants.REDDITJR_ALL_SUBREDDIT
             )
         )
         adapter.setUsages(usages)
         Snackbar.make(
             binding.coordinatorLayoutCustomizePostFilterActivity,
             getString(
-                R.string.post_filter_wildcard_scoped_to_continuum_all, Constants.CONTINUUM_ALL_SUBREDDIT
+                R.string.post_filter_wildcard_scoped_to_redditjr_all, Constants.REDDITJR_ALL_SUBREDDIT
             ),
             Snackbar.LENGTH_LONG
         ).show()
     }
 
-    private fun isContinuumAllUsage(usage: PostFilterUsage): Boolean =
-        usage.usage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(usage.nameOfUsage)
+    private fun isRedditJrAllUsage(usage: PostFilterUsage): Boolean =
+        usage.usage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isRedditJrAll(usage.nameOfUsage)
 
     override fun onRuleValuePickerRequested(field: RuleField, exclude: Boolean) {
         pendingRuleExclude = exclude

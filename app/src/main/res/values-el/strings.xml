@@ -537,7 +537,6 @@
     <string name="settings_open_source_title">"Ανοιχτού Κώδικα"</string>
     <string name="settings_open_source_summary">"Βάλε το στα αγαπημένα στο GitHub αν σου αρέσει η εφαρμογή"</string>
     <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Λογαριασμός Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1456,8 +1455,8 @@
     <string name="post_filter_rule_error_wildcard_too_short">"Χρησιμοποίησε τουλάχιστον %1$d χαρακτήρες. Οι πιο σύντομες λέξεις ταιριάζουν με πολύ περισσότερα subreddits από ό,τι θα περίμενες."</string>
     <string name="post_filter_rule_error_asterisk">"Επίλεξε έναν τύπο αντιστοίχισης αντί να πληκτρολογήσεις *."</string>
     <string name="post_filter_match_explanation">"Μια αντιστοίχιση διαφορετική από την \"Ακριβώς\" ισχύει μόνο στο r/%1$s, επομένως μια ευρεία λέξη δεν μπορεί να αδειάσει τις άλλες ροές σου. Θα προστεθεί στο \"Ισχύει για\" για εσάς."</string>
-    <string name="post_filter_applies_to_summary_locked">"Ένας κανόνας \"Ξεκινά με\", \"Τελειώνει με\" ή \"Περιέχει\" εκτελείται μόνο στο r/ContinuumAll, επομένως αυτό το φίλτρο είναι καρφιτσωμένο σε αυτό. Κατάργησε αυτόν τον κανόνα για να επιλέξεις άλλες ροές."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"Το r/%1$s προστέθηκε στο \"Ισχύει για\""</string>
+    <string name="post_filter_applies_to_summary_locked">"Ένας κανόνας \"Ξεκινά με\", \"Τελειώνει με\" ή \"Περιέχει\" εκτελείται μόνο στο r/RedditJrAll, επομένως αυτό το φίλτρο είναι καρφιτσωμένο σε αυτό. Κατάργησε αυτόν τον κανόνα για να επιλέξεις άλλες ροές."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"Το r/%1$s προστέθηκε στο \"Ισχύει για\""</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Αποκλείστηκε από %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits από αυτόν τον κανόνα έχει κρυφές αναρτήσεις. Δεν μπορείς να γνωρίζεις αυτήν τη λίστα εκ των προτέρων, επομένως δημιουργείται καθώς περιηγείσαι."</string>
@@ -1630,7 +1629,7 @@
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Δεν χορηγήθηκε άδεια για ειδοποιήσεις"</string>
     <string name="go_to_settings">"Ρυθμίσεις"</string>
-    <string name="welcome_to_continuum">"Καλώς ήρθες στο Reddit Jr., η πύλη σου για μια νέα διάσταση περιήγησης στο Reddit!"</string>
+    <string name="welcome_to_redditjr">"Καλώς ήρθες στο Reddit Jr., η πύλη σου για μια νέα διάσταση περιήγησης στο Reddit!"</string>
     <string name="subscription_prompt">"Πριν βουτήξεις στις αμέτρητες δυνατότητες που προσφέρει αυτή η εφαρμογή,\n        Θέλω να είμαι εκ των προτέρων και διαφανής σχετικά με μια σημαντική αλλαγή που έχω εφαρμόσει για να εξασφαλίσω την καλύτερη δυνατή εξυπηρέτηση για εσάς.\n        \n\nΑπό εδώ και στο εξής, θα χρειάζεσαι μια μηνιαία συνδρομή για να αποκτήσεις πρόσβαση στο Reddit API εντός Reddit Jr. και\n        Αυτό συμβαίνει επειδή το Reddit έχει αρχίσει να χρεώνει για πρόσβαση API από την 1η Ιουλίου 2023.\n        \n\nΌλες οι βαθμίδες λειτουργούν το ίδιο. Εάν θέλεις να υποστηρίξεις το Reddit Jr., μπορείς να εγγραφείς σε υψηλότερο επίπεδο.\n        Τα περισσότερα χρήματα από το χαμηλότερο επίπεδο πηγαίνουν στο Reddit.\n    "</string>
     <string name="monthly">"Μηνιαία"</string>
     <string name="yearly">"Ετήσια"</string>

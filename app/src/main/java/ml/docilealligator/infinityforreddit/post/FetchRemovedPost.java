@@ -262,7 +262,7 @@ public class FetchRemovedPost {
     }
 
     /**
-     * Classifies a recovered non-self post's url into a continuum media {@link Post} type, using the
+     * Classifies a recovered non-self post's url into a Reddit Jr. media {@link Post} type, using the
      * archive's {@code post_hint}/{@code domain} plus the url's file extension. Returns
      * {@link Post#GIF_TYPE} for gifs, {@link Post#IMAGE_TYPE} for still images, or {@code -1} when the
      * url is not a recognized image (a real external/reddit link, recovered as a plain link instead).

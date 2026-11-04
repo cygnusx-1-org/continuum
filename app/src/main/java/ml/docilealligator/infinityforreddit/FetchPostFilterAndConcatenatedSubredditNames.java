@@ -21,7 +21,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
      * {@link PostFilter#isPostAllowed} reads for them.
      *
      * <p>Wildcard "Exclude subreddits" terms only run on
-     * {@link Constants#CONTINUUM_ALL_SUBREDDIT}, so the flag that enables them is set here, where
+     * {@link Constants#REDDITJR_ALL_SUBREDDIT}, so the flag that enables them is set here, where
      * the feed is still known — {@code isPostAllowed} itself is static and sees only a post and a
      * filter. When the resolved filter has no wildcard term (the overwhelmingly common case) the
      * supporting lookups are skipped entirely, so nothing pays for a feature it is not using.
@@ -29,7 +29,7 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
      * <p>The two static sets are left alone on that path rather than cleared. They are read only
      * while a wildcard term is matching — which happens on that one feed, which refreshes them as it
      * loads — and every feed resolves its filter on a shared executor: clearing them here would
-     * strip a ContinuumAll feed that is still paging of its subscribed-subreddit protection the
+     * strip an all-feed that is still paging of its subscribed-subreddit protection the
      * moment any other feed loaded.
      */
     private static PostFilter resolvePostFilter(RedditDataRoomDatabase redditDataRoomDatabase,
@@ -56,11 +56,15 @@ public class FetchPostFilterAndConcatenatedSubredditNames {
                                                     int postFilterUsage, @Nullable String nameOfUsage,
                                                     String accountName) {
         List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao()
-                .getValidPostFilters(postFilterUsage, nameOfUsage, accountName);
+                .getValidPostFilters(postFilterUsage, nameOfUsage,
+                        // A filter saved before the rename names the feed by its old name.
+                        postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isRedditJrAll(nameOfUsage)
+                                ? Constants.LEGACY_ALL_SUBREDDIT : nameOfUsage,
+                        accountName);
         PostFilter mergedPostFilter = PostFilter.mergePostFilter(postFilters);
         mergedPostFilter.username = accountName;
         mergedPostFilter.wildcardSubredditMatchingEnabled =
-                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isContinuumAll(nameOfUsage);
+                postFilterUsage == PostFilterUsage.SUBREDDIT_TYPE && Constants.isRedditJrAll(nameOfUsage);
         return mergedPostFilter;
     }
 

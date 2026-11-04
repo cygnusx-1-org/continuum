@@ -545,7 +545,6 @@ Tekrar denemek için tıklayın."</string>
     <string name="settings_open_source_title">"Açık Kaynak"</string>
     <string name="settings_open_source_summary">"Bu uygulamayı beğendiyseniz Github'da yıldız verin"</string>
     <string name="settings_email_title">"E-posta"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Reddit Hesabı"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1460,8 +1459,8 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"En az %1$d karakter kullanın. Daha kısa kelimeler beklediğinizden çok daha fazla alt dizinle eşleşir."</string>
     <string name="post_filter_rule_error_asterisk">"* yazmak yerine bir eşleşme türü seçin."</string>
     <string name="post_filter_match_explanation">"\'Tam\' dışındaki bir eşleşme yalnızca r/%1$s için geçerlidir, dolayısıyla geniş bir kelime diğer akışlarını boşaltamaz. Senin için \'Şunlar için geçerlidir\' bölümüne eklenecektir."</string>
-    <string name="post_filter_applies_to_summary_locked">"'Şununla başlar', 'Şununla biter' veya 'İçerir' kuralı yalnızca r/ContinuumAll üzerinde çalışır, dolayısıyla bu filtre ona sabitlenir. Diğer yayınları seçmek için bu kuralı kaldırın."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s 'Şunlar için geçerlidir'a eklendi"</string>
+    <string name="post_filter_applies_to_summary_locked">"'Şununla başlar', 'Şununla biter' veya 'İçerir' kuralı yalnızca r/RedditJrAll üzerinde çalışır, dolayısıyla bu filtre ona sabitlenir. Diğer yayınları seçmek için bu kuralı kaldırın."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s 'Şunlar için geçerlidir'a eklendi"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"%1$s tarafından engellendi"</string>
     <string name="post_filter_blocked_subreddits_summary">"Bu kuralın gönderilerini gizlediği subredditler. Bu listeyi önceden bilemezsin, dolayısıyla sen göz atarken oluşturulur."</string>
@@ -1634,7 +1633,7 @@ Tekrar denemek için dokun."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Bildirim izni verilmemiştir"</string>
     <string name="go_to_settings">"Ayarlar"</string>
-    <string name="welcome_to_continuum">"Reddit’e açılan kapın Reddit Jr.’a hoş geldin!"</string>
+    <string name="welcome_to_redditjr">"Reddit’e açılan kapın Reddit Jr.’a hoş geldin!"</string>
     <string name="subscription_prompt">"Bu uygulamanın sunduğu sayısız olasılığa dalmadan önce,\n sana mümkün olan en iyi hizmeti sağlamak için uyguladığım önemli bir değişiklik konusunda açık ve şeffaf olmak istiyorum.\n \n\nŞu andan itibaren Reddit Jr. içinde Reddit API’ye erişmek için aylık bir aboneliğe ihtiyacın olacak;\n bunun nedeni Reddit’in 1 Temmuz 2023’ten beri API erişimi için ücret almasıdır.\n \n\nTüm kademeler aynı şekilde çalışır. Reddit Jr.’u desteklemek istersen daha yüksek bir kademeye abone olabilirsin.\n En düşük kademeden gelen paranın büyük kısmı Reddit’e gider.\n    "</string>
     <string name="monthly">"Aylık"</string>
     <string name="yearly">"Yıllık"</string>

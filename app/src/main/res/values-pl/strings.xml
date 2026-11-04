@@ -537,7 +537,6 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="settings_open_source_title">"Otwartoźródłowe"</string>
     <string name="settings_open_source_summary">"Oznacz gwiazdką na Githubie jeśli lubisz tą aplikację"</string>
     <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Konto Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1458,8 +1457,8 @@ Nie jest chora ani nic, ale na pewno może stać się lepsza."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Użyj co najmniej %1$d znaków. Krótsze słowa pasują do znacznie większej liczby subredditów, niż można by się spodziewać."</string>
     <string name="post_filter_rule_error_asterisk">"Wybierz typ dopasowania zamiast wpisywać *."</string>
     <string name="post_filter_match_explanation">"Dopasowanie inne niż „Dokładnie” ma zastosowanie tylko w r/%1$s, więc szerokie słowo nie może opróżnić pozostałych kanałów. Zostanie on dodany do sekcji „Dotyczy”."</string>
-    <string name="post_filter_applies_to_summary_locked">"Reguły „Zaczyna się od”, „Kończy się na” lub „Zawiera” działają tylko na r/ContinuumAll, więc ten filtr jest do niej przypięty. Usuń tę regułę, aby wybrać inne kanały."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s dodano do „Dotyczy”"</string>
+    <string name="post_filter_applies_to_summary_locked">"Reguły „Zaczyna się od”, „Kończy się na” lub „Zawiera” działają tylko na r/RedditJrAll, więc ten filtr jest do niej przypięty. Usuń tę regułę, aby wybrać inne kanały."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s dodano do „Dotyczy”"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Zablokowany przez %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddity, z których ta reguła zawiera ukryte posty. Nie możesz znać tej listy z wyprzedzeniem, dlatego jest ona tworzona w trakcie przeglądania."</string>
@@ -1632,7 +1631,7 @@ Kliknij by spróbować ponownie."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Nie przyznano pozwolenia na powiadomienie"</string>
     <string name="go_to_settings">"Ustawienia"</string>
-    <string name="welcome_to_continuum">"Witamy w Reddit Jr., Twojej bramie do zupełnie nowego wymiaru przeglądania Reddit!"</string>
+    <string name="welcome_to_redditjr">"Witamy w Reddit Jr., Twojej bramie do zupełnie nowego wymiaru przeglądania Reddit!"</string>
     <string name="subscription_prompt">"Zanim zagłębisz się w niezliczone możliwości, jakie oferuje ta aplikacja,\n Chcę od razu i otwarcie poinformować o istotnej zmianie, którą wprowadziłem, aby zapewnić Ci najlepszą możliwą obsługę.\n \n\nOd teraz będziesz potrzebować miesięcznej subskrypcji, aby uzyskać dostęp do Reddit API w ciągu Reddit Jr. i\n dzieje się tak, ponieważ Reddit zaczęło pobierać opłaty za dostęp do API od 1 lipca 2023 r.\n \n\nWszystkie poziomy działają tak samo. Jeśli chcesz wesprzeć Reddit Jr., możesz zapisać się na wyższy poziom.\n Większość pieniędzy z najniższego poziomu trafia do Reddit.\n    "</string>
     <string name="monthly">"Co miesiąc"</string>
     <string name="yearly">"Co rok"</string>

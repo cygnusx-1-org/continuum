@@ -128,7 +128,7 @@ class SpoilerMaskDrawableTest {
     }
 
     private fun render(text: Spannable): Rendered {
-        // A platform theme rather than the app's: nothing here turns on how Continuum styles a
+        // A platform theme rather than the app's: nothing here turns on how Reddit Jr. styles a
         // TextView, and a themed context keeps TextView's own attribute lookups off the app theme.
         val textView = TextView(ContextThemeWrapper(context, android.R.style.Theme_Material_Light))
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, TEXT_SIZE_PX)

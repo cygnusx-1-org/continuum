@@ -544,7 +544,6 @@ Apasă pentru reîncărcare."</string>
     <string name="settings_open_source_title">"Sursă deschisă"</string>
     <string name="settings_open_source_summary">"Dă o stea pe GitHub dacă îți place această aplicație"</string>
     <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Cont Reddit"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1465,8 +1464,8 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="post_filter_rule_error_wildcard_too_short">"Folosește cel puțin %1$d caractere. Cuvintele mai scurte se potrivesc cu mult mai multe subreddite decât te-ai aștepta."</string>
     <string name="post_filter_rule_error_asterisk">"Alege un tip de potrivire în loc să introduci *."</string>
     <string name="post_filter_match_explanation">"O potrivire diferită de „Exact” se aplică numai pe r/%1$s, așa că un cuvânt amplu nu poate goli celelalte fluxuri. Va fi adăugat la „Se aplică la” pentru tine."</string>
-    <string name="post_filter_applies_to_summary_locked">"O regulă „Începe cu”, „Se termină cu” sau „Conține” rulează numai pe r/ContinuumAll, deci acest filtru este fixat pe acesta. Elimină regula pentru a alege alte fluxuri."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s adăugat la „Se aplică la”"</string>
+    <string name="post_filter_applies_to_summary_locked">"O regulă „Începe cu”, „Se termină cu” sau „Conține” rulează numai pe r/RedditJrAll, deci acest filtru este fixat pe acesta. Elimină regula pentru a alege alte fluxuri."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s adăugat la „Se aplică la”"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blocat de %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddit din care această regulă a ascuns postările. Nu poți cunoaște această listă în avans, așa că este construită pe măsură ce navighezi."</string>
@@ -1639,7 +1638,7 @@ Apasă pentru a reîncerca."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Permisiunea de notificare nu este acordată"</string>
     <string name="go_to_settings">"Setări"</string>
-    <string name="welcome_to_continuum">"Bine ai venit la Reddit Jr., poarta ta de acces către o dimensiune cu totul nouă a navigării Reddit!"</string>
+    <string name="welcome_to_redditjr">"Bine ai venit la Reddit Jr., poarta ta de acces către o dimensiune cu totul nouă a navigării Reddit!"</string>
     <string name="subscription_prompt">"Înainte de a te scufunda în nenumăratele posibilități oferite de această aplicație,\n        Vreau să fiu direct și transparent cu privire la o schimbare semnificativă pe care am implementat-o pentru a te asigura cel mai bun serviciu posibil.\n        \n\nDe acum înainte, vei avea nevoie de un abonament lunar pentru a accesa Reddit API în Reddit Jr. și\n        acest lucru se datorează faptului că Reddit a început să taxeze pentru accesul API începând cu 1 iulie 2023.\n        \n\nToate nivelurile funcționează la fel. Dacă dorești să susții Reddit Jr., te poți abona la un nivel superior.\n        Majoritatea banilor de la nivelul cel mai de jos merg la Reddit.\n    "</string>
     <string name="monthly">"Lunar"</string>
     <string name="yearly">"Anual"</string>

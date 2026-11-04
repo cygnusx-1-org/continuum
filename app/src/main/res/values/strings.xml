@@ -478,9 +478,9 @@
     <string name="settings_save_front_page_scrolled_position_summary">Browse new posts after refreshing in HOME (Front Page, sort type: Best)</string>
     <string name="decoder_copy">Copy decoded text</string>
     <string name="decoder_copied">Copied %1$s</string>
-    <string name="decoder_simpcity_titles">SimpCity titles</string>
-    <string name="decoder_simpcity_all">SimpCity all</string>
-    <string name="decoder_social_search">Social search</string>
+    <string name="decoder_simpcity_titles">TITLE</string>
+    <string name="decoder_simpcity_all">ALL</string>
+    <string name="decoder_social_search">SOCIALS</string>
     <string name="settings_decode_nato_binary_title">Decode binary</string>
     <string name="settings_decode_nato_binary_summary">Show the decoded text, with Copy and search buttons, under comments and posts in NSFW communities that contain 8-bit binary</string>
     <string name="settings_collapse_automod_and_stickied_title">Collapse AutoModerator and stickied comments</string>
@@ -608,7 +608,6 @@
     <string name="settings_open_source_title">Open Source</string>
     <string name="settings_open_source_summary">Star it on Github if you like this app</string>
     <string name="settings_email_title">Email</string>
-    <string name="settings_email_summary">continuum@cygnusx-1.org</string>
     <string name="settings_reddit_account_title">Reddit Account</string>
     <string name="settings_reddit_account_summary">u/edgan</string>
     <string name="settings_subreddit_title">Subreddit</string>
@@ -816,8 +815,6 @@
     <string name="settings_collapse_stickied_posts_summary">Show a subreddit\'s stickied posts as a single line. Tap one to open it up</string>
     <string name="settings_hide_nsfw_badge_title">Hide NSFW Badge</string>
     <string name="settings_hide_nsfw_badge_summary">Never show the NSFW badge on posts, in the feed or in the post, and use the space</string>
-    <string name="settings_nsfw_in_type_badge_title">Show NSFW in the Post Type Badge</string>
-    <string name="settings_nsfw_in_type_badge_summary">Show NSFW inside the post type badge, like "Image · NSFW", instead of as a badge of its own. Has no effect while the post type is hidden</string>
     <string name="settings_post_type_triangle_indicator">Post Type Triangle Indicator</string>
     <string name="settings_post_type_triangle_indicator_summary">Show post type as a colored triangle on the thumbnail in compact layout instead of a text badge</string>
     <string name="settings_hide_post_type_indicator_title">Hide Post Type Icon</string>
@@ -1629,7 +1626,7 @@
     <string name="added_to_filter">Added to %1$s</string>
     <string name="post_filter_usage_removed">Feed removed</string>
 
-    <!-- Wildcard subreddit matching, scoped to r/ContinuumAll -->
+    <!-- Wildcard subreddit matching, scoped to r/RedditJrAll -->
     <string name="post_filter_rule_match_label">Match</string>
     <string name="post_filter_match_exact">Exact</string>
     <string name="post_filter_match_prefix">Starts with</string>
@@ -1650,8 +1647,8 @@
     <string name="post_filter_rule_refused_plain_filter">\'Starts with\', \'Ends with\' and \'Contains\' need a filter of their own, and this one already holds other rules.</string>
     <string name="post_filter_rule_refused_wildcard_filter_named">%1$s holds nothing but \'Starts with\', \'Ends with\' and \'Contains\' subreddit rules. Add this to a different filter.</string>
     <string name="post_filter_rule_refused_mixed_filter">This filter holds both \'Starts with\', \'Ends with\' or \'Contains\' subreddit rules and ordinary ones. Remove one kind before adding more.</string>
-    <string name="post_filter_applies_to_summary_locked">A \'Starts with\', \'Ends with\' or \'Contains\' rule only runs on r/ContinuumAll, so this filter is pinned to it. Remove that rule to choose other feeds.</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">r/%1$s added to \'Applies to\'</string>
+    <string name="post_filter_applies_to_summary_locked">A \'Starts with\', \'Ends with\' or \'Contains\' rule only runs on r/RedditJrAll, so this filter is pinned to it. Remove that rule to choose other feeds.</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">r/%1$s added to \'Applies to\'</string>
 
     <!-- What a rule actually blocked -->
     <string name="subreddit_name_prefixed">r/%1$s</string>
@@ -1883,7 +1880,7 @@
     <string name="denied_notification_permission">Notification permission is not granted</string>
     <string name="go_to_settings">Settings</string>
 
-    <string name="welcome_to_continuum">Welcome to Reddit Jr., your gateway to a whole new dimension of Reddit browsing!</string>
+    <string name="welcome_to_redditjr">Welcome to Reddit Jr., your gateway to a whole new dimension of Reddit browsing!</string>
     <string name="subscription_prompt">Before you dive into the countless possibilities this app offers,
         I want to be upfront and transparent about a significant change I\'ve implemented to ensure the best possible service for you.
         \n\nFrom now on, you will need a monthly subscription to access the Reddit API within Reddit Jr. and

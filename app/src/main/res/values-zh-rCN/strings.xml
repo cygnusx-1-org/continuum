@@ -544,7 +544,6 @@
     <string name="settings_open_source_title">"开源"</string>
     <string name="settings_open_source_summary">"如果您喜欢此应用，请在 Github 上 Star"</string>
     <string name="settings_email_title">"电子邮件"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Reddit 帐户"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"版块"</string>
@@ -1459,8 +1458,8 @@ Reddit 视频分辨率较低。
     <string name="post_filter_rule_error_wildcard_too_short">"至少使用 %1$d 个字符。较短的单词匹配的 Reddit 子版块数量远超您的预期。"</string>
     <string name="post_filter_rule_error_asterisk">"选择匹配类型而不是键入 *。"</string>
     <string name="post_filter_match_explanation">"“精确”以外的匹配仅适用于 r/%1$s，因此宽泛的单词无法清空您的其他提要。它将被添加到“适用于”中。"</string>
-    <string name="post_filter_applies_to_summary_locked">"“开头为”、“结尾为”或“包含”规则仅在 r/ContinuumAll 上运行，因此此过滤器固定到它。删除该规则以选择其他提要。"</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s 添加到“适用于”"</string>
+    <string name="post_filter_applies_to_summary_locked">"“开头为”、“结尾为”或“包含”规则仅在 r/RedditJrAll 上运行，因此此过滤器固定到它。删除该规则以选择其他提要。"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s 添加到“适用于”"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"被 %1$s 屏蔽"</string>
     <string name="post_filter_blocked_subreddits_summary">"此规则的 Reddit 子版块隐藏了帖子。您无法提前知道此列表，因此它是在您浏览时构建的。"</string>
@@ -1632,7 +1631,7 @@ Reddit 视频分辨率较低。
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"未授予通知权限"</string>
     <string name="go_to_settings">"设置"</string>
-    <string name="welcome_to_continuum">"欢迎使用 Reddit Jr.，浏览 Reddit 社区的全新方式！"</string>
+    <string name="welcome_to_redditjr">"欢迎使用 Reddit Jr.，浏览 Reddit 社区的全新方式！"</string>
     <string name="subscription_prompt">"在您深入了解此应用程序提供的无数可能性之前，\n我想坦率且透明地说明我所实施的一项重大更改，以确保为您提供最好的服务。\n\n\n从现在开始，您将需要每月订阅才能在Reddit Jr.内访问RedditAPI而\n这是因为Reddit自2023年7月1日起开始对API访问收费。\n\n\n所有级别的工作方式相同。如果您想支持Reddit Jr.，您可以订阅更高的级别。\n最低级别的大部分资金都会流向Reddit。\n    "</string>
     <string name="monthly">"每月"</string>
     <string name="yearly">"每年"</string>

@@ -536,7 +536,6 @@
     <string name="settings_open_source_title">"Nyílt forráskód"</string>
     <string name="settings_open_source_summary">"Adj csillagot Githubon, ha tetszik az app"</string>
     <string name="settings_email_title">"Email"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Reddit fiók"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1452,8 +1451,8 @@ Az alap az indigó amoled téma"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Legalább %1$d karaktert használj. A rövidebb szavak sokkal több alredditnek felelnek meg, mint azt várná."</string>
     <string name="post_filter_rule_error_asterisk">"A * beírása helyett válassz egyezési típust."</string>
     <string name="post_filter_match_explanation">"A „Pontosan”-tól eltérő egyezés csak a r/%1$s esetén érvényes, ezért egy széles szó nem ürítheti ki a többi hírcsatornát. A rendszer hozzáadja az „Érvényes” közé."</string>
-    <string name="post_filter_applies_to_summary_locked">"A „Ezzel kezdődik”, „Ezzel végződik” vagy „Tartalmaz” szabály csak r/ContinuumAll esetén fut, ezért ez a szűrő erre van rögzítve. Más hírcsatornák kiválasztásához távolítsd el ezt a szabályt."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s hozzáadva az „Érvényes” listához"</string>
+    <string name="post_filter_applies_to_summary_locked">"A „Ezzel kezdődik”, „Ezzel végződik” vagy „Tartalmaz” szabály csak r/RedditJrAll esetén fut, ezért ez a szűrő erre van rögzítve. Más hírcsatornák kiválasztásához távolítsd el ezt a szabályt."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s hozzáadva az „Érvényes” listához"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Letiltotta: %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits ez a szabály rejtett bejegyzéseket tartalmaz. Ezt a listát nem ismerheti előre, ezért böngészés közben épül fel."</string>
@@ -1622,7 +1621,7 @@ Az alap az indigó amoled téma"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Az értesítési engedély nincs megadva"</string>
     <string name="go_to_settings">"Beállítások"</string>
-    <string name="welcome_to_continuum">"Üdvözöljük a Reddit Jr. webhelyen, amely az Reddit böngészés egy teljesen új dimenziójához vezető kapu!"</string>
+    <string name="welcome_to_redditjr">"Üdvözöljük a Reddit Jr. webhelyen, amely az Reddit böngészés egy teljesen új dimenziójához vezető kapu!"</string>
     <string name="subscription_prompt">"Mielőtt belevetnéd magad az alkalmazás által kínált számtalan lehetőségbe,\n        szeretnék előre és átláthatóan nyilatkozni egy jelentős változásról, amelyet azért vezettem be, hogy a lehető legjobb szolgáltatást nyújthassam neked.\n        \n\nMostantól havi előfizetésre lesz szükséged ahhoz, hogy a Reddit Jr.on belül hozzáférj a Reddit API-hoz, és\n        ez azért van, mert a Reddit 2023. július 1. óta díjat számít fel az API-hozzáférésért.\n        \n\nMinden szint ugyanúgy működik. Ha támogatni szeretnéd a Reddit Jr.ot, előfizethetsz magasabb szintre is.\n        A legalacsonyabb szintből befolyó pénz nagy része a Reddithez kerül.\n    "</string>
     <string name="monthly">"Havonta"</string>
     <string name="yearly">"Évente"</string>

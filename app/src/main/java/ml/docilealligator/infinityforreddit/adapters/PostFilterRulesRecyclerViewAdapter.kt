@@ -113,7 +113,7 @@ class PostFilterRulesRecyclerViewAdapter(
     private var blockedCounts: Map<String, Int> = emptyMap()
 
     /**
-     * A wildcard subreddit rule only ever runs on r/ContinuumAll, so a filter holding one is pinned
+     * A wildcard subreddit rule only ever runs on r/RedditJrAll, so a filter holding one is pinned
      * to that feed alone. Letting it also apply to Home would produce a filter that is half inert
      * there, with nothing on screen to say which half.
      *
@@ -121,7 +121,7 @@ class PostFilterRulesRecyclerViewAdapter(
      * the two kinds apart. The way out is the same either way: delete the wildcard rule, which the
      * summary says, and the feeds become editable again.
      */
-    private val isPinnedToContinuumAll: Boolean
+    private val isPinnedToRedditJrAll: Boolean
         get() = PostFilterRuleKinds.hasWildcard(rules)
 
     /** Display-only: which header chips the user has checked. Never affects what gets saved. */
@@ -264,7 +264,7 @@ class PostFilterRulesRecyclerViewAdapter(
     // region Applies to
 
     private fun bindUsageChips(binding: ItemPostFilterAppliesToBinding) {
-        val locked = isPinnedToContinuumAll
+        val locked = isPinnedToRedditJrAll
         binding.summaryTextViewItemPostFilterAppliesTo.setText(
             if (locked) R.string.post_filter_applies_to_summary_locked else R.string.post_filter_applies_to_summary
         )
@@ -297,7 +297,7 @@ class PostFilterRulesRecyclerViewAdapter(
             chip.text = label
             // While locked the feed can be neither removed nor renamed: with "Add feed" gone there
             // would be no way to put it back short of deleting the rules that caused the lock, which
-            // is the trap issue #426 was reported from — r/ContinuumAll edited to something else,
+            // is the trap issue #426 was reported from — r/RedditJrAll edited to something else,
             // and then nothing on screen to edit it back with.
             chip.isCloseIconVisible = !locked
             chip.setCloseIconContentDescription(

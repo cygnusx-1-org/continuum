@@ -1,4 +1,4 @@
-// Custom Android Lint checks for Continuum, packaged as a plain JVM jar and wired into the app's
+// Custom Android Lint checks for Reddit Jr., packaged as a plain JVM jar and wired into the app's
 // lint run via `lintChecks project(':lint-checks')` in app/build.gradle.
 //
 // The one check here, InconsistentLayoutVariantIds, exists because AGP's built-in
@@ -33,6 +33,6 @@ dependencies {
 
 jar {
     manifest {
-        attributes('Lint-Registry-v2': 'ml.docilealligator.infinityforreddit.lint.ContinuumIssueRegistry')
+        attributes('Lint-Registry-v2': 'ml.docilealligator.infinityforreddit.lint.RedditJrIssueRegistry')
     }
 }

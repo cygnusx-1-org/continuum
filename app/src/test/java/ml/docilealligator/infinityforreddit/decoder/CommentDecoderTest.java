@@ -51,7 +51,11 @@ public class CommentDecoderTest {
         assertEquals("name", CommentDecoder.searchTerm("https://link.me/name"));
         assertEquals("name", CommentDecoder.searchTerm("TikTok and IG: name"));
         assertEquals("name", CommentDecoder.searchTerm("name"));
-        assertEquals("a/", CommentDecoder.searchTerm("a/"));
+        assertEquals("name", CommentDecoder.searchTerm("https://link.me/name/"));
+        assertEquals("name", CommentDecoder.searchTerm("https://link.me/name//"));
+        assertEquals("name", CommentDecoder.searchTerm("TikTok and IG: https://link.me/name/"));
+        assertEquals("a", CommentDecoder.searchTerm("a/"));
+        assertEquals("/", CommentDecoder.searchTerm("/"));
     }
 
     @Test

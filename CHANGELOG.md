@@ -2,6 +2,20 @@
 
 ---
 
+8.3.3.9.1.17 / 2026-11-3
+============
+* Renamed the remaining Continuum names in the code: the lint checks, the post filter code, the comments, the release scripts and the Gradle release settings
+* The login redirect entry for custom API keys is now `redditjr://localhost` instead of `continuum://localhost`. The built-in RedReader login is unchanged
+* Renamed the `r/ContinuumAll` feed to `r/RedditJrAll`. Saved post filters are moved to the new name, and the old name still opens the same feed
+* Decoder: a link with a trailing slash, such as `https://link.me/name/`, now searches for `name` instead of the whole link
+* Decoder buttons are now `TITLE`, `ALL` and `SOCIALS`
+
+8.3.3.9.1.16 / 2026-11-3
+============
+* The card border gradient on NSFW posts no longer depends on `Hide NSFW Badge`
+* Removed `Show NSFW in the Post Type Badge`. The NSFW badge is a badge of its own again, and `Hide NSFW Badge` still hides it
+* Removed the unused Recently Visited and API recording settings files from Backup & Restore and the account settings. Backups that contain them still restore
+
 8.3.3.9.1.15 / 2026-11-3
 ============
 * Removed the API statistics feature: the screen, the code that recorded API calls, and its database table

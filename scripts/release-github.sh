@@ -4,7 +4,7 @@
 # `scripts/release-builds.sh [release|beta] 2` (or the matching ./gradlew assemble task).
 #
 # Optional leading variant argument (release|beta); defaults to release. "beta" uploads the beta
-# variant's APKs and publishes the GitHub release to the continuum-beta repo (selected in
+# variant's APKs and publishes the GitHub release to the redditjr-beta repo (selected in
 # app/build.gradle via the RELEASE_VARIANT env var). Backward compatible with the previous
 # single-argument (release notes) invocation.
 VARIANT="release"

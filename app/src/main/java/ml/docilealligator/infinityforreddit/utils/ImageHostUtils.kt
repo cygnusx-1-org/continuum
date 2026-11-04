@@ -7,7 +7,7 @@ import android.net.Uri
  * of one.
  *
  * Reddit classifies `imgchest.com/p/<id>` and `imgbb.com/<id>` as `post_hint: link`, because the URL
- * really is an HTML page — the image lives on a separate CDN host. Continuum therefore rendered them
+ * really is an HTML page — the image lives on a separate CDN host. Reddit Jr. therefore rendered them
  * as link cards that opened a browser, which is issue #412's second half. It does still generate a
  * `preview` for them, so the card has something to draw; only the tap target was wrong.
  *

@@ -540,7 +540,6 @@ Druk om opnieuw te proberen."</string>
     <string name="settings_open_source_title">"Open source"</string>
     <string name="settings_open_source_summary">"Druk op de GitHub-ster als je deze app graag gebruikt"</string>
     <string name="settings_email_title">"E-mailadres"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Reddit-account"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1460,8 +1459,8 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Gebruik minimaal %1$d tekens. Kortere woorden komen overeen met veel meer subreddits dan je zou verwachten."</string>
     <string name="post_filter_rule_error_asterisk">"Kies een zoektype in plaats van * te typen."</string>
     <string name="post_filter_match_explanation">"Een andere match dan 'Exact' geldt alleen op r/%1$s, dus een breed woord kan je andere feeds niet leegmaken. Het wordt voor je toegevoegd aan 'Geldt voor'."</string>
-    <string name="post_filter_applies_to_summary_locked">"Een regel 'Begint met', 'Eindigt met' of 'Bevat' werkt alleen op r/ContinuumAll, dus dit filter is eraan vastgemaakt. Verwijder die regel om andere feeds te kiezen."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s toegevoegd aan 'Geldt voor'"</string>
+    <string name="post_filter_applies_to_summary_locked">"Een regel 'Begint met', 'Eindigt met' of 'Bevat' werkt alleen op r/RedditJrAll, dus dit filter is eraan vastgemaakt. Verwijder die regel om andere feeds te kiezen."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s toegevoegd aan 'Geldt voor'"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Geblokkeerd door %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits waarvan deze regel berichten heeft verborgen. Je kunt deze lijst niet van tevoren kennen, dus hij wordt opgebouwd terwijl je bladert."</string>
@@ -1630,7 +1629,7 @@ Ze is niet ziek of zo, maar ze kan zeker beter worden."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Er is geen toestemming voor melding verleend"</string>
     <string name="go_to_settings">"Instellingen"</string>
-    <string name="welcome_to_continuum">"Welkom bij Reddit Jr., je toegangspoort tot een geheel nieuwe dimensie van Reddit browsen!"</string>
+    <string name="welcome_to_redditjr">"Welkom bij Reddit Jr., je toegangspoort tot een geheel nieuwe dimensie van Reddit browsen!"</string>
     <string name="subscription_prompt">"Voordat je ingaat op de talloze mogelijkheden die deze app biedt\n wil ik eerlijk en transparant zijn over een belangrijke verandering die ik heb doorgevoerd om je de best mogelijke service te garanderen.\n \n\nVanaf nu heb je een maandelijks abonnement nodig om toegang te krijgen tot de Reddit API binnen Reddit Jr. en\n dit komt omdat Reddit sinds 1 juli 2023 kosten in rekening brengt voor API toegang.\n \n\nAlle niveaus werken hetzelfde. Als je Reddit Jr. wilt steunen, kun je je abonneren op een hoger niveau.\n Het grootste deel van het geld van het laagste niveau gaat naar Reddit.\n    "</string>
     <string name="monthly">"Maandelijks"</string>
     <string name="yearly">"Jaarlijks"</string>

@@ -543,7 +543,6 @@
     <string name="settings_open_source_title">"オープンソース"</string>
     <string name="settings_open_source_summary">"このアプリが気に入ったようでしたらGitHubで星をつけてください"</string>
     <string name="settings_email_title">"電子メール"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Redditアカウント"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"サブレディット"</string>
@@ -1458,8 +1457,8 @@ https://play.google.com/store/"</string>
     <string name="post_filter_rule_error_wildcard_too_short">"少なくとも %1$d 文字を使用してください。短い単語は、予想よりもはるかに多くのサブレディットに一致します。"</string>
     <string name="post_filter_rule_error_asterisk">"* を入力する代わりに、一致タイプを選択します。"</string>
     <string name="post_filter_match_explanation">"「完全一致」以外の一致は r/%1$s にのみ適用されるため、広範な単語で他のフィードを空にすることはできません。 「に適用されます」に追加されます。"</string>
-    <string name="post_filter_applies_to_summary_locked">"「次で始まる」、「次で終わる」、または「次を含む」ルールは r/ContinuumAll でのみ実行されるため、このフィルターはそれに固定されます。他のフィードを選択するには、そのルールを削除してください。"</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s が「に適用されます」に追加されました"</string>
+    <string name="post_filter_applies_to_summary_locked">"「次で始まる」、「次で終わる」、または「次を含む」ルールは r/RedditJrAll でのみ実行されるため、このフィルターはそれに固定されます。他のフィードを選択するには、そのルールを削除してください。"</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s が「に適用されます」に追加されました"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"%1$s によってブロックされました"</string>
     <string name="post_filter_blocked_subreddits_summary">"このルールで投稿が非表示になっているサブレディット。このリストは事前に知ることができないため、閲覧中に作成されます。"</string>
@@ -1627,7 +1626,7 @@ https://play.google.com/store/"</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"通知権限が付与されていません"</string>
     <string name="go_to_settings">"設定"</string>
-    <string name="welcome_to_continuum">"Reddit Jr. へようこそ。まったく新しい次元の Reddit 閲覧へのゲートウェイです。"</string>
+    <string name="welcome_to_redditjr">"Reddit Jr. へようこそ。まったく新しい次元の Reddit 閲覧へのゲートウェイです。"</string>
     <string name="subscription_prompt">"このアプリが提供する無数の可能性を検討する前に、\n 皆様に最高のサービスを提供するために実施した重要な変更について、率直かつ透明性を持ってお伝えしたいと思います。\n \n\n 今後、Reddit Jr. 以内にReddit API にアクセスするには、月額サブスクリプションが必要になります。そして\n これは、Reddit が 2023 年 7 月 1 日以降、API のアクセスに対して課金を開始したためです。\n \n\n すべての層は同じように機能します。 Reddit Jr. をサポートしたい場合は、より高いティアに登録できます。\n 最下位ティアからの資金のほとんどは Reddit に使われます。\n    "</string>
     <string name="monthly">"毎月"</string>
     <string name="yearly">"毎年"</string>

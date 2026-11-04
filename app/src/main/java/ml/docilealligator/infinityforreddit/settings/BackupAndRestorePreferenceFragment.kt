@@ -87,10 +87,6 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
     lateinit var postHistorySharedPreferences: SharedPreferences
 
     @Inject
-    @Named("recently_visited")
-    lateinit var recentlyVisitedSharedPreferences: SharedPreferences
-
-    @Inject
     lateinit var executor: Executor
 
     private val handler = Handler(Looper.getMainLooper())
@@ -141,7 +137,6 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
                     amoledThemeSharedPreferences, postFeedScrolledPositionSharedPreferences,
                     mainActivityTabsSharedPreferences, proxySharedPreferences,
                     nsfwAndBlurringSharedPreferences, postHistorySharedPreferences,
-                    recentlyVisitedSharedPreferences,
                     object : BackupSettings.BackupSettingsListener {
                         override fun success() {
                             Toast.makeText(mActivity, R.string.backup_settings_success,
@@ -263,7 +258,6 @@ class BackupAndRestorePreferenceFragment : CustomFontPreferenceFragmentCompat() 
             lightThemeSharedPreferences, darkThemeSharedPreferences, amoledThemeSharedPreferences,
             postFeedScrolledPositionSharedPreferences, mainActivityTabsSharedPreferences,
             proxySharedPreferences, nsfwAndBlurringSharedPreferences, postHistorySharedPreferences,
-            recentlyVisitedSharedPreferences,
             object : RestoreSettings.RestoreSettingsListener {
                 override fun success() {
                     Toast.makeText(mActivity, R.string.restore_settings_success,

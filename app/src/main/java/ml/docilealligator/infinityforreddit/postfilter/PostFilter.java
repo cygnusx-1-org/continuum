@@ -133,7 +133,7 @@ public class PostFilter implements Parcelable {
      *
      * <p>Set when the filter is resolved for a feed (see {@code
      * FetchPostFilterAndConcatenatedSubredditNames}), true only for
-     * {@link ml.docilealligator.infinityforreddit.Constants#CONTINUUM_ALL_SUBREDDIT}. Everywhere
+     * {@link ml.docilealligator.infinityforreddit.Constants#REDDITJR_ALL_SUBREDDIT}. Everywhere
      * else a wildcard term is inert and only exact names filter, which is what keeps a broad term
      * from silently emptying Home, Search or a subreddit page.
      *

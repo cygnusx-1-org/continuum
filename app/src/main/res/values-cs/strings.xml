@@ -544,7 +544,6 @@
     <string name="settings_open_source_title">"Open Source"</string>
     <string name="settings_open_source_summary">"Pokud máš rádi tuto aplikaci, dej jí hvězdičku na GitHubu"</string>
     <string name="settings_email_title">"E-mail"</string>
-    <string name="settings_email_summary">"continuum@cygnusx-1.org"</string>
     <string name="settings_reddit_account_title">"Reddit účet"</string>
     <string name="settings_reddit_account_summary">"u/edgan"</string>
     <string name="settings_subreddit_title">"Subreddit"</string>
@@ -1465,8 +1464,8 @@ Chodí popředu."</string>
     <string name="post_filter_rule_error_wildcard_too_short">"Použij alespoň %1$d znaků. Kratší slova odpovídají mnohem více subredditům, než bys očekával."</string>
     <string name="post_filter_rule_error_asterisk">"Vyber typ shody místo psaní *."</string>
     <string name="post_filter_match_explanation">"Jiná shoda než 'Přesně' platí pouze pro r/%1$s, takže široké slovo nemůže vyprázdnit tvoje ostatní kanály. Bude přidáno do „Platí pro“."</string>
-    <string name="post_filter_applies_to_summary_locked">"Pravidlo 'Začíná na', 'Končí na' nebo 'Obsahuje' běží pouze na r/ContinuumAll, takže tento filtr je k němu připojen. Chceš-li vybrat jiné zdroje, toto pravidlo odstraň."</string>
-    <string name="post_filter_wildcard_scoped_to_continuum_all">"r/%1$s přidáno do „Platí pro“"</string>
+    <string name="post_filter_applies_to_summary_locked">"Pravidlo 'Začíná na', 'Končí na' nebo 'Obsahuje' běží pouze na r/RedditJrAll, takže tento filtr je k němu připojen. Chceš-li vybrat jiné zdroje, toto pravidlo odstraň."</string>
+    <string name="post_filter_wildcard_scoped_to_redditjr_all">"r/%1$s přidáno do „Platí pro“"</string>
     <string name="subreddit_name_prefixed">"r/%1$s"</string>
     <string name="post_filter_blocked_subreddits_title">"Blokováno %1$s"</string>
     <string name="post_filter_blocked_subreddits_summary">"Subreddits z tohoto pravidla má skryté příspěvky. Tento seznam nemůžeš znát předem, takže se vytváří při procházení."</string>
@@ -1641,7 +1640,7 @@ Klepnutím to zkusíš znova."</string>
     <string name="image_index_in_gallery">"%1$d/%2$d"</string>
     <string name="denied_notification_permission">"Oprávnění k oznámením neuděleno"</string>
     <string name="go_to_settings">"Nastavení"</string>
-    <string name="welcome_to_continuum">"Vítej v Reddit Jr., tvojí bráně do zcela nové dimenze Reddit prohlížení!"</string>
+    <string name="welcome_to_redditjr">"Vítej v Reddit Jr., tvojí bráně do zcela nové dimenze Reddit prohlížení!"</string>
     <string name="subscription_prompt">"Než se ponoříš do bezpočtu možností, které tato aplikace nabízí,\n        Chci být upřímný a transparentní ohledně významné změny, kterou jsem zavedl, abych tobě zajistil nejlepší možné služby.\n        \n\nOd této chvíle budeš potřebovat měsíční předplatné pro přístup k Reddit API v rámci Reddit Jr. a\n        je to proto, že Reddit začalo účtovat za API přístup od 1. července 2023.\n        \n\nVšechny vrstvy fungují stejně. Pokud chceš podpořit Reddit Jr., můžeš se přihlásit k odběru vyšší úrovně.\n        Většina peněz z nejnižší úrovně jde do Reddit.\n    "</string>
     <string name="monthly">"Měsíčně"</string>
     <string name="yearly">"ročně"</string>

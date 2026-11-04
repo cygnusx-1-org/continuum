@@ -68,8 +68,6 @@ object AccountSettingsMigration {
         Scoped(SharedPreferencesUtils.HIDE_READ_POSTS_AUTOMATICALLY_IN_SEARCH_BASE),
     )
 
-    private val RECENTLY_VISITED = listOf(Scoped(SharedPreferencesUtils.RECENTLY_VISITED_ENABLED_BASE))
-
     private val MAIN_PAGE_TABS = listOf(
         Scoped(SharedPreferencesUtils.MAIN_PAGE_TABS_ORDER),
         Scoped(SharedPreferencesUtils.MAIN_PAGE_SHOW_TAB_NAMES),
@@ -122,7 +120,6 @@ object AccountSettingsMigration {
     private val RESCOPED_BACKUP_FILES = listOf(
         SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE to NSFW_AND_SPOILER,
         SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE to POST_HISTORY,
-        SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE to RECENTLY_VISITED,
         SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE to MAIN_PAGE_TABS,
         SharedPreferencesUtils.DEFAULT_PREFERENCES_FILE to DEFAULT_FILE,
     )
@@ -207,7 +204,6 @@ object AccountSettingsMigration {
             val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
             val nsfwAndSpoilerSharedPreferences = file(context, SharedPreferencesUtils.NSFW_AND_SPOILER_SHARED_PREFERENCES_FILE)
             val postHistorySharedPreferences = file(context, SharedPreferencesUtils.POST_HISTORY_SHARED_PREFERENCES_FILE)
-            val recentlyVisitedSharedPreferences = file(context, SharedPreferencesUtils.RECENTLY_VISITED_SHARED_PREFERENCES_FILE)
             val mainPageTabsSharedPreferences = file(context, SharedPreferencesUtils.MAIN_PAGE_TABS_SHARED_PREFERENCES_FILE)
 
             // Anonymous first: it is the namespace every old spelling disagreed about.
@@ -217,7 +213,6 @@ object AccountSettingsMigration {
             if (!internalSharedPreferences.getBoolean(SharedPreferencesUtils.ACCOUNT_SCOPE_MIGRATED, false)) {
                 rescope(nsfwAndSpoilerSharedPreferences, NSFW_AND_SPOILER, namespaces)
                 rescope(postHistorySharedPreferences, POST_HISTORY, namespaces)
-                rescope(recentlyVisitedSharedPreferences, RECENTLY_VISITED, namespaces)
                 rescope(mainPageTabsSharedPreferences, MAIN_PAGE_TABS, namespaces)
                 rescope(defaultSharedPreferences, DEFAULT_FILE, namespaces)
 

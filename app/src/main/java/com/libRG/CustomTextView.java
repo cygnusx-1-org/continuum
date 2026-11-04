@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Vendored into Continuum and migrated to AndroidX. Trimmed to the rounded-shape
+ * Vendored into Reddit Jr. and migrated to AndroidX. Trimmed to the rounded-shape
  * background feature (the only part this app uses); the original library's read-more,
  * checkable and custom-font features were removed.
  */
