@@ -110,7 +110,6 @@ import ml.docilealligator.infinityforreddit.post.PostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostModification;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostType;
 import ml.docilealligator.infinityforreddit.readpost.ReadPostsUtils;
-import ml.docilealligator.infinityforreddit.recentlyvisited.RecordRecentlyVisited;
 import ml.docilealligator.infinityforreddit.resume.FeedResumeState;
 import ml.docilealligator.infinityforreddit.resume.Restorable;
 import ml.docilealligator.infinityforreddit.resume.ResumeLaunchExtras;
@@ -187,9 +186,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
     @Inject()
     @Named("post_history")
     SharedPreferences mPostHistorySharedPreferences;
-    @Inject
-    @Named("recently_visited")
-    SharedPreferences mRecentlyVisitedSharedPreferences;
     @Inject
     @Named("post_layout")
     SharedPreferences mPostLayoutSharedPreferences;
@@ -603,9 +599,6 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                     mRecordedVisit = true;
                     ml.docilealligator.infinityforreddit.recentsubreddits.RecentSubreddits.record(
                             mSharedPreferences, accountName, subredditData.getName(), subredditData.getIconUrl());
-                    RecordRecentlyVisited.recordSubreddit(mExecutor, mRedditDataRoomDatabase,
-                            mRecentlyVisitedSharedPreferences, accountName, subredditData.getName(),
-                            subredditData.getIconUrl());
                 }
 
                 if (mSharedPreferences.getBoolean(SharedPreferencesUtils.HIDE_SUBREDDIT_BANNER, false)) {

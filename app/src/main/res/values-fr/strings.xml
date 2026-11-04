@@ -171,11 +171,8 @@ Appuyez pour réessayer."</string>
     <string name="user_multi_reddit">"Utilisateur MultiReddit"</string>
     <string name="subscribed_subreddits">"Sous-reddits abonnés"</string>
     <string name="history">"Historique"</string>
-    <string name="recently_visited">"récemment visité"</string>
-    <string name="recently_visited_activity_subtitle">"Stocké sur cet appareil"</string>
     <string name="no_subreddits_visited_yet">"Aucun sous-reddit visité pour le moment"</string>
     <string name="no_users_visited_yet">"Tu n’as encore visité aucun profil utilisateur"</string>
-    <string name="search_recently_visited">"Rechercher les articles récemment visités"</string>
     <string name="follow_user">"Suivre l'utilisateur"</string>
     <string name="unfollow_user">"Ne plus suivre l'utilisateur"</string>
     <string name="save_user">"Enregistrer l'utilisateur"</string>
@@ -699,10 +696,6 @@ Appuyez pour réessayer."</string>
     <string name="settings_language_title">"Langage"</string>
     <string name="settings_enable_search_history_title">"Activer l'historique de recherche"</string>
     <string name="settings_post_history_title">"Historique des posts"</string>
-    <string name="settings_recently_visited_title">"récemment visité"</string>
-    <string name="settings_recently_visited_summary">"Conserve une liste des sous-reddits et des utilisateurs que tu visites"</string>
-    <string name="settings_save_recently_visited_title">"Enregistrer Récemment visité"</string>
-    <string name="settings_save_recently_visited_description">"La désactivation de cette option supprime les sous-reddits récemment visités et les utilisateurs stockés pour ce compte."</string>
     <string name="settings_save_read_posts_title">"Enregistrer les messages lus"</string>
     <string name="settings_limit_history_size_title">"Taille limite de l'historique"</string>
     <string name="settings_limit_history_size_hint">"Limite d'historique"</string>

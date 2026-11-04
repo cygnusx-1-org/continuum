@@ -181,11 +181,8 @@
     <string name="user_multi_reddit">User MultiReddit</string>
     <string name="subscribed_subreddits">Subscribed Subreddits</string>
     <string name="history">History</string>
-    <string name="recently_visited">Recently Visited</string>
-    <string name="recently_visited_activity_subtitle">Stored on this device</string>
     <string name="no_subreddits_visited_yet">No subreddits visited yet</string>
     <string name="no_users_visited_yet">No users visited yet</string>
-    <string name="search_recently_visited">Search recently visited</string>
     <string name="follow_user">Follow user</string>
     <string name="unfollow_user">Unfollow user</string>
     <string name="save_user">Save user</string>
@@ -795,10 +792,6 @@
     <string name="settings_language_title">Language</string>
     <string name="settings_enable_search_history_title">Enable Search History</string>
     <string name="settings_post_history_title">Post History</string>
-    <string name="settings_recently_visited_title">Recently Visited</string>
-    <string name="settings_recently_visited_summary">Keep a list of the subreddits and users you visit</string>
-    <string name="settings_save_recently_visited_title">Save Recently Visited</string>
-    <string name="settings_save_recently_visited_description">Turning this off deletes the recently visited subreddits and users stored for this account.</string>
     <string name="settings_save_read_posts_title">Save Read Posts</string>
     <string name="settings_limit_history_size_title">Limit History Size</string>
     <string name="settings_limit_history_size_hint">History Limit</string>

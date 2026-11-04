@@ -171,11 +171,8 @@ Naciśnij, aby spróbować ponownie."</string>
     <string name="user_multi_reddit">"MultiReddit użytkownika"</string>
     <string name="subscribed_subreddits">"Subskrybowane subreddity"</string>
     <string name="history">"Historia"</string>
-    <string name="recently_visited">"Ostatnio odwiedzone"</string>
-    <string name="recently_visited_activity_subtitle">"Przechowywane na tym urządzeniu"</string>
     <string name="no_subreddits_visited_yet">"Nie odwiedzono jeszcze żadnych subredditów"</string>
     <string name="no_users_visited_yet">"Nie odwiedziłeś jeszcze żadnego profilu użytkownika"</string>
-    <string name="search_recently_visited">"Wyszukaj ostatnio odwiedzane elementy"</string>
     <string name="follow_user">"Obserwuj użytkownika"</string>
     <string name="unfollow_user">"Przestań obserwować użytkownika"</string>
     <string name="save_user">"Zapisz użytkownika"</string>
@@ -704,10 +701,6 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="settings_language_title">"Język"</string>
     <string name="settings_enable_search_history_title">"Włącz historię wyszukiwania"</string>
     <string name="settings_post_history_title">"Historia postów"</string>
-    <string name="settings_recently_visited_title">"Ostatnio odwiedzone"</string>
-    <string name="settings_recently_visited_summary">"Prowadź listę subredditów i odwiedzanych użytkowników"</string>
-    <string name="settings_save_recently_visited_title">"Zapisz ostatnio odwiedzone"</string>
-    <string name="settings_save_recently_visited_description">"Wyłączenie tej opcji powoduje usunięcie ostatnio odwiedzonych subredditów i użytkowników zapisanych dla tego konta."</string>
     <string name="settings_save_read_posts_title">"Zapisz przeczytane posty"</string>
     <string name="settings_limit_history_size_title">"Ogranicz rozmiar historii"</string>
     <string name="settings_limit_history_size_hint">"Limit historii"</string>

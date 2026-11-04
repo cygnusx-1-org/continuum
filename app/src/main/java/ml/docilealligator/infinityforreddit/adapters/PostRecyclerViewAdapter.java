@@ -2320,6 +2320,25 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     @Nullable
     private RecyclerView attachedRecyclerView;
 
+    // Set while another screen, such as the gallery list, is drawn over the feed. That screen is
+    // translucent, so the feed behind it keeps painting, and a gif card left animating there costs
+    // frames the screen in front needs. Videos are already paused by the fragment's onPause.
+    private boolean mFeedPaused;
+
+    /**
+     * Stops every animating gif card while the feed is covered, and lets them start again once
+     * it is back on screen.
+     */
+    public void setFeedPaused(boolean paused) {
+        if (mFeedPaused == paused) {
+            return;
+        }
+        mFeedPaused = paused;
+        if (attachedRecyclerView != null) {
+            updateAnimatedGifs(attachedRecyclerView);
+        }
+    }
+
     private final Runnable gifAutoplayUpdate = () -> {
         if (attachedRecyclerView != null) {
             updateAnimatedGifs(attachedRecyclerView);
@@ -2394,7 +2413,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             }
             // Every gif card on screen is visited, not just the winners: one that has dropped below
             // the threshold has to be put back to its still.
-            boolean animate = ToroUtil.visibleAreaOffset(mediaView, recyclerView) >= mStartAutoplayVisibleAreaOffset
+            boolean animate = !mFeedPaused
+                    && ToroUtil.visibleAreaOffset(mediaView, recyclerView) >= mStartAutoplayVisibleAreaOffset
                     && (selected == null || selected.contains(holder.getBindingAdapterPosition()));
             setGifAnimating(holder, animate);
         }

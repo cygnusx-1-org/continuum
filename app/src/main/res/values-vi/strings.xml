@@ -170,11 +170,8 @@
     <string name="user_multi_reddit">"Người dùng MultiReddit"</string>
     <string name="subscribed_subreddits">"Subreddits đã đăng ký"</string>
     <string name="history">"Lịch sử"</string>
-    <string name="recently_visited">"Đã truy cập gần đây"</string>
-    <string name="recently_visited_activity_subtitle">"Được lưu trữ trên thiết bị này"</string>
     <string name="no_subreddits_visited_yet">"Chưa có subreddits nào được truy cập"</string>
     <string name="no_users_visited_yet">"Bạn chưa truy cập bất kỳ hồ sơ người dùng nào"</string>
-    <string name="search_recently_visited">"Tìm kiếm các mục đã truy cập gần đây"</string>
     <string name="follow_user">"Theo dõi người dùng"</string>
     <string name="unfollow_user">"Hủy theo dõi người dùng"</string>
     <string name="save_user">"Lưu người dùng"</string>
@@ -704,10 +701,6 @@ Tự động phát video bị tắt."</string>
     <string name="settings_language_title">"Ngôn ngữ"</string>
     <string name="settings_enable_search_history_title">"Bật lịch sử tìm kiếm"</string>
     <string name="settings_post_history_title">"Lịch sử bài đăng"</string>
-    <string name="settings_recently_visited_title">"Đã truy cập gần đây"</string>
-    <string name="settings_recently_visited_summary">"Giữ danh sách các subreddits và người dùng bạn truy cập"</string>
-    <string name="settings_save_recently_visited_title">"Lưu Đã truy cập gần đây"</string>
-    <string name="settings_save_recently_visited_description">"Việc tắt tính năng này sẽ xóa các subreddits đã truy cập gần đây và người dùng được lưu trữ cho tài khoản này."</string>
     <string name="settings_save_read_posts_title">"Lưu bài đăng đã đọc"</string>
     <string name="settings_limit_history_size_title">"Kích thước lịch sử giới hạn"</string>
     <string name="settings_limit_history_size_hint">"Giới hạn lịch sử"</string>

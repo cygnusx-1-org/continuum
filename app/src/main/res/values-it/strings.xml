@@ -177,11 +177,8 @@ Tocca per riprovare."</string>
     <string name="user_multi_reddit">"Utente MultiReddit"</string>
     <string name="subscribed_subreddits">"Subreddit iscritti"</string>
     <string name="history">"Cronologia"</string>
-    <string name="recently_visited">"Visitato di recente"</string>
-    <string name="recently_visited_activity_subtitle">"Memorizzato su questo dispositivo"</string>
     <string name="no_subreddits_visited_yet">"Nessun subreddit ancora visitato"</string>
     <string name="no_users_visited_yet">"Non hai ancora visitato nessun profilo utente"</string>
-    <string name="search_recently_visited">"Cerca gli elementi visitati di recente"</string>
     <string name="follow_user">"Segui utente"</string>
     <string name="unfollow_user">"Smetti di seguire l'utente"</string>
     <string name="save_user">"Salva utente"</string>
@@ -712,10 +709,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_language_title">"Lingua"</string>
     <string name="settings_enable_search_history_title">"Abilita cronologia di ricerca"</string>
     <string name="settings_post_history_title">"Cronologia dei post"</string>
-    <string name="settings_recently_visited_title">"Visitato di recente"</string>
-    <string name="settings_recently_visited_summary">"Mantieni un elenco dei subreddit e degli utenti che visiti"</string>
-    <string name="settings_save_recently_visited_title">"Salva Visitati di recente"</string>
-    <string name="settings_save_recently_visited_description">"La disattivazione di questa opzione elimina i subreddit visitati di recente e gli utenti memorizzati per questo account."</string>
     <string name="settings_save_read_posts_title">"Salva i post letti"</string>
     <string name="settings_limit_history_size_title">"Limita dimensione cronologia"</string>
     <string name="settings_limit_history_size_hint">"Limite cronologia"</string>

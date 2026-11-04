@@ -10,6 +10,8 @@
 * Removed `Settings > Debug`
 * `Privacy Policy` now opens a real policy, PRIVACY.md in the repository
 * With `Collapse Stickied Posts` on, tap the pin on an opened-up stickied post to fold it back into one line
+* Removed Recently Visited: the sidebar row, its screen and its Settings screen. Recents covers it. Your Backup & Restore files still work
+* GIF cards in the feed stop animating while a gallery or other screen is open over it
 
 8.3.3.9.1.13 / 2026-11-3
 ============

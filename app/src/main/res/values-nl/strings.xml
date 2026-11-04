@@ -172,11 +172,8 @@ Druk om opnieuw te proberen."</string>
     <string name="user_multi_reddit">"Gebruiker MultiReddit"</string>
     <string name="subscribed_subreddits">"Geabonneerde subreddits"</string>
     <string name="history">"Geschiedenis"</string>
-    <string name="recently_visited">"Onlangs bezocht"</string>
-    <string name="recently_visited_activity_subtitle">"Opgeslagen op dit apparaat"</string>
     <string name="no_subreddits_visited_yet">"Nog geen subreddits bezocht"</string>
     <string name="no_users_visited_yet">"Je hebt nog geen gebruikersprofielen bezocht"</string>
-    <string name="search_recently_visited">"Recent bezochte artikelen zoeken"</string>
     <string name="follow_user">"Volg gebruiker"</string>
     <string name="unfollow_user">"Gebruiker niet meer volgen"</string>
     <string name="save_user">"Gebruiker opslaan"</string>
@@ -707,10 +704,6 @@ Automatisch afspelen van video is uitgeschakeld."</string>
     <string name="settings_language_title">"Taal"</string>
     <string name="settings_enable_search_history_title">"Zoekgeschiedenis Inschakelen"</string>
     <string name="settings_post_history_title">"Post Geschiedenis"</string>
-    <string name="settings_recently_visited_title">"Onlangs bezocht"</string>
-    <string name="settings_recently_visited_summary">"Een lijst bijhouden van de subreddits en gebruikers die je bezoekt"</string>
-    <string name="settings_save_recently_visited_title">"Recent bezocht opslaan"</string>
-    <string name="settings_save_recently_visited_description">"Als je dit uitschakelt, worden de recent bezochte subreddits en gebruikers verwijderd die voor dit account zijn opgeslagen."</string>
     <string name="settings_save_read_posts_title">"Gelezen berichten opslaan"</string>
     <string name="settings_limit_history_size_title">"Beperk de grootte van de geschiedenis"</string>
     <string name="settings_limit_history_size_hint">"Geschiedenislimiet"</string>

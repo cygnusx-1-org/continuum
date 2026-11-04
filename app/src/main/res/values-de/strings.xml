@@ -176,11 +176,8 @@ Tippen für Neuversuch."</string>
     <string name="user_multi_reddit">"Benutzer-MultiReddit"</string>
     <string name="subscribed_subreddits">"Abonnierte Subreddits"</string>
     <string name="history">"Verlauf"</string>
-    <string name="recently_visited">"Kürzlich besucht"</string>
-    <string name="recently_visited_activity_subtitle">"Auf diesem Gerät gespeichert"</string>
     <string name="no_subreddits_visited_yet">"Noch keine Subreddits besucht"</string>
     <string name="no_users_visited_yet">"Noch keine Benutzerprofile besucht"</string>
-    <string name="search_recently_visited">"Suche nach kürzlich besuchten Elementen"</string>
     <string name="follow_user">"Benutzer folgen"</string>
     <string name="unfollow_user">"Dem Benutzer nicht mehr folgen"</string>
     <string name="save_user">"Benutzer speichern"</string>
@@ -711,10 +708,6 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="settings_language_title">"Sprache"</string>
     <string name="settings_enable_search_history_title">"Suchverlauf aktivieren"</string>
     <string name="settings_post_history_title">"Beitragsverlauf aktivieren"</string>
-    <string name="settings_recently_visited_title">"Kürzlich besucht"</string>
-    <string name="settings_recently_visited_summary">"Eine Liste der Subreddits und Benutzer führen, die du besuchst"</string>
-    <string name="settings_save_recently_visited_title">"Zuletzt besucht speichern"</string>
-    <string name="settings_save_recently_visited_description">"Durch Deaktivieren werden die zuletzt besuchten Subreddits und Benutzer gelöscht, die für dieses Konto gespeichert sind."</string>
     <string name="settings_save_read_posts_title">"Gelesene Beiträge speichern"</string>
     <string name="settings_limit_history_size_title">"Verlaufsgröße begrenzen"</string>
     <string name="settings_limit_history_size_hint">"Verlaufslimit"</string>

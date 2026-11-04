@@ -174,11 +174,8 @@
     <string name="user_multi_reddit">"பயனர் மல்டிரெடிட்"</string>
     <string name="subscribed_subreddits">"சப்ரெடிட்கள் குழுசேர்ந்தன"</string>
     <string name="history">"வரலாறு"</string>
-    <string name="recently_visited">"சமீபத்தில் பார்வையிட்டது"</string>
-    <string name="recently_visited_activity_subtitle">"இந்த சாதனத்தில் சேமிக்கப்பட்டது"</string>
     <string name="no_subreddits_visited_yet">"சப்ரெடிட்கள் எதுவும் இதுவரை பார்வையிடப்படவில்லை"</string>
     <string name="no_users_visited_yet">"நீங்கள் இதுவரை எந்த பயனர் சுயவிவரத்தையும் பார்வையிடவில்லை"</string>
-    <string name="search_recently_visited">"தேடல் சமீபத்தில் பார்வையிட்ட உருப்படிகள்"</string>
     <string name="follow_user">"பயனரைப் பின்தொடரவும்"</string>
     <string name="unfollow_user">"பயனரைப் பின்தொடர வேண்டாம்"</string>
     <string name="save_user">"பயனரைச் சேமிக்கவும்"</string>
@@ -701,10 +698,6 @@
     <string name="settings_language_title">"மொழி"</string>
     <string name="settings_enable_search_history_title">"தேடல் வரலாற்றை இயக்கு"</string>
     <string name="settings_post_history_title">"இடுகை வரலாறு"</string>
-    <string name="settings_recently_visited_title">"சமீபத்தில் பார்வையிட்டது"</string>
-    <string name="settings_recently_visited_summary">"நீங்கள் பார்வையிடும் சப்ரெடிட்கள் மற்றும் பயனர்களின் பட்டியலை வைத்திருங்கள்"</string>
-    <string name="settings_save_recently_visited_title">"சேமி சமீபத்தில் பார்வையிட்டது"</string>
-    <string name="settings_save_recently_visited_description">"இதை முடக்குவது, சமீபத்தில் பார்வையிட்ட சப்ரெடிட்கள் மற்றும் இந்தக் கணக்கில் சேமிக்கப்பட்ட பயனர்களை நீக்குகிறது."</string>
     <string name="settings_save_read_posts_title">"படித்த இடுகைகளைச் சேமிக்கவும்"</string>
     <string name="settings_limit_history_size_title">"வரம்பு வரலாறு அளவு"</string>
     <string name="settings_limit_history_size_hint">"வரலாறு வரம்பு"</string>

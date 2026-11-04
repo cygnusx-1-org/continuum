@@ -176,11 +176,8 @@
     <string name="user_multi_reddit">"用户多reddit"</string>
     <string name="subscribed_subreddits">"订阅的 Reddit 子版块"</string>
     <string name="history">"历史"</string>
-    <string name="recently_visited">"最近访问过"</string>
-    <string name="recently_visited_activity_subtitle">"存储在此设备上"</string>
     <string name="no_subreddits_visited_yet">"尚未访问 subreddits"</string>
     <string name="no_users_visited_yet">"您还没有访问过任何用户个人资料"</string>
-    <string name="search_recently_visited">"搜索最近访问的项目"</string>
     <string name="follow_user">"关注用户"</string>
     <string name="unfollow_user">"取消关注用户"</string>
     <string name="save_user">"保存用户"</string>
@@ -711,10 +708,6 @@ Reddit 视频分辨率较低。
     <string name="settings_language_title">"语言"</string>
     <string name="settings_enable_search_history_title">"启用搜索历史"</string>
     <string name="settings_post_history_title">"帖子历史"</string>
-    <string name="settings_recently_visited_title">"最近访问过"</string>
-    <string name="settings_recently_visited_summary">"保留您访问的子版块和用户的列表"</string>
-    <string name="settings_save_recently_visited_title">"保存最近访问过的内容"</string>
-    <string name="settings_save_recently_visited_description">"关闭此功能会删除最近访问的 subreddits 和为此帐户存储的用户。"</string>
     <string name="settings_save_read_posts_title">"保存已读帖子"</string>
     <string name="settings_limit_history_size_title">"限制历史大小"</string>
     <string name="settings_limit_history_size_hint">"历史限额"</string>

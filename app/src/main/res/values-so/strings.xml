@@ -168,11 +168,8 @@
     <string name="user_multi_reddit">"Isticmaale MultiReddit"</string>
     <string name="subscribed_subreddits">"Subreddits-ka-qodobsan"</string>
     <string name="history">"Taariikhda"</string>
-    <string name="recently_visited">"dhawaan la booqday"</string>
-    <string name="recently_visited_activity_subtitle">"Ku kaydsan qalabkan"</string>
     <string name="no_subreddits_visited_yet">"Weli majiraan hoosaadyo la booqday"</string>
     <string name="no_users_visited_yet">"Wali ma aadan booqan wax profile-ka isticmaale"</string>
-    <string name="search_recently_visited">"Raadinta alaabta dhawaan la booqday"</string>
     <string name="follow_user">"raac isticmaale"</string>
     <string name="unfollow_user">"Isticmaalaha aan la socon"</string>
     <string name="save_user">"Keydi isticmaalaha"</string>
@@ -694,10 +691,6 @@
     <string name="settings_language_title">"Luuqadda"</string>
     <string name="settings_enable_search_history_title">"Dari taariikhda raadinta"</string>
     <string name="settings_post_history_title">"Taariikhda Boostada"</string>
-    <string name="settings_recently_visited_title">"dhawaan la booqday"</string>
-    <string name="settings_recently_visited_summary">"Hayso liis-hoosaadyada iyo isticmaalayaasha aad booqato"</string>
-    <string name="settings_save_recently_visited_title">"Save dhawaan la booqday"</string>
-    <string name="settings_save_recently_visited_description">"Deminta tan waxay tirtirtaa hoosaadyada dhowaan la booqday iyo isticmaalayaasha lagu kaydiyay akoonkan."</string>
     <string name="settings_save_read_posts_title">"Keydso qoraallada la akhriyay"</string>
     <string name="settings_limit_history_size_title">"Xaddidaadda cabbirka taariikhda"</string>
     <string name="settings_limit_history_size_hint">"Xadka Taariikhda"</string>

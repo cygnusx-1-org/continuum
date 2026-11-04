@@ -175,11 +175,8 @@
     <string name="user_multi_reddit">"Пользователь MultiReddit"</string>
     <string name="subscribed_subreddits">"Субреддиты с подпиской"</string>
     <string name="history">"История"</string>
-    <string name="recently_visited">"Недавно посещенные"</string>
-    <string name="recently_visited_activity_subtitle">"Хранится на этом устройстве."</string>
     <string name="no_subreddits_visited_yet">"Пока не посещались субреддиты"</string>
     <string name="no_users_visited_yet">"Ты ещё не посетил ни одного профиля пользователя"</string>
-    <string name="search_recently_visited">"Поиск недавно посещенных элементов"</string>
     <string name="follow_user">"Следовать за пользователем"</string>
     <string name="unfollow_user">"Отписаться от пользователя"</string>
     <string name="save_user">"Сохранить пользователя"</string>
@@ -710,10 +707,6 @@
     <string name="settings_language_title">"Язык"</string>
     <string name="settings_enable_search_history_title">"Включить историю поиска"</string>
     <string name="settings_post_history_title">"История поста"</string>
-    <string name="settings_recently_visited_title">"Недавно посещенные"</string>
-    <string name="settings_recently_visited_summary">"Сохранять список субреддитов и пользователей, которых ты посещаешь"</string>
-    <string name="settings_save_recently_visited_title">"Сохранить недавно посещенные"</string>
-    <string name="settings_save_recently_visited_description">"При отключении этого параметра удаляются недавно посещенные субреддиты и пользователи, сохраненные для этой учетной записи."</string>
     <string name="settings_save_read_posts_title">"Сохранять прочитанные публикации"</string>
     <string name="settings_limit_history_size_title">"Ограничить размер истории"</string>
     <string name="settings_limit_history_size_hint">"Предел истории"</string>

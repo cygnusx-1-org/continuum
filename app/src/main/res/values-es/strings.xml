@@ -176,11 +176,8 @@ Toca para reintentar."</string>
     <string name="user_multi_reddit">"Usuario MultiReddit"</string>
     <string name="subscribed_subreddits">"Subreddits suscritos a"</string>
     <string name="history">"Historial"</string>
-    <string name="recently_visited">"Visitado recientemente"</string>
-    <string name="recently_visited_activity_subtitle">"Almacenado en este dispositivo"</string>
     <string name="no_subreddits_visited_yet">"Aún no se han visitado subreddits"</string>
     <string name="no_users_visited_yet">"Aún no has visitado ningún perfil de usuario"</string>
-    <string name="search_recently_visited">"Buscar artículos visitados recientemente"</string>
     <string name="follow_user">"Seguir usuario"</string>
     <string name="unfollow_user">"Dejar de seguir al usuario"</string>
     <string name="save_user">"Guardar usuario"</string>
@@ -711,10 +708,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_language_title">"Lenguaje"</string>
     <string name="settings_enable_search_history_title">"Activar historial de búsqueda"</string>
     <string name="settings_post_history_title">"Historial de publicaciones"</string>
-    <string name="settings_recently_visited_title">"Visitado recientemente"</string>
-    <string name="settings_recently_visited_summary">"Mantenga una lista de los subreddits y usuarios que visita"</string>
-    <string name="settings_save_recently_visited_title">"Guardar Visitado recientemente"</string>
-    <string name="settings_save_recently_visited_description">"Al desactivar esta opción se eliminan los subreddits visitados recientemente y los usuarios almacenados para esta cuenta."</string>
     <string name="settings_save_read_posts_title">"Guardar publicaciones leídas"</string>
     <string name="settings_limit_history_size_title">"Tamaño del historial límite"</string>
     <string name="settings_limit_history_size_hint">"Límite histórico"</string>

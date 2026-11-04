@@ -176,11 +176,8 @@
     <string name="user_multi_reddit">"사용자 MultiReddit"</string>
     <string name="subscribed_subreddits">"구독 하위 레딧"</string>
     <string name="history">"역사"</string>
-    <string name="recently_visited">"최근 방문"</string>
-    <string name="recently_visited_activity_subtitle">"이 장치에 저장됨"</string>
     <string name="no_subreddits_visited_yet">"아직 하위 레딧을 방문하지 않았습니다."</string>
     <string name="no_users_visited_yet">"아직 사용자 프로필을 방문하지 않았습니다."</string>
-    <string name="search_recently_visited">"최근 방문한 상품 검색"</string>
     <string name="follow_user">"사용자 팔로우"</string>
     <string name="unfollow_user">"사용자 팔로우 취소"</string>
     <string name="save_user">"사용자 저장"</string>
@@ -704,10 +701,6 @@
     <string name="settings_language_title">"언어"</string>
     <string name="settings_enable_search_history_title">"검색 기록 활성화"</string>
     <string name="settings_post_history_title">"게시물 기록"</string>
-    <string name="settings_recently_visited_title">"최근 방문"</string>
-    <string name="settings_recently_visited_summary">"귀하가 방문하는 하위 레딧 및 사용자 목록을 유지하세요"</string>
-    <string name="settings_save_recently_visited_title">"최근 방문 저장"</string>
-    <string name="settings_save_recently_visited_description">"이 기능을 끄면 최근 방문한 하위 레딧과 이 계정에 저장된 사용자가 삭제됩니다."</string>
     <string name="settings_save_read_posts_title">"읽은 게시물 저장"</string>
     <string name="settings_limit_history_size_title">"제한 기록 크기"</string>
     <string name="settings_limit_history_size_hint">"기록 제한"</string>

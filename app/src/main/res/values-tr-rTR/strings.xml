@@ -177,11 +177,8 @@ Tekrar denemek için tıklayın."</string>
     <string name="user_multi_reddit">"Kullanıcı Çoklu Reddit"</string>
     <string name="subscribed_subreddits">"Abone Olunan Alt Dizinler"</string>
     <string name="history">"Geçmiş"</string>
-    <string name="recently_visited">"En Son Ziyaret Edilenler"</string>
-    <string name="recently_visited_activity_subtitle">"Bu cihazda depolandı"</string>
     <string name="no_subreddits_visited_yet">"Henüz alt dizin ziyaret edilmedi"</string>
     <string name="no_users_visited_yet">"Henüz herhangi bir kullanıcı profilini ziyaret etmedin"</string>
-    <string name="search_recently_visited">"Son zamanlarda ziyaret edilen öğeleri arayın"</string>
     <string name="follow_user">"Kullanıcıyı takip et"</string>
     <string name="unfollow_user">"Kullanıcıyı takip etmeyi bırak"</string>
     <string name="save_user">"Kullanıcıyı kaydet"</string>
@@ -708,10 +705,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_language_title">"Dil"</string>
     <string name="settings_enable_search_history_title">"Arama Geçmişini Etkinleştir"</string>
     <string name="settings_post_history_title">"Gönderi Geçmişi"</string>
-    <string name="settings_recently_visited_title">"En Son Ziyaret Edilenler"</string>
-    <string name="settings_recently_visited_summary">"Ziyaret ettiğin alt dizinlerin ve kullanıcıların bir listesini tut"</string>
-    <string name="settings_save_recently_visited_title">"Son Ziyaret Edilenleri Kaydet"</string>
-    <string name="settings_save_recently_visited_description">"Bunu kapatmak, yakın zamanda ziyaret edilen alt dizinleri ve bu hesap için saklanan kullanıcıları siler."</string>
     <string name="settings_save_read_posts_title">"Okunan Gönderileri Kaydet"</string>
     <string name="settings_limit_history_size_title">"Sınır Geçmişi Boyutu"</string>
     <string name="settings_limit_history_size_hint">"Geçmiş Sınırı"</string>
