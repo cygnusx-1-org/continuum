@@ -78,6 +78,14 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
         this.mActivity = host.activity();
     }
 
+    /**
+     * The host, for subclasses whose overrides run while setBaseView is still inside their
+     * superclass constructor, before any field of their own has been assigned.
+     */
+    final PostRowHost rowHost() {
+        return host;
+    }
+
     void startSubredditOrUserActivity(String subredditName) {
         if (subredditName.startsWith("u_")) {
             Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);

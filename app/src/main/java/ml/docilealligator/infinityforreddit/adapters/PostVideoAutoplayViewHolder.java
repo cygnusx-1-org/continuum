@@ -44,6 +44,6 @@ class PostVideoAutoplayViewHolder extends PostBaseVideoAutoplayViewHolder {
 
     @Override
     void setItemViewBackgroundColor(boolean isReadPost) {
-        itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? host.readPostCardViewBackgroundColor() : host.cardViewBackgroundColor()));
+        itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? rowHost().readPostCardViewBackgroundColor() : rowHost().cardViewBackgroundColor()));
     }
 }

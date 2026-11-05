@@ -56,6 +56,8 @@ import ml.docilealligator.infinityforreddit.adapters.CompactThumbnailPreloader;
 import ml.docilealligator.infinityforreddit.adapters.PostBaseViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostCompactBaseViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardTextTypeViewHolder;
+import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayLegacyControllerViewHolder;
+import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadSubredditIcon;
 import ml.docilealligator.infinityforreddit.asynctasks.LoadUserData;
@@ -1539,8 +1541,8 @@ public abstract class PostFragmentBase extends Fragment {
 
             if (parent.getAdapter() != null) {
                 RecyclerView.ViewHolder viewHolder = parent.getChildViewHolder(view);
-                if (viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardVideoAutoplayViewHolder ||
-                        viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardVideoAutoplayLegacyControllerViewHolder ||
+                if (viewHolder instanceof PostMaterial3CardVideoAutoplayViewHolder ||
+                        viewHolder instanceof PostMaterial3CardVideoAutoplayLegacyControllerViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardWithPreviewViewHolder ||
                         viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardGalleryTypeViewHolder ||
                         viewHolder instanceof PostMaterial3CardTextTypeViewHolder) {

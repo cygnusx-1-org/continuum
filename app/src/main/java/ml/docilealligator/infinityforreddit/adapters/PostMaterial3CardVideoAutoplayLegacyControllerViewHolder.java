@@ -44,6 +44,6 @@ public class PostMaterial3CardVideoAutoplayLegacyControllerViewHolder extends Po
 
     @Override
     void setItemViewBackgroundColor(boolean isReadPost) {
-        itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? host.readPostFilledCardViewBackgroundColor() : host.filledCardViewBackgroundColor()));
+        itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? rowHost().readPostFilledCardViewBackgroundColor() : rowHost().filledCardViewBackgroundColor()));
     }
 }
