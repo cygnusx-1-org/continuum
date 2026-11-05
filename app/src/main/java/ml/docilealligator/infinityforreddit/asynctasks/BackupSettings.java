@@ -51,7 +51,6 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.model.enums.EncryptionMethod;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -70,7 +69,6 @@ public class BackupSettings {
 
     public static void backupSettings(Context context, Executor executor, Handler handler,
                                     ContentResolver contentResolver, Uri destinationDirUri,
-                                    String password,
                                     RedditDataRoomDatabase redditDataRoomDatabase,
                                     SharedPreferences lightThemeSharedPreferences,
                                     SharedPreferences darkThemeSharedPreferences,
@@ -171,7 +169,7 @@ public class BackupSettings {
             // they govern.
             boolean res30 = saveTable(redditDataRoomDatabase.recentSearchQueryDao().getAllForBackup(), databaseDirFile.getAbsolutePath(), "/recent_search_queries.json");
 
-            boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri, password);
+            boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri);
 
             try {
                 FileUtils.deleteDirectory(new File(cacheDir + "/Backup/"));
@@ -233,17 +231,15 @@ public class BackupSettings {
         return true;
     }
 
-    private static boolean zipAndMoveToDestinationDir(Context context, File cacheDir, ContentResolver contentResolver, Uri destinationDirUri, String password) {
+    private static boolean zipAndMoveToDestinationDir(Context context, File cacheDir, ContentResolver contentResolver, Uri destinationDirUri) {
         OutputStream outputStream = null;
         boolean result = false;
         try {
             String time = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.US).format(LocalDateTime.now(ZoneId.systemDefault()));
             String fileName = "RedditJr_Settings_Backup_v" + BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE + "-" + time + ".zip";
             String filePath = cacheDir + "/Backup/" + fileName;
-            try (ZipFile zip = new ZipFile(filePath, password.toCharArray())) {
+            try (ZipFile zip = new ZipFile(filePath)) {
                 ZipParameters zipParameters = new ZipParameters();
-                zipParameters.setEncryptFiles(true);
-                zipParameters.setEncryptionMethod(EncryptionMethod.AES);
                 zip.addFolder(new File(cacheDir + "/Backup/" + BuildConfig.VERSION_NAME + "/"), zipParameters);
             }
 

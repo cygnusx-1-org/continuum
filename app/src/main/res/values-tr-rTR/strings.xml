@@ -733,7 +733,6 @@ Otomatik video oynatma kapatılır."</string>
     <string name="settings_category_backup_and_restore_title">"Yedekleme ve Geri Yükleme"</string>
     <string name="settings_backup_and_restore_summary">"Her hesabın ayarlarını şifrelenmiş bir arşive kaydedin veya bir hesabı tekrar okuyun"</string>
     <string name="settings_backup_settings_title">"Yedekleme Ayarları"</string>
-    <string name="settings_backup_settings_summary">"Hesaplar, İstemci Kimliği ve Giphy API Anahtarı içerir. Yedeklemeyi oluştururken bir parola girmeniz istenecektir."</string>
     <string name="settings_restore_settings_title">"Ayarları Eski Haline Getir"</string>
     <string name="settings_credits_love_animation_title">"Aşk Animasyonu"</string>
     <string name="settings_swipe_between_posts_title">"Gönderiler Arasında Kaydır"</string>
@@ -1493,7 +1492,6 @@ Amoled Tema Şablonu Oluştur"</string>
     <string name="restore_settings_partially_failed">"Bazı ayarlar başarıyla geri yüklenemeyebilir. Değişiklikleri görmek için uygulamayı yeniden başlatın."</string>
     <string name="restore_settings_failed_file_corrupted">"Ayarlar geri yüklenemedi. Dosya bozulmuş olabilir."</string>
     <string name="restore_settings_failed_cannot_get_file">"Dosyaya erişilemiyor"</string>
-    <string name="restore_settings_failed_wrong_password">"Yanlış şifre veya bozuk yedekleme dosyası. Lütfen tekrar deneyin."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Önbellek dizinine erişilemiyor"</string>
     <string name="suicide_prevention_quote">"Kendinizi öldürmemek için bir işaret arıyorsanız, işte bu. \u2764"</string>
     <string name="do_not_show_this_again">"Bunu bir daha gösterme"</string>
@@ -1766,14 +1764,7 @@ Tekrar denemek için dokun."</string>
     <string name="proxy_direct">"Doğrudan"</string>
     <string name="settings_backup_accounts_client_id_title">"Yedekleme Hesapları ve Müşteri Kimliği"</string>
     <string name="settings_backup_accounts_client_id_summary">"Yedekleme dosyasına kullanıcı hesaplarını ve İstemci Kimliğini ekleyin (önerilir)"</string>
-    <string name="backup_password_dialog_title">"Yedekleme Parolasını Girin"</string>
-    <string name="backup_password_dialog_message">"Yedekleme dosyanı şifrelemek için 6–32 karakterlik bir şifre gir. Bu şifreyi unutma; ayarlarını geri yüklemek için ona ihtiyacın olacak."</string>
-    <string name="enter_backup_password">"Şifreyi girin"</string>
     <string name="password_cannot_be_empty">"Şifre boş olamaz"</string>
-    <string name="restore_password_dialog_title">"Geri Yükleme Şifresini Girin"</string>
-    <string name="restore_password_dialog_message">"Lütfen bu yedekleme dosyasını şifrelemek için kullanılan şifreyi girin."</string>
-    <string name="enter_restore_password">"Şifreyi girin"</string>
-    <string name="show_password">"Şifreyi göster"</string>
     <string name="title_activity_settings">"Ayarlar"</string>
     <string name="title_activity_login">"Oturum aç"</string>
     <string name="restart_app_to_apply_changes">"Değişiklikleri uygulamak üzere uygulamayı yeniden başlatmak için buraya basın"</string>

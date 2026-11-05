@@ -736,7 +736,6 @@ Redarea automată a videoclipurilor este dezactivată."</string>
     <string name="settings_category_backup_and_restore_title">"Backup și restaurare"</string>
     <string name="settings_backup_and_restore_summary">"Salvează setările fiecărui cont într-o arhivă criptată sau citești una înapoi"</string>
     <string name="settings_backup_settings_title">"Setări pentru Copie de Rezervă"</string>
-    <string name="settings_backup_settings_summary">"Include conturi, ID client și cheie API Giphy. Ți se va solicita să introduci o parolă la crearea copiei de rezervă."</string>
     <string name="settings_restore_settings_title">"Restabilirea Setărilor"</string>
     <string name="settings_credits_love_animation_title">"Animație de Dragoste"</string>
     <string name="settings_swipe_between_posts_title">"Glisează între Postări"</string>
@@ -1499,7 +1498,6 @@ Nu e bolnavă sau ceva de genul, dar cu siguranță ar putea să se facă bine."
     <string name="restore_settings_partially_failed">"Este posibil ca unele setări să nu se fi restaurat cu succes. Repornește aplicația pentru a vedea modificările."</string>
     <string name="restore_settings_failed_file_corrupted">"Nu s-a putut restaura setările. E posibil că fișierul e corupt."</string>
     <string name="restore_settings_failed_cannot_get_file">"Nu s-a putut accesa fișierul"</string>
-    <string name="restore_settings_failed_wrong_password">"Parolă incorectă sau fișier de rezervă corupt. Te rugăm să încerci din nou."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Nu se poate accesa directorul cache"</string>
     <string name="suicide_prevention_quote">"Dacă ești în căutarea unui semn pentru a nu te sinucide, acesta e.\u2764"</string>
     <string name="do_not_show_this_again">"Nu mai afișa asta din nou"</string>
@@ -1771,14 +1769,7 @@ Apasă pentru a reîncerca."</string>
     <string name="proxy_direct">"Direct"</string>
     <string name="settings_backup_accounts_client_id_title">"Conturi de rezervă și ID client"</string>
     <string name="settings_backup_accounts_client_id_summary">"Include conturile de utilizator și ID-ul clientului în fișierul de rezervă (recomandat)"</string>
-    <string name="backup_password_dialog_title">"Introdu parola de rezervă"</string>
-    <string name="backup_password_dialog_message">"Te rugăm să introduci o parolă de 6–32 de caractere pentru a cripta fișierul de rezervă. Reține această parolă — vei avea nevoie de ea pentru a-ți restabili setările."</string>
-    <string name="enter_backup_password">"Introdu parola"</string>
     <string name="password_cannot_be_empty">"Parola nu poate fi goală"</string>
-    <string name="restore_password_dialog_title">"Introdu parola de restaurare"</string>
-    <string name="restore_password_dialog_message">"Te rugăm să introduci parola care a fost folosită pentru a cripta acest fișier de rezervă."</string>
-    <string name="enter_restore_password">"Introdu parola"</string>
-    <string name="show_password">"Afișează parola"</string>
     <string name="title_activity_settings">"Setări"</string>
     <string name="title_activity_login">"Conectează-te"</string>
     <string name="restart_app_to_apply_changes">"Apasă aici pentru a reporni aplicația pentru a aplica modificările"</string>

@@ -729,7 +729,6 @@
     <string name="settings_category_backup_and_restore_title">"백업 및 복원"</string>
     <string name="settings_backup_and_restore_summary">"모든 계정의 설정을 암호화된 아카이브에 저장하거나 다시 읽어보세요"</string>
     <string name="settings_backup_settings_title">"백업 설정"</string>
-    <string name="settings_backup_settings_summary">"계정, 클라이언트 ID, Giphy API 키가 포함됩니다. 백업을 생성할 때 비밀번호를 입력하라는 메시지가 표시됩니다."</string>
     <string name="settings_restore_settings_title">"복원 설정"</string>
     <string name="settings_credits_love_animation_title">"사랑 애니메이션"</string>
     <string name="settings_swipe_between_posts_title">"게시물 간 스와이프"</string>
@@ -1483,7 +1482,6 @@
     <string name="restore_settings_partially_failed">"설정 복원이 부분적으로 실패했습니다."</string>
     <string name="restore_settings_failed_file_corrupted">"파일이 손상되었거나 형식이 잘못되었습니다. 유효한 백업 파일을 선택하십시오."</string>
     <string name="restore_settings_failed_cannot_get_file">"파일을 가져올 수 없습니다. 다시 시도해 주세요."</string>
-    <string name="restore_settings_failed_wrong_password">"비밀번호가 잘못되었거나 백업 파일이 손상되었습니다. 다시 시도해 주세요."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"캐시 디렉터리에 액세스할 수 없습니다."</string>
     <string name="suicide_prevention_quote">"자살하지 말라는 표시를 찾고 있다면 바로 이것입니다.\u2764"</string>
     <string name="do_not_show_this_again">"이것을 다시 표시하지 않음"</string>
@@ -1752,14 +1750,7 @@
     <string name="proxy_direct">"다이렉트"</string>
     <string name="settings_backup_accounts_client_id_title">"백업 계정 및 클라이언트 ID"</string>
     <string name="settings_backup_accounts_client_id_summary">"백업 파일에 사용자 계정 및 클라이언트 ID 포함(권장)"</string>
-    <string name="backup_password_dialog_title">"백업 비밀번호 입력"</string>
-    <string name="backup_password_dialog_message">"백업 파일을 암호화하려면 6~32자의 비밀번호를 입력하세요. 이 비밀번호를 기억하십시오. 설정을 복원하려면 이 비밀번호가 필요합니다."</string>
-    <string name="enter_backup_password">"비밀번호를 입력하세요"</string>
     <string name="password_cannot_be_empty">"비밀번호는 비워둘 수 없습니다."</string>
-    <string name="restore_password_dialog_title">"복원 비밀번호 입력"</string>
-    <string name="restore_password_dialog_message">"이 백업 파일을 암호화하는 데 사용된 비밀번호를 입력하세요."</string>
-    <string name="enter_restore_password">"비밀번호를 입력하세요"</string>
-    <string name="show_password">"비밀번호 표시"</string>
     <string name="title_activity_settings">"설정"</string>
     <string name="title_activity_login">"로그인"</string>
     <string name="restart_app_to_apply_changes">"변경 사항을 적용하려면 여기를 눌러 앱을 다시 시작하세요."</string>

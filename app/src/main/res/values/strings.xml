@@ -833,7 +833,7 @@
     <string name="settings_category_backup_and_restore_title">Backup and Restore</string>
     <string name="settings_backup_and_restore_summary">Save the settings of every account to an encrypted archive, or read one back</string>
     <string name="settings_backup_settings_title">Backup Settings</string>
-    <string name="settings_backup_settings_summary">Includes accounts, Client ID, and Giphy API Key. You will be prompted to enter a password when creating the backup.</string>
+    <string name="settings_backup_settings_summary">Includes accounts, Client ID, and Giphy API Key. The backup file is not encrypted, so keep it somewhere private.</string>
     <string name="settings_restore_settings_title">Restore Settings</string>
     <string name="settings_credits_love_animation_title">Love Animation</string>
     <string name="settings_swipe_between_posts_title">Swipe Between Posts</string>
@@ -1698,7 +1698,6 @@
     <string name="restore_settings_partially_failed">Restoring settings partially failed</string>
     <string name="restore_settings_failed_file_corrupted">File corrupted or invalid format. Please select a valid backup file.</string>
     <string name="restore_settings_failed_cannot_get_file">Cannot get the file. Please try again.</string>
-    <string name="restore_settings_failed_wrong_password">Incorrect password or corrupted backup file. Please try again.</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">Cannot access cache directory</string>
 
     <string name="suicide_prevention_quote">If you are looking for a sign not to kill yourself, this is it.\u2764</string>
@@ -2052,15 +2051,8 @@
     <string name="settings_backup_accounts_client_id_title">Backup Accounts and Client ID</string>
     <string name="settings_backup_accounts_client_id_summary">Include user accounts and Client ID in the backup file (recommended)</string>
 
-    <string name="backup_password_dialog_title">Enter Backup Password</string>
-    <string name="backup_password_dialog_message">Please enter a 6-32 character password to encrypt your backup file. Remember this password - you will need it to restore your settings.</string>
-    <string name="enter_backup_password">Enter password</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>
 
-    <string name="restore_password_dialog_title">Enter Restore Password</string>
-    <string name="restore_password_dialog_message">Please enter the password that was used to encrypt this backup file.</string>
-    <string name="enter_restore_password">Enter password</string>
-    <string name="show_password">Show password</string>
 
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_login">Sign in</string>
@@ -2068,8 +2060,6 @@
 
     <string name="subreddits_hidden_by_default_removed_message">Subreddits hidden by default removed</string>
 
-    <string name="password_too_short_error" translatable="false">Password must be at least %d characters long.</string>
-    <string name="password_too_long_error" translatable="false">Password must be no more than %d characters long.</string>
     <string name="jump_to_parent_comment">Jump to Parent Comment</string>
     <string name="long_press_post_non_media_area">Long Press on Post (Non-Media Area)</string>
     <string name="long_press_post_media">Long Press on Post Media</string>

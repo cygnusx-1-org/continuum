@@ -21,8 +21,6 @@ import ml.docilealligator.infinityforreddit.resume.ResumeState
 import ml.docilealligator.infinityforreddit.settings.MainPageTabsUtils
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils
 import net.lingala.zip4j.ZipFile
-import net.lingala.zip4j.model.ZipParameters
-import net.lingala.zip4j.model.enums.EncryptionMethod
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -52,7 +50,6 @@ import org.robolectric.Shadows.shadowOf
 class RestoreSettingsTest {
 
     private companion object {
-        const val PASSWORD = "restore-test"
         const val VERSION_DIR = "8.3.0.2"
         const val CURRENT_ACCOUNT_FILE = "current_account_test"
     }
@@ -134,11 +131,8 @@ class RestoreSettingsTest {
 
         val zip = File(context.cacheDir, "backup.zip")
         zip.delete()
-        ZipFile(zip, PASSWORD.toCharArray()).use { archive ->
-            archive.addFolder(versionDir, ZipParameters().apply {
-                isEncryptFiles = true
-                encryptionMethod = EncryptionMethod.AES
-            })
+        ZipFile(zip).use { archive ->
+            archive.addFolder(versionDir)
         }
 
         val uri = Uri.parse("content://ml.docilealligator.infinityforreddit.test/backup.zip")
@@ -150,7 +144,6 @@ class RestoreSettingsTest {
             Handler(Looper.getMainLooper()),
             context.contentResolver,
             uri,
-            PASSWORD,
             database,
             currentAccount,
             file("light_theme_test"),
@@ -164,7 +157,6 @@ class RestoreSettingsTest {
             object : RestoreSettings.RestoreSettingsListener {
                 override fun success() = Unit
                 override fun failed(errorMessage: String) = Unit
-                override fun failedWithWrongPassword(errorMessage: String) = Unit
             },
         )
     }
