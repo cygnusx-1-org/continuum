@@ -62,7 +62,6 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
     // can't see the assignment inside the initializeFragment() helper.
     @SuppressWarnings("NullAway.Init")
     private Fragment mFragment;
-    private PostLayoutBottomSheetFragment postLayoutBottomSheetFragment;
     private ActivityAccountPostsBinding binding;
 
     @Override
@@ -128,7 +127,6 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.accountPostsToolbar);
 
-        postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
 
         if (savedInstanceState != null) {
             Fragment restoredFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT_OUT_STATE);
@@ -206,8 +204,7 @@ public class AccountPostsActivity extends BaseActivity implements SortTypeSelect
                 ((PostFragment) mFragment).refresh();
             }
             return true;
-        } else if (itemId == R.id.action_change_post_layout_account_posts_activity) {
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         } else if (itemId == android.R.id.home) {
             finish();

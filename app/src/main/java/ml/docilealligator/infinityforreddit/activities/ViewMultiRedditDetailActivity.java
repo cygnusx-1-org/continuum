@@ -953,8 +953,7 @@ public class ViewMultiRedditDetailActivity extends BaseActivity implements SortT
                 ((FragmentCommunicator) mFragment).refresh();
             }
             return true;
-        } else if (itemId == R.id.action_change_post_layout_view_multi_reddit_detail_activity) {
-            showPostLayoutBottomSheetFragment();
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         } else if (itemId == R.id.action_list_subreddits_view_multi_reddit_detail_activity) {
             if (multiReddit != null && multiReddit.getSubreddits() != null && !multiReddit.getSubreddits().isEmpty()) {

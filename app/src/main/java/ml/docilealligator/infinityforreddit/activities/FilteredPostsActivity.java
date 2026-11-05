@@ -565,9 +565,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
                 ((FragmentCommunicator) mFragment).refresh();
             }
             return true;
-        } else if (itemId == R.id.action_change_post_layout_filtered_post_activity) {
-            PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         }
         return false;
