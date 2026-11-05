@@ -1362,7 +1362,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     // snippet of the text post this card last held would otherwise stay on screen
                     // under the next one -- a link post, which sets no snippet at all, or a text
                     // post whose body wants it on the other side of the image.
-                    hideSnippetSlotsasPreview;
+                    hideSnippetSlots(asPreview);
                     // The play badge starts hidden for the same reason, and only the video and gif
                     // branches below ever show it: without this, the badge of the gif card this
                     // holder last carried stays over a text post's image -- a pairing the feed now
