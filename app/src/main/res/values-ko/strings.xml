@@ -889,7 +889,6 @@
     <string name="favorites">"즐겨찾기"</string>
     <string name="all">"모두"</string>
     <string name="link_post_layout_auto">"자동"</string>
-    <string name="post_layout_compact_2">"컴팩트 레이아웃 2"</string>
     <string name="post_layout_gallery">"갤러리 레이아웃"</string>
     <string name="elapsed_time_just_now">"방금"</string>
     <string name="elapsed_time_a_minute_ago">"1분"</string>

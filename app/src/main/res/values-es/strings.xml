@@ -896,7 +896,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="favorites">"Favoritos"</string>
     <string name="all">"Todos"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_compact_2">"Diseño compacto 2"</string>
     <string name="post_layout_gallery">"Diseño de galería"</string>
     <string name="elapsed_time_just_now">"Ahora mismo"</string>
     <string name="elapsed_time_a_minute_ago">"Hace 1 Minuto"</string>

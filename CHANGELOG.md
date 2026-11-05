@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.25-beta.2 / 2026-11-5
+============
+* Renamed Compact Layout 2 to Compact Layout
+
 8.3.3.9.1.25-beta.1 / 2026-11-5
 ============
 * Removed Compact Layout and Card Layout 2. A feed or setting that used Compact Layout now uses Compact Layout 2, and one that used Card Layout 2 now uses Card Layout

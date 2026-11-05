@@ -1026,7 +1026,7 @@
 
     <string name="link_post_layout_auto">Auto</string>
     <string name="post_layout_card">Card Bottom</string>
-    <string name="post_layout_compact_2">Compact Layout 2</string>
+    <string name="post_layout_compact_2">Compact Layout</string>
     <string name="post_layout_gallery">Gallery Layout</string>
     <string name="post_layout_card_3">Card Top</string>
 
