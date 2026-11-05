@@ -7,7 +7,6 @@ import ml.docilealligator.infinityforreddit.videoautoplay.ExoCreator;
 import ml.docilealligator.infinityforreddit.customtheme.CustomThemeWrapper;
 import ml.docilealligator.infinityforreddit.fragments.PostFragmentBase;
 import android.widget.ImageView;
-import ml.docilealligator.infinityforreddit.post.Post;
 
 /**
  * What the video rows need on top of {@link PostRowHost}. Like it, every value is read when asked
@@ -38,6 +37,4 @@ interface PostVideoHost extends PostRowHost {
     void scheduleGifAutoplayUpdate();
 
     void notifyItemChanged(int position);
-
-    void openMedia(Post post, long videoProgress);
 }

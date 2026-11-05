@@ -126,6 +126,10 @@ interface PostRowHost {
     @Nullable
     PlayerSelector playerSelector();
 
+    String longPressPostMediaAction();
+
+    void openMedia(Post post, long videoProgress);
+
     @Nullable
     Post getItem(int position);
 

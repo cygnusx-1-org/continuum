@@ -17,8 +17,6 @@ interface PostCompactHost extends PostRowHost {
 
     boolean longPressToHideToolbarInCompactLayout();
 
-    String longPressPostMediaAction();
-
     float scale();
 
     GradientDrawable createRoundedBackground(int color, float cornerRadiusDp);

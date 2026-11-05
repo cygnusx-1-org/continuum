@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.25-beta.6 / 2026-11-5
+============
+* Internal clean-up with no change in what you see: the image, link and gallery card rows now live in their own files, which leaves only binding code in the post list adapter
+
 8.3.3.9.1.25-beta.5 / 2026-11-5
 ============
 * Internal clean-up with no change in what you see: the video post rows and their player now live in their own files
