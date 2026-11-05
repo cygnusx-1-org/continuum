@@ -481,8 +481,8 @@
     <string name="decoder_simpcity_titles">TITLE</string>
     <string name="decoder_simpcity_all">ALL</string>
     <string name="decoder_social_search">SOCIALS</string>
-    <string name="settings_decode_nato_binary_title">Decode binary</string>
-    <string name="settings_decode_nato_binary_summary">Show the decoded text, with Copy and search buttons, under comments and posts in NSFW communities that contain 8-bit binary</string>
+    <string name="settings_decode_nato_binary_title">Decode binary and base64</string>
+    <string name="settings_decode_nato_binary_summary">Show the decoded text, with Copy and search buttons, under comments and posts in NSFW communities that contain 8-bit binary or base64</string>
     <string name="settings_collapse_automod_and_stickied_title">Collapse AutoModerator and stickied comments</string>
     <string name="settings_collapse_automod_and_stickied_summary">Show them as a collapsed row until tapped open. Applies the next time a post is opened</string>
     <string name="settings_hide_subreddit_icon_title">Hide Subreddit Icon</string>
