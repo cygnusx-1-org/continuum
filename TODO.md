@@ -2,14 +2,29 @@
 
 Things deliberately left alone, and why.
 
-- [ ] **OAuth redirect: nothing to do.** Reddit Jr. logs in with RedReader's built-in client ID and its `redreader://rr_oauth_redir` redirect, which belongs to RedReader and must not change. The manifest's own entry is now `redditjr://localhost`, used only if you turn on API key overrides and register your own Reddit app with that redirect.
-- [ ] **First gallery slow to scroll.** Feed videos were already paused when another screen opens, so the likely culprit was a GIF card still animating in the feed behind the gallery. Those are now stopped too, and the list loads screen-sized pictures and preloads the next two. If the first gallery is still slower than later ones, it is something else; say so.
-- [ ] **Split up `PostRecyclerViewAdapter`.** The repeated casts are gone, but the file is still about 7,900 lines. Roughly 3,800 of them are the row classes (one per layout and post type), written as inner classes that reach straight into the adapter's colors, settings and listeners. Moving them to their own files means turning them into separate classes that are handed those values, which touches every row and can break a layout in ways only a phone shows. Do it one family at a time (compact, gallery, video, text), with a screenshot check of each layout, when there is a reason to change that code.
-- [ ] **Comment media button.** It lists the images and GIFs in the comments that are loaded and not folded away, from the pictures Reddit attached and the image links in the text. Videos and links to other sites such as Imgur albums are not included.
-- [ ] **Decoder forum search is two buttons.** The userscript has one button that searches titles first and the whole forum on the next tap, with the icon changing from ◎ to ◉. The app has `TITLE` and `ALL` buttons, which you asked for, and which reach the same two searches. Switch to the single button if you want it to match the userscript exactly.
+- [ ] **Split up `PostRecyclerViewAdapter`.** The repeated casts are gone, but the file is still about 7,900 lines. Do this only when there is a reason to change that code. When you do, give me this prompt and I will follow it:
+
+  > Split the post list's row classes out of `PostRecyclerViewAdapter` into their own files, one family per pull request: compact, then gallery, then text, then video, then card previews. Read the family's classes and everything in the adapter they use first, and tell me the plan before changing anything.
+
+  **What is there.** About 3,800 lines (from `PostViewHolder` to the end of the file) are the row classes, one per layout and post type. They are inner classes, so they read the adapter's fields directly: `mActivity`, `mGlide`, the colors, the settings flags, the autoplay state and the click handling. The adapter's own code binds, recycles and updates them through `instanceof` checks.
+
+  **Plan for each family.**
+  1. List every adapter field and method the family's classes touch. That list is the whole job. Put the colors and settings the rows read in one small object that the adapter builds and passes in, and give actions such as vote, hide and open a post to the rows as interfaces or functions, not as references to the adapter.
+  2. Move the family's classes to top-level classes in the same package. Keep their names, the fields other code reads (`post`, `animatingGif`, `preview`, the views), and every listener behaving the same. No renames, no reformatting and no logic changes in the same pull request.
+  3. Change the adapter only where it creates, binds or recycles those rows.
+  4. Settings that change while a feed is open (the `set...` methods the fragment calls, then `refreshAdapter()`) must still reach the rows, so check the object holding them is updated, not copied once.
+
+  **Take care with.**
+  - Video and gallery rows are Toro players. Their play, pause, release and "manually paused" state must move as they are. Do the video family last.
+  - Rows are recycled. The bind code sets and clears things in both directions because a row can arrive carrying the last post's state. Keep every "set it back" line.
+  - Do not change how the adapter picks a view type, the stickied one-line row, the card top border or the vote hiding.
+  - The build uses NullAway and Error Prone. Run the build in CI before each step; a failing compile there is cheaper than finding it on a phone.
+
+  **How to check it.** The layout snapshot tests (`RoborazziLayoutTest`, `PostPreviewSnapshotTest`) cover the XML layouts, not the adapter's binding, so a green build is not enough. For each family, after CI passes, I give you a checklist of exactly what to open on your phone: every layout that family appears in (Card, Card 2, Card 3, Compact, Compact 2, Gallery), with a text post, an image, a GIF, a video, a gallery and an NSFW post, plus scrolling through a long feed, voting, hiding and undoing, and rotating the phone. Ship each family as its own release and wait for your "looks good" before starting the next.
+
+  **Stop and ask if** a row needs something from the adapter that cannot be passed in cleanly, or a family cannot be moved without changing how its rows behave.
 - [ ] **Audit leftovers.** Found but left alone as larger or riskier than a quick win:
   - `RestoreSettings` repeats the same "read a table, filter it to known accounts, insert it" steps about twenty times, each with small differences. The backup side now has a helper; the restore side handles your data and each table has its own rules, so change it with a restore test in hand.
   - Several places read `getDisplayMetrics().density` by hand where `Utils.convertDpToPixel` exists.
-- [ ] **Update notifications.** The app only checks when it opens, at most once a day.
 
 Kept on purpose: the README credits Continuum and Infinity for Reddit as upstream, because their AGPL license requires it.
