@@ -89,11 +89,25 @@ public class SharedPreferencesUtils {
     public static final String POST_LAYOUT_SEARCH_POST = "post_layout_search_post";
     public static final String HISTORY_POST_LAYOUT_READ_POST = "history_post_layout_read_post";
     public static final int POST_LAYOUT_CARD = 0;
-    public static final int POST_LAYOUT_COMPACT = 1;
     public static final int POST_LAYOUT_GALLERY = 2;
-    public static final int POST_LAYOUT_CARD_2 = 3;
     public static final int POST_LAYOUT_CARD_3 = 4;
     public static final int POST_LAYOUT_COMPACT_2 = 5;
+    // Layouts that no longer exist; a feed or setting that still holds one gets the nearest survivor
+    // (see normalizePostLayout), so nothing stored by an older version is left pointing at nothing.
+    private static final int REMOVED_POST_LAYOUT_COMPACT = 1;
+    private static final int REMOVED_POST_LAYOUT_CARD_2 = 3;
+
+    /** The layout to draw for a stored value: Compact becomes Compact 2, Card 2 becomes Card. */
+    public static int normalizePostLayout(int postLayout) {
+        switch (postLayout) {
+            case REMOVED_POST_LAYOUT_COMPACT:
+                return POST_LAYOUT_COMPACT_2;
+            case REMOVED_POST_LAYOUT_CARD_2:
+                return POST_LAYOUT_CARD;
+            default:
+                return postLayout;
+        }
+    }
 
     public static final String FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.front_page_scrolled_position";
     public static final String FRONT_PAGE_SCROLLED_POSITION_FRONT_PAGE_BASE = "_front_page";
@@ -112,8 +126,6 @@ public class SharedPreferencesUtils {
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE = "number_of_columns_in_post_feed_landscape";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_UNFOLDED = "number_of_columns_in_post_feed_portrait_unfolded";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_UNFOLDED = "number_of_columns_in_post_feed_landscape_unfolded";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_COMPACT_LAYOUT = "number_of_columns_in_post_feed_portrait_compact_layout";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_COMPACT_LAYOUT = "number_of_columns_in_post_feed_landscape_compact_layout";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT = "number_of_columns_in_post_feed_portrait_gallery_layout";
     public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT = "number_of_columns_in_post_feed_landscape_gallery_layout";
     public static final String SWIPE_RIGHT_TO_GO_BACK = "swipe_to_go_back_from_post_detail";
@@ -312,8 +324,6 @@ public class SharedPreferencesUtils {
     public static final String SHOW_SUICIDE_PREVENTION_ACTIVITY = "show_suicide_prevention_activity";
     public static final String LOVE_ANIMATION = "love_animation";
     public static final String SWIPE_BETWEEN_POSTS = "swipe_between_posts";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_CARD_LAYOUT_2 = "number_of_columns_in_post_feed_portrait_card_layout_2";
-    public static final String NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_CARD_LAYOUT_2 = "number_of_columns_in_post_feed_landscape_card_layout_2";
     public static final String SHOW_ONLY_ONE_COMMENT_LEVEL_INDICATOR = "show_only_one_comment_level_indicator";
     public static final String ENABLE_MATERIAL_YOU = "enable_material_you";
     public static final String APPLY_MATERIAL_YOU = "apply_material_you";

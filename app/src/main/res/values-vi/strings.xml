@@ -889,12 +889,8 @@ Tự động phát video bị tắt."</string>
     <string name="favorites">"Yêu thích"</string>
     <string name="all">"Tất cả"</string>
     <string name="link_post_layout_auto">"Tự động"</string>
-    <string name="post_layout_card">"Bố cục thẻ"</string>
-    <string name="post_layout_compact">"Bố cục nhỏ gọn"</string>
     <string name="post_layout_compact_2">"Bố cục nhỏ gọn 2"</string>
     <string name="post_layout_gallery">"Bố cục bộ sưu tập"</string>
-    <string name="post_layout_card_2">"Bố cục thẻ 2"</string>
-    <string name="post_layout_card_3">"Bố cục thẻ 3"</string>
     <string name="elapsed_time_just_now">"Vừa ngay lúc này"</string>
     <string name="elapsed_time_a_minute_ago">"1 phút"</string>
     <string name="elapsed_time_minutes_ago">"%1$d phút"</string>

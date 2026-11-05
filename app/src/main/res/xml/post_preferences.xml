@@ -121,7 +121,7 @@
         app:title="@string/settings_show_gallery_media_as_grid" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontPreferenceCategory
-        app:title="@string/post_layout_compact" />
+        app:title="@string/post_layout_compact_2" />
 
     <ml.docilealligator.infinityforreddit.customviews.preference.CustomFontListPreference
         app:defaultValue="112"

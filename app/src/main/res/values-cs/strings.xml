@@ -896,12 +896,8 @@ Automatické přehrávání videí je zakázáno."</string>
     <string name="favorites">"Oblíbené"</string>
     <string name="all">"Vše"</string>
     <string name="link_post_layout_auto">"Automaticky"</string>
-    <string name="post_layout_card">"Rozložení karet"</string>
-    <string name="post_layout_compact">"Kompaktní rozložení"</string>
     <string name="post_layout_compact_2">"Kompaktní rozvržení 2"</string>
     <string name="post_layout_gallery">"Rozložení galerie"</string>
-    <string name="post_layout_card_2">"Rozložení karet 2"</string>
-    <string name="post_layout_card_3">"Rozložení karty 3"</string>
     <string name="elapsed_time_just_now">"Právě teď"</string>
     <string name="elapsed_time_a_minute_ago">"1 minuta"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minut"</string>

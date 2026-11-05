@@ -886,12 +886,8 @@
     <string name="favorites">"பிடித்தவை"</string>
     <string name="all">"அனைத்தும்"</string>
     <string name="link_post_layout_auto">"தானாக"</string>
-    <string name="post_layout_card">"அட்டை தளவமைப்பு"</string>
-    <string name="post_layout_compact">"கச்சிதமான தளவமைப்பு"</string>
     <string name="post_layout_compact_2">"காம்பாக்ட் லேஅவுட் 2"</string>
     <string name="post_layout_gallery">"காட்சியக தளவமைப்பு"</string>
-    <string name="post_layout_card_2">"அட்டை தளவமைப்பு 2"</string>
-    <string name="post_layout_card_3">"அட்டை தளவமைப்பு 3"</string>
     <string name="elapsed_time_just_now">"இப்போது தான்"</string>
     <string name="elapsed_time_a_minute_ago">"1 நிமிடம்"</string>
     <string name="elapsed_time_minutes_ago">"%1$d நிமிடங்கள்"</string>

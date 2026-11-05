@@ -581,10 +581,6 @@ public abstract class PostFragmentBase extends Fragment {
         final boolean foldEnabled = mSharedPreferences.getBoolean(SharedPreferencesUtils.ENABLE_FOLD_SUPPORT, false);
         if (resources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             switch (postLayout) {
-                case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_CARD_LAYOUT_2, "1");
-                case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_COMPACT_LAYOUT, "1");
                 case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                     return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_PORTRAIT_GALLERY_LAYOUT, "2");
                 default:
@@ -599,10 +595,6 @@ public abstract class PostFragmentBase extends Fragment {
             }
         } else {
             switch (postLayout) {
-                case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_CARD_LAYOUT_2, "2");
-                case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                    return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_COMPACT_LAYOUT, "2");
                 case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                     return SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.NUMBER_OF_COLUMNS_IN_POST_FEED_LANDSCAPE_GALLERY_LAYOUT, "2");
                 default:
@@ -1501,7 +1493,7 @@ public abstract class PostFragmentBase extends Fragment {
             // StaggeredGridLayoutManager itself accepts. Clamping keeps the divisions below safe.
             mNColumns = Math.max(1, nColumns);
             mCard3VerticalSpace = -itemOffset / 4;
-            // Card Layout 3 items carry their own 16dp horizontal margin (layout_marginStart /
+            // Card Top items carry their own 16dp horizontal margin (layout_marginStart /
             // layout_marginEnd in the item_post_card_3_* layouts, and applyCompactItemLayoutParams
             // for the compact variant). The decoration cancels it back out so that layout ends up
             // with the same gaps as the others. itemOffset is that same 16dp.

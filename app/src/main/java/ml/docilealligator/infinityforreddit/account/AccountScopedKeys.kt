@@ -63,10 +63,6 @@ object AccountScopedKeys {
         "number_of_columns_in_post_feed_portrait", "number_of_columns_in_post_feed_landscape",
         "number_of_columns_in_post_feed_portrait_unfolded",
         "number_of_columns_in_post_feed_landscape_unfolded",
-        "number_of_columns_in_post_feed_portrait_card_layout_2",
-        "number_of_columns_in_post_feed_landscape_card_layout_2",
-        "number_of_columns_in_post_feed_portrait_compact_layout",
-        "number_of_columns_in_post_feed_landscape_compact_layout",
         "number_of_columns_in_post_feed_portrait_gallery_layout",
         "number_of_columns_in_post_feed_landscape_gallery_layout",
 

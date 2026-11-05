@@ -896,12 +896,8 @@ Automatisches Abspielen von Videos ist deaktiviert."</string>
     <string name="favorites">"Favoriten"</string>
     <string name="all">"Alles"</string>
     <string name="link_post_layout_auto">"Automatisch"</string>
-    <string name="post_layout_card">"Karten-Layout"</string>
-    <string name="post_layout_compact">"Kompaktes Layout"</string>
     <string name="post_layout_compact_2">"Kompaktes Layout 2"</string>
     <string name="post_layout_gallery">"Galerie-Ansicht"</string>
-    <string name="post_layout_card_2">"Karten-Ansicht 2"</string>
-    <string name="post_layout_card_3">"Kartenlayout 3"</string>
     <string name="elapsed_time_just_now">"Gerade eben"</string>
     <string name="elapsed_time_a_minute_ago">"1 Minute"</string>
     <string name="elapsed_time_minutes_ago">"%1$d Minuten"</string>
