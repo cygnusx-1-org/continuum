@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.9.1.19 / 2026-11-4
+============
+* Decoder: added base64. It decodes only when the bytes are valid UTF-8 and free of control characters, so ordinary long words and IDs are left alone. The box is labelled `B64`
+* Decoder: a paragraph with binary shows only the binary, and base64 is tried only when binary gave nothing. A text already shown anywhere in a comment is not shown again, whichever decoder found it
+* Decoder: the search buttons now look for the `@handles` in the text if it has any, otherwise the names left once its links are removed, and open one search for each name (up to four)
+* Decoder: the label never wraps, and the decoded text is one line that scrolls sideways. Multi-line results keep their lines for Copy
+* The setting is now called `Decode binary and base64`
+
 8.3.3.9.1.18 / 2026-11-4
 ============
 * Undoing a hide now puts the post back in the feed straight away, like hiding takes it out. In the Hidden list it works the other way round: unhiding takes the post out of the list

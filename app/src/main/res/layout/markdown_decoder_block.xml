@@ -21,19 +21,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
+            android:ellipsize="none"
             android:letterSpacing="0.08"
+            android:maxLines="1"
+            android:singleLine="true"
             android:textAllCaps="true"
             android:textSize="11sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/result_text_view_markdown_decoder_block"
+        <!-- One line however long the text is: it scrolls sideways instead of wrapping. -->
+        <HorizontalScrollView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="monospace"
-            android:textIsSelectable="true"
-            android:textSize="15sp" />
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <TextView
+                android:id="@+id/result_text_view_markdown_decoder_block"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:singleLine="true"
+                android:textIsSelectable="true"
+                android:textSize="15sp" />
+        </HorizontalScrollView>
 
         <ImageButton
             android:id="@+id/copy_button_markdown_decoder_block"
