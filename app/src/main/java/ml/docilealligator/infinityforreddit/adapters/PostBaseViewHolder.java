@@ -27,6 +27,7 @@ public abstract class PostBaseViewHolder extends PostViewHolder {
     TextView userTextView;
     @Nullable
     Post.Preview preview;
+    ConstraintLayout bottomConstraintLayout;
 
     private final PostRowHost host;
     private final BaseActivity mActivity;
@@ -79,6 +80,7 @@ public abstract class PostBaseViewHolder extends PostViewHolder {
                 shareButton);
 
         this.subredditTextView = subredditTextView;
+        this.bottomConstraintLayout = bottomConstraintLayout;
         this.userTextView = userTextView;
 
         if (host.voteButtonsOnTheRight() && saveButton != null && shareButton != null && commentsCountButton != null) {

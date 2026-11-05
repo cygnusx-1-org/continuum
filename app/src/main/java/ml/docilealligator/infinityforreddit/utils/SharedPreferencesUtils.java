@@ -92,21 +92,12 @@ public class SharedPreferencesUtils {
     public static final int POST_LAYOUT_GALLERY = 2;
     public static final int POST_LAYOUT_CARD_3 = 4;
     public static final int POST_LAYOUT_COMPACT_2 = 5;
-    // Layouts that no longer exist; a feed or setting that still holds one gets the nearest survivor
-    // (see normalizePostLayout), so nothing stored by an older version is left pointing at nothing.
-    private static final int REMOVED_POST_LAYOUT_COMPACT = 1;
-    private static final int REMOVED_POST_LAYOUT_CARD_2 = 3;
+    /** Card Top without the row of buttons under the content; swiping does the same things. */
+    public static final int POST_LAYOUT_CARD_CLEAN = 6;
 
-    /** The layout to draw for a stored value: Compact becomes Compact 2, Card 2 becomes Card. */
-    public static int normalizePostLayout(int postLayout) {
-        switch (postLayout) {
-            case REMOVED_POST_LAYOUT_COMPACT:
-                return POST_LAYOUT_COMPACT_2;
-            case REMOVED_POST_LAYOUT_CARD_2:
-                return POST_LAYOUT_CARD;
-            default:
-                return postLayout;
-        }
+    /** Whether {@code postLayout} draws the Card Top rows: Card Top itself, and Card Clean. */
+    public static boolean isCardTop(int postLayout) {
+        return postLayout == POST_LAYOUT_CARD_3 || postLayout == POST_LAYOUT_CARD_CLEAN;
     }
 
     public static final String FRONT_PAGE_SCROLLED_POSITION_SHARED_PREFERENCES_FILE = "ml.docilealligator.infinityforreddit.front_page_scrolled_position";

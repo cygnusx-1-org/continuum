@@ -399,8 +399,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mNonDataSavingModeDefaultResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0");
             mSimultaneousAutoplayLimit = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SIMULTANEOUS_AUTOPLAY_LIMIT, "1");
 
-            mPostLayout = SharedPreferencesUtils.normalizePostLayout(postLayout);
-            mDefaultLinkPostLayout = SharedPreferencesUtils.normalizePostLayout(SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.DEFAULT_LINK_POST_LAYOUT_KEY, "-1"));
+            mPostLayout = postLayout;
+            mDefaultLinkPostLayout = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.DEFAULT_LINK_POST_LAYOUT_KEY, "-1");
 
             mColorAccent = customThemeWrapper.getColorAccent();
             mCardViewBackgroundColor = customThemeWrapper.getCardViewBackgroundColor();
@@ -597,7 +597,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
      */
     private void applyCardTopBorder(PostViewHolder holder) {
         if ((mPostLayout != SharedPreferencesUtils.POST_LAYOUT_CARD
-                && mPostLayout != SharedPreferencesUtils.POST_LAYOUT_CARD_3)
+                && !SharedPreferencesUtils.isCardTop(mPostLayout))
                 || !(holder.itemView instanceof FrameLayout) || holder.post == null) {
             return;
         }
@@ -740,6 +740,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
 
                         switch (mDefaultLinkPostLayout) {
                             case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
+                            case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
                                 return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                             case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                                 return VIEW_TYPE_POST_GALLERY;
@@ -767,6 +768,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                         case SharedPreferencesUtils.POST_LAYOUT_CARD:
                             return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                         case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
+                        case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
                             return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                         case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                             return VIEW_TYPE_POST_GALLERY;
@@ -921,6 +923,32 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         if (holder instanceof PostViewHolder asPost && asPost.post != null) {
             applyCardTopBorder(asPost);
         }
+        if (holder instanceof PostBaseViewHolder asBase) {
+            applyCleanCard(asBase);
+        }
+    }
+
+    /**
+     * Card Clean is Card Top without the row of buttons under the content. The row is squeezed to
+     * a strip of bottom padding rather than removed, so the card keeps its space below the text;
+     * every other layout gets it back at its natural height, because rows are recycled.
+     */
+    private void applyCleanCard(PostBaseViewHolder holder) {
+        ConstraintLayout bar = holder.bottomConstraintLayout;
+        if (bar == null) {
+            return;
+        }
+        boolean clean = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN;
+        int height = clean ? Math.round(16 * mScale) : ViewGroup.LayoutParams.WRAP_CONTENT;
+        ViewGroup.LayoutParams params = bar.getLayoutParams();
+        if (params.height != height) {
+            params.height = height;
+            bar.setLayoutParams(params);
+        }
+        bar.setClipChildren(true);
+        bar.setImportantForAccessibility(clean
+                ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
     }
 
     @SuppressLint("RecyclerView")
@@ -2542,7 +2570,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         if (itemWidthPx <= 0) {
             return 0;
         }
-        boolean inset = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 && !multiColumn;
+        boolean inset = SharedPreferencesUtils.isCardTop(mPostLayout) && !multiColumn;
         return Math.max(0, itemWidthPx - (inset ? 2 * Math.round(16 * mScale) : 0));
     }
 
@@ -3012,6 +3040,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         switch (mPostLayout) {
             case SharedPreferencesUtils.POST_LAYOUT_CARD:
             case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
+            case SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN:
                 return PostCardPreviewStyle.CARD_PRELOAD_ROWS_AHEAD;
             default:
                 return PreloadWindow.MAX_AHEAD;
@@ -3060,7 +3089,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     public void setPostLayout(int postLayout) {
-        mPostLayout = SharedPreferencesUtils.normalizePostLayout(postLayout);
+        mPostLayout = postLayout;
     }
 
     public void setBlurNsfwAndDoNotBlurNsfwInNsfwSubreddits(boolean needBlurNsfw, boolean doNotBlurNsfwInNsfwSubreddits) {
@@ -3263,7 +3292,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     public void setDefaultLinkPostLayout(int defaultLinkPostLayout) {
-        mDefaultLinkPostLayout = SharedPreferencesUtils.normalizePostLayout(defaultLinkPostLayout);
+        mDefaultLinkPostLayout = defaultLinkPostLayout;
     }
 
     public void setFixedHeightPreviewInCard(boolean fixedHeightPreviewInCard) {

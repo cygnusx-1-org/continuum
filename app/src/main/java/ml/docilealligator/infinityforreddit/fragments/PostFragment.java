@@ -431,7 +431,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 String sortTime = mSortTypeSharedPreferences.getString(SharedPreferencesUtils.SORT_TIME_SEARCH_POST, SortType.Time.ALL.name());
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)), SortType.Time.valueOf(Objects.requireNonNull(sortTime)));
             }
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SEARCH_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -503,7 +503,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             // own -- the same reason the firehose feeds do.
             boolean displaySubredditName = Constants.isFirehoseSubreddit(subredditName)
                     || randomSubredditPseudoName != null;
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_SUBREDDIT_POST_BASE + subredditName, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -578,8 +578,8 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                     sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
                 }
             }
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
-                    defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath,
+                    defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -643,7 +643,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             settingsSortType = savedOrDefaultSortType();
             SortType overrideSortType = getOverrideSortType(savedInstanceState);
             sortType = overrideSortType != null ? overrideSortType : settingsSortType;
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_USER_POST_BASE + username, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -706,7 +706,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
 
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -773,7 +773,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
                 }
             }
 
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_MULTI_REDDIT_POST_BASE + multiRedditPath, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -834,7 +834,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             // The duplicates endpoint has its own ordering and ignores the standard sort params; the
             // ViewModel still needs a non-null SortType, so use a neutral default.
             sortType = new SortType(SortType.Type.BEST);
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
@@ -875,7 +875,7 @@ public class PostFragment extends PostFragmentBase implements FragmentCommunicat
             } else {
                 sortType = new SortType(SortType.Type.valueOf(Objects.requireNonNull(sort)));
             }
-            postLayout = SharedPreferencesUtils.normalizePostLayout(mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout));
+            postLayout = mPostLayoutSharedPreferences.getInt(SharedPreferencesUtils.POST_LAYOUT_FRONT_PAGE_POST, defaultPostLayout);
 
             mAdapter = new PostRecyclerViewAdapter(mActivity, this, mRedditDataRoomDatabase, mExecutor,
                     mOauthRetrofit, mRedgifsRetrofit, mStreamableApiProvider, mShortClipOkHttpClient,
