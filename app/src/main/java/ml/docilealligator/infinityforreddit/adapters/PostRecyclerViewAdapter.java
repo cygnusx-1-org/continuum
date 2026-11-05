@@ -514,11 +514,11 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Override public BaseActivity activity() { return mActivity; }
         @Override public Callback callback() { return mCallback; }
         @Override public String accountName() { return mAccountName; }
-        @Override public String accessToken() { return mAccessToken; }
+        @Override @Nullable public String accessToken() { return mAccessToken; }
         @Override public Retrofit oauthRetrofit() { return mOauthRetrofit; }
         @Override public RedditDataRoomDatabase database() { return mRedditDataRoomDatabase; }
         @Override public Executor executor() { return mExecutor; }
-        @Override public SharedPreferences postHistorySharedPreferences() { return mPostHistorySharedPreferences; }
+        @Override @Nullable public SharedPreferences postHistorySharedPreferences() { return mPostHistorySharedPreferences; }
         @Override public boolean displaySubredditName() { return mDisplaySubredditName; }
         @Override public boolean markPostsAsReadAfterVoting() { return mMarkPostsAsReadAfterVoting; }
         @Override public boolean hideTheNumberOfVotes() { return mHideTheNumberOfVotes; }
@@ -531,7 +531,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Override public int upvotedColor() { return mUpvotedColor; }
         @Override public int downvotedColor() { return mDownvotedColor; }
         @Override public int postIconAndInfoColor() { return mPostIconAndInfoColor; }
-        @Override public Post getItem(int position) { return PostRecyclerViewAdapter.this.getItem(position); }
+        @Override @Nullable public Post getItem(int position) { return PostRecyclerViewAdapter.this.getItem(position); }
         @Override public boolean canStartActivity() { return canStartActivity; }
         @Override public void setCanStartActivity(boolean value) { canStartActivity = value; }
         @Override public void openViewPostDetailActivity(Post post, int position) { PostRecyclerViewAdapter.this.openViewPostDetailActivity(post, position); }

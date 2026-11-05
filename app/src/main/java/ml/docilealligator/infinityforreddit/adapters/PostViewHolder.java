@@ -32,6 +32,9 @@ import ml.docilealligator.infinityforreddit.utils.SavedPostCacheNotifier;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import org.greenrobot.eventbus.EventBus;
 
+// Views and the post are assigned by setBaseView and bind, not by the constructor (as when this was
+// an inner class of the adapter).
+@SuppressWarnings("NullAway.Init")
 public abstract class PostViewHolder extends RecyclerView.ViewHolder {
     AspectRatioGifImageView iconGifImageView;
     ImageView stickiedPostImageView;
