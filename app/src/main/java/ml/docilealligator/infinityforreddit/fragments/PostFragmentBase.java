@@ -53,9 +53,12 @@ import ml.docilealligator.infinityforreddit.R;
 import ml.docilealligator.infinityforreddit.RedditDataRoomDatabase;
 import ml.docilealligator.infinityforreddit.activities.BaseActivity;
 import ml.docilealligator.infinityforreddit.adapters.CompactThumbnailPreloader;
+import ml.docilealligator.infinityforreddit.adapters.PostBaseGalleryTypeViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostBaseViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostCompactBaseViewHolder;
+import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardGalleryTypeViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardTextTypeViewHolder;
+import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardWithPreviewViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayLegacyControllerViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostMaterial3CardVideoAutoplayViewHolder;
 import ml.docilealligator.infinityforreddit.adapters.PostRecyclerViewAdapter;
@@ -650,8 +653,8 @@ public abstract class PostFragmentBase extends Fragment {
 
     public boolean isRecyclerViewItemSwipeable(RecyclerView.ViewHolder viewHolder) {
         if (swipeActionEnabled) {
-            if (viewHolder instanceof PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) {
-                return !((PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) viewHolder).isSwipeLocked();
+            if (viewHolder instanceof PostBaseGalleryTypeViewHolder) {
+                return !((PostBaseGalleryTypeViewHolder) viewHolder).isSwipeLocked();
             }
 
             return true;
@@ -729,8 +732,8 @@ public abstract class PostFragmentBase extends Fragment {
         if (!(viewHolder instanceof PostBaseViewHolder) &&
                 !(viewHolder instanceof PostCompactBaseViewHolder)) {
             return 0;
-        } else if (viewHolder instanceof PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) {
-            if (((PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) viewHolder).isSwipeLocked()) {
+        } else if (viewHolder instanceof PostBaseGalleryTypeViewHolder) {
+            if (((PostBaseGalleryTypeViewHolder) viewHolder).isSwipeLocked()) {
                 return 0;
             }
         }
@@ -1543,8 +1546,8 @@ public abstract class PostFragmentBase extends Fragment {
                 RecyclerView.ViewHolder viewHolder = parent.getChildViewHolder(view);
                 if (viewHolder instanceof PostMaterial3CardVideoAutoplayViewHolder ||
                         viewHolder instanceof PostMaterial3CardVideoAutoplayLegacyControllerViewHolder ||
-                        viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardWithPreviewViewHolder ||
-                        viewHolder instanceof PostRecyclerViewAdapter.PostMaterial3CardGalleryTypeViewHolder ||
+                        viewHolder instanceof PostMaterial3CardWithPreviewViewHolder ||
+                        viewHolder instanceof PostMaterial3CardGalleryTypeViewHolder ||
                         viewHolder instanceof PostMaterial3CardTextTypeViewHolder) {
                     outRect.set(left - mCard3Margin, mCard3VerticalSpace,
                             right - mCard3Margin, mCard3VerticalSpace);

@@ -16,8 +16,6 @@ import ml.docilealligator.infinityforreddit.SaveMemoryCenterInisdeDownsampleStra
  * is open.
  */
 interface PostGalleryHost extends PostRowHost {
-    int primaryTextColor();
-
     SharedPreferences sharedPreferences();
 
     RequestManager glide();

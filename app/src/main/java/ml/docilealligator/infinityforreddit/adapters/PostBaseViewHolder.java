@@ -180,8 +180,8 @@ public abstract class PostBaseViewHolder extends PostViewHolder {
             }
 
             if (host.longPressPostNonMediaAreaAction().equals(SharedPreferencesUtils.LONG_PRESS_POST_VALUE_SHOW_POST_OPTIONS)) {
-                if (post.getPostType() == Post.GALLERY_TYPE && this instanceof PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) {
-                    RecyclerView.LayoutManager layoutManager = ((PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder) this).galleryRecyclerView.getLayoutManager();
+                if (post.getPostType() == Post.GALLERY_TYPE && this instanceof PostBaseGalleryTypeViewHolder) {
+                    RecyclerView.LayoutManager layoutManager = ((PostBaseGalleryTypeViewHolder) this).galleryRecyclerView.getLayoutManager();
                     if (layoutManager instanceof LinearLayoutManagerBugFixed) {
                         showPostOptions(((LinearLayoutManagerBugFixed) layoutManager).findFirstVisibleItemPosition());
                     } else {
@@ -200,7 +200,7 @@ public abstract class PostBaseViewHolder extends PostViewHolder {
 
     void showPostOptions(int currentGalleryItemPosition) {
         PostOptionsBottomSheetFragment postOptionsBottomSheetFragment;
-        if (post.getPostType() == Post.GALLERY_TYPE && this instanceof PostRecyclerViewAdapter.PostBaseGalleryTypeViewHolder && currentGalleryItemPosition >= 0) {
+        if (post.getPostType() == Post.GALLERY_TYPE && this instanceof PostBaseGalleryTypeViewHolder && currentGalleryItemPosition >= 0) {
             postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(post,
                     getBindingAdapterPosition(), currentGalleryItemPosition, true);
         } else {
