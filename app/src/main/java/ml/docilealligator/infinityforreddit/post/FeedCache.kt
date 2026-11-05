@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.post
 
 import androidx.annotation.WorkerThread
 import com.google.gson.Gson
+import ml.docilealligator.infinityforreddit.utils.SharedGson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.concurrent.Executors
@@ -205,7 +206,7 @@ object FeedCache {
         val array = root.optJSONArray(KEY_POSTS) ?: return null
         val posts =
             try {
-                Gson().fromJson<List<Post>>(array.toString(), POST_LIST)
+                SharedGson.INSTANCE.fromJson<List<Post>>(array.toString(), POST_LIST)
             } catch (e: RuntimeException) {
                 // Every other way this file can be malformed returns null and is treated as a miss.
                 // Gson is reflective and throws more than JsonSyntaxException, and this runs on the
@@ -277,7 +278,7 @@ object FeedCache {
                         put(KEY_VERSION, VERSION)
                         put(KEY_CACHED_AT, cachedAt)
                         put(KEY_AFTER, cursor ?: JSONObject.NULL)
-                        put(KEY_POSTS, JSONArray(Gson().toJson(window)))
+                        put(KEY_POSTS, JSONArray(SharedGson.INSTANCE.toJson(window)))
                     }
                     .toString()
             } catch (e: JSONException) {

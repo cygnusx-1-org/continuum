@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.paging.PagingSource
 import com.google.gson.Gson
+import ml.docilealligator.infinityforreddit.utils.SharedGson
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -746,7 +747,7 @@ class ViewPostDetailFragmentViewModelNew(
                         try {
                             response.errorBody().use { errorBody ->
                                 if (errorBody != null) {
-                                    val redditError = Gson().fromJson(
+                                    val redditError = SharedGson.INSTANCE.fromJson(
                                         errorBody.string(),
                                         RedditError::class.java
                                     )

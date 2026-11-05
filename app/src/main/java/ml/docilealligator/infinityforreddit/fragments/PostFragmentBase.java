@@ -344,53 +344,21 @@ public abstract class PostFragmentBase extends Fragment {
             }
         });
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false).observe(getViewLifecycleOwner(), postTypeTriangleIndicator -> {
-            if (getPostAdapter() != null && getPostAdapter().setPostTypeTriangleIndicator(postTypeTriangleIndicator)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.POST_TYPE_TRIANGLE_INDICATOR, false, PostRecyclerViewAdapter::setPostTypeTriangleIndicator);
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_VOTE_BUTTONS, false).observe(getViewLifecycleOwner(), hideVoteButtons -> {
-            if (getPostAdapter() != null && getPostAdapter().setHideVoteButtons(hideVoteButtons)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.HIDE_VOTE_BUTTONS, false, PostRecyclerViewAdapter::setHideVoteButtons);
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.POST_TYPE_CARD_BORDER, true).observe(getViewLifecycleOwner(), border -> {
-            if (getPostAdapter() != null && getPostAdapter().setPostTypeCardBorder(border)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.POST_TYPE_CARD_BORDER, true, PostRecyclerViewAdapter::setPostTypeCardBorder);
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.COLLAPSE_STICKIED_POSTS, false).observe(getViewLifecycleOwner(), collapse -> {
-            if (getPostAdapter() != null && getPostAdapter().setCollapseStickiedPosts(collapse)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.COLLAPSE_STICKIED_POSTS, false, PostRecyclerViewAdapter::setCollapseStickiedPosts);
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_NSFW_BADGE, false).observe(getViewLifecycleOwner(), hideNsfwBadge -> {
-            if (getPostAdapter() != null && getPostAdapter().setHideNsfwBadge(hideNsfwBadge)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.HIDE_NSFW_BADGE, false, PostRecyclerViewAdapter::setHideNsfwBadge);
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_POST_TYPE_INDICATOR, false).observe(getViewLifecycleOwner(), hidePostTypeIndicator -> {
-            if (getPostAdapter() != null && getPostAdapter().setHidePostTypeIndicator(hidePostTypeIndicator)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.HIDE_POST_TYPE_INDICATOR, false, PostRecyclerViewAdapter::setHidePostTypeIndicator);
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.HIDE_IMAGE_COUNT_IN_GALLERY, false).observe(getViewLifecycleOwner(), hideImageCountInGallery -> {
-            if (getPostAdapter() != null && getPostAdapter().setHideImageCountInGallery(hideImageCountInGallery)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.HIDE_IMAGE_COUNT_IN_GALLERY, false, PostRecyclerViewAdapter::setHideImageCountInGallery);
 
-        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false).observe(getViewLifecycleOwner(), disableProfileAvatarAnimation -> {
-            if (getPostAdapter() != null && getPostAdapter().setDisableProfileAvatarAnimation(disableProfileAvatarAnimation)) {
-                refreshAdapter();
-            }
-        });
+        observeAdapterFlag(SharedPreferencesUtils.DISABLE_PROFILE_AVATAR_ANIMATION, false, PostRecyclerViewAdapter::setDisableProfileAvatarAnimation);
 
         // Only a one-column feed carries the buffer; changePostLayout applies it when the feed
         // goes back to one column.
@@ -403,6 +371,21 @@ public abstract class PostFragmentBase extends Fragment {
         });
 
         return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    /**
+     * Re-reads a boolean setting into the adapter whenever it changes, and redraws the feed only
+     * when the adapter says the value was different.
+     */
+    private void observeAdapterFlag(String key, boolean defaultValue,
+                                    java.util.function.BiPredicate<PostRecyclerViewAdapter, Boolean> setter) {
+        SharedPreferencesLiveDataKt.booleanLiveData(mSharedPreferences, key, defaultValue)
+                .observe(getViewLifecycleOwner(), value -> {
+                    PostRecyclerViewAdapter adapter = getPostAdapter();
+                    if (adapter != null && setter.test(adapter, value)) {
+                        refreshAdapter();
+                    }
+                });
     }
 
     @Override

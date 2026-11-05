@@ -30,6 +30,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -261,7 +262,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
             String multiRedditJson = intent.getStringExtra(EXTRA_SEARCH_IN_MULTIREDDIT_JSON);
             if (multiRedditJson != null) {
                 try {
-                    mSearchInMultiReddit = new Gson().fromJson(multiRedditJson, MultiReddit.class);
+                    mSearchInMultiReddit = SharedGson.INSTANCE.fromJson(multiRedditJson, MultiReddit.class);
                 } catch (JsonSyntaxException e) {
                     mSearchInMultiReddit = null;
                 }
@@ -382,7 +383,7 @@ public class SearchResultActivity extends BaseActivity implements SortTypeSelect
         MultiReddit searchInMultiReddit = getIntent().getParcelableExtra(EXTRA_SEARCH_IN_MULTIREDDIT);
         if (searchInMultiReddit != null) {
             out.remove(EXTRA_SEARCH_IN_MULTIREDDIT);
-            out.putString(EXTRA_SEARCH_IN_MULTIREDDIT_JSON, new Gson().toJson(searchInMultiReddit));
+            out.putString(EXTRA_SEARCH_IN_MULTIREDDIT_JSON, SharedGson.INSTANCE.toJson(searchInMultiReddit));
         }
         // A tab named by an opening search link ("?type=sr") answers what the user asked for at the
         // moment they arrived. A replay is not that moment, and left in it would override the tab

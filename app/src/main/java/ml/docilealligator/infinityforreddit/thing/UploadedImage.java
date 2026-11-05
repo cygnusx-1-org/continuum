@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
@@ -59,10 +60,10 @@ public class UploadedImage implements Parcelable {
     }
 
     public static String getArrayListJSONModel(ArrayList<UploadedImage> uploadedImages) {
-        return new Gson().toJson(uploadedImages, new TypeToken<List<UploadedImage>>(){}.getType());
+        return SharedGson.INSTANCE.toJson(uploadedImages, new TypeToken<List<UploadedImage>>(){}.getType());
     }
 
     public static List<UploadedImage> fromListJson(@Nullable String json) throws JsonParseException {
-        return new Gson().fromJson(json, new TypeToken<List<UploadedImage>>(){}.getType());
+        return SharedGson.INSTANCE.fromJson(json, new TypeToken<List<UploadedImage>>(){}.getType());
     }
 }

@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.20 / 2026-11-4
+============
+* Internal clean-up with no change in what you see: one shared JSON reader instead of a new one for every call, filter regexes compiled once instead of for every post, and shorter code for the feed settings that redraw the list
+
 8.3.3.9.1.19 / 2026-11-4
 ============
 * Decoder: added base64. It decodes only when the bytes are valid UTF-8 and free of control characters, so ordinary long words and IDs are left alone. The box is labelled `B64`

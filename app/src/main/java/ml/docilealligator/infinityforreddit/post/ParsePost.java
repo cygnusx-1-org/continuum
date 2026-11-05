@@ -991,8 +991,7 @@ public class ParsePost {
 
                     boolean spoilerInBody = false;
                     if (!selfText.equals("")) {
-                        Pattern p = Pattern.compile(">!.+!<");
-                        spoilerInBody = p.matcher(
+                        spoilerInBody = SPOILER_IN_BODY_PATTERN.matcher(
                                 selfText.substring(0, Math.min(selfText.length(), 400))).find();
                     }
 
@@ -1042,6 +1041,7 @@ public class ParsePost {
     }
 
     /** A run of blank lines, left where a stripped URL had a paragraph to itself. */
+    private static final Pattern SPOILER_IN_BODY_PATTERN = Pattern.compile(">!.+!<");
     private static final Pattern BLANK_LINE_RUN_PATTERN = Pattern.compile("\\n[ \\t]*(?:\\n[ \\t]*){2,}");
 
     /**

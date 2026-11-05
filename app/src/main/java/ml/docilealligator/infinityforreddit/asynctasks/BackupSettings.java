@@ -9,6 +9,7 @@ import android.util.Log;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -135,63 +136,63 @@ public class BackupSettings {
             boolean res31 = saveMapToFile(userTagsSharedPreferences.getAll(), backupDir, SharedPreferencesUtils.USER_TAGS_SHARED_PREFERENCES_FILE);
 
             List<SubscribedSubredditData> anonymousSubscribedSubredditsData = redditDataRoomDatabase.subscribedSubredditDao().getAllSubscribedSubredditsList(Account.ANONYMOUS_ACCOUNT);
-            String anonymousSubscribedSubredditsDataJson = new Gson().toJson(anonymousSubscribedSubredditsData);
+            String anonymousSubscribedSubredditsDataJson = SharedGson.INSTANCE.toJson(anonymousSubscribedSubredditsData);
             boolean res14 = saveDatabaseTableToFile(anonymousSubscribedSubredditsDataJson, databaseDirFile.getAbsolutePath(), "/anonymous_subscribed_subreddits.json");
 
             List<SubscribedUserData> anonymousSubscribedUsersData = redditDataRoomDatabase.subscribedUserDao().getAllSubscribedUsersList(Account.ANONYMOUS_ACCOUNT);
-            String anonymousSubscribedUsersDataJson = new Gson().toJson(anonymousSubscribedUsersData);
+            String anonymousSubscribedUsersDataJson = SharedGson.INSTANCE.toJson(anonymousSubscribedUsersData);
             boolean res15 = saveDatabaseTableToFile(anonymousSubscribedUsersDataJson, databaseDirFile.getAbsolutePath(), "/anonymous_subscribed_users.json");
 
             List<MultiReddit> anonymousMultireddits = redditDataRoomDatabase.multiRedditDao().getAllMultiRedditsList(Account.ANONYMOUS_ACCOUNT);
-            String anonymousMultiredditsJson = new Gson().toJson(anonymousMultireddits);
+            String anonymousMultiredditsJson = SharedGson.INSTANCE.toJson(anonymousMultireddits);
             boolean res16 = saveDatabaseTableToFile(anonymousMultiredditsJson, databaseDirFile.getAbsolutePath(), "/anonymous_multireddits.json");
 
             List<AnonymousMultiredditSubreddit> anonymousMultiredditSubreddits = redditDataRoomDatabase.anonymousMultiredditSubredditDao().getAllSubreddits();
-            String anonymousMultiredditSubredditsJson = new Gson().toJson(anonymousMultiredditSubreddits);
+            String anonymousMultiredditSubredditsJson = SharedGson.INSTANCE.toJson(anonymousMultiredditSubreddits);
             boolean res17 = saveDatabaseTableToFile(anonymousMultiredditSubredditsJson, databaseDirFile.getAbsolutePath(), "/anonymous_multireddit_subreddits.json");
 
             List<CustomTheme> customThemes = redditDataRoomDatabase.customThemeDao().getAllCustomThemesList();
-            String customThemesJson = new Gson().toJson(customThemes);
+            String customThemesJson = SharedGson.INSTANCE.toJson(customThemes);
             boolean res18 = saveDatabaseTableToFile(customThemesJson, databaseDirFile.getAbsolutePath(), "/custom_themes.json");
 
             List<PostFilter> postFilters = redditDataRoomDatabase.postFilterDao().getAllPostFiltersForBackup();
-            String postFiltersJson = new Gson().toJson(postFilters);
+            String postFiltersJson = SharedGson.INSTANCE.toJson(postFilters);
             boolean res19 = saveDatabaseTableToFile(postFiltersJson, databaseDirFile.getAbsolutePath(), "/post_filters.json");
 
             List<PostFilterUsage> postFilterUsage = redditDataRoomDatabase.postFilterUsageDao().getAllPostFilterUsageForBackup();
-            String postFilterUsageJson = new Gson().toJson(postFilterUsage);
+            String postFilterUsageJson = SharedGson.INSTANCE.toJson(postFilterUsage);
             boolean res20 = saveDatabaseTableToFile(postFilterUsageJson, databaseDirFile.getAbsolutePath(), "/post_filter_usage.json");
 
             List<CommentFilter> commentFilters = redditDataRoomDatabase.commentFilterDao().getAllCommentFiltersForBackup();
-            String commentFiltersJson = new Gson().toJson(commentFilters);
+            String commentFiltersJson = SharedGson.INSTANCE.toJson(commentFilters);
             boolean res21 = saveDatabaseTableToFile(commentFiltersJson, databaseDirFile.getAbsolutePath(), "/comment_filters.json");
 
             List<CommentFilterUsage> commentFilterUsage = redditDataRoomDatabase.commentFilterUsageDao().getAllCommentFilterUsageForBackup();
-            String commentFilterUsageJson = new Gson().toJson(commentFilterUsage);
+            String commentFilterUsageJson = SharedGson.INSTANCE.toJson(commentFilterUsage);
             boolean res22 = saveDatabaseTableToFile(commentFilterUsageJson, databaseDirFile.getAbsolutePath(), "/comment_filter_usage.json");
 
             List<Account> accounts = redditDataRoomDatabase.accountDao().getAllAccounts();
-            String accountsJson = new Gson().toJson(accounts);
+            String accountsJson = SharedGson.INSTANCE.toJson(accounts);
             boolean res23 = saveDatabaseTableToFile(accountsJson, databaseDirFile.getAbsolutePath(), "/accounts.json");
 
             List<ReadPost> readPosts = redditDataRoomDatabase.readPostDao().getAllReadPostsForBackup();
-            String readPostsJson = new Gson().toJson(readPosts);
+            String readPostsJson = SharedGson.INSTANCE.toJson(readPosts);
             boolean res24 = saveDatabaseTableToFile(readPostsJson, databaseDirFile.getAbsolutePath(), "/read_posts.json");
 
             List<LocalSavedThing> localSaved = redditDataRoomDatabase.localSavedThingDao().getAllForBackup();
-            String localSavedJson = new Gson().toJson(localSaved);
+            String localSavedJson = SharedGson.INSTANCE.toJson(localSaved);
             boolean res25 = saveDatabaseTableToFile(localSavedJson, databaseDirFile.getAbsolutePath(), "/local_saved.json");
 
             List<AnonymousSavedComment> anonymousSavedComments = redditDataRoomDatabase.anonymousSavedCommentDao().getAllForBackup();
-            String anonymousSavedCommentsJson = new Gson().toJson(anonymousSavedComments);
+            String anonymousSavedCommentsJson = SharedGson.INSTANCE.toJson(anonymousSavedComments);
             boolean res32 = saveDatabaseTableToFile(anonymousSavedCommentsJson, databaseDirFile.getAbsolutePath(), "/anonymous_saved_comments.json");
 
             List<CommentDraft> commentDrafts = redditDataRoomDatabase.commentDraftDao().getCommentDraftsForBackup();
-            String commentDraftsJson = new Gson().toJson(commentDrafts);
+            String commentDraftsJson = SharedGson.INSTANCE.toJson(commentDrafts);
             boolean res27 = saveDatabaseTableToFile(commentDraftsJson, databaseDirFile.getAbsolutePath(), "/comment_drafts.json");
 
             List<Reminder> reminders = redditDataRoomDatabase.reminderDao().getAllRemindersForBackup();
-            String remindersJson = new Gson().toJson(reminders);
+            String remindersJson = SharedGson.INSTANCE.toJson(reminders);
             boolean res28 = saveDatabaseTableToFile(remindersJson, databaseDirFile.getAbsolutePath(), "/reminders.json");
 
             // Search history is local-only: nothing on Reddit can re-sync it, and restoring clears
@@ -199,7 +200,7 @@ public class BackupSettings {
             // search *settings* travel in the shared-preferences files above; this is the data
             // they govern.
             List<RecentSearchQuery> recentSearchQueries = redditDataRoomDatabase.recentSearchQueryDao().getAllForBackup();
-            String recentSearchQueriesJson = new Gson().toJson(recentSearchQueries);
+            String recentSearchQueriesJson = SharedGson.INSTANCE.toJson(recentSearchQueries);
             boolean res30 = saveDatabaseTableToFile(recentSearchQueriesJson, databaseDirFile.getAbsolutePath(), "/recent_search_queries.json");
 
             boolean zipRes = zipAndMoveToDestinationDir(context, cacheDir, contentResolver, destinationDirUri, password);

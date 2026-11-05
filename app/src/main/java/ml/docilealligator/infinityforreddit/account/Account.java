@@ -9,6 +9,7 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonParseException;
 import java.util.Objects;
 
@@ -166,10 +167,10 @@ public class Account implements Parcelable {
     }
 
     public String getJSONModel() {
-        return new Gson().toJson(this);
+        return SharedGson.INSTANCE.toJson(this);
     }
 
     public static Account fromJson(@Nullable String json) throws JsonParseException {
-        return new Gson().fromJson(json, Account.class);
+        return SharedGson.INSTANCE.fromJson(json, Account.class);
     }
 }
