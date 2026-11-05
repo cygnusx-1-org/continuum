@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.21 / 2026-11-5
+============
+* Internal clean-up with no change in what you see: dates are formatted with a reused formatter instead of a new one for every post and comment, the "how long ago or the date" choice lives in one place, and the backup code is shorter
+
 8.3.3.9.1.20 / 2026-11-4
 ============
 * Internal clean-up with no change in what you see: one shared JSON reader instead of a new one for every call, filter regexes compiled once instead of for every post, and shorter code for the feed settings that redraw the list

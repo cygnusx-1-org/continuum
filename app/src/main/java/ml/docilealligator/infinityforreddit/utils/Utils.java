@@ -307,10 +307,33 @@ public final class Utils {
         return source.subSequence(0, i + 1);
     }
 
+    // Building a SimpleDateFormat parses its pattern, and this ran for every post and comment drawn
+    // with absolute times. One per thread, since a SimpleDateFormat is not safe to share.
+    private static final ThreadLocal<java.util.Map<String, SimpleDateFormat>> DATE_FORMATS =
+            new ThreadLocal<>();
+
     public static String getFormattedTime(Locale locale, long time, String pattern) {
-        Calendar postTimeCalendar = Calendar.getInstance();
-        postTimeCalendar.setTimeInMillis(time);
-        return new SimpleDateFormat(pattern, locale).format(postTimeCalendar.getTime());
+        java.util.Map<String, SimpleDateFormat> formats = DATE_FORMATS.get();
+        if (formats == null) {
+            formats = new java.util.HashMap<>();
+            DATE_FORMATS.set(formats);
+        }
+        String key = locale.toLanguageTag() + '|' + pattern;
+        SimpleDateFormat format = formats.get(key);
+        if (format == null) {
+            format = new SimpleDateFormat(pattern, locale);
+            formats.put(key, format);
+        }
+        // The device's time zone can change while the app runs.
+        format.setTimeZone(java.util.TimeZone.getDefault());
+        return format.format(new java.util.Date(time));
+    }
+
+    /**
+     * The time as the user chose to see it: how long ago, or the date and time in their pattern.
+     */
+    public static String getTimeText(Context context, boolean showElapsedTime, Locale locale, long time, String pattern) {
+        return showElapsedTime ? getElapsedTime(context, time) : getFormattedTime(locale, time, pattern);
     }
 
     public static String getElapsedTime(Context context, long time) {

@@ -59,10 +59,7 @@ public class ParseMessage {
         int nComments = rawMessageJSON.isNull(JSONUtils.NUM_COMMENTS_KEY) ? -1 : rawMessageJSON.getInt(JSONUtils.NUM_COMMENTS_KEY);
         long timeUTC = rawMessageJSON.getLong(JSONUtils.CREATED_UTC_KEY) * 1000;
 
-        Calendar submitTimeCalendar = Calendar.getInstance();
-        submitTimeCalendar.setTimeInMillis(timeUTC);
-        String formattedTime = new SimpleDateFormat("MMM d, yyyy, HH:mm",
-                locale).format(submitTimeCalendar.getTime());
+        String formattedTime = Utils.getFormattedTime(locale, timeUTC, "MMM d, yyyy, HH:mm");
 
         ArrayList<Message> replies = null;
         if (!rawMessageJSON.isNull(JSONUtils.REPLIES_KEY) && rawMessageJSON.get(JSONUtils.REPLIES_KEY) instanceof JSONObject) {

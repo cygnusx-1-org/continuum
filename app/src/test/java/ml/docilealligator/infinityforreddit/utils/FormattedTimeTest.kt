@@ -49,4 +49,29 @@ class FormattedTimeTest {
 
         assertEquals("2023-11-14 17:13", Utils.getFormattedTime(Locale.US, postedAt, "yyyy-MM-dd HH:mm"))
     }
+
+    @Test
+    fun `a cached format follows a change of time zone`() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Tokyo"))
+        assertEquals("2023-11-15 07:13", Utils.getFormattedTime(Locale.US, postedAt, "yyyy-MM-dd HH:mm"))
+
+        // The same pattern again, now on a clock that moved while the app was running.
+        TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+        assertEquals("2023-11-14 17:13", Utils.getFormattedTime(Locale.US, postedAt, "yyyy-MM-dd HH:mm"))
+    }
+
+    @Test
+    fun `the time text is the formatted time unless elapsed time is asked for`() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Tokyo"))
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+
+        assertEquals(
+            "2023-11-15 07:13",
+            Utils.getTimeText(context, false, Locale.US, postedAt, "yyyy-MM-dd HH:mm")
+        )
+        assertEquals(
+            Utils.getElapsedTime(context, postedAt),
+            Utils.getTimeText(context, true, Locale.US, postedAt, "yyyy-MM-dd HH:mm")
+        )
+    }
 }

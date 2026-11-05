@@ -324,12 +324,8 @@ public class CommentsListingRecyclerViewAdapter extends PagedListAdapter<Comment
                     ((CommentBaseViewHolder) holder).authorFlairTextView.setText(comment.getAuthorFlair());
                 }
 
-                if (mShowElapsedTime) {
-                    ((CommentBaseViewHolder) holder).commentTimeTextView.setText(
-                            Utils.getElapsedTime(mActivity, comment.getCommentTimeMillis()));
-                } else {
-                    ((CommentBaseViewHolder) holder).commentTimeTextView.setText(Utils.getFormattedTime(mLocale, comment.getCommentTimeMillis(), mTimeFormatPattern));
-                }
+                ((CommentBaseViewHolder) holder).commentTimeTextView.setText(Utils.getTimeText(
+                        mActivity, mShowElapsedTime, mLocale, comment.getCommentTimeMillis(), mTimeFormatPattern));
 
                 mEmoteCloseBracketInlineProcessor.setMediaMetadataMap(comment.getMediaMetadataMap());
                 mEmoteCloseBracketInlineProcessor.setCommentFaceLookup(

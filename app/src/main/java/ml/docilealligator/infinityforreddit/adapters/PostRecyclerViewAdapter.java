@@ -1194,12 +1194,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
             }
 
-            if (mShowElapsedTime) {
-                ((PostViewHolder) holder).postTimeTextView.setText(
-                        Utils.getElapsedTime(mActivity, post.getPostTimeMillis()));
-            } else {
-                ((PostViewHolder) holder).postTimeTextView.setText(Utils.getFormattedTime(mLocale, post.getPostTimeMillis(), mTimeFormatPattern));
-            }
+            ((PostViewHolder) holder).postTimeTextView.setText(Utils.getTimeText(
+                    mActivity, mShowElapsedTime, mLocale, post.getPostTimeMillis(), mTimeFormatPattern));
 
             ((PostViewHolder) holder).titleTextView.setText(post.getTitle());
             if (!mHideTheNumberOfVotes) {

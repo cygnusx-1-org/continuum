@@ -9,7 +9,7 @@ Things deliberately left alone, and why.
 - [ ] **Decoder forum search is two buttons.** The userscript has one button that searches titles first and the whole forum on the next tap, with the icon changing from ◎ to ◉. The app has `TITLE` and `ALL` buttons, which you asked for, and which reach the same two searches. Switch to the single button if you want it to match the userscript exactly.
 - [ ] **Audit leftovers.** Found but left alone as larger or riskier than a quick win:
   - `PostRecyclerViewAdapter` repeats `((PostViewHolder) holder).` hundreds of times, where one local variable per bind would do. It is part of the adapter split above.
-  - `BackupSettings` and `RestoreSettings` repeat the same "read a table, convert it, save or restore it" steps about twenty times. A table-by-table loop would shorten them, but they handle your data, so change them with a restore test in hand.
+  - `RestoreSettings` repeats the same "read a table, filter it to known accounts, insert it" steps about twenty times, each with small differences. The backup side now has a helper; the restore side handles your data and each table has its own rules, so change it with a restore test in hand.
   - `PostFilter.isPostAllowed` splits each comma-separated list again for every post. It is cheap for short lists; cache the split if filters grow long.
   - Several places read `getDisplayMetrics().density` by hand where `Utils.convertDpToPixel` exists.
 - [ ] **Update notifications.** The app only checks when it opens, at most once a day.

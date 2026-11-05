@@ -146,11 +146,8 @@ class ShadowboxInfoPanel(
         binding.userTextViewShadowboxInfoPanel.text =
             if (hideSubredditAndUserPrefix) post.author else post.authorNamePrefixed
         binding.userTextViewShadowboxInfoPanel.setTextColor(usernameColor)
-        binding.postTimeTextViewShadowboxInfoPanel.text = if (showElapsedTime) {
-            Utils.getElapsedTime(host, post.postTimeMillis)
-        } else {
-            Utils.getFormattedTime(locale, post.postTimeMillis, timeFormatPattern)
-        }
+        binding.postTimeTextViewShadowboxInfoPanel.text =
+            Utils.getTimeText(host, showElapsedTime, locale, post.postTimeMillis, timeFormatPattern)
         loadSubredditIcon(post)
         renderTags(post)
         renderLink(post)

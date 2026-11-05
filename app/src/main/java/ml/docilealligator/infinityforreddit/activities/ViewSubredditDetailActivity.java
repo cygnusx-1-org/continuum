@@ -662,7 +662,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 String nSubscribers = getString(R.string.subscribers_number_detail, subredditData.getNSubscribers());
                 binding.subscriberCountTextViewViewSubredditDetailActivity.setText(nSubscribers);
                 binding.sinceTextViewViewSubredditDetailActivity.setText(getString(R.string.since_info,
-                        new SimpleDateFormat("MMM d, yyyy", locale).format(subredditData.getCreatedUTC())));
+                        Utils.getFormattedTime(locale, subredditData.getCreatedUTC(), "MMM d, yyyy")));
                 description = subredditData.getDescription();
                 if (hideSubredditDescription || description.equals("")) {
                     binding.descriptionTextViewViewSubredditDetailActivity.setVisibility(View.GONE);
