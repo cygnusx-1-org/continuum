@@ -4869,7 +4869,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
 
         PostWithPreviewTypeViewHolder(@NonNull ItemPostWithPreviewBinding binding) {
-            super(binding.getRoot(, mRowHost), mRowHost);
+            super(binding.getRoot(), mRowHost);
             setBaseView(
                     binding.iconGifImageViewItemPostWithPreview,
                     binding.subredditNameTextViewItemPostWithPreview,
