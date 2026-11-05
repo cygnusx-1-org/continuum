@@ -40,7 +40,7 @@ public final class CommentDecoder {
             "babepedia.com",
     };
 
-    private static final Pattern WHITESPACE = Pattern.compile("\s");
+    private static final Pattern WHITESPACE = Pattern.compile("\\s");
     private static final Pattern PARAGRAPH_BREAK = Pattern.compile("\\n[ \\t]*\\n");
     private static final Pattern BINARY = Pattern.compile("\\b(?:[01]{8}\\s*){2,}\\b");
     // Sixteen or more base64 characters in groups of four, with the padding that closes it, not
