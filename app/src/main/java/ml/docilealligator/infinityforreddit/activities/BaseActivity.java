@@ -29,6 +29,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -931,9 +932,10 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
                             .valueOf(customThemeWrapper.getToolbarPrimaryTextAndIconColor()));
                 }
                 Utils.setTitleWithCustomFontToMenuItem(typeface, item, null);
-                if (item.hasSubMenu()) {
-                    for (int j = 0; j < item.getSubMenu().size(); j++) {
-                        Utils.setTitleWithCustomFontToMenuItem(typeface, item.getSubMenu().getItem(j), null);
+                SubMenu subMenu = item.getSubMenu();
+                if (subMenu != null) {
+                    for (int j = 0; j < subMenu.size(); j++) {
+                        Utils.setTitleWithCustomFontToMenuItem(typeface, subMenu.getItem(j), null);
                     }
                 }
             }
