@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
 import java.util.Objects;
@@ -35,7 +36,7 @@ public class OnlineCustomThemeMetadata implements Parcelable {
     };
 
     public static OnlineCustomThemeMetadata fromJson(String json) throws JsonParseException {
-        Gson gson = new Gson();
+        Gson gson = SharedGson.INSTANCE;
         return gson.fromJson(json, OnlineCustomThemeMetadata.class);
     }
 

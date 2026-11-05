@@ -35,6 +35,7 @@ import com.bumptech.glide.RequestManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -706,7 +707,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                     binding.postTitleEditTextPostGalleryActivity.getText().toString(),
                     binding.postContentEditTextPostGalleryActivity.getText().toString(), isSpoiler, isNSFW,
                     binding.receivePostReplyNotificationsSwitchMaterialPostGalleryActivity.isChecked(), flair, items);
-            intent.putExtra(SubmitPostService.EXTRA_REDDIT_GALLERY_PAYLOAD, new Gson().toJson(payload));
+            intent.putExtra(SubmitPostService.EXTRA_REDDIT_GALLERY_PAYLOAD, SharedGson.INSTANCE.toJson(payload));
 
             ContextCompat.startForegroundService(this, intent);*/
 
@@ -723,7 +724,7 @@ public class PostGalleryActivity extends BaseActivity implements FlairBottomShee
                     binding.postContentEditTextPostGalleryActivity.getText().toString(), isSpoiler, isNSFW,
                     binding.receivePostReplyNotificationsSwitchMaterialPostGalleryActivity.isChecked(), flair, items);
 
-            String payloadJSON = new Gson().toJson(payload);
+            String payloadJSON = SharedGson.INSTANCE.toJson(payload);
             extras.putString(SubmitPostService.EXTRA_REDDIT_GALLERY_PAYLOAD, payloadJSON);
 
             JobInfo jobInfo = SubmitPostService.constructJobInfo(this, payloadJSON.length() * 2L, extras);

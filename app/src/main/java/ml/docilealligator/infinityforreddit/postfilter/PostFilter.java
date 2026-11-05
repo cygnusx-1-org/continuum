@@ -24,6 +24,27 @@ import ml.docilealligator.infinityforreddit.post.Post;
 
 @Entity(tableName = "post_filter", primaryKeys = {"name", "username"})
 public class PostFilter implements Parcelable {
+    // The regexes a filter names, compiled once. isPostAllowed runs for every post of every page, and
+    // compiling the same patterns each time was most of what a regex filter cost. A pattern that does
+    // not compile is remembered as such, so it is logged once.
+    private static final java.util.Map<String, java.util.Optional<Pattern>> COMPILED_REGEXES =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    @Nullable
+    private static Pattern compiledRegex(String regex) {
+        if (COMPILED_REGEXES.size() > 256) {
+            COMPILED_REGEXES.clear();
+        }
+        return COMPILED_REGEXES.computeIfAbsent(regex, r -> {
+            try {
+                return java.util.Optional.of(Pattern.compile(r));
+            } catch (PatternSyntaxException e) {
+                Log.e("PostFilter", "isPostAllowed failed", e);
+                return java.util.Optional.empty();
+            }
+        }).orElse(null);
+    }
+
     /**
      * The account this filter belongs to, [Account.ANONYMOUS_ACCOUNT] when logged out. Half the
      * primary key: two accounts each having a filter called "NSFW" is the point of the column.
@@ -291,14 +312,9 @@ public class PostFilter implements Parcelable {
         }
         if (!postFilter.postTitleExcludesRegexes.isEmpty()) {
             for (String regex : postFilter.postTitleExcludesRegexes) {
-                try {
-                    Pattern pattern = Pattern.compile(regex);
-                    Matcher matcher = pattern.matcher(post.getTitle());
-                    if (matcher.find()) {
-                        return false;
-                    }
-                } catch (PatternSyntaxException e) {
-                    Log.e("PostFilter", "isPostAllowed failed", e);
+                Pattern pattern = compiledRegex(regex);
+                if (pattern != null && pattern.matcher(post.getTitle()).find()) {
+                    return false;
                 }
             }
         }
@@ -311,15 +327,10 @@ public class PostFilter implements Parcelable {
         if (!postFilter.postTitleContainsRegexes.isEmpty()) {
             boolean matched = false;
             for (String regex : postFilter.postTitleContainsRegexes) {
-                try {
-                    Pattern pattern = Pattern.compile(regex);
-                    Matcher matcher = pattern.matcher(post.getTitle());
-                    if (matcher.find()) {
-                        matched = true;
-                        break;
-                    }
-                } catch (PatternSyntaxException e) {
-                    Log.e("PostFilter", "isPostAllowed failed", e);
+                Pattern pattern = compiledRegex(regex);
+                if (pattern != null && pattern.matcher(post.getTitle()).find()) {
+                    matched = true;
+                    break;
                 }
             }
             if (!matched) {

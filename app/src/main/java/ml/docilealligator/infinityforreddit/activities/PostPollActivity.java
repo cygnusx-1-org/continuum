@@ -33,6 +33,7 @@ import com.bumptech.glide.RequestManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -731,7 +732,7 @@ public class PostPollActivity extends BaseActivity implements FlairBottomSheetFr
                     binding.receivePostReplyNotificationsSwitchMaterialPostPollActivity.isChecked(),
                     subredditIsUser ? "profile" : "subreddit");
         }
-        String payloadJSON = new Gson().toJson(payload);
+        String payloadJSON = SharedGson.INSTANCE.toJson(payload);
         extras.putString(SubmitPostService.EXTRA_POLL_PAYLOAD, payloadJSON);
 
         JobInfo jobInfo = SubmitPostService.constructJobInfo(this, payloadJSON.length() * 2L, extras);

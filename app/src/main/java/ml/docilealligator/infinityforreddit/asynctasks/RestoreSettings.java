@@ -10,6 +10,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -754,7 +755,7 @@ public class RestoreSettings {
 
     private static <T> List<T> getListFromFile(File file, Type dataType) {
         try (JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-            Gson gson = new Gson();
+            Gson gson = SharedGson.INSTANCE;
             List<T> result = gson.fromJson(reader, dataType);
             if (result != null) {
                 return result;

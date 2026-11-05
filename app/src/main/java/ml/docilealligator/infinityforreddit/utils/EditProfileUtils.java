@@ -46,7 +46,7 @@ public final class EditProfileUtils {
                 }
 
                 final JSONObject resBody = new JSONObject(json);
-                final SubredditSettingData data = new Gson().fromJson(resBody.getString("data"), SubredditSettingData.class);
+                final SubredditSettingData data = SharedGson.INSTANCE.fromJson(resBody.getString("data"), SubredditSettingData.class);
 
                 if (data.getPublicDescription().equals(publicDesc)
                         && data.getTitle().equals(displayName)) {

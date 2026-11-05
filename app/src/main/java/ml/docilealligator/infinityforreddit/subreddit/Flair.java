@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonParseException;
 import java.util.Objects;
 
@@ -87,10 +88,10 @@ public class Flair implements Parcelable {
     }
 
     public String getJSONModel() {
-        return new Gson().toJson(this);
+        return SharedGson.INSTANCE.toJson(this);
     }
 
     public static Flair fromJson(@Nullable String json) throws JsonParseException {
-        return new Gson().fromJson(json, Flair.class);
+        return SharedGson.INSTANCE.fromJson(json, Flair.class);
     }
 }

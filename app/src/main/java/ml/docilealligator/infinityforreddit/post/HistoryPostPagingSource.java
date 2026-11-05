@@ -8,6 +8,7 @@ import androidx.paging.PagingState;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -112,7 +113,7 @@ public class HistoryPostPagingSource extends ListenableFuturePagingSource<String
                         // Gson returns null for an empty or literal-null body. Reading the reason
                         // off it threw an NPE that the catch below swallowed, silently discarding
                         // the specific reason instead of reporting it.
-                        RedditError redditError = new Gson().fromJson(errorBody.string(), RedditError.class);
+                        RedditError redditError = SharedGson.INSTANCE.fromJson(errorBody.string(), RedditError.class);
                         if (redditError != null) {
                             return new LoadResult.Error<>(new PostPagingSource.PostPagingSourceError(response.code(), redditError.getReason()));
                         }

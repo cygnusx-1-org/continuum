@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
  * Looks up the latest GitHub release of this fork and compares it with the running version.
  */
 public final class UpdateChecker {
+    private static final java.util.regex.Pattern DIGIT_RUN = java.util.regex.Pattern.compile("\\d+");
     static final String REPO = "jayblah/redditjr";
     private static final String API = "https://api.github.com/repos/" + REPO + "/releases";
 
@@ -162,7 +163,7 @@ public final class UpdateChecker {
 
     // Every run of digits, so "beta.12" gives {12}.
     private static int[] numericParts(String text) {
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\d+").matcher(text);
+        java.util.regex.Matcher matcher = DIGIT_RUN.matcher(text);
         java.util.List<Integer> numbers = new java.util.ArrayList<>();
         while (matcher.find()) {
             try {

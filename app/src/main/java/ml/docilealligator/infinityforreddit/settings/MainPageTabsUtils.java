@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -36,7 +37,7 @@ import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
  * migrate the old configuration.
  */
 public class MainPageTabsUtils {
-    private static final Gson gson = new Gson();
+    private static final Gson gson = SharedGson.INSTANCE;
     private static final Type LIST_TYPE = new TypeToken<List<MainPageTabInput>>() {
     }.getType();
 

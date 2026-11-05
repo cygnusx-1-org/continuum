@@ -42,6 +42,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -229,7 +230,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
             String postJson = getIntent().getStringExtra(EXTRA_POST_JSON);
             if (postJson != null) {
                 try {
-                    post = new Gson().fromJson(postJson, Post.class);
+                    post = SharedGson.INSTANCE.fromJson(postJson, Post.class);
                 } catch (JsonSyntaxException e) {
                     post = null;
                 }
@@ -280,6 +281,12 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         }
     }
 
+    // A picture decoded at the screen's width, whatever size the file is.
+    private RequestBuilder<Drawable> sizedRequest(String url) {
+        return Glide.with(this).load(url)
+                .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL);
+    }
+
     private class GalleryListAdapter extends RecyclerView.Adapter<GalleryListViewHolder> {
         @NonNull
         @Override
@@ -296,9 +303,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
                 Post.Gallery item = gallery.get(next);
                 String url = urlFor(item);
                 if (url != null && !(item.mediaType == Post.Gallery.TYPE_GIF && autoplayGifs)) {
-                    Glide.with(ViewRedditGalleryActivity.this).load(url)
-                            .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL)
-                            .preload();
+                    sizedRequest(url).preload();
                 }
             }
         }
@@ -349,12 +354,10 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
                 binding.errorImageViewItemShadowboxGallery.setVisibility(View.VISIBLE);
             } else {
                 // Decoded at the screen's width, whatever size the file is.
-                RequestBuilder<Drawable> request = Glide.with(ViewRedditGalleryActivity.this).load(main)
-                        .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL);
+                RequestBuilder<Drawable> request = sizedRequest(main);
                 if (still != null && !still.equals(main)) {
                     // The still stands in while an animated GIF downloads.
-                    request = request.thumbnail(Glide.with(ViewRedditGalleryActivity.this).load(still)
-                            .override(getResources().getDisplayMetrics().widthPixels, Target.SIZE_ORIGINAL));
+                    request = request.thumbnail(sizedRequest(still));
                 }
                 request.into(binding.imageViewItemShadowboxGallery);
             }
@@ -513,7 +516,7 @@ public class ViewRedditGalleryActivity extends AppCompatActivity
         }
         Bundle out = new Bundle(extras);
         out.remove(EXTRA_POST);
-        out.putString(EXTRA_POST_JSON, new Gson().toJson(post));
+        out.putString(EXTRA_POST_JSON, SharedGson.INSTANCE.toJson(post));
         // The index the user originally tapped is superseded by the item they were actually on when
         // they left, so it must not travel with the replay. Left in, it would make the restored
         // screen open on the tapped item and ignore the recorded one -- and it is precisely its

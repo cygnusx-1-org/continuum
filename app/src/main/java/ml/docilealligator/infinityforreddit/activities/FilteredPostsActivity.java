@@ -18,6 +18,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import com.google.gson.JsonSyntaxException;
 import java.util.Locale;
 import java.util.Objects;
@@ -207,7 +208,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
             String postFilterJson = getIntent().getStringExtra(EXTRA_CONSTRUCTED_POST_FILTER_JSON);
             if (postFilterJson != null) {
                 try {
-                    postFilter = new Gson().fromJson(postFilterJson, PostFilter.class);
+                    postFilter = SharedGson.INSTANCE.fromJson(postFilterJson, PostFilter.class);
                 } catch (JsonSyntaxException e) {
                     postFilter = null;
                 }
@@ -386,7 +387,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
         PostFilter postFilter = getIntent().getParcelableExtra(EXTRA_CONSTRUCTED_POST_FILTER);
         if (postFilter != null) {
             out.remove(EXTRA_CONSTRUCTED_POST_FILTER);
-            out.putString(EXTRA_CONSTRUCTED_POST_FILTER_JSON, new Gson().toJson(postFilter));
+            out.putString(EXTRA_CONSTRUCTED_POST_FILTER_JSON, SharedGson.INSTANCE.toJson(postFilter));
         }
         return out;
     }
@@ -405,7 +406,7 @@ public class FilteredPostsActivity extends BaseActivity implements SortTypeSelec
             String json = getIntent().getStringExtra(EXTRA_CONSTRUCTED_POST_FILTER_JSON);
             if (json != null) {
                 try {
-                    constructed = new Gson().fromJson(json, PostFilter.class);
+                    constructed = SharedGson.INSTANCE.fromJson(json, PostFilter.class);
                 } catch (JsonSyntaxException e) {
                     constructed = null;
                 }

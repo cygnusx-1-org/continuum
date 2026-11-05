@@ -2,6 +2,7 @@ package ml.docilealligator.infinityforreddit.multireddit;
 
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
+import ml.docilealligator.infinityforreddit.utils.SharedGson;
 import java.util.ArrayList;
 
 // Fields are read reflectively by Gson when this model is serialised into the
@@ -39,7 +40,7 @@ public class MultiRedditJSONModel {
     }
 
     public String createJSONModel() {
-        Gson gson = new Gson();
+        Gson gson = SharedGson.INSTANCE;
         return gson.toJson(this);
     }
 }
