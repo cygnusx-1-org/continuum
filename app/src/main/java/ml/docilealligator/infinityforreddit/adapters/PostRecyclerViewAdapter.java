@@ -25,9 +25,9 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.fragment.app.FragmentManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -510,7 +510,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     /** Hands the row classes live values from this adapter; see {@link PostRowHost}. */
-    private final PostRowHost mRowHost = new PostRowHost() {
+    private final PostCompactHost mRowHost = new PostCompactHost() {
         @Override public BaseActivity activity() { return mActivity; }
         @Override public Callback callback() { return mCallback; }
         @Override public String accountName() { return mAccountName; }
@@ -537,6 +537,40 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Override public void openViewPostDetailActivity(Post post, int position) { PostRecyclerViewAdapter.this.openViewPostDetailActivity(post, position); }
         @Override public void shareLink(Post post) { PostRecyclerViewAdapter.this.shareLink(post); }
         @Override public void storeReadState(Post post, boolean read) { PostRecyclerViewAdapter.this.storeReadState(post, read); }
+        @Override public int archivedIconTint() { return mArchivedIconTint; }
+        @Override public int cardViewBackgroundColor() { return mCardViewBackgroundColor; }
+        @Override public int colorAccent() { return mColorAccent; }
+        @Override public int compactThumbnailBoxSizePx() { return mCompactThumbnailBoxSizePx; }
+        @Override public int crosspostIconTint() { return mCrosspostIconTint; }
+        @Override public int dividerColor() { return mDividerColor; }
+        @Override public int filledCardViewBackgroundColor() { return mFilledCardViewBackgroundColor; }
+        @Override public int flairBackgroundColor() { return mFlairBackgroundColor; }
+        @Override public int flairTextColor() { return mFlairTextColor; }
+        @Override public int lockedIconTint() { return mLockedIconTint; }
+        @Override public int mediaIndicatorBackgroundColor() { return mMediaIndicatorBackgroundColor; }
+        @Override public int mediaIndicatorIconTint() { return mMediaIndicatorIconTint; }
+        @Override public int nsfwBackgroundColor() { return mNSFWBackgroundColor; }
+        @Override public int nsfwTextColor() { return mNSFWTextColor; }
+        @Override public int noPreviewPostTypeBackgroundColor() { return mNoPreviewPostTypeBackgroundColor; }
+        @Override public int noPreviewPostTypeIconTint() { return mNoPreviewPostTypeIconTint; }
+        @Override public int postLayout() { return mPostLayout; }
+        @Override public int postTypeTextColor() { return mPostTypeTextColor; }
+        @Override public int readPostCardViewBackgroundColor() { return mReadPostCardViewBackgroundColor; }
+        @Override public int readPostFilledCardViewBackgroundColor() { return mReadPostFilledCardViewBackgroundColor; }
+        @Override public int secondaryTextColor() { return mSecondaryTextColor; }
+        @Override public int spoilerBackgroundColor() { return mSpoilerBackgroundColor; }
+        @Override public int spoilerTextColor() { return mSpoilerTextColor; }
+        @Override public int stickiedPostIconTint() { return mStickiedPostIconTint; }
+        @Override public boolean longPressToHideToolbarInCompactLayout() { return mLongPressToHideToolbarInCompactLayout; }
+        @Override public boolean markPostsAsRead() { return mMarkPostsAsRead; }
+        @Override public boolean voteButtonsOnTheRight() { return mVoteButtonsOnTheRight; }
+        @Override public String longPressPostMediaAction() { return mLongPressPostMediaAction; }
+        @Override public String longPressPostNonMediaAreaAction() { return mLongPressPostNonMediaAreaAction; }
+        @Override public float scale() { return mScale; }
+        @Override public FragmentManager childFragmentManager() { return mFragment.getChildFragmentManager(); }
+        @Override public GradientDrawable createRoundedBackground(int color, float cornerRadiusDp) { return PostRecyclerViewAdapter.this.createRoundedBackground(color, cornerRadiusDp); }
+        @Override public void openMedia(Post post) { PostRecyclerViewAdapter.this.openMedia(post); }
+        @Override public void openMedia(Post post, boolean peekMedia) { PostRecyclerViewAdapter.this.openMedia(post, peekMedia); }
     };
 
     @Override
@@ -938,21 +972,21 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             return new PostTextTypeViewHolder(ItemPostTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         } else if (viewType == VIEW_TYPE_POST_COMPACT) {
             if (mShowThumbnailOnTheLeftInCompactLayout) {
-                return new PostCompactLeftThumbnailViewHolder(ItemPostCompactBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostCompactLeftThumbnailViewHolder(ItemPostCompactBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             } else {
-                return new PostCompactRightThumbnailViewHolder(ItemPostCompactRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostCompactRightThumbnailViewHolder(ItemPostCompactRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             }
         } else if (viewType == VIEW_TYPE_POST_COMPACT_2) {
             if (mShowThumbnailOnTheLeftInCompactLayout) {
-                return new PostCompact2LeftThumbnailViewHolder(ItemPostCompact2Binding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostCompact2LeftThumbnailViewHolder(ItemPostCompact2Binding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             } else {
-                return new PostCompact2RightThumbnailViewHolder(ItemPostCompact2RightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostCompact2RightThumbnailViewHolder(ItemPostCompact2RightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             }
         } else if (viewType == VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
             if (mShowThumbnailOnTheLeftInCompactLayout) {
-                return new PostCard2CompactLinkLeftThumbnailViewHolder(ItemPostCard2CompactLinkBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostCard2CompactLinkLeftThumbnailViewHolder(ItemPostCard2CompactLinkBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             } else {
-                return new PostCard2CompactLinkRightThumbnailViewHolder(ItemPostCard2CompactLinkRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+                return new PostCard2CompactLinkRightThumbnailViewHolder(ItemPostCard2CompactLinkRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             }
         } else if (viewType == VIEW_TYPE_POST_GALLERY) {
             return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -5840,621 +5874,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         @Override
         void setItemViewBackgroundColor(boolean isReadPost) {
             itemView.setBackgroundTintList(ColorStateList.valueOf(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor));
-        }
-    }
-
-    public class PostCompactBaseViewHolder extends PostViewHolder {
-        BadgedNameTextView nameTextView;
-        BadgedNameTextView usernameTextView;
-        @Nullable TextView linkTextView;
-        RelativeLayout relativeLayout;
-        LoadingIndicator loadingIndicator;
-        ImageView imageView;
-        ImageView playButtonImageView;
-        FrameLayout noPreviewPostImageFrameLayout;
-        ImageView noPreviewPostImageView;
-        @Nullable ConstraintLayout bottomConstraintLayout;
-        @Nullable PostTypeIndicatorView postTypeIndicatorView;
-        @Nullable PostTypeIndicatorView noPreviewPostTypeIndicatorView;
-        View divider;
-        RequestListener<Drawable> requestListener;
-        GradientDrawable itemViewBackground;
-        Drawable thumbnailRoundedEdgeBackground;
-
-        PostCompactBaseViewHolder(View itemView) {
-            super(itemView, mRowHost);
-        }
-
-        void setupUsernameView(BadgedNameTextView usernameTextView) {
-            this.usernameTextView = usernameTextView;
-
-            if (mActivity.typeface != null) {
-                usernameTextView.setTypeface(mActivity.typeface);
-            }
-
-            usernameTextView.setOnClickListener(view -> {
-                if (!canStartActivity) {
-                    return;
-                }
-                int position = getBindingAdapterPosition();
-                if (position < 0) {
-                    return;
-                }
-                Post post = getItem(position);
-                if (post == null || post.isAuthorDeleted()) {
-                    return;
-                }
-                canStartActivity = false;
-                Intent intent = new Intent(mActivity, ViewUserDetailActivity.class);
-                intent.putExtra(ViewUserDetailActivity.EXTRA_USER_NAME_KEY, post.getAuthor());
-                mActivity.startActivity(intent);
-            });
-        }
-
-        void setBaseView(AspectRatioGifImageView iconGifImageView,
-                         BadgedNameTextView nameTextView,
-                         ImageView stickiedPostImageView,
-                         TextView postTimeTextView,
-                         TextView titleTextView,
-                         @Nullable CustomTextView typeTextView,
-                         @Nullable ImageView archivedImageView,
-                         @Nullable ImageView lockedImageView,
-                         @Nullable ImageView crosspostImageView,
-                         @Nullable CustomTextView nsfwTextView,
-                         @Nullable CustomTextView spoilerTextView,
-                         @Nullable CustomTextView flairTextView,
-                         @Nullable TextView linkTextView,
-                         RelativeLayout relativeLayout,
-                         LoadingIndicator loadingIndicator,
-                         ImageView imageView,
-                         ImageView playButtonImageView,
-                         FrameLayout noPreviewLinkImageFrameLayout,
-                         ImageView noPreviewLinkImageView,
-                         @Nullable ConstraintLayout bottomConstraintLayout,
-                         MaterialButton upvoteButton,
-                         TextView scoreTextView,
-                         MaterialButton downvoteButton,
-                         @Nullable MaterialButton commentsCountButton,
-                         @Nullable MaterialButton saveButton,
-                         @Nullable MaterialButton shareButton,
-                         View divider) {
-            super.setBaseView(iconGifImageView,
-                    nameTextView,
-                    stickiedPostImageView,
-                    postTimeTextView,
-                    titleTextView,
-                    typeTextView,
-                    archivedImageView,
-                    lockedImageView,
-                    crosspostImageView,
-                    nsfwTextView,
-                    spoilerTextView,
-                    flairTextView,
-                    upvoteButton,
-                    scoreTextView,
-                    downvoteButton,
-                    commentsCountButton,
-                    saveButton,
-                    shareButton);
-
-            this.nameTextView = nameTextView;
-            this.linkTextView = linkTextView;
-            this.relativeLayout = relativeLayout;
-            this.loadingIndicator = loadingIndicator;
-            this.imageView = imageView;
-            this.playButtonImageView = playButtonImageView;
-            this.noPreviewPostImageFrameLayout = noPreviewLinkImageFrameLayout;
-            this.noPreviewPostImageView = noPreviewLinkImageView;
-            this.bottomConstraintLayout = bottomConstraintLayout;
-            this.divider = divider;
-
-            // The layouts inflate at @dimen/post_compact_thumbnail_size; the preference overrides it
-            // here so all six compact variants follow one setting. Both boxes are sized: the preview
-            // wrapper and the no-preview link fallback, exactly one of which is ever shown.
-            ViewGroup.LayoutParams imageParams = relativeLayout.getLayoutParams();
-            imageParams.width = mCompactThumbnailBoxSizePx;
-            imageParams.height = mCompactThumbnailBoxSizePx;
-            relativeLayout.setLayoutParams(imageParams);
-            ViewGroup.LayoutParams noPreviewParams = noPreviewLinkImageView.getLayoutParams();
-            noPreviewParams.width = mCompactThumbnailBoxSizePx;
-            noPreviewParams.height = mCompactThumbnailBoxSizePx;
-            noPreviewLinkImageView.setLayoutParams(noPreviewParams);
-
-            if (mVoteButtonsOnTheRight && saveButton != null && shareButton != null && commentsCountButton != null) {
-                if (bottomConstraintLayout != null) {
-                    ConstraintSet constraintSet = new ConstraintSet();
-                    constraintSet.clone(bottomConstraintLayout);
-                    constraintSet.clear(upvoteButton.getId(), ConstraintSet.START);
-                    constraintSet.clear(scoreTextView.getId(), ConstraintSet.START);
-                    constraintSet.clear(downvoteButton.getId(), ConstraintSet.START);
-                    constraintSet.clear(saveButton.getId(), ConstraintSet.END);
-                    constraintSet.clear(shareButton.getId(), ConstraintSet.END);
-                    constraintSet.connect(upvoteButton.getId(), ConstraintSet.END, scoreTextView.getId(), ConstraintSet.START);
-                    constraintSet.connect(scoreTextView.getId(), ConstraintSet.END, downvoteButton.getId(), ConstraintSet.START);
-                    constraintSet.connect(downvoteButton.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
-                    constraintSet.connect(commentsCountButton.getId(), ConstraintSet.START, saveButton.getId(), ConstraintSet.END);
-                    constraintSet.connect(commentsCountButton.getId(), ConstraintSet.END, upvoteButton.getId(), ConstraintSet.START);
-                    constraintSet.connect(saveButton.getId(), ConstraintSet.START, shareButton.getId(), ConstraintSet.END);
-                    constraintSet.connect(shareButton.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
-                    constraintSet.setHorizontalBias(commentsCountButton.getId(), 0);
-                    constraintSet.applyTo(bottomConstraintLayout);
-                }
-            }
-
-            if (((ViewGroup) itemView).getLayoutTransition() != null) {
-                ((ViewGroup) itemView).getLayoutTransition().setAnimateParentHierarchy(false);
-            }
-
-            if (mActivity.typeface != null) {
-                nameTextView.setTypeface(mActivity.typeface);
-                postTimeTextView.setTypeface(mActivity.typeface);
-                if (typeTextView != null) {
-                    typeTextView.setTypeface(mActivity.typeface);
-                }
-                if (spoilerTextView != null) {
-                    spoilerTextView.setTypeface(mActivity.typeface);
-                }
-                if (nsfwTextView != null) {
-                    nsfwTextView.setTypeface(mActivity.typeface);
-                }
-                if (flairTextView != null) {
-                    flairTextView.setTypeface(mActivity.typeface);
-                }
-                if (linkTextView != null) {
-                    linkTextView.setTypeface(mActivity.typeface);
-                }
-                upvoteButton.setTypeface(mActivity.typeface);
-                if (commentsCountButton != null) {
-                    commentsCountButton.setTypeface(mActivity.typeface);
-                }
-            }
-            if (mActivity.titleTypeface != null) {
-                titleTextView.setTypeface(mActivity.titleTypeface);
-            }
-
-            applyCompactItemLayoutParams();
-            applyCompactItemBackground(false);
-            postTimeTextView.setTextColor(mSecondaryTextColor);
-            titleTextView.setTextColor(mPostTitleColor);
-            stickiedPostImageView.setColorFilter(mStickiedPostIconTint, PorterDuff.Mode.SRC_IN);
-            if (typeTextView != null) {
-                typeTextView.setTextColor(mPostTypeTextColor);
-            }
-            if (spoilerTextView != null) {
-                spoilerTextView.setBackgroundColor(mSpoilerBackgroundColor);
-                spoilerTextView.setBorderColor(mSpoilerBackgroundColor);
-                spoilerTextView.setTextColor(mSpoilerTextColor);
-            }
-            if (nsfwTextView != null) {
-                nsfwTextView.setBackgroundColor(mNSFWBackgroundColor);
-                nsfwTextView.setBorderColor(mNSFWBackgroundColor);
-                nsfwTextView.setTextColor(mNSFWTextColor);
-            }
-            if (flairTextView != null) {
-                flairTextView.setBackgroundColor(mFlairBackgroundColor);
-                flairTextView.setBorderColor(mFlairBackgroundColor);
-                flairTextView.setTextColor(mFlairTextColor);
-            }
-            if (archivedImageView != null) {
-                archivedImageView.setColorFilter(mArchivedIconTint, PorterDuff.Mode.SRC_IN);
-            }
-            if (lockedImageView != null) {
-                lockedImageView.setColorFilter(mLockedIconTint, PorterDuff.Mode.SRC_IN);
-            }
-            if (crosspostImageView != null) {
-                crosspostImageView.setColorFilter(mCrosspostIconTint, PorterDuff.Mode.SRC_IN);
-            }
-            if (linkTextView != null) {
-                linkTextView.setTextColor(mSecondaryTextColor);
-            }
-            playButtonImageView.setColorFilter(mMediaIndicatorIconTint, PorterDuff.Mode.SRC_IN);
-            playButtonImageView.setBackgroundTintList(ColorStateList.valueOf(mMediaIndicatorBackgroundColor));
-            loadingIndicator.setIndicatorColor(mColorAccent);
-            loadingIndicator.setVisibility(View.GONE);
-            noPreviewLinkImageFrameLayout.setBackground(createRoundedBackground(
-                    mNoPreviewPostTypeBackgroundColor,
-                    mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD ? 16 :
-                            mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? 12 : 8));
-            noPreviewLinkImageView.setBackground(null);
-            noPreviewLinkImageView.setColorFilter(mNoPreviewPostTypeIconTint, android.graphics.PorterDuff.Mode.SRC_IN);
-            upvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            scoreTextView.setTextColor(mPostIconAndInfoColor);
-            downvoteButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            if (commentsCountButton != null) {
-                commentsCountButton.setTextColor(mPostIconAndInfoColor);
-                commentsCountButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            }
-            if (saveButton != null) {
-                saveButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            }
-            if (shareButton != null) {
-                shareButton.setIconTint(ColorStateList.valueOf(mPostIconAndInfoColor));
-            }
-            divider.setBackgroundColor(mDividerColor);
-
-            imageView.setClipToOutline(true);
-            noPreviewLinkImageFrameLayout.setClipToOutline(true);
-
-            itemView.setOnLongClickListener(view -> {
-                if (bottomConstraintLayout != null && mLongPressToHideToolbarInCompactLayout) {
-                    if (bottomConstraintLayout.getLayoutParams().height == 0) {
-                        ViewGroup.LayoutParams params = bottomConstraintLayout.getLayoutParams();
-                        params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-                        bottomConstraintLayout.setLayoutParams(params);
-                        mCallback.delayTransition();
-                    } else {
-                        mCallback.delayTransition();
-                        ViewGroup.LayoutParams params = bottomConstraintLayout.getLayoutParams();
-                        params.height = 0;
-                        bottomConstraintLayout.setLayoutParams(params);
-                    }
-                    return true;
-                } else if (mLongPressPostNonMediaAreaAction.equals(SharedPreferencesUtils.LONG_PRESS_POST_VALUE_SHOW_POST_OPTIONS)) {
-                    showPostOptions();
-                    return true;
-                } else if (mLongPressPostNonMediaAreaAction.equals(SharedPreferencesUtils.LONG_PRESS_POST_VALUE_PREVIEW_IN_FULLSCREEN)) {
-                    markPostRead(post, true);
-                    openMedia(post, true);
-                    return true;
-                }
-                return false;
-            });
-
-            imageView.setOnClickListener(view -> {
-                int position = getBindingAdapterPosition();
-                if (position < 0) {
-                    return;
-                }
-                Post post = getItem(position);
-                if (post != null) {
-                    markPostRead(post, true);
-                    if (post.getPostType() == Post.TEXT_TYPE) {
-                        // Preview thumbnail on a self/text post; open the post like tapping the row.
-                        openViewPostDetailActivity(post, position);
-                    } else {
-                        openMedia(post);
-                    }
-                }
-            });
-
-            imageView.setOnLongClickListener(v -> {
-                if (mLongPressPostMediaAction.equals(SharedPreferencesUtils.LONG_PRESS_POST_VALUE_SHOW_POST_OPTIONS)) {
-                    showPostOptions();
-                    return true;
-                } else if (mLongPressPostMediaAction.equals(SharedPreferencesUtils.LONG_PRESS_POST_VALUE_PREVIEW_IN_FULLSCREEN)) {
-                    markPostRead(post, true);
-                    openMedia(post, true);
-                    return true;
-                }
-                return false;
-            });
-
-            noPreviewLinkImageFrameLayout.setOnClickListener(view -> {
-                imageView.performClick();
-            });
-
-            noPreviewLinkImageFrameLayout.setOnLongClickListener(view -> imageView.performLongClick());
-
-            requestListener = new RequestListener<>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
-                    loadingIndicator.setVisibility(View.GONE);
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
-                    loadingIndicator.setVisibility(View.GONE);
-                    if (Utils.previewLikelyHasTransparentBackground(resource)) {
-                        imageView.setBackgroundResource(R.drawable.transparent_image_backdrop);
-                    }
-                    return false;
-                }
-            };
-        }
-
-        void applyCompactItemLayoutParams() {
-            ViewGroup.LayoutParams params = itemView.getLayoutParams();
-            if (!(params instanceof ViewGroup.MarginLayoutParams)) {
-                return;
-            }
-
-            int horizontalMargin = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (16 * mScale) : 0;
-            int verticalMargin = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 ? (int) (8 * mScale) : 0;
-            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) params;
-
-            if (marginLayoutParams.leftMargin == horizontalMargin
-                    && marginLayoutParams.rightMargin == horizontalMargin
-                    && marginLayoutParams.topMargin == verticalMargin
-                    && marginLayoutParams.bottomMargin == verticalMargin) {
-                return;
-            }
-
-            marginLayoutParams.setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin);
-            itemView.setLayoutParams(marginLayoutParams);
-        }
-
-        void applyCompactItemBackground(boolean isReadPost) {
-            if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD) {
-                int backgroundColor = isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor;
-                setRoundedItemViewBackground(backgroundColor, 16);
-            } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3) {
-                int backgroundColor = isReadPost ? mReadPostFilledCardViewBackgroundColor : mFilledCardViewBackgroundColor;
-                setRoundedItemViewBackground(backgroundColor, 12);
-            } else {
-                itemView.setClipToOutline(false);
-                int backgroundColor = isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor;
-                itemView.setBackgroundColor(backgroundColor);
-            }
-        }
-
-        private void setRoundedItemViewBackground(int color, float cornerRadiusDp) {
-            // Reuse a single GradientDrawable per holder and only swap its color, so we don't
-            // allocate a new drawable on every bind/recycle while scrolling. The corner radius is
-            // fixed for the lifetime of the holder because mPostLayout never changes.
-            if (itemViewBackground == null) {
-                itemViewBackground = createRoundedBackground(color, cornerRadiusDp);
-                itemView.setBackground(itemViewBackground);
-                itemView.setClipToOutline(true);
-            } else {
-                itemViewBackground.setColor(color);
-            }
-        }
-
-        void showPostOptions() {
-            Post post = getItem(getBindingAdapterPosition());
-            if (post == null) {
-                return;
-            }
-
-            PostOptionsBottomSheetFragment postOptionsBottomSheetFragment;
-            postOptionsBottomSheetFragment = PostOptionsBottomSheetFragment.newInstance(post, getBindingAdapterPosition(), true);
-            postOptionsBottomSheetFragment.show(mFragment.getChildFragmentManager(), postOptionsBottomSheetFragment.getTag());
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            applyCompactItemBackground(isReadPost);
-        }
-
-        @Override
-        void markPostRead(Post post, boolean changePostItemColor) {
-            if (!mHandleReadPost) {
-                return;
-            }
-
-            if (!post.isRead() && mMarkPostsAsRead) {
-                post.markAsRead();
-                if (changePostItemColor) {
-                    applyCompactItemBackground(true);
-                    titleTextView.setTextColor(mReadPostTitleColor);
-                }
-                if (mActivity != null && mActivity instanceof MarkPostAsReadInterface) {
-                    ((MarkPostAsReadInterface) mActivity).markPostAsRead(post);
-                }
-            }
-        }
-    }
-
-    class PostCompactLeftThumbnailViewHolder extends PostCompactBaseViewHolder {
-        PostCompactLeftThumbnailViewHolder(@NonNull ItemPostCompactBinding binding) {
-            super(binding.getRoot());
-            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact;
-            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompact;
-
-            setBaseView(binding.iconGifImageViewItemPostCompact,
-                    binding.nameTextViewItemPostCompact,
-                    binding.stickiedPostImageViewItemPostCompact,
-                    binding.postTimeTextViewItemPostCompact,
-                    binding.titleTextViewItemPostCompact,
-                    binding.typeTextViewItemPostCompact,
-                    binding.archivedImageViewItemPostCompact,
-                    binding.lockedImageViewItemPostCompact,
-                    binding.crosspostImageViewItemPostCompact,
-                    binding.nsfwTextViewItemPostCompact,
-                    binding.spoilerCustomTextViewItemPostCompact,
-                    binding.flairCustomTextViewItemPostCompact,
-                    binding.linkTextViewItemPostCompact,
-                    binding.imageViewWrapperItemPostCompact,
-                    binding.progressBarItemPostCompact,
-                    binding.imageViewItemPostCompact,
-                    binding.playButtonImageViewItemPostCompact,
-                    binding.frameLayoutImageViewNoPreviewLinkItemPostCompact,
-                    binding.imageViewNoPreviewLinkItemPostCompact,
-                    binding.bottomConstraintLayoutItemPostCompact,
-                    binding.upvoteButtonItemPostCompact,
-                    binding.scoreTextViewItemPostCompact,
-                    binding.downvoteButtonItemPostCompact,
-                    binding.commentsCountButtonItemPostCompact,
-                    binding.saveButtonItemPostCompact,
-                    binding.shareButtonItemPostCompact,
-                    binding.dividerItemPostCompact);
-            setupUsernameView(binding.usernameTextViewItemPostCompact);
-        }
-    }
-
-    class PostCompactRightThumbnailViewHolder extends PostCompactBaseViewHolder {
-        PostCompactRightThumbnailViewHolder(@NonNull ItemPostCompactRightThumbnailBinding binding) {
-            super(binding.getRoot());
-            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompactRightThumbnail;
-            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompactRightThumbnail;
-
-            setBaseView(binding.iconGifImageViewItemPostCompactRightThumbnail,
-                    binding.nameTextViewItemPostCompactRightThumbnail,
-                    binding.stickiedPostImageViewItemPostCompactRightThumbnail,
-                    binding.postTimeTextViewItemPostCompactRightThumbnail,
-                    binding.titleTextViewItemPostCompactRightThumbnail,
-                    binding.typeTextViewItemPostCompactRightThumbnail,
-                    binding.archivedImageViewItemPostCompactRightThumbnail,
-                    binding.lockedImageViewItemPostCompactRightThumbnail,
-                    binding.crosspostImageViewItemPostCompactRightThumbnail,
-                    binding.nsfwTextViewItemPostCompactRightThumbnail,
-                    binding.spoilerCustomTextViewItemPostCompactRightThumbnail,
-                    binding.flairCustomTextViewItemPostCompactRightThumbnail,
-                    binding.linkTextViewItemPostCompactRightThumbnail,
-                    binding.imageViewWrapperItemPostCompactRightThumbnail,
-                    binding.progressBarItemPostCompactRightThumbnail,
-                    binding.imageViewItemPostCompactRightThumbnail,
-                    binding.playButtonImageViewItemPostCompactRightThumbnail,
-                    binding.frameLayoutImageViewNoPreviewLinkItemPostCompactRightThumbnail,
-                    binding.imageViewNoPreviewLinkItemPostCompactRightThumbnail,
-                    binding.bottomConstraintLayoutItemPostCompactRightThumbnail,
-                    binding.upvoteButtonItemPostCompactRightThumbnail,
-                    binding.scoreTextViewItemPostCompactRightThumbnail,
-                    binding.downvoteButtonItemPostCompactRightThumbnail,
-                    binding.commentsCountButtonItemPostCompactRightThumbnail,
-                    binding.saveButtonItemPostCompactRightThumbnail,
-                    binding.shareButtonItemPostCompactRightThumbnail,
-                    binding.dividerItemPostCompactRightThumbnail);
-            setupUsernameView(binding.usernameTextViewItemPostCompactRightThumbnail);
-        }
-    }
-
-    class PostCard2CompactLinkRightThumbnailViewHolder extends PostCompactBaseViewHolder {
-        PostCard2CompactLinkRightThumbnailViewHolder(@NonNull ItemPostCard2CompactLinkRightThumbnailBinding binding) {
-            super(binding.getRoot());
-            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCard2CompactLinkRightThumbnail;
-            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCard2CompactLinkRightThumbnail;
-
-            setBaseView(binding.iconGifImageViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.nameTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.stickiedPostImageViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.postTimeTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.titleTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.typeTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.archivedImageViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.lockedImageViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.crosspostImageViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.nsfwTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.spoilerCustomTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.flairCustomTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.linkTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.imageViewWrapperItemPostCard2CompactLinkRightThumbnail,
-                    binding.progressBarItemPostCard2CompactLinkRightThumbnail,
-                    binding.imageViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.playButtonImageViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.frameLayoutImageViewNoPreviewLinkItemPostCard2CompactLinkRightThumbnail,
-                    binding.imageViewNoPreviewLinkItemPostCard2CompactLinkRightThumbnail,
-                    binding.bottomConstraintLayoutItemPostCard2CompactLinkRightThumbnail,
-                    binding.upvoteButtonItemPostCard2CompactLinkRightThumbnail,
-                    binding.scoreTextViewItemPostCard2CompactLinkRightThumbnail,
-                    binding.downvoteButtonItemPostCard2CompactLinkRightThumbnail,
-                    binding.commentsCountButtonItemPostCard2CompactLinkRightThumbnail,
-                    binding.saveButtonItemPostCard2CompactLinkRightThumbnail,
-                    binding.shareButtonItemPostCard2CompactLinkRightThumbnail,
-                    binding.dividerItemPostCard2CompactLinkRightThumbnail);
-            setupUsernameView(binding.usernameTextViewItemPostCard2CompactLinkRightThumbnail);
-        }
-    }
-
-    class PostCard2CompactLinkLeftThumbnailViewHolder extends PostCompactBaseViewHolder {
-        PostCard2CompactLinkLeftThumbnailViewHolder(@NonNull ItemPostCard2CompactLinkBinding binding) {
-            super(binding.getRoot());
-            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCard2CompactLink;
-            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCard2CompactLink;
-
-            setBaseView(binding.iconGifImageViewItemPostCard2CompactLink,
-                    binding.nameTextViewItemPostCard2CompactLink,
-                    binding.stickiedPostImageViewItemPostCard2CompactLink,
-                    binding.postTimeTextViewItemPostCard2CompactLink,
-                    binding.titleTextViewItemPostCard2CompactLink,
-                    binding.typeTextViewItemPostCard2CompactLink,
-                    binding.archivedImageViewItemPostCard2CompactLink,
-                    binding.lockedImageViewItemPostCard2CompactLink,
-                    binding.crosspostImageViewItemPostCard2CompactLink,
-                    binding.nsfwTextViewItemPostCard2CompactLink,
-                    binding.spoilerCustomTextViewItemPostCard2CompactLink,
-                    binding.flairCustomTextViewItemPostCard2CompactLink,
-                    binding.linkTextViewItemPostCard2CompactLink,
-                    binding.imageViewWrapperItemPostCard2CompactLink,
-                    binding.progressBarItemPostCard2CompactLink,
-                    binding.imageViewItemPostCard2CompactLink,
-                    binding.playButtonImageViewItemPostCard2CompactLink,
-                    binding.frameLayoutImageViewNoPreviewLinkItemPostCard2CompactLink,
-                    binding.imageViewNoPreviewLinkItemPostCard2CompactLink,
-                    binding.bottomConstraintLayoutItemPostCard2CompactLink,
-                    binding.upvoteButtonItemPostCard2CompactLink,
-                    binding.scoreTextViewItemPostCard2CompactLink,
-                    binding.downvoteButtonItemPostCard2CompactLink,
-                    binding.commentsCountButtonItemPostCard2CompactLink,
-                    binding.saveButtonItemPostCard2CompactLink,
-                    binding.shareButtonItemPostCard2CompactLink,
-                    binding.dividerItemPostCard2CompactLink);
-            setupUsernameView(binding.usernameTextViewItemPostCard2CompactLink);
-        }
-    }
-
-    class PostCompact2LeftThumbnailViewHolder extends PostCompactBaseViewHolder {
-        PostCompact2LeftThumbnailViewHolder(@NonNull ItemPostCompact2Binding binding) {
-            super(binding.getRoot());
-            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact2;
-            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompact2;
-
-            setBaseView(binding.iconGifImageViewItemPostCompact2,
-                    binding.nameTextViewItemPostCompact2,
-                    binding.stickiedPostImageViewItemPostCompact2,
-                    binding.postTimeTextViewItemPostCompact2,
-                    binding.titleTextViewItemPostCompact2,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    binding.imageViewWrapperItemPostCompact2,
-                    binding.progressBarItemPostCompact2,
-                    binding.imageViewItemPostCompact2,
-                    binding.playButtonImageViewItemPostCompact2,
-                    binding.frameLayoutImageViewNoPreviewLinkItemPostCompact2,
-                    binding.imageViewNoPreviewLinkItemPostCompact2,
-                    null,
-                    binding.upvoteButtonItemPostCompact2,
-                    binding.scoreTextViewItemPostCompact2,
-                    binding.downvoteButtonItemPostCompact2,
-                    null,
-                    null,
-                    null,
-                    binding.dividerItemPostCompact2);
-            setupUsernameView(binding.usernameTextViewItemPostCompact2);
-        }
-    }
-
-    class PostCompact2RightThumbnailViewHolder extends PostCompactBaseViewHolder {
-        PostCompact2RightThumbnailViewHolder(@NonNull ItemPostCompact2RightThumbnailBinding binding) {
-            super(binding.getRoot());
-            postTypeIndicatorView = binding.postTypeIndicatorViewItemPostCompact2RightThumbnail;
-            noPreviewPostTypeIndicatorView = binding.postTypeIndicatorViewNoPreviewItemPostCompact2RightThumbnail;
-
-            setBaseView(binding.iconGifImageViewItemPostCompact2RightThumbnail,
-                    binding.nameTextViewItemPostCompact2RightThumbnail,
-                    binding.stickiedPostImageViewItemPostCompact2RightThumbnail,
-                    binding.postTimeTextViewItemPostCompact2RightThumbnail,
-                    binding.titleTextViewItemPostCompact2RightThumbnail,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    binding.imageViewWrapperItemPostCompact2RightThumbnail,
-                    binding.progressBarItemPostCompact2RightThumbnail,
-                    binding.imageViewItemPostCompact2RightThumbnail,
-                    binding.playButtonImageViewItemPostCompact2RightThumbnail,
-                    binding.frameLayoutImageViewNoPreviewLinkItemPostCompact2RightThumbnail,
-                    binding.imageViewNoPreviewLinkItemPostCompact2RightThumbnail,
-                    null,
-                    binding.upvoteButtonItemPostCompact2RightThumbnail,
-                    binding.scoreTextViewItemPostCompact2RightThumbnail,
-                    binding.downvoteButtonItemPostCompact2RightThumbnail,
-                    null,
-                    null,
-                    null,
-                    binding.dividerItemPostCompact2RightThumbnail);
-            setupUsernameView(binding.usernameTextViewItemPostCompact2RightThumbnail);
         }
     }
 
