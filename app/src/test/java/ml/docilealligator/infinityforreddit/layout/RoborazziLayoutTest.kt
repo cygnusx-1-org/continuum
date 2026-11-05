@@ -89,7 +89,7 @@ import org.robolectric.annotation.GraphicsMode
 class RoborazziLayoutTest(private val case: Case) {
 
     /** Post layout family, which is what decides the column count. See [columnsFor]. */
-    enum class Family { CARD, CARD_2, CARD_3, COMPACT, COMPACT_2, GALLERY, NONE }
+    enum class Family { CARD, CARD_3, COMPACT_2, GALLERY, NONE }
 
     enum class Orientation { PORTRAIT, LANDSCAPE }
 
@@ -183,14 +183,6 @@ class RoborazziLayoutTest(private val case: Case) {
             LayoutSpec("cardGalleryType", R.layout.item_post_gallery_type, Family.CARD),
             LayoutSpec("cardVideo", R.layout.item_post_video_type_autoplay, Family.CARD),
             LayoutSpec("cardVideoLegacy", R.layout.item_post_video_type_autoplay_legacy_controller, Family.CARD),
-            // Card 2.
-            LayoutSpec("card2", R.layout.item_post_card_2_with_preview, Family.CARD_2),
-            LayoutSpec("card2Text", R.layout.item_post_card_2_text, Family.CARD_2),
-            LayoutSpec("card2GalleryType", R.layout.item_post_card_2_gallery_type, Family.CARD_2),
-            LayoutSpec("card2Video", R.layout.item_post_card_2_video_autoplay, Family.CARD_2),
-            LayoutSpec("card2VideoLegacy", R.layout.item_post_card_2_video_autoplay_legacy_controller, Family.CARD_2),
-            LayoutSpec("card2CompactLink", R.layout.item_post_card_2_compact_link, Family.CARD_2),
-            LayoutSpec("card2CompactLinkRight", R.layout.item_post_card_2_compact_link_right_thumbnail, Family.CARD_2),
             // Card 3 (Material 3).
             LayoutSpec("card3", R.layout.item_post_card_3_with_preview, Family.CARD_3),
             LayoutSpec("card3Text", R.layout.item_post_card_3_text, Family.CARD_3),
@@ -198,8 +190,6 @@ class RoborazziLayoutTest(private val case: Case) {
             LayoutSpec("card3Video", R.layout.item_post_card_3_video_type_autoplay, Family.CARD_3),
             LayoutSpec("card3VideoLegacy", R.layout.item_post_card_3_video_type_autoplay_legacy_controller, Family.CARD_3),
             // Compact, both thumbnail sides.
-            LayoutSpec("compact", R.layout.item_post_compact, Family.COMPACT),
-            LayoutSpec("compactRight", R.layout.item_post_compact_right_thumbnail, Family.COMPACT),
             LayoutSpec("compact2", R.layout.item_post_compact_2, Family.COMPACT_2),
             LayoutSpec("compact2Right", R.layout.item_post_compact_2_right_thumbnail, Family.COMPACT_2),
             // Gallery.
@@ -402,14 +392,13 @@ class RoborazziLayoutTest(private val case: Case) {
         )
 
         /**
-         * The six layouts the Thumbnail size preference (issue #355) resizes. Every compact family
-         * plus both card_2 compact-link variants share one square box, sized in
+         * The layouts the Thumbnail size preference (issue #355) resizes. Both compact 2 variants
+         * share one square box, sized in
          * PostCompactBaseViewHolder.setBaseView from the pref rather than left at the dimen the XML
          * inflates with. Derived from [FEED_LAYOUTS] so a family added there is picked up by name.
          */
         private val COMPACT_THUMBNAIL_LAYOUT_NAMES = setOf(
-            "compact", "compactRight", "compact2", "compact2Right",
-            "card2CompactLink", "card2CompactLinkRight",
+            "compact2", "compact2Right",
         )
         private val COMPACT_THUMBNAIL_LAYOUTS: List<LayoutSpec> =
             FEED_LAYOUTS.filter { it.name in COMPACT_THUMBNAIL_LAYOUT_NAMES }
@@ -517,15 +506,13 @@ class RoborazziLayoutTest(private val case: Case) {
                 family == Family.NONE -> 1
                 orientation == Orientation.LANDSCAPE -> 2
                 family == Family.GALLERY -> 2
-                family == Family.CARD || family == Family.CARD_3 || family == Family.COMPACT_2 ->
-                    if (isTablet) 2 else 1
-                else -> 1 // CARD_2, COMPACT
+                else -> if (isTablet) 2 else 1 // CARD, CARD_3, COMPACT_2
             }
 
         /**
          * The theme overlay BaseActivity would layer on for this theme type
-         * (BaseActivity.java:147-174). It matters because several layouts — the compact family and
-         * both card_2 compact-link variants — read `?attr/backgroundColor` and friends straight from
+         * (BaseActivity.java:147-174). It matters because several layouts — the compact 2 layouts
+         * — read `?attr/backgroundColor` and friends straight from
          * the theme rather than being coloured per-view during binding.
          */
         @StyleRes

@@ -889,12 +889,8 @@
     <string name="favorites">"Αγαπημένα"</string>
     <string name="all">"Ολα"</string>
     <string name="link_post_layout_auto">"Αυτόματο"</string>
-    <string name="post_layout_card">"Διάταξη Καρτών"</string>
-    <string name="post_layout_compact">"Συμπαγής Διαταξη"</string>
     <string name="post_layout_compact_2">"Συμπαγής διάταξη 2"</string>
     <string name="post_layout_gallery">"Διάταξη Συλλογής"</string>
-    <string name="post_layout_card_2">"Διάταξη Καρτών 2"</string>
-    <string name="post_layout_card_3">"Διάταξη κάρτας 3"</string>
     <string name="elapsed_time_just_now">"Μόλις Τώρα"</string>
     <string name="elapsed_time_a_minute_ago">"1 Λεπτό"</string>
     <string name="elapsed_time_minutes_ago">"%1$d Λεπτά"</string>

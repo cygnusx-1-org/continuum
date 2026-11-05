@@ -884,12 +884,8 @@ Videó autómatikus lejátszása le van tiltva."</string>
     <string name="favorites">"Kedvencek"</string>
     <string name="all">"Minden"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_card">"Kártya elrendezés"</string>
-    <string name="post_layout_compact">"Kompakt elrendezés"</string>
     <string name="post_layout_compact_2">"Kompakt elrendezés 2"</string>
     <string name="post_layout_gallery">"Galléria elrendezés"</string>
-    <string name="post_layout_card_2">"Kártya elrendezés 2"</string>
-    <string name="post_layout_card_3">"kártyaelrendezés 3"</string>
     <string name="elapsed_time_just_now">"Épp most"</string>
     <string name="elapsed_time_a_minute_ago">"1 perc"</string>
     <string name="elapsed_time_minutes_ago">"%1$d perc"</string>

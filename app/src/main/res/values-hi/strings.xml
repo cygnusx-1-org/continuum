@@ -887,12 +887,8 @@
     <string name="favorites">"पसंदीदा "</string>
     <string name="all">"सभी "</string>
     <string name="link_post_layout_auto">"ऑटो"</string>
-    <string name="post_layout_card">"कार्ड विन्यास "</string>
-    <string name="post_layout_compact">"संक्षिप्त विन्यास "</string>
     <string name="post_layout_compact_2">"कॉम्पैक्ट लेआउट 2"</string>
     <string name="post_layout_gallery">"गैलरी लेआउट"</string>
-    <string name="post_layout_card_2">"कार्ड लेआउट 2"</string>
-    <string name="post_layout_card_3">"कार्ड लेआउट 3"</string>
     <string name="elapsed_time_just_now">"अभी अभी "</string>
     <string name="elapsed_time_a_minute_ago">"1 मिनट "</string>
     <string name="elapsed_time_minutes_ago">"%1$d मिनट "</string>

@@ -105,13 +105,6 @@ import ml.docilealligator.infinityforreddit.customviews.BadgedNameTextView;
 import ml.docilealligator.infinityforreddit.customviews.LinearLayoutManagerBugFixed;
 import ml.docilealligator.infinityforreddit.customviews.MaxHeightSquareFrameLayout;
 import ml.docilealligator.infinityforreddit.customviews.PostTypeIndicatorView;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2CompactLinkRightThumbnailBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2GalleryTypeBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2TextBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2VideoAutoplayBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2VideoAutoplayLegacyControllerBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCard2WithPreviewBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3GalleryTypeBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3TextBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3VideoTypeAutoplayBinding;
@@ -119,8 +112,6 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3VideoTypeAu
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3WithPreviewBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCompact2Binding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCompact2RightThumbnailBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCompactBinding;
-import ml.docilealligator.infinityforreddit.databinding.ItemPostCompactRightThumbnailBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostGalleryBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostGalleryGalleryTypeBinding;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostGalleryTypeBinding;
@@ -181,19 +172,13 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private static final int VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE = 2;
     private static final int VIEW_TYPE_POST_CARD_GALLERY_TYPE = 3;
     private static final int VIEW_TYPE_POST_CARD_TEXT_TYPE = 4;
-    private static final int VIEW_TYPE_POST_COMPACT = 5;
     private static final int VIEW_TYPE_POST_COMPACT_2 = 6;
     private static final int VIEW_TYPE_POST_GALLERY = 7;
     private static final int VIEW_TYPE_POST_GALLERY_GALLERY_TYPE = 8;
-    private static final int VIEW_TYPE_POST_CARD_2_VIDEO_AUTOPLAY_TYPE = 9;
-    private static final int VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE = 10;
-    private static final int VIEW_TYPE_POST_CARD_2_GALLERY_TYPE = 11;
-    private static final int VIEW_TYPE_POST_CARD_2_TEXT_TYPE = 12;
     private static final int VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE = 13;
     private static final int VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE = 14;
     private static final int VIEW_TYPE_POST_CARD_3_GALLERY_TYPE = 15;
     private static final int VIEW_TYPE_POST_CARD_3_TEXT_TYPE = 16;
-    private static final int VIEW_TYPE_POST_CARD_2_COMPACT_LINK = 17;
     private static final int VIEW_TYPE_STICKIED_COLLAPSED = 18;
 
     private static final DiffUtil.ItemCallback<Post> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
@@ -339,7 +324,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     // The same column in pixels, as laid out. Not itemWidth times the density: that is rounded to
     // a whole dp, and a box a pixel off the view's is a decode at the wrong size.
     private int itemWidthPx;
-    // Whether the feed is in more than one column, where its decoration cancels Card Layout 3's own
+    // Whether the feed is in more than one column, where its decoration cancels Card Top's own
     // margins (PostFragmentBase.StaggeredGridLayoutManagerItemOffsetDecoration).
     private boolean multiColumn;
 
@@ -441,8 +426,8 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             mNonDataSavingModeDefaultResolution = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.REDDIT_VIDEO_DEFAULT_RESOLUTION_NO_DATA_SAVING, "0");
             mSimultaneousAutoplayLimit = SharedPreferencesUtils.getInt(mSharedPreferences, SharedPreferencesUtils.SIMULTANEOUS_AUTOPLAY_LIMIT, "1");
 
-            mPostLayout = postLayout;
-            mDefaultLinkPostLayout = SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.DEFAULT_LINK_POST_LAYOUT_KEY, "-1");
+            mPostLayout = SharedPreferencesUtils.normalizePostLayout(postLayout);
+            mDefaultLinkPostLayout = SharedPreferencesUtils.normalizePostLayout(SharedPreferencesUtils.getInt(sharedPreferences, SharedPreferencesUtils.DEFAULT_LINK_POST_LAYOUT_KEY, "-1"));
 
             mColorAccent = customThemeWrapper.getColorAccent();
             mCardViewBackgroundColor = customThemeWrapper.getCardViewBackgroundColor();
@@ -604,7 +589,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     private static final String TOP_BORDER_TAG = "post_type_top_border";
 
     /**
-     * A thin line across the top of a Card Layout 1 or 3 card, in the post type's colour: the card
+     * A thin line across the top of a Card Bottom or Card Top card, in the post type's colour: the card
      * layouts' version of the compact layout's triangle. The card is a FrameLayout, so the line is
      * one more child laid over its top edge, which the card's rounded corners clip.
      */
@@ -721,7 +706,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         if (mAutoplay) {
@@ -735,31 +720,27 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     case Post.GIF_TYPE:
                     case Post.IMAGE_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
                     case Post.GALLERY_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         return VIEW_TYPE_POST_CARD_GALLERY_TYPE;
                     case Post.LINK_TYPE:
                     case Post.NO_PREVIEW_LINK_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         switch (mDefaultLinkPostLayout) {
-                            case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                                return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                             case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
                                 return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                             case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                                 return VIEW_TYPE_POST_GALLERY;
-                            case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                                return VIEW_TYPE_POST_COMPACT;
                             case SharedPreferencesUtils.POST_LAYOUT_COMPACT_2:
                                 return VIEW_TYPE_POST_COMPACT_2;
                         }
@@ -777,36 +758,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                 }
             }
             return VIEW_TYPE_POST_CARD_TEXT_TYPE;
-        } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_COMPACT) {
-            if (post != null) {
-                if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
-                    switch (mDefaultLinkPostLayout) {
-                        case SharedPreferencesUtils.POST_LAYOUT_CARD:
-                            return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
-                        case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                            return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
-                        case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
-                            return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
-                        case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                            return VIEW_TYPE_POST_GALLERY;
-                    }
-                }
-            }
-            return VIEW_TYPE_POST_COMPACT;
         } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_COMPACT_2) {
             if (post != null) {
                 if (post.getPostType() == Post.LINK_TYPE || post.getPostType() == Post.NO_PREVIEW_LINK_TYPE) {
                     switch (mDefaultLinkPostLayout) {
                         case SharedPreferencesUtils.POST_LAYOUT_CARD:
                             return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
-                        case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                            return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                         case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
                             return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                         case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                             return VIEW_TYPE_POST_GALLERY;
-                        case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                            return VIEW_TYPE_POST_COMPACT;
                     }
                 }
             }
@@ -821,73 +782,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             } else {
                 return VIEW_TYPE_POST_GALLERY;
             }
-        } else if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2) {
-            if (post != null) {
-                switch (post.getPostType()) {
-                    case Post.VIDEO_TYPE:
-                        if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
-                        }
-
-                        if (mAutoplay) {
-                            if ((!mAutoplayNsfwVideos && post.isNSFW()) || post.isSpoiler()) {
-                                return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
-                            }
-                            return VIEW_TYPE_POST_CARD_2_VIDEO_AUTOPLAY_TYPE;
-                        }
-
-                        return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
-                    case Post.GIF_TYPE:
-                    case Post.IMAGE_TYPE:
-                        if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
-                        }
-
-                        return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
-                    case Post.GALLERY_TYPE:
-                        if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
-                        }
-
-                        return VIEW_TYPE_POST_CARD_2_GALLERY_TYPE;
-                    case Post.LINK_TYPE:
-                    case Post.NO_PREVIEW_LINK_TYPE:
-                        if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
-                        }
-
-                        switch (mDefaultLinkPostLayout) {
-                            case SharedPreferencesUtils.POST_LAYOUT_CARD:
-                                return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
-                            case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
-                                return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
-                            case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
-                                return VIEW_TYPE_POST_GALLERY;
-                            case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                                return VIEW_TYPE_POST_CARD_2_COMPACT_LINK;
-                            case SharedPreferencesUtils.POST_LAYOUT_COMPACT_2:
-                                return VIEW_TYPE_POST_COMPACT_2;
-                        }
-                        return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
-                    default:
-                        // Self/text posts can carry a preview: one Reddit generated from a link in
-                        // the body (an OpenGraph image), or the first image the body embeds (see
-                        // ParsePost). Show it in the feed like Slide and reddit.com do. Unlike the
-                        // post detail (issue #317), the feed renders no body inline, so the preview
-                        // duplicates nothing here.
-                        if (post.getPreviews() != null && !post.getPreviews().isEmpty()) {
-                            return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
-                        }
-                        return VIEW_TYPE_POST_CARD_2_TEXT_TYPE;
-                }
-            }
-            return VIEW_TYPE_POST_CARD_2_TEXT_TYPE;
         } else {
             if (post != null) {
                 switch (post.getPostType()) {
                     case Post.VIDEO_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         if (mAutoplay) {
@@ -901,31 +801,27 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     case Post.GIF_TYPE:
                     case Post.IMAGE_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         return VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE;
                     case Post.GALLERY_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         return VIEW_TYPE_POST_CARD_3_GALLERY_TYPE;
                     case Post.LINK_TYPE:
                     case Post.NO_PREVIEW_LINK_TYPE:
                         if (shouldUseCompactLayout(post)) {
-                            return VIEW_TYPE_POST_COMPACT;
+                            return VIEW_TYPE_POST_COMPACT_2;
                         }
 
                         switch (mDefaultLinkPostLayout) {
                             case SharedPreferencesUtils.POST_LAYOUT_CARD:
                                 return VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE;
-                            case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
-                                return VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE;
                             case SharedPreferencesUtils.POST_LAYOUT_GALLERY:
                                 return VIEW_TYPE_POST_GALLERY;
-                            case SharedPreferencesUtils.POST_LAYOUT_COMPACT:
-                                return VIEW_TYPE_POST_COMPACT;
                             case SharedPreferencesUtils.POST_LAYOUT_COMPACT_2:
                                 return VIEW_TYPE_POST_COMPACT_2;
                         }
@@ -970,44 +866,16 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             return new PostGalleryTypeViewHolder(ItemPostGalleryTypeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         } else if (viewType == VIEW_TYPE_POST_CARD_TEXT_TYPE) {
             return new PostTextTypeViewHolder(ItemPostTextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-        } else if (viewType == VIEW_TYPE_POST_COMPACT) {
-            if (mShowThumbnailOnTheLeftInCompactLayout) {
-                return new PostCompactLeftThumbnailViewHolder(ItemPostCompactBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
-            } else {
-                return new PostCompactRightThumbnailViewHolder(ItemPostCompactRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
-            }
         } else if (viewType == VIEW_TYPE_POST_COMPACT_2) {
             if (mShowThumbnailOnTheLeftInCompactLayout) {
                 return new PostCompact2LeftThumbnailViewHolder(ItemPostCompact2Binding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             } else {
                 return new PostCompact2RightThumbnailViewHolder(ItemPostCompact2RightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
             }
-        } else if (viewType == VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
-            if (mShowThumbnailOnTheLeftInCompactLayout) {
-                return new PostCard2CompactLinkLeftThumbnailViewHolder(ItemPostCard2CompactLinkBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
-            } else {
-                return new PostCard2CompactLinkRightThumbnailViewHolder(ItemPostCard2CompactLinkRightThumbnailBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false), mRowHost);
-            }
         } else if (viewType == VIEW_TYPE_POST_GALLERY) {
             return new PostGalleryViewHolder(ItemPostGalleryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         } else if (viewType == VIEW_TYPE_POST_GALLERY_GALLERY_TYPE) {
             return new PostGalleryGalleryTypeViewHolder(ItemPostGalleryGalleryTypeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-        } else if (viewType == VIEW_TYPE_POST_CARD_2_VIDEO_AUTOPLAY_TYPE) {
-            if (mDataSavingMode) {
-                return new PostCard2WithPreviewViewHolder(ItemPostCard2WithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-            }
-
-            if (mLegacyAutoplayVideoControllerUI) {
-                return new PostCard2VideoAutoplayLegacyControllerViewHolder(ItemPostCard2VideoAutoplayLegacyControllerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-            } else {
-                return new PostCard2VideoAutoplayViewHolder(ItemPostCard2VideoAutoplayBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-            }
-        } else if (viewType == VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE) {
-            return new PostCard2WithPreviewViewHolder(ItemPostCard2WithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-        } else if (viewType == VIEW_TYPE_POST_CARD_2_GALLERY_TYPE) {
-            return new PostCard2GalleryTypeViewHolder(ItemPostCard2GalleryTypeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-        } else if (viewType == VIEW_TYPE_POST_CARD_2_TEXT_TYPE) {
-            return new PostCard2TextTypeViewHolder(ItemPostCard2TextBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         } else if (viewType == VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE) {
             if (mDataSavingMode) {
                 return new PostMaterial3CardWithPreviewViewHolder(ItemPostCard3WithPreviewBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
@@ -1706,7 +1574,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
                     }
                 }
 
-                if (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2 || mShowDividerInCompactLayout) {
+                if (mShowDividerInCompactLayout) {
                     asCompact.divider.setVisibility(View.VISIBLE);
                 } else {
                     asCompact.divider.setVisibility(View.GONE);
@@ -2672,8 +2540,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         if (itemWidthPx <= 0) {
             return 0;
         }
-        boolean inset = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_2
-                || (mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 && !multiColumn);
+        boolean inset = mPostLayout == SharedPreferencesUtils.POST_LAYOUT_CARD_3 && !multiColumn;
         return Math.max(0, itemWidthPx - (inset ? 2 * Math.round(16 * mScale) : 0));
     }
 
@@ -2922,7 +2789,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public List<PreloadRequest> previewPreloadRequests(Post post) {
         int viewType = viewTypeFor(post);
         if (viewType == VIEW_TYPE_POST_CARD_GALLERY_TYPE
-                || viewType == VIEW_TYPE_POST_CARD_2_GALLERY_TYPE
                 || viewType == VIEW_TYPE_POST_CARD_3_GALLERY_TYPE) {
             return mShowGalleryMediaAsGrid ? galleryGridPreloadRequests(post) : asList(galleryPreloadRequest(post));
         }
@@ -2936,8 +2802,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     // previewPreloadRequests for every row but a gallery card's.
     @Nullable
     private PreloadRequest previewPreloadRequest(Post post, int viewType) {
-        if (viewType == VIEW_TYPE_POST_COMPACT || viewType == VIEW_TYPE_POST_COMPACT_2
-                || viewType == VIEW_TYPE_POST_CARD_2_COMPACT_LINK) {
+        if (viewType == VIEW_TYPE_POST_COMPACT_2) {
             if (!showsCompactThumbnailBox(post) || !postHasPreviews(post)) {
                 return null;
             }
@@ -2947,14 +2812,12 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
         }
 
         boolean videoAutoplayType = viewType == VIEW_TYPE_POST_CARD_VIDEO_AUTOPLAY_TYPE
-                || viewType == VIEW_TYPE_POST_CARD_2_VIDEO_AUTOPLAY_TYPE
                 || viewType == VIEW_TYPE_POST_CARD_3_VIDEO_AUTOPLAY_TYPE;
         // Data saving builds a with-preview card for the autoplay type (onCreateViewHolder), so
         // only without it is the row a video card drawing its unblurred still.
         boolean videoStill = videoAutoplayType && !mDataSavingMode;
         if (!videoAutoplayType
                 && viewType != VIEW_TYPE_POST_CARD_WITH_PREVIEW_TYPE
-                && viewType != VIEW_TYPE_POST_CARD_2_WITH_PREVIEW_TYPE
                 && viewType != VIEW_TYPE_POST_CARD_3_WITH_PREVIEW_TYPE) {
             return null;
         }
@@ -3146,7 +3009,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     public int preloadRowsAhead() {
         switch (mPostLayout) {
             case SharedPreferencesUtils.POST_LAYOUT_CARD:
-            case SharedPreferencesUtils.POST_LAYOUT_CARD_2:
             case SharedPreferencesUtils.POST_LAYOUT_CARD_3:
                 return PostCardPreviewStyle.CARD_PRELOAD_ROWS_AHEAD;
             default:
@@ -3196,7 +3058,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     public void setPostLayout(int postLayout) {
-        mPostLayout = postLayout;
+        mPostLayout = SharedPreferencesUtils.normalizePostLayout(postLayout);
     }
 
     public void setBlurNsfwAndDoNotBlurNsfwInNsfwSubreddits(boolean needBlurNsfw, boolean doNotBlurNsfwInNsfwSubreddits) {
@@ -3399,7 +3261,7 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
     }
 
     public void setDefaultLinkPostLayout(int defaultLinkPostLayout) {
-        mDefaultLinkPostLayout = defaultLinkPostLayout;
+        mDefaultLinkPostLayout = SharedPreferencesUtils.normalizePostLayout(defaultLinkPostLayout);
     }
 
     public void setFixedHeightPreviewInCard(boolean fixedHeightPreviewInCard) {
@@ -6264,212 +6126,6 @@ public class PostRecyclerViewAdapter extends PagingDataAdapter<Post, RecyclerVie
             super(binding.getRoot(), binding.galleryFrameLayoutItemPostGalleryGalleryType,
                     binding.galleryRecyclerViewItemPostGalleryGalleryType, binding.imageIndexTextViewItemPostGalleryGalleryType,
                     binding.imageViewNoPreviewItemPostGalleryGalleryType);
-        }
-    }
-
-    @UnstableApi
-    class PostCard2VideoAutoplayViewHolder extends PostBaseVideoAutoplayViewHolder {
-        PostCard2VideoAutoplayViewHolder(ItemPostCard2VideoAutoplayBinding binding) {
-            super(binding.getRoot(),
-                    binding.iconGifImageViewItemPostCard2VideoAutoplay,
-                    binding.subredditNameTextViewItemPostCard2VideoAutoplay,
-                    binding.userTextViewItemPostCard2VideoAutoplay,
-                    binding.stickiedPostImageViewItemPostCard2VideoAutoplay,
-                    binding.postTimeTextViewItemPostCard2VideoAutoplay,
-                    binding.titleTextViewItemPostCard2VideoAutoplay,
-                    binding.typeTextViewItemPostCard2VideoAutoplay,
-                    binding.crosspostImageViewItemPostCard2VideoAutoplay,
-                    binding.archivedImageViewItemPostCard2VideoAutoplay,
-                    binding.lockedImageViewItemPostCard2VideoAutoplay,
-                    binding.nsfwTextViewItemPostCard2VideoAutoplay,
-                    binding.spoilerCustomTextViewItemPostCard2VideoAutoplay,
-                    binding.flairCustomTextViewItemPostCard2VideoAutoplay,
-                    binding.previewFrameLayoutItemPostCard2VideoAutoplay,
-                    binding.aspectRatioFrameLayoutItemPostCard2VideoAutoplay,
-                    binding.previewImageViewItemPostCard2VideoAutoplay,
-                    binding.errorLoadingVideoImageViewItemPostCard2VideoAutoplay,
-                    binding.playerViewItemPostCard2VideoAutoplay,
-                    binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.mute_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.fullscreen_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.exo_play),
-                    binding.getRoot().findViewById(R.id.exo_progress),
-                    binding.bottomConstraintLayoutItemPostCard2VideoAutoplay,
-                    binding.upvoteButtonItemPostCard2VideoAutoplay,
-                    binding.scoreTextViewItemPostCard2VideoAutoplay,
-                    binding.downvoteButtonItemPostCard2VideoAutoplay,
-                    binding.commentsCountButtonItemPostCard2VideoAutoplay,
-                    binding.saveButtonItemPostCard2VideoAutoplay,
-                    binding.shareButtonItemPostCard2VideoAutoplay);
-
-            binding.dividerItemPostCard2VideoAutoplay.setBackgroundColor(mDividerColor);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundColor(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor);
-        }
-    }
-
-    @UnstableApi
-    class PostCard2VideoAutoplayLegacyControllerViewHolder extends PostBaseVideoAutoplayViewHolder {
-        PostCard2VideoAutoplayLegacyControllerViewHolder(ItemPostCard2VideoAutoplayLegacyControllerBinding binding) {
-            super(binding.getRoot(),
-                    binding.iconGifImageViewItemPostCard2VideoAutoplay,
-                    binding.subredditNameTextViewItemPostCard2VideoAutoplay,
-                    binding.userTextViewItemPostCard2VideoAutoplay,
-                    binding.stickiedPostImageViewItemPostCard2VideoAutoplay,
-                    binding.postTimeTextViewItemPostCard2VideoAutoplay,
-                    binding.titleTextViewItemPostCard2VideoAutoplay,
-                    binding.typeTextViewItemPostCard2VideoAutoplay,
-                    binding.crosspostImageViewItemPostCard2VideoAutoplay,
-                    binding.archivedImageViewItemPostCard2VideoAutoplay,
-                    binding.lockedImageViewItemPostCard2VideoAutoplay,
-                    binding.nsfwTextViewItemPostCard2VideoAutoplay,
-                    binding.spoilerCustomTextViewItemPostCard2VideoAutoplay,
-                    binding.flairCustomTextViewItemPostCard2VideoAutoplay,
-                    binding.previewFrameLayoutItemPostCard2VideoAutoplay,
-                    binding.aspectRatioFrameLayoutItemPostCard2VideoAutoplay,
-                    binding.previewImageViewItemPostCard2VideoAutoplay,
-                    binding.errorLoadingVideoImageViewItemPostCard2VideoAutoplay,
-                    binding.playerViewItemPostCard2VideoAutoplay,
-                    binding.getRoot().findViewById(R.id.video_quality_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.mute_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.fullscreen_exo_playback_control_view),
-                    binding.getRoot().findViewById(R.id.exo_play),
-                    binding.getRoot().findViewById(R.id.exo_progress),
-                    binding.bottomConstraintLayoutItemPostCard2VideoAutoplay,
-                    binding.upvoteButtonItemPostCard2VideoAutoplay,
-                    binding.scoreTextViewItemPostCard2VideoAutoplay,
-                    binding.downvoteButtonItemPostCard2VideoAutoplay,
-                    binding.commentsCountButtonItemPostCard2VideoAutoplay,
-                    binding.saveButtonItemPostCard2VideoAutoplay,
-                    binding.shareButtonItemPostCard2VideoAutoplay);
-
-            binding.dividerItemPostCard2VideoAutoplay.setBackgroundColor(mDividerColor);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundColor(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor);
-        }
-    }
-
-    class PostCard2WithPreviewViewHolder extends PostWithPreviewTypeViewHolder {
-
-        PostCard2WithPreviewViewHolder(@NonNull ItemPostCard2WithPreviewBinding binding) {
-            super(binding.getRoot());
-            setBaseView(
-                    binding.iconGifImageViewItemPostCard2WithPreview,
-                    binding.subredditNameTextViewItemPostCard2WithPreview,
-                    binding.userTextViewItemPostCard2WithPreview,
-                    binding.stickiedPostImageViewItemPostCard2WithPreview,
-                    binding.postTimeTextViewItemPostCard2WithPreview,
-                    binding.titleTextViewItemPostCard2WithPreview,
-                    binding.typeTextViewItemPostCard2WithPreview,
-                    binding.archivedImageViewItemPostCard2WithPreview,
-                    binding.lockedImageViewItemPostCard2WithPreview,
-                    binding.crosspostImageViewItemPostCard2WithPreview,
-                    binding.nsfwTextViewItemPostCard2WithPreview,
-                    binding.spoilerCustomTextViewItemPostCard2WithPreview,
-                    binding.flairCustomTextViewItemPostCard2WithPreview,
-                    binding.bottomConstraintLayoutItemPostCard2WithPreview,
-                    binding.upvoteButtonItemPostCard2WithPreview,
-                    binding.scoreTextViewItemPostCard2WithPreview,
-                    binding.downvoteButtonItemPostCard2WithPreview,
-                    binding.commentsCountButtonItemPostCard2WithPreview,
-                    binding.saveButtonItemPostCard2WithPreview,
-                    binding.shareButtonItemPostCard2WithPreview,
-                    binding.linkTextViewItemPostCard2WithPreview,
-                    binding.imageViewNoPreviewGalleryItemPostCard2WithPreview,
-                    binding.progressBarItemPostCard2WithPreview,
-                    binding.videoOrGifIndicatorImageViewItemPostCard2WithPreview,
-                    binding.loadImageErrorTextViewItemPostCard2WithPreview,
-                    null,
-                    binding.imageViewItemPostCard2WithPreview);
-            contentTextView = binding.contentTextViewItemPostCard2WithPreview;
-
-            binding.dividerItemPostCard2WithPreview.setBackgroundColor(mDividerColor);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundColor(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor);
-        }
-    }
-
-    public class PostCard2GalleryTypeViewHolder extends PostBaseGalleryTypeViewHolder {
-
-        PostCard2GalleryTypeViewHolder(ItemPostCard2GalleryTypeBinding binding) {
-            super(binding.getRoot(),
-                    binding.iconGifImageViewItemPostCard2GalleryType,
-                    binding.subredditNameTextViewItemPostCard2GalleryType,
-                    binding.userTextViewItemPostCard2GalleryType,
-                    binding.stickiedPostImageViewItemPostCard2GalleryType,
-                    binding.postTimeTextViewItemPostCard2GalleryType,
-                    binding.titleTextViewItemPostCard2GalleryType,
-                    binding.typeTextViewItemPostCard2GalleryType,
-                    binding.archivedImageViewItemPostCard2GalleryType,
-                    binding.lockedImageViewItemPostCard2GalleryType,
-                    binding.crosspostImageViewItemPostCard2GalleryType,
-                    binding.nsfwTextViewItemPostCard2GalleryType,
-                    binding.spoilerCustomTextViewItemPostCard2GalleryType,
-                    binding.flairCustomTextViewItemPostCard2GalleryType,
-                    binding.galleryFrameLayoutItemPostCard2GalleryType,
-                    binding.galleryRecyclerViewItemPostCard2GalleryType,
-                    binding.imageIndexTextViewItemPostCard2GalleryType,
-                    binding.noPreviewImageViewItemPostCard2GalleryType,
-                    binding.bottomConstraintLayoutItemPostCard2GalleryType,
-                    binding.upvoteButtonItemPostCard2GalleryType,
-                    binding.scoreTextViewItemPostCard2GalleryType,
-                    binding.downvoteButtonItemPostCard2GalleryType,
-                    binding.commentsCountButtonItemPostCard2GalleryType,
-                    binding.saveButtonItemPostCard2GalleryType,
-                    binding.shareButtonItemPostCard2GalleryType);
-
-            binding.mediaCardViewItemPostCard2GalleryType.setBackgroundTintList(ColorStateList.valueOf(mCardViewBackgroundColor));
-            binding.dividerItemPostCard2GalleryType.setBackgroundColor(mDividerColor);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundColor(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor);
-        }
-    }
-
-    class PostCard2TextTypeViewHolder extends PostTextTypeViewHolder {
-        PostCard2TextTypeViewHolder(@NonNull ItemPostCard2TextBinding binding) {
-            super(binding.getRoot());
-
-            setBaseView(
-                    binding.iconGifImageViewItemPostCard2Text,
-                    binding.subredditNameTextViewItemPostCard2Text,
-                    binding.userTextViewItemPostCard2Text,
-                    binding.stickiedPostImageViewItemPostCard2Text,
-                    binding.postTimeTextViewItemPostCard2Text,
-                    binding.titleTextViewItemPostCard2Text,
-                    binding.typeTextViewItemPostCard2Text,
-                    binding.archivedImageViewItemPostCard2Text,
-                    binding.lockedImageViewItemPostCard2Text,
-                    binding.crosspostImageViewItemPostCard2Text,
-                    binding.nsfwTextViewItemPostCard2Text,
-                    binding.spoilerCustomTextViewItemPostCard2Text,
-                    binding.flairCustomTextViewItemPostCard2Text,
-                    binding.bottomConstraintLayoutItemPostCard2Text,
-                    binding.upvoteButtonItemPostCard2Text,
-                    binding.scoreTextViewItemPostCard2Text,
-                    binding.downvoteButtonItemPostCard2Text,
-                    binding.commentsCountButtonItemPostCard2Text,
-                    binding.saveButtonItemPostCard2Text,
-                    binding.shareButtonItemPostCard2Text,
-                    binding.contentTextViewItemPostCard2Text);
-
-            binding.dividerItemPostCard2Text.setBackgroundColor(mDividerColor);
-        }
-
-        @Override
-        void setItemViewBackgroundColor(boolean isReadPost) {
-            itemView.setBackgroundColor(isReadPost ? mReadPostCardViewBackgroundColor : mCardViewBackgroundColor);
         }
     }
 

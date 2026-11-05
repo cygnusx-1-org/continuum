@@ -896,12 +896,8 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="favorites">"Favoritos"</string>
     <string name="all">"Todos"</string>
     <string name="link_post_layout_auto">"Auto"</string>
-    <string name="post_layout_card">"Diseño de tarjeta"</string>
-    <string name="post_layout_compact">"Diseño compacto"</string>
     <string name="post_layout_compact_2">"Diseño compacto 2"</string>
     <string name="post_layout_gallery">"Diseño de galería"</string>
-    <string name="post_layout_card_2">"Diseño de tarjeta 2"</string>
-    <string name="post_layout_card_3">"Diseño de tarjeta 3"</string>
     <string name="elapsed_time_just_now">"Ahora mismo"</string>
     <string name="elapsed_time_a_minute_ago">"Hace 1 Minuto"</string>
     <string name="elapsed_time_minutes_ago">"Hace %1$d minutos"</string>

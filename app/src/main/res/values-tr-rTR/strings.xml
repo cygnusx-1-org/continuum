@@ -893,12 +893,8 @@ Otomatik video oynatma kapatılır."</string>
     <string name="favorites">"Favoriler"</string>
     <string name="all">"Tümü"</string>
     <string name="link_post_layout_auto">"Otomatik"</string>
-    <string name="post_layout_card">"Kart Düzeni"</string>
-    <string name="post_layout_compact">"Kompakt Düzeni"</string>
     <string name="post_layout_compact_2">"Kompakt Düzen 2"</string>
     <string name="post_layout_gallery">"Galeri Düzeni"</string>
-    <string name="post_layout_card_2">"Kart Düzeni 2"</string>
-    <string name="post_layout_card_3">"Kart Düzeni 3"</string>
     <string name="elapsed_time_just_now">"Şimdi"</string>
     <string name="elapsed_time_a_minute_ago">"1 Dakika"</string>
     <string name="elapsed_time_minutes_ago">"%1$d Dakika"</string>

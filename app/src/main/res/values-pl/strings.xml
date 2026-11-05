@@ -889,12 +889,8 @@ Autoodtwarzanie filmów jest wyłączone."</string>
     <string name="favorites">"Ulubione"</string>
     <string name="all">"Wszystkie"</string>
     <string name="link_post_layout_auto">"Automatycznie"</string>
-    <string name="post_layout_card">"Układ kart"</string>
-    <string name="post_layout_compact">"Kompaktowy układ"</string>
     <string name="post_layout_compact_2">"Układ kompaktowy 2"</string>
     <string name="post_layout_gallery">"Layout galerii"</string>
-    <string name="post_layout_card_2">"Layout karty 2"</string>
-    <string name="post_layout_card_3">"Układ karty 3"</string>
     <string name="elapsed_time_just_now">"Właśnie teraz"</string>
     <string name="elapsed_time_a_minute_ago">"Minutę temu"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minut temu"</string>

@@ -2,6 +2,12 @@
 
 ---
 
+8.3.3.9.1.25-beta.1 / 2026-11-5
+============
+* Removed Compact Layout and Card Layout 2. A feed or setting that used Compact Layout now uses Compact Layout 2, and one that used Card Layout 2 now uses Card Layout
+* Renamed Card Layout to Card Bottom and Card Layout 3 to Card Top
+* The per-layout column counts for the removed layouts are gone from `Settings > Post > The Number of Columns in Post Feed`
+
 8.3.3.9.1.24-beta.1 / 2026-11-5
 ============
 * Internal clean-up with no change in what you see: the compact post rows (Compact, Compact 2 and the Card 2 link rows) now live in their own files

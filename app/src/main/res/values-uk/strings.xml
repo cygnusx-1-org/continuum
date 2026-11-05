@@ -896,12 +896,8 @@
     <string name="favorites">"Відібрані"</string>
     <string name="all">"Усе"</string>
     <string name="link_post_layout_auto">"Авто"</string>
-    <string name="post_layout_card">"Картковий вигляд"</string>
-    <string name="post_layout_compact">"Компактний вигляд"</string>
     <string name="post_layout_compact_2">"Компактний макет 2"</string>
     <string name="post_layout_gallery">"Вигляд галереї"</string>
-    <string name="post_layout_card_2">"Картковий вигляд 2"</string>
-    <string name="post_layout_card_3">"Картка Макет 3"</string>
     <string name="elapsed_time_just_now">"Тільки що"</string>
     <string name="elapsed_time_a_minute_ago">"1 хвилина"</string>
     <string name="elapsed_time_minutes_ago">"%1$d хвилин"</string>

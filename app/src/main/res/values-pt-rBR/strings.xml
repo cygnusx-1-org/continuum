@@ -897,12 +897,8 @@ A reprodução automática de vídeos fica desativada."</string>
     <string name="favorites">"Favoritos"</string>
     <string name="all">"Todos"</string>
     <string name="link_post_layout_auto">"Automático"</string>
-    <string name="post_layout_card">"Estrutura de cartão"</string>
-    <string name="post_layout_compact">"Estrutura compacta"</string>
     <string name="post_layout_compact_2">"Layout Compacto 2"</string>
     <string name="post_layout_gallery">"Estrutura de galeria"</string>
-    <string name="post_layout_card_2">"Estrutura de cartão 2"</string>
-    <string name="post_layout_card_3">"Layout do cartão 3"</string>
     <string name="elapsed_time_just_now">"Agora"</string>
     <string name="elapsed_time_a_minute_ago">"1 minuto"</string>
     <string name="elapsed_time_minutes_ago">"%1$d minutos"</string>

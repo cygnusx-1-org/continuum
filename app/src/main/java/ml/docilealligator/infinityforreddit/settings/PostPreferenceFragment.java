@@ -47,6 +47,11 @@ public class PostPreferenceFragment extends CustomFontPreferenceFragmentCompat {
         SwitchPreference hideTextPostContentSwitch = findPreference(SharedPreferencesUtils.HIDE_TEXT_POST_CONTENT);
         SwitchPreference fixedHeightPreviewInCardSwitch = findPreference(SharedPreferencesUtils.FIXED_HEIGHT_PREVIEW_IN_CARD);
 
+        // A layout that was removed (Compact, Card 2) may still be what an older version stored.
+        normalizeStoredLayout(defaultPostLayoutList);
+        normalizeStoredLayout(defaultPostLayoutUnfoldedList);
+        normalizeStoredLayout(defaultLinkPostLayoutList);
+
         if (defaultPostLayoutList != null) {
             defaultPostLayoutList.setOnPreferenceChangeListener((preference, newValue) -> {
                 EventBus.getDefault().post(new ChangeDefaultPostLayoutEvent(Integer.parseInt((String) newValue)));
@@ -153,6 +158,17 @@ public class PostPreferenceFragment extends CustomFontPreferenceFragmentCompat {
                 EventBus.getDefault().post(new ChangeFixedHeightPreviewInCardEvent((Boolean) newValue));
                 return true;
             });
+        }
+    }
+
+    private static void normalizeStoredLayout(@Nullable ListPreference list) {
+        if (list == null || list.getValue() == null) {
+            return;
+        }
+        int stored = Integer.parseInt(list.getValue());
+        int normalized = SharedPreferencesUtils.normalizePostLayout(stored);
+        if (normalized != stored) {
+            list.setValue(String.valueOf(normalized));
         }
     }
 }
