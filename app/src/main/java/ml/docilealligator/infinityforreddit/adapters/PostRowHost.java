@@ -3,6 +3,7 @@ package ml.docilealligator.infinityforreddit.adapters;
 import android.content.SharedPreferences;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentManager;
 
 import java.util.concurrent.Executor;
 
@@ -76,6 +77,46 @@ interface PostRowHost {
     boolean markPostsAsRead();
 
     void openMedia(Post post);
+
+    int stickiedPostIconTint();
+
+    int secondaryTextColor();
+
+    int spoilerBackgroundColor();
+
+    int spoilerTextColor();
+
+    int nsfwBackgroundColor();
+
+    int nsfwTextColor();
+
+    int flairBackgroundColor();
+
+    int flairTextColor();
+
+    int archivedIconTint();
+
+    int lockedIconTint();
+
+    int crosspostIconTint();
+
+    int postTypeTextColor();
+
+    int filledCardViewBackgroundColor();
+
+    int readPostFilledCardViewBackgroundColor();
+
+    int subredditColor();
+
+    int usernameColor();
+
+    boolean voteButtonsOnTheRight();
+
+    String longPressPostNonMediaAreaAction();
+
+    FragmentManager childFragmentManager();
+
+    void openMedia(Post post, boolean peekMedia);
 
     @Nullable
     Post getItem(int position);

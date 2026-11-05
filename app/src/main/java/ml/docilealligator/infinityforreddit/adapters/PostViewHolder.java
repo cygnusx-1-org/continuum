@@ -716,8 +716,8 @@ public abstract class PostViewHolder extends RecyclerView.ViewHolder {
         host.storeReadState(post, read);
         setItemViewBackgroundColor(read);
         titleTextView.setTextColor(read ? host.readPostTitleColor() : host.postTitleColor());
-        if (this instanceof PostRecyclerViewAdapter.PostTextTypeViewHolder) {
-            ((PostRecyclerViewAdapter.PostTextTypeViewHolder) this).contentTextView.setTextColor(
+        if (this instanceof PostTextTypeViewHolder) {
+            ((PostTextTypeViewHolder) this).contentTextView.setTextColor(
                     read ? host.readPostContentColor() : host.postContentColor());
         }
         if (!read) {
