@@ -1493,7 +1493,6 @@ Nie jest chora ani nic, ale na pewno może stać się lepsza."</string>
     <string name="restore_settings_partially_failed">"Niektóre opcje mogły zostać nie wczytane poprawnie. Zrestartuj aplikację aby zobaczyć zmiany."</string>
     <string name="restore_settings_failed_file_corrupted">"Nie można wczytać ustawień. Plik może być uszkodzony."</string>
     <string name="restore_settings_failed_cannot_get_file">"Brak dostępu do pliku"</string>
-    <string name="restore_settings_failed_wrong_password">"Nieprawidłowe hasło lub uszkodzony plik kopii zapasowej. Spróbuj ponownie."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Nie można uzyskać dostępu do katalogu pamięci podręcznej"</string>
     <string name="suicide_prevention_quote">"Jeśli szukasz znaku, by nie odbierać sobie życia, to właśnie on.\u2764"</string>
     <string name="do_not_show_this_again">"Nie pokazuj ponownie"</string>
@@ -1764,14 +1763,7 @@ Kliknij by spróbować ponownie."</string>
     <string name="proxy_direct">"Bezpośrednie"</string>
     <string name="settings_backup_accounts_client_id_title">"Konta kopii zapasowych i identyfikator klienta"</string>
     <string name="settings_backup_accounts_client_id_summary">"Dołącz konta użytkowników i identyfikator klienta do pliku kopii zapasowej (zalecane)"</string>
-    <string name="backup_password_dialog_title">"Wprowadź hasło zapasowe"</string>
-    <string name="backup_password_dialog_message">"Wprowadź hasło o długości od 6 do 32 znaków, aby zaszyfrować plik kopii zapasowej. Zapamiętaj to hasło - będzie Ci potrzebne do przywrócenia ustawień."</string>
-    <string name="enter_backup_password">"Wprowadź hasło"</string>
     <string name="password_cannot_be_empty">"Hasło nie może być puste"</string>
-    <string name="restore_password_dialog_title">"Wprowadź hasło przywracania"</string>
-    <string name="restore_password_dialog_message">"Proszę wprowadzić hasło użyte do zaszyfrowania tego pliku kopii zapasowej."</string>
-    <string name="enter_restore_password">"Wprowadź hasło"</string>
-    <string name="show_password">"Pokaż hasło"</string>
     <string name="title_activity_settings">"Ustawienia"</string>
     <string name="title_activity_login">"Zaloguj się"</string>
     <string name="restart_app_to_apply_changes">"Naciśnij tutaj, aby ponownie uruchomić aplikację i zastosować zmiany"</string>

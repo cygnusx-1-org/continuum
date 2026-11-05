@@ -1496,7 +1496,6 @@ Sie ist nicht krank oder so, aber sie könnte sich definitiv bessern."</string>
     <string name="restore_settings_partially_failed">"Einige Einstellungen wurden vielleicht nicht erfolgreich wiederhergestellt. Starte die Anwendung neu, um die Änderungen zu sehen."</string>
     <string name="restore_settings_failed_file_corrupted">"Die Einstellungen konnten nicht wiederhergestellt werden. Die Datei könnte korrupt sein."</string>
     <string name="restore_settings_failed_cannot_get_file">"Kann nicht auf die Datei zugreifen"</string>
-    <string name="restore_settings_failed_wrong_password">"Falsches Passwort oder beschädigte Sicherungsdatei. Bitte versuche es erneut."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Auf das Cache-Verzeichnis kann nicht zugegriffen werden"</string>
     <string name="suicide_prevention_quote">"Wenn du nach einem Zeichen suchst, dich nicht zu töten, dann ist es dies.\u2764"</string>
     <string name="do_not_show_this_again">"Dies nicht erneut anzeigen"</string>
@@ -1770,14 +1769,7 @@ Keine Sorge, du kannst Reddit Jr. trotzdem genießen."</string>
     <string name="proxy_direct">"Direkt"</string>
     <string name="settings_backup_accounts_client_id_title">"Sicherungskonten und Client-ID"</string>
     <string name="settings_backup_accounts_client_id_summary">"Benutzerkonten und Client-ID in die Sicherungsdatei aufnehmen (empfohlen)"</string>
-    <string name="backup_password_dialog_title">"Backup-Passwort eingeben"</string>
-    <string name="backup_password_dialog_message">"Gib bitte ein 6–32 Zeichen langes Passwort ein, um deine Sicherungsdatei zu verschlüsseln. Merke dir dieses Passwort – du brauchst es, um deine Einstellungen wiederherzustellen."</string>
-    <string name="enter_backup_password">"Passwort eingeben"</string>
     <string name="password_cannot_be_empty">"Passwort darf nicht leer sein"</string>
-    <string name="restore_password_dialog_title">"Wiederherstellungspasswort eingeben"</string>
-    <string name="restore_password_dialog_message">"Gib bitte das Passwort ein, mit dem diese Sicherungsdatei verschlüsselt wurde."</string>
-    <string name="enter_restore_password">"Passwort eingeben"</string>
-    <string name="show_password">"Passwort anzeigen"</string>
     <string name="title_activity_settings">"Einstellungen"</string>
     <string name="title_activity_login">"Anmelden"</string>
     <string name="restart_app_to_apply_changes">"Tippe hier, um die App neu zu starten und die Änderungen zu übernehmen"</string>

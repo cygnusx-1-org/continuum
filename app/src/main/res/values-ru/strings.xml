@@ -1500,7 +1500,6 @@ https://play.google.com/store/"</string>
     <string name="restore_settings_partially_failed">"Некоторые настройки не могут быть восстановлены. Перезапусти приложение, чтобы увидеть изменения."</string>
     <string name="restore_settings_failed_file_corrupted">"Невозможно восстановить настройки. Возможно, файл повреждён."</string>
     <string name="restore_settings_failed_cannot_get_file">"Нет доступа к файлу"</string>
-    <string name="restore_settings_failed_wrong_password">"Неверный пароль или поврежден файл резервной копии. Пожалуйста, попробуй еще раз."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Невозможно получить доступ к каталогу кэша."</string>
     <string name="suicide_prevention_quote">"Если ты ищешь знак, чтобы не убивать себя, то вот он.\u2764"</string>
     <string name="do_not_show_this_again">"Больше не показывать"</string>
@@ -1773,14 +1772,7 @@ https://play.google.com/store/"</string>
     <string name="proxy_direct">"Прямой"</string>
     <string name="settings_backup_accounts_client_id_title">"Резервные учетные записи и идентификатор клиента"</string>
     <string name="settings_backup_accounts_client_id_summary">"Включить учетные записи пользователей и идентификатор клиента в файл резервной копии (рекомендуется)"</string>
-    <string name="backup_password_dialog_title">"Введи резервный пароль"</string>
-    <string name="backup_password_dialog_message">"Введи пароль длиной 6–32 символа, чтобы зашифровать файл резервной копии. Запомни этот пароль — он понадобится тебе для восстановления настроек."</string>
-    <string name="enter_backup_password">"Введи пароль"</string>
     <string name="password_cannot_be_empty">"Пароль не может быть пустым."</string>
-    <string name="restore_password_dialog_title">"Введи пароль для восстановления"</string>
-    <string name="restore_password_dialog_message">"Введи пароль, который использовался для шифрования этого файла резервной копии."</string>
-    <string name="enter_restore_password">"Введи пароль"</string>
-    <string name="show_password">"Показать пароль"</string>
     <string name="title_activity_settings">"Настройки"</string>
     <string name="title_activity_login">"Войти"</string>
     <string name="restart_app_to_apply_changes">"Нажми здесь, чтобы перезапустить приложение и применить изменения."</string>

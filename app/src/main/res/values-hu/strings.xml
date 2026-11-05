@@ -1485,7 +1485,6 @@ Az alap az indigó amoled téma"</string>
     <string name="restore_settings_partially_failed">"Előfordulhat, hogy egyes beállításokat nem lehet visszaállítani. A változások érvénybelépéséhez indítsd újra az alkalmazást."</string>
     <string name="restore_settings_failed_file_corrupted">"Nem lehet visszaállítani a beállításokat. Lehet, hogy a fájl sérült"</string>
     <string name="restore_settings_failed_cannot_get_file">"Nem lehet hozzáférni a fájlhoz"</string>
-    <string name="restore_settings_failed_wrong_password">"Hibás jelszó vagy sérült biztonsági mentési fájl. Kérjük, próbáld újra."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Nem lehet hozzáférni a gyorsítótár könyvtárához"</string>
     <string name="suicide_prevention_quote">"Ha jelet vársz, hogy ne öld meg magad, akkor EZ AZ.\u2764"</string>
     <string name="do_not_show_this_again">"Ne mutassa újra"</string>
@@ -1754,14 +1753,7 @@ Az alap az indigó amoled téma"</string>
     <string name="proxy_direct">"Közvetlen"</string>
     <string name="settings_backup_accounts_client_id_title">"Biztonsági mentési fiókok és ügyfél-azonosító"</string>
     <string name="settings_backup_accounts_client_id_summary">"Tartalmazza a felhasználói fiókokat és az ügyfél-azonosítót a biztonsági mentési fájlban (ajánlott)"</string>
-    <string name="backup_password_dialog_title">"Írd be a biztonsági jelszót"</string>
-    <string name="backup_password_dialog_message">"Kérjük, adj meg egy 6–32 karakteres jelszót a biztonsági mentési fájl titkosításához. Emlékezzen erre a jelszóra – szüksége lesz rá a beállítások visszaállításához."</string>
-    <string name="enter_backup_password">"Add meg a jelszót"</string>
     <string name="password_cannot_be_empty">"A jelszó nem lehet üres"</string>
-    <string name="restore_password_dialog_title">"Írd be a visszaállítási jelszót"</string>
-    <string name="restore_password_dialog_message">"Kérjük, add meg a biztonsági mentési fájl titkosításához használt jelszót."</string>
-    <string name="enter_restore_password">"Add meg a jelszót"</string>
-    <string name="show_password">"Jelszó megjelenítése"</string>
     <string name="title_activity_settings">"Beállítások"</string>
     <string name="title_activity_login">"Bejelentkezés"</string>
     <string name="restart_app_to_apply_changes">"Nyomd meg ide az alkalmazás újraindításához a módosítások alkalmazásához"</string>

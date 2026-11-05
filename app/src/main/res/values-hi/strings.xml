@@ -1487,7 +1487,6 @@
     <string name="restore_settings_partially_failed">"सेटिंग्स को पुनर्स्थापित करना आंशिक रूप से विफल रहा"</string>
     <string name="restore_settings_failed_file_corrupted">"फ़ाइल दूषित या अमान्य प्रारूप। कृपया एक वैध बैकअप फ़ाइल चुनें."</string>
     <string name="restore_settings_failed_cannot_get_file">"फ़ाइल नहीं मिल सकी. कृपया पुन: प्रयास करें।"</string>
-    <string name="restore_settings_failed_wrong_password">"गलत पासवर्ड या दूषित बैकअप फ़ाइल। कृपया पुन: प्रयास करें।"</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"कैश निर्देशिका तक नहीं पहुंच सकता"</string>
     <string name="suicide_prevention_quote">"यदि आप खुद को न मारने के लिए कोई संकेत ढूंढ रहे हैं, तो यह है।\u2764"</string>
     <string name="do_not_show_this_again">"इसे दोबारा न दिखाएं"</string>
@@ -1756,14 +1755,7 @@
     <string name="proxy_direct">"डायरेक्ट"</string>
     <string name="settings_backup_accounts_client_id_title">"बैकअप खाते और क्लाइंट आईडी"</string>
     <string name="settings_backup_accounts_client_id_summary">"बैकअप फ़ाइल में उपयोगकर्ता खाते और क्लाइंट आईडी शामिल करें (अनुशंसित)"</string>
-    <string name="backup_password_dialog_title">"बैकअप पासवर्ड दर्ज करें"</string>
-    <string name="backup_password_dialog_message">"कृपया अपनी बैकअप फ़ाइल को एन्क्रिप्ट करने के लिए 6–32 अक्षर का पासवर्ड दर्ज करें। इस पासवर्ड को याद रखें - आपको अपनी सेटिंग्स पुनर्स्थापित करने के लिए इसकी आवश्यकता होगी।"</string>
-    <string name="enter_backup_password">"पासवर्ड दर्ज करें"</string>
     <string name="password_cannot_be_empty">"पासवर्ड खाली नहीं हो सकता"</string>
-    <string name="restore_password_dialog_title">"रिस्टोर पासवर्ड दर्ज करें"</string>
-    <string name="restore_password_dialog_message">"कृपया वह पासवर्ड दर्ज करें जिसका उपयोग इस बैकअप फ़ाइल को एन्क्रिप्ट करने के लिए किया गया था।"</string>
-    <string name="enter_restore_password">"पासवर्ड दर्ज करें"</string>
-    <string name="show_password">"पासवर्ड दिखाएं"</string>
     <string name="title_activity_settings">"सेटिंग"</string>
     <string name="title_activity_login">"साइन इन करें"</string>
     <string name="restart_app_to_apply_changes">"परिवर्तन लागू करने के लिए ऐप को पुनरारंभ करने के लिए यहां दबाएं"</string>

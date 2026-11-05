@@ -1475,7 +1475,6 @@
     <string name="restore_settings_partially_failed">"Soo celinta dejinta ayaa qayb ahaan fashilantay"</string>
     <string name="restore_settings_failed_file_corrupted">"Faylku wuu xumaaday ama qaab aan sax ahayn. Fadlan dooro fayl gurmad ah oo sax ah."</string>
     <string name="restore_settings_failed_cannot_get_file">"ma heli karo faylka. Fadlan isku day mar kale"</string>
-    <string name="restore_settings_failed_wrong_password">"Furaha sirta ah ee khaldan ama faylka kaydka ah ee kharribmay. Fadlan isku day mar kale"</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Ma geli karo hagaha kaydinta"</string>
     <string name="suicide_prevention_quote">"Haddii aad raadinayso calaamad aadan is dilin, waa kan.\u2764"</string>
     <string name="do_not_show_this_again">"tan mar dambe ha muujin"</string>
@@ -1744,14 +1743,7 @@
     <string name="proxy_direct">"toos ah"</string>
     <string name="settings_backup_accounts_client_id_title">"Xisaabaadka Kaabta iyo Aqoonsiga Macmiilka"</string>
     <string name="settings_backup_accounts_client_id_summary">"Ku dar koontooyinka isticmaalaha iyo aqoonsiga macmiilka faylka kaydka ah (lagu taliyay)"</string>
-    <string name="backup_password_dialog_title">"Geli Password Backup"</string>
-    <string name="backup_password_dialog_message">"Fadlan geli 6–32 xaraf sir ah si aad u xafiddo faylkaaga kaydinta Xusuusnow erayga sirta ah - waxaad u baahan doontaa si aad u soo celiso dejimahaaga."</string>
-    <string name="enter_backup_password">"Geli erayga sirta ah"</string>
     <string name="password_cannot_be_empty">"Password ma noqon karo madhan"</string>
-    <string name="restore_password_dialog_title">"Geli erayga sirta ah ee soo celinta"</string>
-    <string name="restore_password_dialog_message">"Fadlan geli erayga sirta ah ee loo isticmaalay in lagu sireeyo faylka kaydka ah."</string>
-    <string name="enter_restore_password">"Geli erayga sirta ah"</string>
-    <string name="show_password">"Muuji erayga sirta ah"</string>
     <string name="title_activity_settings">"Dejimaha"</string>
     <string name="title_activity_login">"Soo gal"</string>
     <string name="restart_app_to_apply_changes">"Riix halkan si aad dib ugu bilowdo abka si aad u isticmaasho isbedelada"</string>

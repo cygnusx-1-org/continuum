@@ -1498,7 +1498,6 @@ Ela não está doente nem nada, mas certamente poderá melhorar."</string>
     <string name="restore_settings_partially_failed">"Algumas definições poderão não ter sido restauradas com sucesso. Reinicie a aplicação para ver as alterações."</string>
     <string name="restore_settings_failed_file_corrupted">"Não é possível restaurar as definições. O ficheiro poderá estar corrompido. "</string>
     <string name="restore_settings_failed_cannot_get_file">"Não é possível aceder ao ficheiro"</string>
-    <string name="restore_settings_failed_wrong_password">"Palavra-passe incorreta ou ficheiro de cópia de segurança corrompido. Por favor, tente novamente."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Não é possível aceder ao diretório de cache"</string>
     <string name="suicide_prevention_quote">"Se está a procura de um sinal para não se suicidar, isto é o sinal.\u2764"</string>
     <string name="do_not_show_this_again">"Não mostrar novamente"</string>
@@ -1770,14 +1769,7 @@ Toque para tentar novamente."</string>
     <string name="proxy_direct">"Direto"</string>
     <string name="settings_backup_accounts_client_id_title">"Contas de cópia de segurança e ID de cliente"</string>
     <string name="settings_backup_accounts_client_id_summary">"Incluir contas de utilizador e ID de cliente no ficheiro de cópia de segurança (recomendado)"</string>
-    <string name="backup_password_dialog_title">"Introduza a palavra-passe de backup"</string>
-    <string name="backup_password_dialog_message">"Introduza uma palavra-passe de 6 a 32 caracteres para encriptar o seu ficheiro de cópia de segurança. Lembre-se desta palavra-passe - precisará dela para restaurar as suas definições."</string>
-    <string name="enter_backup_password">"Introduza a palavra-passe"</string>
     <string name="password_cannot_be_empty">"A palavra-passe não pode ficar vazia"</string>
-    <string name="restore_password_dialog_title">"Introduza a palavra-passe de restauração"</string>
-    <string name="restore_password_dialog_message">"Introduza a palavra-passe utilizada para encriptar este ficheiro de cópia de segurança."</string>
-    <string name="enter_restore_password">"Introduza a palavra-passe"</string>
-    <string name="show_password">"Mostrar palavra-passe"</string>
     <string name="title_activity_settings">"Definições"</string>
     <string name="title_activity_login">"Entrar"</string>
     <string name="restart_app_to_apply_changes">"Prima aqui para reiniciar a aplicação e aplicar as alterações"</string>

@@ -1485,7 +1485,6 @@ Basé sur le thème sombre Indigo"</string>
     <string name="restore_settings_partially_failed">"Certains paramètres peuvent ne pas être restaurés avec succès. Redémarrez l'application pour voir les changements."</string>
     <string name="restore_settings_failed_file_corrupted">"Impossible de restaurer les paramètres. Le fichier est peut-être corrompu."</string>
     <string name="restore_settings_failed_cannot_get_file">"Impossible d'accéder au fichier"</string>
-    <string name="restore_settings_failed_wrong_password">"Mot de passe incorrect ou fichier de sauvegarde corrompu. Veuillez réessayer."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Impossible d'accéder au répertoire de cache"</string>
     <string name="suicide_prevention_quote">"Si tu cherches un signe pour ne pas te suicider, c\'est celui-ci.\u2764"</string>
     <string name="do_not_show_this_again">"Ne plus voir ça"</string>
@@ -1758,14 +1757,7 @@ Cliquez pour réessayer."</string>
     <string name="proxy_direct">"Direct"</string>
     <string name="settings_backup_accounts_client_id_title">"Comptes de sauvegarde et ID client"</string>
     <string name="settings_backup_accounts_client_id_summary">"Inclure les comptes d'utilisateur et l'ID client dans le fichier de sauvegarde (recommandé)"</string>
-    <string name="backup_password_dialog_title">"Entrez le mot de passe de sauvegarde"</string>
-    <string name="backup_password_dialog_message">"Saisis un mot de passe de 6 à 32 caractères pour chiffrer ton fichier de sauvegarde. N’oublie pas ce mot de passe : tu en auras besoin pour restaurer tes paramètres."</string>
-    <string name="enter_backup_password">"Entrez le mot de passe"</string>
     <string name="password_cannot_be_empty">"Le mot de passe ne peut pas être vide"</string>
-    <string name="restore_password_dialog_title">"Entrez le mot de passe de restauration"</string>
-    <string name="restore_password_dialog_message">"Veuillez saisir le mot de passe utilisé pour chiffrer ce fichier de sauvegarde."</string>
-    <string name="enter_restore_password">"Entrez le mot de passe"</string>
-    <string name="show_password">"Afficher le mot de passe"</string>
     <string name="title_activity_settings">"Paramètres"</string>
     <string name="title_activity_login">"Se connecter"</string>
     <string name="restart_app_to_apply_changes">"Appuyez ici pour redémarrer l'application afin d'appliquer les modifications"</string>

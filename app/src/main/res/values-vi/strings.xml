@@ -1488,7 +1488,6 @@ Cô ta không ốm hay gì cả, nhưng cô ấy chắc chắn có thể khá h�
     <string name="restore_settings_partially_failed">"Một số cài đặt có thể không được khôi phục thành công. Hãy khởi động lại ứng dụng để thấy các thay đổi."</string>
     <string name="restore_settings_failed_file_corrupted">"Không thể khôi phục cài đặt. Tệp này có thể là bị hỏng."</string>
     <string name="restore_settings_failed_cannot_get_file">"Không thể truy cập tệp"</string>
-    <string name="restore_settings_failed_wrong_password">"Mật khẩu không chính xác hoặc tệp sao lưu bị hỏng. Vui lòng thử lại."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Không thể truy cập thư mục bộ đệm"</string>
     <string name="suicide_prevention_quote">"Nếu bạn đang tìm một dấu hiệu để không tự tử, thì nó ở đây rồi.\u2764"</string>
     <string name="do_not_show_this_again">"Không hiện lại"</string>
@@ -1760,14 +1759,7 @@ Nhấn để thử lại."</string>
     <string name="proxy_direct">"trực tiếp"</string>
     <string name="settings_backup_accounts_client_id_title">"Tài khoản dự phòng và ID khách hàng"</string>
     <string name="settings_backup_accounts_client_id_summary">"Bao gồm tài khoản người dùng và ID khách hàng trong tệp sao lưu (được khuyến nghị)"</string>
-    <string name="backup_password_dialog_title">"Nhập mật khẩu sao lưu"</string>
-    <string name="backup_password_dialog_message">"Vui lòng nhập mật khẩu 6–32 ký tự để mã hóa tệp sao lưu của bạn. Hãy nhớ mật khẩu này - bạn sẽ cần nó để khôi phục cài đặt của mình."</string>
-    <string name="enter_backup_password">"Nhập mật khẩu"</string>
     <string name="password_cannot_be_empty">"Mật khẩu không được để trống"</string>
-    <string name="restore_password_dialog_title">"Nhập Khôi phục mật khẩu"</string>
-    <string name="restore_password_dialog_message">"Vui lòng nhập mật khẩu đã được sử dụng để mã hóa tệp sao lưu này."</string>
-    <string name="enter_restore_password">"Nhập mật khẩu"</string>
-    <string name="show_password">"Hiển thị mật khẩu"</string>
     <string name="title_activity_settings">"Cài đặt"</string>
     <string name="title_activity_login">"Đăng nhập"</string>
     <string name="restart_app_to_apply_changes">"Nhấn vào đây để khởi động lại ứng dụng để áp dụng các thay đổi"</string>
