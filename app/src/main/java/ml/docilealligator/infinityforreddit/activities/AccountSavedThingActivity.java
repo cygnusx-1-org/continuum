@@ -96,7 +96,6 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
     private final FeedResumeState resumeFeed = new FeedResumeState();
     private int resumeTab = -1;
     private SectionsPagerAdapter sectionsPagerAdapter;
-    private PostLayoutBottomSheetFragment postLayoutBottomSheetFragment;
     private ActivityAccountSavedThingBinding binding;
 
     private static final long SEARCH_DEBOUNCE_MS = 500;
@@ -161,7 +160,6 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         setToolbarGoToTop(binding.accountSavedThingToolbar);
 
-        postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
 
         fragmentManager = getSupportFragmentManager();
 
@@ -364,8 +362,7 @@ public class AccountSavedThingActivity extends BaseActivity implements ActivityT
         } else if (itemId == R.id.action_refresh_account_saved_thing_activity) {
             sectionsPagerAdapter.refresh();
             return true;
-        } else if (itemId == R.id.action_change_post_layout_account_saved_thing_activity) {
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         }
         return false;

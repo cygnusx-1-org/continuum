@@ -1457,9 +1457,7 @@ public class ViewUserDetailActivity extends BaseActivity implements SortTypeSele
             mFetchUserInfoSuccess = false;
             fetchUserInfo();
             return true;
-        } else if (itemId == R.id.action_change_post_layout_view_user_detail_activity) {
-            PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         } else if (itemId == R.id.action_share_view_user_detail_activity) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);

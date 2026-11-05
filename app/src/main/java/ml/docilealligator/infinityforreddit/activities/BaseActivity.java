@@ -29,6 +29,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,6 +84,7 @@ import ml.docilealligator.infinityforreddit.utils.CustomThemeSharedPreferencesUt
 import ml.docilealligator.infinityforreddit.utils.RedditLinkUtils;
 import ml.docilealligator.infinityforreddit.utils.SharedPreferencesUtils;
 import ml.docilealligator.infinityforreddit.utils.TextToSpeechHelper;
+import ml.docilealligator.infinityforreddit.bottomsheetfragments.PostLayoutBottomSheetFragment;
 import ml.docilealligator.infinityforreddit.utils.Utils;
 import ml.docilealligator.infinityforreddit.viewmodels.TextToSpeechViewModel;
 import org.greenrobot.eventbus.EventBus;
@@ -930,6 +932,12 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
                             .valueOf(customThemeWrapper.getToolbarPrimaryTextAndIconColor()));
                 }
                 Utils.setTitleWithCustomFontToMenuItem(typeface, item, null);
+                SubMenu subMenu = item.getSubMenu();
+                if (subMenu != null) {
+                    for (int j = 0; j < subMenu.size(); j++) {
+                        Utils.setTitleWithCustomFontToMenuItem(typeface, subMenu.getItem(j), null);
+                    }
+                }
             }
         }
         return true;
@@ -939,6 +947,31 @@ public abstract class BaseActivity extends AppCompatActivity implements CustomFo
      * Puts Settings at the bottom of the three-dot menu of every screen that themes its menu here,
      * so it is one tap away without opening the navigation drawer. Settings itself has no use for it.
      */
+    /**
+     * Handles a tap on one of the layouts in a screen's "Change Post Layout" submenu, handing the
+     * choice to the screen the way the old bottom sheet did. False for any other menu item.
+     */
+    protected final boolean handlePostLayoutMenuItem(int itemId) {
+        int postLayout;
+        if (itemId == R.id.action_post_layout_card_bottom) {
+            postLayout = SharedPreferencesUtils.POST_LAYOUT_CARD;
+        } else if (itemId == R.id.action_post_layout_card_top) {
+            postLayout = SharedPreferencesUtils.POST_LAYOUT_CARD_3;
+        } else if (itemId == R.id.action_post_layout_card_clean) {
+            postLayout = SharedPreferencesUtils.POST_LAYOUT_CARD_CLEAN;
+        } else if (itemId == R.id.action_post_layout_compact) {
+            postLayout = SharedPreferencesUtils.POST_LAYOUT_COMPACT_2;
+        } else if (itemId == R.id.action_post_layout_gallery) {
+            postLayout = SharedPreferencesUtils.POST_LAYOUT_GALLERY;
+        } else {
+            return false;
+        }
+        if (this instanceof PostLayoutBottomSheetFragment.PostLayoutSelectionCallback callback) {
+            callback.postLayoutSelected(postLayout);
+        }
+        return true;
+    }
+
     private void addSettingsMenuItem(Menu menu) {
         if (this instanceof SettingsActivity || menu.findItem(R.id.action_open_settings_overflow) != null) {
             return;

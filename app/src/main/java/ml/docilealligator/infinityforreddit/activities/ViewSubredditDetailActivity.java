@@ -1476,9 +1476,7 @@ public class ViewSubredditDetailActivity extends BaseActivity implements SortTyp
                 sectionsPagerAdapter.refresh(true);
             }
             return true;
-        } else if (itemId == R.id.action_change_post_layout_view_subreddit_detail_activity) {
-            PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         } else if (itemId == R.id.action_select_user_flair_view_subreddit_detail_activity) {
             if (accountName.equals(Account.ANONYMOUS_ACCOUNT)) {

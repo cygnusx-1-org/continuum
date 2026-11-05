@@ -262,9 +262,7 @@ public class HistoryActivity extends BaseActivity implements ActivityToolbarInte
         } else if (itemId == R.id.action_refresh_history_activity) {
             sectionsPagerAdapter.refresh();
             return true;
-        } else if (itemId == R.id.action_change_post_layout_history_activity) {
-            PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         }
         return false;

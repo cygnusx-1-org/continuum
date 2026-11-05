@@ -1787,9 +1787,7 @@ public class MainActivity extends BaseActivity implements SortTypeSelectionCallb
             mFetchUserInfoSuccess = false;
             loadUserData();
             return true;
-        } else if (itemId == R.id.action_change_post_layout_main_activity) {
-            PostLayoutBottomSheetFragment postLayoutBottomSheetFragment = new PostLayoutBottomSheetFragment();
-            postLayoutBottomSheetFragment.show(getSupportFragmentManager(), postLayoutBottomSheetFragment.getTag());
+        } else if (handlePostLayoutMenuItem(itemId)) {
             return true;
         } else if (itemId == R.id.action_open_clipboard_reddit_link_main_activity) {
             openClipboardRedditLink();
