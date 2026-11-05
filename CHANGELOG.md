@@ -2,6 +2,10 @@
 
 ---
 
+8.3.3.9.1.22 / 2026-11-5
+============
+* Internal clean-up with no change in what you see: the post list code uses one named variable per row type instead of repeating the same cast several hundred times, and post filters split their comma-separated lists once instead of for every post
+
 8.3.3.9.1.21 / 2026-11-5
 ============
 * Internal clean-up with no change in what you see: dates are formatted with a reused formatter instead of a new one for every post and comment, the "how long ago or the date" choice lives in one place, and the backup code is shorter
