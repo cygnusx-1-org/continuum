@@ -18,15 +18,18 @@ import ml.docilealligator.infinityforreddit.databinding.ItemPostTextBinding;
 class PostTextTypeViewHolder extends PostBaseViewHolder {
     TextView contentTextView;
 
+    private final PostRowHost host;
     private final BaseActivity mActivity;
 
     PostTextTypeViewHolder(@NonNull View itemView, PostRowHost host) {
         super(itemView, host);
+        this.host = host;
         this.mActivity = host.activity();
     }
 
     PostTextTypeViewHolder(@NonNull ItemPostTextBinding binding, PostRowHost host) {
         super(binding.getRoot(), host);
+        this.host = host;
         this.mActivity = host.activity();
         setBaseView(
                 binding.iconGifImageViewItemPostTextType,

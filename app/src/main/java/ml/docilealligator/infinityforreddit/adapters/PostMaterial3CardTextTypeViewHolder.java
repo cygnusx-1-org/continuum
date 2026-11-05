@@ -5,8 +5,11 @@ import androidx.annotation.NonNull;
 import ml.docilealligator.infinityforreddit.databinding.ItemPostCard3TextBinding;
 
 public class PostMaterial3CardTextTypeViewHolder extends PostTextTypeViewHolder {
+    private final PostRowHost host;
+
     PostMaterial3CardTextTypeViewHolder(@NonNull ItemPostCard3TextBinding binding, PostRowHost host) {
         super(binding.getRoot(), host);
+        this.host = host;
         setBaseView(
                 binding.iconGifImageViewItemPostCard3TextType,
                 binding.subredditNameTextViewItemPostCard3TextType,
