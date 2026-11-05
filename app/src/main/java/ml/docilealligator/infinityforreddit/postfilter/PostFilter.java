@@ -35,14 +35,17 @@ public class PostFilter implements Parcelable {
         if (COMPILED_REGEXES.size() > 256) {
             COMPILED_REGEXES.clear();
         }
-        return COMPILED_REGEXES.computeIfAbsent(regex, r -> {
+        java.util.Optional<Pattern> compiled = COMPILED_REGEXES.get(regex);
+        if (compiled == null) {
             try {
-                return java.util.Optional.of(Pattern.compile(r));
+                compiled = java.util.Optional.of(Pattern.compile(regex));
             } catch (PatternSyntaxException e) {
                 Log.e("PostFilter", "isPostAllowed failed", e);
-                return java.util.Optional.empty();
+                compiled = java.util.Optional.empty();
             }
-        }).orElse(null);
+            COMPILED_REGEXES.put(regex, compiled);
+        }
+        return compiled.orElse(null);
     }
 
     /**
