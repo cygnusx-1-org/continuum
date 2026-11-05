@@ -720,7 +720,6 @@
     <string name="settings_category_backup_and_restore_title">"Sigurnosno kopiranje i vraćanje"</string>
     <string name="settings_backup_and_restore_summary">"Spremi postavke svakog računa u šifriranu arhivu ili ih pročitaj"</string>
     <string name="settings_backup_settings_title">"Postavke sigurnosne kopije"</string>
-    <string name="settings_backup_settings_summary">"Uključuje račune, ID klijenta i Giphy API ključ. Prilikom izrade sigurnosne kopije od tebe će se tražiti lozinka."</string>
     <string name="settings_restore_settings_title">"Vrati postavke"</string>
     <string name="settings_credits_love_animation_title">"Ljubavna animacija"</string>
     <string name="settings_swipe_between_posts_title">"Prijeđi prstom između objava"</string>
@@ -1481,7 +1480,6 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="restore_settings_partially_failed">"Vraćanje postavki djelomično nije uspjelo"</string>
     <string name="restore_settings_failed_file_corrupted">"Datoteka je oštećena ili nevažeći format. Odaberi važeću datoteku sigurnosne kopije."</string>
     <string name="restore_settings_failed_cannot_get_file">"Ne mogu dobiti datoteku. Molimo pokušaj ponovo."</string>
-    <string name="restore_settings_failed_wrong_password">"Netočna lozinka ili oštećena datoteka sigurnosne kopije. Molimo pokušaj ponovo."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Nije moguće pristupiti direktoriju predmemorije"</string>
     <string name="suicide_prevention_quote">"Ako tražiš znak da se ne ubiješ, to je to.\u2764"</string>
     <string name="do_not_show_this_again">"Ne prikazuj ovo više"</string>
@@ -1750,14 +1748,7 @@ Baziraj na Indigo Amoled temi"</string>
     <string name="proxy_direct">"Izravno"</string>
     <string name="settings_backup_accounts_client_id_title">"Sigurnosni računi i ID klijenta"</string>
     <string name="settings_backup_accounts_client_id_summary">"Uključi korisničke račune i ID klijenta u datoteku sigurnosne kopije (preporučeno)"</string>
-    <string name="backup_password_dialog_title">"Unesi sigurnosnu lozinku"</string>
-    <string name="backup_password_dialog_message">"Unesi lozinku od 6–32 znaka za šifriranje sigurnosne kopije. Zapamti ovu lozinku - trebat će vam da vrati svoje postavke."</string>
-    <string name="enter_backup_password">"Unesi lozinku"</string>
     <string name="password_cannot_be_empty">"Lozinka ne može biti prazna"</string>
-    <string name="restore_password_dialog_title">"Unesi lozinku za vraćanje"</string>
-    <string name="restore_password_dialog_message">"Unesi lozinku koja je korištena za šifriranje ove datoteke sigurnosne kopije."</string>
-    <string name="enter_restore_password">"Unesi lozinku"</string>
-    <string name="show_password">"Prikaži lozinku"</string>
     <string name="title_activity_settings">"Postavke"</string>
     <string name="title_activity_login">"Prijavi se"</string>
     <string name="restart_app_to_apply_changes">"Pritisni ovdje za ponovno pokretanje aplikacije za primjenu promjena"</string>

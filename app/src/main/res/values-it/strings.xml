@@ -737,7 +737,6 @@ La riproduzione automatica video è disabilitata."</string>
     <string name="settings_category_backup_and_restore_title">"Backup e ripristino"</string>
     <string name="settings_backup_and_restore_summary">"Salva le impostazioni di ogni account in un archivio crittografato o rileggine uno"</string>
     <string name="settings_backup_settings_title">"Impostazioni Backup"</string>
-    <string name="settings_backup_settings_summary">"Include account, ID cliente e chiave API Giphy. Ti verrà richiesto di inserire una password durante la creazione del backup."</string>
     <string name="settings_restore_settings_title">"Reimposta le impostazioni"</string>
     <string name="settings_credits_love_animation_title">"Animazione amore"</string>
     <string name="settings_swipe_between_posts_title">"Scorri tra i post"</string>
@@ -1496,7 +1495,6 @@ https://play.google.com/store/"</string>
     <string name="restore_settings_partially_failed">"Alcune impostazioni non sono state ripristinate correttamente. Riavvia l'app per vedere i cambiamenti."</string>
     <string name="restore_settings_failed_file_corrupted">"Impossibile ripristinare le impostazioni. Potrebbero essere corrotte."</string>
     <string name="restore_settings_failed_cannot_get_file">"Impossibile accedere al file"</string>
-    <string name="restore_settings_failed_wrong_password">"Password errata o file di backup danneggiato. Per favore riprova."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"Impossibile accedere alla directory della cache"</string>
     <string name="suicide_prevention_quote">"Se stai cercando un segnale per non ucciderti, eccolo.\u2764"</string>
     <string name="do_not_show_this_again">"Non mostrare di nuovo"</string>
@@ -1770,14 +1768,7 @@ Non preoccupatevi, potete ancora godervi Reddit Jr.."</string>
     <string name="proxy_direct">"Diretto"</string>
     <string name="settings_backup_accounts_client_id_title">"Account di backup e ID cliente"</string>
     <string name="settings_backup_accounts_client_id_summary">"Includere account utente e ID cliente nel file di backup (consigliato)"</string>
-    <string name="backup_password_dialog_title">"Immettere la password di backup"</string>
-    <string name="backup_password_dialog_message">"Inserisci una password di 6–32 caratteri per crittografare il file di backup. Ricorda questa password: ti servirà per ripristinare le tue impostazioni."</string>
-    <string name="enter_backup_password">"Immettere la password"</string>
     <string name="password_cannot_be_empty">"La password non può essere vuota"</string>
-    <string name="restore_password_dialog_title">"Immettere la password di ripristino"</string>
-    <string name="restore_password_dialog_message">"Inserisci la password utilizzata per crittografare questo file di backup."</string>
-    <string name="enter_restore_password">"Immettere la password"</string>
-    <string name="show_password">"Mostra password"</string>
     <string name="title_activity_settings">"Impostazioni"</string>
     <string name="title_activity_login">"Accedi"</string>
     <string name="restart_app_to_apply_changes">"Premere qui per riavviare l'app e applicare le modifiche"</string>

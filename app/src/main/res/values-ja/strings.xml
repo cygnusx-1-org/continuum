@@ -732,7 +732,6 @@
     <string name="settings_category_backup_and_restore_title">"バックアップと復元"</string>
     <string name="settings_backup_and_restore_summary">"すべてのアカウントの設定を暗号化されたアーカイブに保存するか、再度読み取ります"</string>
     <string name="settings_backup_settings_title">"設定をバックアップ"</string>
-    <string name="settings_backup_settings_summary">"アカウント、クライアント ID、Giphy API キーが含まれます。バックアップを作成するときに、パスワードの入力を求められます。"</string>
     <string name="settings_restore_settings_title">"設定を復元"</string>
     <string name="settings_credits_love_animation_title">"愛のアニメーション"</string>
     <string name="settings_swipe_between_posts_title">"投稿をスワイプで移動"</string>
@@ -1490,7 +1489,6 @@ https://play.google.com/store/"</string>
     <string name="restore_settings_partially_failed">"いくつかの設定が正しく復元されませんでした。変更を反映するにはアプリを再起動してください。"</string>
     <string name="restore_settings_failed_file_corrupted">"設定を復元できません。ファイルが破損している可能性があります。"</string>
     <string name="restore_settings_failed_cannot_get_file">"ファイルにアクセスできません"</string>
-    <string name="restore_settings_failed_wrong_password">"パスワードが間違っているか、バックアップ ファイルが破損しています。もう一度試してください。"</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"キャッシュ ディレクトリにアクセスできません"</string>
     <string name="suicide_prevention_quote">"自殺しないようにというサインを探しているなら、これです。\u2764"</string>
     <string name="do_not_show_this_again">"再度表示しない"</string>
@@ -1759,14 +1757,7 @@ https://play.google.com/store/"</string>
     <string name="proxy_direct">"ダイレクト"</string>
     <string name="settings_backup_accounts_client_id_title">"バックアップ アカウントとクライアント ID"</string>
     <string name="settings_backup_accounts_client_id_summary">"バックアップ ファイルにユーザー アカウントとクライアント ID を含める (推奨)"</string>
-    <string name="backup_password_dialog_title">"バックアップパスワードを入力してください"</string>
-    <string name="backup_password_dialog_message">"バックアップ ファイルを暗号化するための 6 ～ 32 文字のパスワードを入力してください。このパスワードは覚えておいてください。設定を復元するために必要になります。"</string>
-    <string name="enter_backup_password">"パスワードを入力してください"</string>
     <string name="password_cannot_be_empty">"パスワードを空にすることはできません"</string>
-    <string name="restore_password_dialog_title">"復元パスワードを入力してください"</string>
-    <string name="restore_password_dialog_message">"このバックアップ ファイルの暗号化に使用したパスワードを入力してください。"</string>
-    <string name="enter_restore_password">"パスワードを入力してください"</string>
-    <string name="show_password">"パスワードを表示"</string>
     <string name="title_activity_settings">"設定"</string>
     <string name="title_activity_login">"サインイン"</string>
     <string name="restart_app_to_apply_changes">"ここを押してアプリを再起動し、変更を適用します"</string>

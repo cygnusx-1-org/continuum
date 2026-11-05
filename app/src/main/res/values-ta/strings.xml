@@ -726,7 +726,6 @@
     <string name="settings_category_backup_and_restore_title">"காப்புப்பிரதி மற்றும் மீட்டமை"</string>
     <string name="settings_backup_and_restore_summary">"ஒவ்வொரு கணக்கின் அமைப்புகளையும் மறைகுறியாக்கப்பட்ட காப்பகத்தில் சேமிக்கவும் அல்லது மீண்டும் படிக்கவும்"</string>
     <string name="settings_backup_settings_title">"அமைவுகளைப் பிரதியெடு"</string>
-    <string name="settings_backup_settings_summary">"கணக்குகள், கிளையண்ட் ஐடி மற்றும் Giphy API சாவியை உள்ளடக்கியது. காப்புப்பிரதியை உருவாக்கும்போது கடவுச்சொல்லை உள்ளிடும்படி கேட்கப்படும்."</string>
     <string name="settings_restore_settings_title">"அமைவுகளை மீட்டமை"</string>
     <string name="settings_credits_love_animation_title">"காதல் அனிமேஷன்"</string>
     <string name="settings_swipe_between_posts_title">"இடுகைகளுக்கிடையே தேய்"</string>
@@ -1482,7 +1481,6 @@
     <string name="restore_settings_partially_failed">"அமைப்புகளை மீட்டமைப்பது ஓரளவு தோல்வியடைந்தது"</string>
     <string name="restore_settings_failed_file_corrupted">"கோப்பு சிதைந்துள்ளது அல்லது தவறான வடிவம். சரியான காப்புப்பிரதி கோப்பைத் தேர்ந்தெடுக்கவும்."</string>
     <string name="restore_settings_failed_cannot_get_file">"கோப்பை அணுக முடியவில்லை"</string>
-    <string name="restore_settings_failed_wrong_password">"தவறான கடவுச்சொல் அல்லது சிதைந்த காப்பு கோப்பு. மீண்டும் முயற்சிக்கவும்."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"கேச் கோப்பகத்தை அணுக முடியாது"</string>
     <string name="suicide_prevention_quote">"உங்களைக் கொல்ல வேண்டாம் என்ற அடையாளத்தைத் தேடுகிறீர்களானால், இதுதான்.\u2764"</string>
     <string name="do_not_show_this_again">"இதை மீண்டும் காட்டாதே"</string>
@@ -1751,14 +1749,7 @@
     <string name="proxy_direct">"நேரடி"</string>
     <string name="settings_backup_accounts_client_id_title">"காப்பு கணக்குகள் மற்றும் கிளையன்ட் ஐடி"</string>
     <string name="settings_backup_accounts_client_id_summary">"காப்பு கோப்பில் பயனர் கணக்குகள் மற்றும் கிளையண்ட் ஐடியைச் சேர்க்கவும் (பரிந்துரைக்கப்பட்டது)"</string>
-    <string name="backup_password_dialog_title">"காப்பு கடவுச்சொல்லை உள்ளிடவும்"</string>
-    <string name="backup_password_dialog_message">"உங்கள் காப்பு கோப்பை குறியாக்கம் செய்ய 6–32 எழுத்து கடவுச்சொல்லை உள்ளிடவும். இந்த கடவுச்சொல்லை நினைவில் கொள்ளுங்கள் - உங்கள் அமைப்புகளை மீட்டமைக்க இது தேவைப்படும்."</string>
-    <string name="enter_backup_password">"கடவுச்சொல்லை உள்ளிடவும்"</string>
     <string name="password_cannot_be_empty">"கடவுச்சொல் காலியாக இருக்கக்கூடாது"</string>
-    <string name="restore_password_dialog_title">"மீட்டமை கடவுச்சொல்லை உள்ளிடவும்"</string>
-    <string name="restore_password_dialog_message">"இந்த காப்பு கோப்பை குறியாக்க பயன்படுத்திய கடவுச்சொல்லை உள்ளிடவும்."</string>
-    <string name="enter_restore_password">"கடவுச்சொல்லை உள்ளிடவும்"</string>
-    <string name="show_password">"கடவுச்சொல்லைக் காட்டு"</string>
     <string name="title_activity_settings">"அமைப்புகள்"</string>
     <string name="title_activity_login">"உள்நுழைக"</string>
     <string name="restart_app_to_apply_changes">"மாற்றங்களைப் பயன்படுத்த, பயன்பாட்டை மறுதொடக்கம் செய்ய இங்கே அழுத்தவும்"</string>

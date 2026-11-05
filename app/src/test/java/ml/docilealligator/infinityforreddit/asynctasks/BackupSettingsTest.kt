@@ -42,7 +42,6 @@ import org.robolectric.RobolectricTestRunner
 class BackupSettingsTest {
 
     private companion object {
-        const val PASSWORD = "backup-test"
     }
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -98,7 +97,6 @@ class BackupSettingsTest {
             context.contentResolver,
             DocumentsContract.buildTreeDocumentUri(
                 FakeDocumentsProvider.AUTHORITY, FakeDocumentsProvider.ROOT_DOCUMENT_ID),
-            PASSWORD,
             database,
             file("light_theme_test"),
             file("dark_theme_test"),
@@ -116,7 +114,7 @@ class BackupSettingsTest {
 
         val written = destination.listFiles()?.singleOrNull { it.name.endsWith(".zip") }
         assertNotNull("the backup wrote no zip into the destination directory", written)
-        return ZipFile(written!!, PASSWORD.toCharArray())
+        return ZipFile(written!!)
     }
 
     /** One backed up preference file, read back out of the zip as the map it was written from. */

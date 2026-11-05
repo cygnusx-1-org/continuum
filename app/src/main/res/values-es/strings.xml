@@ -736,7 +736,6 @@ La reproducción automática de video está deshabilitada."</string>
     <string name="settings_category_backup_and_restore_title">"Copia de seguridad y restauración"</string>
     <string name="settings_backup_and_restore_summary">"Guarde la configuración de cada cuenta en un archivo cifrado o vuelva a leer uno"</string>
     <string name="settings_backup_settings_title">"Respaldar ajustes"</string>
-    <string name="settings_backup_settings_summary">"Incluye cuentas, ID de cliente y clave de la API de Giphy. Se te pedirá una contraseña al crear la copia de seguridad."</string>
     <string name="settings_restore_settings_title">"Restablecer ajustes"</string>
     <string name="settings_credits_love_animation_title">"Animación de amor"</string>
     <string name="settings_swipe_between_posts_title">"Deslizar entre posts"</string>
@@ -1498,7 +1497,6 @@ No está enferma ni nada, pero definitivamente podría mejorar."</string>
     <string name="restore_settings_partially_failed">"Algunos ajustes pueden no haber sido restaurados correctamente. Reinicia la aplicación para ver los cambios."</string>
     <string name="restore_settings_failed_file_corrupted">"No fue posible restaurar la configuración. El archivo puede estar corrupto."</string>
     <string name="restore_settings_failed_cannot_get_file">"No fue posible acceder al archivo"</string>
-    <string name="restore_settings_failed_wrong_password">"Contraseña incorrecta o archivo de copia de seguridad dañado. Por favor inténtalo de nuevo."</string>
     <string name="restore_settings_failed_cannot_get_cache_dir">"No se puede acceder al directorio de caché"</string>
     <string name="suicide_prevention_quote">"Si estas buscando un cartel para no suicidarte, aquí esta.\u2764"</string>
     <string name="do_not_show_this_again">"No mostrar esto de nuevo"</string>
@@ -1770,14 +1768,7 @@ Toque para volver a intentarlo."</string>
     <string name="proxy_direct">"Directo"</string>
     <string name="settings_backup_accounts_client_id_title">"Cuentas de respaldo e ID de cliente"</string>
     <string name="settings_backup_accounts_client_id_summary">"Incluir cuentas de usuario e ID de cliente en el archivo de copia de seguridad (recomendado)"</string>
-    <string name="backup_password_dialog_title">"Ingrese la contraseña de respaldo"</string>
-    <string name="backup_password_dialog_message">"Ingrese una contraseña de 6 a 32 caracteres para cifrar su archivo de respaldo. Recuerde esta contraseña; la necesitará para restaurar su configuración."</string>
-    <string name="enter_backup_password">"Introducir contraseña"</string>
     <string name="password_cannot_be_empty">"La contraseña no puede estar vacía"</string>
-    <string name="restore_password_dialog_title">"Ingrese la contraseña de restauración"</string>
-    <string name="restore_password_dialog_message">"Introduzca la contraseña que se utilizó para cifrar este archivo de copia de seguridad."</string>
-    <string name="enter_restore_password">"Introducir contraseña"</string>
-    <string name="show_password">"Mostrar contraseña"</string>
     <string name="title_activity_settings">"Ajustes"</string>
     <string name="title_activity_login">"Iniciar sesión"</string>
     <string name="restart_app_to_apply_changes">"Presione aquí para reiniciar la aplicación y aplicar los cambios."</string>

@@ -2,6 +2,14 @@
 
 ---
 
+8.3.3.9.1.26-beta.2 / 2026-11-5
+============
+* Backing up your settings no longer asks for a password, and restoring no longer asks for one either. The backup file is a plain zip, so keep it somewhere private
+
+8.3.3.9.1.26-beta.1 / 2026-11-5
+============
+* Settings is now at the bottom of the three-dot menu on every screen, so you no longer have to open the navigation drawer
+
 8.3.3.9.1.25-beta.6 / 2026-11-5
 ============
 * Internal clean-up with no change in what you see: the image, link and gallery card rows now live in their own files, which leaves only binding code in the post list adapter
